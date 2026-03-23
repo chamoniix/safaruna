@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  web:
+    image: node:20-alpine
+    container_name: safaruna_web
+    working_dir: /app
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    environment:
+      - NODE_ENV=development
+      # Si on utilise Supabase Cloud, on n'a besoin ici que des variables NEXT_PUBLIC_SUPABASE_URL et SUPABASE_ANON_KEY
+    command: sh -c "npm install && npm run dev"
+    restart: unless-stopped
+
+  # Note: Supabase local (PostgreSQL + Auth + Storage) peut être lancé via "npx supabase start"
+  # dans le futur si désiré, ou via le cloud Supabase gratuit.

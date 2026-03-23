@@ -1,65 +1,274 @@
-import Image from "next/image";
+import Link from "next/link";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <>
+      <Navbar />
+
+      {/* HERO */}
+      <section className="hero">
+        <div className="hero-content">
+          <div className="hero-badge">
+            <span className="dot"></span> Première plateforme dédiée à l'Omra
+          </div>
+          <h1>
+            <em>Vis ton Omra</em>
+            <strong>comme elle mérite d'être vécue.</strong>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="hero-sub">
+            Trouve ton guide privé qui parle ta langue. Il t'accompagne dans tous les rituels, te raconte l'histoire des lieux saints, et fait de ton Omra bien plus qu'un simple voyage.
           </p>
+          <div className="hero-actions">
+            <Link href="#guides" className="btn-primary">
+              Trouver mon guide
+            </Link>
+            <Link href="#comment" className="btn-secondary">
+              Voir comment ça marche
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className="hero-visual">
+          <div className="floating-stat top-left">
+            <strong>4.97 ★</strong>
+            <span style={{ color: "var(--muted)", fontSize: "0.72rem" }}>Note moyenne</span>
+          </div>
+          <div className="guide-card">
+            <div className="guide-card-header">
+              <div className="avatar">شر</div>
+              <div>
+                <div className="guide-info">
+                  <h3>Cheikh Rachid Al-Madani</h3>
+                  <p>Guide certifié — Makkah & Madinah</p>
+                </div>
+                <div className="stars">★★★★★</div>
+                <div className="verified-badge">✓ Vérifié SAFARUNA</div>
+              </div>
+            </div>
+            <div className="lang-chips">
+              <span className="chip active">🇫🇷 Français</span>
+              <span className="chip">🇩🇿 Arabe</span>
+              <span className="chip">🇬🇧 English</span>
+            </div>
+            <div className="service-list">
+              <div className="service-item">
+                <span className="check">✓</span> Rituels complets de l'Omra
+              </div>
+              <div className="service-item">
+                <span className="check">✓</span> Visite Jabal Uhud + Badr
+              </div>
+              <div className="service-item">
+                <span className="check">✓</span> Grotte Hira & Thawr
+              </div>
+              <div className="service-item">
+                <span className="check">✓</span> Voiture 7 places incluse
+              </div>
+              <div className="service-item">
+                <span className="check">✓</span> Du'a & récitations expliqués
+              </div>
+            </div>
+            <div className="price-row">
+              <div>
+                <div className="price-label">Forfait 5 jours</div>
+                <div className="price">
+                  450€ <span>/ personne</span>
+                </div>
+              </div>
+              <button className="btn-book">Réserver</button>
+            </div>
+          </div>
+          <div className="floating-stat bottom-right">
+            <strong>2 400+</strong>
+            <span style={{ color: "var(--muted)", fontSize: "0.72rem" }}>Pèlerins accompagnés</span>
+          </div>
         </div>
-      </main>
-    </div>
+      </section>
+
+      {/* TRUST STRIP */}
+      <div className="trust">
+        <div className="trust-item">
+          <strong>320+</strong>
+          <span>Guides certifiés</span>
+        </div>
+        <div className="trust-item">
+          <strong>12 pays</strong>
+          <span>Langues couvertes</span>
+        </div>
+        <div className="trust-item">
+          <strong>98%</strong>
+          <span>Satisfaction</span>
+        </div>
+        <div className="trust-item">
+          <strong>24h</strong>
+          <span>Support disponible</span>
+        </div>
+        <div className="trust-item">
+          <strong>0 compromis</strong>
+          <span>Sur les rituels</span>
+        </div>
+      </div>
+
+      {/* HOW IT WORKS */}
+      <section id="comment">
+        <div className="section-label">Processus simple</div>
+        <h2>
+          En 4 étapes, ton Omra<br />
+          <em>devient inoubliable</em>
+        </h2>
+        <p className="section-sub">
+          Plus besoin de suivre un groupe de 40 personnes où tu n'entends rien et ne peux rien demander. Tu choisis, tu personnalises, tu comprends.
+        </p>
+        <div className="steps-grid">
+          <div className="step-card">
+            <div className="step-num">01</div>
+            <div className="step-icon">🗓️</div>
+            <h3>Choisis tes dates</h3>
+            <p>Renseigne tes dates d'arrivée à Makkah et Madinah, la taille de ton groupe (famille, solo, couple).</p>
+          </div>
+          <div className="step-card">
+            <div className="step-num">02</div>
+            <div className="step-icon">🗣️</div>
+            <h3>Filtre par langue</h3>
+            <p>Sélectionne ta langue maternelle. Ton guide te parlera dans ta langue, te racontera l'histoire, t'expliquera chaque du'a.</p>
+          </div>
+          <div className="step-card">
+            <div className="step-num">03</div>
+            <div className="step-icon">🕌</div>
+            <h3>Personnalise ton programme</h3>
+            <p>Choisis les lieux à visiter, avec ou sans voiture du guide, van pour famille, durée courte ou longue.</p>
+          </div>
+          <div className="step-card">
+            <div className="step-num">04</div>
+            <div className="step-icon">✨</div>
+            <h3>Vis ton Omra</h3>
+            <p>Ton guide t'attend à l'aéroport ou à l'hôtel. Tu commences un voyage spirituel unique, intime, en famille.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* GUIDES */}
+      <section id="guides" className="bg-dark" style={{ padding: "6rem 4rem" }}>
+        <div className="section-label">Nos guides</div>
+        <h2>
+          Des guides qui <em>parlent ta langue</em><br />
+          et connaissent chaque pierre
+        </h2>
+        <p className="section-sub">
+          Chaque guide est vérifié, certifié et évalué par la communauté. Ils vivent à Makkah ou Madinah depuis des années.
+        </p>
+        <div className="guides-grid">
+          <div className="guide-profile">
+            <div className="guide-top">
+              <div className="guide-avatar-dark" style={{ background: "linear-gradient(135deg, #F0D897, #C9A84C)" }}>
+                RA
+              </div>
+              <div>
+                <div className="guide-name">Rachid Al-Madani</div>
+                <div className="guide-origin">🇸🇦 Madinah, 12 ans d'expérience</div>
+                <div className="guide-stars">★★★★★ (214 avis)</div>
+              </div>
+            </div>
+            <div className="guide-langs">
+              <span className="lang-pill">🇫🇷 Français</span>
+              <span className="lang-pill">🇦🇱 Arabe</span>
+              <span className="lang-pill">🇬🇧 English</span>
+            </div>
+            <div className="services-tags">
+              <span className="stag">Rituels Omra complets</span>
+              <span className="stag">Jabal Uhud</span>
+              <span className="stag">Masjid Quba</span>
+              <span className="stag">Grotte Hira</span>
+              <span className="stag">Train Haramain</span>
+              <span className="stag">Voiture incluse</span>
+            </div>
+            <div className="guide-footer">
+              <div className="guide-price-dark">
+                380€ <small>/ pers · 3 jours</small>
+              </div>
+              <Link href="/guides/1" className="btn-book-dark">
+                Voir profil
+              </Link>
+            </div>
+          </div>
+
+          <div className="guide-profile">
+            <div className="guide-top">
+              <div className="guide-avatar-dark" style={{ background: "linear-gradient(135deg, #9FE1CB, #1D9E75)" }}>
+                FO
+              </div>
+              <div>
+                <div className="guide-name">Fatima Al-Omari</div>
+                <div className="guide-origin">🇸🇦 Makkah, 8 ans d'expérience</div>
+                <div className="guide-stars">★★★★★ (178 avis)</div>
+              </div>
+            </div>
+            <div className="guide-langs">
+              <span className="lang-pill">🇫🇷 Français</span>
+              <span className="lang-pill">🇲🇦 Darija</span>
+              <span className="lang-pill">🇹🇷 Türkçe</span>
+            </div>
+            <div className="services-tags">
+              <span className="stag">Guide femme (familles)</span>
+              <span className="stag">Rituels Omra</span>
+              <span className="stag">Masjid Al-Haram</span>
+              <span className="stag">Zam-Zam</span>
+              <span className="stag">Musée du Coran</span>
+              <span className="stag">Van 9 places</span>
+            </div>
+            <div className="guide-footer">
+              <div className="guide-price-dark">
+                320€ <small>/ pers · 3 jours</small>
+              </div>
+              <Link href="/guides/2" className="btn-book-dark">
+                Voir profil
+              </Link>
+            </div>
+          </div>
+        </div>
+        <div style={{ textAlign: "center", marginTop: "2.5rem" }}>
+          <Link href="/guides" className="btn-book-dark" style={{ fontSize: "0.88rem", padding: "0.8rem 2rem" }}>
+            Voir tous les guides →
+          </Link>
+        </div>
+      </section>
+
+      {/* PACKAGES */}
+      <section id="packages">
+        <div className="section-label">Nos forfaits</div>
+        <h2>Un programme pour <em>chaque pèlerin</em></h2>
+        <p className="section-sub">Que tu aies 3 jours ou 10 jours, seul ou en famille, il existe un forfait fait pour toi.</p>
+        <div className="packages-grid">
+          <div className="package-card">
+            <div className="package-icon">🌙</div>
+            <h3>Omra Essentielle</h3>
+            <p className="pkg-sub">Pour ceux qui viennent faire l'Omra et comprendre chaque rituel en profondeur</p>
+            <ul className="pkg-features">
+              <li><span className="pkg-check">✓</span> Tous les rituels expliqués</li>
+              <li><span className="pkg-check">✓</span> 1 à 6 personnes max</li>
+            </ul>
+            <div className="pkg-price">
+              280€ <small>/ pers · 2 jours</small>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA FINAL */}
+      <section className="cta-section">
+        <div className="arabic-deco">بسم الله الرحمن الرحيم</div>
+        <h2>
+          Ton Omra mérite un guide<br />
+          <em>à la hauteur de ta foi.</em>
+        </h2>
+        <div style={{ display: "flex", gap: "1rem", justifyContent: "center", marginTop: "2rem", flexWrap: "wrap" }}>
+          <Link href="/guides" className="btn-primary" style={{ background: "var(--gold)", color: "var(--deep)", fontWeight: 700 }}>
+            Trouver mon guide →
+          </Link>
+        </div>
+      </section>
+
+      <Footer />
+    </>
   );
 }

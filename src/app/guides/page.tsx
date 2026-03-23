@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 export default function GuideSearchPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -10,6 +12,7 @@ export default function GuideSearchPage() {
 
   return (
     <div className="font-sans bg-[var(--cream)] text-[var(--deep)] min-h-screen">
+      <Navbar />
       <style dangerouslySetInnerHTML={{ __html: `
         .search-hero { background: var(--deep); padding: 3rem 2rem 2rem; position: relative; overflow: hidden; }
         .search-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 100% at 50% 100%, rgba(201,168,76,.12) 0%, transparent 70%); pointer-events: none; }
@@ -21,6 +24,8 @@ export default function GuideSearchPage() {
         .search-bar { max-width: 860px; margin: 0 auto 1.5rem; background: white; border-radius: 20px; padding: 1rem 1.25rem; display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: .75rem; align-items: end; box-shadow: 0 16px 48px rgba(0,0,0,.2); }
         .sb-field label { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); display: block; margin-bottom: .3rem; }
         .sb-field select, .sb-field input { width: 100%; border: none; background: var(--cream); border-radius: var(--radius-sm); padding: .6rem .85rem; font-family: 'Manrope', sans-serif; font-size: .85rem; color: var(--deep); outline: none; cursor: pointer; border: 1.5px solid var(--sand); transition: border-color .2s; }
+        .sb-field input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; }
+        .sb-field input[type="date"]:hover::-webkit-calendar-picker-indicator { opacity: 1; }
         .sb-field select:focus, .sb-field input:focus { border-color: var(--gold); background: white; }
         .btn-search { background: var(--gold); color: var(--deep); border: none; border-radius: var(--radius-sm); padding: .7rem 1.6rem; font-family: 'Manrope', sans-serif; font-size: .85rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all .2s; }
         .btn-search:hover { background: var(--gold-dark); color: white; transform: translateY(-1px); }
@@ -253,6 +258,7 @@ export default function GuideSearchPage() {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Link from "next/link";
+import BookingWidget from "./BookingWidget";
 
 // Using dynamic route destructuring for Next.js App Router
 export default async function GuideProfile({ params }: { params: Promise<{ id: string }> }) {
@@ -89,44 +90,7 @@ export default async function GuideProfile({ params }: { params: Promise<{ id: s
 
           {/* Right Column: Reservation Sticky Panel */}
           <div>
-            <div className="guide-card" style={{ position: 'sticky', top: '100px', border: '1px solid var(--sand)', padding: '2rem' }}>
-              <h3 style={{ fontSize: '1.3rem', fontWeight: 700, color: 'var(--deep)', marginBottom: '0.5rem', fontFamily: 'var(--font-cormorant)' }}>Vérifier la disponibilité</h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: '1.5rem' }}>Ce guide est très demandé en période de Ramadan.</p>
-              
-              <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--deep)' }}>Taille de votre groupe</label>
-                <select style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--sand)', background: 'white', color: 'var(--deep)' }}>
-                  <option>1 personne (Solo)</option>
-                  <option>2 personnes (Couple)</option>
-                  <option>3 à 5 personnes (Famille)</option>
-                  <option>6+ personnes (Grand groupe)</option>
-                </select>
-              </div>
-
-              <div style={{ marginBottom: '2rem' }}>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.5rem', color: 'var(--deep)' }}>Mois prévu</label>
-                <select style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid var(--sand)', background: 'white', color: 'var(--deep)' }}>
-                  <option>Mars 2026</option>
-                  <option>Avril 2026</option>
-                  <option>Mai 2026</option>
-                  <option>Juin 2026 (Hajj)</option>
-                </select>
-              </div>
-
-              <div className="price-row" style={{ marginBottom: '1.5rem', background: 'var(--sand)' }}>
-                <span className="price-label" style={{ color: 'var(--deep)', fontWeight: 600 }}>À partir de</span>
-                <div className="price" style={{ fontSize: '1.5rem' }}>280€</div>
-              </div>
-
-              {/* Server Action Target for booking */}
-              <button className="btn-book" style={{ width: '100%', padding: '1rem', fontSize: '1rem', background: 'var(--deep)', color: 'var(--gold-light)' }}>
-                Envoyer une demande
-              </button>
-              
-              <p style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--muted)', marginTop: '1rem' }}>
-                Vous ne paierez rien tant que le guide n'a pas confirmé sa disponibilité exacte.
-              </p>
-            </div>
+            <BookingWidget guideId={resolvedParams.id} pricePerDay={150} />
           </div>
           
         </div>

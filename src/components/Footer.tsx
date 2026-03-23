@@ -17,17 +17,17 @@ export default function Footer() {
           <ul>
             <li><Link href="/guides">Trouver un guide</Link></li>
             <li><Link href="/#packages">Nos forfaits</Link></li>
-            <li><Link href="/dashboard/pilgrim">Tableau de bord</Link></li>
-            <li><Link href="/auth/login">Connexion</Link></li>
+            <li><Link href="/espace/tableau-de-bord">Tableau de bord</Link></li>
+            <li><Link href="/connexion">Connexion</Link></li>
           </ul>
         </div>
         <div className="footer-col">
           <h4>Guides</h4>
           <ul>
-            <li><Link href="/auth/register?role=guide">Créer mon profil</Link></li>
-            <li><Link href="/dashboard/guide">Espace Guide</Link></li>
-            <li><Link href="/#guides-espace">Revenus et Écosystème</Link></li>
-            <li><Link href="/#confiance">Charte SAFARUNA</Link></li>
+            <li><Link href="/guide/inscription">Créer mon profil</Link></li>
+            <li><Link href="/guide/tableau-de-bord">Espace Guide</Link></li>
+            <li><Link href="/devenir-guide">Revenus et Écosystème</Link></li>
+            <li><Link href="/charte">Charte SAFARUNA</Link></li>
           </ul>
         </div>
         <div className="footer-col">

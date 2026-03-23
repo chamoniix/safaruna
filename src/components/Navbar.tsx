@@ -13,10 +13,10 @@ export default function Navbar() {
         <Link href="/#confiance">Confiance</Link>
       </div>
       <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-        <Link href="/auth/login" style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--deep)', textDecoration: 'none' }}>
+        <Link href="/connexion" style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--deep)', textDecoration: 'none' }}>
           Connexion
         </Link>
-        <Link href="/auth/register" className="btn-nav">
+        <Link href="/inscription" className="btn-nav">
           S'inscrire
         </Link>
       </div>

@@ -129,7 +129,7 @@ export default function LieuxSaintsEncyclopedia() {
                 <PlaceCard 
                   title="Jabal Uhud" 
                   tag="Histoire"
-                  description={'"Une montagne qui nous aime et que nous aimons" - Lieu de la célèbre bataille d\\'Uhud.'}
+                  description={"\"Une montagne qui nous aime et que nous aimons\" - Lieu de la célèbre bataille d'Uhud."}
                   image="https://images.unsplash.com/photo-1579005981146-24f4693ae908?ixlib=rb-4.0.3"
                   features={['Martyrs', 'Bataille d\'Uhud', 'Montagne bénie']}
                 />

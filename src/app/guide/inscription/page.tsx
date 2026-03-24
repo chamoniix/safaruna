@@ -152,16 +152,122 @@ export default function GuideOnboarding() {
                   </div>
                 )}
 
-                {/* STEP 3, 4, 5 placehoders to speed up */}
-                {currentStep >= 3 && currentStep <= 5 && (
+                {/* STEP 3 */}
+                {currentStep === 3 && (
                   <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                    <h2 className="text-2xl font-serif text-[var(--deep)] mb-6 border-b border-[var(--sand)] pb-4">
-                      {currentStep === 3 ? "3. Lieux & services" : currentStep === 4 ? "4. Forfaits & tarifs" : "5. Documents justificatifs"}
-                    </h2>
-                    <div className="p-10 text-center bg-[var(--cream)] rounded-xl border border-[var(--sand)] border-dashed">
-                      <span className="text-4xl mb-4 block">🏗️</span>
-                      <h3 className="font-bold text-[var(--deep)] mb-2">Section {currentStep} simplifiée pour la démo</h3>
-                      <p className="text-sm text-[var(--muted)]">Dans la version complète, cette section contient : {currentStep === 3 ? "25 checkboxes de lieux et options de transport." : currentStep === 4 ? "Le configurateur de prix des forfaits Omra." : "L'upload sécurisé des pièces d'identité et de l'IBAN crypté AES-256."}</p>
+                    <h2 className="text-2xl font-serif text-[var(--deep)] mb-6 border-b border-[var(--sand)] pb-4">3. Lieux & services</h2>
+                    <div className="space-y-6">
+                      <div>
+                        <label className="block text-sm font-semibold mb-3">Lieux saints maîtrisés (Cochez tous ceux que vous pouvez guider)</label>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {['Masjid Al-Haram', 'Jabal Al-Nour / Hira', 'Jabal Thawr', 'Zamzam (Explications)', 'Bataille de Badr', 'Masjid Quba', 'Jabal Uhud', 'Al-Baqi', 'Masjid Al-Qiblatayn', 'Arafat / Jabal Rahmah', 'Mina', 'Muzdalifah'].map(l => (
+                            <label key={l} className="flex items-center gap-2 p-3 border border-[var(--sand)] rounded-xl hover:bg-[var(--gold-pale)] cursor-pointer transition-colors">
+                              <input type="checkbox" className="accent-[var(--gold-dark)]" />
+                              <span className="text-sm font-medium leading-tight">{l}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold mb-3">Transport proposé</label>
+                        <div className="flex flex-col gap-3">
+                          <label className="flex items-center gap-3 p-4 border border-[var(--sand)] rounded-xl cursor-pointer hover:bg-[var(--gold-pale)]">
+                            <input type="radio" name="transport" className="accent-[var(--gold-dark)] w-4 h-4" defaultChecked />
+                            <div>
+                              <span className="block font-bold">Aucun transport</span>
+                              <span className="text-xs text-[var(--muted)]">Le pèlerin gère ses propres déplacements (Uber, Taxi)</span>
+                            </div>
+                          </label>
+                          <label className="flex items-center gap-3 p-4 border border-[var(--sand)] rounded-xl cursor-pointer hover:bg-[var(--gold-pale)]">
+                            <input type="radio" name="transport" className="accent-[var(--gold-dark)] w-4 h-4" />
+                            <div>
+                              <span className="block font-bold">Voiture standard (4 places)</span>
+                              <span className="text-xs text-[var(--muted)]">Je conduis les pèlerins dans mon véhicule de tourisme.</span>
+                            </div>
+                          </label>
+                          <label className="flex items-center gap-3 p-4 border border-[var(--sand)] rounded-xl cursor-pointer hover:bg-[var(--gold-pale)]">
+                            <input type="radio" name="transport" className="accent-[var(--gold-dark)] w-4 h-4" />
+                            <div>
+                              <span className="block font-bold">Van familial (7-9 places)</span>
+                              <span className="text-xs text-[var(--muted)]">Idéal pour les grandes familles ou groupes.</span>
+                            </div>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* STEP 4 */}
+                {currentStep === 4 && (
+                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                    <h2 className="text-2xl font-serif text-[var(--deep)] mb-6 border-b border-[var(--sand)] pb-4">4. Forfaits & tarifs</h2>
+                    <p className="text-sm text-[var(--muted)] mb-6">Définissez vos prix de base. La plateforme prélève une commission de 15% sur ces montants.</p>
+                    <div className="space-y-6">
+                      <div className="p-5 border border-[var(--sand)] rounded-xl bg-[var(--cream)]">
+                        <div className="flex justify-between items-center mb-4">
+                          <h4 className="font-bold text-[var(--deep)]">Forfait Omra Essentielle (3h - 5h)</h4>
+                          <span className="text-[10px] bg-[var(--gold-pale)] text-[var(--gold-dark)] px-2 py-1 rounded font-bold uppercase tracking-wider">Obligatoire</span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-semibold mb-1">Prix par personne (€)</label>
+                            <input type="number" className="w-full px-3 py-2 rounded-lg border border-[var(--sand)]" placeholder="ex: 120" required />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold mb-1">Prix de groupe max (€)</label>
+                            <input type="number" className="w-full px-3 py-2 rounded-lg border border-[var(--sand)]" placeholder="ex: 400" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-5 border border-[var(--sand)] rounded-xl">
+                        <div className="flex justify-between items-center mb-4">
+                          <h4 className="font-bold text-[var(--deep)]">Forfait Ziyara Histoire (Journée 8h)</h4>
+                          <input type="checkbox" className="accent-[var(--gold-dark)] w-4 h-4" defaultChecked />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-semibold mb-1">Prix par personne (€)</label>
+                            <input type="number" className="w-full px-3 py-2 rounded-lg border border-[var(--sand)]" placeholder="ex: 200" />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold mb-1">Prix de groupe max (€)</label>
+                            <input type="number" className="w-full px-3 py-2 rounded-lg border border-[var(--sand)]" placeholder="ex: 600" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* STEP 5 */}
+                {currentStep === 5 && (
+                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
+                    <h2 className="text-2xl font-serif text-[var(--deep)] mb-6 border-b border-[var(--sand)] pb-4">5. Documents & KYC</h2>
+                    <p className="text-sm text-[var(--muted)] mb-6">Ces documents sont obligatoires pour la vérification KYC et ne seront jamais rendus publics.</p>
+                    <div className="space-y-6">
+                      <div className="w-full border-2 border-dashed border-[var(--sand)] rounded-xl p-6 text-center hover:bg-[var(--gold-pale)] transition-colors cursor-pointer group">
+                        <span className="text-2xl mb-2 block group-hover:scale-110 transition-transform">📄</span>
+                        <h4 className="font-bold text-sm mb-1">Pièce d&apos;identité (Passeport / CNI)</h4>
+                        <p className="text-xs text-[var(--muted)] mb-3">Format JPG, PNG ou PDF (Max 5Mo)</p>
+                        <button type="button" className="text-xs font-bold text-[var(--gold-dark)] bg-white border border-[var(--sand)] px-4 py-2 rounded-full shadow-sm pointer-events-none">Parcourir...</button>
+                      </div>
+                      
+                      <div className="w-full border-2 border-dashed border-[var(--sand)] rounded-xl p-6 text-center hover:bg-[var(--gold-pale)] transition-colors cursor-pointer group">
+                        <span className="text-2xl mb-2 block group-hover:scale-110 transition-transform">🎓</span>
+                        <h4 className="font-bold text-sm mb-1">Diplôme ou Certificat Islamique</h4>
+                        <p className="text-xs text-[var(--muted)] mb-3">Optionnel mais fortement recommandé</p>
+                        <button type="button" className="text-xs font-bold text-[var(--gold-dark)] bg-white border border-[var(--sand)] px-4 py-2 rounded-full shadow-sm pointer-events-none">Parcourir...</button>
+                      </div>
+
+                      <div className="pt-4 border-t border-[var(--sand)]">
+                        <h4 className="font-bold text-sm mb-3">Coordonnées bancaires européennes (IBAN)</h4>
+                        <p className="text-xs text-[var(--muted)] mb-4">Pour recevoir vos virements mensuels. Données cryptées AES-256 en base de données.</p>
+                        <div>
+                          <input type="text" className="w-full px-4 py-3 rounded-xl border border-[var(--sand)] font-mono text-sm uppercase tracking-widest" placeholder="FR76 0000 0000 0000 0000 0000 000" required />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}

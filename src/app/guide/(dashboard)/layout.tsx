@@ -7,105 +7,136 @@ import { useState } from 'react';
 export default function GuideLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isAvailable, setIsAvailable] = useState(true);
-
-  // Helper to determine active link
   const isActive = (path: string) => pathname === path || pathname.startsWith(path + '/');
 
   return (
-    <div className="flex min-h-screen bg-[var(--cream)] text-[var(--deep)] font-sans">
-      {/* SIDEBAR */}
-      <aside className="w-[250px] bg-[var(--deep)] flex flex-col fixed top-0 left-0 bottom-0 z-50 overflow-y-auto hidden md:flex">
-        <div className="px-6 py-5 border-b border-white/10 flex items-center justify-between">
-          <Link href="/" className="font-serif text-2xl font-semibold text-white">
-            SAFAR<span className="text-[var(--gold)]">U</span>NA
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#FAF7F0', color: '#1A1209', fontFamily: 'var(--font-manrope, Manrope, sans-serif)' }}>
+      {/* SIDEBAR — inline styles to circumvent globals.css nav rule */}
+      <div style={{
+        width: 250,
+        background: '#1A1209',
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        bottom: 0,
+        zIndex: 50,
+        overflowY: 'auto',
+        flexShrink: 0,
+      }} className="hidden md:flex">
+        <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Link href="/" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.5rem', fontWeight: 600, color: 'white', textDecoration: 'none' }}>
+            SAFAR<span style={{ color: '#C9A84C' }}>U</span>NA
           </Link>
-          <span className="bg-[var(--gold)] text-[var(--deep)] text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded-full">Guide</span>
+          <span style={{ background: '#C9A84C', color: '#1A1209', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '0.2rem 0.5rem', borderRadius: 50 }}>Guide</span>
         </div>
         
-        <div className="p-5 border-b border-white/10 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--gold-light)] to-[var(--gold)] flex items-center justify-center font-serif text-lg font-bold text-[var(--deep)] relative shrink-0">
-            رم
-            <div className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-[var(--deep)] ${isAvailable ? 'bg-[#27AE60]' : 'bg-gray-400'}`}></div>
+        <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div style={{ position: 'relative', width: 40, height: 40, flexShrink: 0 }}>
+            <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>رم</div>
+            <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10, borderRadius: '50%', background: isAvailable ? '#27AE60' : '#aaa', border: '2px solid #1A1209' }}></div>
           </div>
-          <div className="min-w-0">
-            <div className="text-sm font-semibold text-white truncate">Rachid Al-Madani</div>
-            <div className="text-xs text-[var(--gold)] mt-0.5">★★★★★ 4.97 (214)</div>
-            <div className="flex items-center gap-1.5 mt-1.5 cursor-pointer" onClick={() => setIsAvailable(!isAvailable)}>
-              <div className={`w-7 h-3.5 rounded-full relative transition-colors ${isAvailable ? 'bg-[var(--green)]' : 'bg-white/15'}`}>
-                <div className={`absolute top-[2px] w-2.5 h-2.5 rounded-full bg-white transition-all ${isAvailable ? 'right-[2px]' : 'left-[2px]'}`}></div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'white', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Rachid Al-Madani</div>
+            <div style={{ fontSize: '0.7rem', color: '#C9A84C' }}>★★★★★ 4.97</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, cursor: 'pointer' }} onClick={() => setIsAvailable(!isAvailable)}>
+              <div style={{ width: 28, height: 14, borderRadius: 50, background: isAvailable ? '#27AE60' : 'rgba(255,255,255,0.15)', position: 'relative', transition: 'background 0.2s' }}>
+                <div style={{ position: 'absolute', top: 2, width: 10, height: 10, borderRadius: '50%', background: 'white', transition: 'left 0.2s', left: isAvailable ? 16 : 2 }}></div>
               </div>
-              <span className={`text-[10px] ${isAvailable ? 'text-[#6EC68A]' : 'text-white/50'}`}>{isAvailable ? 'Disponible' : 'Indisponible'}</span>
+              <span style={{ fontSize: '0.625rem', color: isAvailable ? '#6EC68A' : 'rgba(255,255,255,0.4)' }}>{isAvailable ? 'Disponible' : 'Indisponible'}</span>
             </div>
           </div>
         </div>
 
-        <nav className="flex-1 py-3 text-sm">
-          <div className="text-[10px] font-bold tracking-widest uppercase text-white/20 px-6 py-2.5">Tableau de bord</div>
-          <Link href="/guide/tableau-de-bord" className={`flex items-center gap-3 px-6 py-2 border-l-2 transition-colors ${isActive('/guide/tableau-de-bord') ? 'text-[var(--gold-light)] bg-[var(--gold)]/10 border-[var(--gold)]' : 'text-white/50 hover:text-white/90 hover:bg-white/5 border-transparent'}`}>
-            <span className="w-4 text-center">🏠</span> Accueil
-          </Link>
-          <Link href="/guide/demandes" className={`flex items-center gap-3 px-6 py-2 border-l-2 transition-colors ${isActive('/guide/demandes') ? 'text-[var(--gold-light)] bg-[var(--gold)]/10 border-[var(--gold)]' : 'text-white/50 hover:text-white/90 hover:bg-white/5 border-transparent'}`}>
-            <span className="w-4 text-center">📥</span> Demandes <span className="ml-auto bg-[var(--red)] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[16px] text-center">3</span>
-          </Link>
-          <Link href="/guide/missions" className={`flex items-center gap-3 px-6 py-2 border-l-2 transition-colors ${isActive('/guide/missions') ? 'text-[var(--gold-light)] bg-[var(--gold)]/10 border-[var(--gold)]' : 'text-white/50 hover:text-white/90 hover:bg-white/5 border-transparent'}`}>
-            <span className="w-4 text-center">📋</span> Mes missions
-          </Link>
-          <Link href="/guide/messages" className={`flex items-center gap-3 px-6 py-2 border-l-2 transition-colors ${isActive('/guide/messages') ? 'text-[var(--gold-light)] bg-[var(--gold)]/10 border-[var(--gold)]' : 'text-white/50 hover:text-white/90 hover:bg-white/5 border-transparent'}`}>
-            <span className="w-4 text-center">💬</span> Messages <span className="ml-auto bg-[var(--red)] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[16px] text-center">5</span>
-          </Link>
+        <div style={{ flex: 1, paddingTop: '0.5rem', paddingBottom: '0.5rem' }}>
+          <GuideSection label="Tableau de bord" />
+          <GuideLink href="/guide/tableau-de-bord" icon="🏠" label="Accueil" isActive={isActive('/guide/tableau-de-bord')} />
+          <GuideLink href="/guide/demandes" icon="📥" label="Demandes" badge="3" isActive={isActive('/guide/demandes')} />
+          <GuideLink href="/guide/missions" icon="📋" label="Mes missions" isActive={isActive('/guide/missions')} />
+          <GuideLink href="/guide/messages" icon="💬" label="Messages" badge="5" isActive={isActive('/guide/messages')} />
 
-          <div className="text-[10px] font-bold tracking-widest uppercase text-white/20 px-6 py-2.5 mt-2">Gestion</div>
-          <Link href="/guide/calendrier" className={`flex items-center gap-3 px-6 py-2 border-l-2 transition-colors ${isActive('/guide/calendrier') ? 'text-[var(--gold-light)] bg-[var(--gold)]/10 border-[var(--gold)]' : 'text-white/50 hover:text-white/90 hover:bg-white/5 border-transparent'}`}>
-             <span className="w-4 text-center">📅</span> Calendrier
-          </Link>
-          <Link href="/guide/revenus" className={`flex items-center gap-3 px-6 py-2 border-l-2 transition-colors ${isActive('/guide/revenus') ? 'text-[var(--gold-light)] bg-[var(--gold)]/10 border-[var(--gold)]' : 'text-white/50 hover:text-white/90 hover:bg-white/5 border-transparent'}`}>
-             <span className="w-4 text-center">💰</span> Mes revenus
-          </Link>
-          <Link href="/guide/avis" className={`flex items-center gap-3 px-6 py-2 border-l-2 transition-colors ${isActive('/guide/avis') ? 'text-[var(--gold-light)] bg-[var(--gold)]/10 border-[var(--gold)]' : 'text-white/50 hover:text-white/90 hover:bg-white/5 border-transparent'}`}>
-             <span className="w-4 text-center">⭐</span> Mes avis
-          </Link>
-          
-          <div className="text-[10px] font-bold tracking-widest uppercase text-white/20 px-6 py-2.5 mt-2">Mon profil</div>
-          <Link href="/guide/profil" className={`flex items-center gap-3 px-6 py-2 border-l-2 transition-colors ${isActive('/guide/profil') ? 'text-[var(--gold-light)] bg-[var(--gold)]/10 border-[var(--gold)]' : 'text-white/50 hover:text-white/90 hover:bg-white/5 border-transparent'}`}>
-             <span className="w-4 text-center">👤</span> Modifier profil
-          </Link>
-          <Link href="/guide/forfaits" className={`flex items-center gap-3 px-6 py-2 border-l-2 transition-colors ${isActive('/guide/forfaits') ? 'text-[var(--gold-light)] bg-[var(--gold)]/10 border-[var(--gold)]' : 'text-white/50 hover:text-white/90 hover:bg-white/5 border-transparent'}`}>
-             <span className="w-4 text-center">📦</span> Mes forfaits
-          </Link>
-        </nav>
+          <GuideSection label="Gestion" />
+          <GuideLink href="/guide/calendrier" icon="📅" label="Calendrier" isActive={isActive('/guide/calendrier')} />
+          <GuideLink href="/guide/revenus" icon="💰" label="Mes revenus" isActive={isActive('/guide/revenus')} />
+          <GuideLink href="/guide/avis" icon="⭐" label="Mes avis" isActive={isActive('/guide/avis')} />
 
-        <div className="p-6 border-t border-white/10 flex flex-col gap-2">
-          <Link href="/charte" className="flex items-center gap-2 text-xs text-white/30 hover:text-white/70 transition-colors">
+          <GuideSection label="Mon profil" />
+          <GuideLink href="/guide/profil" icon="👤" label="Modifier profil" isActive={isActive('/guide/profil')} />
+          <GuideLink href="/guide/forfaits" icon="📦" label="Mes forfaits" isActive={isActive('/guide/forfaits')} />
+        </div>
+
+        <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <Link href="/charte" style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', textDecoration: 'none' }}>
             <span>🔒</span> Charte SAFARUNA
           </Link>
-          <button className="flex items-center gap-2 text-xs text-white/30 hover:text-white/70 transition-colors text-left">
+          <button style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
             <span>🚪</span> Déconnexion
           </button>
         </div>
-      </aside>
+      </div>
 
       {/* MAIN CONTENT */}
-      <div className="flex-1 md:ml-[250px] flex flex-col min-w-0">
-        <header className="sticky top-0 z-40 bg-[var(--cream)]/95 backdrop-blur-md border-b border-[var(--sand)] px-8 py-4 flex items-center justify-between">
-          <h2 className="font-serif text-xl">Tableau de bord guide</h2>
-          <div className="flex items-center gap-3">
-            <button className="relative w-9 h-9 rounded-full border border-[var(--sand)] bg-white flex items-center justify-center hover:border-[var(--gold)] transition-colors">
+      <div style={{ flex: 1, marginLeft: 0, display: 'flex', flexDirection: 'column', minWidth: 0 }} className="md:ml-[250px]">
+        <div style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 40,
+          background: 'rgba(250,247,240,0.95)',
+          backdropFilter: 'blur(12px)',
+          borderBottom: '1px solid #E8DFC8',
+          padding: '1rem 2rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}>
+          <span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', color: '#1A1209' }}>Tableau de bord guide</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <button style={{ position: 'relative', width: 36, height: 36, borderRadius: '50%', border: '1px solid #E8DFC8', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '0.9rem' }}>
               🔔
-              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[var(--red)] border-2 border-white"></span>
+              <span style={{ position: 'absolute', top: 5, right: 5, width: 8, height: 8, borderRadius: '50%', background: '#C0392B', border: '2px solid white' }}></span>
             </button>
-            <button className="px-4 py-1.5 rounded-full text-xs font-bold bg-[var(--deep)] text-[var(--gold-light)] hover:bg-[var(--warm)] transition-colors hidden sm:block">
-              Partager profil
-            </button>
-            <button className="px-4 py-1.5 rounded-full text-xs font-bold bg-[var(--gold)] text-[var(--deep)] hover:bg-[var(--gold-dark)] hover:text-white transition-colors">
-              + Dispo
-            </button>
+            <button style={{ padding: '0.4rem 1rem', borderRadius: 50, fontSize: '0.75rem', fontWeight: 700, background: '#1A1209', color: '#F0D897', border: 'none', cursor: 'pointer' }}>Partager profil</button>
+            <button style={{ padding: '0.4rem 1rem', borderRadius: 50, fontSize: '0.75rem', fontWeight: 700, background: '#C9A84C', color: '#1A1209', border: 'none', cursor: 'pointer' }}>+ Dispo</button>
           </div>
-        </header>
+        </div>
 
-        <main className="p-6 sm:p-8 max-w-[1200px] w-full mx-auto">
+        <main style={{ padding: '2rem', maxWidth: 1200, width: '100%', margin: '0 auto' }}>
           {children}
         </main>
       </div>
     </div>
+  );
+}
+
+function GuideSection({ label }: { label: string }) {
+  return (
+    <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)', padding: '0.75rem 1.5rem 0.35rem' }}>
+      {label}
+    </div>
+  );
+}
+
+function GuideLink({ href, icon, label, isActive, badge }: { href: string; icon: string; label: string; isActive: boolean; badge?: string }) {
+  return (
+    <Link href={href} style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: '0.75rem',
+      padding: '0.55rem 1.5rem',
+      textDecoration: 'none',
+      fontSize: '0.875rem',
+      fontWeight: isActive ? 700 : 400,
+      color: isActive ? '#F0D897' : 'rgba(255,255,255,0.5)',
+      background: isActive ? 'rgba(201,168,76,0.12)' : 'transparent',
+      borderLeft: isActive ? '2px solid #C9A84C' : '2px solid transparent',
+      transition: 'all 0.15s',
+    }}>
+      <span style={{ width: 16, textAlign: 'center', fontSize: '0.9rem' }}>{icon}</span>
+      <span style={{ flex: 1 }}>{label}</span>
+      {badge && (
+        <span style={{ background: '#C0392B', color: 'white', fontSize: '0.6rem', fontWeight: 700, padding: '0.15rem 0.45rem', borderRadius: 50, minWidth: 16, textAlign: 'center' }}>{badge}</span>
+      )}
+    </Link>
   );
 }

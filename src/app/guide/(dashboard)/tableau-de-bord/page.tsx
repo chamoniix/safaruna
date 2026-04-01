@@ -1,24 +1,89 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 
 export default function GuideDashboard() {
+  const [isAvailable, setIsAvailable] = useState(true);
+
   return (
     <>
+      {/* AVAILABILITY TOGGLE BANNER */}
+      <div
+        className="rounded-2xl p-4 flex items-center justify-between mb-6 border"
+        style={{
+          background: isAvailable ? 'rgba(29,92,58,0.08)' : 'rgba(122,109,90,0.08)',
+          borderColor: isAvailable ? 'rgba(29,92,58,0.2)' : 'rgba(122,109,90,0.2)',
+        }}
+      >
+        <div className="flex items-center gap-3">
+          <div
+            className="w-3 h-3 rounded-full"
+            style={{
+              background: isAvailable ? '#27AE60' : '#aaa',
+              boxShadow: isAvailable ? '0 0 0 4px rgba(39,174,96,0.2)' : 'none',
+            }}
+          ></div>
+          <div>
+            <div className="text-sm font-bold" style={{ color: isAvailable ? '#1D5C3A' : '#7A6D5A' }}>
+              {isAvailable ? 'Vous êtes disponible' : 'Vous êtes indisponible'}
+            </div>
+            <div className="text-xs" style={{ color: isAvailable ? 'rgba(29,92,58,0.7)' : 'rgba(122,109,90,0.7)' }}>
+              {isAvailable
+                ? 'Les pèlerins peuvent vous contacter et réserver.'
+                : 'Votre profil est masqué dans les résultats de recherche.'}
+            </div>
+          </div>
+        </div>
+        <button
+          onClick={() => setIsAvailable(!isAvailable)}
+          className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold transition-all"
+          style={{
+            background: isAvailable ? '#1D5C3A' : '#1A1209',
+            color: isAvailable ? 'white' : '#F0D897',
+          }}
+        >
+          <div
+            style={{
+              width: 32,
+              height: 16,
+              borderRadius: 50,
+              background: isAvailable ? 'rgba(255,255,255,0.3)' : 'rgba(240,216,151,0.3)',
+              position: 'relative',
+              transition: 'background 0.2s',
+            }}
+          >
+            <div
+              style={{
+                position: 'absolute',
+                top: 3,
+                width: 10,
+                height: 10,
+                borderRadius: '50%',
+                background: 'white',
+                transition: 'left 0.2s',
+                left: isAvailable ? 18 : 3,
+              }}
+            ></div>
+          </div>
+          {isAvailable ? 'Passer indisponible' : 'Passer disponible'}
+        </button>
+      </div>
+
       {/* EARNINGS BANNER */}
       <div className="bg-[var(--deep)] rounded-3xl p-8 md:p-10 flex flex-col md:flex-row md:items-center justify-between gap-8 mb-8 relative overflow-hidden">
         <div className="absolute top-1/2 -translate-y-1/2 right-12 md:right-48 font-serif text-8xl md:text-[140px] text-[var(--gold)]/10 font-bold select-none pointer-events-none" style={{ direction: 'rtl' }}>رزق</div>
-        
+
         <div className="relative z-10">
           <h2 className="font-serif text-2xl md:text-3xl text-white mb-2">Bonjour, <em className="text-[var(--gold)] italic">Cheikh Rachid</em> 🌙</h2>
           <p className="text-white/40 text-sm">Voici vos revenus et performances ce mois-ci.</p>
         </div>
-        
+
         <div className="relative z-10 md:text-right">
           <div className="font-serif text-5xl md:text-6xl font-semibold text-[var(--gold-light)] leading-none mb-2">3 840 €</div>
-          <div className="text-white/40 text-xs mb-2">Revenus · Mars 2025</div>
+          <div className="text-white/40 text-xs mb-2">Revenus · Avril 2026</div>
           <div className="inline-flex items-center gap-1.5 bg-[#1D5C3A]/40 text-[#6EC68A] text-xs font-bold px-3 py-1 rounded-full">
-            ↑ +24% vs février
+            ↑ +24% vs mars
           </div>
         </div>
       </div>

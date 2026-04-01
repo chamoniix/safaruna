@@ -194,7 +194,7 @@ export default function GuideSearchPage() {
 
           <div className={`guides-grid ${viewMode === 'list' ? 'list-view' : ''}`}>
             {/* CARD 1 */}
-            <Link href="/guides/1" style={{textDecoration: 'none'}}>
+            <Link href="/guides/rachid-al-madani" style={{textDecoration: 'none'}}>
               <div className={`gcard ${viewMode === 'list' ? 'list-view' : ''}`}>
                 <div className={`gcard-banner ${viewMode === 'list' ? 'list-view' : ''}`} style={{ background: 'linear-gradient(135deg, #1A1209, #4A2C0A)' }}>
                   <div className={`gcard-avatar ${viewMode === 'list' ? 'list-view' : ''}`} style={{ background: 'url(/guide-avatar.png) center/cover' }}>
@@ -227,7 +227,7 @@ export default function GuideSearchPage() {
             </Link>
 
             {/* CARD 2 */}
-            <Link href="/guides/2" style={{textDecoration: 'none'}}>
+            <Link href="/guides/fatima-al-omari" style={{textDecoration: 'none'}}>
               <div className={`gcard ${viewMode === 'list' ? 'list-view' : ''}`}>
                 <div className={`gcard-banner ${viewMode === 'list' ? 'list-view' : ''}`} style={{ background: 'linear-gradient(135deg, #082818, #1D5C3A)' }}>
                   <div className={`gcard-avatar ${viewMode === 'list' ? 'list-view' : ''}`} style={{ background: 'linear-gradient(135deg,#9FE1CB,#1D9E75)' }}>فع</div>

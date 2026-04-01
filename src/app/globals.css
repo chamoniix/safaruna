@@ -7,9 +7,9 @@
   --color-orange: #C05A10; --color-orange-bg: #FEF0E6;
 }
 :root {
-  --gold: #C9A84C; --gold-light: #F0D897; --gold-dark: #8B6914; --cream: #FAF7F0;
+  --gold: #C9A84C; --gold-light: #F0D897; --gold-dark: #8B6914; --gold-pale: #FAF3E0; --cream: #FAF7F0;
   --deep: #1A1209; --warm: #2D1F08; --sand: #E8DFC8; --muted: #7A6D5A;
-  --green: #1D5C3A; --green-light: #E8F5EE; --radius: 16px;
+  --green: #1D5C3A; --green-light: #E8F5EE; --green-bg: #E8F5EE; --radius: 16px;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: var(--font-manrope), 'Manrope', sans-serif; background: var(--cream); color: var(--deep); overflow-x: hidden; line-height: 1.6; }

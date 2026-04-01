@@ -31,6 +31,7 @@ export const authOptions: AuthOptions = {
             id: "1",
             email: credentials.email,
             name: credentials.email.split("@")[0],
+            role: "PELERIN",
           }
         }
         return null

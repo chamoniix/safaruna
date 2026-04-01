@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -14,12 +14,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -88,7 +88,7 @@ model GuideProfile {
   userId            String   @unique
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   slug              String?  @unique
-  bio               String?  @db.Text
+  bio               String? 
   city              String?
   nationality       String?
   experienceYears   Int?
@@ -141,8 +141,8 @@ model Place {
   nameAr      String?
   city        String
   category    String
-  description String   @db.Text
-  duaText     String?  @db.Text
+  description String  
+  duaText     String? 
   
   guidePlaces GuidePlace[]
 }
@@ -157,7 +157,7 @@ model Package {
   priceGroup         Float?
   minPeople          Int      @default(1)
   maxPeople          Int
-  cancellationPolicy String?  @db.Text
+  cancellationPolicy String? 
   
   reservations       Reservation[]
 }
@@ -166,7 +166,7 @@ model Availability {
   id             String   @id @default(cuid())
   guideProfileId String
   guideProfile   GuideProfile @relation(fields: [guideProfileId], references: [id], onDelete: Cascade)
-  date           DateTime @db.Date
+  date           DateTime
   status         AvailabilityStatus @default(AVAILABLE)
 
   @@unique([guideProfileId, date])
@@ -187,8 +187,8 @@ model Reservation {
   guideProfile      GuideProfile @relation("GuideReservations", fields: [guideProfileId], references: [id])
   packageId         String
   package           Package  @relation(fields: [packageId], references: [id])
-  startDate         DateTime @db.Date
-  endDate           DateTime @db.Date
+  startDate         DateTime
+  endDate           DateTime
   nbPeople          Int
   transportOption   String?
   optionsJson       Json?
@@ -197,7 +197,7 @@ model Reservation {
   totalPrice        Float
   status            ReservationStatus @default(PENDING)
   stripePaymentId   String?
-  notes             String?  @db.Text
+  notes             String? 
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   
@@ -233,7 +233,7 @@ model Message {
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   senderId       String
   sender         User     @relation(fields: [senderId], references: [id])
-  content        String   @db.Text
+  content        String  
   readAt         DateTime?
   createdAt      DateTime @default(now())
 }
@@ -248,8 +248,8 @@ model Review {
   ratingPunctuality  Int?
   ratingPedagogy     Int?
   ratingKnowledge    Int?
-  comment            String   @db.Text
-  guideResponse      String?  @db.Text
+  comment            String  
+  guideResponse      String? 
   createdAt          DateTime @default(now())
 }
 
@@ -286,7 +286,7 @@ model Course {
   category      String
   durationMin   Int
   level         String
-  description   String?  @db.Text
+  description   String? 
   videoUrl      String?
   thumbnailUrl  String?
   
@@ -309,9 +309,9 @@ model Dua {
   id              String   @id @default(cuid())
   category        String
   title           String?
-  arabicText      String   @db.Text
-  transliteration String?  @db.Text
-  translationFr   String   @db.Text
+  arabicText      String  
+  transliteration String? 
+  translationFr   String  
   source          String?
   audioUrl        String?
   
@@ -335,7 +335,7 @@ model Notification {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   type      String
   title     String
-  message   String   @db.Text
+  message   String  
   readAt    DateTime?
   createdAt DateTime @default(now())
 }

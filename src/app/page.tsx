@@ -186,7 +186,7 @@ export default function Home() {
               <div className="guide-price-dark">
                 380€ <small>/ pers · 3 jours</small>
               </div>
-              <Link href="/guides/1" className="btn-book-dark">
+              <Link href="/guides/rachid-al-madani" className="btn-book-dark">
                 Voir profil
               </Link>
             </div>
@@ -220,7 +220,7 @@ export default function Home() {
               <div className="guide-price-dark">
                 320€ <small>/ pers · 3 jours</small>
               </div>
-              <Link href="/guides/2" className="btn-book-dark">
+              <Link href="/guides/fatima-al-omari" className="btn-book-dark">
                 Voir profil
               </Link>
             </div>

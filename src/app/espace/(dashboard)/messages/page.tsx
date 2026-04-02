@@ -75,7 +75,7 @@ export default function MessagesPage() {
           </div>
           <div className="flex gap-2">
             <button className="p-2 text-[var(--deep)] hover:bg-[var(--cream)] rounded-lg transition-colors" title="Voir réservation">📄</button>
-            <Link href="/guides/1" className="p-2 text-[var(--deep)] hover:bg-[var(--cream)] rounded-lg transition-colors border border-[var(--sand)] text-sm font-semibold">Profil</Link>
+            <Link href="/guides/rachid-al-madani" className="p-2 text-[var(--deep)] hover:bg-[var(--cream)] rounded-lg transition-colors border border-[var(--sand)] text-sm font-semibold">Profil</Link>
           </div>
         </header>
 

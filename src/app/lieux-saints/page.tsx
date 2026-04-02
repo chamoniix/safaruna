@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
-const LIEUX = {
+const LIEUX: Record<'Makkah' | 'Madinah', Lieu[]> = {
   Makkah: [
     {
       slug: 'masjid-al-haram',
@@ -198,7 +198,7 @@ const LIEUX = {
       history: "Après 14 jours à Quba, le Prophète ﷺ se dirigea vers Madinah un vendredi matin. À mi-chemin, dans le quartier de Banu Salim ibn Awf, il fut rejoint par un grand nombre de fidèles. Il s'arrêta, fit la prière du vendredi et prononça le premier sermon. Ce vendredi est considéré comme le premier Jumu'ah de l'Islam.",
       dua: "يَا أَيُّهَا الَّذِينَ آمَنُوا إِذَا نُودِيَ لِلصَّلَاةِ مِن يَوْمِ الْجُمُعَةِ",
       duaTrad: "Ô croyants, quand l'appel à la prière retentit le jour du Vendredi... (Al-Jumu'ah 62:9)",
-      features: ['Premier Jumu'ah', 'Hégire 622', 'Lieu rare à visiter'],
+      features: ["Premier Jumu'ah", 'Hégire 622', 'Lieu rare à visiter'],
     },
     {
       slug: 'wadi-al-aqiq',
@@ -215,7 +215,19 @@ const LIEUX = {
   ],
 };
 
-type Lieu = typeof LIEUX.Makkah[0];
+interface Lieu {
+  slug: string;
+  title: string;
+  nameAr: string;
+  tag: string;
+  tagColor: string;
+  description: string;
+  history: string;
+  dua: string;
+  duaTrad: string;
+  duaTranslit?: string;
+  features: string[];
+}
 
 export default function LieuxSaintsPage() {
   const [city, setCity] = useState<'Makkah' | 'Madinah'>('Makkah');
@@ -307,8 +319,8 @@ export default function LieuxSaintsPage() {
                 {/* Arabic text */}
                 <div style={{ fontFamily: 'serif', fontSize: '1.3rem', color: '#F0D897', direction: 'rtl', lineHeight: 1.9, marginBottom: '0.75rem', textAlign: 'center' }}>{selected.dua}</div>
                 {/* Translitération */}
-                {'duaTranslit' in selected && selected.duaTranslit && (
-                  <div style={{ fontSize: '0.78rem', color: 'rgba(201,168,76,0.6)', lineHeight: 1.6, textAlign: 'center', fontStyle: 'italic', marginBottom: '0.5rem' }}>{(selected as typeof selected & { duaTranslit: string }).duaTranslit}</div>
+                {selected.duaTranslit && (
+                  <div style={{ fontSize: '0.78rem', color: 'rgba(201,168,76,0.6)', lineHeight: 1.6, textAlign: 'center', fontStyle: 'italic', marginBottom: '0.5rem' }}>{selected.duaTranslit}</div>
                 )}
                 {/* Traduction */}
                 <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: '0.75rem', marginTop: '0.5rem' }}>🇫🇷 {selected.duaTrad}</div>

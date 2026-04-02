@@ -255,6 +255,53 @@ export default function GuideDashboard() {
 
         </div>
       </div>
+
+      {/* REVENUE CHART */}
+      <section className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-serif text-xl">Évolution des revenus</h2>
+          <Link href="/guide/revenus" className="text-xs font-bold text-[var(--gold-dark)] hover:underline">Voir tout →</Link>
+        </div>
+        <div className="bg-white rounded-2xl border border-[var(--sand)] p-6 shadow-sm">
+          <RevenueChart />
+        </div>
+      </section>
+
+      {/* AVIS + MESSAGES */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+
+        {/* DERNIERS AVIS */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-serif text-xl">Derniers avis</h2>
+            <Link href="/guide/avis" className="text-xs font-bold text-[var(--gold-dark)] hover:underline">Tous les avis →</Link>
+          </div>
+          <div className="bg-white rounded-2xl border border-[var(--sand)] p-5 shadow-sm space-y-4">
+            <AvisCard initials="KL" name="Karim Lamrani" date="28 mars 2026" rating={5} text="Rachid est exceptionnel. Sa connaissance de l'histoire islamique nous a transportés. Un guide hors pair, profondément humain et spirituel." />
+            <AvisCard initials="SA" name="Safia Aouadi" date="14 mars 2026" rating={5} text="Mashallah, une expérience inoubliable. Rachid a pris le temps d'expliquer chaque lieu avec patience. Je le recommande à toute ma famille." />
+            <AvisCard initials="OD" name="Omar Diallo" date="2 mars 2026" rating={5} text="Guide extraordinaire. Il connaît chaque recoin de la Mecque et de Médine. Son du'a pour notre groupe était bouleversant." />
+          </div>
+        </section>
+
+        {/* MESSAGES RÉCENTS */}
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-serif text-xl">Messages récents</h2>
+            <Link href="/guide/messages" className="text-xs font-bold text-[var(--gold-dark)] hover:underline flex items-center gap-1">Tout voir <span className="bg-[var(--gold)] text-[var(--deep)] text-[10px] font-bold px-1.5 py-0.5 rounded-full">5</span></Link>
+          </div>
+          <div className="bg-white rounded-2xl border border-[var(--sand)] shadow-sm overflow-hidden">
+            <MessageRow initials="SM" name="Safia Merabet" preview="Bonjour Cheikh Rachid, est-il possible d'intégrer une visite..." time="14 min" unread />
+            <MessageRow initials="AB" name="Aïcha Benali" preview="Concernant les dates de septembre, nous souhaiterions..." time="1h" unread />
+            <MessageRow initials="KL" name="Karim Lamrani" preview="Jazakallahu khayran pour cette mission magnifique..." time="3h" />
+            <MessageRow initials="YB" name="Youssef Belkacem" preview="Pouvez-vous me rappeler les documents requis pour..." time="Hier" />
+            <MessageRow initials="MH" name="Meryem Hadfi" preview="Suite à notre échange, j'ai confirmé les billets..." time="Hier" />
+            <div className="p-4 text-center border-t border-[var(--sand)]">
+              <Link href="/guide/messages" className="text-xs font-bold text-[var(--gold-dark)] hover:underline">Ouvrir la messagerie →</Link>
+            </div>
+          </div>
+        </section>
+
+      </div>
     </>
   );
 }
@@ -317,4 +364,84 @@ function PerfBar({ label, val, color, pct }: any) {
       <span className="text-xs font-bold text-[var(--deep)] w-8 text-right shrink-0">{val}</span>
     </div>
   )
+}
+
+const MONTHS = ['Oct', 'Nov', 'Déc', 'Jan', 'Fév', 'Mar', 'Avr'];
+const REVENUES = [1820, 2100, 1650, 2480, 2950, 3100, 3840];
+
+function RevenueChart() {
+  const max = Math.max(...REVENUES);
+  const chartH = 140;
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.625rem', height: chartH, paddingBottom: 0 }}>
+        {REVENUES.map((v, i) => {
+          const isLast = i === REVENUES.length - 1;
+          const height = Math.round((v / max) * (chartH - 24));
+          return (
+            <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, height: '100%', justifyContent: 'flex-end' }}>
+              <div style={{ fontSize: '0.6rem', fontWeight: 700, color: isLast ? '#C9A84C' : '#AEA491', marginBottom: 2 }}>
+                {v >= 1000 ? `${(v/1000).toFixed(1).replace('.0','')}k` : v}€
+              </div>
+              <div style={{ width: '100%', height, background: isLast ? '#C9A84C' : '#F5F2EC', border: `1px solid ${isLast ? '#C9A84C' : '#EDE8DC'}`, borderRadius: '6px 6px 0 0', transition: 'height 0.3s' }} />
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ display: 'flex', gap: '0.625rem', marginTop: '0.5rem', borderTop: '1px solid #EDE8DC', paddingTop: '0.5rem' }}>
+        {MONTHS.map((m, i) => (
+          <div key={i} style={{ flex: 1, textAlign: 'center', fontSize: '0.65rem', fontWeight: i === MONTHS.length - 1 ? 800 : 500, color: i === MONTHS.length - 1 ? '#C9A84C' : '#AEA491' }}>{m}</div>
+        ))}
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid #EDE8DC' }}>
+        <div>
+          <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#AEA491' }}>Total 7 mois</div>
+          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.5rem', fontWeight: 700, color: '#1A1209' }}>17 940 €</div>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#AEA491' }}>Meilleur mois</div>
+          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.5rem', fontWeight: 700, color: '#C9A84C' }}>Avril 2026</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AvisCard({ initials, name, date, rating, text }: any) {
+  return (
+    <div style={{ paddingBottom: '1rem', borderBottom: '1px solid #F5F2EC' }}>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800, color: '#1A1209', flexShrink: 0 }}>{initials}</div>
+          <div>
+            <div className="text-xs font-bold text-[var(--deep)]">{name}</div>
+            <div className="text-[10px] text-[var(--muted)]">{date}</div>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 1 }}>
+          {Array.from({length: rating}).map((_, i) => <span key={i} style={{ color: '#C9A84C', fontSize: '0.65rem' }}>★</span>)}
+        </div>
+      </div>
+      <p className="text-[11px] text-[var(--muted)] leading-relaxed italic">"{text}"</p>
+    </div>
+  );
+}
+
+function MessageRow({ initials, name, preview, time, unread }: any) {
+  return (
+    <div className={`flex items-center gap-3 px-5 py-3.5 border-b border-[var(--sand)] hover:bg-[var(--cream)] transition-colors cursor-pointer ${unread ? 'bg-[#FDFAF4]' : ''}`}>
+      <div style={{ position: 'relative', flexShrink: 0 }}>
+        <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 800, color: '#1A1209' }}>{initials}</div>
+        {unread && <div style={{ position: 'absolute', top: 0, right: 0, width: 8, height: 8, borderRadius: '50%', background: '#C0392B', border: '2px solid white' }} />}
+      </div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="flex items-center justify-between">
+          <span className={`text-xs font-bold text-[var(--deep)] ${unread ? '' : 'font-medium'}`}>{name}</span>
+          <span className="text-[10px] text-[var(--muted)] shrink-0">{time}</span>
+        </div>
+        <div className="text-[11px] text-[var(--muted)] truncate">{preview}</div>
+      </div>
+    </div>
+  );
 }

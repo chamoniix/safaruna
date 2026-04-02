@@ -1,12 +1,14 @@
+import React from 'react';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Link from 'next/link';
+import { IconCar, IconDocument, IconBuilding } from '@/components/Icons';
 
-const SERVICES = [
+const SERVICES: Array<{ href: string; badge: string; icon: React.ReactNode; arabic: string; title: string; desc: string; features: string[]; price: string; color: string; bgLight: string }> = [
   {
     href: '/services/transfert',
     badge: 'Transferts',
-    icon: '🚐',
+    icon: <IconCar size={36} stroke="#C9A84C" />,
     arabic: 'نقل',
     title: 'Transfert & Transport',
     desc: 'Navettes aéroport, transferts Makkah–Madinah, véhicules privés avec chauffeur certifié. Ponctualité garantie.',
@@ -18,10 +20,10 @@ const SERVICES = [
   {
     href: '/services/visa',
     badge: 'Visa',
-    icon: '📋',
+    icon: <IconDocument size={36} stroke="#C9A84C" />,
     arabic: 'تأشيرة',
     title: 'Assistance Visa Omra',
-    desc: 'Traitement complet de votre demande de visa Omra. Documents, soumission et suivi jusqu\'à l\'obtention.',
+    desc: "Traitement complet de votre demande de visa Omra. Documents, soumission et suivi jusqu'à l'obtention.",
     features: ['Dossier complet inclus', 'Suivi de demande', 'Délai express disponible', 'Assistance 7j/7'],
     price: 'À partir de 79€',
     color: '#1A4A7A',
@@ -30,10 +32,10 @@ const SERVICES = [
   {
     href: '/services/hotels',
     badge: 'Hébergement',
-    icon: '🏨',
+    icon: <IconBuilding size={36} stroke="#C9A84C" />,
     arabic: 'فندق',
     title: 'Hôtels & Hébergement',
-    desc: 'Sélection d\'hôtels à Makkah et Madinah triés sur le volet — proximité Haram, confort, rapport qualité-prix.',
+    desc: "Sélection d'hôtels à Makkah et Madinah triés sur le volet — proximité Haram, confort, rapport qualité-prix.",
     features: ['Vue Kaaba disponible', 'Makkah & Madinah', 'Check-in facilité', 'Annulation flexible'],
     price: 'À partir de 89€/nuit',
     color: '#7A3A1A',
@@ -79,7 +81,7 @@ export default function ServicesPage() {
                       <span style={{ background: s.bgLight, color: s.color, fontSize: '0.6rem', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '0.2rem 0.65rem', borderRadius: 50, marginBottom: '0.75rem', display: 'inline-block' }}>{s.badge}</span>
                       <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.6rem', fontWeight: 700, color: 'white', margin: 0, lineHeight: 1.2 }}>{s.title}</h2>
                     </div>
-                    <div style={{ fontSize: '2rem', flexShrink: 0 }}>{s.icon}</div>
+                    <div style={{ flexShrink: 0, opacity: 0.9 }}>{s.icon}</div>
                   </div>
                 </div>
 

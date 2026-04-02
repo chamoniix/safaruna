@@ -1,44 +1,51 @@
+import React from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
 import StatsSection from "@/components/StatsSection";
+import {
+  IconMegaphone, IconEye, IconChat, IconGraduationCap, IconShield, IconUserGroup,
+  IconMosque, IconMountain, IconBuilding, IconMap,
+  IconBookOpen, IconStar, IconMoon, IconSparkles, IconHandshake,
+  IconCurrency, IconPhone, IconLock, IconTrophy,
+} from "@/components/Icons";
 
 const LOGO_LETTERS = ['S', 'A', 'F', 'A', 'R', 'U', 'N', 'A'];
 
-const DIFFERENCIATEURS = [
+const DIFFERENCIATEURS: Array<{ icon: React.ReactNode; title: string; desc: string; vs: string }> = [
   {
-    icon: '🗣️',
+    icon: <IconMegaphone size={24} stroke="#C9A84C" />,
     title: 'Guide dans ta langue',
     desc: "Tu choisis ton guide selon sa langue maternelle. Français, Wolof, Darija, Turc — ton guide te parle comme un ami, pas comme un conférencier.",
     vs: "HolyGO : guides assignés sans choix de langue",
   },
   {
-    icon: '👁️',
+    icon: <IconEye size={24} stroke="#C9A84C" />,
     title: 'Profil guide transparent',
     desc: "Biographie complète, certifications vérifiées, avis authentiques, lieux couverts, taux de retour. Tu sais exactement qui tu vas rencontrer.",
     vs: "Agences : photo et prénom, c'est tout",
   },
   {
-    icon: '💬',
+    icon: <IconChat size={24} stroke="#C9A84C" />,
     title: 'Messagerie directe',
     desc: "Tu échanges avec ton guide avant de payer. Pose tes questions, vérifie sa disponibilité, ressens si le courant passe.",
     vs: "Agences : tu pais d'abord, tu rencontres après",
   },
   {
-    icon: '🎓',
+    icon: <IconGraduationCap size={24} stroke="#C9A84C" />,
     title: 'Academy islamique',
     desc: "Apprends les rituels, l'histoire, les du'a avant de partir. 30+ leçons vidéo accessibles dans ton espace pèlerin.",
     vs: "HolyGO : aucune préparation spirituelle",
   },
   {
-    icon: '🛡️',
+    icon: <IconShield size={24} stroke="#C9A84C" />,
     title: 'Garantie remplacement',
     desc: "Si ton guide ne peut pas venir (maladie, urgence), on te trouve un guide équivalent certifié en moins de 2 heures.",
     vs: "Agences : dommage, annulation sans recours",
   },
   {
-    icon: '👥',
+    icon: <IconUserGroup size={24} stroke="#C9A84C" />,
     title: 'Petits groupes max 8',
     desc: "Jamais 40 personnes dans un bus. Maximum 8 pèlerins par guide — pour que chaque question ait une réponse, chaque moment compte.",
     vs: "Agences traditionnelles : groupes de 20 à 50",
@@ -57,7 +64,7 @@ const GUIDES_VEDETTE = [
     reviews: 214,
     langs: ['🇫🇷 Français', '🇸🇦 Arabe', '🇬🇧 English'],
     price: '280€',
-    badge: '🏆 Top Guide',
+    badge: 'Top Guide',
     badgeColor: '#C9A84C',
   },
   {
@@ -71,7 +78,7 @@ const GUIDES_VEDETTE = [
     reviews: 178,
     langs: ['🇫🇷 Français', '🇲🇦 Darija'],
     price: '320€',
-    badge: '👩 Guide Femme',
+    badge: 'Guide Femme',
     badgeColor: '#1D9E75',
   },
   {
@@ -85,18 +92,18 @@ const GUIDES_VEDETTE = [
     reviews: 94,
     langs: ['🇫🇷 Français', '🇸🇳 Wolof'],
     price: '240€',
-    badge: '🌍 Afrique de l\'Ouest',
+    badge: "Afrique de l'Ouest",
     badgeColor: '#E8A020',
   },
 ];
 
-const LIEUX_VEDETTE = [
-  { emoji: '🕋', nameFr: 'Masjid Al-Haram',   nameAr: 'المسجد الحرام',    desc: "La plus grande mosquée du monde. Le cœur du pèlerinage." },
-  { emoji: '⛰️', nameFr: 'Grotte de Hira',     nameAr: 'غار حراء',         desc: "Là où la première révélation coranique fut révélée." },
-  { emoji: '🌿', nameFr: 'Masjid An-Nabawi',   nameAr: 'المسجد النبوي',    desc: "La mosquée du Prophète ﷺ. La Rawdah, jardin du Paradis." },
-  { emoji: '⚔️', nameFr: 'Badr',               nameAr: 'بدر',              desc: "Site de la première grande bataille de l'Islam." },
-  { emoji: '🏔️', nameFr: 'Jabal Rahmah',       nameAr: 'جبل الرحمة',       desc: "La montagne de la Miséricorde, au cœur d'Arafat." },
-  { emoji: '🏛️', nameFr: 'Masjid Quba',        nameAr: 'مسجد قباء',        desc: "La première mosquée bâtie dans l'histoire de l'Islam." },
+const LIEUX_VEDETTE: Array<{ icon: React.ReactNode; nameFr: string; nameAr: string; desc: string }> = [
+  { icon: <IconMosque size={28} stroke="#8B6914" />, nameFr: 'Masjid Al-Haram',   nameAr: 'المسجد الحرام',    desc: "La plus grande mosquée du monde. Le cœur du pèlerinage." },
+  { icon: <IconMountain size={28} stroke="#8B6914" />, nameFr: 'Grotte de Hira', nameAr: 'غار حراء',         desc: "Là où la première révélation coranique fut révélée." },
+  { icon: <IconMosque size={28} stroke="#8B6914" />, nameFr: 'Masjid An-Nabawi', nameAr: 'المسجد النبوي',    desc: "La mosquée du Prophète ﷺ. La Rawdah, jardin du Paradis." },
+  { icon: <IconMap size={28} stroke="#8B6914" />, nameFr: 'Badr',               nameAr: 'بدر',              desc: "Site de la première grande bataille de l'Islam." },
+  { icon: <IconMountain size={28} stroke="#8B6914" />, nameFr: 'Jabal Rahmah', nameAr: 'جبل الرحمة',       desc: "La montagne de la Miséricorde, au cœur d'Arafat." },
+  { icon: <IconBuilding size={28} stroke="#8B6914" />, nameFr: 'Masjid Quba',  nameAr: 'مسجد قباء',        desc: "La première mosquée bâtie dans l'histoire de l'Islam." },
 ];
 
 const TEMOIGNAGES = [
@@ -271,7 +278,7 @@ export default function Home() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem' }}>
             {DIFFERENCIATEURS.map((d, i) => (
               <div key={d.title} className={`diff-card reveal reveal-d${(i % 3) + 1}`}>
-                <div className="diff-icon">{d.icon}</div>
+                <div className="diff-icon" style={{ fontSize: 'unset' }}>{d.icon}</div>
                 <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--deep)', marginBottom: '0.5rem' }}>{d.title}</h3>
                 <p style={{ fontSize: '0.84rem', color: 'var(--muted)', lineHeight: 1.75, marginBottom: '0.75rem' }}>{d.desc}</p>
                 <div style={{ fontSize: '0.7rem', color: 'rgba(192,57,43,0.65)', fontStyle: 'italic', borderTop: '1px solid var(--sand)', paddingTop: '0.6rem' }}>
@@ -372,7 +379,7 @@ export default function Home() {
               <div key={l.nameFr} className={`place-card reveal reveal-d${(i % 3) + 1}`}>
                 <div className="place-arabic-bg" aria-hidden="true">{l.nameAr}</div>
                 <div style={{ position: 'relative', zIndex: 1 }}>
-                  <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>{l.emoji}</div>
+                  <div style={{ marginBottom: '0.75rem' }}>{l.icon}</div>
                   <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--gold-dark)', marginBottom: '0.2rem' }}>
                     {l.nameAr}
                   </div>
@@ -405,13 +412,13 @@ export default function Home() {
           <p className="reveal reveal-d2" style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', marginBottom: '4rem' }}>Sourate Al-Hajj · 22:32</p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '2rem' }}>
-            {[
-              { icon: '🕋', t: 'Authenticité',  d: "Nos guides ne font jamais de compromis sur les rituels. Chaque geste a un sens — ils vous l'expliquent.", color: '#C9A84C' },
-              { icon: '🤲', t: 'Confiance',      d: "La charte islamique que signent nos guides n'est pas un contrat. C'est un serment devant Allah.", color: '#9FE1CB' },
-              { icon: '📖', t: 'Connaissance',   d: "L'Omra sans savoir, c'est marcher dans le noir. Avec SAFARUNA, chaque pas a un sens.", color: '#A8C8F0' },
-            ].map((v, i) => (
+            {([
+              { icon: <IconMosque size={28} stroke="#C9A84C" />, t: 'Authenticité',  d: "Nos guides ne font jamais de compromis sur les rituels. Chaque geste a un sens — ils vous l'expliquent.", color: '#C9A84C' },
+              { icon: <IconHandshake size={28} stroke="#9FE1CB" />, t: 'Confiance',      d: "La charte islamique que signent nos guides n'est pas un contrat. C'est un serment devant Allah.", color: '#9FE1CB' },
+              { icon: <IconBookOpen size={28} stroke="#A8C8F0" />, t: 'Connaissance',   d: "L'Omra sans savoir, c'est marcher dans le noir. Avec SAFARUNA, chaque pas a un sens.", color: '#A8C8F0' },
+            ] as { icon: React.ReactNode; t: string; d: string; color: string }[]).map((v, i) => (
               <div key={v.t} className={`reveal reveal-d${i + 1}`} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '2rem' }}>
-                <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>{v.icon}</div>
+                <div style={{ marginBottom: '0.75rem' }}>{v.icon}</div>
                 <h3 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', color: v.color, marginBottom: '0.5rem', fontWeight: 600 }}>{v.t}</h3>
                 <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.75 }}>{v.d}</p>
               </div>
@@ -476,11 +483,11 @@ export default function Home() {
             3 jours ou 10 jours, solo ou famille — il existe un forfait fait pour toi.
           </p>
           <div className="packages-grid">
-            {[
-              { icon: '🌙', title: 'Omra Essentielle', featured: false, price: '280€', sub: '/ pers · 2–3 jours', features: ["Rituels expliqués (tawaf, sa'i)", "Masjid Al-Haram & Zamzam", "Livret du'a illustré", "Disponibilité 24h/24", "1 à 8 personnes"] },
-              { icon: '🕌', title: 'Omra & Histoire', featured: true, price: '450€', sub: '/ pers · 5 jours', features: ["Tout Essentielle inclus", "Voiture privée 7 places", "Jabal Al-Nour, Thawr, Uhud", "Train Haramain Makkah ↔ Madinah", "Masjid Quba, Al-Baqi', Rawdah", "Conférence Sîra (1h)"] },
-              { icon: '🌟', title: 'Grand Voyage', featured: false, price: '780€', sub: '/ pers · 10 jours', features: ["Tout Omra & Histoire inclus", "Makkah + Madinah + Badr + Ohoud", "Adapté PMR disponible", "Hôtel 5★ à 200m du Haram", "Album photo souvenir", "1 à 12 personnes"] },
-            ].map((p, i) => (
+            {([
+              { icon: <IconMoon size={28} stroke="currentColor" />, title: 'Omra Essentielle', featured: false, price: '280€', sub: '/ pers · 2–3 jours', features: ["Rituels expliqués (tawaf, sa'i)", "Masjid Al-Haram & Zamzam", "Livret du'a illustré", "Disponibilité 24h/24", "1 à 8 personnes"] },
+              { icon: <IconMosque size={28} stroke="currentColor" />, title: 'Omra & Histoire', featured: true, price: '450€', sub: '/ pers · 5 jours', features: ["Tout Essentielle inclus", "Voiture privée 7 places", "Jabal Al-Nour, Thawr, Uhud", "Train Haramain Makkah ↔ Madinah", "Masjid Quba, Al-Baqi', Rawdah", "Conférence Sîra (1h)"] },
+              { icon: <IconSparkles size={28} stroke="currentColor" />, title: 'Grand Voyage', featured: false, price: '780€', sub: '/ pers · 10 jours', features: ["Tout Omra & Histoire inclus", "Makkah + Madinah + Badr + Ohoud", "Adapté PMR disponible", "Hôtel 5★ à 200m du Haram", "Album photo souvenir", "1 à 12 personnes"] },
+            ] as { icon: React.ReactNode; title: string; featured: boolean; price: string; sub: string; features: string[] }[]).map((p, i) => (
               <div key={p.title} className={`package-card ${p.featured ? 'featured' : ''} reveal reveal-d${i + 1}`}>
                 <div className="package-icon">{p.icon}</div>
                 <h3>{p.title}</h3>
@@ -508,12 +515,12 @@ export default function Home() {
             320 guides gagnent en moyenne 3 200€/mois sur SAFARUNA. Inscription gratuite, commission transparente, paiement sécurisé.
           </p>
           <div className="revenue-grid">
-            {[
-              { icon: '💰', t: '3 200€ / mois',    p: "Revenus moyens d'un guide actif" },
-              { icon: '📱', t: 'Tableau de bord',   p: "Disponibilités, demandes, paiements" },
-              { icon: '🔒', t: 'Paiement sécurisé', p: "Virement mensuel, commission 12%" },
-              { icon: '🏆', t: 'Badge Vérifié',      p: "Certification reconnue par les pèlerins" },
-            ].map((r, i) => (
+            {([
+              { icon: <IconCurrency size={24} stroke="#C9A84C" />, t: '3 200€ / mois',    p: "Revenus moyens d'un guide actif" },
+              { icon: <IconPhone size={24} stroke="#C9A84C" />, t: 'Tableau de bord',   p: "Disponibilités, demandes, paiements" },
+              { icon: <IconLock size={24} stroke="#C9A84C" />, t: 'Paiement sécurisé', p: "Virement mensuel, commission 12%" },
+              { icon: <IconTrophy size={24} stroke="#C9A84C" />, t: 'Badge Vérifié',      p: "Certification reconnue par les pèlerins" },
+            ] as { icon: React.ReactNode; t: string; p: string }[]).map((r, i) => (
               <div key={r.t} className={`revenue-card reveal reveal-d${i + 1}`}>
                 <div className="r-icon">{r.icon}</div>
                 <h4>{r.t}</h4>

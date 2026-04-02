@@ -76,19 +76,17 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
         </div>
       </div>
 
-      {/* MAIN CONTENT */}
-      <div style={{ flex: 1, marginLeft: 0, display: 'flex', flexDirection: 'column', minWidth: 0 }} className="md:ml-[250px]">
+      {/* MAIN CONTENT — margin-left via CSS class to avoid inline-style override */}
+      <div className="main-content-guide" style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+        <style dangerouslySetInnerHTML={{ __html: `
+          .main-content-guide { margin-left: 0; }
+          @media (min-width: 768px) { .main-content-guide { margin-left: 250px; } }
+        `}} />
         <div style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 40,
-          background: 'rgba(250,247,240,0.95)',
-          backdropFilter: 'blur(12px)',
-          borderBottom: '1px solid #E8DFC8',
-          padding: '1rem 2rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
+          position: 'sticky', top: 0, zIndex: 40,
+          background: 'rgba(250,247,240,0.95)', backdropFilter: 'blur(12px)',
+          borderBottom: '1px solid #E8DFC8', padding: '1rem 2rem',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
           <span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', color: '#1A1209' }}>Tableau de bord guide</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>

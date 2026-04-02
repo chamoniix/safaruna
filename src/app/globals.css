@@ -204,9 +204,9 @@ footer { background: var(--warm); padding: 3rem 4rem 2rem; color: rgba(255,255,2
 .comparison-table { width: 100%; border-collapse: collapse; }
 .comparison-table th, .comparison-table td { padding: 0.85rem 1.1rem; text-align: center; font-size: 0.83rem; border-bottom: 1px solid var(--sand); }
 .comparison-table th { font-size: 0.68rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding-top: 0; padding-bottom: 0.75rem; }
-.comparison-table th.col-safaruna { color: var(--gold-dark); }
+.comparison-table th.col-safaruma { color: var(--gold-dark); }
 .comparison-table td { color: var(--warm); }
-.comparison-table td.col-safaruna { background: rgba(201,168,76,0.05); }
+.comparison-table td.col-safaruma { background: rgba(201,168,76,0.05); }
 .comparison-table td.col-label { text-align: left; font-weight: 600; color: var(--deep); font-size: 0.85rem; }
 .comparison-table tr:last-child td { border-bottom: none; }
 .ct-yes { color: var(--green) !important; font-weight: 800; font-size: 1rem; }

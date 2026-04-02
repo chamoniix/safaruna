@@ -4,7 +4,7 @@ export default function Navbar() {
   return (
     <nav>
       <Link href="/" className="logo" style={{ textDecoration: 'none' }}>
-        SAFAR<span>U</span>NA
+        SAFAR<span>UMA</span>
       </Link>
       <div className="nav-links">
         <Link href="/guides">Nos guides</Link>

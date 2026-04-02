@@ -11,7 +11,7 @@ import {
   IconCurrency, IconPhone, IconLock, IconTrophy,
 } from "@/components/Icons";
 
-const LOGO_LETTERS = ['S', 'A', 'F', 'A', 'R', 'U', 'N', 'A'];
+const LOGO_LETTERS = ['S', 'A', 'F', 'A', 'R', 'U', 'M', 'A'];
 
 const DIFFERENCIATEURS: Array<{ icon: React.ReactNode; title: string; desc: string; vs: string }> = [
   {
@@ -144,7 +144,7 @@ export default function Home() {
             {LOGO_LETTERS.map((letter, i) => (
               <span
                 key={i}
-                className={`hero-logo-letter${letter === 'U' ? ' gold' : ''}`}
+                className={`hero-logo-letter${i >= 5 ? ' gold' : ''}`}
                 style={{ animationDelay: `${i * 80}ms` }}
                 aria-hidden="true"
               >

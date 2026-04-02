@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { IconCar, IconVan, IconTrain, IconShield, IconStar, IconPerson, IconUserGroup, IconClock, IconAccessibility, IconMap } from '@/components/Icons';
 
 const GUIDES_DATA = [
   {
@@ -189,28 +190,36 @@ export default function GuideSearchPage() {
               <input type="date" style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 10, padding: '0.6rem 0.85rem', fontFamily: 'inherit', fontSize: '0.85rem', color: '#1A1209', background: '#FDFBF7', outline: 'none' }} />
             </div>
             <button style={{ background: '#C9A84C', color: '#1A1209', border: 'none', borderRadius: 10, padding: '0.7rem 1.6rem', fontFamily: 'inherit', fontSize: '0.875rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-              🔍 Rechercher
+              Rechercher →
             </button>
           </div>
 
           {/* Quick filters */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'center' }}>
-            {['🇫🇷 Francophone', '🚗 Avec voiture', '👩 Femme guide', '👨‍👩‍👧 Famille', '♿ PMR', '⭐ Top noté'].map(f => (
+            {([
+              { key: '🇫🇷 Francophone', label: '🇫🇷 Francophone', icon: null },
+              { key: '🚗 Avec voiture', label: 'Avec voiture', icon: <IconCar size={12} stroke="currentColor" /> },
+              { key: '👩 Femme guide', label: 'Femme guide', icon: <IconPerson size={12} stroke="currentColor" /> },
+              { key: '👨‍👩‍👧 Famille', label: 'Famille', icon: <IconUserGroup size={12} stroke="currentColor" /> },
+              { key: '♿ PMR', label: 'PMR', icon: <IconAccessibility size={12} stroke="currentColor" /> },
+              { key: '⭐ Top noté', label: 'Top noté', icon: <IconStar size={12} stroke="currentColor" /> },
+            ] as Array<{ key: string; label: string; icon: React.ReactNode }>).map(f => (
               <button
-                key={f}
-                onClick={() => setActiveQF(f)}
+                key={f.key}
+                onClick={() => setActiveQF(f.key)}
                 style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
                   padding: '0.3rem 0.9rem',
                   borderRadius: 50,
-                  border: `1px solid ${activeQF === f ? '#C9A84C' : 'rgba(255,255,255,0.15)'}`,
-                  background: activeQF === f ? '#C9A84C' : 'rgba(255,255,255,0.07)',
-                  color: activeQF === f ? '#1A1209' : 'rgba(255,255,255,0.65)',
+                  border: `1px solid ${activeQF === f.key ? '#C9A84C' : 'rgba(255,255,255,0.15)'}`,
+                  background: activeQF === f.key ? '#C9A84C' : 'rgba(255,255,255,0.07)',
+                  color: activeQF === f.key ? '#1A1209' : 'rgba(255,255,255,0.65)',
                   fontSize: '0.75rem',
-                  fontWeight: activeQF === f ? 700 : 500,
+                  fontWeight: activeQF === f.key ? 700 : 500,
                   cursor: 'pointer',
                   transition: 'all 0.2s',
                 }}
-              >{f}</button>
+              >{f.icon}{f.label}</button>
             ))}
           </div>
         </div>
@@ -218,11 +227,11 @@ export default function GuideSearchPage() {
 
       {/* ── TRUST BAR ── */}
       <div className="trust-bar">
-        <div className="trust-bar-item"><span className="icon">✓</span> Guides mutawwif certifiés</div>
-        <div className="trust-bar-item"><span className="icon">🛡️</span> Paiement 100% sécurisé</div>
-        <div className="trust-bar-item"><span className="icon">⭐</span> Note moyenne 4.94 / 5</div>
-        <div className="trust-bar-item"><span className="icon">♿</span> Guides PMR disponibles</div>
-        <div className="trust-bar-item"><span className="icon">⏱️</span> Réponse garantie &lt; 2h</div>
+        <div className="trust-bar-item"><span className="icon" style={{ fontWeight: 700 }}>✓</span> Guides mutawwif certifiés</div>
+        <div className="trust-bar-item"><IconShield size={14} /> Paiement 100% sécurisé</div>
+        <div className="trust-bar-item"><IconStar size={14} /> Note moyenne 4.94 / 5</div>
+        <div className="trust-bar-item"><IconPerson size={14} /> Guides PMR disponibles</div>
+        <div className="trust-bar-item"><IconClock size={14} /> Réponse garantie &lt; 2h</div>
       </div>
 
       {/* ── MAIN ── */}
@@ -247,8 +256,12 @@ export default function GuideSearchPage() {
           </FilterCard>
 
           <FilterCard title="Transport">
-            {[{ label: '🚗 Voiture privée', count: 187 }, { label: '🚌 Van 7–12 places', count: 94 }, { label: '🚇 Train Haramain', count: 63 }].map(o => (
-              <FilterOpt key={o.label} label={o.label} count={o.count} />
+            {([
+              { icon: <IconCar size={14} stroke="#7A6D5A" />, label: 'Voiture privée', count: 187 },
+              { icon: <IconVan size={14} stroke="#7A6D5A" />, label: 'Van 7–12 places', count: 94 },
+              { icon: <IconTrain size={14} stroke="#7A6D5A" />, label: 'Train Haramain', count: 63 },
+            ] as Array<{ icon: React.ReactNode; label: string; count: number }>).map(o => (
+              <FilterOpt key={o.label} icon={o.icon} label={o.label} count={o.count} />
             ))}
           </FilterCard>
 
@@ -261,16 +274,20 @@ export default function GuideSearchPage() {
           <FilterCard title="Note minimale">
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
               {['4.5+', '4.7+', '4.9+'].map(r => (
-                <button key={r} style={{ padding: '0.3rem 0.75rem', borderRadius: 50, border: '1.5px solid #E8DFC8', background: 'transparent', fontSize: '0.75rem', cursor: 'pointer', color: '#7A6D5A', fontWeight: 500 }}>
-                  ⭐ {r}
+                <button key={r} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.3rem 0.75rem', borderRadius: 50, border: '1.5px solid #E8DFC8', background: 'transparent', fontSize: '0.75rem', cursor: 'pointer', color: '#7A6D5A', fontWeight: 500 }}>
+                  <IconStar size={12} stroke="#C9A84C" /> {r}
                 </button>
               ))}
             </div>
           </FilterCard>
 
           <FilterCard title="Spécialités">
-            {[{ label: '👩 Guide femme', count: 48 }, { label: '♿ Adapté PMR', count: 17 }, { label: '👨‍👩‍👧 Spécialiste familles', count: 130 }].map(o => (
-              <FilterOpt key={o.label} label={o.label} count={o.count} />
+            {([
+              { icon: <IconPerson size={14} stroke="#7A6D5A" />, label: 'Guide femme', count: 48 },
+              { icon: <IconAccessibility size={14} stroke="#7A6D5A" />, label: 'Adapté PMR', count: 17 },
+              { icon: <IconUserGroup size={14} stroke="#7A6D5A" />, label: 'Spécialiste familles', count: 130 },
+            ] as Array<{ icon: React.ReactNode; label: string; count: number }>).map(o => (
+              <FilterOpt key={o.label} icon={o.icon} label={o.label} count={o.count} />
             ))}
           </FilterCard>
         </aside>
@@ -346,11 +363,12 @@ function FilterCard({ title, children }: { title: string; children: React.ReactN
   );
 }
 
-function FilterOpt({ label, count }: { label: string; count: number }) {
+function FilterOpt({ icon, label, count }: { icon?: React.ReactNode; label: string; count: number }) {
   return (
     <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.3rem 0', cursor: 'pointer' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
         <input type="checkbox" style={{ width: 14, height: 14, accentColor: '#C9A84C', cursor: 'pointer' }} />
+        {icon && <span style={{ display: 'inline-flex', alignItems: 'center' }}>{icon}</span>}
         <span style={{ fontSize: '0.82rem', color: '#1A1209' }}>{label}</span>
       </div>
       <span style={{ fontSize: '0.68rem', color: '#7A6D5A', background: '#F5F0E8', padding: '0.1rem 0.45rem', borderRadius: 50 }}>{count}</span>
@@ -445,7 +463,7 @@ function GuideCard({ guide: g, listView }: { guide: GuideData; listView: boolean
             </div>
           </div>
           <div style={{ fontSize: '0.72rem', color: '#7A6D5A', fontStyle: 'italic', marginBottom: '0.6rem' }}>{g.title}</div>
-          <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginBottom: '0.75rem' }}>📍 {g.location} · {g.experience} ans</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.72rem', color: '#7A6D5A', marginBottom: '0.75rem' }}><IconMap size={12} stroke="#7A6D5A" /> {g.location} · {g.experience} ans</div>
 
           {/* Languages */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', marginBottom: '0.7rem' }}>

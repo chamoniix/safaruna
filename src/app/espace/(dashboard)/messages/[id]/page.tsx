@@ -33,7 +33,7 @@ export default function PelerinMessageThread({ params }: { params: { id: string 
       <div className="bg-gradient-to-r from-[#1A1209] to-[#3D2A10] p-4 shadow-inner border-y border-[#C9A84C]/30 relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_50%,rgba(201,168,76,0.15)_0%,transparent_60%)] pointer-events-none"></div>
         <p className="relative z-10 text-xs text-white/80 leading-relaxed text-center max-w-2xl mx-auto">
-          ⚠️ Pour votre sécurité et dans le respect de la charte SAFARUNA, <strong className="text-[#C9A84C]">toutes les transactions doivent passer par la plateforme.</strong> Tout accord direct est contraire à nos CGU et à l'éthique islamique. Allah est témoin de nos engagements.
+          ⚠️ Pour votre sécurité et dans le respect de la charte SAFARUMA, <strong className="text-[#C9A84C]">toutes les transactions doivent passer par la plateforme.</strong> Tout accord direct est contraire à nos CGU et à l'éthique islamique. Allah est témoin de nos engagements.
         </p>
       </div>
 

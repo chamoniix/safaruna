@@ -51,11 +51,11 @@ export default function Footer() {
             <li><Link href="/guide/inscription">Créer mon profil</Link></li>
             <li><Link href="/guide/tableau-de-bord">Espace Guide</Link></li>
             <li><Link href="/devenir-guide">Revenus et Écosystème</Link></li>
-            <li><Link href="/charte">Charte SAFARUNA</Link></li>
+            <li><Link href="/charte">Charte SAFARUMA</Link></li>
           </ul>
         </div>
         <div className="footer-col">
-          <h4>SAFARUNA</h4>
+          <h4>SAFARUMA</h4>
           <ul>
             <li><Link href="/a-propos">À propos</Link></li>
             <li><Link href="/blog">Blog</Link></li>
@@ -66,7 +66,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="footer-bottom">
-        <span className="copy">© 2025 SAFARUNA — Tous droits réservés</span>
+        <span className="copy">© 2025 SAFARUMA. Tous droits réservés</span>
         <span style={{ color: "rgba(255,255,255,0.3)" }}>Made with respect for the Deen</span>
       </div>
     </footer>

@@ -20,7 +20,7 @@ const CATEGORIES = [
         a: 'Un passeport valide (6 mois minimum), le visa Omra (que nous pouvons traiter pour vous), un certificat de vaccination méningococcique, et une photo d\'identité récente. Pour les femmes de moins de 45 ans voyageant sans mahram, des justificatifs supplémentaires peuvent être requis.',
       },
       {
-        q: 'Combien coûte un guide SAFARUNA ?',
+        q: 'Combien coûte un guide SAFARUMA ?',
         a: 'Les tarifs varient selon le guide, sa spécialité et la durée. Comptez entre 150€ et 400€ par jour. Chaque guide fixe ses propres honoraires, visibles sur son profil. Vous ne payez que si votre demande est acceptée.',
       },
       {
@@ -51,12 +51,12 @@ const CATEGORIES = [
     icon: '🎓',
     questions: [
       {
-        q: 'Comment devenir guide sur SAFARUNA ?',
+        q: 'Comment devenir guide sur SAFARUMA ?',
         a: 'Rendez-vous sur /devenir-guide et soumettez votre candidature. Vous aurez besoin de votre accréditation saoudienne en cours de validité, d\'une pièce d\'identité, d\'un justificatif de résidence et d\'une lettre de motivation. Notre équipe vous contactera sous 5 jours ouvrés.',
       },
       {
-        q: 'Quelle commission prend SAFARUNA ?',
-        a: 'SAFARUNA prélève 15% sur chaque mission effectuée. Ce pourcentage inclut la visibilité sur la plateforme, les paiements sécurisés, l\'assurance responsabilité civile, et l\'accès à tous les outils de gestion.',
+        q: 'Quelle commission prend SAFARUMA ?',
+        a: 'SAFARUMA prélève 15% sur chaque mission effectuée. Ce pourcentage inclut la visibilité sur la plateforme, les paiements sécurisés, l\'assurance responsabilité civile, et l\'accès à tous les outils de gestion.',
       },
       {
         q: 'Quand et comment suis-je payé ?',
@@ -68,7 +68,7 @@ const CATEGORIES = [
       },
       {
         q: 'Que se passe-t-il si un pèlerin annule au dernier moment ?',
-        a: 'Notre politique d\'annulation vous protège. En cas d\'annulation moins de 24h avant la mission, vous recevez 50% du montant total. Entre 24h et 72h, 25%. SAFARUNA maintient cette garantie indépendamment du remboursement au pèlerin.',
+        a: 'Notre politique d\'annulation vous protège. En cas d\'annulation moins de 24h avant la mission, vous recevez 50% du montant total. Entre 24h et 72h, 25%. SAFARUMA maintient cette garantie indépendamment du remboursement au pèlerin.',
       },
     ],
   },

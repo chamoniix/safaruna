@@ -4,7 +4,7 @@ import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
 
 export const metadata = {
-  title: "Blog SAFARUNA — Guides, conseils et spiritualité pour l'Omra",
+  title: "Blog SAFARUMA — Guides, conseils et spiritualité pour l'Omra",
   description: "Articles de fond sur la préparation de l'Omra, les lieux saints, la spiritualité islamique et les conseils de nos guides certifiés.",
 };
 
@@ -97,7 +97,7 @@ export default function BlogPage() {
         </div>
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 1100, margin: '0 auto' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.25)', padding: '0.35rem 1rem', borderRadius: 50, marginBottom: '1.5rem', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--gold)', animation: 'fadeInUp 0.7s ease both' }}>
-            📖 Blog SAFARUNA
+            📖 Blog SAFARUMA
           </div>
           <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 300, color: 'white', lineHeight: 1.1, marginBottom: '1.25rem', animation: 'fadeInUp 0.8s 0.15s ease both', opacity: 0, maxWidth: 700 }}>
             La connaissance est le plus beau<br />

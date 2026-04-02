@@ -60,7 +60,7 @@ export default function GuideOnboarding() {
           <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', fontSize: '2rem' }}>✓</div>
           <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2rem', color: '#1A1209', marginBottom: '1rem', fontWeight: 400 }}>Dossier soumis</h1>
           <p style={{ color: '#7A6D5A', lineHeight: 1.7, marginBottom: '2rem', fontSize: '0.9rem' }}>
-            BarakAllahu fik. L&apos;équipe SAFARUNA a bien reçu votre candidature. Nous examinerons vos documents insha&apos;Allah et vous serez contacté sous 48h.
+            BarakAllahu fik. L&apos;équipe SAFARUMA a bien reçu votre candidature. Nous examinerons vos documents insha&apos;Allah et vous serez contacté sous 48h.
           </p>
           <Link href="/" style={{ display: 'inline-block', background: '#1A1209', color: '#F0D897', padding: '0.8rem 2rem', borderRadius: 50, fontWeight: 700, fontSize: '0.85rem', textDecoration: 'none' }}>
             Retour à l&apos;accueil
@@ -171,7 +171,7 @@ export default function GuideOnboarding() {
         {/* Bottom note */}
         <div style={{ marginTop: 'auto', padding: '1.5rem 2rem', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
           <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', lineHeight: 1.6 }}>
-            Vos données sont chiffrées et sécurisées. Seule l&apos;équipe SAFARUNA y accède pour la vérification.
+            Vos données sont chiffrées et sécurisées. Seule l&apos;équipe SAFARUMA y accède pour la vérification.
           </div>
         </div>
       </div>
@@ -459,7 +459,7 @@ export default function GuideOnboarding() {
                 <div style={{ background: '#1A1209', borderRadius: 16, padding: '1.25rem 1.5rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <div style={{ fontSize: '1.5rem' }}>💡</div>
                   <div style={{ fontSize: '0.8rem', color: 'rgba(240,216,151,0.8)', lineHeight: 1.6 }}>
-                    SAFARUNA prélève <strong style={{ color: '#F0D897' }}>12% de commission</strong> sur chaque réservation. Les montants ci-dessous sont ce que vous recevrez de la plateforme.
+                    SAFARUMA prélève <strong style={{ color: '#F0D897' }}>12% de commission</strong> sur chaque réservation. Les montants ci-dessous sont ce que vous recevrez de la plateforme.
                   </div>
                 </div>
 
@@ -563,7 +563,7 @@ export default function GuideOnboarding() {
                     {[
                       "N'enseigner que ce qui est authentique selon le Coran et la Sunnah.",
                       "Ne pas percevoir de commissions cachées des commerçants ou hôtels.",
-                      "Respecter la clause de non-contournement de SAFARUNA pour toute transaction avec les pèlerins rencontrés via la plateforme.",
+                      "Respecter la clause de non-contournement de SAFARUMA pour toute transaction avec les pèlerins rencontrés via la plateforme.",
                       "Être ponctuel, patient et bienveillant envers les pèlerins.",
                     ].map((item, i) => (
                       <div key={i} style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
@@ -589,7 +589,7 @@ export default function GuideOnboarding() {
                     onChange={e => setAcceptedCharte(e.target.checked)}
                   />
                   <span style={{ fontSize: '0.85rem', fontWeight: 600, color: acceptedCharte ? '#8B6914' : '#7A6D5A', lineHeight: 1.6 }}>
-                    Je prends Allah à témoin que j&apos;ai lu et j&apos;accepte sans réserve les termes de cette charte islamique et les CGU de SAFARUNA.
+                    Je prends Allah à témoin que j&apos;ai lu et j&apos;accepte sans réserve les termes de cette charte islamique et les CGU de SAFARUMA.
                   </span>
                 </label>
               </div>

@@ -4,7 +4,7 @@ import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
 
 export const metadata = {
-  title: "Visa Omra — Assistance SAFARUNA",
+  title: "Visa Omra — Assistance SAFARUMA",
   description: "Assistance complète pour votre visa Omra individuel ou de groupe. Démarches simplifiées, délais réduits, accompagnement par des guides basés en Arabie Saoudite.",
 };
 
@@ -137,7 +137,7 @@ export default function VisaPage() {
           Prêt à démarrer votre <em style={{ color: 'var(--gold)' }}>dossier visa ?</em>
         </h2>
         <p className="reveal reveal-d1" style={{ color: 'rgba(255,255,255,0.5)', maxWidth: 440, margin: '1rem auto 2.5rem', lineHeight: 1.8 }}>
-          Choisissez votre guide SAFARUNA et nous prenons en charge toutes vos démarches administratives.
+          Choisissez votre guide SAFARUMA et nous prenons en charge toutes vos démarches administratives.
         </p>
         <div className="reveal reveal-d2">
           <Link href="/guides" className="btn-primary" style={{ background: 'var(--gold)', color: 'var(--deep)', fontWeight: 700 }}>

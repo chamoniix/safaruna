@@ -4,8 +4,8 @@ import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
 
 export const metadata = {
-  title: "Transferts & Transport — SAFARUNA",
-  description: "Voiture privée, van 9 places, Train Haramayn Makkah↔Madinah. Vos transferts Omra organisés par votre guide SAFARUNA.",
+  title: "Transferts & Transport — SAFARUMA",
+  description: "Voiture privée, van 9 places, Train Haramayn Makkah↔Madinah. Vos transferts Omra organisés par votre guide SAFARUMA.",
 };
 
 const OPTIONS = [
@@ -162,7 +162,7 @@ export default function TransfertPage() {
           Votre transfert est <em style={{ color: 'var(--gold)' }}>inclus.</em>
         </h2>
         <p className="reveal reveal-d1" style={{ color: 'rgba(255,255,255,0.5)', maxWidth: 440, margin: '1rem auto 2.5rem', lineHeight: 1.8 }}>
-          Choisissez un guide SAFARUNA et votre voiture privée ou van est inclus dans votre forfait dès le premier jour.
+          Choisissez un guide SAFARUMA et votre voiture privée ou van est inclus dans votre forfait dès le premier jour.
         </p>
         <div className="reveal reveal-d2">
           <Link href="/guides" className="btn-primary" style={{ background: 'var(--gold)', color: 'var(--deep)', fontWeight: 700 }}>

@@ -163,7 +163,7 @@ export default function ContactPage() {
                   <div className="contact-info-icon">✉</div>
                   <div>
                     <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: 2 }}>Email</div>
-                    <a href="mailto:contact@safaruna.com" style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1A1209', textDecoration: 'none' }}>contact@safaruna.com</a>
+                    <a href="mailto:contact@safaruma.com" style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1A1209', textDecoration: 'none' }}>contact@safaruma.com</a>
                   </div>
                 </div>
 
@@ -179,7 +179,7 @@ export default function ContactPage() {
                   <div className="contact-info-icon">💬</div>
                   <div>
                     <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: 2 }}>WhatsApp</div>
-                    <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1A1209' }}>+33 6 58 44 21 09</div>
+                    <a href="https://wa.me/33755981234" style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1A1209', textDecoration: 'none' }}>+33 7 55 98 12 34</a>
                     <div style={{ fontSize: '0.72rem', color: '#7A6D5A' }}>Lun–Sam · 9h–20h</div>
                   </div>
                 </div>

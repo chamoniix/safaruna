@@ -48,7 +48,7 @@ export default function RegisterPage() {
           
           <div className="mt-2 p-4 bg-[var(--cream)] rounded-xl border border-[var(--sand)]">
             <p className="text-xs text-[var(--muted)] leading-relaxed italic text-center">
-              "Et remplissez l'engagement, car on sera interrogé au sujet des engagements" (Coran 17:34). En m'inscrivant, j'accepte la charte SAFARUNA.
+              "Et remplissez l'engagement, car on sera interrogé au sujet des engagements" (Coran 17:34). En m'inscrivant, j'accepte la charte SAFARUMA.
             </p>
           </div>
 

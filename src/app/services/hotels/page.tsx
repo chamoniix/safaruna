@@ -4,8 +4,8 @@ import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
 
 export const metadata = {
-  title: "Hôtels & Hébergements Omra — SAFARUNA",
-  description: "Sélection d'hôtels certifiés SAFARUNA à Makkah et Madinah. Proches du Haram, adaptés PMR, avec accueil de qualité pour votre Omra.",
+  title: "Hôtels & Hébergements Omra — SAFARUMA",
+  description: "Sélection d'hôtels certifiés SAFARUMA à Makkah et Madinah. Proches du Haram, adaptés PMR, avec accueil de qualité pour votre Omra.",
 };
 
 const HOTELS_MAKKAH = [
@@ -68,7 +68,7 @@ const CERTIF_CRITERIA = [
   { icon: '📍', t: 'Proximité', d: 'Maximum 500m du Haram à Makkah, 300m du Masjid An-Nabawi à Madinah' },
   { icon: '🥗', t: '100% Halal', d: "Tous les restaurants et services alimentaires de nos hôtels sont certifiés halal" },
   { icon: '♿', t: 'Accessibilité', d: 'Chambres adaptées PMR disponibles sur demande dans chaque établissement sélectionné' },
-  { icon: '🗣️', t: 'Accueil francophone', d: 'Personnel parlant français ou guide SAFARUNA disponible pour faciliter le check-in' },
+  { icon: '🗣️', t: 'Accueil francophone', d: 'Personnel parlant français ou guide SAFARUMA disponible pour faciliter le check-in' },
   { icon: '🧹', t: 'Propreté certifiée', d: 'Audit de propreté régulier par notre équipe sur place' },
   { icon: '🔒', t: 'Coffre-fort', d: 'Coffre-fort individuel dans chaque chambre pour vos documents et objets de valeur' },
 ];
@@ -109,7 +109,7 @@ export default function HotelsPage() {
         <div style={{ maxWidth: 1000, margin: '0 auto' }}>
           <div className="section-label reveal" style={{ textAlign: 'center' }}>Notre sélection</div>
           <h2 className="reveal reveal-d1" style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            Les critères <em>SAFARUNA</em>
+            Les critères <em>SAFARUMA</em>
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
             {CERTIF_CRITERIA.map((c, i) => (
@@ -225,7 +225,7 @@ export default function HotelsPage() {
           Votre hôtel inclus dans <em style={{ color: 'var(--gold)' }}>votre forfait.</em>
         </h2>
         <p className="reveal reveal-d1" style={{ color: 'rgba(255,255,255,0.5)', maxWidth: 440, margin: '1rem auto 2.5rem', lineHeight: 1.8 }}>
-          Votre guide SAFARUNA coordonne votre hébergement avec votre programme de visites. Un seul interlocuteur pour tout organiser.
+          Votre guide SAFARUMA coordonne votre hébergement avec votre programme de visites. Un seul interlocuteur pour tout organiser.
         </p>
         <div className="reveal reveal-d2">
           <Link href="/guides" className="btn-primary" style={{ background: 'var(--gold)', color: 'var(--deep)', fontWeight: 700 }}>

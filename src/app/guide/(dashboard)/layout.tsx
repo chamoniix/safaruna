@@ -135,7 +135,7 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
 
           {/* Footer */}
           <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
-            <Link href="/charte" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.72rem', color: 'rgba(255,255,255,0.25)', textDecoration: 'none' }}>🔒 Charte SAFARUNA</Link>
+            <Link href="/charte" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.72rem', color: 'rgba(255,255,255,0.25)', textDecoration: 'none' }}>🔒 Charte SAFARUMA</Link>
             <button style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.72rem', color: 'rgba(255,255,255,0.25)', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>↩ Déconnexion</button>
           </div>
         </aside>

@@ -140,7 +140,7 @@ export default function Home() {
         {/* Content */}
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 760, width: '100%' }}>
           {/* Logo letter-by-letter */}
-          <div className="hero-logo-word" aria-label="SAFARUNA">
+          <div className="hero-logo-word" aria-label="SAFARUMA">
             {LOGO_LETTERS.map((letter, i) => (
               <span
                 key={i}
@@ -267,13 +267,13 @@ export default function Home() {
           ═══════════════════════════════════════════════════════ */}
       <section style={{ background: 'var(--cream)', padding: '6rem 4rem' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <div className="section-label reveal" style={{ textAlign: 'center' }}>Pourquoi SAFARUNA</div>
+          <div className="section-label reveal" style={{ textAlign: 'center' }}>Pourquoi SAFARUMA</div>
           <h2 className="reveal reveal-d1" style={{ textAlign: 'center', marginBottom: '0.75rem' }}>
             Ce que nous avons,<br />
             <em>qu&apos;aucune autre plateforme n&apos;offre</em>
           </h2>
           <p className="reveal reveal-d2" style={{ textAlign: 'center', color: 'var(--muted)', maxWidth: 520, margin: '0 auto 3.5rem', lineHeight: 1.75, fontSize: '0.9rem' }}>
-            Nous avons construit SAFARUNA en partant d&apos;une question : qu&apos;est-ce qui rend vraiment un pèlerinage inoubliable ?
+            Nous avons construit SAFARUMA en partant d&apos;une question : qu&apos;est-ce qui rend vraiment un pèlerinage inoubliable ?
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem' }}>
             {DIFFERENCIATEURS.map((d, i) => (
@@ -415,7 +415,7 @@ export default function Home() {
             {([
               { icon: <IconMosque size={28} stroke="#C9A84C" />, t: 'Authenticité',  d: "Nos guides ne font jamais de compromis sur les rituels. Chaque geste a un sens — ils vous l'expliquent.", color: '#C9A84C' },
               { icon: <IconHandshake size={28} stroke="#9FE1CB" />, t: 'Confiance',      d: "La charte islamique que signent nos guides n'est pas un contrat. C'est un serment devant Allah.", color: '#9FE1CB' },
-              { icon: <IconBookOpen size={28} stroke="#A8C8F0" />, t: 'Connaissance',   d: "L'Omra sans savoir, c'est marcher dans le noir. Avec SAFARUNA, chaque pas a un sens.", color: '#A8C8F0' },
+              { icon: <IconBookOpen size={28} stroke="#A8C8F0" />, t: 'Connaissance',   d: "L'Omra sans savoir, c'est marcher dans le noir. Avec SAFARUMA, chaque pas a un sens.", color: '#A8C8F0' },
             ] as { icon: React.ReactNode; t: string; d: string; color: string }[]).map((v, i) => (
               <div key={v.t} className={`reveal reveal-d${i + 1}`} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '2rem' }}>
                 <div style={{ marginBottom: '0.75rem' }}>{v.icon}</div>
@@ -427,7 +427,7 @@ export default function Home() {
 
           <div className="reveal" style={{ marginTop: '3rem' }}>
             <Link href="/charte" style={{ fontSize: '0.8rem', color: 'rgba(201,168,76,0.6)', textDecoration: 'none', letterSpacing: '0.08em', borderBottom: '1px solid rgba(201,168,76,0.3)', paddingBottom: '0.2rem' }}>
-              Lire la Charte SAFARUNA →
+              Lire la Charte SAFARUMA →
             </Link>
           </div>
         </div>
@@ -512,7 +512,7 @@ export default function Home() {
           <div className="section-label reveal" style={{ color: 'var(--gold)' }}>Vous êtes guide ?</div>
           <h2 className="reveal reveal-d1">Rejoignez la plateforme et<br /><em>gagnez votre vie avec votre savoir</em></h2>
           <p className="section-sub reveal reveal-d2">
-            320 guides gagnent en moyenne 3 200€/mois sur SAFARUNA. Inscription gratuite, commission transparente, paiement sécurisé.
+            320 guides gagnent en moyenne 3 200€/mois sur SAFARUMA. Inscription gratuite, commission transparente, paiement sécurisé.
           </p>
           <div className="revenue-grid">
             {([
@@ -530,7 +530,7 @@ export default function Home() {
           </div>
           <div className="reveal" style={{ marginTop: '2.5rem' }}>
             <Link href="/guide/inscription" className="btn-primary">
-              Devenir guide SAFARUNA →
+              Devenir guide SAFARUMA →
             </Link>
           </div>
         </div>

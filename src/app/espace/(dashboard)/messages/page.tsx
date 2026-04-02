@@ -87,7 +87,7 @@ export default function MessagesPage() {
              <span className="text-2xl mt-1">⚠️</span>
              <div>
                <p className="text-white text-sm leading-relaxed">
-                 Pour votre sécurité et dans le respect de la charte SAFARUNA, <strong className="text-[var(--gold-light)]">toutes les transactions doivent passer par la plateforme.</strong> Tout accord direct est contraire à nos CGU et à l'éthique islamique. Allah est témoin de nos engagements.
+                 Pour votre sécurité et dans le respect de la charte SAFARUMA, <strong className="text-[var(--gold-light)]">toutes les transactions doivent passer par la plateforme.</strong> Tout accord direct est contraire à nos CGU et à l'éthique islamique. Allah est témoin de nos engagements.
                </p>
              </div>
           </div>

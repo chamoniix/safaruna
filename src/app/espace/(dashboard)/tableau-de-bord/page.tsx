@@ -20,7 +20,7 @@ const CHECKLIST_ITEMS = [
 
 const MESSAGES = [
   { initials: 'RM', name: 'Cheikh Rachid', time: '09:42', preview: 'Wa aleykoum salam, oui je prévois un siège auto pour le petit.', online: true, unread: false, bg: 'linear-gradient(135deg, #F0D897, #C9A84C)' },
-  { initials: '✦',  name: 'Équipe SAFARUNA', time: 'Hier', preview: 'Votre reçu de paiement SAF-2025-012 est disponible.', online: false, unread: true, bg: 'linear-gradient(135deg, #2D1F08, #1A1209)' },
+  { initials: '✦',  name: 'Équipe SAFARUMA', time: 'Hier', preview: 'Votre reçu de paiement SAF-2025-012 est disponible.', online: false, unread: true, bg: 'linear-gradient(135deg, #2D1F08, #1A1209)' },
 ];
 
 export default function PelerinDashboard() {

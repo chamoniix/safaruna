@@ -129,7 +129,7 @@ export default function LoginPage() {
 
             {/* Footer */}
             <p style={{ textAlign: 'center', fontSize: '0.82rem', color: '#7A6D5A', marginTop: '1.75rem', lineHeight: 1.6 }}>
-              Nouveau sur SAFARUNA ?{' '}
+              Nouveau sur SAFARUMA ?{' '}
               <Link href="/inscription" className="link-create" style={{ color: '#C9A84C', fontWeight: 600, textDecoration: 'none' }}>
                 Créer un profil gratuitement
               </Link>

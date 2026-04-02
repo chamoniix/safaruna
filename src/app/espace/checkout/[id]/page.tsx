@@ -90,7 +90,7 @@ export default function CheckoutPage({ params }: { params: { id: string } }) {
                 <div className="pt-6 border-t border-[#FAF3E0]">
                   <p className="text-xs text-[#7A6D5A] mb-6 flex items-start gap-2">
                     <span className="text-[#C9A84C]">🔒</span>
-                    Vos paiements sont sécurisés par Stripe. SAFARUNA ne stocke aucune donnée bancaire sensible.
+                    Vos paiements sont sécurisés par Stripe. SAFARUMA ne stocke aucune donnée bancaire sensible.
                   </p>
                   
                   <button 
@@ -176,7 +176,7 @@ export default function CheckoutPage({ params }: { params: { id: string } }) {
                   <span className="font-bold text-[#1A1209]">80,00 €</span>
                 </div>
                 <div className="flex justify-between items-center text-sm">
-                  <span className="text-[#7A6D5A]">Frais de service SAFARUNA</span>
+                  <span className="text-[#7A6D5A]">Frais de service SAFARUMA</span>
                   <span className="text-[#1D5C3A] font-bold">Inclus dans le prix</span>
                 </div>
               </div>

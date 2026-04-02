@@ -7,7 +7,7 @@ const TEAM = [
     name: 'Yacine Benali',
     role: 'Co-fondateur & CEO',
     origin: 'Algérien, 34 ans',
-    bio: "Ancien cadre bancaire reconverti après une Omra qui a changé sa vie. Yacine a fondé SAFARUNA pour que chaque pèlerin vive ce qu'il a vécu — une connexion profonde, guidée par un expert.",
+    bio: "Ancien cadre bancaire reconverti après une Omra qui a changé sa vie. Yacine a fondé SAFARUMA pour que chaque pèlerin vive ce qu'il a vécu — une connexion profonde, guidée par un expert.",
     initials: 'YB',
     color: '#1A1209',
   },
@@ -15,7 +15,7 @@ const TEAM = [
     name: 'Amira Oussama',
     role: 'Co-fondatrice & Directrice des Guides',
     origin: 'Marocaine, 31 ans',
-    bio: "Spécialiste en sciences islamiques diplômée de l'Université de Médine, Amira pilote la certification et la formation de tous les guides SAFARUNA. Chaque guide passe par elle.",
+    bio: "Spécialiste en sciences islamiques diplômée de l'Université de Médine, Amira pilote la certification et la formation de tous les guides SAFARUMA. Chaque guide passe par elle.",
     initials: 'AO',
     color: '#2A1F0E',
   },
@@ -23,7 +23,7 @@ const TEAM = [
     name: 'Tariq Moussaoui',
     role: 'Directeur Technique',
     origin: 'Français, 29 ans',
-    bio: "Ingénieur passionné par l'impact social du digital. Tariq a construit la plateforme SAFARUNA pour qu'elle soit aussi simple qu'une réservation d'hôtel, aussi sûre qu'une banque.",
+    bio: "Ingénieur passionné par l'impact social du digital. Tariq a construit la plateforme SAFARUMA pour qu'elle soit aussi simple qu'une réservation d'hôtel, aussi sûre qu'une banque.",
     initials: 'TM',
     color: '#C9A84C',
   },
@@ -32,9 +32,9 @@ const TEAM = [
 const TIMELINE = [
   { year: '2021', title: 'La frustration fondatrice', desc: "Yacine part en Omra avec un groupe de 50 personnes. Guide arabophone uniquement, programme trop chargé, aucun temps pour la spiritualité. Il rentre avec une idée." },
   { year: '2022', title: 'La recherche', desc: "8 mois à interviewer 200 pèlerins francophones. Le même problème partout : l'accompagnement de qualité n'existait pas dans leur langue." },
-  { year: '2023', title: 'Les premiers guides', desc: "Amira rejoint l'aventure et certifie les 12 premiers guides SAFARUNA. 300 pèlerins accompagnés la première année. 98% de satisfaction." },
-  { year: '2024', title: 'La plateforme', desc: "Tariq construit SAFARUNA.com. Les pèlerins peuvent enfin choisir, comparer, réserver leur guide privé en quelques clics." },
-  { year: '2025', title: "L'expansion", desc: "320 guides certifiés. 15 000 pèlerins accompagnés. SAFARUNA devient la référence francophone pour l'Omra privée." },
+  { year: '2023', title: 'Les premiers guides', desc: "Amira rejoint l'aventure et certifie les 12 premiers guides SAFARUMA. 300 pèlerins accompagnés la première année. 98% de satisfaction." },
+  { year: '2024', title: 'La plateforme', desc: "Tariq construit SAFARUMA.com. Les pèlerins peuvent enfin choisir, comparer, réserver leur guide privé en quelques clics." },
+  { year: '2025', title: "L'expansion", desc: "320 guides certifiés. 15 000 pèlerins accompagnés. SAFARUMA devient la référence francophone pour l'Omra privée." },
   { year: '2026', title: 'La vision', desc: "Être présent pour chaque pèlerin francophone dans le monde entier. Du Maroc à la Martinique, de Lyon à Montréal." },
 ];
 
@@ -50,43 +50,43 @@ const VALEURS: Array<{ icon: React.ReactNode; title: string; desc: string }> = [
 const COMPARISON = [
   {
     critere: 'Langue d\'accompagnement',
-    safaruna: 'Français + 11 langues',
+    safaruma: 'Français + 11 langues',
     holygo: 'Arabe principalement',
     agence: 'Guide de groupe polyvalent',
   },
   {
     critere: 'Type d\'accompagnement',
-    safaruna: 'Guide privé dédié',
+    safaruma: 'Guide privé dédié',
     holygo: 'Groupe 20-50 personnes',
     agence: 'Groupe 30-80 personnes',
   },
   {
     critere: 'Certification des guides',
-    safaruna: 'Sciences islamiques + examen SAFARUNA',
+    safaruma: 'Sciences islamiques + examen SAFARUMA',
     holygo: 'Non certifié indépendamment',
     agence: 'Variable selon agence',
   },
   {
     critere: 'Personnalisation',
-    safaruna: 'Programme 100% sur-mesure',
+    safaruma: 'Programme 100% sur-mesure',
     holygo: 'Programme fixe',
     agence: 'Programme fixe de groupe',
   },
   {
     critere: 'Réservation en ligne',
-    safaruna: 'Plateforme dédiée, 2 min',
+    safaruma: 'Plateforme dédiée, 2 min',
     holygo: 'Application mobile',
     agence: 'Téléphone / agence physique',
   },
   {
     critere: 'Annulation flexible',
-    safaruna: 'Gratuite jusqu\'à 48h',
+    safaruma: 'Gratuite jusqu\'à 48h',
     holygo: 'Conditions restrictives',
     agence: 'Souvent non remboursable',
   },
   {
     critere: 'Tarif indicatif / jour',
-    safaruna: 'Dès 120€/jour',
+    safaruma: 'Dès 120€/jour',
     holygo: 'Forfait tout-compris',
     agence: 'Inclus dans le forfait',
   },
@@ -151,7 +151,7 @@ export default function AProposPage() {
             maxWidth: '600px',
             margin: '0 auto',
           }}>
-            SAFARUNA est née d&apos;une Omra manquée. Pas manquée dans le sens du voyage —
+            SAFARUMA est née d&apos;une Omra manquée. Pas manquée dans le sens du voyage —
             le vol a décollé, les tawaf ont été faits, les prières récitées.
             Manquée dans le sens de la connexion. De la profondeur. De la présence.
           </p>
@@ -201,7 +201,7 @@ export default function AProposPage() {
               marginTop: '2rem',
               color: 'rgba(250,247,240,0.5)',
               fontSize: '0.85rem',
-            }}>— Yacine Benali, co-fondateur de SAFARUNA</div>
+            }}>— Yacine Benali, co-fondateur de SAFARUMA</div>
           </div>
         </div>
       </section>
@@ -372,7 +372,7 @@ export default function AProposPage() {
               fontSize: 'clamp(2rem, 5vw, 3rem)',
               fontWeight: 600,
               color: 'var(--cream)',
-            }}>Ceux qui ont rendu SAFARUNA possible</h2>
+            }}>Ceux qui ont rendu SAFARUMA possible</h2>
           </div>
 
           <div style={{
@@ -443,7 +443,7 @@ export default function AProposPage() {
               textTransform: 'uppercase',
               color: 'var(--gold)',
               marginBottom: '1rem',
-            }}>Pourquoi SAFARUNA ?</div>
+            }}>Pourquoi SAFARUMA ?</div>
             <h2 style={{
               fontFamily: 'var(--font-cormorant)',
               fontSize: 'clamp(2rem, 5vw, 3rem)',
@@ -478,7 +478,7 @@ export default function AProposPage() {
                     color: 'var(--gold)',
                     background: 'rgba(201,168,76,0.06)',
                     borderBottom: '2px solid var(--gold)',
-                  }}>✦ SAFARUNA</th>
+                  }}>✦ SAFARUMA</th>
                   <th style={{
                     padding: '1rem 1.5rem',
                     textAlign: 'center',
@@ -521,7 +521,7 @@ export default function AProposPage() {
                       fontWeight: 500,
                     }}>
                       <span style={{ marginRight: '0.4rem', color: '#2D7A3B' }}>✓</span>
-                      {row.safaruna}
+                      {row.safaruma}
                     </td>
                     <td style={{
                       padding: '1rem 1.5rem',
@@ -577,7 +577,7 @@ export default function AProposPage() {
             letterSpacing: '0.2em',
             textTransform: 'uppercase',
             color: 'var(--gold)',
-          }}>— La philosophie SAFARUNA</div>
+          }}>— La philosophie SAFARUMA</div>
         </div>
       </section>
 

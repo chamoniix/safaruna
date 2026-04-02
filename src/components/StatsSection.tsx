@@ -21,15 +21,18 @@ function useCounting(end: number, duration: number) {
         if (!entry.isIntersecting || started.current) return;
         started.current = true;
         obs.disconnect();
+        setValue(0); // ensure starts at 0
         const t0 = Date.now();
         const tick = () => {
-          const p = Math.min((Date.now() - t0) / duration, 1);
-          setValue(Math.round((1 - Math.pow(1 - p, 3)) * end)); // ease-out cubic
+          const elapsed = Date.now() - t0;
+          const p = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - p, 3); // ease-out cubic
+          setValue(Math.round(eased * end));
           if (p < 1) requestAnimationFrame(tick);
         };
         requestAnimationFrame(tick);
       },
-      { threshold: 0.4 }
+      { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
     );
     obs.observe(el);
     return () => obs.disconnect();

@@ -4,161 +4,178 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
+const NAV = [
+  { section: 'Mon voyage', items: [
+    { href: '/espace/tableau-de-bord', icon: '⌂', label: 'Tableau de bord' },
+    { href: '/espace/reservations',    icon: '✦', label: 'Mes Réservations' },
+    { href: '/espace/messages',        icon: '◎', label: 'Messages', badge: '2', badgeColor: '#C9A84C' },
+  ]},
+  { section: 'Spiritualité', items: [
+    { href: '/espace/academy',   icon: '▶', label: 'Safaruna Academy' },
+    { href: '/espace/dua',       icon: '◆', label: 'Carnet de Du\'a' },
+    { href: '/espace/checklist', icon: '☑', label: 'Ma Checklist', badge: '6/12', badgeColor: '#1D5C3A' },
+    { href: '/espace/favoris',   icon: '♡', label: 'Mes Favoris' },
+  ]},
+];
+
 export default function PelerinLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const isActive = (path: string) => pathname === path || pathname.startsWith(path + '/');
+  const [open, setOpen] = useState(false);
+  const isActive = (p: string) => pathname === p || pathname.startsWith(p + '/');
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#FDFBF7', color: '#1A1209', fontFamily: 'var(--font-manrope, Manrope, sans-serif)' }}>
+    <div style={{ minHeight: '100vh', background: '#F5F2EC', fontFamily: 'var(--font-manrope, sans-serif)', color: '#1A1209' }}>
 
       {/* ── SIDEBAR ── */}
-      <div style={{
-        width: 260,
-        background: 'white',
-        borderRight: '1px solid #E8DFC8',
-        display: 'flex',
-        flexDirection: 'column',
-        position: 'fixed',
-        top: 0,
-        left: mobileOpen ? 0 : undefined,
-        bottom: 0,
-        zIndex: 50,
+      <aside style={{
+        position: 'fixed', top: 0, left: 0, bottom: 0, width: 260,
+        background: '#FFFFFF', borderRight: '1px solid #EDE8DC',
+        display: 'flex', flexDirection: 'column', zIndex: 60,
         overflowY: 'auto',
-        flexShrink: 0,
-        transition: 'transform 0.25s',
-        transform: mobileOpen ? 'translateX(0)' : undefined,
-      }} className={mobileOpen ? 'flex' : 'hidden lg:flex'}>
+        transition: 'transform 0.3s cubic-bezier(0.4,0,0.2,1)',
+      }} className={open ? 'sidebar-open' : 'sidebar-closed'}>
+        <style dangerouslySetInnerHTML={{ __html: `
+          @media (max-width: 1023px) { .sidebar-closed { transform: translateX(-100%); } .sidebar-open { transform: translateX(0); } }
+          @media (min-width: 1024px) { .sidebar-closed, .sidebar-open { transform: translateX(0); } }
+          .nav-link { transition: background 0.15s, color 0.15s; }
+          .nav-link:hover { background: #FAF7F0 !important; }
+          .sb-logout:hover { color: #C0392B !important; }
+        `}} />
 
-        {/* Logo */}
-        <div style={{ padding: '1.5rem 1.75rem', borderBottom: '1px solid #FAF3E0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link href="/" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.5rem', fontWeight: 600, color: '#1A1209', textDecoration: 'none' }}>
+        {/* Brand */}
+        <div style={{ padding: '1.5rem 1.75rem 1.25rem', borderBottom: '1px solid #EDE8DC', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <Link href="/" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.5rem', fontWeight: 700, color: '#1A1209', textDecoration: 'none', letterSpacing: '0.04em' }}>
             SAFAR<span style={{ color: '#C9A84C' }}>U</span>NA
           </Link>
-          <button onClick={() => setMobileOpen(false)} className="lg:hidden" style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#7A6D5A' }}>✕</button>
+          <button onClick={() => setOpen(false)} className="lg:hidden" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7A6D5A', fontSize: '1.1rem', lineHeight: 1 }}>✕</button>
         </div>
 
-        {/* User */}
-        <div style={{ padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#FAF3E0', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#C9A84C', flexShrink: 0, border: '1px solid #F0D897' }}>
+        {/* User profile */}
+        <div style={{ padding: '1.25rem 1.5rem 1rem', borderBottom: '1px solid #EDE8DC', display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+          <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#1A1209', flexShrink: 0, border: '2px solid #EDE8DC' }}>
             KL
           </div>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#1A1209', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Karim Lamrani</div>
-            <Link href="/espace/profil" style={{ fontSize: '0.72rem', color: '#7A6D5A', textDecoration: 'none', marginTop: 2, display: 'inline-block' }}>Voir le profil →</Link>
+            <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#1A1209', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Karim Lamrani</div>
+            <Link href="/espace/profil" style={{ fontSize: '0.68rem', color: '#C9A84C', textDecoration: 'none', fontWeight: 600 }}>Modifier le profil →</Link>
           </div>
         </div>
 
-        {/* Nav */}
-        <div style={{ flex: 1, paddingTop: '0.5rem', paddingBottom: '0.5rem' }}>
-          <SidebarSection label="Mon voyage" />
-          <SidebarLink href="/espace/tableau-de-bord" icon="🏠" label="Accueil" isActive={isActive('/espace/tableau-de-bord')} onClick={() => setMobileOpen(false)} />
-          <SidebarLink href="/espace/reservations"   icon="🌴" label="Mes Réservations" isActive={isActive('/espace/reservations')} onClick={() => setMobileOpen(false)} />
-          <SidebarLink href="/espace/messages"        icon="💬" label="Messages" badge="1" badgeColor="#1A4A8A" isActive={isActive('/espace/messages')} onClick={() => setMobileOpen(false)} />
+        {/* Navigation */}
+        <nav style={{ flex: 1, padding: '0.75rem 0', overflowY: 'auto' }}>
+          {NAV.map((group) => (
+            <div key={group.section}>
+              <div style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(122,109,90,0.45)', padding: '1rem 1.5rem 0.4rem' }}>
+                {group.section}
+              </div>
+              {group.items.map((item) => (
+                <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className="nav-link" style={{
+                  display: 'flex', alignItems: 'center', gap: '0.75rem',
+                  padding: '0.6rem 1.5rem', textDecoration: 'none',
+                  fontSize: '0.82rem', fontWeight: isActive(item.href) ? 700 : 500,
+                  color: isActive(item.href) ? '#8B6914' : '#5A4E3A',
+                  background: isActive(item.href) ? '#FDF5E0' : 'transparent',
+                  borderLeft: `3px solid ${isActive(item.href) ? '#C9A84C' : 'transparent'}`,
+                  borderRadius: '0 8px 8px 0',
+                  marginRight: '0.75rem',
+                }}>
+                  <span style={{ width: 18, textAlign: 'center', fontSize: '0.9rem', flexShrink: 0, opacity: isActive(item.href) ? 1 : 0.55 }}>{item.icon}</span>
+                  <span style={{ flex: 1 }}>{item.label}</span>
+                  {item.badge && (
+                    <span style={{ background: item.badgeColor, color: item.badgeColor === '#C9A84C' ? '#1A1209' : 'white', fontSize: '0.58rem', fontWeight: 700, padding: '0.15rem 0.45rem', borderRadius: 50, flexShrink: 0 }}>
+                      {item.badge}
+                    </span>
+                  )}
+                </Link>
+              ))}
+            </div>
+          ))}
 
-          <SidebarSection label="Spiritualité & Préparation" />
-          <SidebarLink href="/espace/academy"   icon="🎓" label="Safaruna Academy"   isActive={isActive('/espace/academy')} onClick={() => setMobileOpen(false)} />
-          <SidebarLink href="/espace/dua"       icon="🤲" label="Mon carnet de Du'a" isActive={isActive('/espace/dua')} onClick={() => setMobileOpen(false)} />
-          <SidebarLink href="/espace/checklist" icon="📋" label="Ma Checklist"       isActive={isActive('/espace/checklist')} onClick={() => setMobileOpen(false)} />
-          <SidebarLink href="/espace/favoris"   icon="❤️" label="Mes Favoris"        isActive={isActive('/espace/favoris')} onClick={() => setMobileOpen(false)} />
+          <div style={{ height: 1, background: '#EDE8DC', margin: '0.75rem 1.5rem' }} />
 
-          <div style={{ margin: '0.75rem 1.5rem', borderTop: '1px solid #E8DFC8' }}></div>
+          {[
+            { href: '/espace/profil',     icon: '◎', label: 'Mon profil' },
+            { href: '/espace/parrainage', icon: '✦', label: 'Parrainage', badge: '50€', badgeColor: '#1D5C3A' },
+            { href: '/espace/parametres', icon: '⚙', label: 'Paramètres' },
+          ].map((item) => (
+            <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className="nav-link" style={{
+              display: 'flex', alignItems: 'center', gap: '0.75rem',
+              padding: '0.6rem 1.5rem', textDecoration: 'none',
+              fontSize: '0.82rem', fontWeight: isActive(item.href) ? 700 : 500,
+              color: isActive(item.href) ? '#8B6914' : '#5A4E3A',
+              background: isActive(item.href) ? '#FDF5E0' : 'transparent',
+              borderLeft: `3px solid ${isActive(item.href) ? '#C9A84C' : 'transparent'}`,
+              borderRadius: '0 8px 8px 0',
+              marginRight: '0.75rem',
+            }}>
+              <span style={{ width: 18, textAlign: 'center', fontSize: '0.9rem', flexShrink: 0, opacity: 0.55 }}>{item.icon}</span>
+              <span style={{ flex: 1 }}>{item.label}</span>
+              {item.badge && (
+                <span style={{ background: item.badgeColor, color: 'white', fontSize: '0.58rem', fontWeight: 700, padding: '0.15rem 0.45rem', borderRadius: 50 }}>
+                  {item.badge}
+                </span>
+              )}
+            </Link>
+          ))}
+        </nav>
 
-          <SidebarLink href="/espace/profil"    icon="👤" label="Modifier mon profil" isActive={isActive('/espace/profil')} onClick={() => setMobileOpen(false)} />
-          <SidebarLink href="/espace/parrainage" icon="🎁" label="Parrainage" badge="50€ offerts" badgeColor="#1D5C3A" isActive={isActive('/espace/parrainage')} onClick={() => setMobileOpen(false)} />
-          <SidebarLink href="/espace/parametres" icon="⚙️" label="Paramètres" isActive={isActive('/espace/parametres')} onClick={() => setMobileOpen(false)} />
-        </div>
-
-        <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid #E8DFC8' }}>
-          <button style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.875rem', fontWeight: 700, color: '#C0392B', background: 'none', border: 'none', cursor: 'pointer', width: '100%' }}>
-            <span>🚪</span> Déconnexion
+        {/* Logout */}
+        <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid #EDE8DC', flexShrink: 0 }}>
+          <button className="sb-logout" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.82rem', fontWeight: 600, color: '#7A6D5A', background: 'none', border: 'none', cursor: 'pointer', width: '100%', transition: 'color 0.15s' }}>
+            <span style={{ fontSize: '0.9rem' }}>↩</span> Déconnexion
           </button>
         </div>
-      </div>
+      </aside>
 
       {/* Mobile overlay */}
-      {mobileOpen && (
-        <div
-          onClick={() => setMobileOpen(false)}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 49 }}
-          className="lg:hidden"
-        />
+      {open && (
+        <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 59, backdropFilter: 'blur(2px)' }} className="lg:hidden" />
       )}
 
-      {/* ── MAIN CONTENT ── */}
-      {/* KEY FIX: margin-left in inline style (wins over Tailwind), 0 on mobile via CSS class */}
-      <div className="main-content-pelerin" style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, minHeight: '100vh' }}>
+      {/* ── MAIN ── */}
+      <div className="dash-main" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
         <style dangerouslySetInnerHTML={{ __html: `
-          .main-content-pelerin { margin-left: 0; }
-          @media (min-width: 1024px) { .main-content-pelerin { margin-left: 260px; } }
+          .dash-main { margin-left: 0; }
+          @media (min-width: 1024px) { .dash-main { margin-left: 260px; } }
+          .lg\\:hidden { display: none; }
+          @media (max-width: 1023px) { .lg\\:hidden { display: flex !important; } }
         `}} />
 
         {/* Topbar */}
-        <div style={{
+        <header style={{
           position: 'sticky', top: 0, zIndex: 40,
-          background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(12px)',
-          borderBottom: '1px solid #E8DFC8', padding: '1rem 1.5rem',
+          background: 'rgba(245,242,236,0.92)', backdropFilter: 'blur(16px)',
+          borderBottom: '1px solid #EDE8DC', padding: '0.9rem 1.75rem',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          gap: '1rem',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            {/* Hamburger — visible only on mobile */}
-            <button
-              onClick={() => setMobileOpen(true)}
-              className="lg:hidden"
-              style={{ width: 36, height: 36, borderRadius: 8, border: '1px solid #E8DFC8', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '1rem', flexShrink: 0 }}
-            >
-              ☰
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            {/* Hamburger */}
+            <button onClick={() => setOpen(true)} className="lg:hidden" style={{ width: 38, height: 38, borderRadius: 10, border: '1px solid #EDE8DC', background: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', gap: 4, flexShrink: 0 }}>
+              <span style={{ display: 'block', width: 16, height: 1.5, background: '#1A1209', borderRadius: 2 }} />
+              <span style={{ display: 'block', width: 12, height: 1.5, background: '#1A1209', borderRadius: 2 }} />
+              <span style={{ display: 'block', width: 16, height: 1.5, background: '#1A1209', borderRadius: 2 }} />
             </button>
-            <span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', color: '#1A1209', fontWeight: 400 }}>Espace Pèlerin</span>
+            <div>
+              <span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 600, color: '#1A1209' }}>Espace Pèlerin</span>
+            </div>
           </div>
+
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <button style={{ position: 'relative', width: 40, height: 40, borderRadius: '50%', border: '1px solid #E8DFC8', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '1rem' }}>
+            <button style={{ position: 'relative', width: 38, height: 38, borderRadius: '50%', border: '1px solid #EDE8DC', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '1rem', flexShrink: 0 }}>
               🔔
-              <span style={{ position: 'absolute', top: 6, right: 6, width: 8, height: 8, borderRadius: '50%', background: '#C0392B', border: '2px solid white' }}></span>
+              <span style={{ position: 'absolute', top: 8, right: 8, width: 7, height: 7, borderRadius: '50%', background: '#C9A84C', border: '2px solid white' }} />
             </button>
-            <Link href="/guides" style={{ padding: '0.5rem 1.25rem', borderRadius: 50, fontSize: '0.8rem', fontWeight: 700, background: '#1A1209', color: '#F0D897', textDecoration: 'none' }}>
-              Trouver un guide
+            <Link href="/guides" style={{ padding: '0.5rem 1.25rem', borderRadius: 50, fontSize: '0.75rem', fontWeight: 700, background: '#1A1209', color: '#F0D897', textDecoration: 'none', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
+              + Nouveau guide
             </Link>
           </div>
-        </div>
+        </header>
 
-        <main style={{ padding: '2rem 1.5rem', maxWidth: 1200, width: '100%', margin: '0 auto', flex: 1 }}>
+        <main style={{ flex: 1, padding: '2rem 1.75rem', maxWidth: 1200, width: '100%', margin: '0 auto' }}>
           {children}
         </main>
       </div>
     </div>
-  );
-}
-
-function SidebarSection({ label }: { label: string }) {
-  return (
-    <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(122,109,90,0.5)', padding: '0.75rem 1.5rem 0.4rem' }}>
-      {label}
-    </div>
-  );
-}
-
-function SidebarLink({ href, icon, label, isActive, badge, badgeColor, onClick }: {
-  href: string; icon: string; label: string; isActive: boolean;
-  badge?: string; badgeColor?: string; onClick?: () => void;
-}) {
-  return (
-    <Link href={href} onClick={onClick} style={{
-      display: 'flex', alignItems: 'center', gap: '0.75rem',
-      padding: '0.6rem 1.5rem', textDecoration: 'none',
-      fontSize: '0.875rem', fontWeight: isActive ? 700 : 500,
-      color: isActive ? '#8B6914' : '#7A6D5A',
-      background: isActive ? '#FAF3E0' : 'transparent',
-      borderLeft: isActive ? '3px solid #C9A84C' : '3px solid transparent',
-      transition: 'all 0.15s',
-    }}>
-      <span style={{ width: 20, textAlign: 'center', fontSize: '1rem' }}>{icon}</span>
-      <span style={{ flex: 1 }}>{label}</span>
-      {badge && (
-        <span style={{ background: badgeColor || '#1A4A8A', color: 'white', fontSize: '0.6rem', fontWeight: 700, padding: '0.15rem 0.5rem', borderRadius: 50 }}>
-          {badge}
-        </span>
-      )}
-    </Link>
   );
 }

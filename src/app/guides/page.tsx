@@ -479,6 +479,21 @@ function GuideCard({ guide: g, listView }: { guide: GuideData; listView: boolean
               <span style={{ fontSize: '0.6rem', color: '#7A6D5A' }}>{g.pilgrims} pèlerins</span>
             </div>
           </div>
+
+          {/* CTA button */}
+          <div style={{
+            marginTop: '0.875rem',
+            background: '#1A1209',
+            color: '#F0D897',
+            textAlign: 'center',
+            padding: '0.7rem',
+            borderRadius: 50,
+            fontSize: '0.78rem',
+            fontWeight: 700,
+            letterSpacing: '0.04em',
+          }}>
+            Voir le profil →
+          </div>
         </div>
       </div>
     </Link>

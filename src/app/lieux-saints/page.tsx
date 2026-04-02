@@ -304,8 +304,14 @@ export default function LieuxSaintsPage() {
 
               <div style={{ background: 'linear-gradient(135deg, #0D0A06, #1A1209)', borderRadius: 16, padding: '1.5rem', border: '1px solid rgba(201,168,76,0.15)' }}>
                 <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: '1rem' }}>Du'a recommandée</div>
-                <div style={{ fontFamily: 'serif', fontSize: '1.3rem', color: '#F0D897', direction: 'rtl', lineHeight: 1.8, marginBottom: '0.875rem', textAlign: 'center' }}>{selected.dua}</div>
-                <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, fontStyle: 'italic', textAlign: 'center' }}>{selected.duaTrad}</div>
+                {/* Arabic text */}
+                <div style={{ fontFamily: 'serif', fontSize: '1.3rem', color: '#F0D897', direction: 'rtl', lineHeight: 1.9, marginBottom: '0.75rem', textAlign: 'center' }}>{selected.dua}</div>
+                {/* Translitération */}
+                {'duaTranslit' in selected && selected.duaTranslit && (
+                  <div style={{ fontSize: '0.78rem', color: 'rgba(201,168,76,0.6)', lineHeight: 1.6, textAlign: 'center', fontStyle: 'italic', marginBottom: '0.5rem' }}>{(selected as typeof selected & { duaTranslit: string }).duaTranslit}</div>
+                )}
+                {/* Traduction */}
+                <div style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: '0.75rem', marginTop: '0.5rem' }}>🇫🇷 {selected.duaTrad}</div>
               </div>
 
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '1.25rem' }}>
@@ -326,11 +332,14 @@ export default function LieuxSaintsPage() {
 function PlaceCard({ lieu, onClick }: { lieu: Lieu; onClick: () => void }) {
   return (
     <div onClick={onClick} style={{ background: 'white', borderRadius: 20, border: '1px solid #EDE8DC', overflow: 'hidden', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s, border-color 0.2s', display: 'flex', flexDirection: 'column' }} className="place-card-hover">
-      <style dangerouslySetInnerHTML={{ __html: `.place-card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(26,18,9,0.1); border-color: #C9A84C !important; }` }} />
+      <style dangerouslySetInnerHTML={{ __html: `.place-card-hover:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(26,18,9,0.1); border-color: #C9A84C !important; } .place-card-hover:hover .place-cta-btn { background: #C9A84C !important; color: #1A1209 !important; }` }} />
 
-      {/* Header */}
-      <div style={{ background: 'linear-gradient(135deg, #0D0A06, #1A1209)', padding: '1.75rem', position: 'relative', overflow: 'hidden', minHeight: 120, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-        <div style={{ position: 'absolute', top: '50%', right: '1rem', transform: 'translateY(-50%)', fontFamily: 'serif', fontSize: '3.5rem', color: 'rgba(201,168,76,0.1)', lineHeight: 1, userSelect: 'none', direction: 'rtl' }}>{lieu.nameAr}</div>
+      {/* Header — dark placeholder with Arabic name as hero text */}
+      <div style={{ background: 'linear-gradient(135deg, #0D0A06 0%, #1A1209 60%, #2D1F08 100%)', padding: '1.75rem', position: 'relative', overflow: 'hidden', minHeight: 130, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+        {/* Large Arabic watermark as pseudo-image */}
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'serif', fontSize: 'clamp(3rem, 8vw, 5rem)', color: 'rgba(201,168,76,0.09)', lineHeight: 1, userSelect: 'none', direction: 'rtl', padding: '0 1rem', textAlign: 'center' }}>{lieu.nameAr}</div>
+        {/* Subtle gold glow */}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%', background: 'linear-gradient(to top, rgba(201,168,76,0.05), transparent)', pointerEvents: 'none' }} />
         <div style={{ position: 'relative', zIndex: 1 }}>
           <div style={{ display: 'inline-block', background: lieu.tagColor, color: 'white', fontSize: '0.58rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '0.18rem 0.6rem', borderRadius: 50, marginBottom: '0.5rem' }}>{lieu.tag}</div>
           <h3 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.25rem', fontWeight: 600, color: 'white', lineHeight: 1.2 }}>{lieu.title}</h3>
@@ -338,22 +347,25 @@ function PlaceCard({ lieu, onClick }: { lieu: Lieu; onClick: () => void }) {
       </div>
 
       {/* Body */}
-      <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '0.875rem' }}>
-        <p style={{ fontSize: '0.8rem', color: '#7A6D5A', lineHeight: 1.7, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
+      <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <p style={{ fontSize: '0.8rem', color: '#7A6D5A', lineHeight: 1.7, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', margin: 0 }}>
           {lieu.description}
         </p>
-        {/* Arabic name */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ fontFamily: 'serif', fontSize: '1rem', color: '#C9A84C', direction: 'rtl' }}>{lieu.nameAr}</div>
-          <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#8B6914' }}>Voir l'histoire →</span>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+            {lieu.features.slice(0, 2).map((f) => (
+              <span key={f} style={{ background: '#FAF3E0', color: '#8B6914', fontSize: '0.6rem', fontWeight: 700, padding: '0.15rem 0.5rem', borderRadius: 50, border: '1px solid rgba(201,168,76,0.2)' }}>{f}</span>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Footer features */}
-      <div style={{ padding: '0.75rem 1.25rem', borderTop: '1px solid #EDE8DC', display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-        {lieu.features.map((f) => (
-          <span key={f} style={{ background: '#FAF3E0', color: '#8B6914', fontSize: '0.62rem', fontWeight: 700, padding: '0.18rem 0.55rem', borderRadius: 50, border: '1px solid #EDE8DC' }}>{f}</span>
-        ))}
+      {/* CTA button */}
+      <div style={{ padding: '0 1.25rem 1.25rem' }}>
+        <div className="place-cta-btn" style={{ background: '#1A1209', color: '#F0D897', textAlign: 'center', padding: '0.7rem', borderRadius: 50, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.04em', transition: 'background 0.2s, color 0.2s' }}>
+          Découvrir →
+        </div>
       </div>
     </div>
   );

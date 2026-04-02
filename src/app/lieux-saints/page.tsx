@@ -97,7 +97,7 @@ const LIEUX: Record<'Makkah' | 'Madinah', Lieu[]> = {
       tag: 'Meeqat',
       tagColor: '#8B6914',
       description: "Le Meeqat le plus proche de Makkah, aussi appelé Masjid Aïsha (ra). C'est d'ici que les pèlerins déjà à Makkah peuvent entrer en état d'Ihram pour accomplir une Omra supplémentaire. Aïsha (ra) y accomplit son Omra sur l'ordre du Prophète ﷺ lors du Hajj d'adieu.",
-      history: "Lors du Hajj d'adieu, Aïsha (ra) eut ses règles et ne put pas accomplir l'Omra qu'elle avait prévue. Après la fin de ses règles, le Prophète ﷺ envoya son frère Abd Ar-Rahman pour l'accompagner à Tan'im, d'où elle entra en Ihram pour accomplir son Omra. Ce lieu porte depuis son nom.",
+      history: "Lors du Hajj d'adieu, Aïsha (ra) eut ses règles et ne put pas accomplir la Omra qu'elle avait prévue. Après la fin de ses règles, le Prophète ﷺ envoya son frère Abd Ar-Rahman pour l'accompagner à Tan'im, d'où elle entra en Ihram pour accomplir son Omra. Ce lieu porte depuis son nom.",
       dua: "لَبَّيْكَ اللَّهُمَّ عُمْرَةً",
       duaTrad: "Me voici, Ô Allah, pour accomplir une Omra. (à prononcer en entrant en état d'Ihram)",
       features: ['Ihram Omra', 'À 5 km du Haram', 'Meeqat historique'],

@@ -4,8 +4,8 @@ import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
 
 export const metadata = {
-  title: "Blog SAFARUMA — Guides, conseils et spiritualité pour l'Omra",
-  description: "Articles de fond sur la préparation de l'Omra, les lieux saints, la spiritualité islamique et les conseils de nos guides certifiés.",
+  title: "Blog SAFARUMA — Guides, conseils et spiritualité pour la Omra",
+  description: "Articles de fond sur la préparation de la Omra, les lieux saints, la spiritualité islamique et les conseils de nos guides certifiés.",
 };
 
 export const ARTICLES = [

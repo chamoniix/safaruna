@@ -148,6 +148,8 @@ footer { background: var(--warm); padding: 3rem 4rem 2rem; color: rgba(255,255,2
 .footer-col ul li { margin-bottom: 0.5rem; }
 .footer-col ul li a { color: rgba(255,255,255,0.5); text-decoration: none; font-size: 0.82rem; transition: color 0.2s; }
 .footer-col ul li a:hover { color: var(--gold-light); }
+.footer-social-icon { color: #7A6D5A; transition: color 0.2s; display: flex; align-items: center; justify-content: center; }
+.footer-social-icon:hover { color: #C9A84C; }
 .footer-bottom { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; flex-wrap: wrap; gap: 0.5rem; }
 .footer-bottom .copy { color: rgba(255,255,255,0.35); }
 /* ── ANNOUNCEMENT BAR ─────────────────────────────────────────────────────── */

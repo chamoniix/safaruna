@@ -17,21 +17,21 @@ const manrope = Manrope({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://safaruma.com'),
-  title: "SAFARUMA — Guides privés pour l'Omra et l'Arabie Saoudite",
-  description: "Trouvez votre guide privé pour l'Omra, la découverte historique et le tourisme spirituel en Arabie Saoudite. 320 guides certifiés, 12 langues.",
+  title: "SAFARUMA — Le voyage vers tes origines commence ici.",
+  description: "SAFARUMA connecte les voyageurs avec des guides privés certifiés pour vivre la Omra, découvrir l'histoire de l'Islam et retrouver ses origines spirituelles. 320 guides certifiés, 12 langues.",
   keywords: ["omra", "guide omra", "umrah", "guide privé", "arabie saoudite", "makkah", "madinah", "pèlerinage", "guide islamique"],
   openGraph: {
     type: 'website',
     url: 'https://safaruma.com',
     siteName: 'SAFARUMA',
-    title: "SAFARUMA — Guides privés pour l'Omra et l'Arabie Saoudite",
-    description: "Trouvez votre guide privé pour l'Omra, la découverte historique et le tourisme spirituel en Arabie Saoudite. 320 guides certifiés, 12 langues.",
+    title: "SAFARUMA — Le voyage vers tes origines commence ici.",
+    description: "SAFARUMA connecte les voyageurs avec des guides privés certifiés pour vivre la Omra, découvrir l'histoire de l'Islam et retrouver ses origines spirituelles. 320 guides certifiés, 12 langues.",
     images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'SAFARUMA' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "SAFARUMA — Guides privés pour l'Omra et l'Arabie Saoudite",
-    description: "Trouvez votre guide privé pour l'Omra, la découverte historique et le tourisme spirituel en Arabie Saoudite. 320 guides certifiés, 12 langues.",
+    title: "SAFARUMA — Le voyage vers tes origines commence ici.",
+    description: "SAFARUMA connecte les voyageurs avec des guides privés certifiés pour vivre la Omra, découvrir l'histoire de l'Islam et retrouver ses origines spirituelles. 320 guides certifiés, 12 langues.",
     images: ['/og-image.jpg'],
   },
   alternates: {

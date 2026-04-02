@@ -17,7 +17,7 @@ export default function RegisterPage() {
             SAFAR<span className="text-[var(--gold)]">U</span>MA
           </Link>
           <h1 className="text-xl font-bold text-[var(--deep)] mt-4">Créer votre compte de confiance</h1>
-          <p className="text-sm text-[var(--muted)] mt-2">Rejoignez la première plateforme dédiée aux guides d'Omra certifiés.</p>
+          <p className="text-sm text-[var(--muted)] mt-2">Rejoignez la première plateforme dédiée aux guides de Omra certifiés.</p>
         </div>
 
         <form className="flex flex-col gap-5">

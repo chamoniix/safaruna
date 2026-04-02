@@ -158,27 +158,28 @@ export default function Home() {
             <div className="golden-line-anim" />
           </div>
 
-          {/* Label */}
+          {/* Arabic subtitle */}
           <div style={{
-            fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.2em',
-            textTransform: 'uppercase', color: 'rgba(201,168,76,0.7)',
-            marginBottom: '1.5rem',
+            fontFamily: 'var(--font-cormorant, serif)',
+            fontSize: '1rem', letterSpacing: '0.15em',
+            color: 'rgba(201,168,76,0.6)',
+            marginBottom: '1rem',
             animation: 'fadeIn 0.8s 1.0s ease both', opacity: 0,
           }}>
-            La première plateforme de guides privés pour l&apos;Omra
+            سافر • SAFARUMA • Voyage
           </div>
 
           {/* Main tagline */}
           <h1 style={{
             fontFamily: 'var(--font-cormorant, serif)',
             fontSize: 'clamp(2.4rem, 5.5vw, 3.8rem)',
-            fontWeight: 300, color: 'white', lineHeight: 1.1,
-            marginBottom: '1.25rem',
+            fontWeight: 300, color: 'white', lineHeight: 1.15,
+            marginBottom: '1.5rem',
             animation: 'fadeInUp 0.9s 1.2s ease both', opacity: 0,
           }}>
-            Vis ton Omra comme elle
+            Le voyage vers tes origines
             <br />
-            <em style={{ color: 'var(--gold)', fontStyle: 'italic' }}>mérite d&apos;être vécue.</em>
+            <em style={{ color: 'var(--gold)', fontStyle: 'italic' }}>commence ici.</em>
           </h1>
 
           <p style={{
@@ -193,7 +194,7 @@ export default function Home() {
           {/* CTAs */}
           <div style={{
             display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap',
-            marginBottom: '2rem',
+            marginBottom: '1.5rem',
             animation: 'fadeInUp 0.9s 1.6s ease both', opacity: 0,
           }}>
             <Link href="/guides" className="btn-hero-cta">
@@ -207,6 +208,7 @@ export default function Home() {
           {/* Live trust mini-row */}
           <div style={{
             display: 'flex', gap: '2rem', justifyContent: 'center', flexWrap: 'wrap',
+            marginBottom: '1.75rem',
             animation: 'fadeIn 0.9s 1.8s ease both', opacity: 0,
           }}>
             <div className="live-badge">
@@ -217,6 +219,20 @@ export default function Home() {
               <span style={{ color: 'var(--gold)' }}>★★★★★</span> 4.96 · 709 avis vérifiés
             </span>
           </div>
+
+          {/* Citation */}
+          <p style={{
+            fontFamily: 'var(--font-cormorant, serif)',
+            fontStyle: 'italic',
+            fontSize: '0.95rem',
+            color: 'rgba(240,216,151,0.5)',
+            maxWidth: 480,
+            margin: '0 auto',
+            lineHeight: 1.7,
+            animation: 'fadeIn 0.9s 2.0s ease both', opacity: 0,
+          }}>
+            &ldquo;Voyage — car dans chaque pas vers les lieux saints,<br />ton âme retrouve ce qu&apos;elle cherchait.&rdquo;
+          </p>
         </div>
 
         {/* Scroll indicator */}
@@ -245,18 +261,18 @@ export default function Home() {
             fontSize: 'clamp(2rem, 4.5vw, 3.2rem)',
             fontWeight: 300, color: 'white', lineHeight: 1.15, marginBottom: '2.5rem',
           }}>
-            90% des pèlerins font l&apos;Omra<br />
+            90% des pèlerins font la Omra<br />
             <em style={{ color: 'var(--gold)', fontStyle: 'italic' }}>sans vraiment la comprendre.</em>
           </h2>
           <p className="reveal reveal-d2" style={{ color: 'rgba(255,255,255,0.55)', lineHeight: 1.9, fontSize: '1rem', marginBottom: '1.5rem' }}>
             35 personnes dans un bus. Un guide qui parle arabe. Tu imites les gestes de ceux devant toi. Tu tournes autour de la Kaaba en ne sachant pas vraiment pourquoi tu tournes. Tu récites des du&apos;a que tu n&apos;as jamais apprises. Tu rentres chez toi avec une belle photo, mais quelque chose manque.
           </p>
           <p className="reveal reveal-d3" style={{ color: 'rgba(255,255,255,0.55)', lineHeight: 1.9, fontSize: '1rem', marginBottom: '3rem' }}>
-            Ce n&apos;est pas l&apos;Omra qui était mauvaise. C&apos;est le format. Un voyage d&apos;une telle profondeur mérite un guide qui prend le temps — <em style={{ color: 'rgba(240,216,151,0.8)' }}>ton temps</em> — pour tout t&apos;expliquer, dans ta langue, à ton rythme.
+            Ce n&apos;est pas la Omra qui était mauvaise. C&apos;est le format. Un voyage d&apos;une telle profondeur mérite un guide qui prend le temps — <em style={{ color: 'rgba(240,216,151,0.8)' }}>ton temps</em> — pour tout t&apos;expliquer, dans ta langue, à ton rythme.
           </p>
           <div className="reveal reveal-d4">
             <Link href="/guides" className="btn-hero-cta">
-              Et si ton Omra avait du sens ? →
+              Et si ta Omra avait du sens ? →
             </Link>
           </div>
         </div>

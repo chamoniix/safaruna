@@ -34,7 +34,7 @@ const TIMELINE = [
   { year: '2022', title: 'La recherche', desc: "8 mois à interviewer 200 pèlerins francophones. Le même problème partout : l'accompagnement de qualité n'existait pas dans leur langue." },
   { year: '2023', title: 'Les premiers guides', desc: "Amira rejoint l'aventure et certifie les 12 premiers guides SAFARUMA. 300 pèlerins accompagnés la première année. 98% de satisfaction." },
   { year: '2024', title: 'La plateforme', desc: "Tariq construit SAFARUMA.com. Les pèlerins peuvent enfin choisir, comparer, réserver leur guide privé en quelques clics." },
-  { year: '2025', title: "L'expansion", desc: "320 guides certifiés. 15 000 pèlerins accompagnés. SAFARUMA devient la référence francophone pour l'Omra privée." },
+  { year: '2025', title: "L'expansion", desc: "320 guides certifiés. 15 000 pèlerins accompagnés. SAFARUMA devient la référence francophone pour la Omra privée." },
   { year: '2026', title: 'La vision', desc: "Être présent pour chaque pèlerin francophone dans le monde entier. Du Maroc à la Martinique, de Lyon à Montréal." },
 ];
 

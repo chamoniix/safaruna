@@ -77,7 +77,7 @@ function baseTemplate(content: string): string {
         <tr>
           <td style="background:#F5F0E8;border:1px solid #E8DFC8;border-top:none;border-radius:0 0 16px 16px;padding:20px 40px;text-align:center;">
             <p style="margin:0;font-size:11px;color:#9A8D7A;line-height:1.6;">
-              SAFARUMA — La plateforme des guides privés pour l'Omra<br>
+              SAFARUMA — La plateforme des guides privés pour la Omra<br>
               <a href="https://safaruma.com" style="color:#C9A84C;text-decoration:none;">safaruma.com</a>
               &nbsp;·&nbsp;
               <a href="mailto:contact@safaruma.com" style="color:#C9A84C;text-decoration:none;">contact@safaruma.com</a>

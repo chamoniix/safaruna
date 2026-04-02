@@ -19,7 +19,7 @@ export default function SafarunaAcademy() {
           <div className="inline-block bg-[#C9A84C] text-[#1A1209] text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-4 shadow-sm">
             Nouveau Module
           </div>
-          <h1 className="font-serif text-3xl md:text-5xl mb-4 leading-tight">Comprendre le Tafsir des versets du Hajj & de l'Omra</h1>
+          <h1 className="font-serif text-3xl md:text-5xl mb-4 leading-tight">Comprendre le Tafsir des versets du Hajj & de la Omra</h1>
           <p className="text-white/70 mb-8 leading-relaxed">
             Plongez dans les profondeurs du Coran avec Cheikh Rachid pour comprendre la signification spirituelle derrière chaque action que vous accomplirez à Makkah.
           </p>
@@ -53,7 +53,7 @@ export default function SafarunaAcademy() {
           <h2 className="font-serif text-2xl text-[#1A1209] mb-4">Reprendre la lecture</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <CourseCard 
-              title="Les rites de l'Omra : étape par étape"
+              title="Les rites de la Omra : étape par étape"
               image="https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
               progress={45} timeRemaining="12 min restants"
             />
@@ -69,14 +69,14 @@ export default function SafarunaAcademy() {
       {/* POPULAR COURSES */}
       <section className="mb-12">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-serif text-2xl text-[#1A1209]">Rituels (Fiqh) de l'Omra</h2>
+          <h2 className="font-serif text-2xl text-[#1A1209]">Rituels (Fiqh) de la Omra</h2>
           <button className="text-[10px] font-bold text-[#8B6914] uppercase tracking-wider hover:underline">Voir tout</button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <SmallCourseCard title="L'État de l'Ihram : Règles et interdits" duration="45 min" modules="4 modules" image="https://images.unsplash.com/photo-1580418827493-f2b22c0a76cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" />
           <SmallCourseCard title="Comment accomplir le Tawaaf correctement" duration="32 min" modules="3 modules" image="https://images.unsplash.com/photo-1585036156171-384164a8c675?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" />
           <SmallCourseCard title="Le Sa'i entre Safa et Marwa" duration="28 min" modules="2 modules" image="https://images.unsplash.com/photo-1627916602852-52ce648b2eb3?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" />
-          <SmallCourseCard title="La fin de l'Omra : Rasage ou coupe" duration="15 min" modules="1 module" image="https://images.unsplash.com/photo-1563299796-1cda1e129184?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" />
+          <SmallCourseCard title="La fin de la Omra : Rasage ou coupe" duration="15 min" modules="1 module" image="https://images.unsplash.com/photo-1563299796-1cda1e129184?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" />
         </div>
       </section>
 

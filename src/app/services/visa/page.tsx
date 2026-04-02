@@ -11,7 +11,7 @@ export const metadata = {
 const STEPS = [
   { n: '01', icon: '📋', t: 'Créez votre dossier', d: "Renseignez vos informations personnelles, votre groupe et vos dates dans notre formulaire sécurisé. Cela prend moins de 10 minutes." },
   { n: '02', icon: '📄', t: 'Documents requis', d: "Passeport valide 6 mois, photo d'identité fond blanc, justificatif de situation islamique (pour les femmes : mahram ou groupe féminin)." },
-  { n: '03', icon: '🔄', t: 'Traitement assisté', d: "Notre équipe basée à Jeddah vérifie votre dossier et le soumet via les canaux officiels du Ministère du Hajj et de l'Omra saoudien." },
+  { n: '03', icon: '🔄', t: 'Traitement assisté', d: "Notre équipe basée à Jeddah vérifie votre dossier et le soumet via les canaux officiels du Ministère du Hajj et de la Omra saoudien." },
   { n: '04', icon: '✅', t: 'Visa reçu', d: "Vous recevez votre visa numérique (Nusuk) par email en 3 à 10 jours ouvrés. Il est directement lié à votre passeport — aucun sticker requis." },
 ];
 

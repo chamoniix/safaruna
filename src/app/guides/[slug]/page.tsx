@@ -23,7 +23,7 @@ const PACKAGES = [
     price: 280,
     days: 3,
     description:
-      "Le parcours fondamental de l'Omra avec accompagnement complet du guide lors des rituels obligatoires. Idéal pour les pèlerins avec un budget maîtrisé.",
+      "Le parcours fondamental de la Omra avec accompagnement complet du guide lors des rituels obligatoires. Idéal pour les pèlerins avec un budget maîtrisé.",
     features: [
       "Accueil à l'aéroport et transfert",
       "Guide personnel pour tous les rituels (tawaf, sa'i)",

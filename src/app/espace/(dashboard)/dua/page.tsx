@@ -10,7 +10,7 @@ export default function DuaTracker() {
       <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
           <h1 className="font-serif text-3xl md:text-4xl text-[#1A1209] mb-2">Mon Carnet de Du'a</h1>
-          <p className="text-[#7A6D5A]">Suivez vos invocations quotidiennes et apprenez celles du Hajj &amp; de l'Omra.</p>
+          <p className="text-[#7A6D5A]">Suivez vos invocations quotidiennes et apprenez celles du Hajj &amp; de la Omra.</p>
         </div>
         
         <div className="bg-white border border-[#E8DFC8] rounded-2xl p-4 flex items-center gap-6 shadow-[0_2px_10px_rgba(26,18,9,0.02)]">

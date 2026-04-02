@@ -166,7 +166,7 @@ export default function PelerinDashboard() {
               {/* Content */}
               <div style={{ flex: 1, padding: '1.25rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minWidth: 0 }}>
                 <div>
-                  <h3 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.15rem', fontWeight: 600, color: '#1A1209', lineHeight: 1.3, marginBottom: '0.4rem' }}>Les rites de l'Omra : étape par étape</h3>
+                  <h3 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.15rem', fontWeight: 600, color: '#1A1209', lineHeight: 1.3, marginBottom: '0.4rem' }}>Les rites de la Omra : étape par étape</h3>
                   <p style={{ fontSize: '0.78rem', color: '#7A6D5A', lineHeight: 1.6, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
                     Comprenez le Tawaf, le Sa'i et les règles spirituelles de l'Ihram avant d'arriver au Meeqat.
                   </p>

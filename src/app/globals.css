@@ -153,10 +153,17 @@ footer { background: var(--warm); padding: 3rem 4rem 2rem; color: rgba(255,255,2
 .footer-bottom { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; flex-wrap: wrap; gap: 0.5rem; }
 .footer-bottom .copy { color: rgba(255,255,255,0.35); }
 /* ── ANNOUNCEMENT BAR ─────────────────────────────────────────────────────── */
-.announcement-bar { position: relative; z-index: 100; width: 100%; box-sizing: border-box; background: var(--deep); color: rgba(240,216,151,0.85); font-size: 0.78rem; font-weight: 600; text-align: center; padding: 0.55rem 1rem; letter-spacing: 0.04em; border-bottom: 1px solid rgba(201,168,76,0.2); display: flex; align-items: center; justify-content: center; gap: 0.6rem; flex-wrap: wrap; }
-.announcement-bar a { color: var(--gold); text-decoration: none; font-weight: 700; border-bottom: 1px solid rgba(201,168,76,0.4); transition: border-color 0.2s; }
+.announcement-bar { position: relative; z-index: 100; width: 100%; box-sizing: border-box; background: var(--deep); color: rgba(240,216,151,0.85); font-size: 0.78rem; font-weight: 600; text-align: center; padding: 0.55rem 1rem; letter-spacing: 0.04em; border-bottom: 1px solid rgba(201,168,76,0.2); display: flex; align-items: center; justify-content: center; gap: 0.6rem; flex-wrap: nowrap; overflow: hidden; white-space: nowrap; }
+.announcement-bar a { color: var(--gold); text-decoration: none; font-weight: 700; border-bottom: 1px solid rgba(201,168,76,0.4); transition: border-color 0.2s; white-space: nowrap; }
 .announcement-bar a:hover { border-color: var(--gold); }
 .announcement-bar .ab-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); animation: pulse 2s infinite; flex-shrink: 0; }
+.ab-mobile { display: none; }
+.ab-desktop { display: contents; }
+@media (max-width: 640px) {
+  .announcement-bar { font-size: 0.69rem; padding: 0.45rem 0.75rem; max-height: 36px; }
+  .ab-desktop { display: none; }
+  .ab-mobile { display: contents; }
+}
 
 /* ── HERO FULL ─────────────────────────────────────────────────────────────── */
 .hero-full { min-height: 100vh; background: #0D0A06; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 6rem 2rem 4rem; text-align: center; }

@@ -3,150 +3,120 @@
 import { useState } from 'react';
 
 const FEATURED_GUIDES = [
-  { id: 2, name: 'Youssef Malik', city: 'Lyon', featured: true },
-  { id: 3, name: 'Omar Benali', city: 'Marseille', featured: true },
-  { id: 4, name: 'Hassan Toure', city: 'Bordeaux', featured: false },
-  { id: 7, name: 'Bilal Choudhry', city: 'Toulouse', featured: false },
+  { id: 2, name: 'Youssef Malik',  city: 'Lyon',      featured: true },
+  { id: 3, name: 'Omar Benali',    city: 'Marseille', featured: true },
+  { id: 4, name: 'Hassan Toure',   city: 'Bordeaux',  featured: false },
+  { id: 7, name: 'Bilal Choudhry', city: 'Toulouse',  featured: false },
 ];
 
 const ARTICLES = [
-  { title: 'Comment préparer son Omra ?', slug: 'preparer-omra', status: 'PUBLIÉ', updated: '2026-03-15' },
-  { title: 'Les lieux incontournables de La Mecque', slug: 'lieux-mecque', status: 'PUBLIÉ', updated: '2026-03-10' },
-  { title: 'Guide du pèlerin : Médine', slug: 'guide-medine', status: 'BROUILLON', updated: '2026-03-28' },
+  { title: 'Comment préparer son Omra ?',               slug: 'preparer-omra',  status: 'PUBLIÉ',    updated: '15/03/2026' },
+  { title: 'Les lieux incontournables de La Mecque',     slug: 'lieux-mecque',   status: 'PUBLIÉ',    updated: '10/03/2026' },
+  { title: 'Guide du pèlerin : Médine',                  slug: 'guide-medine',   status: 'BROUILLON', updated: '28/03/2026' },
 ];
 
-export default function AdminContenu() {
-  const [banner, setBanner] = useState('Ramadan 2026 — Réservez votre guide dès maintenant');
-  const [bannerActive, setBannerActive] = useState(true);
-  const [featured, setFeatured] = useState(FEATURED_GUIDES);
+const card: React.CSSProperties = {
+  background: '#FFFFFF', borderRadius: 12, padding: '1.5rem',
+  boxShadow: '0 1px 3px rgba(0,0,0,0.08)', border: '1px solid #E8DFC8',
+};
 
-  const toggleFeatured = (id: number) => {
-    setFeatured(prev => prev.map(g => g.id === id ? { ...g, featured: !g.featured } : g));
-  };
+function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <button onClick={() => onChange(!value)} style={{
+      width: 44, height: 24, borderRadius: 12, border: 'none', flexShrink: 0,
+      background: value ? '#1A1209' : '#E8DFC8', cursor: 'pointer', position: 'relative',
+    }}>
+      <div style={{
+        position: 'absolute', top: 4, width: 16, height: 16, borderRadius: '50%',
+        background: value ? '#F0D897' : '#FFFFFF',
+        transition: 'left 0.2s', left: value ? 24 : 4,
+      }} />
+    </button>
+  );
+}
+
+export default function AdminContenu() {
+  const [banner, setBanner]         = useState('Ramadan 2026 — Réservez votre guide dès maintenant');
+  const [bannerActive, setBannerActive] = useState(true);
+  const [featured, setFeatured]     = useState(FEATURED_GUIDES);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
       {/* Banner */}
-      <div style={{ background: '#1A1209', border: '1px solid rgba(201,168,76,0.15)', borderRadius: 16, padding: '1.5rem' }}>
+      <div style={card}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C9A84C' }}>
-            Bandeau annonce
+          <div>
+            <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>Bandeau annonce</div>
+            <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>Affiché en haut de toutes les pages publiques</div>
           </div>
-          <button
-            onClick={() => setBannerActive(!bannerActive)}
-            style={{
-              width: 40, height: 22, borderRadius: 11, border: 'none',
-              background: bannerActive ? '#C9A84C' : 'rgba(255,255,255,0.15)',
-              cursor: 'pointer', position: 'relative', transition: 'background 0.2s',
-            }}
-          >
-            <div style={{
-              position: 'absolute', top: 3, width: 16, height: 16, borderRadius: '50%', background: 'white',
-              transition: 'left 0.2s', left: bannerActive ? 21 : 3,
-            }} />
-          </button>
+          <Toggle value={bannerActive} onChange={setBannerActive} />
         </div>
         <input
-          value={banner}
-          onChange={e => setBanner(e.target.value)}
-          style={{
-            width: '100%', padding: '0.75rem 1rem',
-            background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.1)',
-            borderRadius: 8, color: 'white', fontSize: '0.875rem', fontFamily: 'inherit',
-            outline: 'none', boxSizing: 'border-box',
-          }}
+          value={banner} onChange={e => setBanner(e.target.value)}
+          style={{ width: '100%', padding: '0.75rem 1rem', boxSizing: 'border-box', background: '#F8F6F2', border: '1.5px solid #E8DFC8', borderRadius: 8, color: '#1A1209', fontSize: '0.875rem', fontFamily: 'inherit', outline: 'none' }}
         />
-        <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
-          <button style={{
-            padding: '0.55rem 1.25rem', borderRadius: 8, border: 'none',
-            background: '#C9A84C', color: '#1A1209',
-            fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-          }}>
+        <div style={{ marginTop: '0.875rem' }}>
+          <button style={{ padding: '0.55rem 1.5rem', borderRadius: 50, border: 'none', background: '#1A1209', color: '#F0D897', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
             Sauvegarder
           </button>
         </div>
       </div>
 
       {/* Featured guides */}
-      <div style={{ background: '#1A1209', border: '1px solid rgba(201,168,76,0.15)', borderRadius: 16, padding: '1.5rem' }}>
-        <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: '1rem' }}>
+      <div style={card}>
+        <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209', marginBottom: '1rem' }}>
           Guides mis en avant
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           {featured.map(g => (
             <div key={g.id} style={{
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              padding: '0.75rem 1rem', borderRadius: 10,
-              background: g.featured ? 'rgba(201,168,76,0.08)' : 'rgba(255,255,255,0.04)',
-              border: `1px solid ${g.featured ? 'rgba(201,168,76,0.2)' : 'transparent'}`,
+              padding: '0.875rem 1rem', borderRadius: 8,
+              background: g.featured ? '#FEF9EC' : '#F8F6F2',
+              border: `1px solid ${g.featured ? '#E8D08A' : '#E8DFC8'}`,
             }}>
               <div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'white' }}>{g.name}</div>
-                <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)' }}>{g.city}</div>
+                <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#1A1209' }}>{g.name}</div>
+                <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>{g.city}</div>
               </div>
-              <button
-                onClick={() => toggleFeatured(g.id)}
-                style={{
-                  width: 40, height: 22, borderRadius: 11, border: 'none',
-                  background: g.featured ? '#C9A84C' : 'rgba(255,255,255,0.15)',
-                  cursor: 'pointer', position: 'relative', transition: 'background 0.2s', flexShrink: 0,
-                }}
-              >
-                <div style={{
-                  position: 'absolute', top: 3, width: 16, height: 16, borderRadius: '50%', background: 'white',
-                  transition: 'left 0.2s', left: g.featured ? 21 : 3,
-                }} />
-              </button>
+              <Toggle
+                value={g.featured}
+                onChange={v => setFeatured(prev => prev.map(x => x.id === g.id ? { ...x, featured: v } : x))}
+              />
             </div>
           ))}
         </div>
       </div>
 
-      {/* Blog articles */}
-      <div style={{ background: '#1A1209', border: '1px solid rgba(201,168,76,0.15)', borderRadius: 16, padding: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C9A84C' }}>
-            Articles de blog
-          </div>
-          <button style={{
-            padding: '0.4rem 1rem', borderRadius: 8, border: '1px solid rgba(201,168,76,0.3)',
-            background: 'transparent', color: '#C9A84C',
-            fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-          }}>
+      {/* Blog */}
+      <div style={card}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>Articles de blog</div>
+          <button style={{ padding: '0.45rem 1rem', borderRadius: 50, border: '1px solid #1A1209', background: 'transparent', color: '#1A1209', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
             + Nouvel article
           </button>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
-          {ARTICLES.map((a, i) => (
-            <div key={a.slug} style={{
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              padding: '0.875rem 0',
-              borderBottom: i < ARTICLES.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
-            }}>
-              <div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'white', marginBottom: '0.15rem' }}>{a.title}</div>
-                <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.3)' }}>/{a.slug} · Modifié le {a.updated}</div>
-              </div>
-              <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                <span style={{
-                  fontSize: '0.6rem', fontWeight: 700, padding: '0.25rem 0.55rem', borderRadius: 20,
-                  background: a.status === 'PUBLIÉ' ? '#4CAF9A22' : 'rgba(255,255,255,0.07)',
-                  color: a.status === 'PUBLIÉ' ? '#4CAF9A' : 'rgba(255,255,255,0.4)',
-                }}>
-                  {a.status}
-                </span>
-                <button style={{
-                  padding: '0.3rem 0.65rem', borderRadius: 6, border: 'none',
-                  background: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.5)',
-                  fontSize: '0.68rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
-                }}>
-                  Modifier
-                </button>
-              </div>
+        {ARTICLES.map((a, i) => (
+          <div key={a.slug} style={{
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem',
+            padding: '0.875rem 0',
+            borderBottom: i < ARTICLES.length - 1 ? '1px solid #F0EBE0' : 'none',
+          }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: '0.88rem', fontWeight: 600, color: '#1A1209', marginBottom: '0.15rem' }}>{a.title}</div>
+              <div style={{ fontSize: '0.68rem', color: '#7A6D5A' }}>/{a.slug} · Modifié le {a.updated}</div>
             </div>
-          ))}
-        </div>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexShrink: 0 }}>
+              <span style={{ fontSize: '0.62rem', fontWeight: 700, padding: '0.25rem 0.55rem', borderRadius: 20, background: a.status === 'PUBLIÉ' ? '#DCFCE7' : '#F5F3EF', color: a.status === 'PUBLIÉ' ? '#16A34A' : '#7A6D5A' }}>
+                {a.status}
+              </span>
+              <button style={{ padding: '0.3rem 0.7rem', borderRadius: 6, border: '1px solid #E8DFC8', background: '#FFFFFF', color: '#7A6D5A', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+                Modifier
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
 
     </div>

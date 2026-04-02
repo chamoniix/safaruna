@@ -3,6 +3,17 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import GuideProfileClient from './GuideProfileClient';
 
+// Pre-render all guide pages at build time → no server-side DB lookup needed
+export async function generateStaticParams() {
+  return [
+    { slug: 'rachid-al-madani' },
+    { slug: 'fatima-al-omari' },
+    { slug: 'youssouf-konate' },
+    { slug: 'abdullah-ben-yusuf' },
+    { slug: 'samira-al-rashidi' },
+  ];
+}
+
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
 const PACKAGES = [
@@ -154,7 +165,7 @@ const GUIDES: Record<string, {
     name: 'Cheikh Rachid Al-Madani',
     initials: 'RA',
     location: 'Makkah · Madinah',
-    experience: 12,
+    experience: 14,
     rating: 4.97,
     reviewCount: 214,
     pilgrimsCount: '2 400+',
@@ -194,12 +205,12 @@ const GUIDES: Record<string, {
     location: 'Makkah',
     experience: 8,
     rating: 4.95,
-    reviewCount: 89,
-    pilgrimsCount: '680+',
+    reviewCount: 178,
+    pilgrimsCount: '860+',
     returnRate: 87,
     speciality: 'Guide femme · Spécialiste familles',
     isWoman: true,
-    languages: ['🇫🇷 Français', '🇲🇦 Darija'],
+    languages: ['🇫🇷 Français', '🇲🇦 Darija', '🇹🇷 Türkçe'],
     shortBio:
       'Guide certifiée et femme au parcours exceptionnel. Fatima accompagne les femmes seules et les familles avec une approche bienveillante et rassurante, idéale pour un premier voyage à La Mecque.',
     bioFull: [
@@ -231,13 +242,13 @@ const GUIDES: Record<string, {
     name: 'Cheikh Youssouf Konaté',
     initials: 'YK',
     location: 'Makkah',
-    experience: 9,
-    rating: 4.92,
-    reviewCount: 142,
-    pilgrimsCount: '1 100+',
+    experience: 6,
+    rating: 4.88,
+    reviewCount: 94,
+    pilgrimsCount: '620+',
     returnRate: 84,
     speciality: "Guide Afrique de l\'Ouest · Multilangues",
-    languages: ['🇫🇷 Français', '🇸🇳 Wolof', '🇬🇧 English'],
+    languages: ['🇫🇷 Français', '🇸🇳 Wolof', '🎵 Bambara'],
     shortBio:
       "Originaire de Dakar, Youssouf est la référence des pèlerins d\'Afrique de l\'Ouest. Il combine rigueur académique et chaleur humaine pour un accompagnement à la fois savant et fraternel.",
     bioFull: [
@@ -269,11 +280,11 @@ const GUIDES: Record<string, {
     name: 'Cheikh Abdullah Ben Yusuf',
     initials: 'AB',
     location: 'Madinah',
-    experience: 15,
-    rating: 4.98,
-    reviewCount: 301,
-    pilgrimsCount: '3 200+',
-    returnRate: 94,
+    experience: 11,
+    rating: 4.93,
+    reviewCount: 147,
+    pilgrimsCount: '1 100+',
+    returnRate: 92,
     speciality: 'Expert Madinah · Doctorat Sciences Islamiques',
     languages: ['🇫🇷 Français', '🇸🇦 Arabe'],
     shortBio:
@@ -304,16 +315,17 @@ const GUIDES: Record<string, {
   },
 
   'samira-al-rashidi': {
-    name: 'Ustadha Samira Al-Rashidi',
+    name: 'Samira Al-Rashidi',
     initials: 'SR',
     location: 'Madinah',
-    experience: 7,
-    rating: 4.93,
+    experience: 5,
+    rating: 4.91,
     reviewCount: 76,
-    pilgrimsCount: '520+',
-    returnRate: 89,
+    pilgrimsCount: '420+',
+    returnRate: 86,
     speciality: 'Spécialiste PMR · Madinah',
-    languages: ['🇫🇷 Français', '🇹🇳 Tunisien'],
+    isWoman: true,
+    languages: ['🇫🇷 Français', '🇹🇳 Tunisien', '🇸🇦 Arabe'],
     shortBio:
       "La spécialiste PMR de Madinah. Samira a développé des protocoles d\'accompagnement adaptés aux personnes à mobilité réduite, aux seniors et aux malades, avec une attention et une douceur inégalées.",
     bioFull: [

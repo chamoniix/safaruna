@@ -291,6 +291,19 @@ export default function BookingWidget({ slug, guideName, packages }: BookingWidg
           </button>
         </Link>
 
+        {/* Trust badges */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '1rem', padding: '0.75rem', background: 'var(--cream)', borderRadius: 10, border: '1px solid var(--sand)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.72rem', color: 'var(--warm)', fontWeight: 600 }}>
+            <span style={{ color: 'var(--green)' }}>✓</span> Guide mutawwif certifié
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.72rem', color: 'var(--warm)', fontWeight: 600 }}>
+            <span style={{ color: 'var(--gold-dark)' }}>🛡️</span> Paiement 100% sécurisé
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.72rem', color: 'var(--warm)', fontWeight: 600 }}>
+            <span>↩️</span> Annulation gratuite sous 48h
+          </div>
+        </div>
+
         <div style={{ textAlign: 'center', fontSize: '0.7rem', color: 'var(--muted)', marginTop: '0.75rem', lineHeight: 1.6 }}>
           Sans engagement · Réponse sous 2h · 88% d&apos;acceptation
         </div>

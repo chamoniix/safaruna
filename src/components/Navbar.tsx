@@ -7,10 +7,10 @@ export default function Navbar() {
         SAFAR<span>U</span>NA
       </Link>
       <div className="nav-links">
-        <Link href="/#comment">Comment ça marche</Link>
         <Link href="/guides">Nos guides</Link>
         <Link href="/#packages">Forfaits</Link>
-        <Link href="/#confiance">Confiance</Link>
+        <Link href="/blog">Blog</Link>
+        <Link href="/a-propos">À propos</Link>
       </div>
       <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
         <Link href="/connexion" style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--deep)', textDecoration: 'none' }}>

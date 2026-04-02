@@ -216,6 +216,15 @@ export default function GuideSearchPage() {
         </div>
       </div>
 
+      {/* ── TRUST BAR ── */}
+      <div className="trust-bar">
+        <div className="trust-bar-item"><span className="icon">✓</span> Guides mutawwif certifiés</div>
+        <div className="trust-bar-item"><span className="icon">🛡️</span> Paiement 100% sécurisé</div>
+        <div className="trust-bar-item"><span className="icon">⭐</span> Note moyenne 4.94 / 5</div>
+        <div className="trust-bar-item"><span className="icon">♿</span> Guides PMR disponibles</div>
+        <div className="trust-bar-item"><span className="icon">⏱️</span> Réponse garantie &lt; 2h</div>
+      </div>
+
       {/* ── MAIN ── */}
       <div style={{ maxWidth: 1280, margin: '0 auto', padding: '2.5rem 2rem 6rem', display: 'grid', gridTemplateColumns: '260px 1fr', gap: '2rem', alignItems: 'start' }} className="results-layout">
 

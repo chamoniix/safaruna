@@ -1,332 +1,522 @@
 'use client';
 
 import { useState } from 'react';
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import Link from 'next/link';
 
 const STEPS = [
-  "Informations personnelles",
-  "Langues & formation",
-  "Lieux & services",
-  "Forfaits & tarifs",
-  "Documents",
-  "Charte islamique"
+  { num: 1, label: "Informations personnelles", icon: "👤" },
+  { num: 2, label: "Langues & formation",        icon: "📚" },
+  { num: 3, label: "Lieux & services",           icon: "🕌" },
+  { num: 4, label: "Forfaits & tarifs",          icon: "💰" },
+  { num: 5, label: "Documents",                  icon: "📄" },
+  { num: 6, label: "Charte islamique",           icon: "🤝" },
 ];
+
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '0.75rem 1rem',
+  background: 'white',
+  border: '1.5px solid #E8DFC8',
+  borderRadius: 12,
+  fontFamily: 'var(--font-manrope, Manrope, sans-serif)',
+  fontSize: '0.875rem',
+  color: '#1A1209',
+  outline: 'none',
+  transition: 'border-color 0.2s',
+};
+
+const labelStyle: React.CSSProperties = {
+  display: 'block',
+  fontSize: '0.65rem',
+  fontWeight: 700,
+  letterSpacing: '0.12em',
+  textTransform: 'uppercase',
+  color: '#C9A84C',
+  marginBottom: '0.5rem',
+};
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label style={labelStyle}>{label}</label>
+      {children}
+    </div>
+  );
+}
 
 export default function GuideOnboarding() {
   const [currentStep, setCurrentStep] = useState(1);
   const [acceptedCharte, setAcceptedCharte] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleNext = () => setCurrentStep(prev => Math.min(prev + 1, 6));
-  const handlePrev = () => setCurrentStep(prev => Math.max(prev - 1, 1));
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitted(true);
-  };
+  const handleNext = () => setCurrentStep(p => Math.min(p + 1, 6));
+  const handlePrev = () => setCurrentStep(p => Math.max(p - 1, 1));
+  const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); setIsSubmitted(true); };
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-[var(--cream)]">
-        <Navbar />
-        <main className="max-w-2xl mx-auto px-6 py-32 text-center">
-          <div className="bg-white rounded-3xl p-10 border border-[var(--sand)] shadow-lg">
-            <div className="w-20 h-20 mx-auto bg-[var(--green-bg)] rounded-full flex items-center justify-center mb-6">
-              <span className="text-[var(--green)] text-4xl">✓</span>
-            </div>
-            <h1 className="text-3xl font-serif text-[var(--deep)] mb-4">Dossier soumis avec succès</h1>
-            <p className="text-[var(--muted)] mb-8">BarakAllahu fik. L&apos;équipe SAFARUNA a bien reçu votre candidature. Nous examinerons vos documents insha&apos;Allah et vous serez contacté sous 48h.</p>
-            <Link href="/" className="btn-secondary inline-block">Retour à l&apos;accueil</Link>
-          </div>
-        </main>
-        <Footer />
+      <div style={{ minHeight: '100vh', background: '#1A1209', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
+        <div style={{ background: 'white', borderRadius: 24, padding: '3rem', maxWidth: 480, width: '100%', textAlign: 'center', boxShadow: '0 32px 80px rgba(0,0,0,0.3)' }}>
+          <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', fontSize: '2rem' }}>✓</div>
+          <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2rem', color: '#1A1209', marginBottom: '1rem', fontWeight: 400 }}>Dossier soumis</h1>
+          <p style={{ color: '#7A6D5A', lineHeight: 1.7, marginBottom: '2rem', fontSize: '0.9rem' }}>
+            BarakAllahu fik. L&apos;équipe SAFARUNA a bien reçu votre candidature. Nous examinerons vos documents insha&apos;Allah et vous serez contacté sous 48h.
+          </p>
+          <Link href="/" style={{ display: 'inline-block', background: '#1A1209', color: '#F0D897', padding: '0.8rem 2rem', borderRadius: 50, fontWeight: 700, fontSize: '0.85rem', textDecoration: 'none' }}>
+            Retour à l&apos;accueil
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7]">
-      <Navbar />
-      
-      <main className="max-w-[1200px] mx-auto px-4 sm:px-6 py-24 pt-32">
-        <div className="mb-10">
-          <h1 className="text-3xl font-serif text-[var(--deep)] mb-2">Devenir Guide SAFARUNA</h1>
-          <p className="text-[var(--muted)] max-w-2xl">Mettez votre savoir au service des pèlerins. Complétez ce formulaire pour rejoindre la première plateforme de guides privés pour l&apos;Omra.</p>
+    <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'var(--font-manrope, Manrope, sans-serif)' }}>
+
+      {/* ── DARK SIDEBAR ── */}
+      <div style={{
+        width: 300,
+        background: '#1A1209',
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'fixed',
+        top: 0, left: 0, bottom: 0,
+        zIndex: 50,
+        overflowY: 'auto',
+        flexShrink: 0,
+        padding: '2rem 0',
+      }} className="hidden md:flex">
+
+        {/* Logo */}
+        <div style={{ padding: '0 2rem 2rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+          <Link href="/" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.6rem', fontWeight: 600, color: 'white', textDecoration: 'none', letterSpacing: '0.04em' }}>
+            SAFAR<span style={{ color: '#C9A84C' }}>U</span>NA
+          </Link>
+          <div style={{ marginTop: '0.4rem', fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
+            Inscription Guide
+          </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-8 lg:gap-12">
-          
-          {/* SIDEBAR STEPPER */}
-          <div className="md:w-64 lg:w-80 shrink-0">
-            <div className="sticky top-28 bg-white p-6 rounded-2xl border border-[var(--sand)] shadow-sm">
-              <h3 className="text-xs uppercase tracking-wider font-bold text-[var(--muted)] mb-6">Étapes d&apos;inscription</h3>
-              <ul className="space-y-6 relative before:absolute before:inset-y-0 before:left-4 before:w-[2px] before:bg-[var(--sand)]">
-                {STEPS.map((stepName, i) => {
-                  const stepNum = i + 1;
-                  const isActive = currentStep === stepNum;
-                  const isPast = currentStep > stepNum;
-                  
-                  return (
-                    <li key={stepNum} className="relative flex items-center gap-4 z-10">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${isActive ? 'bg-[var(--gold)] text-[var(--deep)] border-2 border-[var(--gold)] shadow-[0_0_10px_rgba(201,168,76,0.5)]' : isPast ? 'bg-[var(--deep)] text-[var(--gold-light)] border-2 border-[var(--deep)]' : 'bg-white text-[var(--muted)] border-2 border-[var(--sand)]'}`}>
-                        {isPast ? '✓' : stepNum}
-                      </div>
-                      <span className={`text-sm font-semibold ${isActive ? 'text-[var(--deep)]' : isPast ? 'text-[var(--deep)]' : 'text-[var(--muted)]'}`}>
-                        {stepName}
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
+        {/* Progress */}
+        <div style={{ padding: '1.5rem 2rem 0' }}>
+          <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(201,168,76,0.6)', marginBottom: '1.5rem' }}>
+            Étape {currentStep} sur {STEPS.length}
           </div>
 
-          {/* FORM CONTENT */}
-          <div className="flex-1">
-            <form onSubmit={handleSubmit} className="bg-white p-8 md:p-10 rounded-2xl border border-[var(--sand)] shadow-sm min-h-[500px] flex flex-col justify-between">
-              
+          {/* Progress bar */}
+          <div style={{ height: 3, background: 'rgba(255,255,255,0.1)', borderRadius: 50, marginBottom: '2rem', overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${(currentStep / STEPS.length) * 100}%`, background: 'linear-gradient(90deg, #8B6914, #C9A84C)', borderRadius: 50, transition: 'width 0.4s ease' }} />
+          </div>
+
+          {/* Steps list */}
+          <div style={{ position: 'relative' }}>
+            {/* Vertical line */}
+            <div style={{ position: 'absolute', left: 15, top: 16, bottom: 16, width: 1, background: 'rgba(255,255,255,0.08)' }} />
+
+            {STEPS.map(({ num, label, icon }) => {
+              const isActive = currentStep === num;
+              const isPast   = currentStep > num;
+
+              return (
+                <div key={num} style={{ display: 'flex', alignItems: 'center', gap: '1rem', paddingBottom: '1.5rem', position: 'relative', zIndex: 1 }}>
+                  {/* Circle */}
+                  <div style={{
+                    width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: isPast ? '0.8rem' : '0.75rem',
+                    fontWeight: 700,
+                    background: isActive
+                      ? 'linear-gradient(135deg, #F0D897, #C9A84C)'
+                      : isPast
+                        ? 'rgba(201,168,76,0.2)'
+                        : 'rgba(255,255,255,0.06)',
+                    color: isActive
+                      ? '#1A1209'
+                      : isPast
+                        ? '#C9A84C'
+                        : 'rgba(255,255,255,0.3)',
+                    border: isActive
+                      ? 'none'
+                      : isPast
+                        ? '1px solid rgba(201,168,76,0.4)'
+                        : '1px solid rgba(255,255,255,0.1)',
+                    boxShadow: isActive ? '0 0 16px rgba(201,168,76,0.4)' : 'none',
+                    transition: 'all 0.3s',
+                  }}>
+                    {isPast ? '✓' : isActive ? icon : num}
+                  </div>
+
+                  {/* Label */}
+                  <div>
+                    <div style={{
+                      fontSize: '0.8rem',
+                      fontWeight: isActive ? 700 : 500,
+                      color: isActive ? '#F0D897' : isPast ? 'rgba(240,216,151,0.6)' : 'rgba(255,255,255,0.25)',
+                      transition: 'color 0.3s',
+                    }}>
+                      {label}
+                    </div>
+                    {isActive && (
+                      <div style={{ fontSize: '0.6rem', color: '#C9A84C', fontWeight: 600, letterSpacing: '0.05em', marginTop: 2 }}>
+                        En cours →
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Bottom note */}
+        <div style={{ marginTop: 'auto', padding: '1.5rem 2rem', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+          <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', lineHeight: 1.6 }}>
+            Vos données sont chiffrées et sécurisées. Seule l&apos;équipe SAFARUNA y accède pour la vérification.
+          </div>
+        </div>
+      </div>
+
+      {/* ── MAIN FORM AREA ── */}
+      <div style={{ flex: 1, marginLeft: 0, background: '#FDFBF7', minHeight: '100vh', display: 'flex', flexDirection: 'column' }} className="md:ml-[300px]">
+
+        {/* Top bar */}
+        <div style={{ padding: '1.25rem 2rem', borderBottom: '1px solid #E8DFC8', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(253,251,247,0.95)', backdropFilter: 'blur(8px)', position: 'sticky', top: 0, zIndex: 40 }}>
+          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.3rem', color: '#1A1209', fontWeight: 400 }}>
+            {STEPS[currentStep - 1].icon} {STEPS[currentStep - 1].label}
+          </div>
+          {/* Mobile progress */}
+          <div style={{ fontSize: '0.75rem', color: '#7A6D5A', fontWeight: 600 }} className="md:hidden">
+            {currentStep}/{STEPS.length}
+          </div>
+          <Link href="/" style={{ fontSize: '0.75rem', color: '#7A6D5A', textDecoration: 'none', padding: '0.4rem 1rem', borderRadius: 50, border: '1px solid #E8DFC8' }}>
+            ← Quitter
+          </Link>
+        </div>
+
+        {/* Form */}
+        <div style={{ flex: 1, padding: '2.5rem 2rem', maxWidth: 760, width: '100%', margin: '0 auto' }}>
+          <form onSubmit={handleSubmit}>
+
+            {/* ── STEP 1 ── */}
+            {currentStep === 1 && (
               <div>
-                {/* STEP 1 */}
-                {currentStep === 1 && (
-                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                    <h2 className="text-2xl font-serif text-[var(--deep)] mb-6 border-b border-[var(--sand)] pb-4">1. Informations personnelles</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
-                      <div><label className="block text-sm font-semibold mb-1.5">Prénom</label><input type="text" className="w-full px-4 py-3 rounded-xl border border-[var(--sand)]" placeholder="Youssouf" required /></div>
-                      <div><label className="block text-sm font-semibold mb-1.5">Nom</label><input type="text" className="w-full px-4 py-3 rounded-xl border border-[var(--sand)]" placeholder="Konaté" required /></div>
-                      <div><label className="block text-sm font-semibold mb-1.5">WhatsApp</label><input type="tel" className="w-full px-4 py-3 rounded-xl border border-[var(--sand)]" placeholder="+966 50 123 4567" required /></div>
-                      <div><label className="block text-sm font-semibold mb-1.5">Email</label><input type="email" className="w-full px-4 py-3 rounded-xl border border-[var(--sand)]" placeholder="youssouf@exemple.com" required /></div>
-                      <div>
-                        <label className="block text-sm font-semibold mb-1.5">Ville de résidence</label>
-                        <select className="w-full px-4 py-3 rounded-xl border border-[var(--sand)] bg-white" required>
-                          <option value="">Sélectionner</option>
-                          <option value="makkah">Makkah</option>
-                          <option value="madinah">Madinah</option>
-                          <option value="jeddah">Jeddah</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold mb-1.5">Photo de profil</label>
-                        <input type="file" className="w-full text-sm p-2 border border-[var(--sand)] rounded-xl" accept="image/*" />
-                      </div>
-                    </div>
+                <p style={{ color: '#7A6D5A', fontSize: '0.875rem', marginBottom: '2rem', lineHeight: 1.7 }}>
+                  Ces informations seront vérifiées par notre équipe. Elles ne sont pas visibles publiquement.
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
+                  <Field label="Prénom">
+                    <input type="text" style={inputStyle} placeholder="Youssouf" required />
+                  </Field>
+                  <Field label="Nom">
+                    <input type="text" style={inputStyle} placeholder="Konaté" required />
+                  </Field>
+                  <Field label="WhatsApp">
+                    <input type="tel" style={inputStyle} placeholder="+966 50 123 4567" required />
+                  </Field>
+                  <Field label="Adresse email">
+                    <input type="email" style={inputStyle} placeholder="youssouf@exemple.com" required />
+                  </Field>
+                  <Field label="Ville de résidence">
+                    <select style={inputStyle} required>
+                      <option value="">Sélectionner</option>
+                      <option value="makkah">Makkah</option>
+                      <option value="madinah">Madinah</option>
+                      <option value="jeddah">Jeddah</option>
+                      <option value="autre">Autre</option>
+                    </select>
+                  </Field>
+                  <Field label="Nationalité">
+                    <input type="text" style={inputStyle} placeholder="Sénégalaise" />
+                  </Field>
+                </div>
+                <Field label="Photo de profil (JPG/PNG · max 5 Mo)">
+                  <div style={{ border: '2px dashed #E8DFC8', borderRadius: 12, padding: '1.5rem', textAlign: 'center', cursor: 'pointer', background: 'white', transition: 'border-color 0.2s' }}>
+                    <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>📸</div>
+                    <div style={{ fontSize: '0.8rem', color: '#7A6D5A', marginBottom: '0.75rem' }}>Glissez votre photo ou cliquez pour parcourir</div>
+                    <label style={{ display: 'inline-block', background: '#1A1209', color: '#F0D897', padding: '0.5rem 1.25rem', borderRadius: 50, fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}>
+                      Choisir un fichier
+                      <input type="file" style={{ display: 'none' }} accept="image/*" />
+                    </label>
                   </div>
-                )}
+                </Field>
+              </div>
+            )}
 
-                {/* STEP 2 */}
-                {currentStep === 2 && (
-                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                    <h2 className="text-2xl font-serif text-[var(--deep)] mb-6 border-b border-[var(--sand)] pb-4">2. Langues & formation</h2>
-                    <div className="space-y-6">
-                      <div>
-                        <label className="block text-sm font-semibold mb-3">Langues parlées (Sélection multiple)</label>
-                        <div className="flex flex-wrap gap-3">
-                          {['🇫🇷 Français', '🇸🇦 Arabe Classique', '🇲🇦 Darija', '🇬🇧 Anglais', '🇹🇷 Turc', '🇸🇳 Wolof'].map(l => (
-                            <label key={l} className="flex items-center gap-2 p-2 px-4 border border-[var(--sand)] rounded-full hover:bg-[var(--gold-pale)] cursor-pointer transition-colors">
-                              <input type="checkbox" className="accent-[var(--gold-dark)]" />
-                              <span className="text-sm font-medium">{l}</span>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                        <div>
-                          <label className="block text-sm font-semibold mb-1.5">Formation Islamique</label>
-                          <select className="w-full px-4 py-3 rounded-xl border border-[var(--sand)] bg-white" required>
-                            <option value="">Niveau d&apos;étude</option>
-                            <option value="uni">Université Islamique (Madinah/Umm Al-Qura...)</option>
-                            <option value="institut">Institut spécialisé</option>
-                            <option value="autodidacte">Autodidacte confirmé</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-sm font-semibold mb-1.5">Années d&apos;expérience (Guide)</label>
-                          <input type="number" min="0" max="40" className="w-full px-4 py-3 rounded-xl border border-[var(--sand)]" required />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold mb-1.5">Votre biographie (Visible par les pèlerins)</label>
-                        <textarea className="w-full px-4 py-3 rounded-xl border border-[var(--sand)]" rows={4} placeholder="Présentez-vous, votre approche, votre foi..." required></textarea>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* STEP 3 */}
-                {currentStep === 3 && (
-                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                    <h2 className="text-2xl font-serif text-[var(--deep)] mb-6 border-b border-[var(--sand)] pb-4">3. Lieux & services</h2>
-                    <div className="space-y-6">
-                      <div>
-                        <label className="block text-sm font-semibold mb-3">Lieux saints maîtrisés (Cochez tous ceux que vous pouvez guider)</label>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                          {['Masjid Al-Haram', 'Jabal Al-Nour / Hira', 'Jabal Thawr', 'Zamzam (Explications)', 'Bataille de Badr', 'Masjid Quba', 'Jabal Uhud', 'Al-Baqi', 'Masjid Al-Qiblatayn', 'Arafat / Jabal Rahmah', 'Mina', 'Muzdalifah'].map(l => (
-                            <label key={l} className="flex items-center gap-2 p-3 border border-[var(--sand)] rounded-xl hover:bg-[var(--gold-pale)] cursor-pointer transition-colors">
-                              <input type="checkbox" className="accent-[var(--gold-dark)]" />
-                              <span className="text-sm font-medium leading-tight">{l}</span>
-                            </label>
-                          ))}
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold mb-3">Transport proposé</label>
-                        <div className="flex flex-col gap-3">
-                          <label className="flex items-center gap-3 p-4 border border-[var(--sand)] rounded-xl cursor-pointer hover:bg-[var(--gold-pale)]">
-                            <input type="radio" name="transport" className="accent-[var(--gold-dark)] w-4 h-4" defaultChecked />
-                            <div>
-                              <span className="block font-bold">Aucun transport</span>
-                              <span className="text-xs text-[var(--muted)]">Le pèlerin gère ses propres déplacements (Uber, Taxi)</span>
-                            </div>
-                          </label>
-                          <label className="flex items-center gap-3 p-4 border border-[var(--sand)] rounded-xl cursor-pointer hover:bg-[var(--gold-pale)]">
-                            <input type="radio" name="transport" className="accent-[var(--gold-dark)] w-4 h-4" />
-                            <div>
-                              <span className="block font-bold">Voiture standard (4 places)</span>
-                              <span className="text-xs text-[var(--muted)]">Je conduis les pèlerins dans mon véhicule de tourisme.</span>
-                            </div>
-                          </label>
-                          <label className="flex items-center gap-3 p-4 border border-[var(--sand)] rounded-xl cursor-pointer hover:bg-[var(--gold-pale)]">
-                            <input type="radio" name="transport" className="accent-[var(--gold-dark)] w-4 h-4" />
-                            <div>
-                              <span className="block font-bold">Van familial (7-9 places)</span>
-                              <span className="text-xs text-[var(--muted)]">Idéal pour les grandes familles ou groupes.</span>
-                            </div>
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* STEP 4 */}
-                {currentStep === 4 && (
-                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                    <h2 className="text-2xl font-serif text-[var(--deep)] mb-6 border-b border-[var(--sand)] pb-4">4. Forfaits & tarifs</h2>
-                    <p className="text-sm text-[var(--muted)] mb-6">Définissez vos prix de base. La plateforme prélève une commission de 15% sur ces montants.</p>
-                    <div className="space-y-6">
-                      <div className="p-5 border border-[var(--sand)] rounded-xl bg-[var(--cream)]">
-                        <div className="flex justify-between items-center mb-4">
-                          <h4 className="font-bold text-[var(--deep)]">Forfait Omra Essentielle (3h - 5h)</h4>
-                          <span className="text-[10px] bg-[var(--gold-pale)] text-[var(--gold-dark)] px-2 py-1 rounded font-bold uppercase tracking-wider">Obligatoire</span>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs font-semibold mb-1">Prix par personne (€)</label>
-                            <input type="number" className="w-full px-3 py-2 rounded-lg border border-[var(--sand)]" placeholder="ex: 120" required />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-semibold mb-1">Prix de groupe max (€)</label>
-                            <input type="number" className="w-full px-3 py-2 rounded-lg border border-[var(--sand)]" placeholder="ex: 400" />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="p-5 border border-[var(--sand)] rounded-xl">
-                        <div className="flex justify-between items-center mb-4">
-                          <h4 className="font-bold text-[var(--deep)]">Forfait Ziyara Histoire (Journée 8h)</h4>
-                          <input type="checkbox" className="accent-[var(--gold-dark)] w-4 h-4" defaultChecked />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs font-semibold mb-1">Prix par personne (€)</label>
-                            <input type="number" className="w-full px-3 py-2 rounded-lg border border-[var(--sand)]" placeholder="ex: 200" />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-semibold mb-1">Prix de groupe max (€)</label>
-                            <input type="number" className="w-full px-3 py-2 rounded-lg border border-[var(--sand)]" placeholder="ex: 600" />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* STEP 5 */}
-                {currentStep === 5 && (
-                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                    <h2 className="text-2xl font-serif text-[var(--deep)] mb-6 border-b border-[var(--sand)] pb-4">5. Documents & KYC</h2>
-                    <p className="text-sm text-[var(--muted)] mb-6">Ces documents sont obligatoires pour la vérification KYC et ne seront jamais rendus publics.</p>
-                    <div className="space-y-6">
-                      <div className="w-full border-2 border-dashed border-[var(--sand)] rounded-xl p-6 text-center hover:bg-[var(--gold-pale)] transition-colors cursor-pointer group">
-                        <span className="text-2xl mb-2 block group-hover:scale-110 transition-transform">📄</span>
-                        <h4 className="font-bold text-sm mb-1">Pièce d&apos;identité (Passeport / CNI)</h4>
-                        <p className="text-xs text-[var(--muted)] mb-3">Format JPG, PNG ou PDF (Max 5Mo)</p>
-                        <button type="button" className="text-xs font-bold text-[var(--gold-dark)] bg-white border border-[var(--sand)] px-4 py-2 rounded-full shadow-sm pointer-events-none">Parcourir...</button>
-                      </div>
-                      
-                      <div className="w-full border-2 border-dashed border-[var(--sand)] rounded-xl p-6 text-center hover:bg-[var(--gold-pale)] transition-colors cursor-pointer group">
-                        <span className="text-2xl mb-2 block group-hover:scale-110 transition-transform">🎓</span>
-                        <h4 className="font-bold text-sm mb-1">Diplôme ou Certificat Islamique</h4>
-                        <p className="text-xs text-[var(--muted)] mb-3">Optionnel mais fortement recommandé</p>
-                        <button type="button" className="text-xs font-bold text-[var(--gold-dark)] bg-white border border-[var(--sand)] px-4 py-2 rounded-full shadow-sm pointer-events-none">Parcourir...</button>
-                      </div>
-
-                      <div className="pt-4 border-t border-[var(--sand)]">
-                        <h4 className="font-bold text-sm mb-3">Coordonnées bancaires européennes (IBAN)</h4>
-                        <p className="text-xs text-[var(--muted)] mb-4">Pour recevoir vos virements mensuels. Données cryptées AES-256 en base de données.</p>
-                        <div>
-                          <input type="text" className="w-full px-4 py-3 rounded-xl border border-[var(--sand)] font-mono text-sm uppercase tracking-widest" placeholder="FR76 0000 0000 0000 0000 0000 000" required />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* STEP 6 */}
-                {currentStep === 6 && (
-                  <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                    <h2 className="text-2xl font-serif text-[var(--deep)] mb-6 border-b border-[var(--sand)] pb-4">6. Charte islamique & Serment</h2>
-                    <div className="space-y-6">
-                      <div className="bg-[#1A1209] p-6 rounded-2xl text-[var(--gold-light)] relative overflow-hidden">
-                        <div className="absolute right-0 top-0 opacity-10 text-8xl font-serif leading-none pr-4">"</div>
-                        <p className="font-serif italic text-lg text-center mb-4">&quot;Et remplissez l&apos;engagement, car on sera interrogé au sujet des engagements.&quot;</p>
-                        <p className="text-center text-xs text-white/50 uppercase tracking-widest font-sans">Sourate Al-Isra (17:34)</p>
-                      </div>
-                      
-                      <div className="space-y-4 bg-white border border-[var(--sand)] p-6 rounded-xl">
-                        <h4 className="font-bold text-[var(--deep)]">Je m'engage devant Allah à :</h4>
-                        <ul className="space-y-3 text-sm text-[var(--muted)]">
-                           <li className="flex gap-2"><span className="text-[var(--gold)]">✓</span> N&apos;enseigner que ce qui est authentique selon le Coran et la Sunnah.</li>
-                           <li className="flex gap-2"><span className="text-[var(--gold)]">✓</span> Ne pas percevoir de commissions cachées des commerçants ou hôtels.</li>
-                           <li className="flex gap-2"><span className="text-[var(--gold)]">✓</span> Respecter la clause de non-contournement de SAFARUNA pour toute transaction avec les pèlerins rencontrés via la plateforme.</li>
-                           <li className="flex gap-2"><span className="text-[var(--gold)]">✓</span> Être ponctuel, patient et bienveillant envers les pèlerins.</li>
-                        </ul>
-                      </div>
-
-                      <label className="flex items-start gap-4 p-4 border-2 rounded-xl cursor-pointer transition-colors bg-[var(--gold-pale)] border-[var(--gold)] mt-6">
-                        <input type="checkbox" className="mt-1 w-5 h-5 text-[var(--gold)] rounded" checked={acceptedCharte} onChange={(e) => setAcceptedCharte(e.target.checked)} />
-                        <span className="text-sm font-bold text-[var(--gold-dark)]">Je prends Allah à témoin que j&apos;ai lu et j&apos;accepte sans réserve les termes de cette charte islamique et les CGU de SAFARUNA.</span>
+            {/* ── STEP 2 ── */}
+            {currentStep === 2 && (
+              <div>
+                <p style={{ color: '#7A6D5A', fontSize: '0.875rem', marginBottom: '2rem', lineHeight: 1.7 }}>
+                  Votre maîtrise linguistique est l&apos;atout principal pour les pèlerins. Soyez précis.
+                </p>
+                <div style={{ marginBottom: '2rem' }}>
+                  <label style={labelStyle}>Langues parlées</label>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+                    {[
+                      { flag: '🇫🇷', name: 'Français' },
+                      { flag: '🇸🇦', name: 'Arabe Classique' },
+                      { flag: '🇲🇦', name: 'Darija' },
+                      { flag: '🇬🇧', name: 'Anglais' },
+                      { flag: '🇹🇷', name: 'Turc' },
+                      { flag: '🇸🇳', name: 'Wolof' },
+                      { flag: '🇮🇩', name: 'Indonésien' },
+                    ].map(l => (
+                      <label key={l.name} style={{
+                        display: 'flex', alignItems: 'center', gap: '0.5rem',
+                        padding: '0.5rem 1rem', border: '1.5px solid #E8DFC8',
+                        borderRadius: 50, cursor: 'pointer', background: 'white',
+                        fontSize: '0.8rem', fontWeight: 500, color: '#1A1209',
+                        transition: 'all 0.15s',
+                      }}>
+                        <input type="checkbox" style={{ accentColor: '#C9A84C' }} />
+                        {l.flag} {l.name}
                       </label>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
+                  <Field label="Formation islamique">
+                    <select style={inputStyle} required>
+                      <option value="">Niveau d&apos;études</option>
+                      <option value="uni">Université Islamique (Madinah / Umm Al-Qura…)</option>
+                      <option value="institut">Institut spécialisé</option>
+                      <option value="autodidacte">Autodidacte confirmé</option>
+                    </select>
+                  </Field>
+                  <Field label="Années d'expérience">
+                    <input type="number" min="0" max="40" style={inputStyle} placeholder="ex : 8" required />
+                  </Field>
+                </div>
+                <Field label="Biographie (visible par les pèlerins)">
+                  <textarea style={{ ...inputStyle, height: 120, resize: 'vertical' }} placeholder="Présentez-vous, votre approche, votre rapport avec les Lieux Saints…" required />
+                </Field>
+              </div>
+            )}
+
+            {/* ── STEP 3 ── */}
+            {currentStep === 3 && (
+              <div>
+                <p style={{ color: '#7A6D5A', fontSize: '0.875rem', marginBottom: '2rem', lineHeight: 1.7 }}>
+                  Cochez les lieux pour lesquels vous êtes qualifié pour guider et expliquer en profondeur.
+                </p>
+                <div style={{ marginBottom: '2rem' }}>
+                  <label style={labelStyle}>Lieux saints maîtrisés</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                    {[
+                      '🕋 Masjid Al-Haram', '💧 Zamzam', '⛰️ Jabal Al-Nour / Hira', '⛰️ Jabal Thawr',
+                      '⚔️ Bataille de Badr', '🕌 Masjid Quba', '⛰️ Jabal Uhud', '🪦 Al-Baqi\'',
+                      '🕌 Masjid Al-Qiblatayn', '🏔️ Arafat / Jabal Rahmah', '⛺ Mina', '🌙 Muzdalifah',
+                    ].map(l => (
+                      <label key={l} style={{
+                        display: 'flex', alignItems: 'center', gap: '0.75rem',
+                        padding: '0.75rem 1rem', border: '1.5px solid #E8DFC8',
+                        borderRadius: 12, cursor: 'pointer', background: 'white',
+                        fontSize: '0.82rem', fontWeight: 500, color: '#1A1209',
+                      }}>
+                        <input type="checkbox" style={{ accentColor: '#C9A84C', width: 14, height: 14, flexShrink: 0 }} />
+                        {l}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label style={labelStyle}>Transport proposé</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {[
+                      { id: 'none',  icon: '🚶', title: 'Aucun transport',         sub: 'Le pèlerin gère ses propres déplacements.' },
+                      { id: 'car',   icon: '🚗', title: 'Voiture standard (4 pl.)', sub: 'Je conduis les pèlerins dans mon véhicule.' },
+                      { id: 'van',   icon: '🚌', title: 'Van familial (7–9 pl.)',   sub: 'Idéal pour les grandes familles ou groupes.' },
+                    ].map(opt => (
+                      <label key={opt.id} style={{
+                        display: 'flex', alignItems: 'center', gap: '1rem',
+                        padding: '1rem 1.25rem', border: '1.5px solid #E8DFC8',
+                        borderRadius: 14, cursor: 'pointer', background: 'white',
+                      }}>
+                        <input type="radio" name="transport" style={{ accentColor: '#C9A84C', width: 16, height: 16, flexShrink: 0 }} defaultChecked={opt.id === 'none'} />
+                        <div style={{ fontSize: '1.2rem' }}>{opt.icon}</div>
+                        <div>
+                          <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1A1209' }}>{opt.title}</div>
+                          <div style={{ fontSize: '0.72rem', color: '#7A6D5A' }}>{opt.sub}</div>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── STEP 4 ── */}
+            {currentStep === 4 && (
+              <div>
+                <div style={{ background: '#1A1209', borderRadius: 16, padding: '1.25rem 1.5rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{ fontSize: '1.5rem' }}>💡</div>
+                  <div style={{ fontSize: '0.8rem', color: 'rgba(240,216,151,0.8)', lineHeight: 1.6 }}>
+                    SAFARUNA prélève <strong style={{ color: '#F0D897' }}>12% de commission</strong> sur chaque réservation. Les montants ci-dessous sont ce que vous recevrez de la plateforme.
+                  </div>
+                </div>
+
+                {[
+                  { name: 'Omra Essentielle (3h–5h)', tag: 'Obligatoire', required: true },
+                  { name: 'Ziyara Histoire (journée 8h)', tag: 'Optionnel' },
+                  { name: 'Séjour complet 5 jours',     tag: 'Optionnel' },
+                ].map((pkg, i) => (
+                  <div key={i} style={{
+                    padding: '1.25rem', border: '1.5px solid #E8DFC8', borderRadius: 16,
+                    marginBottom: '1rem', background: 'white',
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                      <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#1A1209' }}>{pkg.name}</div>
+                      <span style={{
+                        fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
+                        background: pkg.required ? 'linear-gradient(135deg, #F0D897, #C9A84C)' : '#FAF3E0',
+                        color: '#1A1209', padding: '0.2rem 0.6rem', borderRadius: 50,
+                      }}>{pkg.tag}</span>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                      <Field label="Prix par personne (€)">
+                        <input type="number" style={inputStyle} placeholder="ex : 120" required={pkg.required} />
+                      </Field>
+                      <Field label="Prix de groupe max (€)">
+                        <input type="number" style={inputStyle} placeholder="ex : 400" />
+                      </Field>
                     </div>
                   </div>
-                )}
+                ))}
               </div>
+            )}
 
-              {/* ACTION BUTTONS */}
-              <div className="flex justify-between items-center mt-10 pt-6 border-t border-[var(--sand)]">
-                {currentStep > 1 ? (
-                  <button type="button" onClick={handlePrev} className="px-6 py-3 rounded-full border border-[var(--sand)] font-semibold text-[var(--muted)] hover:text-[var(--deep)] hover:border-[var(--deep)] transition-colors">
-                    ← Précédent
-                  </button>
-                ) : <div></div>}
+            {/* ── STEP 5 ── */}
+            {currentStep === 5 && (
+              <div>
+                <p style={{ color: '#7A6D5A', fontSize: '0.875rem', marginBottom: '2rem', lineHeight: 1.7 }}>
+                  Ces documents sont obligatoires pour la vérification KYC. Ils ne seront jamais rendus publics.
+                </p>
 
-                {currentStep < 6 ? (
-                  <button type="button" onClick={handleNext} className="px-8 py-3 rounded-full bg-[var(--deep)] text-[var(--gold-light)] font-bold hover:bg-[var(--warm)] transition-transform hover:-translate-y-0.5 shadow-md">
-                    Continuer →
-                  </button>
-                ) : (
-                  <button type="submit" disabled={!acceptedCharte} className="px-8 py-3 rounded-full bg-[var(--gold)] text-[var(--deep)] font-bold hover:bg-[var(--gold-dark)] hover:text-white transition-all shadow-[0_8px_20px_rgba(201,168,76,0.3)] disabled:opacity-50 disabled:cursor-not-allowed">
-                    Soumettre mon dossier
-                  </button>
-                )}
+                {[
+                  { icon: '🪪', title: "Pièce d'identité",       sub: 'Passeport ou CNI · JPG, PNG ou PDF · Max 5 Mo', required: true },
+                  { icon: '🎓', title: 'Diplôme ou Certificat Islamique', sub: 'Fortement recommandé', required: false },
+                ].map(doc => (
+                  <label key={doc.title} style={{
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    gap: '0.75rem', padding: '2rem', border: '2px dashed #E8DFC8',
+                    borderRadius: 16, cursor: 'pointer', background: 'white',
+                    textAlign: 'center', marginBottom: '1rem', transition: 'border-color 0.2s',
+                  }}>
+                    <div style={{ fontSize: '2rem' }}>{doc.icon}</div>
+                    <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#1A1209' }}>{doc.title}</div>
+                    <div style={{ fontSize: '0.75rem', color: '#7A6D5A' }}>{doc.sub}</div>
+                    <span style={{ display: 'inline-block', background: '#1A1209', color: '#F0D897', padding: '0.5rem 1.25rem', borderRadius: 50, fontSize: '0.72rem', fontWeight: 700 }}>
+                      Parcourir…
+                    </span>
+                    <input type="file" style={{ display: 'none' }} accept=".jpg,.jpeg,.png,.pdf" />
+                  </label>
+                ))}
+
+                <div style={{ paddingTop: '1.5rem', borderTop: '1px solid #E8DFC8' }}>
+                  <label style={labelStyle}>Coordonnées bancaires (IBAN)</label>
+                  <p style={{ fontSize: '0.72rem', color: '#7A6D5A', marginBottom: '0.75rem', lineHeight: 1.5 }}>
+                    Pour recevoir vos virements mensuels. Données chiffrées AES-256.
+                  </p>
+                  <input
+                    type="text"
+                    style={{ ...inputStyle, fontFamily: 'monospace', letterSpacing: '0.08em', textTransform: 'uppercase' }}
+                    placeholder="FR76 0000 0000 0000 0000 0000 000"
+                    required
+                  />
+                </div>
               </div>
+            )}
 
-            </form>
-          </div>
+            {/* ── STEP 6 ── */}
+            {currentStep === 6 && (
+              <div>
+                {/* Verset */}
+                <div style={{ background: '#1A1209', borderRadius: 20, padding: '2rem', textAlign: 'center', marginBottom: '2rem', position: 'relative', overflow: 'hidden' }}>
+                  <div style={{ position: 'absolute', right: '1rem', top: 0, fontSize: '6rem', color: 'rgba(201,168,76,0.08)', fontFamily: 'serif', lineHeight: 1, userSelect: 'none' }}>"</div>
+                  <p style={{ fontFamily: 'var(--font-cormorant, serif)', fontStyle: 'italic', fontSize: '1.3rem', color: '#F0D897', lineHeight: 1.6, marginBottom: '0.75rem', position: 'relative', zIndex: 1 }}>
+                    &ldquo;Et remplissez l&apos;engagement, car on sera interrogé au sujet des engagements.&rdquo;
+                  </p>
+                  <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.4)', letterSpacing: '0.12em', textTransform: 'uppercase', position: 'relative', zIndex: 1 }}>
+                    Sourate Al-Isra (17:34)
+                  </div>
+                </div>
+
+                {/* Engagements */}
+                <div style={{ background: 'white', border: '1.5px solid #E8DFC8', borderRadius: 16, padding: '1.5rem', marginBottom: '1.5rem' }}>
+                  <div style={{ ...labelStyle, marginBottom: '1rem' }}>Je m&apos;engage devant Allah à :</div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
+                    {[
+                      "N'enseigner que ce qui est authentique selon le Coran et la Sunnah.",
+                      "Ne pas percevoir de commissions cachées des commerçants ou hôtels.",
+                      "Respecter la clause de non-contournement de SAFARUNA pour toute transaction avec les pèlerins rencontrés via la plateforme.",
+                      "Être ponctuel, patient et bienveillant envers les pèlerins.",
+                    ].map((item, i) => (
+                      <div key={i} style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+                        <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 700, color: '#1A1209', flexShrink: 0, marginTop: 1 }}>✓</div>
+                        <span style={{ fontSize: '0.85rem', color: '#2D1F08', lineHeight: 1.6 }}>{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Checkbox */}
+                <label style={{
+                  display: 'flex', alignItems: 'flex-start', gap: '1rem',
+                  padding: '1.25rem 1.5rem',
+                  background: acceptedCharte ? 'linear-gradient(135deg, rgba(201,168,76,0.08), rgba(240,216,151,0.12))' : 'white',
+                  border: `2px solid ${acceptedCharte ? '#C9A84C' : '#E8DFC8'}`,
+                  borderRadius: 14, cursor: 'pointer', transition: 'all 0.2s',
+                }}>
+                  <input
+                    type="checkbox"
+                    style={{ width: 18, height: 18, accentColor: '#C9A84C', marginTop: 2, flexShrink: 0 }}
+                    checked={acceptedCharte}
+                    onChange={e => setAcceptedCharte(e.target.checked)}
+                  />
+                  <span style={{ fontSize: '0.85rem', fontWeight: 600, color: acceptedCharte ? '#8B6914' : '#7A6D5A', lineHeight: 1.6 }}>
+                    Je prends Allah à témoin que j&apos;ai lu et j&apos;accepte sans réserve les termes de cette charte islamique et les CGU de SAFARUNA.
+                  </span>
+                </label>
+              </div>
+            )}
+
+            {/* ── NAV BUTTONS ── */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '3rem', paddingTop: '1.5rem', borderTop: '1px solid #E8DFC8' }}>
+              {currentStep > 1 ? (
+                <button
+                  type="button" onClick={handlePrev}
+                  style={{ padding: '0.75rem 1.75rem', borderRadius: 50, border: '1.5px solid #E8DFC8', background: 'white', fontWeight: 600, fontSize: '0.85rem', color: '#7A6D5A', cursor: 'pointer' }}
+                >
+                  ← Précédent
+                </button>
+              ) : <div />}
+
+              {currentStep < 6 ? (
+                <button
+                  type="button" onClick={handleNext}
+                  style={{ padding: '0.85rem 2.25rem', borderRadius: 50, background: '#1A1209', color: '#F0D897', fontWeight: 700, fontSize: '0.875rem', border: 'none', cursor: 'pointer', boxShadow: '0 4px 20px rgba(26,18,9,0.25)', letterSpacing: '0.03em' }}
+                >
+                  Continuer →
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={!acceptedCharte}
+                  style={{
+                    padding: '0.85rem 2.25rem', borderRadius: 50, border: 'none', fontWeight: 700, fontSize: '0.875rem', cursor: acceptedCharte ? 'pointer' : 'not-allowed',
+                    background: acceptedCharte ? 'linear-gradient(135deg, #F0D897, #C9A84C)' : '#E8DFC8',
+                    color: acceptedCharte ? '#1A1209' : '#7A6D5A',
+                    boxShadow: acceptedCharte ? '0 8px 24px rgba(201,168,76,0.35)' : 'none',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  Soumettre mon dossier ✓
+                </button>
+              )}
+            </div>
+
+          </form>
         </div>
-      </main>
-      
-      <Footer />
+      </div>
     </div>
   );
 }

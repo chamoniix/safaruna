@@ -1,6 +1,12 @@
 import { adminLogin } from './actions';
 
-export default function AdminLoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+export default async function AdminLoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
+
   return (
     <div style={{ minHeight: '100vh', background: '#0F0A05', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-manrope, sans-serif)', padding: '1.5rem' }}>
       <div style={{ width: '100%', maxWidth: 400 }}>
@@ -24,8 +30,24 @@ export default function AdminLoginPage({ searchParams }: { searchParams: Promise
               Accès Administration
             </h1>
             <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)', textAlign: 'center', marginBottom: '2rem' }}>
-              Accès réservé à l'équipe SAFARUMA
+              Accès réservé à l&apos;équipe SAFARUMA
             </p>
+
+            {/* Error banner */}
+            {error && (
+              <div style={{
+                marginBottom: '1.25rem', padding: '0.75rem 1rem',
+                background: 'rgba(240,108,76,0.12)', border: '1px solid rgba(240,108,76,0.3)',
+                borderRadius: 10, display: 'flex', alignItems: 'center', gap: '0.6rem',
+              }}>
+                <svg width="16" height="16" fill="none" stroke="#F06C4C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                <span style={{ fontSize: '0.78rem', color: '#F06C4C', fontWeight: 600 }}>
+                  Email ou mot de passe incorrect.
+                </span>
+              </div>
+            )}
 
             <form action={adminLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>

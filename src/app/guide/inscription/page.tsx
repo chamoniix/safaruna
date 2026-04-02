@@ -177,11 +177,19 @@ export default function GuideOnboarding() {
       </div>
 
       {/* ── MAIN FORM AREA ── */}
-      <div style={{ flex: 1, marginLeft: 0, background: '#FDFBF7', minHeight: '100vh', display: 'flex', flexDirection: 'column' }} className="md:ml-[300px]">
+      <div className="inscription-main" style={{ flex: 1, background: '#FAF7F0', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <style dangerouslySetInnerHTML={{ __html: `
+          .inscription-main { margin-left: 0; }
+          @media (min-width: 768px) { .inscription-main { margin-left: 300px; } }
+          .ins-input:focus { border-color: #C9A84C !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.12); }
+          .ins-input { transition: border-color 0.2s, box-shadow 0.2s; }
+          .ins-place-label:hover { border-color: #C9A84C !important; background: #FAF3E0 !important; }
+          .ins-place-label:has(input:checked) { border-color: #C9A84C !important; background: #FAF3E0 !important; }
+        `}} />
 
         {/* Top bar */}
         <div style={{ padding: '1.25rem 2rem', borderBottom: '1px solid #E8DFC8', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(253,251,247,0.95)', backdropFilter: 'blur(8px)', position: 'sticky', top: 0, zIndex: 40 }}>
-          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.3rem', color: '#1A1209', fontWeight: 400 }}>
+          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.6rem', color: '#1A1209', fontWeight: 400 }}>
             {STEPS[currentStep - 1].icon} {STEPS[currentStep - 1].label}
           </div>
           {/* Mobile progress */}
@@ -200,24 +208,27 @@ export default function GuideOnboarding() {
             {/* ── STEP 1 ── */}
             {currentStep === 1 && (
               <div>
+                <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2.5rem', fontWeight: 300, color: '#1A1209', marginBottom: '0.5rem', lineHeight: 1.1 }}>
+                  {STEPS[currentStep - 1].label}
+                </h2>
                 <p style={{ color: '#7A6D5A', fontSize: '0.875rem', marginBottom: '2rem', lineHeight: 1.7 }}>
                   Ces informations seront vérifiées par notre équipe. Elles ne sont pas visibles publiquement.
                 </p>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
                   <Field label="Prénom">
-                    <input type="text" style={inputStyle} placeholder="Youssouf" required />
+                    <input type="text" className="ins-input" style={inputStyle} placeholder="Youssouf" required />
                   </Field>
                   <Field label="Nom">
-                    <input type="text" style={inputStyle} placeholder="Konaté" required />
+                    <input type="text" className="ins-input" style={inputStyle} placeholder="Konaté" required />
                   </Field>
                   <Field label="WhatsApp">
-                    <input type="tel" style={inputStyle} placeholder="+966 50 123 4567" required />
+                    <input type="tel" className="ins-input" style={inputStyle} placeholder="+966 50 123 4567" required />
                   </Field>
                   <Field label="Adresse email">
-                    <input type="email" style={inputStyle} placeholder="youssouf@exemple.com" required />
+                    <input type="email" className="ins-input" style={inputStyle} placeholder="youssouf@exemple.com" required />
                   </Field>
                   <Field label="Ville de résidence">
-                    <select style={inputStyle} required>
+                    <select className="ins-input" style={inputStyle} required>
                       <option value="">Sélectionner</option>
                       <option value="makkah">Makkah</option>
                       <option value="madinah">Madinah</option>
@@ -226,7 +237,7 @@ export default function GuideOnboarding() {
                     </select>
                   </Field>
                   <Field label="Nationalité">
-                    <input type="text" style={inputStyle} placeholder="Sénégalaise" />
+                    <input type="text" className="ins-input" style={inputStyle} placeholder="Sénégalaise" />
                   </Field>
                 </div>
                 <Field label="Photo de profil (JPG/PNG · max 5 Mo)">
@@ -245,6 +256,9 @@ export default function GuideOnboarding() {
             {/* ── STEP 2 ── */}
             {currentStep === 2 && (
               <div>
+                <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2.5rem', fontWeight: 300, color: '#1A1209', marginBottom: '0.5rem', lineHeight: 1.1 }}>
+                  {STEPS[currentStep - 1].label}
+                </h2>
                 <p style={{ color: '#7A6D5A', fontSize: '0.875rem', marginBottom: '2rem', lineHeight: 1.7 }}>
                   Votre maîtrise linguistique est l&apos;atout principal pour les pèlerins. Soyez précis.
                 </p>
@@ -275,7 +289,7 @@ export default function GuideOnboarding() {
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
                   <Field label="Formation islamique">
-                    <select style={inputStyle} required>
+                    <select className="ins-input" style={inputStyle} required>
                       <option value="">Niveau d&apos;études</option>
                       <option value="uni">Université Islamique (Madinah / Umm Al-Qura…)</option>
                       <option value="institut">Institut spécialisé</option>
@@ -283,11 +297,11 @@ export default function GuideOnboarding() {
                     </select>
                   </Field>
                   <Field label="Années d'expérience">
-                    <input type="number" min="0" max="40" style={inputStyle} placeholder="ex : 8" required />
+                    <input type="number" min="0" max="40" className="ins-input" style={inputStyle} placeholder="ex : 8" required />
                   </Field>
                 </div>
                 <Field label="Biographie (visible par les pèlerins)">
-                  <textarea style={{ ...inputStyle, height: 120, resize: 'vertical' }} placeholder="Présentez-vous, votre approche, votre rapport avec les Lieux Saints…" required />
+                  <textarea className="ins-input" style={{ ...inputStyle, height: 120, resize: 'vertical' }} placeholder="Présentez-vous, votre approche, votre rapport avec les Lieux Saints…" required />
                 </Field>
               </div>
             )}
@@ -295,47 +309,139 @@ export default function GuideOnboarding() {
             {/* ── STEP 3 ── */}
             {currentStep === 3 && (
               <div>
+                <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2.5rem', fontWeight: 300, color: '#1A1209', marginBottom: '0.5rem', lineHeight: 1.1 }}>
+                  Lieux &amp; services
+                </h2>
                 <p style={{ color: '#7A6D5A', fontSize: '0.875rem', marginBottom: '2rem', lineHeight: 1.7 }}>
-                  Cochez les lieux pour lesquels vous êtes qualifié pour guider et expliquer en profondeur.
+                  Cochez tous les lieux pour lesquels vous êtes qualifié pour guider et expliquer en profondeur.
                 </p>
-                <div style={{ marginBottom: '2rem' }}>
-                  <label style={labelStyle}>Lieux saints maîtrisés</label>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                    {[
-                      '🕋 Masjid Al-Haram', '💧 Zamzam', '⛰️ Jabal Al-Nour / Hira', '⛰️ Jabal Thawr',
-                      '⚔️ Bataille de Badr', '🕌 Masjid Quba', '⛰️ Jabal Uhud', '🪦 Al-Baqi\'',
-                      '🕌 Masjid Al-Qiblatayn', '🏔️ Arafat / Jabal Rahmah', '⛺ Mina', '🌙 Muzdalifah',
-                    ].map(l => (
-                      <label key={l} style={{
-                        display: 'flex', alignItems: 'center', gap: '0.75rem',
-                        padding: '0.75rem 1rem', border: '1.5px solid #E8DFC8',
-                        borderRadius: 12, cursor: 'pointer', background: 'white',
-                        fontSize: '0.82rem', fontWeight: 500, color: '#1A1209',
-                      }}>
-                        <input type="checkbox" style={{ accentColor: '#C9A84C', width: 14, height: 14, flexShrink: 0 }} />
-                        {l}
-                      </label>
-                    ))}
+
+                {/* 25 lieux en 6 catégories */}
+                {[
+                  {
+                    cat: 'Rituels',
+                    color: '#8B6914',
+                    bg: '#FAF3E0',
+                    border: 'rgba(201,168,76,0.3)',
+                    lieux: [
+                      { icon: '🕋', name: 'Masjid Al-Haram' },
+                      { icon: '💧', name: 'Zamzam' },
+                      { icon: '🔄', name: 'Tawaf complet' },
+                      { icon: '🚶', name: "Sa'i (Safa–Marwa)" },
+                      { icon: '🪢', name: 'Meeqat (points d\'entrée)' },
+                      { icon: '✂️', name: 'Tahallul (fin Ihram)' },
+                    ],
+                  },
+                  {
+                    cat: 'Montagnes & Grottes',
+                    color: '#1D5C3A',
+                    bg: '#E8F5EE',
+                    border: 'rgba(29,92,58,0.2)',
+                    lieux: [
+                      { icon: '⛰️', name: 'Jabal Al-Nour / Hira' },
+                      { icon: '⛰️', name: 'Jabal Thawr' },
+                      { icon: '⛰️', name: 'Jabal Uhud' },
+                      { icon: '🏔️', name: 'Jabal Rahmah / Arafat' },
+                    ],
+                  },
+                  {
+                    cat: 'Mosquées de Madinah',
+                    color: '#1A4A8A',
+                    bg: '#EAF1FB',
+                    border: 'rgba(26,74,138,0.2)',
+                    lieux: [
+                      { icon: '🕌', name: 'Masjid Quba' },
+                      { icon: '🕌', name: 'Masjid Al-Qiblatayn' },
+                      { icon: '🕌', name: 'Masjid Al-Ghamamah' },
+                      { icon: '🕌', name: 'Masjid Al-Fath' },
+                    ],
+                  },
+                  {
+                    cat: 'Sites historiques',
+                    color: '#8B3A0A',
+                    bg: '#FEF0E6',
+                    border: 'rgba(192,90,16,0.2)',
+                    lieux: [
+                      { icon: '⚔️', name: 'Bataille de Badr' },
+                      { icon: '🪖', name: 'Fossé de Khandaq' },
+                      { icon: '🪦', name: "Al-Baqi'" },
+                      { icon: '⛺', name: 'Mina' },
+                      { icon: '🌙', name: 'Muzdalifah' },
+                    ],
+                  },
+                  {
+                    cat: 'Culture & Musées',
+                    color: '#5A2D82',
+                    bg: '#F3EAF8',
+                    border: 'rgba(90,45,130,0.2)',
+                    lieux: [
+                      { icon: '📜', name: 'Musée de la Sîra' },
+                      { icon: '📚', name: 'Bibliothèque Roi Fahd' },
+                      { icon: '📖', name: 'Musée du Coran' },
+                      { icon: '🏛️', name: 'Musée national Arabie Saoudite' },
+                    ],
+                  },
+                  {
+                    cat: 'Autres villes',
+                    color: '#2D4A1A',
+                    bg: '#EBF3E0',
+                    border: 'rgba(45,74,26,0.2)',
+                    lieux: [
+                      { icon: '🌿', name: 'Taïf / Mosquée Addas' },
+                      { icon: '⚓', name: 'Yanbu' },
+                      { icon: '🏙️', name: 'Jeddah historique' },
+                    ],
+                  },
+                ].map(group => (
+                  <div key={group.cat} style={{ marginBottom: '1.75rem' }}>
+                    <div style={{
+                      display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                      fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.12em',
+                      textTransform: 'uppercase', color: group.color,
+                      background: group.bg, border: `1px solid ${group.border}`,
+                      padding: '0.25rem 0.75rem', borderRadius: 50, marginBottom: '0.75rem',
+                    }}>
+                      {group.cat}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.5rem' }}>
+                      {group.lieux.map(l => (
+                        <label key={l.name} className="ins-place-label" style={{
+                          display: 'flex', alignItems: 'center', gap: '0.6rem',
+                          padding: '0.65rem 0.85rem', border: '1.5px solid #E8DFC8',
+                          borderRadius: 8, cursor: 'pointer', background: 'white',
+                          fontSize: '0.8rem', fontWeight: 500, color: '#1A1209',
+                          transition: 'border-color 0.15s, background 0.15s',
+                        }}>
+                          <input type="checkbox" style={{ accentColor: '#C9A84C', width: 14, height: 14, flexShrink: 0 }} />
+                          <span style={{ fontSize: '1rem' }}>{l.icon}</span>
+                          {l.name}
+                        </label>
+                      ))}
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <label style={labelStyle}>Transport proposé</label>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                ))}
+
+                {/* Transport */}
+                <div style={{ marginTop: '0.5rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: '0.75rem' }}>
+                    Transport proposé
+                  </label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
                     {[
-                      { id: 'none',  icon: '🚶', title: 'Aucun transport',         sub: 'Le pèlerin gère ses propres déplacements.' },
-                      { id: 'car',   icon: '🚗', title: 'Voiture standard (4 pl.)', sub: 'Je conduis les pèlerins dans mon véhicule.' },
-                      { id: 'van',   icon: '🚌', title: 'Van familial (7–9 pl.)',   sub: 'Idéal pour les grandes familles ou groupes.' },
+                      { id: 'none', icon: '🚶', title: 'Aucun transport',          sub: 'Le pèlerin gère ses propres déplacements.' },
+                      { id: 'car',  icon: '🚗', title: 'Voiture standard (4 pl.)',  sub: 'Je conduis les pèlerins dans mon véhicule.' },
+                      { id: 'van',  icon: '🚌', title: 'Van familial (7–9 pl.)',    sub: 'Idéal pour les grandes familles ou groupes.' },
                     ].map(opt => (
                       <label key={opt.id} style={{
                         display: 'flex', alignItems: 'center', gap: '1rem',
-                        padding: '1rem 1.25rem', border: '1.5px solid #E8DFC8',
-                        borderRadius: 14, cursor: 'pointer', background: 'white',
+                        padding: '0.85rem 1.1rem', border: '1.5px solid #E8DFC8',
+                        borderRadius: 12, cursor: 'pointer', background: 'white',
                       }}>
                         <input type="radio" name="transport" style={{ accentColor: '#C9A84C', width: 16, height: 16, flexShrink: 0 }} defaultChecked={opt.id === 'none'} />
-                        <div style={{ fontSize: '1.2rem' }}>{opt.icon}</div>
+                        <span style={{ fontSize: '1.1rem' }}>{opt.icon}</span>
                         <div>
-                          <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1A1209' }}>{opt.title}</div>
-                          <div style={{ fontSize: '0.72rem', color: '#7A6D5A' }}>{opt.sub}</div>
+                          <div style={{ fontWeight: 700, fontSize: '0.83rem', color: '#1A1209' }}>{opt.title}</div>
+                          <div style={{ fontSize: '0.7rem', color: '#7A6D5A' }}>{opt.sub}</div>
                         </div>
                       </label>
                     ))}
@@ -347,6 +453,9 @@ export default function GuideOnboarding() {
             {/* ── STEP 4 ── */}
             {currentStep === 4 && (
               <div>
+                <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2.5rem', fontWeight: 300, color: '#1A1209', marginBottom: '0.5rem', lineHeight: 1.1 }}>
+                  {STEPS[currentStep - 1].label}
+                </h2>
                 <div style={{ background: '#1A1209', borderRadius: 16, padding: '1.25rem 1.5rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <div style={{ fontSize: '1.5rem' }}>💡</div>
                   <div style={{ fontSize: '0.8rem', color: 'rgba(240,216,151,0.8)', lineHeight: 1.6 }}>
@@ -373,10 +482,10 @@ export default function GuideOnboarding() {
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                       <Field label="Prix par personne (€)">
-                        <input type="number" style={inputStyle} placeholder="ex : 120" required={pkg.required} />
+                        <input type="number" className="ins-input" style={inputStyle} placeholder="ex : 120" required={pkg.required} />
                       </Field>
                       <Field label="Prix de groupe max (€)">
-                        <input type="number" style={inputStyle} placeholder="ex : 400" />
+                        <input type="number" className="ins-input" style={inputStyle} placeholder="ex : 400" />
                       </Field>
                     </div>
                   </div>
@@ -387,6 +496,9 @@ export default function GuideOnboarding() {
             {/* ── STEP 5 ── */}
             {currentStep === 5 && (
               <div>
+                <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2.5rem', fontWeight: 300, color: '#1A1209', marginBottom: '0.5rem', lineHeight: 1.1 }}>
+                  {STEPS[currentStep - 1].label}
+                </h2>
                 <p style={{ color: '#7A6D5A', fontSize: '0.875rem', marginBottom: '2rem', lineHeight: 1.7 }}>
                   Ces documents sont obligatoires pour la vérification KYC. Ils ne seront jamais rendus publics.
                 </p>
@@ -418,6 +530,7 @@ export default function GuideOnboarding() {
                   </p>
                   <input
                     type="text"
+                    className="ins-input"
                     style={{ ...inputStyle, fontFamily: 'monospace', letterSpacing: '0.08em', textTransform: 'uppercase' }}
                     placeholder="FR76 0000 0000 0000 0000 0000 000"
                     required
@@ -429,6 +542,9 @@ export default function GuideOnboarding() {
             {/* ── STEP 6 ── */}
             {currentStep === 6 && (
               <div>
+                <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2.5rem', fontWeight: 300, color: '#1A1209', marginBottom: '0.5rem', lineHeight: 1.1 }}>
+                  {STEPS[currentStep - 1].label}
+                </h2>
                 {/* Verset */}
                 <div style={{ background: '#1A1209', borderRadius: 20, padding: '2rem', textAlign: 'center', marginBottom: '2rem', position: 'relative', overflow: 'hidden' }}>
                   <div style={{ position: 'absolute', right: '1rem', top: 0, fontSize: '6rem', color: 'rgba(201,168,76,0.08)', fontFamily: 'serif', lineHeight: 1, userSelect: 'none' }}>"</div>

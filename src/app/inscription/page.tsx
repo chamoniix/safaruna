@@ -14,7 +14,7 @@ export default function RegisterPage() {
         
         <div className="text-center mb-8">
           <Link href="/" className="text-2xl font-serif font-bold text-[var(--deep)] inline-block mb-2" style={{ textDecoration: 'none' }}>
-            SAFAR<span className="text-[var(--gold)]">UMA</span>
+            SAFAR<span className="text-[var(--gold)]">U</span>MA
           </Link>
           <h1 className="text-xl font-bold text-[var(--deep)] mt-4">Créer votre compte de confiance</h1>
           <p className="text-sm text-[var(--muted)] mt-2">Rejoignez la première plateforme dédiée aux guides d'Omra certifiés.</p>

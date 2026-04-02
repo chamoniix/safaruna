@@ -90,7 +90,7 @@ export default function GuideOnboarding() {
         {/* Logo */}
         <div style={{ padding: '0 2rem 2rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
           <Link href="/" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.6rem', fontWeight: 600, color: 'white', textDecoration: 'none', letterSpacing: '0.04em' }}>
-            SAFAR<span style={{ color: '#C9A84C' }}>U</span>NA
+            SAFAR<span style={{ color: '#C9A84C' }}>U</span>MA
           </Link>
           <div style={{ marginTop: '0.4rem', fontSize: '0.7rem', color: 'rgba(255,255,255,0.3)', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase' }}>
             Inscription Guide

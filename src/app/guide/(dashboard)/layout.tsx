@@ -74,7 +74,7 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
           {/* Brand + badge */}
           <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
             <Link href="/" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.5rem', fontWeight: 700, color: 'white', textDecoration: 'none', letterSpacing: '0.04em' }}>
-              SAFAR<span style={{ color: '#C9A84C' }}>U</span>NA
+              SAFAR<span style={{ color: '#C9A84C' }}>U</span>MA
             </Link>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span style={{ background: '#C9A84C', color: '#1A1209', fontSize: '0.58rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '0.18rem 0.55rem', borderRadius: 50 }}>Guide</span>

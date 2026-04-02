@@ -50,7 +50,7 @@ export default function LoginPage() {
             {/* Logo */}
             <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
               <Link href="/" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.75rem', fontWeight: 700, color: '#1A1209', textDecoration: 'none', letterSpacing: '0.08em', display: 'inline-block' }}>
-                SAFAR<span style={{ color: '#C9A84C' }}>UMA</span>
+                SAFAR<span style={{ color: '#C9A84C' }}>U</span>MA
               </Link>
             </div>
 

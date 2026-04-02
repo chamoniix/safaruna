@@ -31,7 +31,7 @@ export default function Footer() {
         <div className="footer-brand">
           <Link href="/" style={{ textDecoration: 'none' }} className="logo">
             <span style={{ color: "white" }}>
-              SAFAR<span>UMA</span>
+              SAFAR<span>U</span>MA
             </span>
           </Link>
           <p>La première plateforme dédiée aux guides privés pour l'Omra. Rituels, histoire, spiritualité — vivez-les en profondeur.</p>

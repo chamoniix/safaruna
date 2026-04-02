@@ -144,7 +144,7 @@ export default function Home() {
             {LOGO_LETTERS.map((letter, i) => (
               <span
                 key={i}
-                className={`hero-logo-letter${i >= 5 ? ' gold' : ''}`}
+                className={`hero-logo-letter${i === 5 ? ' gold' : ''}`}
                 style={{ animationDelay: `${i * 80}ms` }}
                 aria-hidden="true"
               >

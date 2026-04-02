@@ -2,7 +2,117 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
-import CounterStrip from "@/components/CounterStrip";
+import StatsSection from "@/components/StatsSection";
+
+const LOGO_LETTERS = ['S', 'A', 'F', 'A', 'R', 'U', 'N', 'A'];
+
+const DIFFERENCIATEURS = [
+  {
+    icon: '🗣️',
+    title: 'Guide dans ta langue',
+    desc: "Tu choisis ton guide selon sa langue maternelle. Français, Wolof, Darija, Turc — ton guide te parle comme un ami, pas comme un conférencier.",
+    vs: "HolyGO : guides assignés sans choix de langue",
+  },
+  {
+    icon: '👁️',
+    title: 'Profil guide transparent',
+    desc: "Biographie complète, certifications vérifiées, avis authentiques, lieux couverts, taux de retour. Tu sais exactement qui tu vas rencontrer.",
+    vs: "Agences : photo et prénom, c'est tout",
+  },
+  {
+    icon: '💬',
+    title: 'Messagerie directe',
+    desc: "Tu échanges avec ton guide avant de payer. Pose tes questions, vérifie sa disponibilité, ressens si le courant passe.",
+    vs: "Agences : tu pais d'abord, tu rencontres après",
+  },
+  {
+    icon: '🎓',
+    title: 'Academy islamique',
+    desc: "Apprends les rituels, l'histoire, les du'a avant de partir. 30+ leçons vidéo accessibles dans ton espace pèlerin.",
+    vs: "HolyGO : aucune préparation spirituelle",
+  },
+  {
+    icon: '🛡️',
+    title: 'Garantie remplacement',
+    desc: "Si ton guide ne peut pas venir (maladie, urgence), on te trouve un guide équivalent certifié en moins de 2 heures.",
+    vs: "Agences : dommage, annulation sans recours",
+  },
+  {
+    icon: '👥',
+    title: 'Petits groupes max 8',
+    desc: "Jamais 40 personnes dans un bus. Maximum 8 pèlerins par guide — pour que chaque question ait une réponse, chaque moment compte.",
+    vs: "Agences traditionnelles : groupes de 20 à 50",
+  },
+];
+
+const GUIDES_VEDETTE = [
+  {
+    slug: 'rachid-al-madani',
+    initials: 'RA',
+    gradient: 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)',
+    bgGradient: 'linear-gradient(160deg, #1A1209 0%, #2D1F08 60%, #1A0E04 100%)',
+    name: 'Cheikh Rachid Al-Madani',
+    location: 'Makkah · Madinah · 14 ans',
+    rating: '4.97',
+    reviews: 214,
+    langs: ['🇫🇷 Français', '🇸🇦 Arabe', '🇬🇧 English'],
+    price: '280€',
+    badge: '🏆 Top Guide',
+    badgeColor: '#C9A84C',
+  },
+  {
+    slug: 'fatima-al-omari',
+    initials: 'FA',
+    gradient: 'linear-gradient(135deg, #9FE1CB 0%, #1D9E75 100%)',
+    bgGradient: 'linear-gradient(160deg, #082818 0%, #1D5C3A 60%, #082818 100%)',
+    name: 'Ustadha Fatima Al-Omari',
+    location: 'Makkah · 8 ans',
+    rating: '4.95',
+    reviews: 178,
+    langs: ['🇫🇷 Français', '🇲🇦 Darija'],
+    price: '320€',
+    badge: '👩 Guide Femme',
+    badgeColor: '#1D9E75',
+  },
+  {
+    slug: 'youssouf-konate',
+    initials: 'YK',
+    gradient: 'linear-gradient(135deg, #F7D774 0%, #E8A020 100%)',
+    bgGradient: 'linear-gradient(160deg, #1A2810 0%, #2D4A1A 60%, #1A2810 100%)',
+    name: 'Cheikh Youssouf Konaté',
+    location: 'Makkah · 6 ans',
+    rating: '4.88',
+    reviews: 94,
+    langs: ['🇫🇷 Français', '🇸🇳 Wolof'],
+    price: '240€',
+    badge: '🌍 Afrique de l\'Ouest',
+    badgeColor: '#E8A020',
+  },
+];
+
+const LIEUX_VEDETTE = [
+  { emoji: '🕋', nameFr: 'Masjid Al-Haram',   nameAr: 'المسجد الحرام',    desc: "La plus grande mosquée du monde. Le cœur du pèlerinage." },
+  { emoji: '⛰️', nameFr: 'Grotte de Hira',     nameAr: 'غار حراء',         desc: "Là où la première révélation coranique fut révélée." },
+  { emoji: '🌿', nameFr: 'Masjid An-Nabawi',   nameAr: 'المسجد النبوي',    desc: "La mosquée du Prophète ﷺ. La Rawdah, jardin du Paradis." },
+  { emoji: '⚔️', nameFr: 'Badr',               nameAr: 'بدر',              desc: "Site de la première grande bataille de l'Islam." },
+  { emoji: '🏔️', nameFr: 'Jabal Rahmah',       nameAr: 'جبل الرحمة',       desc: "La montagne de la Miséricorde, au cœur d'Arafat." },
+  { emoji: '🏛️', nameFr: 'Masjid Quba',        nameAr: 'مسجد قباء',        desc: "La première mosquée bâtie dans l'histoire de l'Islam." },
+];
+
+const TEMOIGNAGES = [
+  {
+    text: "Rachid nous a fait vivre l'histoire à chaque pas. La montée de Jabal Nour avec ses explications était le moment le plus fort de notre vie. Je pleurais sans même comprendre pourquoi.",
+    name: 'Karim L.', city: '🇫🇷 Lyon', init: 'KL', rating: 5, date: 'Mars 2026',
+  },
+  {
+    text: "En tant que groupe de femmes, nous avions des appréhensions. Fatima a tout géré avec une douceur et une compétence incroyables. Elle adapte son rythme, elle répond à chaque question, elle ne juge pas. Une perle.",
+    name: 'Safia M.', city: '🇧🇪 Bruxelles', init: 'SM', rating: 5, date: 'Février 2026',
+  },
+  {
+    text: "Youssouf parle Wolof, connaît les histoires que nos anciens nous ont transmises, et les relie aux lieux saints. Pour notre communauté, c'est inestimable. Toute la famille est repartie transformée.",
+    name: 'Ibrahima D.', city: '🇸🇳 Dakar', init: 'ID', rating: 5, date: 'Janvier 2026',
+  },
+];
 
 export default function Home() {
   return (
@@ -10,377 +120,434 @@ export default function Home() {
       <Navbar />
       <ScrollReveal />
 
-      {/* ════════════════════════════════════════════════════════
-          HERO — cinematic split layout
-          ════════════════════════════════════════════════════════ */}
-      <section className="hero" style={{ position: 'relative', overflow: 'hidden' }}>
-
-        {/* Animated ambient gradient */}
-        <div style={{
-          position: 'absolute', inset: 0, pointerEvents: 'none',
-          background: 'radial-gradient(ellipse 80% 90% at 65% 40%, rgba(201,168,76,0.10) 0%, transparent 65%)',
-          animation: 'heroGlow 6s ease-in-out infinite',
-        }} />
+      {/* ═══════════════════════════════════════════════════════
+          HERO FULLSCREEN — cinématique
+          ═══════════════════════════════════════════════════════ */}
+      <section className="hero-full">
         {/* Arabic watermark */}
-        <div style={{
-          position: 'absolute', top: '10%', right: '5%',
-          fontFamily: 'var(--font-cormorant, serif)',
-          fontSize: 'clamp(6rem, 18vw, 14rem)',
-          color: 'rgba(201,168,76,0.05)',
-          lineHeight: 1, pointerEvents: 'none', userSelect: 'none',
-          direction: 'rtl', zIndex: 0,
-          animation: 'floatY 10s ease-in-out infinite',
-        }}>
-          مكة
-        </div>
+        <div className="hero-full-arabic" aria-hidden="true">بسم الله</div>
 
-        {/* LEFT — text */}
-        <div className="hero-content" style={{ position: 'relative', zIndex: 1 }}>
-          <div className="hero-badge anim-fade-up" style={{ animation: 'fadeInUp 0.7s ease both' }}>
-            <span className="dot"></span> Première plateforme Omra guide privé
+        {/* Ambient glow rings */}
+        <div style={{ position: 'absolute', width: '70vw', height: '70vw', maxWidth: 800, maxHeight: 800, borderRadius: '50%', background: 'radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 65%)', top: '50%', left: '50%', transform: 'translate(-50%, -55%)', pointerEvents: 'none' }} />
+
+        {/* Content */}
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: 760, width: '100%' }}>
+          {/* Logo letter-by-letter */}
+          <div className="hero-logo-word" aria-label="SAFARUNA">
+            {LOGO_LETTERS.map((letter, i) => (
+              <span
+                key={i}
+                className={`hero-logo-letter${letter === 'U' ? ' gold' : ''}`}
+                style={{ animationDelay: `${i * 80}ms` }}
+                aria-hidden="true"
+              >
+                {letter}
+              </span>
+            ))}
           </div>
-          <h1 style={{ animation: 'fadeInUp 0.8s 0.15s ease both', opacity: 0 }}>
-            <em>Vis ton Omra</em>
-            <strong>comme elle mérite<br />d&apos;être vécue.</strong>
+
+          {/* Golden line */}
+          <div className="golden-line-wrap">
+            <div className="golden-line-anim" />
+          </div>
+
+          {/* Label */}
+          <div style={{
+            fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.2em',
+            textTransform: 'uppercase', color: 'rgba(201,168,76,0.7)',
+            marginBottom: '1.5rem',
+            animation: 'fadeIn 0.8s 1.0s ease both', opacity: 0,
+          }}>
+            La première plateforme de guides privés pour l&apos;Omra
+          </div>
+
+          {/* Main tagline */}
+          <h1 style={{
+            fontFamily: 'var(--font-cormorant, serif)',
+            fontSize: 'clamp(2.4rem, 5.5vw, 3.8rem)',
+            fontWeight: 300, color: 'white', lineHeight: 1.1,
+            marginBottom: '1.25rem',
+            animation: 'fadeInUp 0.9s 1.2s ease both', opacity: 0,
+          }}>
+            Vis ton Omra comme elle
+            <br />
+            <em style={{ color: 'var(--gold)', fontStyle: 'italic' }}>mérite d&apos;être vécue.</em>
           </h1>
-          <p className="hero-sub" style={{ animation: 'fadeInUp 0.8s 0.3s ease both', opacity: 0 }}>
-            Ton guide privé parle ta langue, te raconte chaque pierre de Makkah et Madinah, et fait de ton Omra un voyage spirituel inoubliable — en famille, sans foule, sans compromis.
+
+          <p style={{
+            color: 'rgba(255,255,255,0.45)',
+            fontSize: '1rem', lineHeight: 1.8,
+            maxWidth: 520, margin: '0 auto 2.5rem',
+            animation: 'fadeInUp 0.9s 1.4s ease both', opacity: 0,
+          }}>
+            Un guide privé certifié, qui parle ta langue, t&apos;explique chaque rituel, et transforme ton voyage en expérience spirituelle inoubliable.
           </p>
-          <div className="hero-actions" style={{ animation: 'fadeInUp 0.8s 0.45s ease both', opacity: 0 }}>
-            <Link href="/guides" className="btn-primary">
+
+          {/* CTAs */}
+          <div style={{
+            display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap',
+            marginBottom: '2rem',
+            animation: 'fadeInUp 0.9s 1.6s ease both', opacity: 0,
+          }}>
+            <Link href="/guides" className="btn-hero-cta">
               Trouver mon guide →
             </Link>
-            <Link href="#comment" className="btn-secondary">
-              Comment ça marche
+            <Link href="/guide/inscription" className="btn-hero-cta-secondary">
+              Je suis guide
             </Link>
           </div>
 
-          {/* Trust mini-row */}
+          {/* Live trust mini-row */}
           <div style={{
-            display: 'flex', gap: '2rem', marginTop: '2.5rem', flexWrap: 'wrap',
-            animation: 'fadeInUp 0.8s 0.6s ease both', opacity: 0,
+            display: 'flex', gap: '2rem', justifyContent: 'center', flexWrap: 'wrap',
+            animation: 'fadeIn 0.9s 1.8s ease both', opacity: 0,
           }}>
-            {[
-              { n: '320+',  l: 'Guides certifiés' },
-              { n: '4.97★', l: 'Note moyenne' },
-              { n: '98%',   l: 'Satisfaction' },
-            ].map(x => (
-              <div key={x.n} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.25rem', fontWeight: 700, color: 'var(--deep)' }}>{x.n}</span>
-                <span style={{ fontSize: '0.72rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{x.l}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Trust badges */}
-          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem', flexWrap: 'wrap', animation: 'fadeInUp 0.8s 0.75s ease both', opacity: 0 }}>
-            <span className="badge-verified">✓ Guides vérifiés</span>
-            <span className="badge-trust">🛡️ Paiement sécurisé</span>
-            <span className="badge-certified">🎓 Mutawwif certifiés</span>
+            <div className="live-badge">
+              <span className="live-dot" />
+              <span>147 pèlerins ont réservé cette semaine</span>
+            </div>
+            <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <span style={{ color: 'var(--gold)' }}>★★★★★</span> 4.96 · 709 avis vérifiés
+            </span>
           </div>
         </div>
 
-        {/* RIGHT — guide card */}
-        <div className="hero-visual" style={{ position: 'relative', zIndex: 1, animation: 'fadeInLeft 0.9s 0.2s ease both', opacity: 0 }}>
-          <div className="floating-stat top-left anim-float" style={{ animationDelay: '0.5s' }}>
-            <strong>4.97 ★</strong>
-            <span style={{ color: "var(--muted)", fontSize: "0.72rem" }}>Note moyenne</span>
-          </div>
+        {/* Scroll indicator */}
+        <div className="scroll-indicator" aria-hidden="true">
+          <span>Découvrir</span>
+          <div className="scroll-dot" />
+        </div>
+      </section>
 
-          <div className="guide-card" style={{ boxShadow: '0 40px 100px rgba(26,18,9,0.15), 0 0 0 1px rgba(201,168,76,0.12)' }}>
-            <div className="guide-card-header">
-              <div className="avatar" style={{ background: 'linear-gradient(135deg, #F0D897, #C9A84C)' }}>RA</div>
-              <div>
-                <div className="guide-info">
-                  <h3>Cheikh Rachid Al-Madani</h3>
-                  <p>Guide certifié · Makkah &amp; Madinah · 14 ans</p>
+      {/* ═══════════════════════════════════════════════════════
+          STATS — animated counters
+          ═══════════════════════════════════════════════════════ */}
+      <StatsSection />
+
+      {/* ═══════════════════════════════════════════════════════
+          LE PROBLÈME — dark, text reveal
+          ═══════════════════════════════════════════════════════ */}
+      <section style={{ background: 'var(--deep)', padding: '7rem 4rem', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 60% 80% at 50% 50%, rgba(201,168,76,0.05) 0%, transparent 65%)', pointerEvents: 'none' }} />
+        <div style={{ maxWidth: 820, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(201,168,76,0.5)', marginBottom: '1.5rem' }} className="reveal">
+            Le constat
+          </div>
+          <h2 className="reveal reveal-d1" style={{
+            fontFamily: 'var(--font-cormorant, serif)',
+            fontSize: 'clamp(2rem, 4.5vw, 3.2rem)',
+            fontWeight: 300, color: 'white', lineHeight: 1.15, marginBottom: '2.5rem',
+          }}>
+            90% des pèlerins font l&apos;Omra<br />
+            <em style={{ color: 'var(--gold)', fontStyle: 'italic' }}>sans vraiment la comprendre.</em>
+          </h2>
+          <p className="reveal reveal-d2" style={{ color: 'rgba(255,255,255,0.55)', lineHeight: 1.9, fontSize: '1rem', marginBottom: '1.5rem' }}>
+            35 personnes dans un bus. Un guide qui parle arabe. Tu imites les gestes de ceux devant toi. Tu tournes autour de la Kaaba en ne sachant pas vraiment pourquoi tu tournes. Tu récites des du&apos;a que tu n&apos;as jamais apprises. Tu rentres chez toi avec une belle photo, mais quelque chose manque.
+          </p>
+          <p className="reveal reveal-d3" style={{ color: 'rgba(255,255,255,0.55)', lineHeight: 1.9, fontSize: '1rem', marginBottom: '3rem' }}>
+            Ce n&apos;est pas l&apos;Omra qui était mauvaise. C&apos;est le format. Un voyage d&apos;une telle profondeur mérite un guide qui prend le temps — <em style={{ color: 'rgba(240,216,151,0.8)' }}>ton temps</em> — pour tout t&apos;expliquer, dans ta langue, à ton rythme.
+          </p>
+          <div className="reveal reveal-d4">
+            <Link href="/guides" className="btn-hero-cta">
+              Et si ton Omra avait du sens ? →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          DIFFÉRENCIATEURS vs HolyGO
+          ═══════════════════════════════════════════════════════ */}
+      <section style={{ background: 'var(--cream)', padding: '6rem 4rem' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div className="section-label reveal" style={{ textAlign: 'center' }}>Pourquoi SAFARUNA</div>
+          <h2 className="reveal reveal-d1" style={{ textAlign: 'center', marginBottom: '0.75rem' }}>
+            Ce que nous avons,<br />
+            <em>qu&apos;aucune autre plateforme n&apos;offre</em>
+          </h2>
+          <p className="reveal reveal-d2" style={{ textAlign: 'center', color: 'var(--muted)', maxWidth: 520, margin: '0 auto 3.5rem', lineHeight: 1.75, fontSize: '0.9rem' }}>
+            Nous avons construit SAFARUNA en partant d&apos;une question : qu&apos;est-ce qui rend vraiment un pèlerinage inoubliable ?
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem' }}>
+            {DIFFERENCIATEURS.map((d, i) => (
+              <div key={d.title} className={`diff-card reveal reveal-d${(i % 3) + 1}`}>
+                <div className="diff-icon">{d.icon}</div>
+                <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--deep)', marginBottom: '0.5rem' }}>{d.title}</h3>
+                <p style={{ fontSize: '0.84rem', color: 'var(--muted)', lineHeight: 1.75, marginBottom: '0.75rem' }}>{d.desc}</p>
+                <div style={{ fontSize: '0.7rem', color: 'rgba(192,57,43,0.65)', fontStyle: 'italic', borderTop: '1px solid var(--sand)', paddingTop: '0.6rem' }}>
+                  ✕ {d.vs}
                 </div>
-                <div className="stars">★★★★★</div>
-                <div className="verified-badge">✓ Vérifié SAFARUNA</div>
-              </div>
-            </div>
-            <div className="lang-chips">
-              <span className="chip active">🇫🇷 Français</span>
-              <span className="chip">🇸🇦 Arabe</span>
-              <span className="chip">🇬🇧 English</span>
-            </div>
-            <div className="service-list">
-              <div className="service-item"><span className="check">✓</span> Rituels complets de l&apos;Omra</div>
-              <div className="service-item"><span className="check">✓</span> Jabal Al-Nour · Grotte de Hira</div>
-              <div className="service-item"><span className="check">✓</span> Jabal Uhud &amp; Badr</div>
-              <div className="service-item"><span className="check">✓</span> Voiture 7 places + Train Haramain</div>
-              <div className="service-item"><span className="check">✓</span> Du&apos;a &amp; récitations expliqués</div>
-            </div>
-            <div className="price-row">
-              <div>
-                <div className="price-label">Forfait Omra &amp; Histoire · 5 jours</div>
-                <div className="price">450€ <span>/ personne</span></div>
-              </div>
-              <Link href="/guides/rachid-al-madani" className="btn-book" style={{ textDecoration: 'none', display: 'inline-block' }}>
-                Voir profil
-              </Link>
-            </div>
-          </div>
-
-          <div className="floating-stat bottom-right anim-float" style={{ animationDelay: '1.2s' }}>
-            <strong>2 400+</strong>
-            <span style={{ color: "var(--muted)", fontSize: "0.72rem" }}>Pèlerins accompagnés</span>
-          </div>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════
-          TRUST STRIP — animated counters
-          ════════════════════════════════════════════════════════ */}
-      <CounterStrip />
-
-      {/* ════════════════════════════════════════════════════════
-          HOW IT WORKS
-          ════════════════════════════════════════════════════════ */}
-      <section id="comment">
-        <div className="section-label reveal">Processus simple</div>
-        <h2 className="reveal reveal-d1">En 4 étapes, ton Omra<br /><em>devient inoubliable</em></h2>
-        <p className="section-sub reveal reveal-d2">
-          Plus besoin de suivre un groupe de 40 personnes. Tu choisis ton guide, tu personnalises ton programme, tu comprends chaque lieu.
-        </p>
-        <div className="steps-grid">
-          {[
-            { n: '01', icon: '🗓️', t: 'Choisis tes dates',          p: "Renseigne tes dates d'arrivée à Makkah et Madinah, la taille de ton groupe — solo, couple ou famille." },
-            { n: '02', icon: '🗣️', t: 'Filtre par langue',           p: "Sélectionne ta langue maternelle. Ton guide te parlera ta langue, t'expliquera chaque du'a et chaque rituel." },
-            { n: '03', icon: '🕌', t: 'Personnalise ton programme',   p: "Choisis les lieux à visiter, avec ou sans voiture, van pour famille, 3 jours ou 10 jours." },
-            { n: '04', icon: '✨', t: 'Vis ton Omra',                 p: "Ton guide t'attend à l'aéroport ou à l'hôtel. Un voyage spirituel unique, intime, profond." },
-          ].map((s, i) => (
-            <div key={s.n} className={`step-card reveal reveal-d${i + 1}`}>
-              <div className="step-num">{s.n}</div>
-              <div className="step-icon">{s.icon}</div>
-              <h3>{s.t}</h3>
-              <p>{s.p}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════
-          GUIDES SECTION (dark bg)
-          ════════════════════════════════════════════════════════ */}
-      <section id="guides" className="bg-dark" style={{ padding: "6rem 4rem" }}>
-        <div className="section-label reveal" style={{ color: 'var(--gold)' }}>Nos guides</div>
-        <h2 className="reveal reveal-d1">Des guides qui <em>parlent ta langue</em><br />et connaissent chaque pierre</h2>
-        <p className="section-sub reveal reveal-d2">
-          Chaque guide est vérifié, certifié et évalué par la communauté. Ils vivent à Makkah ou Madinah depuis des années.
-        </p>
-
-        <div className="guides-grid">
-          {[
-            {
-              slug: 'rachid-al-madani', initials: 'RA', gradient: 'linear-gradient(135deg, #F0D897, #C9A84C)',
-              name: 'Rachid Al-Madani', origin: '🇸🇦 Madinah · 14 ans', stars: '★★★★★ (214 avis)',
-              langs: ['🇫🇷 Français', '🇸🇦 Arabe', '🇬🇧 English'],
-              tags: ['Rituels Omra complets', 'Jabal Uhud', 'Grotte Hira', 'Train Haramain', 'Voiture incluse'],
-              price: '450€', sub: '/ pers · 5 jours',
-              delay: 'reveal-d1',
-            },
-            {
-              slug: 'fatima-al-omari', initials: 'FA', gradient: 'linear-gradient(135deg, #9FE1CB, #1D9E75)',
-              name: 'Fatima Al-Omari', origin: '🇸🇦 Makkah · 8 ans · Guide femme', stars: '★★★★★ (178 avis)',
-              langs: ['🇫🇷 Français', '🇲🇦 Darija'],
-              tags: ['Guide femme', 'Rituels Omra', 'Masjid Al-Haram', 'Zamzam', 'Van 9 places'],
-              price: '320€', sub: '/ pers · 3 jours',
-              delay: 'reveal-d2',
-            },
-            {
-              slug: 'youssouf-konate', initials: 'YK', gradient: 'linear-gradient(135deg, #F7D774, #E8A020)',
-              name: 'Youssouf Konaté', origin: '🇸🇦 Makkah · 6 ans · Afrique de l\'Ouest', stars: '★★★★★ (94 avis)',
-              langs: ['🇫🇷 Français', '🇸🇳 Wolof'],
-              tags: ['Omra complète', 'Jabal Al-Nour', 'Voiture incluse', 'Familles'],
-              price: '280€', sub: '/ pers · 3 jours',
-              delay: 'reveal-d3',
-            },
-          ].map(g => (
-            <div key={g.slug} className={`guide-profile reveal ${g.delay}`}>
-              <div className="guide-top">
-                <div className="guide-avatar-dark" style={{ background: g.gradient }}>{g.initials}</div>
-                <div>
-                  <div className="guide-name">{g.name}</div>
-                  <div className="guide-origin">{g.origin}</div>
-                  <div className="guide-stars">{g.stars}</div>
-                </div>
-              </div>
-              <div className="guide-langs">
-                {g.langs.map(l => <span key={l} className="lang-pill">{l}</span>)}
-              </div>
-              <div className="services-tags">
-                {g.tags.map(t => <span key={t} className="stag">{t}</span>)}
-              </div>
-              <div className="guide-footer">
-                <div className="guide-price-dark">{g.price} <small>{g.sub}</small></div>
-                <Link href={`/guides/${g.slug}`} className="btn-book-dark">Voir profil</Link>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="reveal" style={{ textAlign: "center", marginTop: "3rem" }}>
-          <Link href="/guides" className="btn-book-dark" style={{ fontSize: "0.9rem", padding: "0.85rem 2.5rem" }}>
-            Voir les 5 guides →
-          </Link>
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════
-          PACKAGES — 3 forfaits
-          ════════════════════════════════════════════════════════ */}
-      <section id="packages">
-        <div className="section-label reveal">Nos forfaits</div>
-        <h2 className="reveal reveal-d1">Un programme pour <em>chaque pèlerin</em></h2>
-        <p className="section-sub reveal reveal-d2">
-          Que tu aies 3 jours ou 10 jours, seul, en couple ou en famille — il existe un forfait fait pour toi.
-        </p>
-
-        <div className="packages-grid">
-          {[
-            {
-              icon: '🌙', title: 'Omra Essentielle', featured: false,
-              sub: "Pour ceux qui viennent accomplir l'Omra et comprendre chaque rituel en profondeur avec un guide dédié.",
-              features: ["Tous les rituels expliqués (tawaf, sa'i)", "Orientation Masjid Al-Haram & Zamzam", "Livret du'a illustré offert", "Disponibilité 24h/24 par WhatsApp", "1 à 8 personnes"],
-              price: '280€', sub2: '/ pers · 2–3 jours', delay: 'reveal-d1',
-            },
-            {
-              icon: '🕌', title: 'Omra & Histoire', featured: true,
-              sub: "L'immersion complète : rituels + visites des lieux historiques de la Sîra prophétique avec voiture incluse.",
-              features: ["Tout ce qui est inclus dans Essentielle", "Voiture privée 7 places pour les visites", "Jabal Al-Nour, Jabal Thawr, Jabal Uhud", "Train Haramain Makkah ↔ Madinah", "Masjid Quba, Al-Baqi', Rawdah", "Conférence Sîra prophétique (1h)"],
-              price: '450€', sub2: '/ pers · 5 jours', delay: 'reveal-d2',
-            },
-            {
-              icon: '🌟', title: 'Grand Voyage Spirituel', featured: false,
-              sub: "Le voyage complet : Makkah, Madinah, Badr, Ohoud et tous les sites majeurs. Adapté PMR. Tout inclus.",
-              features: ["Tout ce qui est inclus dans Omra & Histoire", "Makkah + Madinah + Badr + Ohoud", "Adapté PMR (fauteuil roulant disponible)", "Hôtel 5★ sélectionné à 200m du Haram", "Album photo souvenir du voyage", "1 à 12 personnes"],
-              price: '780€', sub2: '/ pers · 10 jours', delay: 'reveal-d3',
-            },
-          ].map(p => (
-            <div key={p.title} className={`package-card ${p.featured ? 'featured' : ''} reveal ${p.delay}`}>
-              <div className="package-icon">{p.icon}</div>
-              <h3>{p.title}</h3>
-              <p className="pkg-sub">{p.sub}</p>
-              <ul className="pkg-features">
-                {p.features.map(f => <li key={f}><span className="pkg-check">✓</span> {f}</li>)}
-              </ul>
-              <div className="pkg-price">{p.price} <small>{p.sub2}</small></div>
-              <Link href="/guides" className="btn-primary" style={{ marginTop: '1.5rem', display: 'inline-block', fontSize: '0.85rem' }}>
-                Trouver un guide →
-              </Link>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ════════════════════════════════════════════════════════
-          TRUST SECTION — Quran quote + guarantees
-          ════════════════════════════════════════════════════════ */}
-      <div style={{ padding: '0 2rem' }}>
-        <div className="trust-section reveal">
-          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2rem', color: 'rgba(201,168,76,0.6)', marginBottom: '0.5rem', direction: 'rtl' }}>
-            وَمَن يَخْرُجْ مِن بَيْتِهِ مُهَاجِرًا إِلَى اللَّهِ
-          </div>
-          <p className="quran-quote">&ldquo;Et quiconque sort de chez lui en émigrant vers Allah et Son Messager…&rdquo;</p>
-          <p className="quran-ref">Sourate An-Nisaa · 4:100</p>
-
-          <div className="trust-grid">
-            {[
-              { icon: '🛡️', t: 'Guides vérifiés',      p: "Chaque guide passe par un processus de certification rigoureux avant d'être listé." },
-              { icon: '💳', t: 'Paiement sécurisé',     p: "Transactions chiffrées, remboursement garanti en cas d'annulation." },
-              { icon: '⏱️', t: 'Réponse < 2h',          p: "Nos guides s'engagent à répondre en moins de 2h à toute demande." },
-              { icon: '🕌', t: 'Rituels garantis',       p: "0 compromis sur les rituels. Chaque guide est certifié mutawwif." },
-            ].map((c, i) => (
-              <div key={c.t} className={`trust-card reveal reveal-d${i + 1}`}>
-                <div className="t-icon">{c.icon}</div>
-                <h4>{c.t}</h4>
-                <p>{c.p}</p>
               </div>
             ))}
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* ════════════════════════════════════════════════════════
-          TESTIMONIALS
-          ════════════════════════════════════════════════════════ */}
-      <section style={{ background: 'var(--cream)', borderTop: '1px solid var(--sand)' }}>
-        <div className="section-label reveal">Ils en parlent</div>
-        <h2 className="reveal reveal-d1">Ce que disent nos <em>pèlerins</em></h2>
-        <div className="testimonials-grid">
-          {[
-            { q: "Rachid nous a fait vivre l'histoire à chaque pas. La montée de Jabal Nour avec ses explications était le moment le plus fort de notre vie. Incroyable.", name: 'Karim L.', city: '🇫🇷 Lyon', init: 'KL', d: 'reveal-d1' },
-            { q: "Fatima est une perle. En tant que groupe de femmes, nous nous sommes senties parfaitement en sécurité et accompagnées. Elle a su adapter son rythme à tout le monde.", name: 'Safia M.', city: '🇧🇪 Bruxelles', init: 'SM', d: 'reveal-d2' },
-            { q: "Youssouf parle Wolof et connaît les Lieux Saints mieux que quiconque. Pour notre communauté sénégalaise, c'est rare et précieux. Toute la famille est repartie transformée.", name: 'Ibrahima D.', city: '🇸🇳 Dakar', init: 'ID', d: 'reveal-d3' },
-          ].map(t => (
-            <div key={t.name} className={`testi-card reveal ${t.d}`}>
-              <p className="testi-quote">&ldquo;{t.q}&rdquo;</p>
-              <div className="testi-footer">
-                <div className="testi-avatar">{t.init}</div>
-                <div>
-                  <div className="testi-name">{t.name}</div>
-                  <div className="testi-city">{t.city} · <span style={{ color: 'var(--gold)', letterSpacing: 1 }}>★★★★★</span></div>
+      {/* ═══════════════════════════════════════════════════════
+          GUIDES EN VEDETTE — cards hover overlay
+          ═══════════════════════════════════════════════════════ */}
+      <section style={{ background: 'white', padding: '6rem 4rem', borderTop: '1px solid var(--sand)' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div className="section-label reveal">Nos guides</div>
+          <h2 className="reveal reveal-d1">
+            Des guides qui <em>parlent ta langue</em>
+          </h2>
+          <p className="reveal reveal-d2" style={{ color: 'var(--muted)', maxWidth: 520, lineHeight: 1.75, marginBottom: '3rem', fontSize: '0.9rem' }}>
+            Chaque guide est certifié mutawwif, vérifié par notre équipe et évalué par des centaines de pèlerins réels.
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+            {GUIDES_VEDETTE.map((g, i) => (
+              <div key={g.slug} className={`guide-feat-card reveal reveal-d${i + 1}`}
+                style={{ background: g.bgGradient }}>
+                {/* Background avatar initials */}
+                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -55%)', fontFamily: 'var(--font-cormorant, serif)', fontSize: '10rem', fontWeight: 700, color: 'rgba(255,255,255,0.04)', userSelect: 'none', lineHeight: 1 }}>
+                  {g.initials}
+                </div>
+                {/* Main content */}
+                <div className="guide-feat-overlay">
+                  <div style={{ flex: 1 }}>
+                    {/* Badge */}
+                    <div style={{ display: 'inline-block', background: g.badgeColor, color: '#1A1209', fontSize: '0.6rem', fontWeight: 800, letterSpacing: '0.08em', padding: '0.2rem 0.6rem', borderRadius: 50, marginBottom: '0.75rem' }}>
+                      {g.badge}
+                    </div>
+                    {/* Avatar + info */}
+                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '0.5rem' }}>
+                      <div style={{ width: 44, height: 44, borderRadius: '50%', background: g.gradient, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontWeight: 700, color: '#1A1209', fontSize: '1rem', flexShrink: 0 }}>
+                        {g.initials}
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'white' }}>{g.name}</div>
+                        <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.55)' }}>{g.location}</div>
+                      </div>
+                    </div>
+                    {/* Rating */}
+                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '0.5rem' }}>
+                      <span style={{ color: 'var(--gold)', fontSize: '0.82rem', letterSpacing: 2 }}>★★★★★</span>
+                      <span style={{ fontSize: '0.78rem', color: 'white', fontWeight: 700 }}>{g.rating}</span>
+                      <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)' }}>({g.reviews} avis)</span>
+                    </div>
+                    {/* Languages */}
+                    <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.25rem' }}>
+                      {g.langs.map(l => (
+                        <span key={l} style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)', fontSize: '0.68rem', padding: '0.15rem 0.5rem', borderRadius: 50, border: '1px solid rgba(255,255,255,0.15)' }}>{l}</span>
+                      ))}
+                    </div>
+                    {/* Price */}
+                    <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', marginBottom: 0 }}>
+                      À partir de <span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: 'var(--gold-light)' }}>{g.price}</span> / pers.
+                    </div>
+                  </div>
+                  {/* CTA — slides up on hover */}
+                  <Link href={`/guides/${g.slug}`} className="guide-feat-btn">
+                    Voir le profil →
+                  </Link>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+
+          <div className="reveal" style={{ textAlign: 'center', marginTop: '3rem' }}>
+            <Link href="/guides" className="btn-primary" style={{ fontSize: '0.88rem' }}>
+              Voir les 5 guides certifiés →
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* ════════════════════════════════════════════════════════
-          GUIDE CTA — Devenir guide
-          ════════════════════════════════════════════════════════ */}
+      {/* ═══════════════════════════════════════════════════════
+          LIEUX SAINTS — 6 cards avec hover arabique
+          ═══════════════════════════════════════════════════════ */}
+      <section style={{ background: 'var(--cream)', padding: '6rem 4rem', borderTop: '1px solid var(--sand)' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div className="section-label reveal">Les lieux saints</div>
+          <h2 className="reveal reveal-d1">
+            <em>26 lieux</em> que ton guide<br />te fera vivre autrement
+          </h2>
+          <p className="reveal reveal-d2" style={{ color: 'var(--muted)', maxWidth: 520, lineHeight: 1.75, marginBottom: '3rem', fontSize: '0.9rem' }}>
+            Au-delà du Masjid Al-Haram, il existe des dizaines de sites chargés d&apos;histoire. Ton guide certifié te les fait découvrir avec la profondeur qu&apos;ils méritent.
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
+            {LIEUX_VEDETTE.map((l, i) => (
+              <div key={l.nameFr} className={`place-card reveal reveal-d${(i % 3) + 1}`}>
+                <div className="place-arabic-bg" aria-hidden="true">{l.nameAr}</div>
+                <div style={{ position: 'relative', zIndex: 1 }}>
+                  <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>{l.emoji}</div>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--gold-dark)', marginBottom: '0.2rem' }}>
+                    {l.nameAr}
+                  </div>
+                  <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--deep)', marginBottom: '0.5rem' }}>{l.nameFr}</h3>
+                  <p style={{ fontSize: '0.82rem', color: 'var(--muted)', lineHeight: 1.65 }}>{l.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="reveal" style={{ textAlign: 'center', marginTop: '3rem' }}>
+            <Link href="/lieux-saints" className="btn-secondary">
+              Découvrir tous les lieux →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          CHARTE ISLAMIQUE
+          ═══════════════════════════════════════════════════════ */}
+      <section style={{ background: 'var(--deep)', padding: '6rem 4rem', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 70% 90% at 50% 100%, rgba(201,168,76,0.06) 0%, transparent 55%)', pointerEvents: 'none' }} />
+        <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+          <div className="reveal" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(2rem, 5vw, 4rem)', color: 'rgba(201,168,76,0.35)', lineHeight: 1, marginBottom: '1rem', direction: 'rtl' }}>
+            وَمَن يُعَظِّمْ شَعَائِرَ اللَّهِ
+          </div>
+          <p className="reveal reveal-d1" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontStyle: 'italic', color: 'rgba(255,255,255,0.65)', lineHeight: 1.6, marginBottom: '0.75rem' }}>
+            &ldquo;Et quiconque honore les rites sacrés d&apos;Allah — c&apos;est assurément le fruit de la piété des cœurs.&rdquo;
+          </p>
+          <p className="reveal reveal-d2" style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', marginBottom: '4rem' }}>Sourate Al-Hajj · 22:32</p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '2rem' }}>
+            {[
+              { icon: '🕋', t: 'Authenticité',  d: "Nos guides ne font jamais de compromis sur les rituels. Chaque geste a un sens — ils vous l'expliquent.", color: '#C9A84C' },
+              { icon: '🤲', t: 'Confiance',      d: "La charte islamique que signent nos guides n'est pas un contrat. C'est un serment devant Allah.", color: '#9FE1CB' },
+              { icon: '📖', t: 'Connaissance',   d: "L'Omra sans savoir, c'est marcher dans le noir. Avec SAFARUNA, chaque pas a un sens.", color: '#A8C8F0' },
+            ].map((v, i) => (
+              <div key={v.t} className={`reveal reveal-d${i + 1}`} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '2rem' }}>
+                <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>{v.icon}</div>
+                <h3 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', color: v.color, marginBottom: '0.5rem', fontWeight: 600 }}>{v.t}</h3>
+                <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.75 }}>{v.d}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="reveal" style={{ marginTop: '3rem' }}>
+            <Link href="/charte" style={{ fontSize: '0.8rem', color: 'rgba(201,168,76,0.6)', textDecoration: 'none', letterSpacing: '0.08em', borderBottom: '1px solid rgba(201,168,76,0.3)', paddingBottom: '0.2rem' }}>
+              Lire la Charte SAFARUNA →
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          TÉMOIGNAGES — border gauche dorée
+          ═══════════════════════════════════════════════════════ */}
+      <section style={{ background: 'white', padding: '6rem 4rem', borderTop: '1px solid var(--sand)' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div className="section-label reveal">Témoignages</div>
+          <h2 className="reveal reveal-d1" style={{ marginBottom: '3rem' }}>
+            Ce que disent nos <em>pèlerins</em>
+          </h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '1.5rem' }}>
+            {TEMOIGNAGES.map((t, i) => (
+              <div key={t.name} className={`reveal reveal-d${i + 1}`} style={{
+                background: 'var(--cream)', borderRadius: 16, padding: '1.75rem',
+                borderLeft: '3px solid var(--gold)',
+                boxShadow: '0 2px 12px rgba(26,18,9,0.04)',
+              }}>
+                <div style={{ color: 'var(--gold)', fontSize: '1.5rem', lineHeight: 1, marginBottom: '1rem', fontFamily: 'var(--font-cormorant, serif)' }}>&ldquo;</div>
+                <p style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.05rem', fontStyle: 'italic', color: 'var(--deep)', lineHeight: 1.65, marginBottom: '1.5rem' }}>{t.text}</p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--sand)', paddingTop: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--sand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.82rem', color: 'var(--warm)', flexShrink: 0 }}>{t.init}</div>
+                    <div>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--deep)' }}>{t.name}</div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--muted)' }}>{t.city}</div>
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ color: 'var(--gold)', fontSize: '0.72rem', letterSpacing: 2, textAlign: 'right' }}>{'★'.repeat(t.rating)}</div>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--muted)', textAlign: 'right' }}>{t.date}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          FORFAITS — 3 cards
+          ═══════════════════════════════════════════════════════ */}
+      <section id="packages" style={{ background: 'var(--cream)', padding: '6rem 4rem', borderTop: '1px solid var(--sand)' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div className="section-label reveal" style={{ textAlign: 'center' }}>Nos forfaits</div>
+          <h2 className="reveal reveal-d1" style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
+            Un programme pour <em>chaque pèlerin</em>
+          </h2>
+          <p className="reveal reveal-d2" style={{ textAlign: 'center', color: 'var(--muted)', maxWidth: 480, margin: '0 auto 3rem', lineHeight: 1.75, fontSize: '0.9rem' }}>
+            3 jours ou 10 jours, solo ou famille — il existe un forfait fait pour toi.
+          </p>
+          <div className="packages-grid">
+            {[
+              { icon: '🌙', title: 'Omra Essentielle', featured: false, price: '280€', sub: '/ pers · 2–3 jours', features: ["Rituels expliqués (tawaf, sa'i)", "Masjid Al-Haram & Zamzam", "Livret du'a illustré", "Disponibilité 24h/24", "1 à 8 personnes"] },
+              { icon: '🕌', title: 'Omra & Histoire', featured: true, price: '450€', sub: '/ pers · 5 jours', features: ["Tout Essentielle inclus", "Voiture privée 7 places", "Jabal Al-Nour, Thawr, Uhud", "Train Haramain Makkah ↔ Madinah", "Masjid Quba, Al-Baqi', Rawdah", "Conférence Sîra (1h)"] },
+              { icon: '🌟', title: 'Grand Voyage', featured: false, price: '780€', sub: '/ pers · 10 jours', features: ["Tout Omra & Histoire inclus", "Makkah + Madinah + Badr + Ohoud", "Adapté PMR disponible", "Hôtel 5★ à 200m du Haram", "Album photo souvenir", "1 à 12 personnes"] },
+            ].map((p, i) => (
+              <div key={p.title} className={`package-card ${p.featured ? 'featured' : ''} reveal reveal-d${i + 1}`}>
+                <div className="package-icon">{p.icon}</div>
+                <h3>{p.title}</h3>
+                <ul className="pkg-features">
+                  {p.features.map(f => <li key={f}><span className="pkg-check">✓</span> {f}</li>)}
+                </ul>
+                <div className="pkg-price">{p.price} <small>{p.sub}</small></div>
+                <Link href="/guides" className="btn-primary" style={{ marginTop: '1.5rem', display: 'inline-block', fontSize: '0.85rem' }}>
+                  Trouver un guide →
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          GUIDE CTA — devenir guide
+          ═══════════════════════════════════════════════════════ */}
       <section className="bg-dark" style={{ padding: '5rem 4rem' }}>
-        <div className="section-label reveal" style={{ color: 'var(--gold)' }}>Vous êtes guide ?</div>
-        <h2 className="reveal reveal-d1">Rejoignez la plateforme et<br /><em>gagnez votre vie avec votre savoir</em></h2>
-        <p className="section-sub reveal reveal-d2">
-          320 guides gagnent en moyenne 3 200€/mois sur SAFARUNA. Inscription gratuite, commission transparente, paiement sécurisé.
-        </p>
-        <div className="revenue-grid">
-          {[
-            { icon: '💰', t: '3 200€ / mois',    p: "Revenus moyens d'un guide actif sur SAFARUNA" },
-            { icon: '📱', t: 'Tableau de bord',   p: "Gérez vos disponibilités, demandes et paiements en temps réel" },
-            { icon: '🔒', t: 'Paiement sécurisé', p: "Virement mensuel garanti, commission transparente de 12%" },
-            { icon: '🏆', t: 'Badge Vérifié',      p: "Processus de certification reconnu par les pèlerins" },
-          ].map((r, i) => (
-            <div key={r.t} className={`revenue-card reveal reveal-d${i + 1}`}>
-              <div className="r-icon">{r.icon}</div>
-              <h4>{r.t}</h4>
-              <p>{r.p}</p>
-            </div>
-          ))}
-        </div>
-        <div className="reveal" style={{ marginTop: '3rem' }}>
-          <Link href="/guide/inscription" className="btn-primary">
-            Devenir guide SAFARUNA →
-          </Link>
+        <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+          <div className="section-label reveal" style={{ color: 'var(--gold)' }}>Vous êtes guide ?</div>
+          <h2 className="reveal reveal-d1">Rejoignez la plateforme et<br /><em>gagnez votre vie avec votre savoir</em></h2>
+          <p className="section-sub reveal reveal-d2">
+            320 guides gagnent en moyenne 3 200€/mois sur SAFARUNA. Inscription gratuite, commission transparente, paiement sécurisé.
+          </p>
+          <div className="revenue-grid">
+            {[
+              { icon: '💰', t: '3 200€ / mois',    p: "Revenus moyens d'un guide actif" },
+              { icon: '📱', t: 'Tableau de bord',   p: "Disponibilités, demandes, paiements" },
+              { icon: '🔒', t: 'Paiement sécurisé', p: "Virement mensuel, commission 12%" },
+              { icon: '🏆', t: 'Badge Vérifié',      p: "Certification reconnue par les pèlerins" },
+            ].map((r, i) => (
+              <div key={r.t} className={`revenue-card reveal reveal-d${i + 1}`}>
+                <div className="r-icon">{r.icon}</div>
+                <h4>{r.t}</h4>
+                <p>{r.p}</p>
+              </div>
+            ))}
+          </div>
+          <div className="reveal" style={{ marginTop: '2.5rem' }}>
+            <Link href="/guide/inscription" className="btn-primary">
+              Devenir guide SAFARUNA →
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* ════════════════════════════════════════════════════════
+      {/* ═══════════════════════════════════════════════════════
           CTA FINAL
-          ════════════════════════════════════════════════════════ */}
+          ═══════════════════════════════════════════════════════ */}
       <section className="cta-section">
-        <div className="arabic-deco reveal" style={{
-          fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.5rem',
-          color: 'rgba(201,168,76,0.4)', marginBottom: '1.5rem', letterSpacing: '0.1em',
-        }}>
-          بسم الله الرحمن الرحيم
+        <div className="reveal" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(4rem, 15vw, 10rem)', color: 'rgba(201,168,76,0.05)', lineHeight: 1, direction: 'rtl', userSelect: 'none', marginBottom: '0.5rem' }}>
+          سفرنا
         </div>
-        <h2 className="reveal reveal-d1" style={{ color: 'white' }}>
-          Ton Omra mérite un guide<br />
-          <em style={{ color: 'var(--gold)' }}>à la hauteur de ta foi.</em>
+        <h2 className="reveal reveal-d1" style={{ color: 'white', marginTop: '-1rem' }}>
+          Ton Omra mérite mieux.
         </h2>
-        <p className="reveal reveal-d2" style={{ color: 'rgba(255,255,255,0.5)', maxWidth: 480, margin: '1rem auto 2.5rem', lineHeight: 1.8, fontSize: '0.95rem' }}>
-          Rejoins des milliers de pèlerins francophones qui ont vécu une Omra privée, personnalisée et spirituellement riche.
+        <p className="reveal reveal-d2" style={{ color: 'rgba(255,255,255,0.45)', maxWidth: 480, margin: '1rem auto 2.5rem', lineHeight: 1.85, fontSize: '0.95rem' }}>
+          Rejoins des milliers de pèlerins francophones qui ont vécu une Omra privée, profonde et inoubliable — avec un guide qui a consacré sa vie à ce moment.
         </p>
-        <div className="reveal reveal-d3" style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
-          <Link href="/guides" className="btn-primary" style={{ background: 'var(--gold)', color: 'var(--deep)', fontWeight: 700 }}>
+        <div className="reveal reveal-d3" style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Link href="/guides" className="btn-hero-cta" style={{ background: 'var(--gold)', color: 'var(--deep)', borderColor: 'var(--gold)' }}>
             Trouver mon guide →
           </Link>
-          <Link href="/comment-ca-marche" className="btn-secondary" style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.7)' }}>
-            En savoir plus
+          <Link href="/guide/inscription" className="btn-hero-cta-secondary">
+            Je suis guide
           </Link>
         </div>
       </section>

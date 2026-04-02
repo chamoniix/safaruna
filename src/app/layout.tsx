@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import "./globals.css";
+import AnnouncementBar from "@/components/AnnouncementBar";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -27,6 +28,7 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`${cormorant.variable} ${manrope.variable}`}>
       <body className="antialiased font-sans bg-[var(--cream)] text-[var(--deep)]">
+        <AnnouncementBar />
         {children}
       </body>
     </html>

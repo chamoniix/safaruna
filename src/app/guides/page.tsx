@@ -5,260 +5,473 @@ import Link from 'next/link';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
+const GUIDES_DATA = [
+  {
+    slug: 'rachid-al-madani',
+    name: 'Rachid Al-Madani',
+    title: 'Cheikh · Spécialiste Sîra',
+    initials: 'RA',
+    location: 'Makkah · Madinah',
+    experience: 14,
+    rating: 4.97,
+    reviews: 214,
+    pilgrims: '2 400+',
+    languages: ['🇫🇷 Français', '🇸🇦 Arabe', '🇬🇧 English'],
+    services: ['Omra complète', 'Jabal Uhud', 'Train Haramain', 'Voiture 7pl'],
+    price: 280,
+    priceSub: '/ pers · 3j',
+    badge: 'Top Guide',
+    badgeColor: '#C9A84C',
+    gradient: 'linear-gradient(135deg, #2D1F08, #1A1209)',
+    avatarGradient: 'linear-gradient(135deg, #F0D897, #C9A84C)',
+    available: true,
+    isWoman: false,
+  },
+  {
+    slug: 'fatima-al-omari',
+    name: 'Fatima Al-Omari',
+    title: 'Guide femme · Familles',
+    initials: 'FA',
+    location: 'Makkah',
+    experience: 8,
+    rating: 4.95,
+    reviews: 178,
+    pilgrims: '860+',
+    languages: ['🇫🇷 Français', '🇲🇦 Darija'],
+    services: ['Guide femme', 'Rituels Omra', 'Van 9pl', 'Familles'],
+    price: 320,
+    priceSub: '/ pers · 3j',
+    badge: 'Guide femme',
+    badgeColor: '#1D5C3A',
+    gradient: 'linear-gradient(135deg, #082818, #1D5C3A)',
+    avatarGradient: 'linear-gradient(135deg, #9FE1CB, #1D9E75)',
+    available: true,
+    isWoman: true,
+  },
+  {
+    slug: 'youssouf-konate',
+    name: 'Youssouf Konaté',
+    title: 'Spécialiste Afrique de l\'Ouest',
+    initials: 'YK',
+    location: 'Makkah',
+    experience: 6,
+    rating: 4.92,
+    reviews: 94,
+    pilgrims: '620+',
+    languages: ['🇫🇷 Français', '🇸🇳 Wolof', '🇬🇧 English'],
+    services: ['Omra complète', 'Hira', 'Voiture incluse'],
+    price: 240,
+    priceSub: '/ pers · 3j',
+    badge: null,
+    badgeColor: '',
+    gradient: 'linear-gradient(135deg, #1A2810, #2D4A1A)',
+    avatarGradient: 'linear-gradient(135deg, #D4E8A0, #5A8A20)',
+    available: true,
+    isWoman: false,
+  },
+  {
+    slug: 'abdullah-ben-yusuf',
+    name: 'Abdullah Ben Yusuf',
+    title: 'Diplômé · Université de Madinah',
+    initials: 'AB',
+    location: 'Madinah',
+    experience: 10,
+    rating: 4.98,
+    reviews: 147,
+    pilgrims: '1 100+',
+    languages: ['🇫🇷 Français', '🇸🇦 Arabe'],
+    services: ['Rawdah', 'Quba', 'Ohoud', 'Ziyara Madinah'],
+    price: 300,
+    priceSub: '/ pers · 3j',
+    badge: 'Diplômé',
+    badgeColor: '#1A4A8A',
+    gradient: 'linear-gradient(135deg, #0A1830, #1A4A8A)',
+    avatarGradient: 'linear-gradient(135deg, #A0C4F0, #1A6AC9)',
+    available: false,
+    isWoman: false,
+  },
+  {
+    slug: 'samira-al-rashidi',
+    name: 'Samira Al-Rashidi',
+    title: 'Spécialiste PMR · Madinah',
+    initials: 'SR',
+    location: 'Madinah',
+    experience: 7,
+    rating: 4.93,
+    reviews: 76,
+    pilgrims: '520+',
+    languages: ['🇫🇷 Français', '🇹🇳 Tunisien'],
+    services: ['PMR', 'Fauteuil roulant', 'Hôtel adapté', 'Seniors'],
+    price: 380,
+    priceSub: '/ pers · 3j',
+    badge: 'PMR',
+    badgeColor: '#7A2D8A',
+    gradient: 'linear-gradient(135deg, #28081A, #7A2D8A)',
+    avatarGradient: 'linear-gradient(135deg, #F0A8C0, #A81D5C)',
+    available: true,
+    isWoman: true,
+  },
+];
+
 export default function GuideSearchPage() {
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [budget, setBudget] = useState(800);
-  const [resultsNum, setResultsNum] = useState(47);
+  const [viewMode,    setViewMode]    = useState<'grid' | 'list'>('grid');
+  const [budget,      setBudget]      = useState(800);
+  const [activeFilters, setActiveFilters] = useState<string[]>(['🇫🇷 Francophone']);
+  const [activeQF,    setActiveQF]    = useState('🇫🇷 Francophone');
+
+  const removeFilter = (f: string) => setActiveFilters(prev => prev.filter(x => x !== f));
 
   return (
-    <div className="font-sans bg-[var(--cream)] text-[var(--deep)] min-h-screen">
+    <div style={{ fontFamily: 'var(--font-manrope, Manrope, sans-serif)', background: '#FAF7F0', color: '#1A1209', minHeight: '100vh' }}>
       <Navbar />
-      <style dangerouslySetInnerHTML={{ __html: `
-        .search-hero { background: var(--deep); padding: 3rem 2rem 2rem; position: relative; overflow: hidden; }
-        .search-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 60% 100% at 50% 100%, rgba(201,168,76,.12) 0%, transparent 70%); pointer-events: none; }
-        .sh-label { font-size: .7rem; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: rgba(240,216,151,.6); margin-bottom: .5rem; text-align: center; }
-        .sh-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight: 300; color: white; text-align: center; margin-bottom: .4rem; }
-        .sh-title em { font-style: italic; color: var(--gold); }
-        .sh-sub { text-align: center; color: rgba(255,255,255,.45); font-size: .85rem; margin-bottom: 2rem; }
-        
-        .search-bar { max-width: 860px; margin: 0 auto 1.5rem; background: white; border-radius: 20px; padding: 1rem 1.25rem; display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: .75rem; align-items: end; box-shadow: 0 16px 48px rgba(0,0,0,.2); }
-        .sb-field label { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); display: block; margin-bottom: .3rem; }
-        .sb-field select, .sb-field input { width: 100%; border: none; background: var(--cream); border-radius: var(--radius-sm); padding: .6rem .85rem; font-family: 'Manrope', sans-serif; font-size: .85rem; color: var(--deep); outline: none; cursor: pointer; border: 1.5px solid var(--sand); transition: border-color .2s; }
-        .sb-field input[type="date"]::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; }
-        .sb-field input[type="date"]:hover::-webkit-calendar-picker-indicator { opacity: 1; }
-        .sb-field select:focus, .sb-field input:focus { border-color: var(--gold); background: white; }
-        .btn-search { background: var(--gold); color: var(--deep); border: none; border-radius: var(--radius-sm); padding: .7rem 1.6rem; font-family: 'Manrope', sans-serif; font-size: .85rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all .2s; }
-        .btn-search:hover { background: var(--gold-dark); color: white; transform: translateY(-1px); }
-        
-        .quick-filters { max-width: 860px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: .5rem; padding-bottom: 2rem; }
-        .qf-chip { padding: .3rem .85rem; border-radius: 50px; border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.08); color: rgba(255,255,255,.7); font-size: .75rem; font-weight: 500; cursor: pointer; transition: all .2s; }
-        .qf-chip:hover, .qf-chip.active { background: var(--gold); color: var(--deep); border-color: var(--gold); font-weight: 700; }
-        
-        .main-layout { max-width: 1240px; margin: 0 auto; padding: 2rem 2rem 6rem; display: grid; grid-template-columns: 280px 1fr; gap: 2rem; align-items: start; }
-        .sidebar { position: sticky; top: 80px; }
-        .filter-card { background: white; border: 1px solid var(--sand); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1rem; }
-        .filter-card h3 { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 1rem; padding-bottom: .6rem; border-bottom: 1px solid var(--sand); }
-        .filter-reset { float: right; font-size: .72rem; color: var(--gold-dark); cursor: pointer; font-weight: 600; text-transform: none; letter-spacing: 0; }
-        
-        .range-wrap { padding: .25rem 0; }
-        .range-labels { display: flex; justify-content: space-between; font-size: .75rem; color: var(--muted); margin-bottom: .4rem; }
-        .range-val { font-size: .85rem; font-weight: 700; color: var(--deep); }
-        input[type=range] { width: 100%; accent-color: var(--gold); height: 4px; cursor: pointer; }
-        
-        .filter-opt { display: flex; align-items: center; justify-content: space-between; padding: .35rem 0; cursor: pointer; }
-        .filter-opt-left { display: flex; align-items: center; gap: .6rem; }
-        .filter-opt input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--gold); cursor: pointer; }
-        .filter-opt-name { font-size: .83rem; color: var(--deep); }
-        .filter-count { font-size: .7rem; color: var(--muted); background: var(--cream); padding: .1rem .45rem; border-radius: 50px; }
-        
-        .star-row { display: flex; gap: .4rem; flex-wrap: wrap; }
-        .star-btn { padding: .3rem .7rem; border-radius: 50px; border: 1.5px solid var(--sand); background: transparent; font-size: .75rem; cursor: pointer; color: var(--muted); transition: all .2s; }
-        .star-btn:hover, .star-btn.active { background: var(--gold-pale); border-color: var(--gold); color: var(--gold-dark); font-weight: 700; }
-        
-        .lang-pills { display: flex; flex-wrap: wrap; gap: .4rem; }
-        .lang-pill-f { padding: .3rem .75rem; border-radius: 50px; border: 1.5px solid var(--sand); background: transparent; font-size: .75rem; cursor: pointer; color: var(--muted); transition: all .2s; }
-        .lang-pill-f:hover, .lang-pill-f.active { background: var(--deep); border-color: var(--deep); color: var(--gold-light); font-weight: 600; }
-        
-        .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; flex-wrap: wrap; gap: .75rem; }
-        .view-toggle { display: flex; border: 1.5px solid var(--sand); border-radius: var(--radius-sm); overflow: hidden; }
-        .vt-btn { padding: .4rem .75rem; background: white; border: none; cursor: pointer; font-size: .85rem; color: var(--muted); }
-        .vt-btn.active { background: var(--deep); color: var(--gold-light); }
-        
-        .guides-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem; }
-        .guides-grid.list-view { grid-template-columns: 1fr; }
-        
-        .gcard { background: white; border: 1px solid var(--sand); border-radius: var(--radius); overflow: hidden; transition: transform .2s, box-shadow .2s; cursor: pointer; display: flex; flex-direction: column; }
-        .gcard:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(26,18,9,.1); }
-        .gcard.list-view { flex-direction: row; align-items: stretch; }
-        
-        .gcard-banner { height: 90px; position: relative; overflow: hidden; flex-shrink: 0; }
-        .gcard-banner.list-view { width: 120px; height: auto; }
-        .gcard-avatar { position: absolute; bottom: -20px; left: 1.25rem; width: 52px; height: 52px; border-radius: 50%; border: 3px solid white; display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 600; color: var(--deep); }
-        .gcard-avatar.list-view { position: static; margin: auto; bottom: auto; left: auto; border: none; }
-        .online-dot { position: absolute; bottom: 2px; right: 2px; width: 11px; height: 11px; border-radius: 50%; background: #27AE60; border: 2px solid white; }
-        
-        .gcard-body { padding: 1.5rem 1.25rem 1.25rem; flex: 1; display: flex; flex-direction: column; }
-        .gcard-body.list-view { padding: 1.25rem; }
-        .gcard-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: .4rem; }
-        .gc-name { font-size: .95rem; font-weight: 700; color: var(--deep); line-height: 1.2; }
-        .gc-location { font-size: .75rem; color: var(--muted); margin-bottom: .75rem; }
-        .gc-langs { display: flex; flex-wrap: wrap; gap: .3rem; margin-bottom: .75rem; }
-        .gc-lang { background: var(--cream); border: 1px solid var(--sand); padding: .15rem .55rem; border-radius: 50px; font-size: .68rem; font-weight: 600; color: var(--warm); }
-        .gc-lang.main-lang { background: var(--gold-pale); border-color: rgba(201,168,76,.4); color: var(--gold-dark); }
-        .gc-services { display: flex; flex-wrap: wrap; gap: .3rem; margin-bottom: .9rem; }
-        .gc-service { font-size: .68rem; color: var(--muted); background: var(--cream); padding: .15rem .5rem; border-radius: 5px; }
-        
-        .gcard-footer { display: flex; align-items: center; justify-content: space-between; padding-top: .85rem; border-top: 1px solid var(--sand); margin-top: auto; }
-        .gc-price { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; font-weight: 600; color: var(--deep); }
-        .gc-price small { font-family: 'Manrope', sans-serif; font-size: .68rem; color: var(--muted); font-weight: 400; }
-        
-        .active-filters { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; margin-bottom: 1rem; }
-        .af-tag { display: flex; align-items: center; gap: .35rem; background: var(--deep); color: var(--gold-light); padding: .25rem .75rem; border-radius: 50px; font-size: .72rem; font-weight: 600; }
-        .af-tag button { background: none; border: none; color: rgba(240,216,151,.6); cursor: pointer; font-size: .9rem; line-height: 1; padding: 0; }
-        
-        @media(max-width:960px) { .main-layout { grid-template-columns: 1fr; } .sidebar { position: static; } .search-bar { grid-template-columns: 1fr 1fr; } .guides-grid { grid-template-columns: 1fr; } }
-        @media(max-width:600px) { .search-bar { grid-template-columns: 1fr; } }
-      `}} />
 
-      {/* SEARCH HERO */}
-      <div className="search-hero">
-        <div className="sh-label">Trouver mon guide privé</div>
-        <h1 className="sh-title">Ta Omra, dans <em>ta langue</em></h1>
-        <p className="sh-sub">320 guides certifiés · Makkah, Madinah, Taïf, Badr et plus</p>
-
-        <div className="search-bar">
-          <div className="sb-field">
-            <label>Langue du guide</label>
-            <select>
-              <option value="">Toutes les langues</option>
-              <option value="fr">🇫🇷 Français</option>
-              <option value="ar">🇸🇦 Arabe</option>
-              <option value="en">🇬🇧 English</option>
-            </select>
-          </div>
-          <div className="sb-field">
-            <label>Destination</label>
-            <select>
-              <option value="">Makkah + Madinah</option>
-              <option value="makkah">Makkah uniquement</option>
-            </select>
-          </div>
-          <div className="sb-field">
-            <label>Date d'arrivée</label>
-            <input type="date" />
-          </div>
-          <button className="btn-search">🔍 Rechercher</button>
+      {/* ── HERO ── */}
+      <div style={{
+        background: '#1A1209',
+        paddingTop: '8rem',
+        paddingBottom: '3rem',
+        paddingLeft: '2rem',
+        paddingRight: '2rem',
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        {/* Glow */}
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 80% 120% at 50% 110%, rgba(201,168,76,0.14) 0%, transparent 65%)', pointerEvents: 'none' }} />
+        {/* Arabic calligraphy watermark */}
+        <div style={{ position: 'absolute', right: '4rem', top: '50%', transform: 'translateY(-50%)', fontFamily: 'serif', fontSize: '10rem', color: 'rgba(201,168,76,0.05)', userSelect: 'none', pointerEvents: 'none', lineHeight: 1 }}>
+          مرشد
         </div>
 
-        <div className="quick-filters">
-          <div className="qf-chip active">🇫🇷 Francophone</div>
-          <div className="qf-chip">🚗 Avec voiture</div>
-          <div className="qf-chip">👩 Femme guide</div>
-          <div className="qf-chip">👨‍👩‍👧 Famille</div>
+        <div style={{ maxWidth: 860, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(240,216,151,0.55)', marginBottom: '0.75rem', textAlign: 'center' }}>
+            Trouver mon guide privé
+          </div>
+          <h1 style={{
+            fontFamily: 'var(--font-cormorant, serif)',
+            fontSize: 'clamp(2.2rem, 4vw, 3.2rem)',
+            fontWeight: 300,
+            color: 'white',
+            textAlign: 'center',
+            marginBottom: '0.5rem',
+            lineHeight: 1.1,
+          }}>
+            Ton Omra, dans <em style={{ fontStyle: 'italic', color: '#C9A84C' }}>ta langue</em>
+          </h1>
+          <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', marginBottom: '2.5rem' }}>
+            {GUIDES_DATA.length} guides certifiés · Makkah, Madinah, Badr & plus
+          </p>
+
+          {/* Search bar */}
+          <div style={{
+            background: 'white',
+            borderRadius: 20,
+            padding: '1rem 1.25rem',
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr 1fr auto',
+            gap: '0.75rem',
+            alignItems: 'end',
+            boxShadow: '0 24px 60px rgba(0,0,0,0.3)',
+            marginBottom: '1.5rem',
+          }} className="search-grid">
+            {[
+              { label: 'Langue du guide', type: 'select', opts: ['Toutes les langues', '🇫🇷 Français', '🇸🇦 Arabe', '🇬🇧 English', '🇸🇳 Wolof'] },
+              { label: 'Destination',     type: 'select', opts: ['Makkah + Madinah', 'Makkah uniquement', 'Madinah uniquement'] },
+            ].map(f => (
+              <div key={f.label}>
+                <div style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7A6D5A', marginBottom: '0.35rem' }}>{f.label}</div>
+                <select style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 10, padding: '0.6rem 0.85rem', fontFamily: 'inherit', fontSize: '0.85rem', color: '#1A1209', background: '#FDFBF7', outline: 'none' }}>
+                  {f.opts.map(o => <option key={o}>{o}</option>)}
+                </select>
+              </div>
+            ))}
+            <div>
+              <div style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7A6D5A', marginBottom: '0.35rem' }}>Date d&apos;arrivée</div>
+              <input type="date" style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 10, padding: '0.6rem 0.85rem', fontFamily: 'inherit', fontSize: '0.85rem', color: '#1A1209', background: '#FDFBF7', outline: 'none' }} />
+            </div>
+            <button style={{ background: '#C9A84C', color: '#1A1209', border: 'none', borderRadius: 10, padding: '0.7rem 1.6rem', fontFamily: 'inherit', fontSize: '0.875rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+              🔍 Rechercher
+            </button>
+          </div>
+
+          {/* Quick filters */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'center' }}>
+            {['🇫🇷 Francophone', '🚗 Avec voiture', '👩 Femme guide', '👨‍👩‍👧 Famille', '♿ PMR', '⭐ Top noté'].map(f => (
+              <button
+                key={f}
+                onClick={() => setActiveQF(f)}
+                style={{
+                  padding: '0.3rem 0.9rem',
+                  borderRadius: 50,
+                  border: `1px solid ${activeQF === f ? '#C9A84C' : 'rgba(255,255,255,0.15)'}`,
+                  background: activeQF === f ? '#C9A84C' : 'rgba(255,255,255,0.07)',
+                  color: activeQF === f ? '#1A1209' : 'rgba(255,255,255,0.65)',
+                  fontSize: '0.75rem',
+                  fontWeight: activeQF === f ? 700 : 500,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                }}
+              >{f}</button>
+            ))}
+          </div>
         </div>
       </div>
 
-      <div className="main-layout">
-        {/* SIDEBAR */}
-        <aside className="sidebar">
-          <div className="filter-card">
-            <h3>Budget <span className="filter-reset" onClick={() => setBudget(800)}>Réinitialiser</span></h3>
-            <div className="range-wrap">
-              <div className="range-labels"><span>Prix par personne</span><span className="range-val">{budget}€ max</span></div>
-              <input type="range" min="100" max="1500" value={budget} step="50" onChange={(e) => setBudget(Number(e.target.value))} />
-            </div>
-          </div>
+      {/* ── MAIN ── */}
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '2.5rem 2rem 6rem', display: 'grid', gridTemplateColumns: '260px 1fr', gap: '2rem', alignItems: 'start' }} className="results-layout">
 
-          <div className="filter-card">
-            <h3>Transport</h3>
-            <div className="filter-opt">
-              <div className="filter-opt-left"><input type="checkbox" defaultChecked /><span className="filter-opt-name">🚗 Voiture privée incluse</span></div>
-              <span className="filter-count">187</span>
-            </div>
-            <div className="filter-opt">
-              <div className="filter-opt-left"><input type="checkbox" /><span className="filter-opt-name">🚌 Van 12 places</span></div>
-              <span className="filter-count">94</span>
-            </div>
-          </div>
+        {/* ── SIDEBAR ── */}
+        <aside style={{ position: 'sticky', top: 80 }}>
 
-          <div className="filter-card">
-            <h3>Lieux visités</h3>
-            <div className="filter-opt">
-              <div className="filter-opt-left"><input type="checkbox" defaultChecked /><span className="filter-opt-name">🕋 Rituels Omra complets</span></div>
-              <span className="filter-count">320</span>
+          <FilterCard title="Budget">
+            <div style={{ marginBottom: '0.35rem', display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#7A6D5A' }}>
+              <span>Prix / personne</span>
+              <strong style={{ color: '#1A1209' }}>{budget}€ max</strong>
             </div>
-            <div className="filter-opt">
-              <div className="filter-opt-left"><input type="checkbox" /><span className="filter-opt-name">⛰️ Jabal Al-Nour / Hira</span></div>
-              <span className="filter-count">278</span>
+            <input
+              type="range" min="100" max="1500" value={budget} step="50"
+              onChange={e => setBudget(Number(e.target.value))}
+              style={{ width: '100%', accentColor: '#C9A84C', cursor: 'pointer' }}
+            />
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: '#7A6D5A', marginTop: '0.25rem' }}>
+              <span>100€</span><span>1 500€</span>
             </div>
-          </div>
+          </FilterCard>
+
+          <FilterCard title="Transport">
+            {[{ label: '🚗 Voiture privée', count: 187 }, { label: '🚌 Van 7–12 places', count: 94 }, { label: '🚇 Train Haramain', count: 63 }].map(o => (
+              <FilterOpt key={o.label} label={o.label} count={o.count} />
+            ))}
+          </FilterCard>
+
+          <FilterCard title="Langues">
+            {[{ label: '🇫🇷 Français', count: 320 }, { label: '🇸🇦 Arabe', count: 280 }, { label: '🇬🇧 English', count: 140 }, { label: '🇸🇳 Wolof', count: 24 }, { label: '🇲🇦 Darija', count: 89 }].map(o => (
+              <FilterOpt key={o.label} label={o.label} count={o.count} />
+            ))}
+          </FilterCard>
+
+          <FilterCard title="Note minimale">
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+              {['4.5+', '4.7+', '4.9+'].map(r => (
+                <button key={r} style={{ padding: '0.3rem 0.75rem', borderRadius: 50, border: '1.5px solid #E8DFC8', background: 'transparent', fontSize: '0.75rem', cursor: 'pointer', color: '#7A6D5A', fontWeight: 500 }}>
+                  ⭐ {r}
+                </button>
+              ))}
+            </div>
+          </FilterCard>
+
+          <FilterCard title="Spécialités">
+            {[{ label: '👩 Guide femme', count: 48 }, { label: '♿ Adapté PMR', count: 17 }, { label: '👨‍👩‍👧 Spécialiste familles', count: 130 }].map(o => (
+              <FilterOpt key={o.label} label={o.label} count={o.count} />
+            ))}
+          </FilterCard>
         </aside>
 
-        {/* RESULTS */}
+        {/* ── RESULTS ── */}
         <div>
-          <div className="active-filters">
-            <span style={{ fontSize: '.75rem', color: 'var(--muted)', fontWeight: 600 }}>Filtres actifs :</span>
-            <div className="af-tag">🇫🇷 Français <button>×</button></div>
-            <div className="af-tag">⭐ 4.5★+ <button>×</button></div>
-          </div>
+          {/* Active filters */}
+          {activeFilters.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '1.25rem', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.72rem', color: '#7A6D5A', fontWeight: 600 }}>Actifs :</span>
+              {activeFilters.map(f => (
+                <div key={f} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: '#1A1209', color: '#F0D897', padding: '0.2rem 0.75rem', borderRadius: 50, fontSize: '0.72rem', fontWeight: 600 }}>
+                  {f}
+                  <button onClick={() => removeFilter(f)} style={{ background: 'none', border: 'none', color: 'rgba(240,216,151,0.5)', cursor: 'pointer', fontSize: '0.9rem', lineHeight: 1, padding: 0 }}>×</button>
+                </div>
+              ))}
+            </div>
+          )}
 
-          <div className="results-header">
-            <p className="text-sm text-[var(--muted)]"><strong>{resultsNum}</strong> guides trouvés pour vos critères</p>
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className="view-toggle">
-                <button className={`vt-btn ${viewMode === 'grid' ? 'active' : ''}`} onClick={() => setViewMode('grid')}>⊞</button>
-                <button className={`vt-btn ${viewMode === 'list' ? 'active' : ''}`} onClick={() => setViewMode('list')}>☰</button>
-              </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+            <p style={{ fontSize: '0.875rem', color: '#7A6D5A' }}>
+              <strong style={{ color: '#1A1209' }}>{GUIDES_DATA.length}</strong> guides trouvés
+            </p>
+            <div style={{ display: 'flex', border: '1.5px solid #E8DFC8', borderRadius: 8, overflow: 'hidden' }}>
+              {(['grid', 'list'] as const).map(m => (
+                <button
+                  key={m} onClick={() => setViewMode(m)}
+                  style={{ padding: '0.4rem 0.85rem', background: viewMode === m ? '#1A1209' : 'white', color: viewMode === m ? '#F0D897' : '#7A6D5A', border: 'none', cursor: 'pointer', fontSize: '0.9rem' }}
+                >
+                  {m === 'grid' ? '⊞' : '☰'}
+                </button>
+              ))}
             </div>
           </div>
 
-          <div className={`guides-grid ${viewMode === 'list' ? 'list-view' : ''}`}>
-            {/* CARD 1 */}
-            <Link href="/guides/rachid-al-madani" style={{textDecoration: 'none'}}>
-              <div className={`gcard ${viewMode === 'list' ? 'list-view' : ''}`}>
-                <div className={`gcard-banner ${viewMode === 'list' ? 'list-view' : ''}`} style={{ background: 'linear-gradient(135deg, #1A1209, #4A2C0A)' }}>
-                  <div className={`gcard-avatar ${viewMode === 'list' ? 'list-view' : ''}`} style={{ background: 'url(/guide-avatar.png) center/cover' }}>
-                    <div className="online-dot"></div>
-                  </div>
-                </div>
-                <div className={`gcard-body ${viewMode === 'list' ? 'list-view' : ''}`}>
-                  <div className="gcard-top">
-                    <div className="gc-name">Rachid Al-Madani</div>
-                    <div className="text-sm font-bold text-[var(--deep)]"><span className="text-[var(--gold)]">★</span> 4.97 <span className="text-[var(--muted)] font-normal">(214)</span></div>
-                  </div>
-                  <div className="gc-location">📍 Makkah · 14 ans d'expérience</div>
-                  <div className="gc-langs">
-                    <span className="gc-lang main-lang">🇫🇷 Français</span>
-                    <span className="gc-lang">🇸🇦 Arabe</span>
-                  </div>
-                  <div className="gc-services">
-                    <span className="gc-service">Omra complète</span>
-                    <span className="gc-service">Jabal Uhud</span>
-                    <span className="gc-service">Train inclus</span>
-                  </div>
-                  <div className="gcard-footer">
-                    <div><div className="gc-price">280€ <small>/ pers · 3j</small></div></div>
-                    <div className="flex flex-col items-end gap-1">
-                      <span className="px-2 py-0.5 rounded-full bg-[var(--green-bg)] text-[var(--green)] text-[0.65rem] font-bold">✓ Vérifié</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Link>
-
-            {/* CARD 2 */}
-            <Link href="/guides/fatima-al-omari" style={{textDecoration: 'none'}}>
-              <div className={`gcard ${viewMode === 'list' ? 'list-view' : ''}`}>
-                <div className={`gcard-banner ${viewMode === 'list' ? 'list-view' : ''}`} style={{ background: 'linear-gradient(135deg, #082818, #1D5C3A)' }}>
-                  <div className={`gcard-avatar ${viewMode === 'list' ? 'list-view' : ''}`} style={{ background: 'linear-gradient(135deg,#9FE1CB,#1D9E75)' }}>فع</div>
-                </div>
-                <div className={`gcard-body ${viewMode === 'list' ? 'list-view' : ''}`}>
-                  <div className="gcard-top">
-                    <div className="gc-name">Fatima Al-Omari</div>
-                    <div className="text-sm font-bold text-[var(--deep)]"><span className="text-[var(--gold)]">★</span> 4.95 <span className="text-[var(--muted)] font-normal">(178)</span></div>
-                  </div>
-                  <div className="gc-location">📍 Makkah · 8 ans · Guide femme</div>
-                  <div className="gc-langs">
-                    <span className="gc-lang main-lang">🇫🇷 Français</span>
-                    <span className="gc-lang">🇲🇦 Darija</span>
-                  </div>
-                  <div className="gc-services">
-                    <span className="gc-service">Guide femme</span>
-                    <span className="gc-service">Familles</span>
-                  </div>
-                  <div className="gcard-footer">
-                    <div><div className="gc-price">320€ <small>/ pers · 3j</small></div></div>
-                    <div className="flex flex-col items-end gap-1">
-                      <span className="px-2 py-0.5 rounded-full bg-[var(--green-bg)] text-[var(--green)] text-[0.65rem] font-bold">✓ Vérifié</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Link>
+          {/* Cards */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: viewMode === 'grid' ? 'repeat(auto-fill, minmax(290px, 1fr))' : '1fr',
+            gap: '1.25rem',
+          }}>
+            {GUIDES_DATA.map(g => (
+              <GuideCard key={g.slug} guide={g} listView={viewMode === 'list'} />
+            ))}
           </div>
         </div>
       </div>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media(max-width:960px){
+          .results-layout { grid-template-columns: 1fr !important; }
+          .search-grid { grid-template-columns: 1fr 1fr !important; }
+        }
+        @media(max-width:600px){
+          .search-grid { grid-template-columns: 1fr !important; }
+        }
+      `}} />
       <Footer />
     </div>
+  );
+}
+
+/* ─── Sub-components ──────────────────────────────────────────────── */
+
+function FilterCard({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div style={{ background: 'white', border: '1px solid #E8DFC8', borderRadius: 16, padding: '1.25rem', marginBottom: '0.75rem' }}>
+      <div style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#7A6D5A', marginBottom: '0.85rem', paddingBottom: '0.75rem', borderBottom: '1px solid #F0EBD8' }}>
+        {title}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function FilterOpt({ label, count }: { label: string; count: number }) {
+  return (
+    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.3rem 0', cursor: 'pointer' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+        <input type="checkbox" style={{ width: 14, height: 14, accentColor: '#C9A84C', cursor: 'pointer' }} />
+        <span style={{ fontSize: '0.82rem', color: '#1A1209' }}>{label}</span>
+      </div>
+      <span style={{ fontSize: '0.68rem', color: '#7A6D5A', background: '#F5F0E8', padding: '0.1rem 0.45rem', borderRadius: 50 }}>{count}</span>
+    </label>
+  );
+}
+
+type GuideData = typeof GUIDES_DATA[0];
+
+function GuideCard({ guide: g, listView }: { guide: GuideData; listView: boolean }) {
+  return (
+    <Link href={`/guides/${g.slug}`} style={{ textDecoration: 'none', display: 'block' }}>
+      <div style={{
+        background: 'white',
+        border: '1px solid #E8DFC8',
+        borderRadius: 18,
+        overflow: 'hidden',
+        transition: 'transform 0.2s, box-shadow 0.2s, border-color 0.2s',
+        cursor: 'pointer',
+        display: listView ? 'flex' : 'block',
+        alignItems: listView ? 'stretch' : undefined,
+      }}
+        onMouseEnter={e => {
+          (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)';
+          (e.currentTarget as HTMLElement).style.boxShadow = '0 20px 60px rgba(26,18,9,0.12)';
+          (e.currentTarget as HTMLElement).style.borderColor = 'rgba(201,168,76,0.5)';
+        }}
+        onMouseLeave={e => {
+          (e.currentTarget as HTMLElement).style.transform = '';
+          (e.currentTarget as HTMLElement).style.boxShadow = '';
+          (e.currentTarget as HTMLElement).style.borderColor = '#E8DFC8';
+        }}
+      >
+        {/* Banner */}
+        <div style={{
+          height: listView ? 'auto' : 90,
+          width: listView ? 110 : 'auto',
+          background: g.gradient,
+          position: 'relative',
+          overflow: 'hidden',
+          flexShrink: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: listView ? 'center' : undefined,
+        }}>
+          {/* Subtle radial */}
+          <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
+          {/* Avatar */}
+          <div style={{
+            position: listView ? 'static' : 'absolute',
+            bottom: listView ? undefined : -18,
+            left: listView ? undefined : '1.25rem',
+            width: 46,
+            height: 46,
+            borderRadius: '50%',
+            border: listView ? 'none' : '3px solid white',
+            background: g.avatarGradient,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontFamily: 'var(--font-cormorant, serif)',
+            fontSize: '1rem',
+            fontWeight: 700,
+            color: '#1A1209',
+            flexShrink: 0,
+            zIndex: 1,
+          }}>
+            {g.initials}
+          </div>
+          {/* Available dot */}
+          {!listView && (
+            <div style={{ position: 'absolute', bottom: 8, right: 12, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+              <div style={{ width: 7, height: 7, borderRadius: '50%', background: g.available ? '#27AE60' : '#aaa', border: '1.5px solid rgba(255,255,255,0.5)' }} />
+              <span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>{g.available ? 'Disponible' : 'Indisponible'}</span>
+            </div>
+          )}
+          {/* Badge */}
+          {g.badge && !listView && (
+            <div style={{ position: 'absolute', top: 10, right: 10, background: g.badgeColor, color: '#1A1209', fontSize: '0.55rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0.2rem 0.55rem', borderRadius: 50 }}>
+              {g.badge}
+            </div>
+          )}
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: listView ? '1rem 1.25rem' : '1.5rem 1.25rem 1.25rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.2rem', paddingTop: listView ? 0 : '0.5rem' }}>
+            <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.2 }}>{g.name}</div>
+            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1A1209', whiteSpace: 'nowrap' }}>
+              <span style={{ color: '#C9A84C' }}>★</span> {g.rating}
+              <span style={{ fontWeight: 400, color: '#7A6D5A', fontSize: '0.72rem' }}> ({g.reviews})</span>
+            </div>
+          </div>
+          <div style={{ fontSize: '0.72rem', color: '#7A6D5A', fontStyle: 'italic', marginBottom: '0.6rem' }}>{g.title}</div>
+          <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginBottom: '0.75rem' }}>📍 {g.location} · {g.experience} ans</div>
+
+          {/* Languages */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', marginBottom: '0.7rem' }}>
+            {g.languages.map((l, i) => (
+              <span key={l} style={{
+                fontSize: '0.65rem', fontWeight: 600, padding: '0.15rem 0.55rem', borderRadius: 50,
+                background: i === 0 ? '#FAF3E0' : '#F5F0E8',
+                border: `1px solid ${i === 0 ? 'rgba(201,168,76,0.4)' : 'transparent'}`,
+                color: i === 0 ? '#8B6914' : '#7A6D5A',
+              }}>{l}</span>
+            ))}
+          </div>
+
+          {/* Services */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', marginBottom: '0.9rem' }}>
+            {g.services.map(s => (
+              <span key={s} style={{ fontSize: '0.65rem', color: '#7A6D5A', background: '#F5F0E8', padding: '0.15rem 0.5rem', borderRadius: 5 }}>{s}</span>
+            ))}
+          </div>
+
+          {/* Footer */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #F0EBD8', paddingTop: '0.85rem', marginTop: 'auto' }}>
+            <div>
+              <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 600, color: '#1A1209', lineHeight: 1 }}>
+                {g.price}€
+              </div>
+              <div style={{ fontSize: '0.65rem', color: '#7A6D5A' }}>{g.priceSub}</div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.35rem' }}>
+              <span style={{ fontSize: '0.6rem', fontWeight: 700, background: '#E8F5EE', color: '#1D5C3A', padding: '0.15rem 0.55rem', borderRadius: 50 }}>✓ Vérifié</span>
+              <span style={{ fontSize: '0.6rem', color: '#7A6D5A' }}>{g.pilgrims} pèlerins</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Link>
   );
 }

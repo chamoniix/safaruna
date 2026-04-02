@@ -56,7 +56,7 @@ export default async function AdminLoginPage({
                 </label>
                 <input
                   name="email" type="email" required
-                  placeholder="admin@safaruma.com"
+                  placeholder="Adresse email"
                   style={{ width: '100%', padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.12)', borderRadius: 10, color: 'white', fontSize: '0.875rem', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
                 />
               </div>

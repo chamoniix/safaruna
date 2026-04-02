@@ -140,7 +140,7 @@ h2 em { font-style: italic; color: var(--gold-dark); }
 .cta-section h2 em { color: var(--gold); }
 .cta-sub { color: rgba(255,255,255,0.5); max-width: 500px; margin: 1rem auto 2.5rem; }
 footer { background: var(--warm); padding: 3rem 4rem 2rem; color: rgba(255,255,255,0.6); }
-.footer-top { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 3rem; padding-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 1.5rem; }
+.footer-top { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr; gap: 3rem; padding-bottom: 2rem; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 1.5rem; }
 .footer-brand .logo { font-size: 1.6rem; margin-bottom: 0.75rem; display: block; }
 .footer-brand p { font-size: 0.82rem; line-height: 1.7; }
 .footer-col h4 { color: white; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 1rem; }

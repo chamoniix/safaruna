@@ -64,6 +64,17 @@ export default function Footer() {
             <li><Link href="/faq">FAQ</Link></li>
           </ul>
         </div>
+        <div className="footer-col">
+          <h4>Légal</h4>
+          <ul>
+            <li><Link href="/mentions-legales">Mentions légales</Link></li>
+            <li><Link href="/politique-confidentialite">Confidentialité</Link></li>
+            <li><Link href="/cgu">CGU</Link></li>
+            <li><Link href="/conditions-guides">Conditions Guides</Link></li>
+            <li><Link href="/conditions-clients">Conditions Clients</Link></li>
+            <li><Link href="/charte-islamique">Charte Islamique</Link></li>
+          </ul>
+        </div>
       </div>
       <div className="footer-bottom">
         <span className="copy">© 2025 SAFARUMA. Tous droits réservés</span>

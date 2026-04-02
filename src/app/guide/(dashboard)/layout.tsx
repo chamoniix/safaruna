@@ -51,6 +51,20 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
         @media (max-width: 1023px) { .guide-sb-close { display: flex !important; } }
         .g-nav-link { transition: background 0.15s, color 0.15s; }
         .g-nav-link:hover { background: rgba(201,168,76,0.08) !important; color: rgba(255,255,255,0.8) !important; }
+        /* Override global nav { position: fixed } inside sidebar */
+        .guide-sidebar nav {
+          position: static !important;
+          background: transparent !important;
+          border: none !important;
+          backdrop-filter: none !important;
+          padding: 0 !important;
+          top: auto !important;
+          left: auto !important;
+          right: auto !important;
+          z-index: auto !important;
+          display: flex !important;
+          flex-direction: column !important;
+        }
       `}} />
 
       <div style={{ minHeight: '100vh', background: '#F5F2EC', fontFamily: 'var(--font-manrope, sans-serif)', color: '#1A1209' }}>

@@ -9,7 +9,9 @@ export default function Navbar() {
       <div className="nav-links">
         <Link href="/guides">Nos guides</Link>
         <Link href="/#packages">Forfaits</Link>
+        <Link href="/services">Services</Link>
         <Link href="/blog">Blog</Link>
+        <Link href="/faq">FAQ</Link>
         <Link href="/a-propos">À propos</Link>
       </div>
       <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>

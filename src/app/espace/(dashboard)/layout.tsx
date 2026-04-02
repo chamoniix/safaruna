@@ -73,6 +73,20 @@ export default function PelerinLayout({ children }: { children: React.ReactNode 
         .sb-logout-btn:hover { color: #C0392B !important; }
         .sb-close-btn { display: none !important; }
         @media (max-width: 1023px) { .sb-close-btn { display: flex !important; } }
+        /* Override global nav { position: fixed } inside sidebar */
+        .pelerin-sidebar nav {
+          position: static !important;
+          background: transparent !important;
+          border: none !important;
+          backdrop-filter: none !important;
+          padding: 0 !important;
+          top: auto !important;
+          left: auto !important;
+          right: auto !important;
+          z-index: auto !important;
+          display: flex !important;
+          flex-direction: column !important;
+        }
       `}} />
 
       <div style={{ minHeight: '100vh', background: '#F5F2EC', fontFamily: 'var(--font-manrope, sans-serif)', color: '#1A1209' }}>

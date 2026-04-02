@@ -48,10 +48,22 @@ export default function GuideOnboarding() {
   const [currentStep, setCurrentStep] = useState(1);
   const [acceptedCharte, setAcceptedCharte] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [guideEmail, setGuideEmail] = useState('');
+  const [guideName, setGuideName] = useState('');
 
   const handleNext = () => setCurrentStep(p => Math.min(p + 1, 6));
   const handlePrev = () => setCurrentStep(p => Math.max(p - 1, 1));
-  const handleSubmit = (e: React.FormEvent) => { e.preventDefault(); setIsSubmitted(true); };
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitted(true);
+    if (guideEmail) {
+      fetch('/api/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'welcome_guide', email: guideEmail, name: guideName || guideEmail.split('@')[0] }),
+      }).catch(() => {});
+    }
+  };
 
   if (isSubmitted) {
     return (
@@ -216,7 +228,7 @@ export default function GuideOnboarding() {
                 </p>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
                   <Field label="Prénom">
-                    <input type="text" className="ins-input" style={inputStyle} placeholder="Youssouf" required />
+                    <input type="text" className="ins-input" style={inputStyle} placeholder="Youssouf" required onChange={e => setGuideName(n => e.target.value + (n.includes(' ') ? n.slice(n.indexOf(' ')) : ''))} />
                   </Field>
                   <Field label="Nom">
                     <input type="text" className="ins-input" style={inputStyle} placeholder="Konaté" required />
@@ -225,7 +237,7 @@ export default function GuideOnboarding() {
                     <input type="tel" className="ins-input" style={inputStyle} placeholder="+966 50 123 4567" required />
                   </Field>
                   <Field label="Adresse email">
-                    <input type="email" className="ins-input" style={inputStyle} placeholder="youssouf@exemple.com" required />
+                    <input type="email" className="ins-input" style={inputStyle} placeholder="youssouf@exemple.com" required onChange={e => setGuideEmail(e.target.value)} />
                   </Field>
                   <Field label="Ville de résidence">
                     <select className="ins-input" style={inputStyle} required>

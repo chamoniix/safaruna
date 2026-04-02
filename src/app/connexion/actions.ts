@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
+import { sendWelcomePelerin } from '@/lib/email'
 
 export async function login(formData: FormData) {
   const supabase = await createClient()
@@ -40,6 +41,11 @@ export async function signup(formData: FormData) {
   if (error) {
     redirect('/inscription?error=SignupFailed')
   }
+
+  const firstName = (data.options?.data?.first_name as string) ?? '';
+  const lastName  = (data.options?.data?.last_name  as string) ?? '';
+  const fullName  = [firstName, lastName].filter(Boolean).join(' ') || data.email.split('@')[0];
+  sendWelcomePelerin(data.email, fullName).catch(() => {}); // fire-and-forget
 
   revalidatePath('/', 'layout')
   redirect('/espace/tableau-de-bord')

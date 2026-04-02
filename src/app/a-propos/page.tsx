@@ -1,312 +1,630 @@
-import Link from "next/link";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import ScrollReveal from "@/components/ScrollReveal";
-
-export const metadata = {
-  title: "À propos de SAFARUNA — Notre histoire, notre mission",
-  description: "SAFARUNA est née d'une conviction : chaque pèlerin francophone mérite un guide privé qui parle sa langue et connaît chaque pierre des Lieux Saints.",
-};
-
-const VALUES = [
-  {
-    icon: '🕋',
-    title: 'Authenticité spirituelle',
-    desc: "Nous ne faisons aucun compromis sur les rituels. Chaque guide est certifié mutawwif et guidé par une connaissance islamique profonde.",
-  },
-  {
-    icon: '🗣️',
-    title: 'Langue maternelle',
-    desc: "L'Omra se vit pleinement quand on comprend ce qu'on accomplit. Nos guides expliquent chaque geste dans ta langue, avec tes mots.",
-  },
-  {
-    icon: '👨‍👩‍👧',
-    title: 'Accompagnement humain',
-    desc: "Pas de groupes de 40 personnes. Ton guide t'accompagne toi et ta famille — avec patience, disponibilité et bienveillance.",
-  },
-  {
-    icon: '🔍',
-    title: 'Transparence totale',
-    desc: "Prix clairs, profils vérifiés, avis authentiques. Aucune surprise, aucune commission cachée, aucune promesse non tenue.",
-  },
-  {
-    icon: '🌍',
-    title: 'Diversité linguistique',
-    desc: "Français, Darija, Wolof, Bambara, Turc, Anglais… Chaque communauté mérite un guide qui comprend sa culture et son histoire.",
-  },
-  {
-    icon: '♿',
-    title: 'Accessibilité universelle',
-    desc: "L'Omra doit être accessible à tous — personnes âgées, PMR, familles avec nourrissons. Nous avons des guides spécialisés pour chacun.",
-  },
-];
+import ScrollReveal from '@/components/ScrollReveal';
 
 const TEAM = [
   {
-    initials: 'AK',
-    name: 'Amine Khalidi',
+    name: 'Yacine Benali',
     role: 'Co-fondateur & CEO',
-    bio: "Ancien pèlerin déçu par son expérience en groupe, Amine a décidé de créer la plateforme qu'il aurait voulu trouver. Diplômé d'HEC Paris, il a travaillé 8 ans dans la fintech avant de lancer SAFARUNA.",
-    gradient: 'linear-gradient(135deg, #F0D897, #C9A84C)',
+    origin: 'Algérien, 34 ans',
+    bio: "Ancien cadre bancaire reconverti après une Omra qui a changé sa vie. Yacine a fondé SAFARUNA pour que chaque pèlerin vive ce qu'il a vécu — une connexion profonde, guidée par un expert.",
+    initials: 'YB',
+    color: '#1A1209',
   },
   {
-    initials: 'SK',
-    name: 'Soukaïna Kettani',
-    role: 'Co-fondatrice & Head of Guides',
-    bio: "Ancienne directrice de l'Institut Islamique de Lyon, Soukaïna gère le processus de certification des guides. Elle a elle-même effectué 9 Omra et un Hajj.",
-    gradient: 'linear-gradient(135deg, #9FE1CB, #1D9E75)',
+    name: 'Amira Oussama',
+    role: 'Co-fondatrice & Directrice des Guides',
+    origin: 'Marocaine, 31 ans',
+    bio: "Spécialiste en sciences islamiques diplômée de l'Université de Médine, Amira pilote la certification et la formation de tous les guides SAFARUNA. Chaque guide passe par elle.",
+    initials: 'AO',
+    color: '#2A1F0E',
   },
   {
-    initials: 'MO',
-    name: 'Mohammed Ouazzani',
-    role: 'CTO & Co-fondateur',
-    bio: "Ingénieur logiciel avec 12 ans d'expérience chez des scale-ups parisiens. Mohammed a construit l'intégralité de la plateforme avec une obsession : la performance et la simplicité.",
-    gradient: 'linear-gradient(135deg, #A8C8F0, #1A4A8A)',
+    name: 'Tariq Moussaoui',
+    role: 'Directeur Technique',
+    origin: 'Français, 29 ans',
+    bio: "Ingénieur passionné par l'impact social du digital. Tariq a construit la plateforme SAFARUNA pour qu'elle soit aussi simple qu'une réservation d'hôtel, aussi sûre qu'une banque.",
+    initials: 'TM',
+    color: '#C9A84C',
   },
 ];
 
-const MILESTONES = [
-  { year: '2021', event: "Première idée : Amine revient d'une Omra décevante dans un groupe de 45 personnes. Il commence à imaginer SAFARUNA." },
-  { year: '2022', event: "L'équipe fondatrice se constitue à Paris. Premiers entretiens avec 30 guides à Makkah et Madinah." },
-  { year: '2023', event: "Lancement en version bêta avec 12 guides pionniers. 500 pèlerins accompagnés la première saison." },
-  { year: '2024', event: "120 guides certifiés. Ouverture des guides femmes avec Fatima Al-Omari comme première ambassadrice." },
-  { year: '2025', event: "320 guides actifs. 14 000 pèlerins accompagnés. Lancement de l'Academy et du carnet de Du'a numérique." },
-  { year: '2026', event: "Expansion vers le Hajj, le Maroc et les circuits historiques d'Al-Andalus. Certification ISO en cours." },
+const TIMELINE = [
+  { year: '2021', title: 'La frustration fondatrice', desc: "Yacine part en Omra avec un groupe de 50 personnes. Guide arabophone uniquement, programme trop chargé, aucun temps pour la spiritualité. Il rentre avec une idée." },
+  { year: '2022', title: 'La recherche', desc: "8 mois à interviewer 200 pèlerins francophones. Le même problème partout : l'accompagnement de qualité n'existait pas dans leur langue." },
+  { year: '2023', title: 'Les premiers guides', desc: "Amira rejoint l'aventure et certifie les 12 premiers guides SAFARUNA. 300 pèlerins accompagnés la première année. 98% de satisfaction." },
+  { year: '2024', title: 'La plateforme', desc: "Tariq construit SAFARUNA.com. Les pèlerins peuvent enfin choisir, comparer, réserver leur guide privé en quelques clics." },
+  { year: '2025', title: "L'expansion", desc: "320 guides certifiés. 15 000 pèlerins accompagnés. SAFARUNA devient la référence francophone pour l'Omra privée." },
+  { year: '2026', title: 'La vision', desc: "Être présent pour chaque pèlerin francophone dans le monde entier. Du Maroc à la Martinique, de Lyon à Montréal." },
+];
+
+const VALEURS = [
+  { icon: '🕌', title: 'Foi d\'abord', desc: "Chaque décision que nous prenons est filtrée par une question simple : est-ce que cela sert le pèlerin dans son voyage spirituel ?" },
+  { icon: '🎓', title: 'Excellence certifiée', desc: "Nos guides sont diplômés en sciences islamiques, formés à l'accueil et certifiés après un examen rigoureux par notre équipe." },
+  { icon: '🤝', title: 'Confiance totale', desc: "Paiement sécurisé, annulation gratuite 48h, assistance 24h/24. Nous ne disparaissons pas une fois la réservation faite." },
+  { icon: '🌍', title: 'Accessibilité', desc: "L'Omra de qualité ne devrait pas être réservée à ceux qui parlent arabe. Nous guidons dans 12 langues." },
+  { icon: '✨', title: 'Présence', desc: "Pas de groupe de 40 personnes. Un guide, votre famille. Une Omra sur-mesure, à votre rythme, selon vos besoins." },
+  { icon: '📿', title: 'Continuité spirituelle', desc: "Notre accompagnement ne s'arrête pas à l'aéroport. Ressources, du'as, récits — nous restons présents avant, pendant et après." },
+];
+
+const COMPARISON = [
+  {
+    critere: 'Langue d\'accompagnement',
+    safaruna: 'Français + 11 langues',
+    holygo: 'Arabe principalement',
+    agence: 'Guide de groupe polyvalent',
+  },
+  {
+    critere: 'Type d\'accompagnement',
+    safaruna: 'Guide privé dédié',
+    holygo: 'Groupe 20-50 personnes',
+    agence: 'Groupe 30-80 personnes',
+  },
+  {
+    critere: 'Certification des guides',
+    safaruna: 'Sciences islamiques + examen SAFARUNA',
+    holygo: 'Non certifié indépendamment',
+    agence: 'Variable selon agence',
+  },
+  {
+    critere: 'Personnalisation',
+    safaruna: 'Programme 100% sur-mesure',
+    holygo: 'Programme fixe',
+    agence: 'Programme fixe de groupe',
+  },
+  {
+    critere: 'Réservation en ligne',
+    safaruna: 'Plateforme dédiée, 2 min',
+    holygo: 'Application mobile',
+    agence: 'Téléphone / agence physique',
+  },
+  {
+    critere: 'Annulation flexible',
+    safaruna: 'Gratuite jusqu\'à 48h',
+    holygo: 'Conditions restrictives',
+    agence: 'Souvent non remboursable',
+  },
+  {
+    critere: 'Tarif indicatif / jour',
+    safaruna: 'Dès 120€/jour',
+    holygo: 'Forfait tout-compris',
+    agence: 'Inclus dans le forfait',
+  },
 ];
 
 export default function AProposPage() {
   return (
     <>
-      <Navbar />
       <ScrollReveal />
 
-      {/* ─── HERO ─────────────────────────────────────────────────────────────── */}
+      {/* HERO */}
       <section style={{
-        background: 'var(--deep)',
-        paddingTop: '9rem', paddingBottom: '6rem',
-        paddingLeft: '4rem', paddingRight: '4rem',
-        position: 'relative', overflow: 'hidden',
+        background: '#0D0A06',
+        minHeight: '70vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+        overflow: 'hidden',
+        padding: '8rem 2rem 6rem',
         textAlign: 'center',
       }}>
-        {/* Ambient radial glow */}
         <div style={{
-          position: 'absolute', inset: 0, pointerEvents: 'none',
-          background: 'radial-gradient(ellipse 70% 80% at 50% 0%, rgba(201,168,76,0.13) 0%, transparent 65%)',
-        }} />
-        {/* Arabic watermark */}
-        <div style={{
-          position: 'absolute', top: '5%', left: '50%', transform: 'translateX(-50%)',
-          fontFamily: 'var(--font-cormorant, serif)',
-          fontSize: 'clamp(8rem, 25vw, 18rem)',
+          position: 'absolute',
+          inset: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: 'clamp(8rem, 20vw, 18rem)',
+          fontFamily: 'serif',
           color: 'rgba(201,168,76,0.04)',
-          lineHeight: 1, pointerEvents: 'none', userSelect: 'none',
-          direction: 'rtl', zIndex: 0,
-        }}>
-          سفرنا
-        </div>
+          pointerEvents: 'none',
+          userSelect: 'none',
+          lineHeight: 1,
+        }}>سفرنا</div>
 
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 760, margin: '0 auto' }}>
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: '800px' }}>
           <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-            background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.25)',
-            padding: '0.35rem 1rem', borderRadius: 50, marginBottom: '1.5rem',
-            fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.12em',
-            textTransform: 'uppercase', color: 'var(--gold)',
-            animation: 'fadeInUp 0.7s ease both',
-          }}>
-            Notre histoire
-          </div>
-          <h1 style={{
-            fontFamily: 'var(--font-cormorant, serif)',
-            fontSize: 'clamp(2.5rem, 5vw, 4rem)',
-            fontWeight: 300, color: 'white', lineHeight: 1.1,
+            fontSize: '0.65rem',
+            letterSpacing: '0.25em',
+            textTransform: 'uppercase',
+            color: 'var(--gold)',
             marginBottom: '1.5rem',
-            animation: 'fadeInUp 0.8s 0.15s ease both', opacity: 0,
+          }}>Notre histoire</div>
+
+          <h1 style={{
+            fontFamily: 'var(--font-cormorant)',
+            fontSize: 'clamp(2.5rem, 7vw, 4.5rem)',
+            fontWeight: 600,
+            color: 'var(--cream)',
+            lineHeight: 1.15,
+            marginBottom: '2rem',
           }}>
-            SAFARUNA est née d&apos;une<br />
-            <em style={{ fontStyle: 'italic', color: 'var(--gold)' }}>Omra manquée.</em>
+            Née d&apos;une frustration,<br />
+            <span style={{ color: 'var(--gold)' }}>construite avec foi.</span>
           </h1>
+
           <p style={{
-            color: 'rgba(255,255,255,0.65)', fontSize: '1.05rem',
-            lineHeight: 1.85, maxWidth: 600, margin: '0 auto',
-            animation: 'fadeInUp 0.8s 0.3s ease both', opacity: 0,
+            fontSize: 'clamp(1rem, 2vw, 1.2rem)',
+            color: 'rgba(250,247,240,0.7)',
+            lineHeight: 1.8,
+            maxWidth: '600px',
+            margin: '0 auto',
           }}>
-            En 2021, notre co-fondateur Amine est revenu de son premier pèlerinage avec un sentiment de frustration. 45 personnes dans un bus, un guide pressé, des rituels expliqués en arabe uniquement, et une connexion spirituelle manquée. C&apos;est de cette frustration qu&apos;est née la conviction : <strong style={{ color: 'var(--gold-light)' }}>chaque pèlerin mérite mieux.</strong>
+            SAFARUNA est née d&apos;une Omra manquée. Pas manquée dans le sens du voyage —
+            le vol a décollé, les tawaf ont été faits, les prières récitées.
+            Manquée dans le sens de la connexion. De la profondeur. De la présence.
           </p>
         </div>
       </section>
 
-      {/* ─── MISSION ──────────────────────────────────────────────────────────── */}
-      <section style={{ padding: '6rem 4rem', background: 'var(--cream)' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5rem', alignItems: 'center' }}>
-          <div>
-            <div className="section-label reveal">Notre mission</div>
-            <h2 className="reveal reveal-d1" style={{ marginBottom: '1.5rem' }}>
-              Rendre l&apos;Omra <em>spirituellement accessible</em> à tous les francophones
-            </h2>
-            <p className="reveal reveal-d2" style={{ color: 'var(--muted)', lineHeight: 1.85, marginBottom: '1.5rem', fontSize: '0.95rem' }}>
-              Des millions de musulmans francophones effectuent chaque année leur Omra sans vraiment comprendre ce qu&apos;ils accomplissent. La barrière de la langue, la pression des groupes organisés et le manque de transmission transforment souvent ce voyage sacré en excursion touristique.
+      {/* ORIGINE — HISTOIRE */}
+      <section style={{ background: 'var(--cream)', padding: '6rem 2rem' }}>
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <div className="reveal" style={{
+            background: 'var(--deep)',
+            borderRadius: '24px',
+            padding: '3rem',
+            position: 'relative',
+            overflow: 'hidden',
+          }}>
+            <div style={{
+              position: 'absolute',
+              top: '-20px',
+              right: '-20px',
+              fontSize: '8rem',
+              fontFamily: 'serif',
+              color: 'rgba(201,168,76,0.06)',
+              lineHeight: 1,
+            }}>❝</div>
+            <div style={{
+              fontSize: '0.65rem',
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              color: 'var(--gold)',
+              marginBottom: '1.5rem',
+            }}>Décembre 2021 — Médine</div>
+            <p style={{
+              fontFamily: 'var(--font-cormorant)',
+              fontSize: 'clamp(1.3rem, 3vw, 1.8rem)',
+              color: 'var(--cream)',
+              lineHeight: 1.7,
+              fontStyle: 'italic',
+            }}>
+              &ldquo;J&apos;étais à 50 mètres de la tombe du Prophète ﷺ.
+              Je ne comprenais rien de ce que le guide disait.
+              Autour de moi, 40 personnes se bousculaient.
+              Je cherchais la paix — j&apos;ai trouvé le chaos.
+              Dans l&apos;avion du retour, j&apos;ai ouvert mon ordinateur.&rdquo;
             </p>
-            <p className="reveal reveal-d3" style={{ color: 'var(--muted)', lineHeight: 1.85, fontSize: '0.95rem' }}>
-              SAFARUNA connecte ces pèlerins avec des guides privés qui parlent leur langue, connaissent leur culture et ont dédié leur vie à transmettre la profondeur des Lieux Saints. Notre mission : que chaque pèlerin revienne transformé.
-            </p>
+            <div style={{
+              marginTop: '2rem',
+              color: 'rgba(250,247,240,0.5)',
+              fontSize: '0.85rem',
+            }}>— Yacine Benali, co-fondateur de SAFARUNA</div>
           </div>
-          <div className="reveal" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-            {[
-              { n: '320+', l: 'Guides certifiés' },
-              { n: '14 000+', l: 'Pèlerins accompagnés' },
-              { n: '4.97★', l: 'Note moyenne' },
-              { n: '12', l: 'Langues couvertes' },
-              { n: '98%', l: 'Satisfaction' },
-              { n: '2021', l: 'Année de création' },
-            ].map(s => (
-              <div key={s.l} style={{
-                background: 'white', border: '1px solid var(--sand)',
-                borderRadius: 16, padding: '1.25rem',
-                textAlign: 'center',
+        </div>
+      </section>
+
+      {/* TIMELINE */}
+      <section style={{ background: 'var(--sand)', padding: '6rem 2rem' }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+          <div className="reveal" style={{ textAlign: 'center', marginBottom: '4rem' }}>
+            <div style={{
+              fontSize: '0.65rem',
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              color: 'var(--gold)',
+              marginBottom: '1rem',
+            }}>Notre parcours</div>
+            <h2 style={{
+              fontFamily: 'var(--font-cormorant)',
+              fontSize: 'clamp(2rem, 5vw, 3rem)',
+              fontWeight: 600,
+              color: 'var(--deep)',
+            }}>De la frustration à la référence</h2>
+          </div>
+
+          <div style={{ position: 'relative' }}>
+            <div style={{
+              position: 'absolute',
+              left: '50%',
+              top: 0,
+              bottom: 0,
+              width: '1px',
+              background: 'rgba(201,168,76,0.25)',
+              transform: 'translateX(-50%)',
+            }} />
+
+            {TIMELINE.map((item, i) => (
+              <div key={item.year} className="reveal" style={{
+                display: 'flex',
+                gap: '2rem',
+                marginBottom: '3rem',
+                flexDirection: i % 2 === 0 ? 'row' : 'row-reverse',
+                alignItems: 'flex-start',
               }}>
-                <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', fontWeight: 700, color: 'var(--deep)', lineHeight: 1 }}>{s.n}</div>
-                <div style={{ fontSize: '0.72rem', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: '0.4rem' }}>{s.l}</div>
+                <div style={{ flex: 1, textAlign: i % 2 === 0 ? 'right' : 'left' }}>
+                  {i % 2 === 0 && (
+                    <>
+                      <div style={{
+                        fontSize: '0.65rem',
+                        letterSpacing: '0.15em',
+                        color: 'var(--gold)',
+                        textTransform: 'uppercase',
+                        marginBottom: '0.5rem',
+                      }}>{item.year}</div>
+                      <h3 style={{
+                        fontFamily: 'var(--font-cormorant)',
+                        fontSize: '1.3rem',
+                        fontWeight: 600,
+                        color: 'var(--deep)',
+                        marginBottom: '0.5rem',
+                      }}>{item.title}</h3>
+                      <p style={{ color: 'rgba(26,18,9,0.7)', fontSize: '0.9rem', lineHeight: 1.7 }}>
+                        {item.desc}
+                      </p>
+                    </>
+                  )}
+                </div>
+
+                <div style={{
+                  width: '12px',
+                  height: '12px',
+                  borderRadius: '50%',
+                  background: 'var(--gold)',
+                  flexShrink: 0,
+                  marginTop: '6px',
+                  position: 'relative',
+                  zIndex: 1,
+                }} />
+
+                <div style={{ flex: 1, textAlign: i % 2 === 0 ? 'left' : 'right' }}>
+                  {i % 2 !== 0 && (
+                    <>
+                      <div style={{
+                        fontSize: '0.65rem',
+                        letterSpacing: '0.15em',
+                        color: 'var(--gold)',
+                        textTransform: 'uppercase',
+                        marginBottom: '0.5rem',
+                      }}>{item.year}</div>
+                      <h3 style={{
+                        fontFamily: 'var(--font-cormorant)',
+                        fontSize: '1.3rem',
+                        fontWeight: 600,
+                        color: 'var(--deep)',
+                        marginBottom: '0.5rem',
+                      }}>{item.title}</h3>
+                      <p style={{ color: 'rgba(26,18,9,0.7)', fontSize: '0.9rem', lineHeight: 1.7 }}>
+                        {item.desc}
+                      </p>
+                    </>
+                  )}
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ─── VALEURS ──────────────────────────────────────────────────────────── */}
-      <section style={{ background: 'white', padding: '6rem 4rem', borderTop: '1px solid var(--sand)' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <div className="section-label reveal" style={{ textAlign: 'center' }}>Ce en quoi nous croyons</div>
-          <h2 className="reveal reveal-d1" style={{ textAlign: 'center', marginBottom: '0.75rem' }}>
-            Nos <em>valeurs fondatrices</em>
-          </h2>
-          <p className="reveal reveal-d2" style={{ textAlign: 'center', color: 'var(--muted)', maxWidth: 540, margin: '0 auto 3.5rem', lineHeight: 1.75, fontSize: '0.9rem' }}>
-            Ces convictions guident chaque décision que nous prenons — du recrutement des guides à la conception de la plateforme.
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-            {VALUES.map((v, i) => (
-              <div key={v.title} className={`reveal reveal-d${(i % 3) + 1}`} style={{
-                background: 'var(--cream)', borderRadius: 16, padding: '2rem',
-                border: '1px solid var(--sand)',
-                transition: 'transform 0.2s, box-shadow 0.2s',
+      {/* VALEURS */}
+      <section style={{ background: 'var(--cream)', padding: '6rem 2rem' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          <div className="reveal" style={{ textAlign: 'center', marginBottom: '4rem' }}>
+            <div style={{
+              fontSize: '0.65rem',
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              color: 'var(--gold)',
+              marginBottom: '1rem',
+            }}>Ce en quoi nous croyons</div>
+            <h2 style={{
+              fontFamily: 'var(--font-cormorant)',
+              fontSize: 'clamp(2rem, 5vw, 3rem)',
+              fontWeight: 600,
+              color: 'var(--deep)',
+            }}>Nos valeurs fondatrices</h2>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '2rem',
+          }}>
+            {VALEURS.map((v) => (
+              <div key={v.title} className="reveal" style={{
+                background: 'var(--sand)',
+                borderRadius: '16px',
+                padding: '2rem',
+                borderTop: '3px solid var(--gold)',
               }}>
                 <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>{v.icon}</div>
-                <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.6rem', color: 'var(--deep)' }}>{v.title}</h3>
-                <p style={{ fontSize: '0.85rem', color: 'var(--muted)', lineHeight: 1.75 }}>{v.desc}</p>
+                <h3 style={{
+                  fontFamily: 'var(--font-cormorant)',
+                  fontSize: '1.3rem',
+                  fontWeight: 600,
+                  color: 'var(--deep)',
+                  marginBottom: '0.75rem',
+                }}>{v.title}</h3>
+                <p style={{ color: 'rgba(26,18,9,0.7)', fontSize: '0.9rem', lineHeight: 1.7 }}>
+                  {v.desc}
+                </p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ─── STORY TIMELINE ────────────────────────────────────────────────────── */}
-      <section style={{ background: 'var(--deep)', padding: '6rem 4rem' }}>
-        <div style={{ maxWidth: 800, margin: '0 auto' }}>
-          <div className="section-label reveal" style={{ color: 'var(--gold)', textAlign: 'center' }}>Notre parcours</div>
-          <h2 className="reveal reveal-d1" style={{ color: 'white', textAlign: 'center', marginBottom: '3.5rem' }}>
-            De l&apos;idée à la <em>réalité</em>
-          </h2>
-          <div style={{ position: 'relative' }}>
-            {/* Vertical line */}
+      {/* TEAM */}
+      <section style={{ background: '#0D0A06', padding: '6rem 2rem' }}>
+        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
+          <div className="reveal" style={{ textAlign: 'center', marginBottom: '4rem' }}>
             <div style={{
-              position: 'absolute', left: '50%', top: 0, bottom: 0,
-              width: 1, background: 'rgba(201,168,76,0.2)', transform: 'translateX(-50%)',
-            }} />
-            {MILESTONES.map((m, i) => (
-              <div key={m.year} className={`reveal reveal-d${(i % 3) + 1}`} style={{
-                display: 'grid', gridTemplateColumns: '1fr 1fr',
-                gap: '2rem', marginBottom: '2.5rem',
-                textAlign: i % 2 === 0 ? 'right' : 'left',
-                direction: i % 2 === 0 ? 'rtl' : 'ltr',
-              }}>
-                <div>
-                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2rem', fontWeight: 700, color: 'var(--gold)', lineHeight: 1, marginBottom: '0.4rem' }}>{m.year}</div>
-                  <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.88rem', lineHeight: 1.75, direction: 'ltr', textAlign: 'left' }}>{m.event}</p>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: i % 2 === 0 ? 'flex-start' : 'flex-end', paddingTop: '0.3rem' }}>
-                  <div style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--gold)', border: '3px solid var(--deep)', boxShadow: '0 0 0 3px rgba(201,168,76,0.3)' }} />
-                </div>
-              </div>
-            ))}
+              fontSize: '0.65rem',
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              color: 'var(--gold)',
+              marginBottom: '1rem',
+            }}>L&apos;équipe fondatrice</div>
+            <h2 style={{
+              fontFamily: 'var(--font-cormorant)',
+              fontSize: 'clamp(2rem, 5vw, 3rem)',
+              fontWeight: 600,
+              color: 'var(--cream)',
+            }}>Ceux qui ont rendu SAFARUNA possible</h2>
           </div>
-        </div>
-      </section>
 
-      {/* ─── TEAM ─────────────────────────────────────────────────────────────── */}
-      <section style={{ background: 'var(--cream)', padding: '6rem 4rem' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <div className="section-label reveal" style={{ textAlign: 'center' }}>L&apos;équipe fondatrice</div>
-          <h2 className="reveal reveal-d1" style={{ textAlign: 'center', marginBottom: '0.75rem' }}>
-            Ceux qui ont <em>tout quitté</em> pour SAFARUNA
-          </h2>
-          <p className="reveal reveal-d2" style={{ textAlign: 'center', color: 'var(--muted)', maxWidth: 520, margin: '0 auto 3.5rem', lineHeight: 1.75, fontSize: '0.9rem' }}>
-            Trois croyants convaincus que la technologie peut servir la spiritualité — sans jamais la trahir.
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
-            {TEAM.map((m, i) => (
-              <div key={m.name} className={`reveal reveal-d${i + 1}`} style={{
-                background: 'white', borderRadius: 20, padding: '2rem',
-                border: '1px solid var(--sand)',
-                boxShadow: '0 4px 20px rgba(26,18,9,0.04)',
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '2.5rem',
+          }}>
+            {TEAM.map((member) => (
+              <div key={member.name} className="reveal" style={{
+                background: 'rgba(250,247,240,0.04)',
+                border: '1px solid rgba(201,168,76,0.15)',
+                borderRadius: '20px',
+                padding: '2.5rem',
+                textAlign: 'center',
               }}>
                 <div style={{
-                  width: 72, height: 72, borderRadius: '50%',
-                  background: m.gradient, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.6rem', fontWeight: 700, color: 'var(--deep)',
-                  marginBottom: '1.25rem',
-                  boxShadow: '0 8px 24px rgba(26,18,9,0.1)',
-                }}>
-                  {m.initials}
-                </div>
-                <h3 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--deep)', marginBottom: '0.2rem' }}>{m.name}</h3>
-                <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--gold-dark)', marginBottom: '1rem' }}>{m.role}</div>
-                <p style={{ fontSize: '0.85rem', color: 'var(--muted)', lineHeight: 1.75 }}>{m.bio}</p>
+                  width: '80px',
+                  height: '80px',
+                  borderRadius: '50%',
+                  background: member.color,
+                  border: '2px solid var(--gold)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  margin: '0 auto 1.5rem',
+                  fontFamily: 'var(--font-cormorant)',
+                  fontSize: '1.8rem',
+                  fontWeight: 600,
+                  color: 'var(--gold)',
+                }}>{member.initials}</div>
+                <h3 style={{
+                  fontFamily: 'var(--font-cormorant)',
+                  fontSize: '1.5rem',
+                  fontWeight: 600,
+                  color: 'var(--cream)',
+                  marginBottom: '0.25rem',
+                }}>{member.name}</h3>
+                <div style={{
+                  fontSize: '0.7rem',
+                  letterSpacing: '0.15em',
+                  textTransform: 'uppercase',
+                  color: 'var(--gold)',
+                  marginBottom: '0.5rem',
+                }}>{member.role}</div>
+                <div style={{
+                  fontSize: '0.8rem',
+                  color: 'rgba(250,247,240,0.4)',
+                  marginBottom: '1.5rem',
+                }}>{member.origin}</div>
+                <p style={{
+                  color: 'rgba(250,247,240,0.65)',
+                  fontSize: '0.9rem',
+                  lineHeight: 1.7,
+                }}>{member.bio}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ─── MANIFESTO ────────────────────────────────────────────────────────── */}
-      <section style={{ background: 'var(--sand)', padding: '5rem 4rem', textAlign: 'center' }}>
-        <div style={{ maxWidth: 700, margin: '0 auto' }}>
-          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2.5rem', color: 'rgba(201,168,76,0.5)', marginBottom: '1rem', direction: 'rtl' }}>
-            ❝
+      {/* COMPARISON TABLE */}
+      <section style={{ background: 'var(--cream)', padding: '6rem 2rem' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+          <div className="reveal" style={{ textAlign: 'center', marginBottom: '4rem' }}>
+            <div style={{
+              fontSize: '0.65rem',
+              letterSpacing: '0.2em',
+              textTransform: 'uppercase',
+              color: 'var(--gold)',
+              marginBottom: '1rem',
+            }}>Pourquoi SAFARUNA ?</div>
+            <h2 style={{
+              fontFamily: 'var(--font-cormorant)',
+              fontSize: 'clamp(2rem, 5vw, 3rem)',
+              fontWeight: 600,
+              color: 'var(--deep)',
+              marginBottom: '1rem',
+            }}>Ce qui nous différencie</h2>
+            <p style={{ color: 'rgba(26,18,9,0.6)', maxWidth: '500px', margin: '0 auto', lineHeight: 1.7 }}>
+              Comparez objectivement. Nous n&apos;avons rien à cacher.
+            </p>
           </div>
-          <blockquote className="reveal" style={{
-            fontFamily: 'var(--font-cormorant, serif)',
-            fontSize: 'clamp(1.3rem, 2.5vw, 1.9rem)',
-            fontWeight: 300, fontStyle: 'italic',
-            color: 'var(--deep)', lineHeight: 1.5,
-            margin: '0 0 1.5rem',
+
+          <div className="reveal" style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  <th style={{
+                    padding: '1rem 1.5rem',
+                    textAlign: 'left',
+                    fontSize: '0.7rem',
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                    color: 'rgba(26,18,9,0.5)',
+                    borderBottom: '2px solid var(--sand)',
+                  }}>Critère</th>
+                  <th style={{
+                    padding: '1rem 1.5rem',
+                    textAlign: 'center',
+                    fontSize: '0.7rem',
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                    color: 'var(--gold)',
+                    background: 'rgba(201,168,76,0.06)',
+                    borderBottom: '2px solid var(--gold)',
+                  }}>✦ SAFARUNA</th>
+                  <th style={{
+                    padding: '1rem 1.5rem',
+                    textAlign: 'center',
+                    fontSize: '0.7rem',
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                    color: 'rgba(26,18,9,0.5)',
+                    borderBottom: '2px solid var(--sand)',
+                  }}>HolyGO</th>
+                  <th style={{
+                    padding: '1rem 1.5rem',
+                    textAlign: 'center',
+                    fontSize: '0.7rem',
+                    letterSpacing: '0.15em',
+                    textTransform: 'uppercase',
+                    color: 'rgba(26,18,9,0.5)',
+                    borderBottom: '2px solid var(--sand)',
+                  }}>Agence traditionnelle</th>
+                </tr>
+              </thead>
+              <tbody>
+                {COMPARISON.map((row, i) => (
+                  <tr key={row.critere} style={{
+                    background: i % 2 === 0 ? 'transparent' : 'rgba(232,223,200,0.3)',
+                  }}>
+                    <td style={{
+                      padding: '1rem 1.5rem',
+                      fontSize: '0.9rem',
+                      fontWeight: 500,
+                      color: 'var(--deep)',
+                      borderBottom: '1px solid rgba(232,223,200,0.5)',
+                    }}>{row.critere}</td>
+                    <td style={{
+                      padding: '1rem 1.5rem',
+                      textAlign: 'center',
+                      fontSize: '0.85rem',
+                      color: 'var(--deep)',
+                      background: 'rgba(201,168,76,0.06)',
+                      borderBottom: '1px solid rgba(201,168,76,0.15)',
+                      fontWeight: 500,
+                    }}>
+                      <span style={{ marginRight: '0.4rem', color: '#2D7A3B' }}>✓</span>
+                      {row.safaruna}
+                    </td>
+                    <td style={{
+                      padding: '1rem 1.5rem',
+                      textAlign: 'center',
+                      fontSize: '0.85rem',
+                      color: 'rgba(26,18,9,0.55)',
+                      borderBottom: '1px solid rgba(232,223,200,0.5)',
+                    }}>{row.holygo}</td>
+                    <td style={{
+                      padding: '1rem 1.5rem',
+                      textAlign: 'center',
+                      fontSize: '0.85rem',
+                      color: 'rgba(26,18,9,0.55)',
+                      borderBottom: '1px solid rgba(232,223,200,0.5)',
+                    }}>{row.agence}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* MANIFESTO QUOTE */}
+      <section style={{
+        background: 'var(--deep)',
+        padding: '6rem 2rem',
+        textAlign: 'center',
+      }}>
+        <div className="reveal" style={{ maxWidth: '700px', margin: '0 auto' }}>
+          <div style={{
+            fontSize: '3rem',
+            color: 'rgba(201,168,76,0.3)',
+            lineHeight: 1,
+            marginBottom: '1.5rem',
+            fontFamily: 'serif',
+          }}>❝</div>
+          <blockquote style={{
+            fontFamily: 'var(--font-cormorant)',
+            fontSize: 'clamp(1.5rem, 4vw, 2.2rem)',
+            fontStyle: 'italic',
+            color: 'var(--cream)',
+            lineHeight: 1.6,
+            margin: 0,
           }}>
-            Nous croyons que comprendre un lieu sacré, c&apos;est le vivre deux fois — une fois avec ses pieds, et une fois avec son cœur.
+            L&apos;Omra n&apos;est pas un voyage touristique.
+            C&apos;est un rendez-vous avec Allah.
+            Nous voulons que vous y soyez pleinement présent.
           </blockquote>
-          <p className="reveal reveal-d1" style={{ color: 'var(--muted)', fontSize: '0.85rem', fontWeight: 600 }}>
-            — Le manifeste SAFARUNA, 2021
+          <div style={{
+            marginTop: '2rem',
+            fontSize: '0.7rem',
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            color: 'var(--gold)',
+          }}>— La philosophie SAFARUNA</div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section style={{ background: 'var(--cream)', padding: '6rem 2rem', textAlign: 'center' }}>
+        <div className="reveal">
+          <h2 style={{
+            fontFamily: 'var(--font-cormorant)',
+            fontSize: 'clamp(2rem, 5vw, 3rem)',
+            fontWeight: 600,
+            color: 'var(--deep)',
+            marginBottom: '1rem',
+          }}>Prêt à vivre votre Omra autrement ?</h2>
+          <p style={{
+            color: 'rgba(26,18,9,0.6)',
+            marginBottom: '2.5rem',
+            fontSize: '1.05rem',
+          }}>
+            320 guides certifiés. 12 langues. Une plateforme pensée pour vous.
           </p>
+          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <a href="/guides" style={{
+              display: 'inline-block',
+              background: 'var(--gold)',
+              color: 'var(--deep)',
+              padding: '1rem 2.5rem',
+              borderRadius: '50px',
+              fontWeight: 600,
+              fontSize: '0.85rem',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              textDecoration: 'none',
+            }}>Trouver mon guide</a>
+            <a href="/contact" style={{
+              display: 'inline-block',
+              background: 'transparent',
+              color: 'var(--deep)',
+              padding: '1rem 2.5rem',
+              borderRadius: '50px',
+              fontWeight: 500,
+              fontSize: '0.85rem',
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              textDecoration: 'none',
+              border: '1px solid var(--sand)',
+            }}>Nous contacter</a>
+          </div>
         </div>
       </section>
-
-      {/* ─── CTA ──────────────────────────────────────────────────────────────── */}
-      <section className="cta-section">
-        <h2 className="reveal" style={{ color: 'white' }}>
-          Prêt à vivre <em style={{ color: 'var(--gold)' }}>ton Omra différemment ?</em>
-        </h2>
-        <p className="reveal reveal-d1" style={{ color: 'rgba(255,255,255,0.5)', maxWidth: 460, margin: '1rem auto 2.5rem', lineHeight: 1.8 }}>
-          Rejoins des milliers de pèlerins francophones qui ont vécu une Omra privée, profonde et inoubliable.
-        </p>
-        <div className="reveal reveal-d2" style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <Link href="/guides" className="btn-primary" style={{ background: 'var(--gold)', color: 'var(--deep)', fontWeight: 700 }}>
-            Trouver mon guide →
-          </Link>
-          <Link href="/guide/inscription" className="btn-secondary" style={{ borderColor: 'rgba(255,255,255,0.2)', color: 'rgba(255,255,255,0.7)' }}>
-            Devenir guide
-          </Link>
-        </div>
-      </section>
-
-      <Footer />
     </>
   );
 }

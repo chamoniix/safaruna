@@ -148,7 +148,7 @@ export default function PelerinDashboard() {
           {/* Academy */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.875rem' }}>
-              <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 600, color: '#1A1209' }}>Safaruna Academy</h2>
+              <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 600, color: '#1A1209' }}>SAFARUMA Academy</h2>
               <Link href="/espace/academy" style={{ fontSize: '0.75rem', fontWeight: 700, color: '#8B6914', textDecoration: 'none' }}>Reprendre →</Link>
             </div>
             <div className="card-hover" style={{ background: 'white', borderRadius: 20, border: '1px solid #EDE8DC', overflow: 'hidden', display: 'flex', gap: 0, boxShadow: '0 2px 8px rgba(26,18,9,0.04)', transition: 'border-color 0.2s' }}>

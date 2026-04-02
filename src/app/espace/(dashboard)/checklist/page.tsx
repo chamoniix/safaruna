@@ -5,11 +5,11 @@ import { useState } from 'react';
 export default function PreparationChecklist() {
   const [tasks, setTasks] = useState([
     { id: 1, category: 'Administratif', title: 'Passeport valide (+6 mois)', desc: 'Vérifiez la date d\'expiration de votre passeport.', done: true },
-    { id: 2, category: 'Administratif', title: 'Visa Omra / eVisa Touristique', desc: 'Imprimez votre eVisa KSA ou Visa Omra.', done: true },
+    { id: 2, category: 'Administratif', title: 'Visa de Omra / eVisa Touristique', desc: 'Imprimez votre eVisa KSA ou Visa de Omra.', done: true },
     { id: 3, category: 'Administratif', title: 'Vaccin Méningite (ACYW)', desc: 'Carnet de vaccination jaune international requis.', done: false },
     { id: 4, category: 'Spirituel', title: 'Repentir sincère (Tawbah)', desc: 'Demander pardon à Allah et aux personnes lésées.', done: true },
     { id: 5, category: 'Spirituel', title: 'Régler ses dettes', desc: 'S\'acquitter de ses dettes ou demander un délai.', done: true },
-    { id: 6, category: 'Spirituel', title: 'Apprendre les rites (Fiqh)', desc: 'Terminer le module 2 de la Safaruna Academy.', done: false },
+    { id: 6, category: 'Spirituel', title: 'Apprendre les rites (Fiqh)', desc: 'Terminer le module 2 de la SAFARUMA Academy.', done: false },
     { id: 7, category: 'Bagages', title: 'Acheter l\'Ihram (Hommes)', desc: '2 serviettes blanches non cousues.', done: true },
     { id: 8, category: 'Bagages', title: 'Ceinture / Sacoche sécurisée', desc: 'Pour garder téléphone et argent sous l\'Ihram.', done: false },
     { id: 9, category: 'Bagages', title: 'Sandales confortables', desc: 'Doivent laisser le talon et le dessus du pied découverts pour les hommes en Ihram.', done: false },
@@ -27,7 +27,7 @@ export default function PreparationChecklist() {
     <>
       <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h1 className="font-serif text-3xl md:text-4xl text-[#1A1209] mb-2">Ma Checklist Omra</h1>
+          <h1 className="font-serif text-3xl md:text-4xl text-[#1A1209] mb-2">Ma Checklist de Omra</h1>
           <p className="text-[#7A6D5A]">Préparez votre voyage spirituel sans oublier l'essentiel.</p>
         </div>
         
@@ -96,7 +96,7 @@ export default function PreparationChecklist() {
         </div>
         <div className="relative z-10 shrink-0">
           <button className="bg-[#C9A84C] text-[#1A1209] px-6 py-3 rounded-full text-sm font-bold shadow-[0_4px_14px_0_rgba(201,168,76,0.39)] hover:bg-[#F0D897] transition-all">
-            Réviser l'intention dans la Safaruna Academy
+            Réviser l'''intention dans la SAFARUMA Academy
           </button>
         </div>
       </div>

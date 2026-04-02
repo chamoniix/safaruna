@@ -66,7 +66,7 @@ export default function MessagesPage() {
               <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-[var(--green)] border border-white rounded-full"></div>
             </div>
             <div>
-              <h2 className="font-bold text-[var(--deep)]">Rachid Al-Madani</h2>
+              <h2 style={{ fontWeight: 700, color: "var(--deep)", fontSize: "1.1rem" }}>Rachid Al-Madani</h2>
               <div className="flex items-center gap-1.5">
                 <span className="text-xs text-[var(--green)] font-semibold">En ligne</span>
                 <span className="text-[10px] text-[var(--muted)]">• Makkah</span>
@@ -80,23 +80,23 @@ export default function MessagesPage() {
         </header>
 
         {/* MESSAGES CONTAINER */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar pb-32">
+        <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar pb-28">
           
           {/* ANTI-CONTOURNEMENT MESSAGE - MANDATORY */}
-          <div className="max-w-xl mx-auto mb-8 bg-gradient-to-r from-[var(--deep)] to-[#2D1F08] p-4 rounded-2xl border border-[var(--gold-dark)] shadow-md flex items-start gap-3">
-             <span className="text-2xl mt-1">⚠️</span>
-             <div>
-               <p className="text-white text-sm leading-relaxed">
-                 Pour votre sécurité et dans le respect de la charte SAFARUMA, <strong className="text-[var(--gold-light)]">toutes les transactions doivent passer par la plateforme.</strong> Tout accord direct est contraire à nos CGU et à l'éthique islamique. Allah est témoin de nos engagements.
-               </p>
-             </div>
+          <div style={{ maxWidth: 560, margin: '0 auto 2rem', background: '#1A1209', padding: '1rem 1.25rem', borderRadius: 16, border: '1px solid rgba(201,168,76,0.3)', display: 'flex', alignItems: 'flex-start', gap: '0.875rem' }}>
+            <span style={{ color: '#C9A84C', fontSize: '1.2rem', flexShrink: 0, marginTop: 2 }}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </span>
+            <p style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.8rem', lineHeight: 1.65, margin: 0 }}>
+              Pour votre sécurité, <strong style={{ color: '#F0D897' }}>toutes les transactions doivent passer par SAFARUMA.</strong> Tout accord direct est contraire à nos CGU et à l&apos;éthique islamique.
+            </p>
           </div>
 
           <div className="flex flex-col gap-4 max-w-3xl mx-auto">
             <div className="text-center text-xs font-bold text-[var(--muted)] uppercase tracking-widest my-4">Aujourd'hui</div>
             
             <div className="flex justify-end mb-2">
-              <div className="max-w-[75%] bg-[var(--gold-pale)] text-[var(--deep)] p-4 rounded-2xl rounded-tr-sm shadow-sm border border-[var(--sand)]">
+              <div className="max-w-[75%] bg-[var(--gold-pale)] text-[var(--deep)] p-4 rounded-2xl rounded-tr-sm shadow-md border border-[var(--sand)]">
                 <p className="text-sm">As-salamu alaykum. J'ai bien reçu votre demande de réservation, je suis disponible à ces dates insha'Allah !</p>
                 <div className="text-[10px] text-[var(--muted)] mt-1.5 text-right font-semibold">10:15</div>
               </div>
@@ -104,14 +104,14 @@ export default function MessagesPage() {
 
             <div className="flex justify-start mb-2">
                <div className="w-8 h-8 rounded-full bg-[var(--sand)] flex items-center justify-center font-serif font-bold text-[var(--deep)] text-xs shrink-0 self-end mb-1 mr-2 opacity-80">KL</div>
-               <div className="max-w-[75%] bg-white text-[var(--deep)] p-4 rounded-2xl rounded-tl-sm shadow-sm border border-[var(--sand)]">
+               <div className="max-w-[75%] bg-white text-[var(--deep)] p-4 rounded-2xl rounded-tl-sm shadow-md border border-[var(--sand)]">
                 <p className="text-sm">Wa alaykum as-salam. Al Hamdulillah, c'est parfait. Pouvez-vous me confirmer que vous pourrez venir nous chercher à la gare TGV de Makkah ?</p>
                 <div className="text-[10px] text-[var(--muted)] mt-1.5 text-left font-semibold">10:23 <span className="text-[var(--blue)]">✓✓</span></div>
               </div>
             </div>
 
             <div className="flex justify-end mb-2">
-              <div className="max-w-[75%] bg-[var(--gold-pale)] text-[var(--deep)] p-4 rounded-2xl rounded-tr-sm shadow-sm border border-[var(--sand)]">
+              <div className="max-w-[75%] bg-[var(--gold-pale)] text-[var(--deep)] p-4 rounded-2xl rounded-tr-sm shadow-md border border-[var(--sand)]">
                 <p className="text-sm">Oui bien sûr, mon option "Transport Privé" inclut le trajet depuis la gare Haramain jusqu'à votre hôtel, puis la visite de tous les sites prévus dans le forfait.</p>
                 <div className="text-[10px] text-[var(--muted)] mt-1.5 text-right font-semibold">10:38</div>
               </div>

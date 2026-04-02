@@ -30,30 +30,33 @@ export default function DuaTracker() {
         </div>
       </div>
 
-      {/* TABS */}
-      <div className="flex border-b border-[#E8DFC8] mb-8 overflow-x-auto hide-scrollbar">
-        <button 
-          onClick={() => setActiveTab('quotidien')}
-          className={`px-6 py-4 font-bold text-sm whitespace-nowrap transition-colors relative ${activeTab === 'quotidien' ? 'text-[#8B6914]' : 'text-[#7A6D5A] hover:text-[#1A1209]'}`}
-        >
-          Dhikr & Quotidien
-          {activeTab === 'quotidien' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#C9A84C]"></div>}
-        </button>
-        <button 
-          onClick={() => setActiveTab('omra')}
-          className={`px-6 py-4 font-bold text-sm whitespace-nowrap transition-colors relative ${activeTab === 'omra' ? 'text-[#8B6914]' : 'text-[#7A6D5A] hover:text-[#1A1209]'}`}
-        >
-          Spécifiques Omra
-          <span className="ml-2 bg-[#FAF3E0] text-[#8B6914] text-[10px] px-2 py-0.5 rounded-full">Essentiel</span>
-          {activeTab === 'omra' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#C9A84C]"></div>}
-        </button>
-        <button 
-          onClick={() => setActiveTab('favoris')}
-          className={`px-6 py-4 font-bold text-sm whitespace-nowrap transition-colors relative ${activeTab === 'favoris' ? 'text-[#8B6914]' : 'text-[#7A6D5A] hover:text-[#1A1209]'}`}
-        >
-          Mes Favoris
-          {activeTab === 'favoris' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#C9A84C]"></div>}
-        </button>
+      {/* TABS — pill style */}
+      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
+        {([
+          { key: 'quotidien', label: 'Dhikr & Quotidien' },
+          { key: 'omra',      label: 'Spécifiques de Omra', badge: 'Essentiel' },
+          { key: 'favoris',   label: 'Mes Favoris' },
+        ] as { key: string; label: string; badge?: string }[]).map(t => (
+          <button
+            key={t.key}
+            onClick={() => setActiveTab(t.key)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '0.4rem',
+              padding: '0.5rem 1.2rem', borderRadius: 50, fontSize: '0.82rem', fontWeight: 600,
+              cursor: 'pointer', transition: 'all 0.15s', whiteSpace: 'nowrap',
+              background: activeTab === t.key ? '#1A1209' : 'white',
+              color: activeTab === t.key ? '#F0D897' : '#7A6D5A',
+              border: `1px solid ${activeTab === t.key ? '#1A1209' : '#EDE8DC'}`,
+            }}
+          >
+            {t.label}
+            {t.badge && (
+              <span style={{ background: activeTab === t.key ? 'rgba(201,168,76,0.25)' : '#FAF3E0', color: activeTab === t.key ? '#F0D897' : '#8B6914', fontSize: '0.6rem', fontWeight: 700, padding: '0.1rem 0.4rem', borderRadius: 50 }}>
+                {t.badge}
+              </span>
+            )}
+          </button>
+        ))}
       </div>
 
       {/* DUA LIST */}
@@ -137,28 +140,30 @@ function DuaCard({ title, arabic, phonetic, translation, source, audioDuration, 
         </div>
       </div>
 
-      {/* AUDIO PLAYER */}
-      <div className="bg-[#FDFBF7] border border-[#E8DFC8] rounded-xl p-3 flex items-center justify-between gap-4">
-        <button 
+      {/* AUDIO PLAYER — dark premium */}
+      <div style={{ background: '#1A1209', borderRadius: 14, padding: '0.875rem 1.25rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <button
           onClick={() => setIsPlaying(!isPlaying)}
-          className="w-10 h-10 bg-[#1A1209] text-white rounded-full flex items-center justify-center hover:bg-[#C9A84C] transition-colors shrink-0"
+          style={{ width: 40, height: 40, background: isPlaying ? '#C9A84C' : 'rgba(201,168,76,0.2)', border: '1px solid rgba(201,168,76,0.35)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, color: isPlaying ? '#1A1209' : '#C9A84C', fontSize: '0.85rem', transition: 'all 0.15s' }}
         >
           {isPlaying ? '⏸' : '▶'}
         </button>
-        
-        <div className="flex-1 flex items-center gap-3">
-          <div className="text-xs font-mono text-[#7A6D5A]">{isPlaying ? '0:03' : '0:00'}</div>
-          {/* FAKE WAVEFORM */}
-          <div className="flex-1 h-8 flex items-center gap-[2px] opacity-60">
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <span style={{ fontSize: '0.7rem', fontFamily: 'monospace', color: 'rgba(240,216,151,0.5)', flexShrink: 0 }}>{isPlaying ? '0:03' : '0:00'}</span>
+          <div style={{ flex: 1, height: 32, display: 'flex', alignItems: 'center', gap: 2 }}>
             {Array.from({length: 40}).map((_, i) => (
-              <div 
-                key={i} 
-                className={`w-1 rounded-full ${isPlaying && i < 15 ? 'bg-[#C9A84C]' : 'bg-[#E8DFC8]'}`} 
-                style={{ height: `${Math.max(20, Math.random() * 100)}%` }}
-              ></div>
+              <div
+                key={i}
+                style={{
+                  width: 3, borderRadius: 2,
+                  height: `${Math.max(20, (Math.sin(i * 0.4) + 1) * 40 + 15)}%`,
+                  background: isPlaying && i < 15 ? '#C9A84C' : 'rgba(201,168,76,0.2)',
+                  transition: 'background 0.3s',
+                }}
+              />
             ))}
           </div>
-          <div className="text-xs font-mono text-[#7A6D5A]">{audioDuration}</div>
+          <span style={{ fontSize: '0.7rem', fontFamily: 'monospace', color: 'rgba(240,216,151,0.5)', flexShrink: 0 }}>{audioDuration}</span>
         </div>
       </div>
 

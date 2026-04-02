@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import Link from 'next/link';
 import { signup } from '../connexion/actions';
 import { signIn } from 'next-auth/react';
@@ -12,7 +14,7 @@ export default function RegisterPage() {
         
         <div className="text-center mb-8">
           <Link href="/" className="text-2xl font-serif font-bold text-[var(--deep)] inline-block mb-2" style={{ textDecoration: 'none' }}>
-            SAFAR<span className="text-[var(--gold)]">U</span>NA
+            SAFAR<span className="text-[var(--gold)]">UMA</span>
           </Link>
           <h1 className="text-xl font-bold text-[var(--deep)] mt-4">Créer votre compte de confiance</h1>
           <p className="text-sm text-[var(--muted)] mt-2">Rejoignez la première plateforme dédiée aux guides d'Omra certifiés.</p>

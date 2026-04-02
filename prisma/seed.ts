@@ -97,10 +97,10 @@ async function main() {
 
   // --- Guide 2: Fatima Al-Omari ---
   const fatima = await prisma.user.upsert({
-    where: { email: "fatima@safaruna.com" },
+    where: { email: "fatima@safaruma.com" },
     update: {},
     create: {
-      email: "fatima@safaruna.com",
+      email: "fatima@safaruma.com",
       name: "Fatima Al-Omari",
       firstName: "Fatima",
       lastName: "Al-Omari",
@@ -140,10 +140,10 @@ async function main() {
 
   // --- Guide 3: Youssouf Konaté ---
   const youssouf = await prisma.user.upsert({
-    where: { email: "youssouf@safaruna.com" },
+    where: { email: "youssouf@safaruma.com" },
     update: {},
     create: {
-      email: "youssouf@safaruna.com",
+      email: "youssouf@safaruma.com",
       name: "Youssouf Konaté",
       firstName: "Youssouf",
       lastName: "Konaté",
@@ -183,10 +183,10 @@ async function main() {
 
   // --- Guide 4: Abdullah Ben Yusuf (Madinah) ---
   const abdullah = await prisma.user.upsert({
-    where: { email: "abdullah@safaruna.com" },
+    where: { email: "abdullah@safaruma.com" },
     update: {},
     create: {
-      email: "abdullah@safaruna.com",
+      email: "abdullah@safaruma.com",
       name: "Abdullah Ben Yusuf",
       firstName: "Abdullah",
       lastName: "Ben Yusuf",
@@ -233,10 +233,10 @@ async function main() {
 
   // --- Guide 5: Samira Al-Rashidi (Madinah, PMR) ---
   const samira = await prisma.user.upsert({
-    where: { email: "samira@safaruna.com" },
+    where: { email: "samira@safaruma.com" },
     update: {},
     create: {
-      email: "samira@safaruna.com",
+      email: "samira@safaruma.com",
       name: "Samira Al-Rashidi",
       firstName: "Samira",
       lastName: "Al-Rashidi",

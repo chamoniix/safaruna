@@ -10,6 +10,7 @@ export default function Navbar() {
         <Link href="/guides">Nos guides</Link>
         <Link href="/#packages">Forfaits</Link>
         <Link href="/services">Services</Link>
+        <Link href="/guide-omra">Guide Omra</Link>
         <Link href="/blog">Blog</Link>
         <Link href="/faq">FAQ</Link>
         <Link href="/a-propos">À propos</Link>

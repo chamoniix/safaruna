@@ -342,3 +342,5 @@ footer { background: var(--warm); padding: 3rem 4rem 2rem; color: rgba(255,255,2
 @media (max-width: 768px) {
   .whatsapp-fab { width: 48px; height: 48px; bottom: 16px; right: 16px; }
 }
+
+.guide-omra-promo-card:hover { transform: translateY(-3px); box-shadow: 0 20px 60px rgba(201,168,76,0.15); }

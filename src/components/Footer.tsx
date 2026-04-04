@@ -41,6 +41,7 @@ export default function Footer() {
           <ul>
             <li><Link href="/guides">Trouver un guide</Link></li>
             <li><Link href="/#packages">Nos forfaits</Link></li>
+            <li><Link href="/guide-omra">Guide complet de la Omra</Link></li>
             <li><Link href="/espace/tableau-de-bord">Tableau de bord</Link></li>
             <li><Link href="/connexion">Connexion</Link></li>
           </ul>

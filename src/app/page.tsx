@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
@@ -53,8 +54,27 @@ const DIFFERENCIATEURS: Array<{ icon: React.ReactNode; title: string; desc: stri
 
 const GUIDES_VEDETTE = [
   {
+    slug: 'naim-laamari',
+    initials: 'NL',
+    hasPhoto: true,
+    gradient: 'linear-gradient(135deg, #F0D897 0%, #C9A84C 100%)',
+    bgGradient: 'linear-gradient(160deg, #1A1209 0%, #2D1F08 60%, #1A0E04 100%)',
+    name: 'Naïm LAAMARI',
+    location: 'Makkah · 8 ans · Responsable Terrain',
+    rating: '5.0',
+    reviews: 0,
+    langs: ['🇫🇷 Français', '🇸🇦 Arabe', '🇬🇧 English', '🇲🇦 Darija'],
+    price: '150€',
+    badge: '★ OFFICIEL SAFARUMA',
+    badgeColor: '#C9A84C',
+    badgeTextColor: '#1A1209',
+    isOfficial: true,
+    extraBadges: ['GUIDE VÉRIFIÉ ✓', 'RESPONSABLE TERRAIN', 'FORMATEUR CERTIFIÉ'],
+  },
+  {
     slug: 'rachid-al-madani',
     initials: 'RA',
+    hasPhoto: false,
     gradient: 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)',
     bgGradient: 'linear-gradient(160deg, #1A1209 0%, #2D1F08 60%, #1A0E04 100%)',
     name: 'Cheikh Rachid Al-Madani',
@@ -65,10 +85,14 @@ const GUIDES_VEDETTE = [
     price: '280€',
     badge: 'Top Guide',
     badgeColor: '#C9A84C',
+    badgeTextColor: '#1A1209',
+    isOfficial: false,
+    extraBadges: [],
   },
   {
     slug: 'fatima-al-omari',
     initials: 'FA',
+    hasPhoto: false,
     gradient: 'linear-gradient(135deg, #9FE1CB 0%, #1D9E75 100%)',
     bgGradient: 'linear-gradient(160deg, #082818 0%, #1D5C3A 60%, #082818 100%)',
     name: 'Ustadha Fatima Al-Omari',
@@ -79,20 +103,9 @@ const GUIDES_VEDETTE = [
     price: '320€',
     badge: 'Guide Femme',
     badgeColor: '#1D9E75',
-  },
-  {
-    slug: 'youssouf-konate',
-    initials: 'YK',
-    gradient: 'linear-gradient(135deg, #F7D774 0%, #E8A020 100%)',
-    bgGradient: 'linear-gradient(160deg, #1A2810 0%, #2D4A1A 60%, #1A2810 100%)',
-    name: 'Cheikh Youssouf Konaté',
-    location: 'Makkah · 6 ans',
-    rating: '4.88',
-    reviews: 94,
-    langs: ['🇫🇷 Français', '🇸🇳 Wolof'],
-    price: '240€',
-    badge: "Afrique de l'Ouest",
-    badgeColor: '#E8A020',
+    badgeTextColor: '#ffffff',
+    isOfficial: false,
+    extraBadges: [],
   },
 ];
 
@@ -320,47 +333,146 @@ export default function Home() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
             {GUIDES_VEDETTE.map((g, i) => (
-              <div key={g.slug} className={`guide-feat-card reveal reveal-d${i + 1}`}
-                style={{ background: g.bgGradient }}>
-                {/* Background avatar initials */}
-                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -55%)', fontFamily: 'var(--font-cormorant, serif)', fontSize: '10rem', fontWeight: 700, color: 'rgba(255,255,255,0.04)', userSelect: 'none', lineHeight: 1 }}>
+              <div
+                key={g.slug}
+                className={`guide-feat-card reveal reveal-d${i + 1}`}
+                style={{
+                  background: g.bgGradient,
+                  border: g.isOfficial ? '2px solid #C9A84C' : '1px solid rgba(255,255,255,0.06)',
+                  boxShadow: g.isOfficial ? '0 8px 40px rgba(201,168,76,0.2)' : 'none',
+                }}
+              >
+                {/* Background initials watermark */}
+                <div style={{
+                  position: 'absolute', top: '50%', left: '50%',
+                  transform: 'translate(-50%, -55%)',
+                  fontFamily: 'var(--font-cormorant, serif)',
+                  fontSize: '10rem', fontWeight: 700,
+                  color: 'rgba(255,255,255,0.04)',
+                  userSelect: 'none', lineHeight: 1,
+                }}>
                   {g.initials}
                 </div>
+
                 {/* Main content */}
                 <div className="guide-feat-overlay">
                   <div style={{ flex: 1 }}>
-                    {/* Badge */}
-                    <div style={{ display: 'inline-block', background: g.badgeColor, color: '#1A1209', fontSize: '0.6rem', fontWeight: 800, letterSpacing: '0.08em', padding: '0.2rem 0.6rem', borderRadius: 50, marginBottom: '0.75rem' }}>
+
+                    {/* Badge principal */}
+                    <div style={{
+                      display: 'inline-block',
+                      background: g.badgeColor,
+                      color: g.badgeTextColor,
+                      fontSize: '0.6rem',
+                      fontWeight: 800,
+                      letterSpacing: '0.08em',
+                      padding: '0.2rem 0.6rem',
+                      borderRadius: 50,
+                      marginBottom: g.isOfficial ? '0.4rem' : '0.75rem',
+                    }}>
                       {g.badge}
                     </div>
+
+                    {/* Extra badges pour Naïm */}
+                    {g.isOfficial && g.extraBadges.length > 0 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', marginBottom: '0.75rem' }}>
+                        <span style={{ background: '#065F46', color: 'white', fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.06em', padding: '0.15rem 0.5rem', borderRadius: 50 }}>
+                          {g.extraBadges[0]}
+                        </span>
+                        <span style={{ background: '#C9A84C', color: '#1A1209', fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.06em', padding: '0.15rem 0.5rem', borderRadius: 50 }}>
+                          {g.extraBadges[1]}
+                        </span>
+                        <span style={{ background: '#1E3A5F', color: 'white', fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.06em', padding: '0.15rem 0.5rem', borderRadius: 50 }}>
+                          {g.extraBadges[2]}
+                        </span>
+                      </div>
+                    )}
+
                     {/* Avatar + info */}
                     <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '0.5rem' }}>
-                      <div style={{ width: 44, height: 44, borderRadius: '50%', background: g.gradient, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontWeight: 700, color: '#1A1209', fontSize: '1rem', flexShrink: 0 }}>
-                        {g.initials}
-                      </div>
+                      {/* Avatar : photo pour Naïm, initiales pour les autres */}
+                      {g.hasPhoto ? (
+                        <div style={{
+                          width: 48,
+                          height: 48,
+                          borderRadius: '50%',
+                          overflow: 'hidden',
+                          position: 'relative',
+                          flexShrink: 0,
+                          border: '2px solid #C9A84C',
+                          boxShadow: '0 0 0 2px rgba(201,168,76,0.3)',
+                        }}>
+                          <Image
+                            src="/guide-avatar.png"
+                            alt="Naïm LAAMARI — Guide Officiel SAFARUMA"
+                            fill
+                            style={{ objectFit: 'cover', objectPosition: 'center top' }}
+                          />
+                        </div>
+                      ) : (
+                        <div style={{
+                          width: 44,
+                          height: 44,
+                          borderRadius: '50%',
+                          background: g.gradient,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontFamily: 'var(--font-cormorant, serif)',
+                          fontWeight: 700,
+                          color: '#1A1209',
+                          fontSize: '1rem',
+                          flexShrink: 0,
+                        }}>
+                          {g.initials}
+                        </div>
+                      )}
                       <div>
                         <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'white' }}>{g.name}</div>
                         <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.55)' }}>{g.location}</div>
                       </div>
                     </div>
+
                     {/* Rating */}
                     <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '0.5rem' }}>
                       <span style={{ color: 'var(--gold)', fontSize: '0.82rem', letterSpacing: 2 }}>★★★★★</span>
                       <span style={{ fontSize: '0.78rem', color: 'white', fontWeight: 700 }}>{g.rating}</span>
-                      <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)' }}>({g.reviews} avis)</span>
+                      {g.isOfficial ? (
+                        <span style={{ fontSize: '0.62rem', background: '#C9A84C', color: '#1A1209', fontWeight: 800, padding: '0.1rem 0.5rem', borderRadius: 50 }}>
+                          NOTE PARFAITE
+                        </span>
+                      ) : (
+                        <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)' }}>({g.reviews} avis)</span>
+                      )}
                     </div>
+
                     {/* Languages */}
                     <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.25rem' }}>
                       {g.langs.map(l => (
-                        <span key={l} style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)', fontSize: '0.68rem', padding: '0.15rem 0.5rem', borderRadius: 50, border: '1px solid rgba(255,255,255,0.15)' }}>{l}</span>
+                        <span key={l} style={{
+                          background: 'rgba(255,255,255,0.1)',
+                          color: 'rgba(255,255,255,0.8)',
+                          fontSize: '0.68rem',
+                          padding: '0.15rem 0.5rem',
+                          borderRadius: 50,
+                          border: '1px solid rgba(255,255,255,0.15)',
+                        }}>{l}</span>
                       ))}
                     </div>
+
                     {/* Price */}
-                    <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', marginBottom: 0 }}>
-                      À partir de <span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: 'var(--gold-light)' }}>{g.price}</span> / pers.
+                    <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', marginTop: '0.5rem' }}>
+                      À partir de{' '}
+                      <span style={{
+                        fontFamily: 'var(--font-cormorant, serif)',
+                        fontSize: '1.1rem',
+                        fontWeight: 700,
+                        color: 'var(--gold-light)',
+                      }}>{g.price}</span> / pers.
                     </div>
                   </div>
-                  {/* CTA — slides up on hover */}
+
+                  {/* CTA */}
                   <Link href={`/guides/${g.slug}`} className="guide-feat-btn">
                     Voir le profil →
                   </Link>
@@ -371,7 +483,7 @@ export default function Home() {
 
           <div className="reveal" style={{ textAlign: 'center', marginTop: '3rem' }}>
             <Link href="/guides" className="btn-primary" style={{ fontSize: '0.88rem' }}>
-              Voir les 5 guides certifiés →
+              Voir les 6 guides certifiés →
             </Link>
           </div>
         </div>

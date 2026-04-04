@@ -119,6 +119,15 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
                 { href: '/guide/profil',   icon: '◎', label: 'Modifier profil' },
                 { href: '/guide/forfaits', icon: '▤', label: 'Mes forfaits' },
               ]},
+              { section: 'Ressources', items: [
+                { href: '/guide/formation',    icon: '🎓', label: 'Formation SAFARUMA' },
+                { href: '/guide/documents',    icon: '📄', label: 'Mes documents' },
+                { href: '/guide/performances', icon: '📊', label: 'Performances' },
+                { href: '/conditions-guides',  icon: '📋', label: 'Conditions Guides' },
+                { href: '/charte',             icon: '🔒', label: 'Charte SAFARUMA' },
+                { href: '/devenir-guide',      icon: '◈', label: 'Revenus & Écosystème' },
+                { href: '/certification',      icon: '✦', label: 'Certification SAFARUMA' },
+              ]},
             ].map((group) => (
               <div key={group.section}>
                 <div style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)', padding: '0.9rem 1.5rem 0.35rem' }}>{group.section}</div>
@@ -135,7 +144,6 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
 
           {/* Footer */}
           <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
-            <Link href="/charte" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.72rem', color: 'rgba(255,255,255,0.25)', textDecoration: 'none' }}>🔒 Charte SAFARUMA</Link>
             <button style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.72rem', color: 'rgba(255,255,255,0.25)', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>↩ Déconnexion</button>
           </div>
         </aside>

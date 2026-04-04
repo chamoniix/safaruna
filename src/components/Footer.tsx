@@ -49,11 +49,8 @@ export default function Footer() {
         <div className="footer-col">
           <h4>Guides</h4>
           <ul>
-            <li><Link href="/guide/inscription">Créer mon profil</Link></li>
+            <li><Link href="/guide/inscription">Créer mon profil Guide</Link></li>
             <li><Link href="/guide/tableau-de-bord">Espace Guide</Link></li>
-            <li><Link href="/devenir-guide">Revenus et Écosystème</Link></li>
-            <li><Link href="/certification">Certification des guides</Link></li>
-            <li><Link href="/charte">Charte SAFARUMA</Link></li>
           </ul>
         </div>
         <div className="footer-col">
@@ -72,7 +69,6 @@ export default function Footer() {
             <li><Link href="/mentions-legales">Mentions légales</Link></li>
             <li><Link href="/politique-confidentialite">Confidentialité</Link></li>
             <li><Link href="/cgu">CGU</Link></li>
-            <li><Link href="/conditions-guides">Conditions Guides</Link></li>
             <li><Link href="/conditions-clients">Conditions Clients</Link></li>
             <li><Link href="/charte-islamique">Charte Islamique</Link></li>
           </ul>

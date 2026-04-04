@@ -27,6 +27,7 @@ export default function BookingWidget({ slug, guideName, packages }: BookingWidg
   const occupiedDates = [15, 16, 17, 18, 19];
 
   const [selectedDates, setSelectedDates] = useState<number[]>([]);
+  const [guideGender, setGuideGender] = useState<'homme' | 'femme' | null>(null);
 
   const handleDateClick = (day: number) => {
     if (day < today || occupiedDates.includes(day)) return;
@@ -200,6 +201,108 @@ export default function BookingWidget({ slug, guideName, packages }: BookingWidg
           )}
         </div>
 
+        {/* Guide gender preference */}
+        <div style={{ marginBottom: '1.25rem' }}>
+          <div style={{
+            fontSize: '0.7rem',
+            fontWeight: 700,
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            color: 'var(--muted)',
+            marginBottom: '0.6rem',
+          }}>
+            Préférence de guide
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+            {[
+              { value: 'homme' as const, label: 'Guide homme', icon: '👨' },
+              { value: 'femme' as const, label: 'Guide femme', icon: '👩' },
+            ].map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => setGuideGender(g => g === opt.value ? null : opt.value)}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '0.3rem',
+                  padding: '0.75rem 0.5rem',
+                  borderRadius: '10px',
+                  border: guideGender === opt.value
+                    ? '1.5px solid var(--gold)'
+                    : '1.5px solid var(--sand)',
+                  background: guideGender === opt.value
+                    ? 'rgba(201,168,76,0.08)'
+                    : 'transparent',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s',
+                  fontFamily: 'var(--font-manrope), sans-serif',
+                }}
+              >
+                <span style={{ fontSize: '1.25rem' }}>{opt.icon}</span>
+                <span style={{
+                  fontSize: '0.75rem',
+                  fontWeight: guideGender === opt.value ? 700 : 500,
+                  color: guideGender === opt.value ? 'var(--deep)' : 'var(--muted)',
+                }}>
+                  {opt.label}
+                </span>
+                {guideGender === opt.value && (
+                  <span style={{
+                    width: '6px',
+                    height: '6px',
+                    borderRadius: '50%',
+                    background: 'var(--gold)',
+                    display: 'block',
+                  }} />
+                )}
+              </button>
+            ))}
+          </div>
+          {guideGender === null && (
+            <div style={{
+              fontSize: '0.68rem',
+              color: 'var(--muted)',
+              marginTop: '0.4rem',
+              fontStyle: 'italic',
+            }}>
+              Optionnel · Nous ferons de notre mieux pour honorer ta préférence
+            </div>
+          )}
+          {guideGender === 'femme' && (
+            <div style={{
+              fontSize: '0.72rem',
+              color: '#1D5C3A',
+              fontWeight: 600,
+              marginTop: '0.4rem',
+              background: '#E8F5EE',
+              padding: '0.4rem 0.7rem',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+            }}>
+              ✓ Fatima Al-Omari et Samira Al-Rashidi disponibles
+            </div>
+          )}
+          {guideGender === 'homme' && (
+            <div style={{
+              fontSize: '0.72rem',
+              color: '#1A4A8A',
+              fontWeight: 600,
+              marginTop: '0.4rem',
+              background: '#E8F0F8',
+              padding: '0.4rem 0.7rem',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+            }}>
+              ✓ 4 guides hommes certifiés disponibles
+            </div>
+          )}
+        </div>
+
         {/* Calendar */}
         <div style={{ marginBottom: '1.25rem' }}>
           <div style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: '0.6rem' }}>
@@ -271,7 +374,10 @@ export default function BookingWidget({ slug, guideName, packages }: BookingWidg
         </div>
 
         {/* CTA */}
-        <Link href={`/espace/checkout/${slug}`} style={{ display: 'block', textDecoration: 'none' }}>
+        <Link
+          href={`/espace/checkout/${slug}?forfait=${selectedPackage}&personnes=${groupSize}${guideGender ? `&guide=${guideGender}` : ''}`}
+          style={{ display: 'block', textDecoration: 'none' }}
+        >
           <button style={{
             width: '100%',
             padding: '0.9rem',

@@ -144,6 +144,83 @@ const REVIEWS = [
 
 // ─── Guide Data ────────────────────────────────────────────────────────────────
 
+const NAIM_PACKAGES = [
+  {
+    name: 'Forfait Découverte',
+    label: 'Découverte',
+    price: 150,
+    days: 1,
+    description: 'Visite guidée 4h des lieux essentiels de Makkah avec Naïm LAAMARI, Responsable Terrain SAFARUMA.',
+    features: [
+      'Visite guidée 4h des lieux essentiels',
+      'Masjid Al-Haram et la Kaaba',
+      'Puits de Zamzam et Safa & Marwa',
+      'Explications historiques et spirituelles',
+      'Disponibilité téléphonique après la visite',
+    ],
+  },
+  {
+    name: 'Forfait Omra Complète',
+    label: 'Omra Complète',
+    price: 350,
+    days: 3,
+    description: 'Accompagnement complet des rituels de la Omra + histoire des lieux saints de Makkah.',
+    features: [
+      "Accompagnement complet des rituels (tawaf, sa'i, ihram)",
+      'Tous les sites de Makkah : Hira, Thawr, Mina, Arafat',
+      'Gestion de toute situation imprévue sur place',
+      'Voiture privée incluse pour les déplacements',
+      'Disponibilité 24h/24 pendant toute la durée',
+      "Livret de du'a et supplications SAFARUMA",
+      'Certificat de pèlerinage personnalisé',
+    ],
+  },
+  {
+    name: 'Forfait VIP SAFARUMA',
+    label: 'VIP SAFARUMA',
+    price: 600,
+    days: 5,
+    description: 'Service premium exclusif, groupe max 4 personnes. Disponibilité totale de Naïm sur toute la durée.',
+    features: [
+      'Tout ce qui est inclus dans Omra Complète',
+      'Groupe limité à 4 personnes maximum',
+      'Véhicule de prestige avec chauffeur',
+      'Hôtel 5★ sélectionné à proximité du Haram',
+      'Repas du soir inclus chaque jour',
+      'Accès prioritaire à certains espaces du Haram',
+      'Album photo souvenir du voyage',
+      'Suivi WhatsApp personnel post-voyage',
+    ],
+  },
+];
+
+const NAIM_REVIEWS = [
+  {
+    name: 'Yasmine B.',
+    country: 'Paris, France',
+    flag: '🇫🇷',
+    date: 'Mars 2026',
+    rating: 5,
+    text: "Naïm nous a accompagnés pendant toute notre Omra. Sa connaissance des lieux saints est impressionnante. Il a géré un problème de dernière minute avec un calme et une efficacité remarquables. Barakallahu fik.",
+  },
+  {
+    name: 'Omar K.',
+    country: 'Lyon, France',
+    flag: '🇫🇷',
+    date: 'Février 2026',
+    rating: 5,
+    text: "Guide exceptionnel. Il nous a expliqué l'histoire de chaque lieu avec une précision et une passion rares. Ma famille et moi garderons ce voyage toute notre vie.",
+  },
+  {
+    name: 'Fatou D.',
+    country: 'Dakar, Sénégal',
+    flag: '🇸🇳',
+    date: 'Janvier 2026',
+    rating: 5,
+    text: "Guide officiel SAFARUMA et ça se voit ! Professionnel, ponctuel, bienveillant. Il parle un français parfait et connaît Makkah comme sa poche.",
+  },
+];
+
 const GUIDES: Record<string, {
   name: string;
   initials: string;
@@ -433,33 +510,48 @@ export default async function GuideProfilePage({
         }}></div>
 
         {/* Avatar */}
-        <div style={{
-          width: '110px',
-          height: '110px',
-          borderRadius: '50%',
-          background: guide.gradient,
-          margin: '0 auto 1.5rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontFamily: 'var(--font-cormorant), serif',
-          fontSize: '2.5rem',
-          fontWeight: 700,
-          color: 'var(--deep)',
-          position: 'relative',
-          zIndex: 1,
-          boxShadow: '0 0 0 4px rgba(201,168,76,0.25), 0 16px 48px rgba(0,0,0,0.3)',
-        }}>
-          {guide.initials}
+        <div style={{ position: 'relative', zIndex: 1, display: 'inline-block', margin: '0 auto 0.75rem' }}>
+          <div style={{
+            width: guide.isOfficial ? '120px' : '110px',
+            height: guide.isOfficial ? '120px' : '110px',
+            borderRadius: '50%',
+            background: guide.isOfficial ? '#1A1209' : guide.gradient,
+            margin: '0 auto',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontFamily: 'var(--font-cormorant), serif',
+            fontSize: guide.isOfficial ? '2.8rem' : '2.5rem',
+            fontWeight: 700,
+            color: guide.isOfficial ? '#C9A84C' : 'var(--deep)',
+            border: guide.isOfficial ? '3px solid #C9A84C' : 'none',
+            boxShadow: guide.isOfficial
+              ? '0 0 20px rgba(201,168,76,0.3), 0 16px 48px rgba(0,0,0,0.3)'
+              : '0 0 0 4px rgba(201,168,76,0.25), 0 16px 48px rgba(0,0,0,0.3)',
+          }}>
+            {guide.initials}
+          </div>
+          {guide.isOfficial && (
+            <div style={{ position: 'absolute', bottom: -16, left: '50%', transform: 'translateX(-50%)' }}>
+              <svg width="32" height="40" viewBox="0 0 32 40" fill="none">
+                <circle cx="16" cy="10" r="7" fill="#C9A84C" opacity="0.9"/>
+                <rect x="11" y="17" width="10" height="14" rx="2" fill="#C9A84C" opacity="0.85"/>
+                <rect x="8" y="24" width="16" height="10" rx="3" fill="#C9A84C" opacity="0.7"/>
+                <line x1="16" y1="31" x2="16" y2="39" stroke="#C9A84C" strokeWidth="1.5" strokeLinecap="round"/>
+                <line x1="8" y1="34" x2="24" y2="34" stroke="#C9A84C" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            </div>
+          )}
         </div>
 
         {/* Name */}
         <h1 style={{
           fontFamily: 'var(--font-cormorant), serif',
-          fontSize: 'clamp(2rem, 4vw, 3rem)',
-          fontWeight: 400,
+          fontSize: guide.isOfficial ? 'clamp(2rem, 5vw, 3rem)' : 'clamp(2rem, 4vw, 3rem)',
+          fontWeight: guide.isOfficial ? 700 : 400,
           color: 'white',
-          marginBottom: '0.5rem',
+          marginBottom: '0.4rem',
+          marginTop: guide.isOfficial ? '1.5rem' : '0',
           position: 'relative',
           zIndex: 1,
           lineHeight: 1.15,
@@ -474,12 +566,49 @@ export default async function GuideProfilePage({
           letterSpacing: '0.15em',
           textTransform: 'uppercase',
           color: 'var(--gold)',
-          marginBottom: '0.6rem',
+          marginBottom: guide.isOfficial ? '1rem' : '0.6rem',
           position: 'relative',
           zIndex: 1,
         }}>
           {guide.speciality}
         </div>
+
+        {/* Official badges */}
+        {guide.isOfficial && (
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            gap: '8px',
+            marginBottom: '1.25rem',
+            position: 'relative',
+            zIndex: 1,
+          }}>
+            {[
+              { bg: '#1A1209', color: '#F0D897', border: '1px solid #C9A84C', icon: '🛡️', label: 'OFFICIEL SAFARUMA' },
+              { bg: '#065F46', color: 'white', border: 'none', icon: '✓', label: 'GUIDE VÉRIFIÉ' },
+              { bg: '#C9A84C', color: '#1A1209', border: 'none', icon: '📍', label: 'RESPONSABLE TERRAIN' },
+              { bg: '#1E3A5F', color: 'white', border: 'none', icon: '🎓', label: 'FORMATEUR CERTIFIÉ' },
+            ].map(b => (
+              <span key={b.label} style={{
+                background: b.bg,
+                color: b.color,
+                border: b.border ?? 'none',
+                borderRadius: '50px',
+                fontSize: '11px',
+                fontWeight: 700,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                padding: '6px 14px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '5px',
+              }}>
+                <span>{b.icon}</span> {b.label}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* Rating */}
         <div style={{
@@ -490,10 +619,15 @@ export default async function GuideProfilePage({
           marginBottom: '1.25rem',
           position: 'relative',
           zIndex: 1,
+          flexWrap: 'wrap',
         }}>
           <span style={{ color: 'var(--gold)', letterSpacing: '2px', fontSize: '1rem' }}>★★★★★</span>
           <span style={{ color: 'white', fontWeight: 700, fontSize: '0.9rem' }}>{guide.rating}</span>
-          <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.82rem' }}>({guide.reviewCount} avis)</span>
+          {guide.isOfficial ? (
+            <span style={{ background: '#C9A84C', color: '#1A1209', fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.1em', padding: '3px 10px', borderRadius: 50 }}>NOTE PARFAITE</span>
+          ) : (
+            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.82rem' }}>({guide.reviewCount} avis)</span>
+          )}
         </div>
 
         {/* Short bio */}
@@ -592,9 +726,10 @@ export default async function GuideProfilePage({
         <GuideProfileClient
           slug={slug}
           guideName={guide.name}
-          packages={PACKAGES}
+          isOfficial={guide.isOfficial ?? false}
+          packages={guide.isOfficial ? NAIM_PACKAGES : PACKAGES}
           places={PLACES}
-          reviews={REVIEWS}
+          reviews={guide.isOfficial ? NAIM_REVIEWS : REVIEWS}
           certifications={guide.certifications}
           services={guide.services}
           bioFull={guide.bioFull}

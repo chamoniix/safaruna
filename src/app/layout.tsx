@@ -21,13 +21,19 @@ export const metadata: Metadata = {
   title: "SAFARUMA — Le voyage vers tes origines commence ici.",
   description: "SAFARUMA connecte les voyageurs avec des guides privés certifiés pour vivre la Omra, découvrir l'histoire de l'Islam et retrouver ses origines spirituelles. 320 guides certifiés, 12 langues.",
   keywords: ["omra", "guide omra", "umrah", "guide privé", "arabie saoudite", "makkah", "madinah", "pèlerinage", "guide islamique"],
+  icons: {
+    icon: '/logo-icon.png',
+    shortcut: '/logo-icon.png',
+    apple: '/logo-icon.png',
+  },
   openGraph: {
-    type: 'website',
+    title: 'SAFARUMA — Le voyage vers tes origines commence ici',
+    description: 'Guides privés certifiés pour la Omra, la découverte historique et le tourisme spirituel.',
     url: 'https://safaruma.com',
     siteName: 'SAFARUMA',
-    title: "SAFARUMA — Le voyage vers tes origines commence ici.",
-    description: "SAFARUMA connecte les voyageurs avec des guides privés certifiés pour vivre la Omra, découvrir l'histoire de l'Islam et retrouver ses origines spirituelles. 320 guides certifiés, 12 langues.",
-    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'SAFARUMA' }],
+    images: [{ url: '/logo.png', width: 1200, height: 630 }],
+    locale: 'fr_FR',
+    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',

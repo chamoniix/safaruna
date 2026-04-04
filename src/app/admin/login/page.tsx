@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { adminLogin } from './actions';
 
 export default async function AdminLoginPage({
@@ -13,8 +14,8 @@ export default async function AdminLoginPage({
 
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2rem', fontWeight: 700, color: 'white', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>
-            SAFAR<span style={{ color: '#C9A84C' }}>U</span>MA
+          <div style={{ marginBottom: '0.5rem' }}>
+            <Image src="/logo.png" alt="SAFARUMA" width={140} height={40} priority style={{ objectFit: 'contain' }} />
           </div>
           <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)' }}>
             Administration

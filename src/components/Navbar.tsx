@@ -1,10 +1,18 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Navbar() {
   return (
     <nav>
       <Link href="/" className="logo" style={{ textDecoration: 'none' }}>
-        SAFAR<span>U</span>MA
+        <Image
+          src="/logo.png"
+          alt="SAFARUMA"
+          width={140}
+          height={40}
+          priority
+          style={{ objectFit: 'contain' }}
+        />
       </Link>
       <div className="nav-links">
         <Link href="/guides">Nos guides</Link>

@@ -52,6 +52,7 @@ export default function Footer() {
             <li><Link href="/guide/inscription">Créer mon profil</Link></li>
             <li><Link href="/guide/tableau-de-bord">Espace Guide</Link></li>
             <li><Link href="/devenir-guide">Revenus et Écosystème</Link></li>
+            <li><Link href="/certification">Certification des guides</Link></li>
             <li><Link href="/charte">Charte SAFARUMA</Link></li>
           </ul>
         </div>

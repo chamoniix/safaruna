@@ -127,7 +127,21 @@ export default function GuideOmraClient() {
         .go-progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: var(--go-gold); transition: width 0.2s ease; z-index: 200; }
 
         /* Hero */
-        .go-hero { position: relative; background: var(--go-deep); min-height: 70vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 8rem 2rem 5rem; overflow: hidden; }
+        .go-hero { position: relative; background: var(--go-deep); min-height: 50vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 7rem 1.5rem 3rem; overflow: hidden; }
+        @media (max-width: 768px) {
+          .go-hero { min-height: 40vh; padding: 6rem 1.25rem 2.5rem; }
+          .go-hero h1 { font-size: clamp(1.6rem, 7vw, 2.4rem); }
+          .go-hero-sub { font-size: 0.88rem; margin-bottom: 1.5rem; }
+          .go-layout { padding: 1.25rem 1rem 3rem; gap: 1.5rem; }
+          .go-section { margin-bottom: 2rem; }
+          .go-step { padding: 1.1rem; gap: 0.85rem; }
+          .go-dua-card { padding: 1.25rem; }
+          .go-dua-arabic { font-size: 1.25rem; }
+          .go-info-grid { grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+          .go-info-box { padding: 1rem; }
+          .go-cta-block { padding: 2rem 1.25rem; }
+          .go-cta-block h3 { font-size: 1.35rem; }
+        }
         .go-hero-arabic { font-family: 'Tajawal', 'Cinzel', serif; font-size: clamp(5rem, 18vw, 12rem); color: rgba(201,168,76,0.06); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; line-height: 1; direction: rtl; white-space: nowrap; }
         .go-hero-eyebrow { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--go-gold); margin-bottom: 1.25rem; }
         .go-hero h1 { font-family: 'Cinzel', var(--font-cormorant, serif); font-size: clamp(2.2rem, 6vw, 4.2rem); font-weight: 600; color: white; line-height: 1.15; max-width: 720px; margin: 0 auto 1.25rem; }
@@ -136,7 +150,7 @@ export default function GuideOmraClient() {
         .go-hero-badge { background: rgba(201,168,76,0.12); border: 1px solid rgba(201,168,76,0.25); color: rgba(201,168,76,0.9); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; padding: 0.35rem 0.9rem; border-radius: 20px; }
 
         /* Layout */
-        .go-layout { display: grid; grid-template-columns: 240px 1fr; gap: 3rem; max-width: 1200px; margin: 0 auto; padding: 4rem 2rem 6rem; }
+        .go-layout { display: grid; grid-template-columns: 240px 1fr; gap: 3rem; max-width: 1200px; margin: 0 auto; padding: 2rem 2rem 4rem; }
         @media (max-width: 900px) { .go-layout { grid-template-columns: 1fr; } .go-sidebar { display: none; } }
 
         /* Sidebar TOC */
@@ -151,32 +165,32 @@ export default function GuideOmraClient() {
 
         /* Content */
         .go-content { max-width: 760px; }
-        .go-section { margin-bottom: 5rem; scroll-margin-top: 5rem; }
+        .go-section { margin-bottom: 2.5rem; scroll-margin-top: 5rem; }
         .go-section-tag { display: inline-block; font-size: 0.65rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--go-gold); background: rgba(201,168,76,0.08); border: 1px solid rgba(201,168,76,0.2); padding: 0.25rem 0.7rem; border-radius: 4px; margin-bottom: 0.85rem; }
         .go-section h2 { font-family: 'Cinzel', var(--font-cormorant, serif); font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 600; color: var(--go-deep); margin: 0 0 1.25rem; line-height: 1.2; }
         .go-section p { font-size: 0.95rem; color: #4A3728; line-height: 1.9; margin-bottom: 1.1rem; }
         .go-section strong { color: var(--go-deep); }
 
         /* Step cards */
-        .go-steps { display: flex; flex-direction: column; gap: 1.25rem; margin: 2rem 0; }
-        .go-step { display: flex; gap: 1.25rem; background: var(--go-sand); border-radius: 12px; padding: 1.5rem; border-left: 4px solid var(--go-gold); }
+        .go-steps { display: flex; flex-direction: column; gap: 0.85rem; margin: 1.25rem 0; }
+        .go-step { display: flex; gap: 1rem; background: #F8F4EC; border-radius: 12px; padding: 1.25rem; border-left: 3px solid var(--go-gold); }
         .go-step-num { flex-shrink: 0; width: 36px; height: 36px; background: var(--go-deep); color: var(--go-gold); font-family: 'Cinzel', serif; font-size: 0.9rem; font-weight: 700; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
         .go-step-body h3 { font-size: 1rem; font-weight: 700; color: var(--go-deep); margin: 0 0 0.4rem; }
-        .go-step-body p { font-size: 0.875rem; color: #5A4535; line-height: 1.75; margin: 0; }
+        .go-step-body p { font-size: 0.875rem; color: #3D2510; line-height: 1.75; margin: 0; }
 
         /* Ritual info boxes */
-        .go-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1.75rem 0; }
+        .go-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.85rem; margin: 1rem 0; }
         .go-info-box { background: white; border: 1px solid rgba(201,168,76,0.2); border-radius: 10px; padding: 1.25rem; }
         .go-info-box-icon { font-size: 1.4rem; margin-bottom: 0.5rem; }
         .go-info-box h4 { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--go-gold); margin: 0 0 0.3rem; }
         .go-info-box p { font-size: 0.83rem; color: #5A4535; line-height: 1.6; margin: 0; }
 
         /* Du'as */
-        .go-dua-card { background: var(--go-deep); border-radius: 12px; padding: 1.75rem 2rem; margin-bottom: 1.25rem; }
-        .go-dua-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(201,168,76,0.7); margin-bottom: 0.75rem; }
-        .go-dua-arabic { font-family: 'Tajawal', serif; font-size: 1.6rem; color: rgba(201,168,76,0.9); direction: rtl; line-height: 1.8; margin-bottom: 0.9rem; text-align: right; }
-        .go-dua-transliteration { font-size: 0.82rem; font-style: italic; color: rgba(255,255,255,0.45); margin-bottom: 0.5rem; }
-        .go-dua-translation { font-size: 0.88rem; color: rgba(255,255,255,0.65); line-height: 1.65; }
+        .go-dua-card { background: #0D0805; border: 1px solid rgba(201,168,76,0.25); border-radius: 12px; padding: 1.5rem 1.75rem; margin-bottom: 1rem; }
+        .go-dua-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #C9A84C; margin-bottom: 0.65rem; }
+        .go-dua-arabic { font-family: 'Tajawal', serif; font-size: 1.5rem; color: #F0D897; direction: rtl; line-height: 1.8; margin-bottom: 0.75rem; text-align: right; }
+        .go-dua-transliteration { font-size: 0.82rem; font-style: italic; color: rgba(255,255,255,0.65); margin-bottom: 0.4rem; }
+        .go-dua-translation { font-size: 0.88rem; color: rgba(255,255,255,0.85); line-height: 1.65; }
 
         /* Checklist */
         .go-checklist-cat { margin-bottom: 2rem; }

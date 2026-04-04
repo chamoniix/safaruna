@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import GuideProfileClient from './GuideProfileClient';
@@ -511,26 +512,44 @@ export default async function GuideProfilePage({
 
         {/* Avatar */}
         <div style={{ position: 'relative', zIndex: 1, display: 'inline-block', margin: '0 auto 0.75rem' }}>
-          <div style={{
-            width: guide.isOfficial ? '120px' : '110px',
-            height: guide.isOfficial ? '120px' : '110px',
-            borderRadius: '50%',
-            background: guide.isOfficial ? '#1A1209' : guide.gradient,
-            margin: '0 auto',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontFamily: 'var(--font-cormorant), serif',
-            fontSize: guide.isOfficial ? '2.8rem' : '2.5rem',
-            fontWeight: 700,
-            color: guide.isOfficial ? '#C9A84C' : 'var(--deep)',
-            border: guide.isOfficial ? '3px solid #C9A84C' : 'none',
-            boxShadow: guide.isOfficial
-              ? '0 0 20px rgba(201,168,76,0.3), 0 16px 48px rgba(0,0,0,0.3)'
-              : '0 0 0 4px rgba(201,168,76,0.25), 0 16px 48px rgba(0,0,0,0.3)',
-          }}>
-            {guide.initials}
-          </div>
+          {guide.isOfficial ? (
+            <div style={{
+              width: '120px',
+              height: '120px',
+              borderRadius: '50%',
+              border: '3px solid #C9A84C',
+              boxShadow: '0 0 20px rgba(201,168,76,0.3), 0 16px 48px rgba(0,0,0,0.3)',
+              overflow: 'hidden',
+              position: 'relative',
+              margin: '0 auto',
+            }}>
+              <Image
+                src="/guide-avatar.png"
+                alt="Naïm LAAMARI — Guide Officiel SAFARUMA"
+                fill
+                style={{ objectFit: 'cover', objectPosition: 'center top' }}
+                priority
+              />
+            </div>
+          ) : (
+            <div style={{
+              width: '110px',
+              height: '110px',
+              borderRadius: '50%',
+              background: guide.gradient,
+              margin: '0 auto',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontFamily: 'var(--font-cormorant), serif',
+              fontSize: '2.5rem',
+              fontWeight: 700,
+              color: 'var(--deep)',
+              boxShadow: '0 0 0 4px rgba(201,168,76,0.25), 0 16px 48px rgba(0,0,0,0.3)',
+            }}>
+              {guide.initials}
+            </div>
+          )}
           {guide.isOfficial && (
             <div style={{ position: 'absolute', bottom: -16, left: '50%', transform: 'translateX(-50%)' }}>
               <svg width="32" height="40" viewBox="0 0 32 40" fill="none">

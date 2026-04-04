@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { IconCar, IconVan, IconTrain, IconShield, IconStar, IconPerson, IconUserGroup, IconClock, IconAccessibility, IconMap } from '@/components/Icons';
@@ -172,6 +173,25 @@ function getProgramForDays(days: number) {
 
 // ─── SVG Avatars ───────────────────────────────────────────────────────────────
 function GuideAvatarSVG({ slug, gradient, initials, isWoman }: { slug: string; gradient: string; initials: string; isWoman?: boolean }) {
+  if (slug === 'naim-laamari') {
+    return (
+      <div style={{
+        width: 46,
+        height: 46,
+        borderRadius: '50%',
+        overflow: 'hidden',
+        position: 'relative',
+      }}>
+        <Image
+          src="/guide-avatar.png"
+          alt="Naïm LAAMARI"
+          fill
+          style={{ objectFit: 'cover', objectPosition: 'center top' }}
+        />
+      </div>
+    );
+  }
+
   const bgMap: Record<string, string> = {
     'naim-laamari':     '#1A1209',
     'rachid-al-madani': '#1A3A2A',

@@ -277,7 +277,14 @@ footer { background: var(--warm); padding: 3rem 4rem 2rem; color: rgba(255,255,2
   section { padding: 3.5rem 1.25rem; }
   .packages-grid { grid-template-columns: 1fr; }
   .revenue-grid { grid-template-columns: 1fr 1fr; }
-  .footer-top { grid-template-columns: 1fr; gap: 1.5rem; }
+  .footer-top { grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .footer-brand { grid-column: 1 / -1; }
+  .footer-col h4 { margin-bottom: 0.6rem; }
+  .footer-col ul li { margin-bottom: 0.3rem; }
+  .footer-trust { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; flex-wrap: nowrap !important; justify-content: flex-start !important; padding-left: 1rem; padding-right: 1rem; gap: 1rem !important; }
+  .footer-trust::-webkit-scrollbar { display: none; }
+  .footer-social-section { padding-top: 0.75rem !important; margin-bottom: 0.75rem !important; }
+  .footer-bottom { flex-direction: column; gap: 0.25rem; padding: 0.5rem 1rem; text-align: center; font-size: 0.72rem; }
   .cta-section { padding: 4rem 1.25rem; }
   .trust { padding: 1.25rem 1rem; gap: 1rem; }
   .guide-card { padding: 1.25rem; }

@@ -6,7 +6,7 @@ export default function Footer() {
   return (
     <footer>
       {/* Trust badges strip */}
-      <div style={{
+      <div className="footer-trust" style={{
         display: 'flex', flexWrap: 'wrap', gap: '1.5rem',
         alignItems: 'center', justifyContent: 'center',
         padding: '1.25rem 4rem',
@@ -79,7 +79,7 @@ export default function Footer() {
         </div>
       </div>
       {/* Social media */}
-      <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '1.5rem', marginBottom: '1.5rem', textAlign: 'center' }}>
+      <div className="footer-social-section" style={{ borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: '1.5rem', marginBottom: '1.5rem', textAlign: 'center' }}>
         <div style={{ fontSize: '0.69rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.3)', marginBottom: '0.875rem', fontFamily: 'var(--font-manrope, sans-serif)' }}>
           Suivez-nous
         </div>

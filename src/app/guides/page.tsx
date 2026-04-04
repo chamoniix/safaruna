@@ -247,18 +247,28 @@ function GuideAvatarSVG({ slug, gradient, initials, isWoman }: { slug: string; g
 }
 
 export default function GuideSearchPage() {
-  const [budget, setBudget]           = useState(800);
-  const [destination, setDestination] = useState<'all' | 'makkah' | 'madinah' | 'both'>('all');
+  const [destination, setDestination] = useState<'all' | 'makkah' | 'madinah'>('all');
   const [guideOption, setGuideOption] = useState<'separate' | 'same'>('separate');
-  const [selectedLang, setSelectedLang] = useState<string>('');
-  const [activeQF, setActiveQF]       = useState('🇫🇷 Francophone');
+  const [selectedLang, setSelectedLang] = useState('');
+  const [guideGender, setGuideGender] = useState<'homme' | 'femme' | ''>('');
+  const [groupSize, setGroupSize] = useState(2);
+  const [arrivalDate, setArrivalDate] = useState('');
+  const [departureDate, setDepartureDate] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [budget, setBudget] = useState(800);
+
+  const transportMakkahMadinah = destination === 'all' ? (() => {
+    const aller = groupSize * 80;
+    const retour = groupSize * 80;
+    return { aller, retour, total: aller + retour };
+  })() : null;
+
+  const isGroupe = groupSize > 6;
 
   const filteredGuides = GUIDES_DATA.filter(g => {
     if (destination === 'all') return true;
     if (destination === 'makkah') return g.zones.includes('makkah');
     if (destination === 'madinah') return g.zones.includes('madinah');
-    if (destination === 'both') return g.zones.includes('makkah') && g.zones.includes('madinah');
     return true;
   });
   const filteredOfficial = filteredGuides.filter(g => g.isOfficial);
@@ -342,124 +352,113 @@ export default function GuideSearchPage() {
           {/* Search bar */}
           <div className="guides-search-bar">
 
-            <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.6rem' }}>
-              Destination
-            </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
+            <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.5rem' }}>Destination</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.875rem' }}>
               {([
-                { value: 'all',     label: '🕋 Makkah + Madinah' },
-                { value: 'makkah',  label: '🕋 Makkah uniquement' },
-                { value: 'madinah', label: '🌿 Madinah uniquement' },
-              ] as { value: typeof destination; label: string }[]).map(opt => (
-                <button
-                  key={opt.value}
-                  onClick={() => setDestination(opt.value)}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    borderRadius: 50,
-                    border: `1.5px solid ${destination === opt.value ? '#C9A84C' : '#E8DFC8'}`,
-                    background: destination === opt.value ? '#FAF3E0' : 'white',
-                    color: destination === opt.value ? '#8B6914' : '#1A1209',
-                    fontWeight: destination === opt.value ? 700 : 500,
-                    fontSize: '0.82rem',
-                    cursor: 'pointer',
-                    transition: 'all 0.15s',
-                    fontFamily: 'inherit',
-                  }}
-                >
+                { value: 'all' as const,     label: '🕋 Makkah + Madinah' },
+                { value: 'makkah' as const,  label: '🕋 Makkah uniquement' },
+                { value: 'madinah' as const, label: '🌿 Madinah uniquement' },
+              ]).map(opt => (
+                <button key={opt.value} onClick={() => setDestination(opt.value)} style={{ padding: '0.45rem 0.9rem', borderRadius: 50, border: `1.5px solid ${destination === opt.value ? '#C9A84C' : '#E8DFC8'}`, background: destination === opt.value ? '#FAF3E0' : 'white', color: destination === opt.value ? '#8B6914' : '#1A1209', fontWeight: destination === opt.value ? 700 : 500, fontSize: '0.82rem', cursor: 'pointer', fontFamily: 'inherit' }}>
                   {opt.label}
                 </button>
               ))}
             </div>
 
             {destination === 'all' && (
-              <div style={{ marginBottom: '1rem', padding: '0.875rem 1rem', background: '#FAF3E0', borderRadius: 12, border: '1px solid rgba(201,168,76,0.3)' }}>
-                <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#8B6914', marginBottom: '0.6rem' }}>
-                  Option guide Makkah + Madinah
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                  <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', cursor: 'pointer' }}>
-                    <input
-                      type="radio" name="guideOption" value="separate"
-                      checked={guideOption === 'separate'}
-                      onChange={() => setGuideOption('separate')}
-                      style={{ accentColor: '#C9A84C', marginTop: 2, flexShrink: 0 }}
-                    />
+              <div style={{ marginBottom: '0.875rem', padding: '0.75rem 1rem', background: '#FAF3E0', borderRadius: 10, border: '1px solid rgba(201,168,76,0.25)' }}>
+                <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#8B6914', marginBottom: '0.5rem' }}>Option guide</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                  <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer' }}>
+                    <input type="radio" name="guideOption" checked={guideOption === 'separate'} onChange={() => setGuideOption('separate')} style={{ accentColor: '#C9A84C', marginTop: 2, flexShrink: 0 }} />
                     <div>
-                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1A1209' }}>Un guide par ville</div>
-                      <div style={{ fontSize: '0.7rem', color: '#7A6D5A' }}>Recommandé · Guide Makkah + Guide Madinah séparés</div>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1A1209' }}>Un guide par ville</div>
+                      <div style={{ fontSize: '0.68rem', color: '#7A6D5A' }}>Recommandé · Guide Makkah + Guide Madinah séparés</div>
                     </div>
                   </label>
-                  <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', cursor: 'pointer' }}>
-                    <input
-                      type="radio" name="guideOption" value="same"
-                      checked={guideOption === 'same'}
-                      onChange={() => setGuideOption('same')}
-                      style={{ accentColor: '#C9A84C', marginTop: 2, flexShrink: 0 }}
-                    />
+                  <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', cursor: 'pointer' }}>
+                    <input type="radio" name="guideOption" checked={guideOption === 'same'} onChange={() => setGuideOption('same')} style={{ accentColor: '#C9A84C', marginTop: 2, flexShrink: 0 }} />
                     <div>
-                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1A1209' }}>Même guide pour les deux villes</div>
-                      <div style={{ fontSize: '0.7rem', color: '#C0392B' }}>+160€ (train Haramain ~80€ + nuit guide ~80€)</div>
+                      <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1A1209' }}>Même guide pour les deux villes</div>
+                      <div style={{ fontSize: '0.68rem', color: '#7A6D5A' }}>Frais supplémentaires : train Haramain + nuitée guide</div>
                     </div>
                   </label>
                 </div>
               </div>
             )}
 
-            <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.5rem' }}>
-              Langue du guide
+            <div className="dates-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.875rem' }}>
+              <div>
+                <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.35rem' }}>Date d&apos;arrivée</div>
+                <input type="date" value={arrivalDate} onChange={e => setArrivalDate(e.target.value)} style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 10, padding: '0.55rem 0.75rem', fontFamily: 'inherit', fontSize: '0.85rem', color: '#1A1209', background: '#FDFBF7', outline: 'none', boxSizing: 'border-box' }} />
+              </div>
+              <div>
+                <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.35rem' }}>Date de départ</div>
+                <input type="date" value={departureDate} min={arrivalDate || undefined} onChange={e => setDepartureDate(e.target.value)} style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 10, padding: '0.55rem 0.75rem', fontFamily: 'inherit', fontSize: '0.85rem', color: '#1A1209', background: '#FDFBF7', outline: 'none', boxSizing: 'border-box' }} />
+              </div>
             </div>
-            <select
-              value={selectedLang}
-              onChange={e => setSelectedLang(e.target.value)}
-              style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 10, padding: '0.6rem 0.85rem', fontFamily: 'inherit', fontSize: '0.85rem', color: '#1A1209', background: '#FDFBF7', outline: 'none', marginBottom: '0.875rem' }}
-            >
-              <option value="">Toutes les langues</option>
-              {LANGUES.map(l => <option key={l} value={l}>{l}</option>)}
-            </select>
 
-            <button
-              onClick={() => {}}
-              style={{ width: '100%', background: '#C9A84C', color: '#1A1209', border: 'none', borderRadius: 10, padding: '0.75rem', fontFamily: 'inherit', fontSize: '0.875rem', fontWeight: 700, cursor: 'pointer' }}
-            >
+            <div className="prefs-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.875rem' }}>
+              <div>
+                <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.35rem' }}>Guide</div>
+                <div style={{ display: 'flex', gap: '0.4rem' }}>
+                  {([{ v: '' as const, l: 'Tous' }, { v: 'homme' as const, l: '👨 Homme' }, { v: 'femme' as const, l: '👩 Femme' }]).map(o => (
+                    <button key={o.v} onClick={() => setGuideGender(o.v)} style={{ flex: 1, padding: '0.5rem 0.3rem', borderRadius: 8, border: `1.5px solid ${guideGender === o.v ? '#C9A84C' : '#E8DFC8'}`, background: guideGender === o.v ? '#FAF3E0' : 'white', color: guideGender === o.v ? '#8B6914' : '#1A1209', fontSize: '0.72rem', fontWeight: guideGender === o.v ? 700 : 500, cursor: 'pointer', fontFamily: 'inherit' }}>{o.l}</button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.35rem' }}>Personnes</div>
+                <div style={{ display: 'flex', alignItems: 'center', border: '1.5px solid #E8DFC8', borderRadius: 10, overflow: 'hidden', height: 38 }}>
+                  <button onClick={() => setGroupSize(g => Math.max(1, g - 1))} style={{ width: 36, border: 'none', background: 'white', cursor: 'pointer', fontSize: '1rem', color: '#1A1209' }}>−</button>
+                  <div style={{ flex: 1, textAlign: 'center', fontSize: '0.85rem', fontWeight: 700, color: '#1A1209', borderLeft: '1px solid #E8DFC8', borderRight: '1px solid #E8DFC8' }}>{groupSize}</div>
+                  <button onClick={() => setGroupSize(g => Math.min(50, g + 1))} style={{ width: 36, border: 'none', background: 'white', cursor: 'pointer', fontSize: '1rem', color: '#1A1209' }}>+</button>
+                </div>
+                {isGroupe && <div style={{ fontSize: '0.62rem', color: '#8B6914', marginTop: '0.2rem', fontWeight: 600 }}>Tarif groupe (van/bus)</div>}
+              </div>
+            </div>
+
+            <div style={{ marginBottom: '0.875rem' }}>
+              <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.35rem' }}>Langue du guide</div>
+              <select value={selectedLang} onChange={e => setSelectedLang(e.target.value)} style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 10, padding: '0.55rem 0.75rem', fontFamily: 'inherit', fontSize: '0.85rem', color: '#1A1209', background: '#FDFBF7', outline: 'none' }}>
+                <option value="">Toutes les langues</option>
+                {LANGUES.map(l => <option key={l} value={l}>{l}</option>)}
+              </select>
+            </div>
+
+            {destination === 'all' && arrivalDate && departureDate && (
+              <div style={{ marginBottom: '0.875rem', padding: '0.75rem 1rem', background: '#F0F4F0', borderRadius: 10, border: '1px solid rgba(29,92,58,0.2)' }}>
+                <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#1D5C3A', marginBottom: '0.4rem' }}>Transport Madinah ↔ Makkah (estimé)</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: '#1A1209' }}>
+                  <span>Train Haramain × {groupSize} pers.</span>
+                  <span style={{ fontWeight: 700 }}>{transportMakkahMadinah?.total.toLocaleString('fr-FR')} €</span>
+                </div>
+                <div style={{ fontSize: '0.65rem', color: '#7A6D5A', marginTop: '0.2rem' }}>Aller-retour · ~80€/pers/trajet</div>
+              </div>
+            )}
+
+            <button style={{ width: '100%', background: '#C9A84C', color: '#1A1209', border: 'none', borderRadius: 10, padding: '0.75rem', fontFamily: 'inherit', fontSize: '0.875rem', fontWeight: 700, cursor: 'pointer' }}>
               Rechercher →
             </button>
 
           </div>
 
-          {/* Quick filters */}
-          <div className="guides-qf">
-            {([
-              { key: '🇫🇷 Francophone', label: '🇫🇷 Francophone' },
-              { key: '🚗 Avec voiture',  label: 'Avec voiture' },
-              { key: '👩 Femme guide',   label: 'Femme guide' },
-              { key: '👨‍👩‍👧 Famille',     label: 'Famille' },
-              { key: '♿ PMR',           label: 'PMR' },
-              { key: '⭐ Top noté',      label: 'Top noté' },
-            ] as { key: string; label: string }[]).map(f => (
-              <button
-                key={f.key}
-                onClick={() => setActiveQF(f.key)}
-                style={{
-                  padding: '0.3rem 0.9rem', borderRadius: 50, fontSize: '0.75rem',
-                  border: `1px solid ${activeQF === f.key ? '#C9A84C' : 'rgba(255,255,255,0.15)'}`,
-                  background: activeQF === f.key ? '#C9A84C' : 'rgba(255,255,255,0.07)',
-                  color: activeQF === f.key ? '#1A1209' : 'rgba(255,255,255,0.65)',
-                  fontWeight: activeQF === f.key ? 700 : 500,
-                  cursor: 'pointer', transition: 'all 0.2s',
-                }}
-              >{f.label}</button>
-            ))}
-          </div>
         </div>
       </div>
 
       {/* ── TRUST BAR ── */}
-      <div className="trust-bar">
-        <div className="trust-bar-item"><span style={{ fontWeight: 700 }}>✓</span> Guides certifiés</div>
-        <div className="trust-bar-item"><IconShield size={14} /> Paiement sécurisé</div>
-        <div className="trust-bar-item"><IconStar size={14} /> Note 4.94 / 5</div>
-        <div className="trust-bar-item"><IconClock size={14} /> Réponse &lt; 2h</div>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', padding: '0.75rem 1.5rem', background: '#F5F0E8', borderBottom: '1px solid #E8DFC8', flexWrap: 'wrap' }}>
+        {[
+          { icon: '✓', label: 'Guides certifiés' },
+          { icon: '🛡', label: 'Paiement sécurisé' },
+          { icon: '★', label: '4.94/5 · 709 avis' },
+          { icon: '⏱', label: 'Réponse < 2h' },
+        ].map(b => (
+          <span key={b.label} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', fontWeight: 600, color: '#5A4535' }}>
+            <span style={{ color: '#C9A84C', fontSize: '0.85rem' }}>{b.icon}</span>
+            {b.label}
+          </span>
+        ))}
       </div>
 
       {/* ── MAIN CONTENT ── */}
@@ -528,6 +527,12 @@ export default function GuideSearchPage() {
               <GuideCard key={g.slug} guide={g} />
             ))}
           </div>
+
+          <div style={{ textAlign: 'center', marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #E8DFC8' }}>
+            <Link href="/guides" style={{ display: 'inline-block', background: '#1A1209', color: '#F0D897', padding: '0.75rem 2rem', borderRadius: 50, fontSize: '0.85rem', fontWeight: 700, textDecoration: 'none', letterSpacing: '0.04em' }}>
+              Voir tous les guides →
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -592,26 +597,6 @@ export default function GuideSearchPage() {
           }
         }
 
-        /* Quick filters */
-        .guides-qf {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.5rem;
-          justify-content: center;
-        }
-        @media (max-width: 768px) {
-          .guides-qf {
-            justify-content: flex-start;
-            overflow-x: auto;
-            flex-wrap: nowrap;
-            padding-bottom: 0.5rem;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: none;
-          }
-          .guides-qf::-webkit-scrollbar { display: none; }
-          .guides-qf button { flex-shrink: 0; }
-        }
-
         /* Search bar */
         .guides-search-bar {
           background: white;
@@ -631,7 +616,7 @@ export default function GuideSearchPage() {
             border-radius: 0 12px 12px 12px !important;
           }
           .guide-official-card .guide-card-banner {
-            height: 160px !important;
+            height: 120px !important;
           }
           .guides-main {
             padding: 1rem 0.875rem 5rem;
@@ -721,7 +706,7 @@ export default function GuideSearchPage() {
           box-shadow: 0 8px 40px rgba(201,168,76,0.18) !important;
         }
         .guide-official-card .guide-card-banner {
-          height: 200px !important;
+          height: 120px !important;
         }
 
         /* Cards grid */
@@ -738,15 +723,18 @@ export default function GuideSearchPage() {
         }
 
         /* Guide card banner */
-        .guide-card-banner { height: 160px; }
+        .guide-card-banner { height: 100px; }
         @media (max-width: 767px) {
-          .guide-card-banner { height: 160px; }
+          .guide-card-banner { height: 100px; }
         }
 
-        /* Trust bar — hide some items on mobile */
         @media (max-width: 480px) {
-          .trust-bar-item:nth-child(3),
-          .trust-bar-item:nth-child(5) { display: none; }
+          .guides-search-bar .dates-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .guides-search-bar .prefs-grid {
+            grid-template-columns: 1fr !important;
+          }
         }
       `}} />
 
@@ -797,7 +785,7 @@ function GuideCard({ guide: g, official }: { guide: GuideData; official?: boolea
           <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
           {/* Avatar */}
           <div style={{
-            position: 'absolute', bottom: official ? -24 : -18, left: '1.25rem',
+            position: 'absolute', bottom: official ? -18 : -14, left: '1.25rem',
             width: official ? 60 : 46, height: official ? 60 : 46, borderRadius: '50%',
             border: official ? '3px solid #C9A84C' : '3px solid white',
             overflow: 'hidden',
@@ -841,7 +829,7 @@ function GuideCard({ guide: g, official }: { guide: GuideData; official?: boolea
 
         {/* Body */}
         <div style={{ padding: '1.5rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.2rem', paddingTop: '0.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.2rem', paddingTop: official ? '1.25rem' : '1rem' }}>
             <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.2 }}>{g.name}</div>
             <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1A1209', whiteSpace: 'nowrap', flexShrink: 0 }}>
               <span style={{ color: '#C9A84C' }}>★</span> {g.rating}

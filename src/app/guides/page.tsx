@@ -7,6 +7,44 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { IconCar, IconVan, IconTrain, IconShield, IconStar, IconPerson, IconUserGroup, IconClock, IconAccessibility, IconMap } from '@/components/Icons';
 
+const LANGUES = [
+  '🇫🇷 Français',
+  '🇸🇦 Arabe',
+  '🇬🇧 English',
+  '🇲🇦 Darija (Maroc)',
+  '🇩🇿 Algérien',
+  '🇹🇳 Tunisien',
+  '🇸🇳 Wolof',
+  '🎵 Bambara',
+  '🇲🇱 Fulfuldé',
+  '🇹🇷 Türkçe',
+  '🇮🇩 Bahasa Indonesia',
+  '🇲🇾 Bahasa Melayu',
+  '🇵🇰 Urdu',
+  '🌿 Punjabi',
+  '🇧🇩 Bengali',
+  '🇮🇳 Hindi',
+  '🇮🇳 Tamil',
+  '🇮🇷 Farsi (Persan)',
+  '🇦🇿 Azéri',
+  '🇺🇿 Ouzbek',
+  '🇰🇿 Kazakh',
+  '🌍 Haoussa',
+  '🌍 Somali',
+  '🌍 Swahili',
+  '🌍 Amharique',
+  '🇷🇺 Russe',
+  '🇨🇳 Mandarin',
+  '🇪🇸 Español',
+  '🇵🇹 Português',
+  '🇩🇪 Deutsch',
+  '🏔️ Kabyle',
+  '🏔️ Chleuh (Tachelhit)',
+  '🏔️ Tamazight (Souss)',
+  '🌿 Dioula',
+  '🌿 Mooré',
+];
+
 const GUIDES_DATA = [
   {
     slug: 'naim-laamari',
@@ -137,46 +175,6 @@ const GUIDES_DATA = [
   },
 ];
 
-// ─── Programme calculateur ─────────────────────────────────────────────────────
-const PROGRAM_BY_DAYS: Record<number, { icon: string; label: string; duration: string }[]> = {
-  3: [
-    { icon: '🕋', label: 'La Omra complète (Ihram, Tawaf, Sa\'i, Tahallul)', duration: '~5h' },
-    { icon: '⛰️', label: 'Jabal Al-Nour & Grotte de Hira', duration: '~2h' },
-    { icon: '💧', label: 'Zamzam & Masjid Al-Haram libre', duration: 'Inclus' },
-  ],
-  5: [
-    { icon: '🕋', label: 'La Omra complète', duration: '~5h' },
-    { icon: '⛰️', label: 'Jabal Al-Nour & Grotte de Hira', duration: '~2h' },
-    { icon: '🏔️', label: 'Jabal Thawr', duration: '~2h' },
-    { icon: '🌄', label: 'Arafat & Muzdalifah', duration: '~2h45' },
-    { icon: '🌿', label: 'Madinah — Masjid An-Nabawi & Rawdah', duration: 'Demi-journée' },
-  ],
-  7: [
-    { icon: '🕋', label: 'La Omra complète', duration: '~5h' },
-    { icon: '⛰️', label: 'Jabal Al-Nour & Jabal Thawr', duration: '~4h' },
-    { icon: '🌄', label: 'Arafat, Mina & Muzdalifah', duration: '~4h' },
-    { icon: '🌿', label: 'Madinah — An-Nabawi, Rawdah, Quba', duration: '2 jours' },
-    { icon: '⚔️', label: 'Jabal Ohoud & Al-Baqi', duration: '~2h' },
-    { icon: '🏛️', label: 'Masjid Al-Qiblatayn & lieux rares', duration: '~2h' },
-  ],
-  10: [
-    { icon: '🕋', label: 'Omra complète + Rites approfondis', duration: '~5h' },
-    { icon: '🌍', label: 'Makkah complète : Hira, Thawr, Arafat, Mina', duration: '2 jours' },
-    { icon: '🌿', label: 'Madinah complète : An-Nabawi, Quba, Baqi, Ohoud', duration: '3 jours' },
-    { icon: '⚔️', label: 'Badr (150km de Madinah)', duration: '~4h' },
-    { icon: '🏔️', label: 'Taïf (90km de Makkah)', duration: '~4h' },
-    { icon: '🕌', label: 'Jeddah historique', duration: '~4h' },
-  ],
-};
-
-function getProgramForDays(days: number) {
-  if (days <= 0) return null;
-  if (days <= 3) return { key: 3, sites: PROGRAM_BY_DAYS[3] };
-  if (days <= 5) return { key: 5, sites: PROGRAM_BY_DAYS[5] };
-  if (days <= 7) return { key: 7, sites: PROGRAM_BY_DAYS[7] };
-  return { key: 10, sites: PROGRAM_BY_DAYS[10] };
-}
-
 // ─── SVG Avatars ───────────────────────────────────────────────────────────────
 function GuideAvatarSVG({ slug, gradient, initials, isWoman }: { slug: string; gradient: string; initials: string; isWoman?: boolean }) {
   if (slug === 'naim-laamari') {
@@ -250,16 +248,11 @@ function GuideAvatarSVG({ slug, gradient, initials, isWoman }: { slug: string; g
 
 export default function GuideSearchPage() {
   const [budget, setBudget]           = useState(800);
-  const [activeQF, setActiveQF]       = useState('🇫🇷 Francophone');
   const [destination, setDestination] = useState<'all' | 'makkah' | 'madinah' | 'both'>('all');
+  const [guideOption, setGuideOption] = useState<'separate' | 'same'>('separate');
+  const [selectedLang, setSelectedLang] = useState<string>('');
+  const [activeQF, setActiveQF]       = useState('🇫🇷 Francophone');
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [arrivalDate, setArrivalDate]     = useState('');
-  const [departureDate, setDepartureDate] = useState('');
-
-  const numDays = arrivalDate && departureDate
-    ? Math.max(0, Math.round((new Date(departureDate).getTime() - new Date(arrivalDate).getTime()) / (1000 * 60 * 60 * 24)))
-    : 0;
-  const program = getProgramForDays(numDays);
 
   const filteredGuides = GUIDES_DATA.filter(g => {
     if (destination === 'all') return true;
@@ -299,11 +292,9 @@ export default function GuideSearchPage() {
       </FilterCard>
 
       <FilterCard title="Langues">
-        {[
-          { label: '🇫🇷 Français', count: 320 }, { label: '🇸🇦 Arabe', count: 280 },
-          { label: '🇬🇧 English', count: 140 }, { label: '🇸🇳 Wolof', count: 24 },
-          { label: '🇲🇦 Darija', count: 89 },
-        ].map(o => <FilterOpt key={o.label} label={o.label} count={o.count} />)}
+        {LANGUES.slice(0, 10).map(l => (
+          <FilterOpt key={l} label={l} count={Math.floor(Math.random() * 200) + 20} />
+        ))}
       </FilterCard>
 
       <FilterCard title="Note minimale">
@@ -350,62 +341,90 @@ export default function GuideSearchPage() {
 
           {/* Search bar */}
           <div className="guides-search-bar">
-            {/* Row 1: selects */}
-            <div className="gsb-row1">
-              {[
-                { label: 'Langue du guide', opts: ['Toutes les langues', '🇫🇷 Français', '🇸🇦 Arabe', '🇬🇧 English', '🇸🇳 Wolof'] },
-              ].map(f => (
-                <div key={f.label} style={{ flex: 1 }}>
-                  <div style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7A6D5A', marginBottom: '0.35rem' }}>{f.label}</div>
-                  <select style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 10, padding: '0.6rem 0.85rem', fontFamily: 'inherit', fontSize: '0.85rem', color: '#1A1209', background: '#FDFBF7', outline: 'none' }}>
-                    {f.opts.map(o => <option key={o}>{o}</option>)}
-                  </select>
-                </div>
-              ))}
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7A6D5A', marginBottom: '0.35rem' }}>
-                  Destination
-                </div>
-                <select
-                  value={destination}
-                  onChange={e => setDestination(e.target.value as 'all' | 'makkah' | 'madinah' | 'both')}
-                  style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 10, padding: '0.6rem 0.85rem', fontFamily: 'inherit', fontSize: '0.85rem', color: '#1A1209', background: '#FDFBF7', outline: 'none' }}
+
+            <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.6rem' }}>
+              Destination
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
+              {([
+                { value: 'all',     label: '🕋 Makkah + Madinah' },
+                { value: 'makkah',  label: '🕋 Makkah uniquement' },
+                { value: 'madinah', label: '🌿 Madinah uniquement' },
+              ] as { value: typeof destination; label: string }[]).map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => setDestination(opt.value)}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    borderRadius: 50,
+                    border: `1.5px solid ${destination === opt.value ? '#C9A84C' : '#E8DFC8'}`,
+                    background: destination === opt.value ? '#FAF3E0' : 'white',
+                    color: destination === opt.value ? '#8B6914' : '#1A1209',
+                    fontWeight: destination === opt.value ? 700 : 500,
+                    fontSize: '0.82rem',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s',
+                    fontFamily: 'inherit',
+                  }}
                 >
-                  <option value="all">Makkah + Madinah</option>
-                  <option value="makkah">Makkah uniquement</option>
-                  <option value="madinah">Madinah uniquement</option>
-                  <option value="both">Les deux villes (même guide)</option>
-                </select>
-              </div>
+                  {opt.label}
+                </button>
+              ))}
             </div>
-            {/* Row 2: dates + button */}
-            <div className="gsb-row2">
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7A6D5A', marginBottom: '0.35rem' }}>Date d&apos;arrivée</div>
-                <input
-                  type="date" value={arrivalDate} onChange={e => setArrivalDate(e.target.value)}
-                  style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 10, padding: '0.6rem 0.85rem', fontFamily: 'inherit', fontSize: '0.85rem', color: '#1A1209', background: '#FDFBF7', outline: 'none', boxSizing: 'border-box' }}
-                />
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7A6D5A', marginBottom: '0.35rem' }}>Date de départ</div>
-                <input
-                  type="date" value={departureDate} onChange={e => setDepartureDate(e.target.value)}
-                  min={arrivalDate || undefined}
-                  style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 10, padding: '0.6rem 0.85rem', fontFamily: 'inherit', fontSize: '0.85rem', color: '#1A1209', background: '#FDFBF7', outline: 'none', boxSizing: 'border-box' }}
-                />
-              </div>
-              {numDays > 0 && (
-                <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: '0.15rem', flexShrink: 0 }}>
-                  <span style={{ background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.4)', color: '#8B6914', fontSize: '0.75rem', fontWeight: 700, padding: '0.5rem 0.85rem', borderRadius: 50, whiteSpace: 'nowrap' }}>
-                    ⏱ {numDays} jour{numDays > 1 ? 's' : ''}
-                  </span>
+
+            {destination === 'all' && (
+              <div style={{ marginBottom: '1rem', padding: '0.875rem 1rem', background: '#FAF3E0', borderRadius: 12, border: '1px solid rgba(201,168,76,0.3)' }}>
+                <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#8B6914', marginBottom: '0.6rem' }}>
+                  Option guide Makkah + Madinah
                 </div>
-              )}
-              <button style={{ background: '#C9A84C', color: '#1A1209', border: 'none', borderRadius: 10, padding: '0.7rem 1.6rem', fontFamily: 'inherit', fontSize: '0.875rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', alignSelf: 'flex-end' }}>
-                Rechercher →
-              </button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                  <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', cursor: 'pointer' }}>
+                    <input
+                      type="radio" name="guideOption" value="separate"
+                      checked={guideOption === 'separate'}
+                      onChange={() => setGuideOption('separate')}
+                      style={{ accentColor: '#C9A84C', marginTop: 2, flexShrink: 0 }}
+                    />
+                    <div>
+                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1A1209' }}>Un guide par ville</div>
+                      <div style={{ fontSize: '0.7rem', color: '#7A6D5A' }}>Recommandé · Guide Makkah + Guide Madinah séparés</div>
+                    </div>
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', cursor: 'pointer' }}>
+                    <input
+                      type="radio" name="guideOption" value="same"
+                      checked={guideOption === 'same'}
+                      onChange={() => setGuideOption('same')}
+                      style={{ accentColor: '#C9A84C', marginTop: 2, flexShrink: 0 }}
+                    />
+                    <div>
+                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1A1209' }}>Même guide pour les deux villes</div>
+                      <div style={{ fontSize: '0.7rem', color: '#C0392B' }}>+160€ (train Haramain ~80€ + nuit guide ~80€)</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            )}
+
+            <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.5rem' }}>
+              Langue du guide
             </div>
+            <select
+              value={selectedLang}
+              onChange={e => setSelectedLang(e.target.value)}
+              style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 10, padding: '0.6rem 0.85rem', fontFamily: 'inherit', fontSize: '0.85rem', color: '#1A1209', background: '#FDFBF7', outline: 'none', marginBottom: '0.875rem' }}
+            >
+              <option value="">Toutes les langues</option>
+              {LANGUES.map(l => <option key={l} value={l}>{l}</option>)}
+            </select>
+
+            <button
+              onClick={() => {}}
+              style={{ width: '100%', background: '#C9A84C', color: '#1A1209', border: 'none', borderRadius: 10, padding: '0.75rem', fontFamily: 'inherit', fontSize: '0.875rem', fontWeight: 700, cursor: 'pointer' }}
+            >
+              Rechercher →
+            </button>
+
           </div>
 
           {/* Quick filters */}
@@ -442,34 +461,6 @@ export default function GuideSearchPage() {
         <div className="trust-bar-item"><IconStar size={14} /> Note 4.94 / 5</div>
         <div className="trust-bar-item"><IconClock size={14} /> Réponse &lt; 2h</div>
       </div>
-
-      {/* ── PROGRAMME CALCULATOR ── */}
-      {program && numDays > 0 && (
-        <div style={{ background: '#1A1209', borderBottom: '1px solid rgba(201,168,76,0.2)' }}>
-          <div style={{ maxWidth: 1280, margin: '0 auto', padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'flex-start', gap: '1.5rem', flexWrap: 'wrap' }}>
-            <div style={{ flexShrink: 0 }}>
-              <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(201,168,76,0.6)', marginBottom: '0.3rem' }}>
-                Programme estimé
-              </div>
-              <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: 'white' }}>
-                Séjour de {numDays} jour{numDays > 1 ? 's' : ''}
-              </div>
-            </div>
-            <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
-              {program.sites.map((s, i) => (
-                <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(201,168,76,0.18)', borderRadius: 50, padding: '0.3rem 0.85rem', fontSize: '0.75rem', color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>
-                  <span>{s.icon}</span>
-                  {s.label}
-                  <span style={{ color: '#C9A84C', fontWeight: 700 }}>{s.duration}</span>
-                </span>
-              ))}
-              <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', fontStyle: 'italic' }}>
-                · Programme indicatif selon disponibilités
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ── MAIN CONTENT ── */}
       <div className="guides-main">
@@ -628,37 +619,13 @@ export default function GuideSearchPage() {
           padding: 1rem 1.25rem;
           display: flex;
           flex-direction: column;
-          gap: 0.75rem;
           box-shadow: 0 24px 60px rgba(0,0,0,0.3);
           margin-bottom: 1.5rem;
-        }
-        .gsb-row1 {
-          display: flex;
-          gap: 0.75rem;
-        }
-        .gsb-row2 {
-          display: flex;
-          gap: 0.75rem;
-          align-items: flex-end;
         }
         @media (max-width: 768px) {
           .guides-search-bar {
             padding: 0.875rem;
             border-radius: 14px;
-          }
-          .gsb-row1, .gsb-row2 {
-            flex-direction: column;
-            gap: 0.75rem;
-          }
-          .gsb-row1 > div, .gsb-row2 > div { flex: none; width: 100%; }
-          .gsb-row2 > div {
-            flex: none;
-            width: 100%;
-          }
-          .gsb-row2 button[type="button"],
-          .gsb-row2 > button {
-            width: 100%;
-            justify-content: center;
           }
           .guide-official-card {
             border-radius: 0 12px 12px 12px !important;

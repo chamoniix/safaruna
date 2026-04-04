@@ -8,7 +8,6 @@ import {
   IconMegaphone, IconEye, IconChat, IconGraduationCap, IconShield, IconUserGroup,
   IconMosque, IconMountain, IconBuilding, IconMap,
   IconBookOpen, IconStar, IconMoon, IconSparkles, IconHandshake,
-  IconCurrency, IconPhone, IconLock, IconTrophy,
 } from "@/components/Icons";
 
 const LOGO_LETTERS = ['S', 'A', 'F', 'A', 'R', 'U', 'M', 'A'];
@@ -516,38 +515,6 @@ export default function Home() {
                 </Link>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════
-          GUIDE CTA — devenir guide
-          ═══════════════════════════════════════════════════════ */}
-      <section className="bg-dark" style={{ padding: '5rem 4rem' }}>
-        <div style={{ maxWidth: 1000, margin: '0 auto' }}>
-          <div className="section-label reveal" style={{ color: 'var(--gold)' }}>Vous êtes guide ?</div>
-          <h2 className="reveal reveal-d1">Rejoignez la plateforme et<br /><em>gagnez votre vie avec votre savoir</em></h2>
-          <p className="section-sub reveal reveal-d2">
-            320 guides gagnent en moyenne 3 200€/mois sur SAFARUMA. Inscription gratuite, commission transparente, paiement sécurisé.
-          </p>
-          <div className="revenue-grid">
-            {([
-              { icon: <IconCurrency size={24} stroke="#C9A84C" />, t: '3 200€ / mois',    p: "Revenus moyens d'un guide actif" },
-              { icon: <IconPhone size={24} stroke="#C9A84C" />, t: 'Tableau de bord',   p: "Disponibilités, demandes, paiements" },
-              { icon: <IconLock size={24} stroke="#C9A84C" />, t: 'Paiement sécurisé', p: "Virement mensuel, commission 12%" },
-              { icon: <IconTrophy size={24} stroke="#C9A84C" />, t: 'Badge Vérifié',      p: "Certification reconnue par les pèlerins" },
-            ] as { icon: React.ReactNode; t: string; p: string }[]).map((r, i) => (
-              <div key={r.t} className={`revenue-card reveal reveal-d${i + 1}`}>
-                <div className="r-icon">{r.icon}</div>
-                <h4>{r.t}</h4>
-                <p>{r.p}</p>
-              </div>
-            ))}
-          </div>
-          <div className="reveal" style={{ marginTop: '2.5rem' }}>
-            <Link href="/guide/inscription" className="btn-primary">
-              Devenir guide SAFARUMA →
-            </Link>
           </div>
         </div>
       </section>

@@ -6,6 +6,7 @@ import GuideProfileClient from './GuideProfileClient';
 // Pre-render all guide pages at build time → no server-side DB lookup needed
 export async function generateStaticParams() {
   return [
+    { slug: 'naim-laamari' },
     { slug: 'rachid-al-madani' },
     { slug: 'fatima-al-omari' },
     { slug: 'youssouf-konate' },
@@ -154,6 +155,7 @@ const GUIDES: Record<string, {
   returnRate: number;
   speciality: string;
   isWoman?: boolean;
+  isOfficial?: boolean;
   languages: string[];
   shortBio: string;
   bioFull: string[];
@@ -161,6 +163,45 @@ const GUIDES: Record<string, {
   services: string[];
   gradient: string;
 }> = {
+  'naim-laamari': {
+    name: 'Naïm LAAMARI',
+    initials: 'NL',
+    location: 'Makkah Al-Mukarramah',
+    experience: 8,
+    rating: 5.0,
+    reviewCount: 0,
+    pilgrimsCount: 'OFFICIEL',
+    returnRate: 100,
+    speciality: 'Guide Officiel SAFARUMA · Responsable Terrain',
+    isOfficial: true,
+    languages: ['🇫🇷 Français', '🇸🇦 Arabe', '🇬🇧 English', '🇲🇦 Darija'],
+    shortBio:
+      "Responsable Terrain officiel de SAFARUMA à Makkah. Guide certifié depuis 8 ans, diplômé en sciences islamiques, formateur et référent de tous les guides SAFARUMA présents à Makkah.",
+    bioFull: [
+      "Naïm LAAMARI est le Responsable Terrain officiel de SAFARUMA à Makkah. Guide certifié depuis 8 ans, diplômé en sciences islamiques et en histoire des lieux saints, il est la référence ultime pour tous les voyageurs SAFARUMA.",
+      "En tant que Responsable Terrain, Naïm est disponible 7j/7 pour intervenir en cas d'imprévu, assurer le remplacement d'un guide défaillant, et garantir la qualité de chaque expérience. Il forme et certifie personnellement tous les guides SAFARUMA présents à Makkah.",
+      "Ses spécialités : les rituels de la Omra, l'histoire de Makkah depuis l'époque d'Ibrahim ﷺ, les lieux peu connus mais chargés de sens spirituel, et l'accompagnement des personnes à mobilité réduite.",
+    ],
+    certifications: [
+      'Diplôme en Sciences Islamiques — Histoire des Lieux Saints',
+      'Licence officielle de Guide Mutawwif — Ministère du Hajj et de la Omra',
+      'Responsable Terrain Certifié — SAFARUMA',
+      'Formateur et Certificateur des Guides SAFARUMA à Makkah',
+      'Certification Gestion de Crise — Autorité du Haram',
+    ],
+    services: [
+      'Intervention 7j/7 en cas d\'imprévu',
+      'Remplacement guide garanti < 2h',
+      'Rituels Omra complets',
+      'Histoire islamique approfondie',
+      'Accompagnement PMR',
+      'Formation et certification guides',
+      'Gestion de crise sur terrain',
+      'Lieux spirituels rares de Makkah',
+    ],
+    gradient: 'linear-gradient(135deg, #F0D897, #C9A84C)',
+  },
+
   'rachid-al-madani': {
     name: 'Cheikh Rachid Al-Madani',
     initials: 'RA',

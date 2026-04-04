@@ -8,6 +8,27 @@ import { IconCar, IconVan, IconTrain, IconShield, IconStar, IconPerson, IconUser
 
 const GUIDES_DATA = [
   {
+    slug: 'naim-laamari',
+    name: 'Naïm LAAMARI',
+    title: 'Guide Officiel SAFARUMA · Responsable Terrain',
+    initials: 'NL',
+    location: 'Makkah Al-Mukarramah',
+    experience: 8,
+    rating: 5.0,
+    reviews: 0,
+    pilgrims: 'OFFICIEL',
+    languages: ['🇫🇷 Français', '🇸🇦 Arabe', '🇬🇧 English', '🇲🇦 Darija'],
+    services: ['Rituels Omra', 'Histoire islamique', 'PMR', 'Gestion de crise'],
+    price: 150,
+    priceSub: 'dès 150€/pers',
+    badge: 'OFFICIEL SAFARUMA',
+    badgeColor: '#C9A84C',
+    gradient: 'linear-gradient(135deg, #1A1209, #2D1F08)',
+    avatarGradient: 'linear-gradient(135deg, #F0D897, #C9A84C)',
+    available: true,
+    isOfficial: true,
+  },
+  {
     slug: 'rachid-al-madani',
     name: 'Rachid Al-Madani',
     title: 'Cheikh · Spécialiste Sîra',
@@ -282,9 +303,17 @@ export default function GuideSearchPage() {
             </p>
           </div>
 
+          {/* Official guide — full-width featured card */}
+          {GUIDES_DATA.filter(g => g.isOfficial).map(g => (
+            <div key={g.slug} className="guide-official-wrap">
+              <div className="guide-official-label">★ RESPONSABLE OFFICIEL SAFARUMA</div>
+              <GuideCard guide={g} official />
+            </div>
+          ))}
+
           {/* Cards grid */}
           <div className="guides-grid">
-            {GUIDES_DATA.map(g => (
+            {GUIDES_DATA.filter(g => !g.isOfficial).map(g => (
               <GuideCard key={g.slug} guide={g} />
             ))}
           </div>
@@ -416,6 +445,31 @@ export default function GuideSearchPage() {
         }
         .guides-filter-btn:hover { border-color: #C9A84C; }
 
+        /* Official guide featured block */
+        .guide-official-wrap {
+          margin-bottom: 1.5rem;
+        }
+        .guide-official-label {
+          display: inline-block;
+          background: #1A1209;
+          color: #F0D897;
+          font-size: 0.6rem;
+          font-weight: 800;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          padding: 0.35rem 1rem;
+          border-radius: 50px 50px 0 0;
+          margin-bottom: 0;
+        }
+        .guide-official-card {
+          border: 2px solid #C9A84C !important;
+          border-radius: 0 18px 18px 18px !important;
+          box-shadow: 0 8px 40px rgba(201,168,76,0.18) !important;
+        }
+        .guide-official-card .guide-card-banner {
+          height: 200px !important;
+        }
+
         /* Cards grid */
         .guides-grid {
           display: grid;
@@ -475,25 +529,28 @@ function FilterOpt({ icon, label, count }: { icon?: React.ReactNode; label: stri
 
 type GuideData = typeof GUIDES_DATA[0];
 
-function GuideCard({ guide: g }: { guide: GuideData }) {
+function GuideCard({ guide: g, official }: { guide: GuideData; official?: boolean }) {
   return (
     <Link href={`/guides/${g.slug}`} style={{ textDecoration: 'none', display: 'block' }}>
       <div
+        className={official ? 'guide-official-card' : ''}
         style={{ background: 'white', border: '1px solid #E8DFC8', borderRadius: 18, overflow: 'hidden', transition: 'transform 0.2s, box-shadow 0.2s, border-color 0.2s', cursor: 'pointer' }}
-        onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = 'translateY(-3px)'; el.style.boxShadow = '0 16px 48px rgba(26,18,9,0.1)'; el.style.borderColor = 'rgba(201,168,76,0.5)'; }}
-        onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = ''; el.style.boxShadow = ''; el.style.borderColor = '#E8DFC8'; }}
+        onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = 'translateY(-3px)'; el.style.boxShadow = '0 16px 48px rgba(26,18,9,0.1)'; el.style.borderColor = 'rgba(201,168,76,0.7)'; }}
+        onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = ''; el.style.boxShadow = official ? '0 8px 40px rgba(201,168,76,0.18)' : ''; el.style.borderColor = official ? '#C9A84C' : '#E8DFC8'; }}
       >
         {/* Banner */}
         <div className="guide-card-banner" style={{ background: g.gradient, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
           <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
           {/* Avatar */}
           <div style={{
-            position: 'absolute', bottom: -18, left: '1.25rem',
-            width: 46, height: 46, borderRadius: '50%', border: '3px solid white',
+            position: 'absolute', bottom: official ? -24 : -18, left: '1.25rem',
+            width: official ? 60 : 46, height: official ? 60 : 46, borderRadius: '50%',
+            border: official ? '3px solid #C9A84C' : '3px solid white',
             background: g.avatarGradient,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#1A1209',
+            fontFamily: 'var(--font-cormorant, serif)', fontSize: official ? '1.25rem' : '1rem', fontWeight: 700, color: '#1A1209',
             zIndex: 1,
+            boxShadow: official ? '0 0 0 3px #1A1209, 0 4px 16px rgba(201,168,76,0.4)' : 'none',
           }}>
             {g.initials}
           </div>
@@ -502,12 +559,27 @@ function GuideCard({ guide: g }: { guide: GuideData }) {
             <div style={{ width: 7, height: 7, borderRadius: '50%', background: g.available ? '#27AE60' : '#aaa', border: '1.5px solid rgba(255,255,255,0.5)' }} />
             <span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>{g.available ? 'Disponible' : 'Indisponible'}</span>
           </div>
-          {/* Badge */}
-          {g.badge && (
+          {/* Badge(s) */}
+          {official ? (
+            <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+              <span style={{ background: '#1A1209', color: '#F0D897', fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0.2rem 0.55rem', borderRadius: 50, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                🛡 OFFICIEL SAFARUMA
+              </span>
+              <span style={{ background: '#065F46', color: 'white', fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0.2rem 0.55rem', borderRadius: 50 }}>
+                GUIDE VÉRIFIÉ ✓
+              </span>
+              <span style={{ background: '#C9A84C', color: '#1A1209', fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0.2rem 0.55rem', borderRadius: 50 }}>
+                RESPONSABLE TERRAIN
+              </span>
+              <span style={{ background: '#1E3A5F', color: 'white', fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0.2rem 0.55rem', borderRadius: 50 }}>
+                FORMATEUR CERTIFIÉ
+              </span>
+            </div>
+          ) : g.badge ? (
             <div style={{ position: 'absolute', top: 10, right: 10, background: g.badgeColor, color: '#fff', fontSize: '0.55rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0.2rem 0.55rem', borderRadius: 50 }}>
               {g.badge}
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* Body */}
@@ -541,12 +613,27 @@ function GuideCard({ guide: g }: { guide: GuideData }) {
           {/* Footer */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #F0EBD8', paddingTop: '0.85rem', marginTop: 'auto' }}>
             <div>
-              <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 600, color: '#1A1209', lineHeight: 1 }}>{g.price}€</div>
-              <div style={{ fontSize: '0.65rem', color: '#7A6D5A' }}>{g.priceSub}</div>
+              {official ? (
+                <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.2 }}>Dès 150€/pers</div>
+              ) : (
+                <>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 600, color: '#1A1209', lineHeight: 1 }}>{g.price}€</div>
+                  <div style={{ fontSize: '0.65rem', color: '#7A6D5A' }}>{g.priceSub}</div>
+                </>
+              )}
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.35rem' }}>
-              <span style={{ fontSize: '0.6rem', fontWeight: 700, background: '#E8F5EE', color: '#1D5C3A', padding: '0.15rem 0.55rem', borderRadius: 50 }}>✓ Vérifié</span>
-              <span style={{ fontSize: '0.6rem', color: '#7A6D5A' }}>{g.pilgrims} pèlerins</span>
+              {official ? (
+                <>
+                  <span style={{ fontSize: '0.6rem', fontWeight: 800, background: '#1A1209', color: '#F0D897', padding: '0.2rem 0.65rem', borderRadius: 50 }}>★ 5.0 OFFICIEL</span>
+                  <span style={{ fontSize: '0.6rem', fontWeight: 700, background: '#065F46', color: 'white', padding: '0.15rem 0.55rem', borderRadius: 50 }}>GUIDE VÉRIFIÉ ✓</span>
+                </>
+              ) : (
+                <>
+                  <span style={{ fontSize: '0.6rem', fontWeight: 700, background: '#E8F5EE', color: '#1D5C3A', padding: '0.15rem 0.55rem', borderRadius: 50 }}>✓ Vérifié</span>
+                  <span style={{ fontSize: '0.6rem', color: '#7A6D5A' }}>{g.pilgrims} pèlerins</span>
+                </>
+              )}
             </div>
           </div>
 

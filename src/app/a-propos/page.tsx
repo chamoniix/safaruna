@@ -51,43 +51,43 @@ const COMPARISON = [
   {
     critere: 'Langue d\'accompagnement',
     safaruma: 'Français + 11 langues',
-    holygo: 'Arabe principalement',
+    autres: 'Arabe principalement',
     agence: 'Guide de groupe polyvalent',
   },
   {
     critere: 'Type d\'accompagnement',
     safaruma: 'Guide privé dédié',
-    holygo: 'Groupe 20-50 personnes',
+    autres: 'Groupe 20-50 personnes',
     agence: 'Groupe 30-80 personnes',
   },
   {
     critere: 'Certification des guides',
     safaruma: 'Sciences islamiques + examen SAFARUMA',
-    holygo: 'Non certifié indépendamment',
+    autres: 'Non certifié indépendamment',
     agence: 'Variable selon agence',
   },
   {
     critere: 'Personnalisation',
     safaruma: 'Programme 100% sur-mesure',
-    holygo: 'Programme fixe',
+    autres: 'Programme fixe',
     agence: 'Programme fixe de groupe',
   },
   {
     critere: 'Réservation en ligne',
     safaruma: 'Plateforme dédiée, 2 min',
-    holygo: 'Application mobile',
+    autres: 'Application mobile',
     agence: 'Téléphone / agence physique',
   },
   {
     critere: 'Annulation flexible',
     safaruma: 'Gratuite jusqu\'à 48h',
-    holygo: 'Conditions restrictives',
+    autres: 'Conditions restrictives',
     agence: 'Souvent non remboursable',
   },
   {
     critere: 'Tarif indicatif / jour',
     safaruma: 'Dès 120€/jour',
-    holygo: 'Forfait tout-compris',
+    autres: 'Forfait tout-compris',
     agence: 'Inclus dans le forfait',
   },
 ];
@@ -529,7 +529,7 @@ export default function AProposPage() {
                       fontSize: '0.85rem',
                       color: 'rgba(26,18,9,0.55)',
                       borderBottom: '1px solid rgba(232,223,200,0.5)',
-                    }}>{row.holygo}</td>
+                    }}>{row.autres}</td>
                     <td style={{
                       padding: '1rem 1.5rem',
                       textAlign: 'center',

@@ -353,3 +353,11 @@ footer { background: var(--warm); padding: 3rem 4rem 2rem; color: rgba(255,255,2
 .guide-omra-promo-card:hover { transform: translateY(-3px); box-shadow: 0 20px 60px rgba(201,168,76,0.15); }
 .footer-trust-bar::-webkit-scrollbar { display: none; }
 footer div::-webkit-scrollbar { display: none; }
+@media (max-width: 768px) {
+  .guide-omra-promo-card-section { padding-top: 1rem !important; padding-bottom: 1rem !important; }
+}
+@media (max-width: 640px) {
+  .guide-omra-inner { flex-direction: column !important; gap: 1rem !important; }
+  .guide-omra-tags { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; width: 100%; }
+  .guide-omra-cta { display: block; width: 100%; text-align: center; margin-top: 0.5rem; }
+}

@@ -634,7 +634,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════
           GUIDE OMRA — carte premium
           ═══════════════════════════════════════════════════════ */}
-      <section style={{ background: 'var(--cream)', padding: '2rem 2rem', borderTop: '1px solid var(--sand)' }}>
+      <section className="guide-omra-promo-card-section" style={{ background: 'var(--cream)', padding: '2rem 2rem', borderTop: '1px solid var(--sand)' }}>
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
           <Link href="/guide-omra" style={{ textDecoration: 'none', display: 'block' }}>
             <div className="reveal guide-omra-promo-card" style={{
@@ -648,19 +648,19 @@ export default function Home() {
               transition: 'transform 0.2s, box-shadow 0.2s',
             }}>
               <div style={{ position: 'absolute', top: '50%', right: '2rem', transform: 'translateY(-50%)', fontFamily: 'var(--font-cormorant, serif)', fontSize: '6rem', color: 'rgba(201,168,76,0.05)', direction: 'rtl', pointerEvents: 'none', lineHeight: 1 }}>عمرة</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap', position: 'relative' }}>
+              <div className="guide-omra-inner" style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap', position: 'relative' }}>
                 <div style={{ flex: 1, minWidth: 220 }}>
                   <span style={{ display: 'inline-block', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(201,168,76,0.85)', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', padding: '0.22rem 0.65rem', borderRadius: 4, marginBottom: '0.7rem' }}>Guide gratuit</span>
                   <h3 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(1.4rem, 3vw, 1.9rem)', color: 'white', margin: '0 0 0.65rem', lineHeight: 1.2, fontWeight: 400 }}>Guide complet de la Omra</h3>
-                  <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.8, margin: '0 0 1.25rem' }}>Ihram, Tawaf, Sa&apos;i, Tahallul — chaque rituel expliqué avec ses du&apos;as, significations spirituelles et checklist de préparation.</p>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'var(--gold)', color: 'var(--deep)', fontWeight: 700, fontSize: '0.82rem', padding: '0.65rem 1.4rem', borderRadius: 8 }}>Lire le guide →</span>
+                  <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.8, margin: 0 }}>Ihram, Tawaf, Sa&apos;i, Tahallul — chaque rituel expliqué avec ses du&apos;as, significations spirituelles et checklist de préparation.</p>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem', flexShrink: 0 }}>
+                <div className="guide-omra-tags" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem', flexShrink: 0 }}>
                   {['Ihram & Talbiyyah', 'Tawaf — 7 tours', "Sa'i — Safa & Marwa", 'Tahallul', "Du'as essentielles", 'Checklist complète'].map(tag => (
                     <span key={tag} style={{ fontSize: '0.7rem', fontWeight: 600, color: 'rgba(201,168,76,0.75)', background: 'rgba(201,168,76,0.07)', border: '1px solid rgba(201,168,76,0.15)', padding: '0.28rem 0.65rem', borderRadius: 20, whiteSpace: 'nowrap', textAlign: 'center' }}>{tag}</span>
                   ))}
                 </div>
               </div>
+              <span className="guide-omra-cta" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'var(--gold)', color: 'var(--deep)', fontWeight: 700, fontSize: '0.82rem', padding: '0.65rem 1.4rem', borderRadius: 8, marginTop: '1.25rem' }}>Lire le guide →</span>
             </div>
           </Link>
         </div>
@@ -674,10 +674,10 @@ export default function Home() {
           سفرنا
         </div>
         <h2 className="reveal reveal-d1" style={{ color: 'white', marginTop: '-1rem' }}>
-          Ton Omra mérite mieux.
+          Ta Omra mérite mieux.
         </h2>
         <p className="reveal reveal-d2" style={{ color: 'rgba(255,255,255,0.45)', maxWidth: 480, margin: '1rem auto 2.5rem', lineHeight: 1.85, fontSize: '0.95rem' }}>
-          Rejoins des milliers de pèlerins francophones qui ont vécu une Omra privée, profonde et inoubliable — avec un guide qui a consacré sa vie à ce moment.
+          Rejoins des milliers de pèlerins francophones qui ont vécu une Omra privée, profonde et inoubliable avec un guide qui a consacré sa vie à ce moment.
         </p>
         <div className="reveal reveal-d3" style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           <Link href="/guides" className="btn-hero-cta" style={{ background: 'var(--gold)', color: 'var(--deep)', borderColor: 'var(--gold)' }}>

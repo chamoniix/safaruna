@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { signOut } from 'next-auth/react';
 
 /* ── HEROICONS SVG (stroke, 18×18) ── */
 const IcoHome = ({ c }: { c: string }) => (
@@ -64,23 +65,24 @@ const IcoLogout = ({ c }: { c: string }) => (
 type NavItem = { href: string; Icon: React.ComponentType<{ c: string }>; label: string; badge?: string; badgeColor?: string };
 const NAV: { section: string; items: NavItem[] }[] = [
   { section: 'Mon voyage', items: [
-    { href: '/espace/tableau-de-bord', Icon: IcoHome,        label: 'Tableau de bord' },
-    { href: '/espace/reservations',    Icon: IcoCalendar,    label: 'Mes Réservations' },
-    { href: '/espace/messages',        Icon: IcoChat,        label: 'Messages', badge: '2', badgeColor: '#C9A84C' },
+    { href: '/espace/tableau-de-bord', Icon: IcoHome,     label: 'Tableau de bord' },
+    { href: '/espace/reservations',   Icon: IcoCalendar, label: 'Mes réservations' },
+    { href: '/espace/messages',       Icon: IcoChat,     label: 'Messages', badge: '2', badgeColor: '#C9A84C' },
+    { href: '/espace/favoris',        Icon: IcoHeart,    label: 'Mes favoris' },
   ]},
   { section: 'Spiritualité', items: [
     { href: '/espace/academy',   Icon: IcoCap,         label: 'SAFARUMA Academy' },
     { href: '/espace/dua',       Icon: IcoBook,        label: "Carnet de Du'a" },
     { href: '/espace/checklist', Icon: IcoCheckCircle, label: 'Ma Checklist', badge: '6/12', badgeColor: '#1D5C3A' },
-    { href: '/espace/favoris',   Icon: IcoHeart,       label: 'Mes Favoris' },
+  ]},
+  { section: 'Mon compte', items: [
+    { href: '/espace/profil',     Icon: IcoUser, label: 'Mon profil' },
+    { href: '/espace/parrainage', Icon: IcoGift, label: 'Parrainage', badge: '50€', badgeColor: '#1D5C3A' },
+    { href: '/espace/parametres', Icon: IcoCog,  label: 'Paramètres' },
   ]},
 ];
 
-const EXTRA: NavItem[] = [
-  { href: '/espace/profil',     Icon: IcoUser, label: 'Mon profil' },
-  { href: '/espace/parrainage', Icon: IcoGift, label: 'Parrainage', badge: '50€', badgeColor: '#1D5C3A' },
-  { href: '/espace/parametres', Icon: IcoCog,  label: 'Paramètres' },
-];
+const EXTRA: NavItem[] = [];
 
 export default function PelerinLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -167,12 +169,10 @@ export default function PelerinLayout({ children }: { children: React.ReactNode 
                 {group.items.map(item => <NavLink key={item.href} item={item} />)}
               </div>
             ))}
-            <div style={{ height: 1, background: '#EDE8DC', margin: '0.75rem 1.5rem' }} />
-            {EXTRA.map(item => <NavLink key={item.href} item={item} />)}
           </nav>
 
           <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid #EDE8DC', flexShrink: 0 }}>
-            <button className="sb-logout-btn" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.82rem', fontWeight: 600, color: '#C0392B', background: 'none', border: 'none', cursor: 'pointer', width: '100%' }}>
+            <button className="sb-logout-btn" onClick={() => signOut({ callbackUrl: '/' })} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.82rem', fontWeight: 600, color: '#C0392B', background: 'none', border: 'none', cursor: 'pointer', width: '100%' }}>
               <IcoLogout c="#C0392B" /> Déconnexion
             </button>
           </div>

@@ -10,6 +10,7 @@ import { IconCar, IconVan, IconTrain, IconShield, IconStar, IconPerson, IconUser
 const GUIDES_DATA = [
   {
     slug: 'naim-laamari',
+    zones: ['makkah', 'madinah'],
     name: 'Naïm LAAMARI',
     title: 'Guide Officiel SAFARUMA · Responsable Terrain',
     initials: 'NL',
@@ -31,6 +32,7 @@ const GUIDES_DATA = [
   },
   {
     slug: 'rachid-al-madani',
+    zones: ['makkah', 'madinah'],
     name: 'Rachid Al-Madani',
     title: 'Cheikh · Spécialiste Sîra',
     initials: 'RA',
@@ -51,6 +53,7 @@ const GUIDES_DATA = [
   },
   {
     slug: 'fatima-al-omari',
+    zones: ['makkah', 'madinah'],
     name: 'Fatima Al-Omari',
     title: 'Guide femme · Familles',
     initials: 'FA',
@@ -71,6 +74,7 @@ const GUIDES_DATA = [
   },
   {
     slug: 'youssouf-konate',
+    zones: ['makkah'],
     name: 'Youssouf Konaté',
     title: "Spécialiste Afrique de l'Ouest",
     initials: 'YK',
@@ -91,6 +95,7 @@ const GUIDES_DATA = [
   },
   {
     slug: 'abdullah-ben-yusuf',
+    zones: ['madinah'],
     name: 'Abdullah Ben Yusuf',
     title: 'Diplômé · Université de Madinah',
     initials: 'AB',
@@ -111,6 +116,7 @@ const GUIDES_DATA = [
   },
   {
     slug: 'samira-al-rashidi',
+    zones: ['madinah'],
     name: 'Samira Al-Rashidi',
     title: 'Spécialiste PMR · Madinah',
     initials: 'SR',
@@ -245,6 +251,7 @@ function GuideAvatarSVG({ slug, gradient, initials, isWoman }: { slug: string; g
 export default function GuideSearchPage() {
   const [budget, setBudget]           = useState(800);
   const [activeQF, setActiveQF]       = useState('🇫🇷 Francophone');
+  const [destination, setDestination] = useState<'all' | 'makkah' | 'madinah' | 'both'>('all');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [arrivalDate, setArrivalDate]     = useState('');
   const [departureDate, setDepartureDate] = useState('');
@@ -253,6 +260,16 @@ export default function GuideSearchPage() {
     ? Math.max(0, Math.round((new Date(departureDate).getTime() - new Date(arrivalDate).getTime()) / (1000 * 60 * 60 * 24)))
     : 0;
   const program = getProgramForDays(numDays);
+
+  const filteredGuides = GUIDES_DATA.filter(g => {
+    if (destination === 'all') return true;
+    if (destination === 'makkah') return g.zones.includes('makkah');
+    if (destination === 'madinah') return g.zones.includes('madinah');
+    if (destination === 'both') return g.zones.includes('makkah') && g.zones.includes('madinah');
+    return true;
+  });
+  const filteredOfficial = filteredGuides.filter(g => g.isOfficial);
+  const filteredNonOfficial = filteredGuides.filter(g => !g.isOfficial);
 
   const FiltersContent = () => (
     <>
@@ -337,7 +354,6 @@ export default function GuideSearchPage() {
             <div className="gsb-row1">
               {[
                 { label: 'Langue du guide', opts: ['Toutes les langues', '🇫🇷 Français', '🇸🇦 Arabe', '🇬🇧 English', '🇸🇳 Wolof'] },
-                { label: 'Destination',     opts: ['Makkah + Madinah', 'Makkah uniquement', 'Madinah uniquement'] },
               ].map(f => (
                 <div key={f.label} style={{ flex: 1 }}>
                   <div style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7A6D5A', marginBottom: '0.35rem' }}>{f.label}</div>
@@ -346,6 +362,21 @@ export default function GuideSearchPage() {
                   </select>
                 </div>
               ))}
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7A6D5A', marginBottom: '0.35rem' }}>
+                  Destination
+                </div>
+                <select
+                  value={destination}
+                  onChange={e => setDestination(e.target.value as 'all' | 'makkah' | 'madinah' | 'both')}
+                  style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 10, padding: '0.6rem 0.85rem', fontFamily: 'inherit', fontSize: '0.85rem', color: '#1A1209', background: '#FDFBF7', outline: 'none' }}
+                >
+                  <option value="all">Makkah + Madinah</option>
+                  <option value="makkah">Makkah uniquement</option>
+                  <option value="madinah">Madinah uniquement</option>
+                  <option value="both">Les deux villes (même guide)</option>
+                </select>
+              </div>
             </div>
             {/* Row 2: dates + button */}
             <div className="gsb-row2">
@@ -454,7 +485,7 @@ export default function GuideSearchPage() {
           {/* Mobile filter button + count */}
           <div className="guides-mobile-bar">
             <p style={{ fontSize: '0.875rem', color: '#7A6D5A', margin: 0 }}>
-              <strong style={{ color: '#1A1209' }}>{GUIDES_DATA.length}</strong> guides trouvés
+              <strong style={{ color: '#1A1209' }}>{filteredGuides.length}</strong> guide{filteredGuides.length > 1 ? 's' : ''} trouvé{filteredGuides.length > 1 ? 's' : ''}
             </p>
             <button
               onClick={() => setFiltersOpen(true)}
@@ -470,21 +501,39 @@ export default function GuideSearchPage() {
           {/* Desktop count */}
           <div className="guides-desktop-count">
             <p style={{ fontSize: '0.875rem', color: '#7A6D5A', margin: 0 }}>
-              <strong style={{ color: '#1A1209' }}>{GUIDES_DATA.length}</strong> guides trouvés
+              <strong style={{ color: '#1A1209' }}>{filteredGuides.length}</strong> guide{filteredGuides.length > 1 ? 's' : ''} trouvé{filteredGuides.length > 1 ? 's' : ''}
             </p>
           </div>
 
           {/* Official guide — full-width featured card */}
-          {GUIDES_DATA.filter(g => g.isOfficial).map(g => (
+          {filteredOfficial.map(g => (
             <div key={g.slug} className="guide-official-wrap">
               <div className="guide-official-label">★ RESPONSABLE OFFICIEL SAFARUMA</div>
               <GuideCard guide={g} official />
             </div>
           ))}
 
+          {filteredGuides.length === 0 && (
+            <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#7A6D5A' }}>
+              <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>🔍</div>
+              <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.3rem', fontWeight: 600, color: '#1A1209', marginBottom: '0.5rem' }}>
+                Aucun guide pour cette sélection
+              </div>
+              <div style={{ fontSize: '0.85rem' }}>
+                Modifie les filtres ou{' '}
+                <button
+                  onClick={() => setDestination('all')}
+                  style={{ color: '#C9A84C', fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.85rem', textDecoration: 'underline' }}
+                >
+                  voir tous les guides
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Cards grid */}
           <div className="guides-grid">
-            {GUIDES_DATA.filter(g => !g.isOfficial).map(g => (
+            {filteredNonOfficial.map(g => (
               <GuideCard key={g.slug} guide={g} />
             ))}
           </div>

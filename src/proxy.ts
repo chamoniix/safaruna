@@ -16,16 +16,36 @@ export async function proxy(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // ── Pèlerin / Guide routes (NextAuth) ─────────────────
+  // ── Public guide routes ───────────────────────────────
   if (pathname === '/guide/inscription') return NextResponse.next();
+  if (pathname === '/guide/connexion') return NextResponse.next();
 
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET ?? '' });
+  const role = (token?.role as string) || '';
 
-  if (!token) {
-    return NextResponse.redirect(new URL('/connexion', req.url));
+  // ── Routes guide protégées → redirige vers /guide/connexion si pas GUIDE
+  if (pathname.startsWith('/guide/tableau-de-bord') ||
+      pathname.startsWith('/guide/missions') ||
+      pathname.startsWith('/guide/demandes') ||
+      pathname.startsWith('/guide/revenus') ||
+      pathname.startsWith('/guide/calendrier') ||
+      pathname.startsWith('/guide/messages') ||
+      pathname.startsWith('/guide/profil') ||
+      pathname.startsWith('/guide/avis') ||
+      pathname.startsWith('/guide/forfaits')) {
+    if (!token || (role !== 'GUIDE' && role !== 'ADMIN')) {
+      return NextResponse.redirect(new URL('/guide/connexion', req.url));
+    }
   }
-  if (pathname.startsWith('/guide') && token.role !== 'GUIDE' && token.role !== 'ADMIN') {
-    return NextResponse.redirect(new URL('/connexion', req.url));
+
+  // ── Routes pèlerin → redirige vers /connexion si pas PELERIN
+  if (pathname.startsWith('/espace/')) {
+    if (!token) {
+      return NextResponse.redirect(new URL('/connexion', req.url));
+    }
+    if (role !== 'PELERIN' && role !== 'ADMIN') {
+      return NextResponse.redirect(new URL('/connexion', req.url));
+    }
   }
 
   return NextResponse.next();

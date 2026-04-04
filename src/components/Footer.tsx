@@ -50,7 +50,7 @@ export default function Footer() {
           <h4>Guides</h4>
           <ul>
             <li><Link href="/guide/inscription">Créer mon profil Guide</Link></li>
-            <li><Link href="/guide/tableau-de-bord">Espace Guide</Link></li>
+            <li><Link href="/guide/connexion">Espace Guide</Link></li>
           </ul>
         </div>
         <div className="footer-col">

@@ -1,12 +1,15 @@
 import { AuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
+import { PrismaClient } from "@prisma/client"
+import bcrypt from "bcryptjs"
+
+const prisma = new PrismaClient()
 
 export const authOptions: AuthOptions = {
-  // No PrismaAdapter — using pure JWT sessions (no DB writes on login)
   session: {
     strategy: "jwt",
-    maxAge: 7 * 24 * 60 * 60, // 7 days
+    maxAge: 7 * 24 * 60 * 60,
   },
   pages: {
     signIn: "/connexion",
@@ -17,34 +20,73 @@ export const authOptions: AuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
     }),
     CredentialsProvider({
-      name: "credentials",
+      id: "guide-credentials",
+      name: "Guide Login",
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Mot de passe", type: "password" }
+        password: { label: "Mot de passe", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null
-        // Placeholder — returns a mock user for now
-        // TODO: connect to Prisma/Supabase once DB is stable
-        if (credentials.email && credentials.password.length >= 8) {
+        try {
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email },
+          })
+          if (!user || user.role !== "GUIDE") return null
+          if (!user.passwordHash) return null
+          const isValid = await bcrypt.compare(credentials.password, user.passwordHash)
+          if (!isValid) return null
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { lastLogin: new Date() },
+          })
           return {
-            id: "1",
-            email: credentials.email,
-            name: credentials.email.split("@")[0],
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: "GUIDE",
+          }
+        } catch {
+          return null
+        }
+      },
+    }),
+    CredentialsProvider({
+      id: "pelerin-credentials",
+      name: "Pelerin Login",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Mot de passe", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null
+        try {
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email },
+          })
+          if (!user || user.role !== "PELERIN") return null
+          if (!user.passwordHash) return null
+          const isValid = await bcrypt.compare(credentials.password, user.passwordHash)
+          if (!isValid) return null
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
             role: "PELERIN",
           }
+        } catch {
+          return null
         }
-        return null
-      }
-    })
+      },
+    }),
   ],
   callbacks: {
-    async jwt({ token, user, account, profile }) {
+    async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id
         token.role = (user as any).role || "PELERIN"
       }
-      if (account?.provider === "google" && profile) {
+      if (account?.provider === "google") {
         token.role = "PELERIN"
       }
       return token
@@ -55,7 +97,7 @@ export const authOptions: AuthOptions = {
         (session.user as any).role = token.role as string;
       }
       return session
-    }
+    },
   },
   secret: process.env.NEXTAUTH_SECRET,
 }

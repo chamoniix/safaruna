@@ -483,7 +483,7 @@ export default function Home() {
 
           <div className="reveal" style={{ textAlign: 'center', marginTop: '3rem' }}>
             <Link href="/guides" className="btn-primary" style={{ fontSize: '0.88rem' }}>
-              Voir les 6 guides certifiés →
+              Voir tous les guides →
             </Link>
           </div>
         </div>

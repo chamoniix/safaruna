@@ -212,9 +212,6 @@ export default function Home() {
             <Link href="/guides" className="btn-hero-cta">
               Trouver mon guide →
             </Link>
-            <Link href="/guide/inscription" className="btn-hero-cta-secondary">
-              Je suis guide
-            </Link>
           </div>
 
           {/* Live trust mini-row */}
@@ -682,9 +679,6 @@ export default function Home() {
         <div className="reveal reveal-d3" style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           <Link href="/guides" className="btn-hero-cta" style={{ background: 'var(--gold)', color: 'var(--deep)', borderColor: 'var(--gold)' }}>
             Trouver mon guide →
-          </Link>
-          <Link href="/guide/inscription" className="btn-hero-cta-secondary">
-            Je suis guide
           </Link>
         </div>
       </section>

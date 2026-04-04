@@ -6,18 +6,19 @@ export default function Footer() {
   return (
     <footer>
       {/* Trust badges strip */}
-      <div className="footer-trust-bar" style={{
+      <div style={{
         display: 'flex',
-        gap: '1.5rem',
+        gap: '1.25rem',
         alignItems: 'center',
         justifyContent: 'flex-start',
-        padding: '1rem 1.5rem',
+        padding: '0.875rem 1.5rem',
         borderBottom: '1px solid rgba(255,255,255,0.08)',
         marginBottom: '1rem',
         overflowX: 'auto',
         flexWrap: 'nowrap',
         WebkitOverflowScrolling: 'touch' as const,
         scrollbarWidth: 'none' as const,
+        msOverflowStyle: 'none' as const,
       }}>
         {([
           { icon: <span style={{ color: 'rgba(201,168,76,0.8)', fontWeight: 700 }}>✓</span>, label: 'Guides mutawwif certifiés' },
@@ -26,7 +27,7 @@ export default function Footer() {
           { icon: <IconAccessibility size={14} stroke="rgba(201,168,76,0.7)" />, label: 'Accessibilité PMR' },
           { icon: <IconLock size={14} stroke="rgba(201,168,76,0.7)" />, label: 'Données protégées RGPD' },
         ] as { icon: React.ReactNode; label: string }[]).map(b => (
-          <div key={b.label} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>
+          <div key={b.label} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600, flexShrink: 0, whiteSpace: 'nowrap' }}>
             {b.icon}
             {b.label}
           </div>

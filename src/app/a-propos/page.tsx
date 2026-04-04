@@ -487,7 +487,7 @@ export default function AProposPage() {
                     textTransform: 'uppercase',
                     color: 'rgba(26,18,9,0.5)',
                     borderBottom: '2px solid var(--sand)',
-                  }}>HolyGO</th>
+                  }}>Autres apps</th>
                   <th style={{
                     padding: '1rem 1.5rem',
                     textAlign: 'center',

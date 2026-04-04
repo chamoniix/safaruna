@@ -18,7 +18,7 @@ const DIFFERENCIATEURS: Array<{ icon: React.ReactNode; title: string; desc: stri
     icon: <IconMegaphone size={24} stroke="#C9A84C" />,
     title: 'Guide dans ta langue',
     desc: "Tu choisis ton guide selon sa langue maternelle. Français, Wolof, Darija, Turc — ton guide te parle comme un ami, pas comme un conférencier.",
-    vs: "HolyGO : guides assignés sans choix de langue",
+    vs: "Autres plateformes : guides assignés sans choix de langue",
   },
   {
     icon: <IconEye size={24} stroke="#C9A84C" />,
@@ -36,7 +36,7 @@ const DIFFERENCIATEURS: Array<{ icon: React.ReactNode; title: string; desc: stri
     icon: <IconGraduationCap size={24} stroke="#C9A84C" />,
     title: 'Academy islamique',
     desc: "Apprends les rituels, l'histoire, les du'a avant de partir. 30+ leçons vidéo accessibles dans ton espace pèlerin.",
-    vs: "HolyGO : aucune préparation spirituelle",
+    vs: "Autres plateformes : aucune préparation spirituelle",
   },
   {
     icon: <IconShield size={24} stroke="#C9A84C" />,
@@ -279,7 +279,7 @@ export default function Home() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          DIFFÉRENCIATEURS vs HolyGO
+          DIFFÉRENCIATEURS vs autres plateformes
           ═══════════════════════════════════════════════════════ */}
       <section style={{ background: 'var(--cream)', padding: '6rem 4rem' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>

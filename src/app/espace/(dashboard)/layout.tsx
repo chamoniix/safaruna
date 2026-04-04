@@ -71,9 +71,10 @@ const NAV: { section: string; items: NavItem[] }[] = [
     { href: '/espace/favoris',        Icon: IcoHeart,    label: 'Mes favoris' },
   ]},
   { section: 'Spiritualité', items: [
-    { href: '/espace/academy',   Icon: IcoCap,         label: 'SAFARUMA Academy' },
-    { href: '/espace/dua',       Icon: IcoBook,        label: "Carnet de Du'a" },
-    { href: '/espace/checklist', Icon: IcoCheckCircle, label: 'Ma Checklist', badge: '6/12', badgeColor: '#1D5C3A' },
+    { href: '/espace/academy',    Icon: IcoCap,         label: 'SAFARUMA Academy' },
+    { href: '/espace/dua',        Icon: IcoBook,        label: "Carnet de Du'a" },
+    { href: '/espace/checklist',  Icon: IcoCheckCircle, label: 'Ma Checklist', badge: '6/12', badgeColor: '#1D5C3A' },
+    { href: '/espace/guide-omra', Icon: IcoBook,        label: 'Guide complet la Omra' },
   ]},
   { section: 'Mon compte', items: [
     { href: '/espace/profil',     Icon: IcoUser, label: 'Mon profil' },

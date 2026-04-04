@@ -7,10 +7,15 @@ import Footer from "@/components/Footer";
 
 /* ─── Navigation sections ─── */
 const SECTIONS = [
-  { id: 'intro',       label: 'Introduction' },
-  { id: 'preparation', label: 'Préparation' },
-  { id: 'ihram',       label: "L'Ihram" },
-  { id: 'tawaf',       label: 'Le Tawaf' },
+  { id: "intro", label: "Introduction" },
+  { id: "preparation", label: "Préparation" },
+  { id: "ihram", label: "L'Ihram" },
+  { id: "tawaf", label: "Le Tawaf" },
+  { id: "sai", label: "La Sa'i" },
+  { id: "tahallul", label: "Le Tahallul" },
+  { id: "duas", label: "Du'as essentielles" },
+  { id: "checklist", label: "Checklist" },
+  { id: "faq", label: "FAQ" },
 ];
 
 /* ─── FAQ items ─── */
@@ -54,7 +59,9 @@ const CHECKLIST = [
   { cat: "Pratique", items: ["Numéro de votre guide SAFARUMA noté", "Application SAFARUMA téléchargée", "Eau Zamzam réservée", "Monnaie saoudienne (SAR)"] },
 ];
 
-export default function GuideOmraClient() {
+export default function GuideOmraComplet() {
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [progress, setProgress] = useState(0);
   const [activeSection, setActiveSection] = useState("intro");
   const mainRef = useRef<HTMLDivElement>(null);
@@ -91,10 +98,16 @@ export default function GuideOmraClient() {
     return () => obs.disconnect();
   }, []);
 
+  const toggleCheck = (key: string) =>
+    setChecked((prev) => ({ ...prev, [key]: !prev[key] }));
+
   const scrollTo = (id: string) => {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+
+  const totalItems = CHECKLIST.reduce((s, c) => s + c.items.length, 0);
+  const checkedCount = Object.values(checked).filter(Boolean).length;
 
   return (
     <div className="guide-omra">
@@ -223,6 +236,11 @@ export default function GuideOmraClient() {
       {/* Progress bar */}
       <div className="go-progress-bar" style={{ width: `${progress}%` }} />
 
+      {/* Bandeau membre */}
+      <div style={{ background: '#E8F5EE', borderBottom: '1px solid rgba(29,92,58,0.2)', padding: '0.6rem 1.5rem', textAlign: 'center', fontSize: '0.78rem', fontWeight: 600, color: '#1D5C3A' }}>
+        ✓ Guide complet · Réservé aux membres SAFARUMA
+      </div>
+
       <Navbar />
 
       {/* Hero */}
@@ -271,6 +289,12 @@ export default function GuideOmraClient() {
             </a>
           ))}
 
+          <div className="go-checklist-progress">
+            <p className="go-cp-label">Checklist — {checkedCount}/{totalItems}</p>
+            <div className="go-cp-bar-bg">
+              <div className="go-cp-bar-fill" style={{ width: `${totalItems > 0 ? (checkedCount / totalItems) * 100 : 0}%` }} />
+            </div>
+          </div>
         </aside>
 
         {/* Content */}
@@ -438,41 +462,161 @@ export default function GuideOmraClient() {
             </p>
           </section>
 
-          {/* PAYWALL */}
-          <div style={{
-            background: 'linear-gradient(135deg, #1A1209 0%, #2D1F08 100%)',
-            border: '1px solid rgba(201,168,76,0.3)',
-            borderRadius: 20,
-            padding: '3rem 2rem',
-            textAlign: 'center',
-            margin: '3rem 0',
-            position: 'relative',
-            overflow: 'hidden',
-          }}>
-            <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.08) 0%, transparent 60%)', pointerEvents: 'none' }} />
-            <div style={{ position: 'relative', zIndex: 1 }}>
-              <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🕋</div>
-              <h3 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', color: 'white', fontWeight: 600, marginBottom: '0.75rem', lineHeight: 1.2 }}>
-                La suite du guide est gratuite
-              </h3>
-              <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.9rem', lineHeight: 1.7, marginBottom: '2rem', maxWidth: 420, margin: '0 auto 2rem' }}>
-                Sa&apos;i, Tahallul, Du&apos;as essentielles et Checklist complète — accessibles dans votre espace pèlerin gratuit.
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxWidth: 320, margin: '0 auto' }}>
-                <a href="/inscription?redirect=/espace/guide-omra" style={{ display: 'block', background: '#C9A84C', color: '#1A1209', padding: '0.9rem 2rem', borderRadius: 50, fontWeight: 700, fontSize: '0.95rem', textDecoration: 'none', letterSpacing: '0.04em' }}>
-                  Créer mon espace gratuitement →
-                </a>
-                <a href="/connexion?redirect=/espace/guide-omra" style={{ display: 'block', background: 'transparent', color: 'rgba(255,255,255,0.5)', padding: '0.7rem', fontSize: '0.82rem', textDecoration: 'none' }}>
-                  Déjà un compte ? Accéder au guide complet
-                </a>
+          {/* SA'I */}
+          <section id="sai" className="go-section">
+            <span className="go-section-tag go-reveal">Rituel 3</span>
+            <h2 className="go-reveal go-reveal-d1">La Sa'i — السعي</h2>
+            <p className="go-reveal go-reveal-d2">
+              La Sa'i commémore la course d'Hajar, femme d'Ibrahim ﷺ, entre les collines de Safa et Marwa à la recherche d'eau pour son fils Ismaïl. Dieu répondit à son effort et sa foi en faisant jaillir la source de Zamzam.
+            </p>
+            <p className="go-reveal go-reveal-d2">
+              Elle consiste en <strong>7 allers-retours</strong> entre Safa et Marwa (Safa → Marwa = 1 trajet). Elle commence à Safa et se termine à Marwa. Durée estimée : <strong>45min à 1h30</strong>.
+            </p>
+
+            <div className="go-info-grid go-reveal go-reveal-d3">
+              {[
+                { icon: "🏔️", title: "Safa → Marwa", body: "Aller de Safa à Marwa = 1 trajet. 7 trajets au total. On commence à Safa, on finit à Marwa." },
+                { icon: "💨", title: "La course légère", body: "Entre les deux panneaux verts (hommes seulement), accélérer légèrement le pas en souvenir d'Hajar." },
+                { icon: "💧", title: "Wudu", body: "La Sa'i est valide même sans wudu selon la majorité des savants, mais être en état de pureté est recommandé." },
+                { icon: "🌿", title: "Du'a libre", body: "Faites vos du'as personnelles. Chaque allez-retour est une opportunité de dialogue intime avec Dieu." },
+              ].map((b) => (
+                <div key={b.title} className="go-info-box">
+                  <div className="go-info-box-icon">{b.icon}</div>
+                  <h4>{b.title}</h4>
+                  <p>{b.body}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="go-dua-card go-reveal">
+              <p className="go-dua-label">Du'a sur la colline de Safa — au début et à chaque retour à Safa</p>
+              <p className="go-dua-arabic">إِنَّ الصَّفَا وَالْمَرْوَةَ مِنْ شَعَائِرِ اللَّهِ — أَبْدَأُ بِمَا بَدَأَ اللَّهُ بِهِ</p>
+              <p className="go-dua-transliteration">Innas-Safa wal-Marwata min sha'a'irillah — Abda'u bima bada'allahu bih</p>
+              <p className="go-dua-translation">«Safa et Marwa sont parmi les rites d'Allah» — puis «Je commence par ce qu'Allah a commencé.» Faites face à la Kaaba, levez les mains et faites du dhikr et des du'as.</p>
+            </div>
+          </section>
+
+          {/* TAHALLUL */}
+          <section id="tahallul" className="go-section">
+            <span className="go-section-tag go-reveal">Rituel 4</span>
+            <h2 className="go-reveal go-reveal-d1">Le Tahallul — التحلل</h2>
+            <p className="go-reveal go-reveal-d2">
+              Le Tahallul — «sortir de l'état sacré» — marque la fin de la Omra. Pour les hommes, il consiste à se <strong>raser la tête</strong> (halq, recommandé) ou à couper les cheveux de façon égale (taqsir). Pour les femmes, couper une mèche de la longueur d'un bout de doigt suffit.
+            </p>
+            <p className="go-reveal go-reveal-d2">
+              Après le Tahallul, toutes les interdictions de l'Ihram sont levées. Vous avez accompli votre Omra — subhanAllah. Prenez un moment de gratitude, de sujud, de pleurs. C'est un moment de renaissance.
+            </p>
+
+            <div className="go-alert go-reveal">
+              <span className="go-alert-icon">✦</span>
+              <p>Le Prophète ﷺ a fait du'a trois fois pour ceux qui se rasent et une fois pour ceux qui coupent. Raser est donc préférable pour les hommes, mais couper est valide. Ne vous précipitez pas : savourez ce moment de clôture.</p>
+            </div>
+
+            <div className="go-dua-card go-reveal">
+              <p className="go-dua-label">Du'a lors du Tahallul</p>
+              <p className="go-dua-arabic">اللَّهُمَّ تَقَبَّلْ مِنِّي</p>
+              <p className="go-dua-transliteration">Allahumma taqabbal minni</p>
+              <p className="go-dua-translation">«Ô Allah, accepte de moi.» — Une des du'as les plus simples et les plus profondes. Répétez-la autant que vous le souhaitez en ce moment privilégié.</p>
+            </div>
+          </section>
+
+          {/* DU'AS */}
+          <section id="duas" className="go-section">
+            <span className="go-section-tag go-reveal">Invocations</span>
+            <h2 className="go-reveal go-reveal-d1">Du'as Essentielles</h2>
+            <p className="go-reveal go-reveal-d2">
+              La du'a est le cœur de l'adoration. À La Mecque, dans la Maison de Dieu, vos invocations ont une valeur spirituelle particulière. Voici les du'as les plus importantes à connaître.
+            </p>
+
+            {[
+              {
+                label: "Du'a d'entrée à la Mosquée Al-Haram",
+                ar: "اللَّهُمَّ افْتَحْ لِي أَبْوَابَ رَحْمَتِكَ",
+                tr: "Allahumm-aftah li abwaba rahmatik",
+                fr: "«Ô Allah, ouvre-moi les portes de Ta miséricorde.»",
+              },
+              {
+                label: "Du'a au premier regard sur la Kaaba",
+                ar: "اللَّهُمَّ زِدْ هَذَا الْبَيْتَ تَشْرِيفًا وَتَعْظِيمًا وَتَكْرِيمًا وَمَهَابَةً",
+                tr: "Allahumma zid hadhal-bayta tashrifan wa ta'dhiman wa takriman wa mahabah",
+                fr: "«Ô Allah, augmente la dignité, la grandeur, l'honneur et la vénération de cette Maison.»",
+              },
+              {
+                label: "Du'a pour soi-même (à utiliser librement)",
+                ar: "رَبِّ اغْفِرْ لِي وَارْحَمْنِي وَتُبْ عَلَيَّ",
+                tr: "Rabbigh-fir li warhamni wa tub 'alayya",
+                fr: "«Seigneur, pardonne-moi, aie pitié de moi et accorde-moi Ton repentir.»",
+              },
+              {
+                label: "Du'a de Zamzam",
+                ar: "اللَّهُمَّ إِنِّي أَسْأَلُكَ عِلْمًا نَافِعًا وَرِزْقًا وَاسِعًا وَشِفَاءً مِنْ كُلِّ دَاءٍ",
+                tr: "Allahumma inni as'aluka 'ilman nafi'an wa rizqan wasi'an wa shifa'an min kulli da'",
+                fr: "«Ô Allah, je Te demande une science utile, une subsistance abondante et la guérison de toute maladie.»",
+              },
+            ].map((d) => (
+              <div key={d.label} className="go-dua-card go-reveal">
+                <p className="go-dua-label">{d.label}</p>
+                <p className="go-dua-arabic">{d.ar}</p>
+                <p className="go-dua-transliteration">{d.tr}</p>
+                <p className="go-dua-translation">{d.fr}</p>
               </div>
-              <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', marginTop: '1.5rem', flexWrap: 'wrap' }}>
-                {["Sa'i & Tahallul", "Du'as essentielles", 'Checklist complète', 'FAQ Omra'].map(t => (
-                  <span key={t} style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                    <span style={{ color: '#C9A84C' }}>✓</span> {t}
-                  </span>
-                ))}
-              </div>
+            ))}
+          </section>
+
+          {/* CHECKLIST */}
+          <section id="checklist" className="go-section">
+            <span className="go-section-tag go-reveal">Préparation</span>
+            <h2 className="go-reveal go-reveal-d1">Checklist de la Omra</h2>
+            <p className="go-reveal go-reveal-d2">
+              Cochez chaque élément au fur et à mesure de votre préparation. Votre progression est sauvegardée pour cette session.
+            </p>
+
+            <div className="go-reveal go-reveal-d2">
+              {CHECKLIST.map((cat) => (
+                <div key={cat.cat} className="go-checklist-cat">
+                  <p className="go-checklist-cat-title">{cat.cat}</p>
+                  {cat.items.map((item) => {
+                    const key = `${cat.cat}::${item}`;
+                    const isChecked = !!checked[key];
+                    return (
+                      <div key={key} className="go-check-item" onClick={() => toggleCheck(key)} role="checkbox" aria-checked={isChecked} tabIndex={0} onKeyDown={(e) => e.key === " " && toggleCheck(key)}>
+                        <div className={`go-check-box${isChecked ? " checked" : ""}`}>
+                          {isChecked && <svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5L4 7.5L10 1.5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                        </div>
+                        <span className={`go-check-label${isChecked ? " checked" : ""}`}>{item}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* FAQ */}
+          <section id="faq" className="go-section">
+            <span className="go-section-tag go-reveal">Questions fréquentes</span>
+            <h2 className="go-reveal go-reveal-d1">FAQ — Vos questions sur la Omra</h2>
+
+            <div className="go-reveal go-reveal-d1">
+              {FAQ_ITEMS.map((item, i) => (
+                <div key={i} className="go-faq-item">
+                  <div className="go-faq-q" onClick={() => setOpenFaq(openFaq === i ? null : i)}>
+                    <span>{item.q}</span>
+                    <div className={`go-faq-icon${openFaq === i ? " open" : ""}`}>+</div>
+                  </div>
+                  <div className={`go-faq-a${openFaq === i ? " open" : ""}`}>{item.a}</div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* CTA */}
+          <div className="go-cta-block go-reveal">
+            <h3>Accomplissez votre Omra avec un guide qui connaît chaque pierre</h3>
+            <p>Naïm LAAMARI et les guides SAFARUMA vous accompagnent pas à pas — rituels, du'as, histoire et spiritualité — pour que votre Omra soit inoubliable.</p>
+            <div className="go-cta-btns">
+              <Link href="/guides" className="go-btn-gold">Trouver mon guide →</Link>
+              <a href="https://wa.me/message/ZGUPRJRNVJRGN1" target="_blank" rel="noopener noreferrer" className="go-btn-outline">WhatsApp SAFARUMA</a>
             </div>
           </div>
 

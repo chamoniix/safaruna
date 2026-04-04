@@ -296,7 +296,7 @@ export default function GuideSearchPage() {
       <Navbar />
 
       {/* ── HERO ── */}
-      <div style={{ background: '#1A1209', paddingTop: '8rem', paddingBottom: '3rem', paddingLeft: '1.5rem', paddingRight: '1.5rem', position: 'relative', overflow: 'hidden' }}>
+      <div className="guides-hero" style={{ background: '#1A1209', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 80% 120% at 50% 110%, rgba(201,168,76,0.14) 0%, transparent 65%)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', right: '4rem', top: '50%', transform: 'translateY(-50%)', fontFamily: 'serif', fontSize: '10rem', color: 'rgba(201,168,76,0.05)', userSelect: 'none', pointerEvents: 'none', lineHeight: 1 }}>مرشد</div>
 
@@ -358,7 +358,7 @@ export default function GuideSearchPage() {
           </div>
 
           {/* Quick filters */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', justifyContent: 'center' }}>
+          <div className="guides-qf">
             {([
               { key: '🇫🇷 Francophone', label: '🇫🇷 Francophone' },
               { key: '🚗 Avec voiture',  label: 'Avec voiture' },
@@ -516,6 +516,42 @@ export default function GuideSearchPage() {
           to   { transform: translateY(0); }
         }
 
+        /* Hero responsive */
+        .guides-hero {
+          padding-top: 8rem;
+          padding-bottom: 3rem;
+          padding-left: 1.5rem;
+          padding-right: 1.5rem;
+        }
+        @media (max-width: 768px) {
+          .guides-hero {
+            padding-top: 5.5rem;
+            padding-bottom: 2rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
+          }
+        }
+
+        /* Quick filters */
+        .guides-qf {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+          justify-content: center;
+        }
+        @media (max-width: 768px) {
+          .guides-qf {
+            justify-content: flex-start;
+            overflow-x: auto;
+            flex-wrap: nowrap;
+            padding-bottom: 0.5rem;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+          }
+          .guides-qf::-webkit-scrollbar { display: none; }
+          .guides-qf button { flex-shrink: 0; }
+        }
+
         /* Search bar */
         .guides-search-bar {
           background: white;
@@ -546,6 +582,25 @@ export default function GuideSearchPage() {
             gap: 0.75rem;
           }
           .gsb-row1 > div, .gsb-row2 > div { flex: none; width: 100%; }
+          .gsb-row2 > div {
+            flex: none;
+            width: 100%;
+          }
+          .gsb-row2 button[type="button"],
+          .gsb-row2 > button {
+            width: 100%;
+            justify-content: center;
+          }
+          .guide-official-card {
+            border-radius: 0 12px 12px 12px !important;
+          }
+          .guide-official-card .guide-card-banner {
+            height: 160px !important;
+          }
+          .guides-main {
+            padding: 1rem 0.875rem 5rem;
+            gap: 0;
+          }
         }
 
         /* Main layout */

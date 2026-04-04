@@ -5,42 +5,6 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-/* ─── Board members ─── */
-const BOARD = [
-  {
-    initials: "SA",
-    name: "Sheikh Abdullah Al-Makki",
-    title: "Imam et Juriste islamique",
-    city: "La Mecque, Arabie Saoudite",
-    color: "#C9A84C",
-    desc: "Diplômé de l'Université Islamique de Médine, spécialiste des rituels du Hajj et de la Omra. 25 ans d'enseignement des rites du pèlerinage.",
-  },
-  {
-    initials: "MY",
-    name: "Dr. Moussa Yacoubi",
-    title: "Chercheur en sciences islamiques",
-    city: "Paris, France",
-    color: "#A07830",
-    desc: "Docteur en théologie islamique (Paris Sorbonne), auteur de plusieurs ouvrages sur la spiritualité du pèlerinage. Membre du Conseil Théologique Européen.",
-  },
-  {
-    initials: "FA",
-    name: "Sheikh Fouad Al-Ansari",
-    title: "Directeur pédagogique SAFARUMA",
-    city: "Médine, Arabie Saoudite",
-    color: "#B89040",
-    desc: "Mutawwif depuis 30 ans, formateur de guides agréé par le Ministère du Hajj saoudien. Coordinateur du programme de certification SAFARUMA.",
-  },
-  {
-    initials: "NB",
-    name: "Nadia Benhammou",
-    title: "Experte en éthique et déontologie",
-    city: "Bruxelles, Belgique",
-    color: "#9A6E28",
-    desc: "Directrice pédagogique spécialisée dans la formation des accompagnateurs spirituels. Co-auteure du Référentiel Éthique des Guides SAFARUMA.",
-  },
-];
-
 /* ─── Criteria items ─── */
 const CRITERIA = [
   { num: "01", title: "Connaissance des rituels", body: "Maîtrise complète du Fiqh de la Omra : Ihram, Tawaf, Sa'i, Tahallul. Connaissance des rulings des 4 madhabs." },
@@ -53,10 +17,10 @@ const CRITERIA = [
 
 /* ─── Partnership benefits ─── */
 const PARTNER_BENEFITS = [
-  { icon: "🕌", title: "Guides certifiés dédiés", body: "Accès prioritaire aux guides disponibles pour vos groupes de fidèles, réservation simplifiée via un interlocuteur unique." },
+  { icon: "🕌", title: "Guides vérifiés et sélectionnés dédiés", body: "Accès prioritaire aux guides disponibles pour vos groupes de fidèles, réservation simplifiée via un interlocuteur unique." },
   { icon: "📋", title: "Programme sur-mesure", body: "Élaboration d'un programme spirituel et culturel adapté à votre communauté, vos valeurs et vos besoins spécifiques." },
   { icon: "💎", title: "Tarifs partenaires", body: "Conditions tarifaires préférentielles pour les associations et mosquées partenaires avec facturation centralisée." },
-  { icon: "📜", title: "Documentation islamique", body: "Fourniture de livrets spirituels, du'as imprimées et supports pédagogiques co-élaborés avec notre Board de savants." },
+  { icon: "📜", title: "Documentation islamique", body: "Fourniture de livrets spirituels, du'as imprimées et supports pédagogiques co-élaborés avec notre équipe SAFARUMA." },
 ];
 
 /* ─── Badge SVG component ─── */
@@ -68,7 +32,7 @@ function CertBadgeSVG() {
       viewBox="0 0 220 220"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      aria-label="Badge Certifié SAFARUMA"
+      aria-label="Badge Vérifié SAFARUMA"
     >
       {/* Outer ring */}
       <circle cx="110" cy="110" r="104" stroke="url(#badgeGold)" strokeWidth="2.5" fill="none" />
@@ -99,7 +63,7 @@ function CertBadgeSVG() {
       {/* CERTIFIÉ text arc (bottom) */}
       <path id="arcBot" d="M 38 118 A 80 80 0 0 0 182 118" fill="none" />
       <text fill="rgba(201,168,76,0.65)" fontSize="9" fontWeight="600" letterSpacing="2.5" fontFamily="sans-serif">
-        <textPath href="#arcBot" startOffset="50%" textAnchor="middle">GUIDE CERTIFIÉ</textPath>
+        <textPath href="#arcBot" startOffset="50%" textAnchor="middle">GUIDE VÉRIFIÉ</textPath>
       </text>
       {/* Decorative dots */}
       {[0, 60, 120, 180, 240, 300].map((deg) => {
@@ -254,16 +218,6 @@ export default function CertificationClient() {
         .cert-badge-stat-num { font-family: var(--font-cormorant, serif); font-size: 2.2rem; font-weight: 700; color: var(--cp-gold); line-height: 1; }
         .cert-badge-stat-label { font-size: 0.72rem; font-weight: 600; color: #7A6050; letter-spacing: 0.06em; margin-top: 0.2rem; }
 
-        /* Board */
-        .cert-board-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
-        @media (max-width: 700px) { .cert-board-grid { grid-template-columns: 1fr; } }
-        .cert-board-card { background: white; border-radius: 14px; padding: 1.75rem; border: 1px solid rgba(201,168,76,0.15); display: flex; gap: 1.25rem; }
-        .cert-board-avatar { width: 54px; height: 54px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; color: white; }
-        .cert-board-info h3 { font-size: 0.97rem; font-weight: 700; color: var(--cp-deep); margin: 0 0 0.2rem; }
-        .cert-board-info .cert-board-title { font-size: 0.78rem; color: var(--cp-gold); font-weight: 600; margin-bottom: 0.2rem; }
-        .cert-board-info .cert-board-city { font-size: 0.72rem; color: #9A8070; margin-bottom: 0.6rem; }
-        .cert-board-info p { font-size: 0.8rem; color: #5A4535; line-height: 1.7; margin: 0; }
-
         /* Partner section */
         .cert-partner-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.25rem; margin: 2.5rem 0 3rem; }
         @media (max-width: 660px) { .cert-partner-grid { grid-template-columns: 1fr; } }
@@ -310,13 +264,13 @@ export default function CertificationClient() {
             <span style={{ color: "var(--cp-gold)" }}>Le gage de confiance islamique</span>
           </h1>
           <p className="cert-hero-sub cert-reveal cert-reveal-d2">
-            Pas un label commercial. Un protocole rigoureux développé avec des savants islamiques reconnus — pour que chaque pèlerin sache qu'il est entre de bonnes mains.
+            Pas un label commercial. Un protocole rigoureux développé par l'équipe SAFARUMA — pour que chaque pèlerin sache qu'il est entre de bonnes mains.
           </p>
           <div className="cert-hero-pills cert-reveal cert-reveal-d3">
             <span className="cert-pill">Connaissance islamique</span>
             <span className="cert-pill">Savoir-faire terrain</span>
             <span className="cert-pill">Éthique & confiance</span>
-            <span className="cert-pill">Validé par des savants</span>
+            <span className="cert-pill">Sélection rigoureuse</span>
           </div>
         </div>
       </section>
@@ -325,7 +279,7 @@ export default function CertificationClient() {
       <section className="cert-section cert-section-light">
         <div className="cert-section-inner">
           <span className="cert-tag cert-reveal">Pourquoi la certification</span>
-          <h2 className="cert-h2 cert-reveal cert-reveal-d1">Tout le monde peut se dire guide.<br />SAFARUMA certifie ceux qui le sont vraiment.</h2>
+          <h2 className="cert-h2 cert-reveal cert-reveal-d1">Tout le monde peut se dire guide.<br />SAFARUMA vérifie et sélectionne ceux qui le sont vraiment.</h2>
           <p className="cert-lead cert-reveal cert-reveal-d2">
             En l'absence de standard reconnu, n'importe qui peut proposer ses services comme «guide de la Omra». Nous avons construit un processus de certification exigeant, fondé sur trois piliers indissociables, pour protéger les pèlerins et valoriser les vrais professionnels.
           </p>
@@ -396,9 +350,9 @@ export default function CertificationClient() {
                 },
                 {
                   num: "3",
-                  title: "Validation par le Board SAFARUMA",
-                  body: "Les dossiers ayant passé le test sont soumis au Board de savants islamiques pour validation finale et attribution du badge certifié.",
-                  details: ["Revue du dossier complet par le Board", "Entretien oral (optionnel selon profil)", "Attribution du badge numérique certifié", "Accès au réseau SAFARUMA"],
+                  title: "Validation par le Comité de sélection SAFARUMA",
+                  body: "Les dossiers ayant passé le test sont soumis au Comité de sélection SAFARUMA pour validation finale et attribution du badge vérifié.",
+                  details: ["Revue du dossier complet par le Comité", "Entretien oral (optionnel selon profil)", "Attribution du badge numérique vérifié", "Accès au réseau SAFARUMA"],
                 },
               ].map((s, i) => (
                 <div
@@ -421,14 +375,14 @@ export default function CertificationClient() {
               <p className="cert-step-vis-title">
                 {activeStep === 0 && "Inscription et dossier"}
                 {activeStep === 1 && "Test de certification"}
-                {activeStep === 2 && "Validation du Board"}
+                {activeStep === 2 && "Validation du Comité"}
               </p>
               <div className="cert-step-vis-items">
                 {(activeStep === 0
                   ? ["Pièce d'identité ou passeport", "CV et expérience terrain", "Langues parlées et niveaux", "Lettres de recommandation"]
                   : activeStep === 1
                   ? ["Module 1 — Histoire & Géographie (40 q.)", "Module 2 — Rituels & Fiqh (50 q.)", "Module 3 — Éthique & Déontologie (30 q.)", "Score minimum requis : 78%"]
-                  : ["Revue du dossier complet par le Board", "Entretien oral selon profil", "Attribution du badge numérique certifié", "Accès au réseau SAFARUMA"]
+                  : ["Revue du dossier complet par le Comité", "Entretien oral selon profil", "Attribution du badge numérique vérifié", "Accès au réseau SAFARUMA"]
                 ).map((item) => (
                   <div key={item} className="cert-step-vis-item">
                     <div className="cert-step-vis-dot" />
@@ -450,12 +404,12 @@ export default function CertificationClient() {
               <CertBadgeSVG />
             </div>
             <div className="cert-reveal cert-reveal-d1">
-              <h2 className="cert-h2" style={{ marginBottom: "0.75rem" }}>Le Badge Certifié SAFARUMA</h2>
+              <h2 className="cert-h2" style={{ marginBottom: "0.75rem" }}>Le Badge Vérifié SAFARUMA</h2>
               <p style={{ fontSize: "0.95rem", color: "#5A4535", lineHeight: 1.8, marginBottom: 0 }}>
                 Visible sur chaque profil guide, ce badge est infalsifiable et lié à l'identité vérifiée du guide. Il est renouvelé chaque année après une mise à jour des connaissances.
               </p>
               <blockquote className="cert-badge-quote">
-                «Ce badge atteste que ce guide a été évalué et validé par SAFARUMA selon un protocole strict développé avec des savants islamiques reconnus.»
+                «Ce badge atteste que ce guide a été évalué et validé par SAFARUMA selon un protocole rigoureux développé par l'équipe SAFARUMA.»
               </blockquote>
               <div className="cert-badge-stat-row">
                 {[
@@ -494,36 +448,31 @@ export default function CertificationClient() {
         </div>
       </section>
 
-      {/* ── SECTION 4 : BOARD ── */}
+      {/* ── SECTION 4 : COMITÉ (EN COURS DE CONSTITUTION) ── */}
       <section className="cert-section cert-section-sand">
         <div className="cert-section-inner">
-          <span className="cert-tag cert-reveal">Le Board de Certification</span>
-          <h2 className="cert-h2 cert-reveal cert-reveal-d1">Des savants qui garantissent<br />l'excellence islamique de nos guides</h2>
-          <p className="cert-lead cert-reveal cert-reveal-d2">
-            La certification SAFARUMA n'est pas un label auto-déclaré. Elle est validée par un Board indépendant de savants islamiques, formateurs et experts du pèlerinage.
+          <span className="cert-tag cert-reveal">Le Comité de sélection</span>
+          <h2 className="cert-h2 cert-reveal cert-reveal-d1">Un Comité de sélection<br />en cours de constitution</h2>
+          <p className="cert-lead cert-reveal cert-reveal-d2" style={{ marginBottom: "2rem" }}>
+            SAFARUMA collabore activement avec des savants islamiques, imams et experts du pèlerinage pour valider son protocole de sélection. Les membres du Comité seront annoncés prochainement.
           </p>
 
-          <div className="cert-board-grid">
-            {BOARD.map((m, i) => (
-              <div key={m.name} className={`cert-board-card cert-reveal cert-reveal-d${(i % 2) + 1}`}>
-                <div className="cert-board-avatar" style={{ background: m.color }}>
-                  {m.initials}
-                </div>
-                <div className="cert-board-info">
-                  <h3>{m.name}</h3>
-                  <div className="cert-board-title">{m.title}</div>
-                  <div className="cert-board-city">📍 {m.city}</div>
-                  <p>{m.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ marginTop: "2.5rem", background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.2)", borderRadius: 12, padding: "1.25rem 1.5rem", display: "flex", gap: "0.85rem", alignItems: "flex-start" }} className="cert-reveal">
-            <span style={{ fontSize: "1.1rem", flexShrink: 0 }}>✦</span>
-            <p style={{ fontSize: "0.875rem", color: "#4A3728", lineHeight: 1.8, margin: 0 }}>
-              Le Board se réunit deux fois par an pour réviser les critères de certification, valider les nouveaux guides et s'assurer que le protocole reste aligné avec les évolutions du Fiqh contemporain.
-            </p>
+          <div className="cert-reveal" style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.25)", borderRadius: 14, padding: "2rem 2.25rem", display: "flex", gap: "1.5rem", alignItems: "flex-start", maxWidth: 680 }}>
+            <div style={{ width: 44, height: 44, borderRadius: "50%", background: "var(--cp-deep)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: "1.1rem" }}>✦</div>
+            <div>
+              <p style={{ fontSize: "1rem", color: "var(--cp-deep)", fontWeight: 600, margin: "0 0 0.5rem", fontFamily: "var(--font-cormorant, serif)", lineHeight: 1.4 }}>
+                Vous êtes savant, imam ou formateur islamique ?
+              </p>
+              <p style={{ fontSize: "0.875rem", color: "#5A4535", lineHeight: 1.8, margin: "0 0 1.25rem" }}>
+                SAFARUMA recherche des experts du pèlerinage et des sciences islamiques pour participer à la construction de son Comité de sélection. Rejoignez un projet qui valorise l'excellence islamique dans l'accompagnement des pèlerins francophones.
+              </p>
+              <a
+                href="mailto:contact@safaruma.com?subject=Candidature%20Comité%20de%20sélection%20SAFARUMA"
+                style={{ display: "inline-flex", alignItems: "center", gap: "0.4rem", background: "var(--cp-deep)", color: "var(--cp-gold)", fontWeight: 700, fontSize: "0.85rem", padding: "0.7rem 1.4rem", borderRadius: 8, textDecoration: "none", letterSpacing: "0.03em" }}
+              >
+                Contactez-nous →
+              </a>
+            </div>
           </div>
         </div>
       </section>
@@ -534,9 +483,9 @@ export default function CertificationClient() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "4rem", alignItems: "start" }}>
             <div>
               <span className="cert-tag cert-tag-light cert-reveal">Mosquées & Associations</span>
-              <h2 className="cert-h2 cert-h2-light cert-reveal cert-reveal-d1">SAFARUMA offre des guides certifiés aux mosquées partenaires</h2>
+              <h2 className="cert-h2 cert-h2-light cert-reveal cert-reveal-d1">SAFARUMA offre des guides vérifiés et sélectionnés aux mosquées partenaires</h2>
               <p className="cert-lead cert-lead-light cert-reveal cert-reveal-d2">
-                Votre association ou mosquée organise des voyages pour la Omra ? Devenez partenaire SAFARUMA et offrez à vos fidèles des guides certifiés avec un programme spirituel sur-mesure.
+                Votre association ou mosquée organise des voyages pour la Omra ? Devenez partenaire SAFARUMA et offrez à vos fidèles des guides vérifiés et sélectionnés avec un programme spirituel sur-mesure.
               </p>
 
               <div className="cert-partner-grid cert-reveal cert-reveal-d2">

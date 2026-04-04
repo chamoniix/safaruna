@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { getSession } from 'next-auth/react';
 
 /* ─── Navigation sections ─── */
 const SECTIONS = [
@@ -60,11 +61,17 @@ const CHECKLIST = [
 ];
 
 export default function GuideOmraClient() {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [progress, setProgress] = useState(0);
   const [activeSection, setActiveSection] = useState("intro");
   const mainRef = useRef<HTMLDivElement>(null);
+
+  /* ─── Check auth session ─── */
+  useEffect(() => {
+    getSession().then(s => setIsAuthenticated(!!s?.user));
+  }, []);
 
   /* ─── Scroll progress + active section ─── */
   useEffect(() => {
@@ -442,6 +449,46 @@ export default function GuideOmraClient() {
               Une fois le 7e tour accompli, dirigez-vous vers le Maqam Ibrahim et accomplissez 2 rak'at. Lisez Al-Kafirun au 1er rak'at et Al-Ikhlas au 2e. C'est une sunnah confirmée. Puis buvez de l'eau de Zamzam en faisant face à la Qibla.
             </p>
           </section>
+
+          {/* PAYWALL — sections Sa'i et suivantes réservées aux inscrits */}
+          {isAuthenticated === false && (
+            <div style={{
+              background: 'linear-gradient(135deg, #1A1209 0%, #2D1F08 100%)',
+              border: '1px solid rgba(201,168,76,0.3)',
+              borderRadius: 20,
+              padding: '3rem 2rem',
+              textAlign: 'center',
+              margin: '2rem 0',
+              position: 'relative',
+              overflow: 'hidden',
+            }}>
+              <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.08) 0%, transparent 60%)', pointerEvents: 'none' }} />
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🕋</div>
+                <h3 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', color: 'white', fontWeight: 600, marginBottom: '0.75rem', lineHeight: 1.2 }}>
+                  Accédez au guide complet gratuitement
+                </h3>
+                <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.9rem', lineHeight: 1.7, marginBottom: '2rem', maxWidth: 420, margin: '0 auto 2rem' }}>
+                  Créez votre espace pèlerin gratuit pour accéder aux rituels complets, du&apos;as, checklist et suivi de votre Omra.
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxWidth: 320, margin: '0 auto' }}>
+                  <a href="/inscription?redirect=/guide-omra" style={{ display: 'block', background: '#C9A84C', color: '#1A1209', padding: '0.9rem 2rem', borderRadius: 50, fontWeight: 700, fontSize: '0.95rem', textDecoration: 'none', letterSpacing: '0.04em' }}>
+                    Créer mon espace gratuitement →
+                  </a>
+                  <a href="/connexion?redirect=/guide-omra" style={{ display: 'block', background: 'transparent', color: 'rgba(255,255,255,0.5)', padding: '0.7rem', fontSize: '0.82rem', textDecoration: 'none' }}>
+                    Déjà un compte ? Se connecter
+                  </a>
+                </div>
+                <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center', marginTop: '1.5rem', flexWrap: 'wrap' }}>
+                  {['Accès immédiat', 'Compte gratuit', 'Sans engagement'].map(t => (
+                    <span key={t} style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                      <span style={{ color: '#C9A84C' }}>✓</span> {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* SA'I */}
           <section id="sai" className="go-section">

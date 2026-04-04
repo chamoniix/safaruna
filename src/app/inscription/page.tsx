@@ -148,13 +148,23 @@ export default function RegisterPage() {
               <input className="ins-input" id="email" name="email" type="email" required placeholder="karim@exemple.com" />
             </div>
 
-            {/* Objectif */}
+            {/* WhatsApp */}
             <div>
-              <label className="ins-label" htmlFor="role">Mon objectif</label>
-              <select className="ins-input" id="role" name="role" style={{ cursor: 'pointer' }}>
-                <option value="pilgrim">Je cherche un guide — Pèlerin / Voyageur</option>
-                <option value="guide">Je suis guide certifié (Mutawwif)</option>
-              </select>
+              <label className="ins-label" htmlFor="whatsapp">WhatsApp (optionnel)</label>
+              <div style={{ position: 'relative' }}>
+                <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: '0.85rem', color: '#7A6D5A', pointerEvents: 'none' }}>🇫🇷 +33</span>
+                <input
+                  className="ins-input"
+                  id="whatsapp"
+                  name="whatsapp"
+                  type="tel"
+                  placeholder="6 12 34 56 78"
+                  style={{ paddingLeft: '70px' }}
+                />
+              </div>
+              <p style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 4, marginBottom: 0 }}>
+                Pour recevoir les confirmations et offres de guides
+              </p>
             </div>
 
             {/* Mot de passe */}
@@ -187,7 +197,11 @@ export default function RegisterPage() {
           {/* Google */}
           <button
             type="button"
-            onClick={() => signIn('google', { callbackUrl: '/espace/tableau-de-bord' })}
+            onClick={() => {
+              const params = new URLSearchParams(window.location.search);
+              const redirect = params.get('redirect') || '/espace/tableau-de-bord';
+              signIn('google', { callbackUrl: redirect });
+            }}
             className="ins-btn-google"
           >
             <svg width="20" height="20" viewBox="0 0 24 24">

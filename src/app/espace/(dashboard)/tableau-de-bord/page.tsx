@@ -47,7 +47,7 @@ export default function PelerinDashboard() {
           fontWeight: 700,
         }}>العمرة</div>
 
-        <div style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '2rem' }}>
+        <div className="dash-welcome-inner" style={{ position: 'relative', zIndex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '2rem' }}>
           {/* Left */}
           <div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)', color: '#F0D897', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', padding: '0.3rem 0.9rem', borderRadius: 50, marginBottom: '1rem' }}>
@@ -76,15 +76,15 @@ export default function PelerinDashboard() {
           </div>
 
           {/* Right: countdown */}
-          <div style={{ textAlign: 'right', flexShrink: 0 }}>
-            <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(4rem, 10vw, 7rem)', fontWeight: 700, color: '#F0D897', lineHeight: 1, letterSpacing: '-0.02em' }}>47</div>
+          <div className="dash-countdown" style={{ textAlign: 'right', flexShrink: 0 }}>
+            <div className="dash-countdown-num" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(4rem, 10vw, 7rem)', fontWeight: 700, color: '#F0D897', lineHeight: 1, letterSpacing: '-0.02em' }}>47</div>
             <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', marginTop: '0.25rem' }}>Jours restants</div>
           </div>
         </div>
       </div>
 
       {/* ── 4 STAT CARDS ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+      <div className="dash-stat-cards" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
         {STATS.map((s) => (
           <div key={s.label} style={{ background: 'white', borderRadius: 18, padding: '1.4rem 1.5rem', border: '1px solid #EDE8DC', boxShadow: '0 2px 8px rgba(26,18,9,0.04)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <div style={{ width: 46, height: 46, borderRadius: 14, background: s.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: s.iconColor, fontSize: '1rem', flexShrink: 0 }}>
@@ -100,12 +100,34 @@ export default function PelerinDashboard() {
       </div>
 
       {/* ── MAIN GRID ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: '1.5rem', alignItems: 'start' }}>
+      <div className="dash-main-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 2fr) minmax(0, 1fr)', gap: '1.5rem', alignItems: 'start' }}>
         <style dangerouslySetInnerHTML={{ __html: `
-          @media (max-width: 900px) { .dash-grid { grid-template-columns: 1fr !important; } }
+          @media (max-width: 900px) {
+            .dash-grid { grid-template-columns: 1fr !important; }
+            .dash-main-grid { grid-template-columns: 1fr !important; }
+          }
           .play-btn:hover { transform: scale(1.12) !important; }
           .card-hover:hover { border-color: #C9A84C !important; }
           .msg-row:hover { background: #FAF7F0 !important; }
+
+          @media (max-width: 768px) {
+            .dash-main-grid { grid-template-columns: 1fr !important; gap: 1.25rem !important; }
+            .dash-welcome-inner { flex-direction: column !important; gap: 1rem !important; }
+            .dash-countdown { text-align: left !important; display: flex !important; align-items: center !important; gap: 0.75rem !important; }
+            .dash-countdown-num { font-size: 3rem !important; }
+            .dash-academy-card { flex-direction: column !important; }
+            .dash-academy-thumb { width: 100% !important; min-height: 120px !important; }
+            .dash-booking-grid { grid-template-columns: 1fr 1fr !important; }
+            .dash-booking-ref { grid-column: 1 / -1 !important; }
+            .dash-stat-cards { grid-template-columns: 1fr 1fr !important; gap: 0.75rem !important; }
+            .dash-quick-links { grid-template-columns: 1fr 1fr !important; }
+          }
+
+          @media (max-width: 480px) {
+            .dash-stat-cards { grid-template-columns: 1fr 1fr !important; }
+            .dash-booking-grid { grid-template-columns: 1fr !important; }
+            .dash-booking-ref { grid-column: auto !important; }
+          }
         `}} />
 
         {/* Left column */}
@@ -126,13 +148,13 @@ export default function PelerinDashboard() {
             </div>
 
             <div style={{ padding: '1.25rem 1.5rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', marginBottom: '1.25rem' }}>
+              <div className="dash-booking-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', marginBottom: '1.25rem' }}>
                 {[
                   { label: 'Départ', value: '10 Juin 2025' },
                   { label: 'Retour', value: '17 Juin 2025' },
                   { label: 'Réservation', value: 'SAF-2025-012' },
                 ].map((d) => (
-                  <div key={d.label} style={{ background: '#FAF7F0', borderRadius: 12, padding: '0.75rem', border: '1px solid #EDE8DC' }}>
+                  <div key={d.label} className={d.label === 'Réservation' ? 'dash-booking-ref' : ''} style={{ background: '#FAF7F0', borderRadius: 12, padding: '0.75rem', border: '1px solid #EDE8DC' }}>
                     <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.25rem' }}>{d.label}</div>
                     <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1A1209' }}>{d.value}</div>
                   </div>
@@ -151,9 +173,9 @@ export default function PelerinDashboard() {
               <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 600, color: '#1A1209' }}>SAFARUMA Academy</h2>
               <Link href="/espace/academy" style={{ fontSize: '0.75rem', fontWeight: 700, color: '#8B6914', textDecoration: 'none' }}>Reprendre →</Link>
             </div>
-            <div className="card-hover" style={{ background: 'white', borderRadius: 20, border: '1px solid #EDE8DC', overflow: 'hidden', display: 'flex', gap: 0, boxShadow: '0 2px 8px rgba(26,18,9,0.04)', transition: 'border-color 0.2s' }}>
+            <div className="card-hover dash-academy-card" style={{ background: 'white', borderRadius: 20, border: '1px solid #EDE8DC', overflow: 'hidden', display: 'flex', gap: 0, boxShadow: '0 2px 8px rgba(26,18,9,0.04)', transition: 'border-color 0.2s' }}>
               {/* Thumbnail */}
-              <div style={{ width: 180, flexShrink: 0, background: '#0D0A06', position: 'relative', overflow: 'hidden', minHeight: 140 }}>
+              <div className="dash-academy-thumb" style={{ width: 180, flexShrink: 0, background: '#0D0A06', position: 'relative', overflow: 'hidden', minHeight: 140 }}>
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #1A1209, #2D1F08)', opacity: 0.9 }} />
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', zIndex: 1, gap: '0.5rem' }}>
                   <div className="play-btn" style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(255,255,255,0.15)', border: '1.5px solid rgba(255,255,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'transform 0.2s', backdropFilter: 'blur(8px)' }}>
@@ -282,7 +304,7 @@ export default function PelerinDashboard() {
           {/* Quick links */}
           <div>
             <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.25rem', fontWeight: 600, color: '#1A1209', marginBottom: '0.875rem' }}>Accès rapide</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            <div className="dash-quick-links" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
               {[
                 { href: '/guides', icon: '✦', label: 'Nos guides', bg: 'linear-gradient(135deg, #F0D897, #C9A84C)', color: '#1A1209' },
                 { href: '/espace/favoris', icon: '♡', label: 'Favoris', bg: 'white', color: '#1A1209' },

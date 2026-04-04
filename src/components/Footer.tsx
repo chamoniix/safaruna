@@ -6,12 +6,18 @@ export default function Footer() {
   return (
     <footer>
       {/* Trust badges strip */}
-      <div className="footer-trust" style={{
-        display: 'flex', flexWrap: 'wrap', gap: '1.5rem',
-        alignItems: 'center', justifyContent: 'center',
-        padding: '1.25rem 4rem',
+      <div className="footer-trust-bar" style={{
+        display: 'flex',
+        gap: '1.5rem',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        padding: '1rem 1.5rem',
         borderBottom: '1px solid rgba(255,255,255,0.08)',
         marginBottom: '1rem',
+        overflowX: 'auto',
+        flexWrap: 'nowrap',
+        WebkitOverflowScrolling: 'touch' as const,
+        scrollbarWidth: 'none' as const,
       }}>
         {([
           { icon: <span style={{ color: 'rgba(201,168,76,0.8)', fontWeight: 700 }}>✓</span>, label: 'Guides mutawwif certifiés' },

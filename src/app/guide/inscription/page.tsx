@@ -97,7 +97,7 @@ export default function GuideOnboarding() {
         overflowY: 'auto',
         flexShrink: 0,
         padding: '2rem 0',
-      }} className="hidden md:flex">
+      }} className="guide-sidebar-desktop">
 
         {/* Logo */}
         <div style={{ padding: '0 2rem 2rem', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
@@ -197,11 +197,30 @@ export default function GuideOnboarding() {
           .ins-input { transition: border-color 0.2s, box-shadow 0.2s; }
           .ins-place-label:hover { border-color: #C9A84C !important; background: #FAF3E0 !important; }
           .ins-place-label:has(input:checked) { border-color: #C9A84C !important; background: #FAF3E0 !important; }
+          .guide-sidebar-desktop { display: flex; }
+          @media (max-width: 767px) {
+            .guide-sidebar-desktop { display: none !important; }
+            .inscription-main { margin-left: 0 !important; }
+          }
+          .guide-mobile-progress { display: none; }
+          @media (max-width: 767px) {
+            .guide-mobile-progress { display: block !important; }
+          }
+          @media (max-width: 767px) {
+            .ins-form-wrap { padding: 1.25rem 1rem !important; }
+            .ins-grid-2 { grid-template-columns: 1fr !important; }
+            .ins-grid-places { grid-template-columns: 1fr 1fr !important; }
+            .ins-pkg-grid { grid-template-columns: 1fr !important; }
+            .ins-nav-btns { margin-top: 1.5rem !important; padding-top: 1rem !important; }
+            .ins-h2 { font-size: 1.8rem !important; }
+            .ins-topbar { padding: 0.875rem 1rem !important; }
+            .ins-topbar-title { font-size: 1rem !important; }
+          }
         `}} />
 
         {/* Top bar */}
-        <div style={{ padding: '1.25rem 2rem', borderBottom: '1px solid #E8DFC8', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(253,251,247,0.95)', backdropFilter: 'blur(8px)', position: 'sticky', top: 0, zIndex: 40 }}>
-          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.6rem', color: '#1A1209', fontWeight: 400 }}>
+        <div className="ins-topbar" style={{ padding: '1.25rem 2rem', borderBottom: '1px solid #E8DFC8', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(253,251,247,0.95)', backdropFilter: 'blur(8px)', position: 'sticky', top: 0, zIndex: 40 }}>
+          <div className="ins-topbar-title" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.6rem', color: '#1A1209', fontWeight: 400 }}>
             {STEPS[currentStep - 1].icon} {STEPS[currentStep - 1].label}
           </div>
           {/* Mobile progress */}
@@ -213,20 +232,31 @@ export default function GuideOnboarding() {
           </Link>
         </div>
 
+        {/* Mobile progress bar */}
+        <div className="guide-mobile-progress" style={{ display: 'none', padding: '0.75rem 1.25rem', background: '#FAF7F0', borderBottom: '1px solid #E8DFC8' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.5rem' }}>
+            <span>Étape {currentStep} sur {STEPS.length} — {STEPS[currentStep - 1].label}</span>
+            <span style={{ color: '#C9A84C' }}>{Math.round((currentStep / STEPS.length) * 100)}%</span>
+          </div>
+          <div style={{ height: 4, background: '#E8DFC8', borderRadius: 50, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: `${(currentStep / STEPS.length) * 100}%`, background: 'linear-gradient(90deg, #8B6914, #C9A84C)', borderRadius: 50, transition: 'width 0.4s ease' }} />
+          </div>
+        </div>
+
         {/* Form */}
-        <div style={{ flex: 1, padding: '2.5rem 2rem', maxWidth: 760, width: '100%', margin: '0 auto' }}>
+        <div className="ins-form-wrap" style={{ flex: 1, padding: '2.5rem 2rem', maxWidth: 760, width: '100%', margin: '0 auto' }}>
           <form onSubmit={handleSubmit}>
 
             {/* ── STEP 1 ── */}
             {currentStep === 1 && (
               <div>
-                <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2.5rem', fontWeight: 300, color: '#1A1209', marginBottom: '0.5rem', lineHeight: 1.1 }}>
+                <h2 className="ins-h2" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2.5rem', fontWeight: 300, color: '#1A1209', marginBottom: '0.5rem', lineHeight: 1.1 }}>
                   {STEPS[currentStep - 1].label}
                 </h2>
                 <p style={{ color: '#7A6D5A', fontSize: '0.875rem', marginBottom: '2rem', lineHeight: 1.7 }}>
                   Ces informations seront vérifiées par notre équipe. Elles ne sont pas visibles publiquement.
                 </p>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
+                <div className="ins-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
                   <Field label="Prénom">
                     <input type="text" className="ins-input" style={inputStyle} placeholder="Youssouf" required onChange={e => setGuideName(n => e.target.value + (n.includes(' ') ? n.slice(n.indexOf(' ')) : ''))} />
                   </Field>
@@ -268,7 +298,7 @@ export default function GuideOnboarding() {
             {/* ── STEP 2 ── */}
             {currentStep === 2 && (
               <div>
-                <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2.5rem', fontWeight: 300, color: '#1A1209', marginBottom: '0.5rem', lineHeight: 1.1 }}>
+                <h2 className="ins-h2" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2.5rem', fontWeight: 300, color: '#1A1209', marginBottom: '0.5rem', lineHeight: 1.1 }}>
                   {STEPS[currentStep - 1].label}
                 </h2>
                 <p style={{ color: '#7A6D5A', fontSize: '0.875rem', marginBottom: '2rem', lineHeight: 1.7 }}>
@@ -299,7 +329,7 @@ export default function GuideOnboarding() {
                     ))}
                   </div>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
+                <div className="ins-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
                   <Field label="Formation islamique">
                     <select className="ins-input" style={inputStyle} required>
                       <option value="">Niveau d&apos;études</option>
@@ -321,7 +351,7 @@ export default function GuideOnboarding() {
             {/* ── STEP 3 ── */}
             {currentStep === 3 && (
               <div>
-                <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2.5rem', fontWeight: 300, color: '#1A1209', marginBottom: '0.5rem', lineHeight: 1.1 }}>
+                <h2 className="ins-h2" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2.5rem', fontWeight: 300, color: '#1A1209', marginBottom: '0.5rem', lineHeight: 1.1 }}>
                   Lieux &amp; services
                 </h2>
                 <p style={{ color: '#7A6D5A', fontSize: '0.875rem', marginBottom: '2rem', lineHeight: 1.7 }}>
@@ -415,7 +445,7 @@ export default function GuideOnboarding() {
                     }}>
                       {group.cat}
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.5rem' }}>
+                    <div className="ins-grid-places" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.5rem' }}>
                       {group.lieux.map(l => (
                         <label key={l.name} className="ins-place-label" style={{
                           display: 'flex', alignItems: 'center', gap: '0.6rem',
@@ -465,7 +495,7 @@ export default function GuideOnboarding() {
             {/* ── STEP 4 ── */}
             {currentStep === 4 && (
               <div>
-                <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2.5rem', fontWeight: 300, color: '#1A1209', marginBottom: '0.5rem', lineHeight: 1.1 }}>
+                <h2 className="ins-h2" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2.5rem', fontWeight: 300, color: '#1A1209', marginBottom: '0.5rem', lineHeight: 1.1 }}>
                   {STEPS[currentStep - 1].label}
                 </h2>
                 <div style={{ background: '#1A1209', borderRadius: 16, padding: '1.25rem 1.5rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -492,7 +522,7 @@ export default function GuideOnboarding() {
                         color: '#1A1209', padding: '0.2rem 0.6rem', borderRadius: 50,
                       }}>{pkg.tag}</span>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div className="ins-pkg-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                       <Field label="Prix par personne (€)">
                         <input type="number" className="ins-input" style={inputStyle} placeholder="ex : 120" required={pkg.required} />
                       </Field>
@@ -508,7 +538,7 @@ export default function GuideOnboarding() {
             {/* ── STEP 5 ── */}
             {currentStep === 5 && (
               <div>
-                <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2.5rem', fontWeight: 300, color: '#1A1209', marginBottom: '0.5rem', lineHeight: 1.1 }}>
+                <h2 className="ins-h2" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2.5rem', fontWeight: 300, color: '#1A1209', marginBottom: '0.5rem', lineHeight: 1.1 }}>
                   {STEPS[currentStep - 1].label}
                 </h2>
                 <p style={{ color: '#7A6D5A', fontSize: '0.875rem', marginBottom: '2rem', lineHeight: 1.7 }}>
@@ -554,7 +584,7 @@ export default function GuideOnboarding() {
             {/* ── STEP 6 ── */}
             {currentStep === 6 && (
               <div>
-                <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2.5rem', fontWeight: 300, color: '#1A1209', marginBottom: '0.5rem', lineHeight: 1.1 }}>
+                <h2 className="ins-h2" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2.5rem', fontWeight: 300, color: '#1A1209', marginBottom: '0.5rem', lineHeight: 1.1 }}>
                   {STEPS[currentStep - 1].label}
                 </h2>
                 {/* Verset */}
@@ -608,7 +638,7 @@ export default function GuideOnboarding() {
             )}
 
             {/* ── NAV BUTTONS ── */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '3rem', paddingTop: '1.5rem', borderTop: '1px solid #E8DFC8' }}>
+            <div className="ins-nav-btns" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '3rem', paddingTop: '1.5rem', borderTop: '1px solid #E8DFC8' }}>
               {currentStep > 1 ? (
                 <button
                   type="button" onClick={handlePrev}

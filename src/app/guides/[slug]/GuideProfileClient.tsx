@@ -329,6 +329,34 @@ export default function GuideProfileClient({
 
           {/* TAB: FORFAITS */}
           {activeTab === 2 && (
+            <div>
+            {/* Durées officielles des rites */}
+            <div style={{ background: '#1A1209', borderRadius: 14, padding: '1.25rem 1.5rem', marginBottom: '1.5rem' }}>
+              <div style={{ fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(201,168,76,0.7)', marginBottom: '0.6rem' }}>
+                Durées officielles des rites de la Omra
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                {[
+                  { label: 'Ihram + Niyyah au Meeqat', time: '30-45 min' },
+                  { label: 'Tawaf (7 tours Kaaba)', time: '1h30 – 3h' },
+                  { label: "Sa'i Safa & Marwa (7×)", time: '45 min – 1h30' },
+                  { label: 'Tahallul (rasage/coupe)', time: '15-30 min' },
+                  { label: 'OMRA COMPLÈTE', time: '4h – 6h selon affluence', highlight: true },
+                ].map((r: { label: string; time: string; highlight?: boolean }) => (
+                  <span key={r.label} style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
+                    background: r.highlight ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.06)',
+                    border: r.highlight ? '1px solid rgba(201,168,76,0.5)' : '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: 50, padding: '0.3rem 0.85rem',
+                    fontSize: '0.72rem', color: r.highlight ? '#F0D897' : 'rgba(255,255,255,0.75)',
+                    fontWeight: r.highlight ? 700 : 500,
+                  }}>
+                    {r.label}
+                    <strong style={{ color: r.highlight ? '#C9A84C' : 'rgba(255,255,255,0.5)' }}>· {r.time}</strong>
+                  </span>
+                ))}
+              </div>
+            </div>
             <div className="profile-packages-grid">
               {packages.map((pkg, i) => (
                 <div key={i} style={{
@@ -435,6 +463,7 @@ export default function GuideProfileClient({
                   </button>
                 </div>
               ))}
+            </div>
             </div>
           )}
 

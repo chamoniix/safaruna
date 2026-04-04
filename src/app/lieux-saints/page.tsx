@@ -215,6 +215,24 @@ const LIEUX: Record<'Makkah' | 'Madinah', Lieu[]> = {
   ],
 };
 
+const DURATIONS: Record<string, { time: string; dist?: string }> = {
+  'masjid-al-haram':    { time: 'Sur place', dist: 'Centre de Makkah' },
+  'jabal-al-nour':      { time: '~2h total', dist: '8 km de Makkah' },
+  'jabal-thawr':        { time: '~2h total', dist: '6 km de Makkah' },
+  'mina':               { time: '~1h15', dist: '8 km de Makkah' },
+  'arafat':             { time: '~2h45', dist: '25 km de Makkah' },
+  'safa-marwa':         { time: '45min–1h30', dist: 'Dans le Haram' },
+  'muzdalifah':         { time: '~1h', dist: '10 km de Makkah' },
+  'masjid-aisha':       { time: '~1h total', dist: '7 km de Makkah' },
+  'masjid-al-jinn':     { time: '~45 min', dist: '2 km du Haram' },
+  'masjid-an-nabawi':   { time: 'Sur place', dist: 'Centre de Madinah' },
+  'masjid-quba':        { time: '~1h total', dist: '3 km de Madinah' },
+  'masjid-al-qiblatayn':{ time: '~45 min', dist: '5 km de Madinah' },
+  'al-baqi':            { time: '~45 min', dist: '200 m du An-Nabawi' },
+  'jabal-uhud':         { time: '~1h30', dist: '25 km de Madinah' },
+  'badr':               { time: '~4h total', dist: '150 km de Madinah' },
+};
+
 interface Lieu {
   slug: string;
   title: string;
@@ -363,12 +381,15 @@ function PlaceCard({ lieu, onClick }: { lieu: Lieu; onClick: () => void }) {
         <p style={{ fontSize: '0.8rem', color: '#7A6D5A', lineHeight: 1.7, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', margin: 0 }}>
           {lieu.description}
         </p>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.35rem' }}>
           <div style={{ fontFamily: 'serif', fontSize: '1rem', color: '#C9A84C', direction: 'rtl' }}>{lieu.nameAr}</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
-            {lieu.features.slice(0, 2).map((f) => (
-              <span key={f} style={{ background: '#FAF3E0', color: '#8B6914', fontSize: '0.6rem', fontWeight: 700, padding: '0.15rem 0.5rem', borderRadius: 50, border: '1px solid rgba(201,168,76,0.2)' }}>{f}</span>
-            ))}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', alignItems: 'center' }}>
+            {DURATIONS[lieu.slug] && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', background: '#1A1209', color: '#C9A84C', fontSize: '0.58rem', fontWeight: 700, padding: '0.15rem 0.55rem', borderRadius: 50 }}>
+                ⏱ {DURATIONS[lieu.slug].time}
+                {DURATIONS[lieu.slug].dist && <span style={{ color: 'rgba(201,168,76,0.6)', fontWeight: 400 }}>· {DURATIONS[lieu.slug].dist}</span>}
+              </span>
+            )}
           </div>
         </div>
       </div>

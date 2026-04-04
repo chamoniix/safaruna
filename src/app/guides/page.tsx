@@ -130,10 +130,109 @@ const GUIDES_DATA = [
   },
 ];
 
+// ─── Programme calculateur ─────────────────────────────────────────────────────
+const PROGRAM_BY_DAYS: Record<number, { icon: string; label: string; duration: string }[]> = {
+  3: [
+    { icon: '🕋', label: 'La Omra complète (Ihram, Tawaf, Sa\'i, Tahallul)', duration: '~5h' },
+    { icon: '⛰️', label: 'Jabal Al-Nour & Grotte de Hira', duration: '~2h' },
+    { icon: '💧', label: 'Zamzam & Masjid Al-Haram libre', duration: 'Inclus' },
+  ],
+  5: [
+    { icon: '🕋', label: 'La Omra complète', duration: '~5h' },
+    { icon: '⛰️', label: 'Jabal Al-Nour & Grotte de Hira', duration: '~2h' },
+    { icon: '🏔️', label: 'Jabal Thawr', duration: '~2h' },
+    { icon: '🌄', label: 'Arafat & Muzdalifah', duration: '~2h45' },
+    { icon: '🌿', label: 'Madinah — Masjid An-Nabawi & Rawdah', duration: 'Demi-journée' },
+  ],
+  7: [
+    { icon: '🕋', label: 'La Omra complète', duration: '~5h' },
+    { icon: '⛰️', label: 'Jabal Al-Nour & Jabal Thawr', duration: '~4h' },
+    { icon: '🌄', label: 'Arafat, Mina & Muzdalifah', duration: '~4h' },
+    { icon: '🌿', label: 'Madinah — An-Nabawi, Rawdah, Quba', duration: '2 jours' },
+    { icon: '⚔️', label: 'Jabal Ohoud & Al-Baqi', duration: '~2h' },
+    { icon: '🏛️', label: 'Masjid Al-Qiblatayn & lieux rares', duration: '~2h' },
+  ],
+  10: [
+    { icon: '🕋', label: 'Omra complète + Rites approfondis', duration: '~5h' },
+    { icon: '🌍', label: 'Makkah complète : Hira, Thawr, Arafat, Mina', duration: '2 jours' },
+    { icon: '🌿', label: 'Madinah complète : An-Nabawi, Quba, Baqi, Ohoud', duration: '3 jours' },
+    { icon: '⚔️', label: 'Badr (150km de Madinah)', duration: '~4h' },
+    { icon: '🏔️', label: 'Taïf (90km de Makkah)', duration: '~4h' },
+    { icon: '🕌', label: 'Jeddah historique', duration: '~4h' },
+  ],
+};
+
+function getProgramForDays(days: number) {
+  if (days <= 0) return null;
+  if (days <= 3) return { key: 3, sites: PROGRAM_BY_DAYS[3] };
+  if (days <= 5) return { key: 5, sites: PROGRAM_BY_DAYS[5] };
+  if (days <= 7) return { key: 7, sites: PROGRAM_BY_DAYS[7] };
+  return { key: 10, sites: PROGRAM_BY_DAYS[10] };
+}
+
+// ─── SVG Avatars ───────────────────────────────────────────────────────────────
+function GuideAvatarSVG({ slug, gradient, initials, isWoman }: { slug: string; gradient: string; initials: string; isWoman?: boolean }) {
+  const bgMap: Record<string, string> = {
+    'naim-laamari':     '#1A1209',
+    'rachid-al-madani': '#1A3A2A',
+    'youssouf-konate':  '#2A1A3A',
+    'abdullah-ben-yusuf':'#1A2A3A',
+    'fatima-al-omari':  '#3A1A2A',
+    'samira-al-rashidi':'#2A3A1A',
+  };
+  const kefMap: Record<string, string> = {
+    'naim-laamari':     '#C9A84C',
+    'rachid-al-madani': '#9FE1CB',
+    'youssouf-konate':  '#D4A0E0',
+    'abdullah-ben-yusuf':'#A0C4F0',
+    'fatima-al-omari':  '#F0A8C0',
+    'samira-al-rashidi':'#A8D4A0',
+  };
+  const bg = bgMap[slug] || '#1A1209';
+  const accent = kefMap[slug] || '#C9A84C';
+
+  if (isWoman) {
+    return (
+      <svg width="46" height="46" viewBox="0 0 46 46" fill="none">
+        <rect width="46" height="46" rx="23" fill={bg} />
+        {/* Head */}
+        <circle cx="23" cy="14" r="6" fill="white" opacity="0.92" />
+        {/* Hijab */}
+        <ellipse cx="23" cy="13" rx="9" ry="6" fill={accent} opacity="0.85" />
+        <path d="M14 14 Q14 26 16 30 Q19 34 23 34 Q27 34 30 30 Q32 26 32 14" fill={accent} opacity="0.55" />
+        {/* Body/abaya */}
+        <path d="M16 26 Q14 34 14 40 L32 40 Q32 34 30 26 Q27 22 23 22 Q19 22 16 26Z" fill="white" opacity="0.82" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg width="46" height="46" viewBox="0 0 46 46" fill="none">
+      <rect width="46" height="46" rx="23" fill={bg} />
+      {/* Keffieh */}
+      <ellipse cx="23" cy="11" rx="10" ry="5.5" fill={accent} opacity="0.9" />
+      <path d="M13 11 Q13 16 15 18 L31 18 Q33 16 33 11" fill={accent} opacity="0.7" />
+      {/* Head */}
+      <circle cx="23" cy="14" r="6" fill="white" opacity="0.92" />
+      {/* Keffieh band */}
+      <rect x="14" y="10" width="18" height="3" rx="1.5" fill={accent} opacity="0.95" />
+      {/* Thobe / body */}
+      <path d="M15 24 Q13 34 13 42 L33 42 Q33 34 31 24 Q28 20 23 20 Q18 20 15 24Z" fill="white" opacity="0.85" />
+    </svg>
+  );
+}
+
 export default function GuideSearchPage() {
   const [budget, setBudget]           = useState(800);
   const [activeQF, setActiveQF]       = useState('🇫🇷 Francophone');
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [arrivalDate, setArrivalDate]     = useState('');
+  const [departureDate, setDepartureDate] = useState('');
+
+  const numDays = arrivalDate && departureDate
+    ? Math.max(0, Math.round((new Date(departureDate).getTime() - new Date(arrivalDate).getTime()) / (1000 * 60 * 60 * 24)))
+    : 0;
+  const program = getProgramForDays(numDays);
 
   const FiltersContent = () => (
     <>
@@ -214,24 +313,48 @@ export default function GuideSearchPage() {
 
           {/* Search bar */}
           <div className="guides-search-bar">
-            {[
-              { label: 'Langue du guide', opts: ['Toutes les langues', '🇫🇷 Français', '🇸🇦 Arabe', '🇬🇧 English', '🇸🇳 Wolof'] },
-              { label: 'Destination',     opts: ['Makkah + Madinah', 'Makkah uniquement', 'Madinah uniquement'] },
-            ].map(f => (
-              <div key={f.label}>
-                <div style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7A6D5A', marginBottom: '0.35rem' }}>{f.label}</div>
-                <select style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 10, padding: '0.6rem 0.85rem', fontFamily: 'inherit', fontSize: '0.85rem', color: '#1A1209', background: '#FDFBF7', outline: 'none' }}>
-                  {f.opts.map(o => <option key={o}>{o}</option>)}
-                </select>
-              </div>
-            ))}
-            <div>
-              <div style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7A6D5A', marginBottom: '0.35rem' }}>Date d&apos;arrivée</div>
-              <input type="date" style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 10, padding: '0.6rem 0.85rem', fontFamily: 'inherit', fontSize: '0.85rem', color: '#1A1209', background: '#FDFBF7', outline: 'none' }} />
+            {/* Row 1: selects */}
+            <div className="gsb-row1">
+              {[
+                { label: 'Langue du guide', opts: ['Toutes les langues', '🇫🇷 Français', '🇸🇦 Arabe', '🇬🇧 English', '🇸🇳 Wolof'] },
+                { label: 'Destination',     opts: ['Makkah + Madinah', 'Makkah uniquement', 'Madinah uniquement'] },
+              ].map(f => (
+                <div key={f.label} style={{ flex: 1 }}>
+                  <div style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7A6D5A', marginBottom: '0.35rem' }}>{f.label}</div>
+                  <select style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 10, padding: '0.6rem 0.85rem', fontFamily: 'inherit', fontSize: '0.85rem', color: '#1A1209', background: '#FDFBF7', outline: 'none' }}>
+                    {f.opts.map(o => <option key={o}>{o}</option>)}
+                  </select>
+                </div>
+              ))}
             </div>
-            <button style={{ background: '#C9A84C', color: '#1A1209', border: 'none', borderRadius: 10, padding: '0.7rem 1.6rem', fontFamily: 'inherit', fontSize: '0.875rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-              Rechercher →
-            </button>
+            {/* Row 2: dates + button */}
+            <div className="gsb-row2">
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7A6D5A', marginBottom: '0.35rem' }}>Date d&apos;arrivée</div>
+                <input
+                  type="date" value={arrivalDate} onChange={e => setArrivalDate(e.target.value)}
+                  style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 10, padding: '0.6rem 0.85rem', fontFamily: 'inherit', fontSize: '0.85rem', color: '#1A1209', background: '#FDFBF7', outline: 'none', boxSizing: 'border-box' }}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7A6D5A', marginBottom: '0.35rem' }}>Date de départ</div>
+                <input
+                  type="date" value={departureDate} onChange={e => setDepartureDate(e.target.value)}
+                  min={arrivalDate || undefined}
+                  style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 10, padding: '0.6rem 0.85rem', fontFamily: 'inherit', fontSize: '0.85rem', color: '#1A1209', background: '#FDFBF7', outline: 'none', boxSizing: 'border-box' }}
+                />
+              </div>
+              {numDays > 0 && (
+                <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: '0.15rem', flexShrink: 0 }}>
+                  <span style={{ background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.4)', color: '#8B6914', fontSize: '0.75rem', fontWeight: 700, padding: '0.5rem 0.85rem', borderRadius: 50, whiteSpace: 'nowrap' }}>
+                    ⏱ {numDays} jour{numDays > 1 ? 's' : ''}
+                  </span>
+                </div>
+              )}
+              <button style={{ background: '#C9A84C', color: '#1A1209', border: 'none', borderRadius: 10, padding: '0.7rem 1.6rem', fontFamily: 'inherit', fontSize: '0.875rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', alignSelf: 'flex-end' }}>
+                Rechercher →
+              </button>
+            </div>
           </div>
 
           {/* Quick filters */}
@@ -268,6 +391,34 @@ export default function GuideSearchPage() {
         <div className="trust-bar-item"><IconStar size={14} /> Note 4.94 / 5</div>
         <div className="trust-bar-item"><IconClock size={14} /> Réponse &lt; 2h</div>
       </div>
+
+      {/* ── PROGRAMME CALCULATOR ── */}
+      {program && numDays > 0 && (
+        <div style={{ background: '#1A1209', borderBottom: '1px solid rgba(201,168,76,0.2)' }}>
+          <div style={{ maxWidth: 1280, margin: '0 auto', padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'flex-start', gap: '1.5rem', flexWrap: 'wrap' }}>
+            <div style={{ flexShrink: 0 }}>
+              <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(201,168,76,0.6)', marginBottom: '0.3rem' }}>
+                Programme estimé
+              </div>
+              <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: 'white' }}>
+                Séjour de {numDays} jour{numDays > 1 ? 's' : ''}
+              </div>
+            </div>
+            <div style={{ flex: 1, display: 'flex', flexWrap: 'wrap', gap: '0.5rem', alignItems: 'center' }}>
+              {program.sites.map((s, i) => (
+                <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(201,168,76,0.18)', borderRadius: 50, padding: '0.3rem 0.85rem', fontSize: '0.75rem', color: 'rgba(255,255,255,0.85)', fontWeight: 500 }}>
+                  <span>{s.icon}</span>
+                  {s.label}
+                  <span style={{ color: '#C9A84C', fontWeight: 700 }}>{s.duration}</span>
+                </span>
+              ))}
+              <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)', fontStyle: 'italic' }}>
+                · Programme indicatif selon disponibilités
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── MAIN CONTENT ── */}
       <div className="guides-main">
@@ -370,19 +521,31 @@ export default function GuideSearchPage() {
           background: white;
           border-radius: 20px;
           padding: 1rem 1.25rem;
-          display: grid;
-          grid-template-columns: 1fr 1fr 1fr auto;
+          display: flex;
+          flex-direction: column;
           gap: 0.75rem;
-          align-items: end;
           box-shadow: 0 24px 60px rgba(0,0,0,0.3);
           margin-bottom: 1.5rem;
         }
+        .gsb-row1 {
+          display: flex;
+          gap: 0.75rem;
+        }
+        .gsb-row2 {
+          display: flex;
+          gap: 0.75rem;
+          align-items: flex-end;
+        }
         @media (max-width: 768px) {
           .guides-search-bar {
-            grid-template-columns: 1fr;
             padding: 0.875rem;
             border-radius: 14px;
           }
+          .gsb-row1, .gsb-row2 {
+            flex-direction: column;
+            gap: 0.75rem;
+          }
+          .gsb-row1 > div, .gsb-row2 > div { flex: none; width: 100%; }
         }
 
         /* Main layout */
@@ -546,13 +709,16 @@ function GuideCard({ guide: g, official }: { guide: GuideData; official?: boolea
             position: 'absolute', bottom: official ? -24 : -18, left: '1.25rem',
             width: official ? 60 : 46, height: official ? 60 : 46, borderRadius: '50%',
             border: official ? '3px solid #C9A84C' : '3px solid white',
-            background: g.avatarGradient,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: 'var(--font-cormorant, serif)', fontSize: official ? '1.25rem' : '1rem', fontWeight: 700, color: '#1A1209',
+            overflow: 'hidden',
             zIndex: 1,
             boxShadow: official ? '0 0 0 3px #1A1209, 0 4px 16px rgba(201,168,76,0.4)' : 'none',
           }}>
-            {g.initials}
+            <GuideAvatarSVG
+              slug={g.slug}
+              gradient={g.gradient}
+              initials={g.initials}
+              isWoman={g.slug === 'fatima-al-omari' || g.slug === 'samira-al-rashidi'}
+            />
           </div>
           {/* Available dot */}
           <div style={{ position: 'absolute', bottom: 8, right: 12, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
@@ -614,11 +780,15 @@ function GuideCard({ guide: g, official }: { guide: GuideData; official?: boolea
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #F0EBD8', paddingTop: '0.85rem', marginTop: 'auto' }}>
             <div>
               {official ? (
-                <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.2 }}>Dès 150€/pers</div>
+                <>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.2 }}>Dès 150€/pers</div>
+                  <div style={{ fontSize: '0.6rem', color: '#7A6D5A', marginTop: '0.2rem' }}>Omra ~5h · Visites incluses</div>
+                </>
               ) : (
                 <>
                   <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 600, color: '#1A1209', lineHeight: 1 }}>{g.price}€</div>
                   <div style={{ fontSize: '0.65rem', color: '#7A6D5A' }}>{g.priceSub}</div>
+                  <div style={{ fontSize: '0.6rem', color: '#9A8A7A', marginTop: '0.15rem' }}>Omra ~4-6h · Visites incluses</div>
                 </>
               )}
             </div>

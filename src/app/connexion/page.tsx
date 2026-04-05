@@ -1,12 +1,33 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
-
 import Link from 'next/link';
-import { login } from './actions';
+import { useState, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function LoginPage() {
+function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get('redirect') || '/espace/tableau-de-bord';
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    const result = await signIn('pelerin-credentials', { email, password, redirect: false });
+    setLoading(false);
+    if (result?.ok) {
+      router.push(redirect);
+    } else {
+      setError('Identifiants incorrects. Vérifiez votre e-mail et mot de passe.');
+    }
+  }
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: `
@@ -21,10 +42,15 @@ export default function LoginPage() {
         .login-input:focus { border-color: #C9A84C; box-shadow: 0 0 0 3px rgba(201,168,76,0.12); }
         .login-input::placeholder { color: rgba(122,109,90,0.5); }
         .btn-email { transition: background 0.2s, transform 0.15s; }
-        .btn-email:hover { background: #2D1F08 !important; transform: translateY(-1px); }
+        .btn-email:hover:not(:disabled) { background: #2D1F08 !important; transform: translateY(-1px); }
+        .btn-email:disabled { opacity: 0.65; cursor: not-allowed; }
         .btn-google { transition: border-color 0.2s, background 0.2s; }
         .btn-google:hover { border-color: #C9A84C !important; background: #FDFBF7 !important; }
         .link-create:hover { text-decoration: underline; }
+        .login-error {
+          background: #FDECEA; border: 1px solid #F5C6C2; border-radius: 10px;
+          padding: 12px 14px; color: #C0392B; font-size: 0.84rem; line-height: 1.5;
+        }
       `}} />
 
       <div style={{
@@ -32,7 +58,6 @@ export default function LoginPage() {
         background: '#FAF7F0', padding: '2rem 1rem',
         fontFamily: 'var(--font-manrope, sans-serif)',
       }}>
-        {/* Subtle background texture */}
         <div style={{ position: 'fixed', inset: 0, background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.05) 0%, transparent 60%)', pointerEvents: 'none' }} />
 
         <div style={{
@@ -42,25 +67,32 @@ export default function LoginPage() {
           boxShadow: '0 8px 48px rgba(26,18,9,0.08), 0 2px 12px rgba(26,18,9,0.04)',
           overflow: 'hidden',
         }}>
-          {/* Gold top bar */}
           <div style={{ height: 4, background: 'linear-gradient(90deg, #C9A84C, #F0D897, #C9A84C)' }} />
 
           <div style={{ padding: '2.5rem 2.5rem 2.25rem' }}>
 
-            {/* Logo */}
             <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
               <Link href="/" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.75rem', fontWeight: 700, color: '#1A1209', textDecoration: 'none', letterSpacing: '0.08em', display: 'inline-block' }}>
                 SAFAR<span style={{ color: '#C9A84C' }}>U</span>MA
               </Link>
             </div>
 
-            {/* Form */}
-            <form style={{ display: 'flex', flexDirection: 'column', gap: '1.125rem' }}>
+            {error && (
+              <div className="login-error" style={{ marginBottom: '1.25rem' }}>
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.125rem' }}>
               <div>
                 <label htmlFor="email" style={{ display: 'block', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.5rem' }}>
                   Adresse e-mail
                 </label>
-                <input className="login-input" id="email" name="email" type="email" required placeholder="nom@exemple.com" />
+                <input
+                  className="login-input" id="email" name="email" type="email" required
+                  placeholder="nom@exemple.com"
+                  value={email} onChange={e => setEmail(e.target.value)}
+                />
               </div>
 
               <div>
@@ -68,34 +100,41 @@ export default function LoginPage() {
                   <label htmlFor="password" style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7A6D5A' }}>
                     Mot de passe
                   </label>
-                  <Link href="#" style={{ fontSize: '0.75rem', fontWeight: 600, color: '#C9A84C', textDecoration: 'none' }}>Oublié ?</Link>
+                  <Link href="/mot-de-passe-oublie" style={{ fontSize: '0.75rem', fontWeight: 600, color: '#C9A84C', textDecoration: 'none' }}>Oublié ?</Link>
                 </div>
-                <input className="login-input" id="password" name="password" type="password" required placeholder="••••••••" />
+                <input
+                  className="login-input" id="password" name="password" type="password" required
+                  placeholder="••••••••"
+                  value={password} onChange={e => setPassword(e.target.value)}
+                />
               </div>
 
-              <button formAction={login} className="btn-email" style={{
-                width: '100%', padding: '13px', marginTop: '0.25rem',
-                background: '#1A1209', color: '#F0D897',
-                border: 'none', borderRadius: 50, cursor: 'pointer',
-                fontSize: '0.875rem', fontWeight: 600, letterSpacing: '0.04em',
-                fontFamily: 'var(--font-manrope, sans-serif)',
-              }}>
-                Se connecter avec Email
+              <button
+                type="submit"
+                className="btn-email"
+                disabled={loading}
+                style={{
+                  width: '100%', padding: '13px', marginTop: '0.25rem',
+                  background: '#1A1209', color: '#F0D897',
+                  border: 'none', borderRadius: 50, cursor: 'pointer',
+                  fontSize: '0.875rem', fontWeight: 600, letterSpacing: '0.04em',
+                  fontFamily: 'var(--font-manrope, sans-serif)',
+                }}
+              >
+                {loading ? 'Connexion…' : 'Se connecter avec Email'}
               </button>
             </form>
 
-            {/* Divider */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', margin: '1.5rem 0' }}>
               <div style={{ flex: 1, height: 1, background: '#E8DFC8' }} />
               <span style={{ fontSize: '0.8rem', color: '#7A6D5A', fontWeight: 500 }}>ou</span>
               <div style={{ flex: 1, height: 1, background: '#E8DFC8' }} />
             </div>
 
-            {/* Google */}
             <button
               type="button"
               className="btn-google"
-              onClick={() => signIn('google', { callbackUrl: '/espace/tableau-de-bord' })}
+              onClick={() => signIn('google', { callbackUrl: redirect })}
               style={{
                 width: '100%', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
                 background: 'white', border: '1px solid #E8DFC8', borderRadius: 50, cursor: 'pointer',
@@ -112,7 +151,6 @@ export default function LoginPage() {
               Continuer avec Google
             </button>
 
-            {/* Footer */}
             <p style={{ textAlign: 'center', fontSize: '0.82rem', color: '#7A6D5A', marginTop: '1.75rem', lineHeight: 1.6 }}>
               Nouveau sur SAFARUMA ?{' '}
               <Link href="/inscription" className="link-create" style={{ color: '#C9A84C', fontWeight: 600, textDecoration: 'none' }}>
@@ -123,5 +161,13 @@ export default function LoginPage() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }

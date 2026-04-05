@@ -120,7 +120,7 @@ export default function RegisterPage() {
               SAFAR<span style={{ color: '#C9A84C' }}>U</span>MA
             </Link>
             <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(1.8rem, 5vw, 2.25rem)', fontWeight: 700, color: '#1A1209', lineHeight: 1.1, margin: '0 0 0.5rem' }}>
-              Créer votre compte de confiance
+              Rejoins la communauté SAFARUMA
             </h1>
             <p style={{ fontSize: '0.875rem', color: '#7A6D5A', margin: 0 }}>
               Rejoignez la première plateforme dédiée aux guides pour la Omra certifiés.

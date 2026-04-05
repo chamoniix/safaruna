@@ -1,6 +1,15 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export default function AnnouncementBar() {
+  const pathname = usePathname();
+
+  if (pathname.includes('/connexion') || pathname.includes('/inscription') || pathname.includes('/guide/connexion')) {
+    return null;
+  }
+
   return (
     <div className="announcement-bar">
       <span className="ab-dot" />

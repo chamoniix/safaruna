@@ -48,27 +48,10 @@ export default function LoginPage() {
           <div style={{ padding: '2.5rem 2.5rem 2.25rem' }}>
 
             {/* Logo */}
-            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+            <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
               <Link href="/" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.75rem', fontWeight: 700, color: '#1A1209', textDecoration: 'none', letterSpacing: '0.08em', display: 'inline-block' }}>
                 SAFAR<span style={{ color: '#C9A84C' }}>U</span>MA
               </Link>
-            </div>
-
-            {/* Heading */}
-            <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-              <h1 style={{
-                fontFamily: 'var(--font-cormorant, serif)',
-                fontSize: 52,
-                fontWeight: 600,
-                color: '#1A1209',
-                lineHeight: 1.05,
-                marginBottom: '0.625rem',
-              }}>
-                Bon retour<br />parmi nous
-              </h1>
-              <p style={{ fontSize: 14, color: '#7A6D5A', lineHeight: 1.65, fontFamily: 'var(--font-manrope, sans-serif)' }}>
-                Connectez-vous pour accéder<br />à votre espace de confiance.
-              </p>
             </div>
 
             {/* Form */}

@@ -48,6 +48,7 @@ const LANGUES = [
 const GUIDES_DATA = [
   {
     slug: 'naim-laamari',
+    gender: 'homme',
     zones: ['makkah', 'madinah'],
     name: 'Naïm LAAMARI',
     title: 'Guide Officiel SAFARUMA · Responsable Terrain',
@@ -70,6 +71,7 @@ const GUIDES_DATA = [
   },
   {
     slug: 'rachid-al-madani',
+    gender: 'homme',
     zones: ['makkah', 'madinah'],
     name: 'Rachid Al-Madani',
     title: 'Cheikh · Spécialiste Sîra',
@@ -91,6 +93,7 @@ const GUIDES_DATA = [
   },
   {
     slug: 'fatima-al-omari',
+    gender: 'femme',
     zones: ['makkah', 'madinah'],
     name: 'Fatima Al-Omari',
     title: 'Guide femme · Familles',
@@ -112,6 +115,7 @@ const GUIDES_DATA = [
   },
   {
     slug: 'youssouf-konate',
+    gender: 'homme',
     zones: ['makkah'],
     name: 'Youssouf Konaté',
     title: "Spécialiste Afrique de l'Ouest",
@@ -133,6 +137,7 @@ const GUIDES_DATA = [
   },
   {
     slug: 'abdullah-ben-yusuf',
+    gender: 'homme',
     zones: ['madinah'],
     name: 'Abdullah Ben Yusuf',
     title: 'Diplômé · Université de Madinah',
@@ -154,6 +159,7 @@ const GUIDES_DATA = [
   },
   {
     slug: 'samira-al-rashidi',
+    gender: 'femme',
     zones: ['madinah'],
     name: 'Samira Al-Rashidi',
     title: 'Spécialiste PMR · Madinah',
@@ -266,9 +272,11 @@ export default function GuideSearchPage() {
   const isGroupe = groupSize > 6;
 
   const filteredGuides = GUIDES_DATA.filter(g => {
-    if (destination === 'all') return true;
-    if (destination === 'makkah') return g.zones.includes('makkah');
-    if (destination === 'madinah') return g.zones.includes('madinah');
+    if (destination === 'makkah' && !g.zones.includes('makkah')) return false;
+    if (destination === 'madinah' && !g.zones.includes('madinah')) return false;
+    if (guideGender === 'homme' && g.gender !== 'homme') return false;
+    if (guideGender === 'femme' && g.gender !== 'femme') return false;
+    if (selectedLang && !g.languages.some(l => l === selectedLang)) return false;
     return true;
   });
   const filteredOfficial = filteredGuides.filter(g => g.isOfficial);
@@ -421,7 +429,7 @@ export default function GuideSearchPage() {
             <div style={{ marginBottom: '0.875rem' }}>
               <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.35rem' }}>Langue du guide</div>
               <select value={selectedLang} onChange={e => setSelectedLang(e.target.value)} style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 10, padding: '0.55rem 0.75rem', fontFamily: 'inherit', fontSize: '0.85rem', color: '#1A1209', background: '#FDFBF7', outline: 'none' }}>
-                <option value="">Toutes les langues</option>
+                <option value="">Choix de la langue</option>
                 {LANGUES.map(l => <option key={l} value={l}>{l}</option>)}
               </select>
             </div>

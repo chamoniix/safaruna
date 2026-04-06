@@ -23,13 +23,16 @@ export default function MentionsLegales() {
 
       <section id="editeur">
         <h2 style={h2}>1. Éditeur du site</h2>
-        <p style={p}>Le site <strong>safaruma.com</strong> est édité par SAFARUMA, plateforme de mise en relation entre pèlerins et guides privés pour la Omra et la visite des Lieux Saints d'Arabie Saoudite.</p>
+        <p style={p}>Le site <strong>safaruma.com</strong> est édité par HOLDINGAI LTD, société enregistrée en Angleterre et au Pays de Galles (Company Number 16382871). SAFARUMA est une marque commerciale exploitée par HOLDINGAI LTD.</p>
         <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1rem' }}>
           {[
-            ['Raison sociale',          'SAFARUMA'],
-            ['Email de contact',        'contact@safaruma.com'],
-            ['Site web',                'safaruma.com'],
-            ['Directeur de publication','Équipe SAFARUMA'],
+            ['Société',                  'HOLDINGAI LTD'],
+            ['Numéro d\'enregistrement', '16382871 (Companies House, England & Wales)'],
+            ['Siège social',             'Lytchett House, 13 Freeland Park, Wareham Road, Poole, Dorset, BH16 6FA, United Kingdom'],
+            ['Incorporée le',            '11 avril 2025'],
+            ['Marque exploitée',         'SAFARUMA — plateforme de mise en relation pèlerins / guides privés pour la Omra'],
+            ['Email de contact',         'contact@safaruma.com'],
+            ['Site web',                 'safaruma.com'],
           ].map(([k, v]) => (
             <tr key={k} style={{ borderBottom: '1px solid #E8DFC8' }}>
               <td style={{ padding: '0.65rem 1rem 0.65rem 0', color: '#7A6D5A', fontWeight: 600, fontSize: '0.82rem', width: '42%', verticalAlign: 'top' }}>{k}</td>
@@ -66,12 +69,12 @@ export default function MentionsLegales() {
           <div className="box-title">Contenu des guides</div>
           <p style={{ ...p, marginBottom: 0 }}>Les profils des guides (photos, descriptions, certifications) restent leur propriété personnelle. En les publiant sur SAFARUMA, les guides accordent une licence d'utilisation non exclusive à SAFARUMA pour les afficher sur la plateforme.</p>
         </div>
-        <p style={p}>© 2025–2026 SAFARUMA. Tous droits réservés.</p>
+        <p style={p}>© 2025–2026 HOLDINGAI LTD. Tous droits réservés. SAFARUMA est une marque déposée de HOLDINGAI LTD.</p>
       </section>
 
       <section id="donnees">
         <h2 style={h2}>4. Données personnelles</h2>
-        <p style={p}>SAFARUMA traite vos données personnelles conformément au Règlement Général sur la Protection des Données (RGPD — UE 2016/679) et à la loi française Informatique et Libertés.</p>
+        <p style={p}>SAFARUMA traite vos données personnelles conformément au UK GDPR et au Data Protection Act 2018.</p>
         <p style={p}>Pour toute question relative à vos données, consultez notre <a href="/politique-confidentialite" style={{ color: '#C9A84C', fontWeight: 600 }}>Politique de confidentialité</a>.</p>
       </section>
 

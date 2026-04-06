@@ -25,8 +25,8 @@ export default function CGU() {
 
       <section id="objet">
         <h2 style={h2}>1. Objet et champ d'application</h2>
-        <p style={p}>Les présentes Conditions Générales d'Utilisation (CGU) régissent l'accès et l'utilisation de la plateforme SAFARUMA, accessible à l'adresse <strong>safaruma.com</strong>.</p>
-        <p style={p}>En créant un compte ou en utilisant les services de SAFARUMA, vous acceptez sans réserve les présentes CGU. Si vous n'acceptez pas ces conditions, vous ne devez pas utiliser la plateforme.</p>
+        <p style={p}>Les présentes Conditions Générales d'Utilisation (CGU) régissent l'accès et l'utilisation de la plateforme HOLDINGAI LTD (exploitant la marque SAFARUMA), accessible à l'adresse <strong>safaruma.com</strong>.</p>
+        <p style={p}>En créant un compte ou en utilisant les services de HOLDINGAI LTD (exploitant la marque SAFARUMA), vous acceptez sans réserve les présentes CGU. Si vous n'acceptez pas ces conditions, vous ne devez pas utiliser la plateforme.</p>
         <p style={p}>Ces CGU s'appliquent à tous les utilisateurs : pèlerins, guides (Mutawwifin) et visiteurs. Des conditions spécifiques s'appliquent aux <a href="/conditions-guides" style={{ color: '#C9A84C' }}>Guides</a> et aux <a href="/conditions-clients" style={{ color: '#C9A84C' }}>Clients</a>.</p>
       </section>
 
@@ -115,7 +115,7 @@ export default function CGU() {
 
       <section id="droit">
         <h2 style={h2}>9. Droit applicable et juridiction</h2>
-        <p style={p}>Les présentes CGU sont régies par le <strong>droit français</strong>. En cas de litige non résolu à l'amiable, compétence exclusive est attribuée aux <strong>tribunaux de Paris</strong>.</p>
+        <p style={p}>Les présentes CGU sont régies par le <strong>droit anglais — juridiction des tribunaux d'Angleterre et du Pays de Galles</strong>. En cas de litige non résolu à l'amiable, compétence exclusive est attribuée aux <strong>tribunaux d'Angleterre et du Pays de Galles</strong>.</p>
         <p style={p}>SAFARUMA se réserve le droit de modifier les présentes CGU. Les utilisateurs seront informés de toute modification significative par email avec un préavis de 30 jours.</p>
       </section>
 

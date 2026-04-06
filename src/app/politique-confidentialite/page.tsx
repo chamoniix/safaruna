@@ -24,7 +24,7 @@ export default function PolitiqueConfidentialite() {
 
       <section id="collecte">
         <h2 style={h2}>1. Données collectées</h2>
-        <p style={p}>Lors de votre utilisation de la plateforme SAFARUMA, nous collectons les données suivantes :</p>
+        <p style={p}>Lors de votre utilisation de la plateforme HOLDINGAI LTD (SAFARUMA), nous collectons les données suivantes :</p>
         <div className="legal-box-gold">
           <div className="box-title">Données d'identité et de contact</div>
           <ul style={ul}>
@@ -92,7 +92,7 @@ export default function PolitiqueConfidentialite() {
           <li style={li}><strong>L'autre partie à votre réservation</strong> — le guide voit vos coordonnées de contact après confirmation, et vice-versa</li>
           <li style={li}><strong>Autorités légales</strong> — uniquement si requis par une obligation légale ou décision judiciaire</li>
         </ul>
-        <p style={p}>Tous nos sous-traitants sont conformes au RGPD et liés par des clauses contractuelles de protection des données.</p>
+        <p style={p}>Tous nos sous-traitants sont conformes au UK GDPR et Data Protection Act 2018, et liés par des clauses contractuelles de protection des données.</p>
       </section>
 
       <section id="droits">
@@ -109,7 +109,7 @@ export default function PolitiqueConfidentialite() {
         <div className="legal-box-gold">
           <div className="box-title">Comment exercer vos droits</div>
           <p style={{ ...p, marginBottom: '0.5rem' }}>Envoyez votre demande par email à : <a href="mailto:contact@safaruma.com" style={{ color: '#C9A84C', fontWeight: 700 }}>contact@safaruma.com</a></p>
-          <p style={{ ...p, marginBottom: 0 }}>Délai de réponse : <strong>30 jours maximum</strong> conformément au RGPD. En cas d'insatisfaction, vous pouvez adresser une réclamation à la <strong>CNIL</strong> (www.cnil.fr).</p>
+          <p style={{ ...p, marginBottom: 0 }}>Délai de réponse : <strong>30 jours maximum</strong> conformément au UK GDPR. En cas d'insatisfaction, vous pouvez adresser une réclamation à l'<strong>ICO</strong> (Information Commissioner's Office — ico.org.uk).</p>
         </div>
       </section>
 
@@ -140,9 +140,9 @@ export default function PolitiqueConfidentialite() {
         <p style={p}>Pour toute question relative à vos données personnelles :</p>
         <p style={p}>
           <strong>Email :</strong> <a href="mailto:contact@safaruma.com" style={{ color: '#C9A84C', fontWeight: 700 }}>contact@safaruma.com</a><br />
-          Objet recommandé : « RGPD — [votre demande] »
+          Objet recommandé : « UK GDPR — [votre demande] »
         </p>
-        <p style={p}>Autorité de contrôle compétente : <strong>CNIL</strong> — Commission Nationale de l'Informatique et des Libertés<br />3 Place de Fontenoy, 75007 Paris — <a href="https://www.cnil.fr" style={{ color: '#C9A84C' }} target="_blank" rel="noopener noreferrer">www.cnil.fr</a></p>
+        <p style={p}>Autorité de contrôle compétente : <strong>ICO</strong> — Information Commissioner's Office<br />Wycliffe House, Water Lane, Wilmslow, Cheshire SK9 5AF, United Kingdom — <a href="https://ico.org.uk" style={{ color: '#C9A84C' }} target="_blank" rel="noopener noreferrer">ico.org.uk</a></p>
       </section>
 
     </LegalLayout>

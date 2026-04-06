@@ -126,7 +126,7 @@ export default function Footer() {
       </div>
 
       <div className="footer-bottom">
-        <span className="copy">© 2025 SAFARUMA. Tous droits réservés</span>
+        <span className="copy">© 2025 HOLDINGAI LTD · SAFARUMA est une marque de HOLDINGAI LTD · Co. No. 16382871 · England &amp; Wales</span>
         <span style={{ color: "rgba(255,255,255,0.3)" }}>Made with respect for the Deen</span>
       </div>
     </footer>

@@ -2,171 +2,241 @@
 
 import { useState } from 'react';
 
+const DUAS = [
+  {
+    id: 1,
+    cat: 'omra',
+    important: true,
+    title: "Talbiyah — En entrant en état d'Ihram",
+    arabic: "لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ، لَبَّيْكَ لَا شَرِيكَ لَكَ لَبَّيْكَ، إِنَّ الْحَمْدَ وَالنِّعْمَةَ لَكَ وَالْمُلْكَ، لَا شَرِيكَ لَكَ",
+    phonetic: "Labbayk, Allahumma labbayk, labbayk la sharika laka labbayk. Innal-hamda wan-ni'mata laka wal-mulk, la sharika lak.",
+    translation: "Me voici, Ô Allah, me voici. Me voici, Tu n'as pas d'associé, me voici. En vérité la louange et la grâce T'appartiennent, ainsi que la royauté. Tu n'as pas d'associé.",
+    duration: '0:24',
+    learned: false,
+  },
+  {
+    id: 2,
+    cat: 'omra',
+    important: false,
+    title: "En entrant à la Mosquée Al-Haram",
+    arabic: "بِسْمِ اللَّهِ، وَالصَّلَاةُ وَالسَّلَامُ عَلَى رَسُولِ اللَّهِ، اللَّهُمَّ افْتَحْ لِي أَبْوَابَ رَحْمَتِكَ",
+    phonetic: "Bismillahi was-salatu was-salamu 'ala rasulillahi, Allahumma-ftah li abwaba rahmatik.",
+    translation: "Au nom d'Allah, que la prière et le salut soient sur le Messager d'Allah. Ô Allah, ouvre-moi les portes de Ta miséricorde.",
+    duration: '0:15',
+    learned: true,
+  },
+  {
+    id: 3,
+    cat: 'omra',
+    important: false,
+    title: "Entre le coin Yéménite et la Pierre Noire",
+    arabic: "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ",
+    phonetic: "Rabbana atina fid-dunya hasanatan wa fil-akhirati hasanatan wa qina 'adhaban-nar.",
+    translation: "Seigneur, accorde-nous le bien en ce monde et le bien dans l'au-delà, et protège-nous du châtiment du Feu.",
+    source: "Sourate Al-Baqarah (2:201)",
+    duration: '0:12',
+    learned: false,
+  },
+  {
+    id: 4,
+    cat: 'omra',
+    important: false,
+    title: "Sur le mont Safa et Marwa",
+    arabic: "لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ",
+    phonetic: "La ilaha illallahu wahdahu la sharika lah, lahul-mulku wa lahul-hamdu wa huwa 'ala kulli shay'in qadir.",
+    translation: "Il n'y a de divinité digne d'adoration qu'Allah Seul, sans associé. À Lui la royauté, à Lui la louange, et Il est Omnipotent.",
+    duration: '0:45',
+    learned: false,
+  },
+  {
+    id: 5,
+    cat: 'quotidien',
+    important: false,
+    title: "Le matin — Awaker avec gratitude",
+    arabic: "الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ",
+    phonetic: "Alhamdu lillahi-lladhi ahyana ba'da ma amatana wa ilayhin-nushur.",
+    translation: "Louange à Allah qui nous a redonné vie après nous avoir fait mourir, et c'est vers Lui que sera la résurrection.",
+    duration: '0:10',
+    learned: true,
+  },
+  {
+    id: 6,
+    cat: 'quotidien',
+    important: false,
+    title: "Avant de dormir",
+    arabic: "بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا",
+    phonetic: "Bismika Allahumma amutu wa ahya.",
+    translation: "En Ton nom, Ô Allah, je meurs et je vis.",
+    duration: '0:08',
+    learned: false,
+  },
+];
+
+const TABS = [
+  { key: 'tous',      label: 'Toutes' },
+  { key: 'omra',     label: "De la Omra", badge: 'Essentiel' },
+  { key: 'quotidien', label: 'Quotidiennes' },
+  { key: 'favoris',  label: 'Mémorisées' },
+];
+
+function DuaCard({ dua, onToggleLearned }: { dua: typeof DUAS[0]; onToggleLearned: (id: number) => void }) {
+  const [playing, setPlaying] = useState(false);
+
+  return (
+    <div style={{
+      background: 'white',
+      border: `1.5px solid ${dua.important ? '#C9A84C' : '#EDE8DC'}`,
+      borderRadius: 16,
+      overflow: 'hidden',
+      boxShadow: dua.important ? '0 4px 20px rgba(201,168,76,0.1)' : '0 1px 4px rgba(26,18,9,0.04)',
+    }}>
+      {/* Header */}
+      <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid #F5F0E8', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.75rem' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {dua.important && (
+            <span style={{ display: 'inline-block', background: '#FAF3E0', color: '#8B6914', fontSize: '0.58rem', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '0.18rem 0.55rem', borderRadius: 50, marginBottom: '0.4rem' }}>
+              Obligatoire
+            </span>
+          )}
+          <h3 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.3, margin: 0 }}>{dua.title}</h3>
+          {dua.source && <div style={{ fontSize: '0.65rem', fontWeight: 700, color: '#7A6D5A', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: '0.25rem' }}>{dua.source}</div>}
+        </div>
+        <button
+          onClick={() => onToggleLearned(dua.id)}
+          style={{
+            width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
+            background: dua.learned ? '#E8F5EE' : 'white',
+            border: `1.5px solid ${dua.learned ? '#1D5C3A' : '#EDE8DC'}`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', fontSize: '0.75rem', color: dua.learned ? '#1D5C3A' : '#7A6D5A',
+            fontWeight: 700, transition: 'all 0.15s',
+          }}
+          title={dua.learned ? 'Mémorisée' : 'Marquer mémorisée'}
+        >
+          {dua.learned ? '✓' : '○'}
+        </button>
+      </div>
+
+      {/* Arabic */}
+      <div style={{ padding: '1.25rem', background: '#0D0A06', borderBottom: '1px solid rgba(201,168,76,0.15)' }}>
+        <p style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(1.3rem, 3vw, 1.7rem)', color: '#F0D897', lineHeight: 2, direction: 'rtl', textAlign: 'right', margin: 0 }} dir="rtl">
+          {dua.arabic}
+        </p>
+      </div>
+
+      {/* Phonetic + Translation */}
+      <div style={{ padding: '1rem 1.25rem' }}>
+        <div style={{ marginBottom: '0.75rem' }}>
+          <div style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.3rem' }}>Translittération</div>
+          <p style={{ fontSize: '0.85rem', color: '#4A3728', fontStyle: 'italic', lineHeight: 1.65, margin: 0 }}>{dua.phonetic}</p>
+        </div>
+        <div>
+          <div style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.3rem' }}>Traduction</div>
+          <p style={{ fontSize: '0.85rem', color: '#1A1209', lineHeight: 1.65, margin: 0 }}>{dua.translation}</p>
+        </div>
+      </div>
+
+      {/* Audio player */}
+      <div style={{ margin: '0 1.25rem 1.25rem', background: '#1A1209', borderRadius: 12, padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
+        <button
+          onClick={() => setPlaying(p => !p)}
+          style={{ width: 36, height: 36, borderRadius: '50%', background: playing ? '#C9A84C' : 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, color: playing ? '#1A1209' : '#C9A84C', fontSize: '0.82rem', transition: 'all 0.15s' }}
+        >
+          {playing ? '⏸' : '▶'}
+        </button>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ fontSize: '0.62rem', color: 'rgba(240,216,151,0.4)', fontFamily: 'monospace', flexShrink: 0 }}>0:00</span>
+          <div style={{ flex: 1, height: 28, display: 'flex', alignItems: 'center', gap: '2px' }}>
+            {Array.from({ length: 32 }).map((_, i) => (
+              <div key={i} style={{ width: 3, borderRadius: 2, height: `${Math.max(20, (Math.sin(i * 0.5) + 1) * 40 + 10)}%`, background: playing && i < 12 ? '#C9A84C' : 'rgba(201,168,76,0.18)', transition: 'background 0.3s' }} />
+            ))}
+          </div>
+          <span style={{ fontSize: '0.62rem', color: 'rgba(240,216,151,0.4)', fontFamily: 'monospace', flexShrink: 0 }}>{dua.duration}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function DuaTracker() {
-  const [activeTab, setActiveTab] = useState('quotidien');
+  const [activeTab, setActiveTab] = useState('tous');
+  const [duas, setDuas] = useState(DUAS);
+
+  const toggleLearned = (id: number) => {
+    setDuas(ds => ds.map(d => d.id === id ? { ...d, learned: !d.learned } : d));
+  };
+
+  const filtered = duas.filter(d => {
+    if (activeTab === 'tous') return true;
+    if (activeTab === 'favoris') return d.learned;
+    return d.cat === activeTab;
+  });
+
+  const learnedCount = duas.filter(d => d.learned).length;
 
   return (
     <>
-      <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <style dangerouslySetInnerHTML={{ __html: `
+        .dua-tab { transition: background 0.15s, color 0.15s, border-color 0.15s; }
+        .dua-tab:hover { border-color: #C9A84C !important; }
+      `}} />
+
+      {/* Header */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
         <div>
-          <h1 className="font-serif text-3xl md:text-4xl text-[#1A1209] mb-2">Mon Carnet de Du'a</h1>
-          <p className="text-[#7A6D5A]">Suivez vos invocations quotidiennes et apprenez celles du Hajj &amp; de la Omra.</p>
+          <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', fontWeight: 600, color: '#1A1209', marginBottom: '0.25rem' }}>
+            Mon Carnet de Du&apos;a
+          </h1>
+          <p style={{ fontSize: '0.875rem', color: '#7A6D5A' }}>
+            Apprenez et mémorisez les invocations essentielles de la Omra.
+          </p>
         </div>
-        
-        <div className="bg-white border border-[#E8DFC8] rounded-2xl p-4 flex items-center gap-6 shadow-[0_2px_10px_rgba(26,18,9,0.02)]">
-          <div>
-            <div className="text-[10px] font-bold tracking-widest uppercase text-[#A93226] mb-1">Série actuelle</div>
-            <div className="font-serif text-2xl font-bold text-[#1A1209] flex items-center gap-2">
-              <span className="text-[#C9A84C]">🔥</span> 12 jours
-            </div>
+
+        {/* Stats */}
+        <div style={{ display: 'flex', gap: '1rem', background: 'white', border: '1px solid #EDE8DC', borderRadius: 14, padding: '0.875rem 1.25rem', boxShadow: '0 2px 8px rgba(26,18,9,0.04)', flexShrink: 0 }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C0392B', marginBottom: '0.2rem' }}>Série</div>
+            <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.5rem', fontWeight: 700, color: '#1A1209', lineHeight: 1 }}>🔥 12j</div>
           </div>
-          <div className="w-[1px] h-10 bg-[#FAF3E0]"></div>
-          <div>
-            <div className="text-[10px] font-bold tracking-widest uppercase text-[#1D5C3A] mb-1">Du'a mémorisées</div>
-            <div className="font-serif text-2xl font-bold text-[#1A1209]">
-              4 / 15
-            </div>
+          <div style={{ width: 1, background: '#F0EBD8' }} />
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#1D5C3A', marginBottom: '0.2rem' }}>Mémorisées</div>
+            <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.5rem', fontWeight: 700, color: '#1A1209', lineHeight: 1 }}>{learnedCount}/{duas.length}</div>
           </div>
         </div>
       </div>
 
-      {/* TABS — pill style */}
-      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
-        {([
-          { key: 'quotidien', label: 'Dhikr & Quotidien' },
-          { key: 'omra',      label: 'Spécifiques de Omra', badge: 'Essentiel' },
-          { key: 'favoris',   label: 'Mes Favoris' },
-        ] as { key: string; label: string; badge?: string }[]).map(t => (
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+        {TABS.map(t => (
           <button
             key={t.key}
+            className="dua-tab"
             onClick={() => setActiveTab(t.key)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: '0.4rem',
-              padding: '0.5rem 1.2rem', borderRadius: 50, fontSize: '0.82rem', fontWeight: 600,
-              cursor: 'pointer', transition: 'all 0.15s', whiteSpace: 'nowrap',
-              background: activeTab === t.key ? '#1A1209' : 'white',
-              color: activeTab === t.key ? '#F0D897' : '#7A6D5A',
-              border: `1px solid ${activeTab === t.key ? '#1A1209' : '#EDE8DC'}`,
-            }}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', padding: '0.45rem 1rem', borderRadius: 50, fontSize: '0.8rem', fontWeight: activeTab === t.key ? 700 : 500, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap', background: activeTab === t.key ? '#1A1209' : 'white', color: activeTab === t.key ? '#F0D897' : '#7A6D5A', border: `1.5px solid ${activeTab === t.key ? '#1A1209' : '#EDE8DC'}` }}
           >
             {t.label}
-            {t.badge && (
-              <span style={{ background: activeTab === t.key ? 'rgba(201,168,76,0.25)' : '#FAF3E0', color: activeTab === t.key ? '#F0D897' : '#8B6914', fontSize: '0.6rem', fontWeight: 700, padding: '0.1rem 0.4rem', borderRadius: 50 }}>
-                {t.badge}
-              </span>
-            )}
+            {t.badge && <span style={{ background: activeTab === t.key ? 'rgba(201,168,76,0.2)' : '#FAF3E0', color: activeTab === t.key ? '#F0D897' : '#8B6914', fontSize: '0.58rem', fontWeight: 700, padding: '0.1rem 0.4rem', borderRadius: 50 }}>{t.badge}</span>}
+            {t.key === 'favoris' && <span style={{ background: activeTab === t.key ? 'rgba(201,168,76,0.2)' : '#E8F5EE', color: activeTab === t.key ? '#F0D897' : '#1D5C3A', fontSize: '0.58rem', fontWeight: 700, padding: '0.1rem 0.4rem', borderRadius: 50 }}>{learnedCount}</span>}
           </button>
         ))}
       </div>
 
-      {/* DUA LIST */}
-      <div className="space-y-6">
-        
-        <DuaCard 
-          title="Invocation en entrant à la mosquée"
-          arabic="بِسْمِ اللَّهِ، وَالصَّلَاةُ وَالسَّلَامُ عَلَى رَسُولِ اللَّهِ، اللَّهُمَّ افْتَحْ لِي أَبْوَابَ رَحْمَتِكَ"
-          phonetic="Bismillahi was-salatu was-salamu 'ala rasulillahi, Allahumma-ftah li abwaba rahmatik."
-          translation="Au nom d'Allah, que la prière et le salut soient sur le Messager d'Allah. Ô Allah, ouvre-moi les portes de Ta miséricorde."
-          audioDuration="0:15"
-          learned={true}
-        />
+      {/* Empty state */}
+      {filtered.length === 0 && (
+        <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#7A6D5A' }}>
+          <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>🤲</div>
+          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', color: '#1A1209', marginBottom: '0.4rem' }}>Aucune du&apos;a mémorisée</div>
+          <div style={{ fontSize: '0.82rem' }}>Cliquez sur ○ sur chaque du&apos;a pour la marquer comme mémorisée.</div>
+        </div>
+      )}
 
-        <DuaCard 
-          title="Talbiyah (En entrant en état d'Ihram)"
-          arabic="لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ، لَبَّيْكَ لَا شَرِيكَ لَكَ لَبَّيْكَ، إِنَّ الْحَمْدَ وَالنِّعْمَةَ لَكَ وَالْمُلْكَ، لَا شَرِيكَ لَكَ"
-          phonetic="Labbayk, Allahumma labbayk, labbayk la sharika laka labbayk. Innal-hamda wan-ni'mata laka wal-mulk, la sharika lak."
-          translation="Me voici, Ô Allah, me voici. Me voici, Tu n'as pas d'associé, me voici. En vérité la louange et la grâce T'appartiennent, ainsi que la royauté. Tu n'as pas d'associé."
-          audioDuration="0:24"
-          important={true}
-        />
-
-        <DuaCard 
-          title="Invocation entre le coin Yéménite et la Pierre Noire"
-          arabic="رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ"
-          phonetic="Rabbana atina fid-dunya hasanatan wa fil-akhirati hasanatan wa qina 'adhaban-nar."
-          translation="Seigneur, accorde-nous le bien en ce monde et le bien dans l'au-delà, et protège-nous du châtiment du Feu."
-          source="Sourate Al-Baqarah (2:201)"
-          audioDuration="0:12"
-        />
-
-        <DuaCard 
-          title="Invocation sur le mont Safa et Marwa"
-          arabic="إِنَّ الصَّفَا وَالْمَرْوَةَ مِن شَعَائِرِ اللَّهِ ... لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ"
-          phonetic="Innas-Safa wal-Marwata min sha'a'irillah... La ilaha illallahu wahdahu la sharika lah, lahul-mulku wa lahul-hamdu wa huwa 'ala kulli shay'in qadir."
-          translation="Certes, As-Safa et Al-Marwa sont parmi les lieux sacrés d'Allah... Il n'y a de divinité digne d'adoration qu'Allah Seul, sans associé. À Lui la royauté, à Lui la louange, et Il est Omnipotent."
-          audioDuration="0:45"
-        />
-
+      {/* List */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        {filtered.map(dua => (
+          <DuaCard key={dua.id} dua={dua} onToggleLearned={toggleLearned} />
+        ))}
       </div>
     </>
-  );
-}
-
-function DuaCard({ title, arabic, phonetic, translation, source, audioDuration, important, learned }: any) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isSaved, setIsSaved] = useState(learned);
-
-  return (
-    <div className={`bg-white border rounded-2xl p-6 md:p-8 transition-colors ${important ? 'border-[#C9A84C] shadow-[0_4px_20px_rgba(201,168,76,0.1)]' : 'border-[#E8DFC8] shadow-sm hover:border-[#C9A84C]'}`}>
-      <div className="flex justify-between items-start mb-6">
-        <div>
-          {important && <div className="text-[10px] font-bold tracking-widest uppercase text-[#8B6914] bg-[#FAF3E0] px-2 py-1 rounded-md inline-block mb-3">Obligatoire</div>}
-          <h3 className="font-serif text-xl md:text-2xl text-[#1A1209] font-bold">{title}</h3>
-          {source && <p className="text-xs font-bold text-[#7A6D5A] mt-2 uppercase tracking-wide">{source}</p>}
-        </div>
-        <button 
-          onClick={() => setIsSaved(!isSaved)}
-          className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors shrink-0 ${isSaved ? 'bg-[#E8F5EE] text-[#1D5C3A] border border-[#1D5C3A]/20' : 'bg-white border border-[#E8DFC8] text-[#7A6D5A] hover:bg-[#FAF7F0]'}`}
-        >
-          {isSaved ? '✓' : '🔖'}
-        </button>
-      </div>
-
-      {/* ARABIC TEXT */}
-      <div className="mb-6 text-right">
-        <p className="font-serif text-3xl md:text-4xl text-[#1A1209] leading-loose text-right" style={{ direction: 'rtl' }} dir="rtl">
-          {arabic}
-        </p>
-      </div>
-
-      <div className="space-y-4 mb-8">
-        <div>
-          <div className="text-[10px] uppercase tracking-widest font-bold text-[#7A6D5A] mb-1">Translittération</div>
-          <p className="text-sm md:text-base text-[#1A1209] italic font-medium">{phonetic}</p>
-        </div>
-        <div>
-          <div className="text-[10px] uppercase tracking-widest font-bold text-[#7A6D5A] mb-1">Traduction</div>
-          <p className="text-sm md:text-base text-[#1A1209]">{translation}</p>
-        </div>
-      </div>
-
-      {/* AUDIO PLAYER — dark premium */}
-      <div style={{ background: '#1A1209', borderRadius: 14, padding: '0.875rem 1.25rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <button
-          onClick={() => setIsPlaying(!isPlaying)}
-          style={{ width: 40, height: 40, background: isPlaying ? '#C9A84C' : 'rgba(201,168,76,0.2)', border: '1px solid rgba(201,168,76,0.35)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, color: isPlaying ? '#1A1209' : '#C9A84C', fontSize: '0.85rem', transition: 'all 0.15s' }}
-        >
-          {isPlaying ? '⏸' : '▶'}
-        </button>
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <span style={{ fontSize: '0.7rem', fontFamily: 'monospace', color: 'rgba(240,216,151,0.5)', flexShrink: 0 }}>{isPlaying ? '0:03' : '0:00'}</span>
-          <div style={{ flex: 1, height: 32, display: 'flex', alignItems: 'center', gap: 2 }}>
-            {Array.from({length: 40}).map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  width: 3, borderRadius: 2,
-                  height: `${Math.max(20, (Math.sin(i * 0.4) + 1) * 40 + 15)}%`,
-                  background: isPlaying && i < 15 ? '#C9A84C' : 'rgba(201,168,76,0.2)',
-                  transition: 'background 0.3s',
-                }}
-              />
-            ))}
-          </div>
-          <span style={{ fontSize: '0.7rem', fontFamily: 'monospace', color: 'rgba(240,216,151,0.5)', flexShrink: 0 }}>{audioDuration}</span>
-        </div>
-      </div>
-
-    </div>
   );
 }

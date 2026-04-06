@@ -108,7 +108,7 @@ export default function PelerinLayout({ children }: { children: React.ReactNode 
         .pelerin-sidebar {
           position: fixed !important; left: 0 !important; top: 0 !important;
           width: 260px !important; height: 100vh !important;
-          z-index: 50 !important; overflow-y: auto;
+          z-index: 50 !important; overflow: hidden;
           background: #FFFFFF; border-right: 1px solid #EDE8DC;
           display: flex; flex-direction: column;
           transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
@@ -142,6 +142,15 @@ export default function PelerinLayout({ children }: { children: React.ReactNode 
           right: auto !important; z-index: auto !important;
           display: flex !important; flex-direction: column !important;
         }
+        @media (max-width: 1023px) {
+          .pelerin-sidebar {
+            height: 100dvh !important;
+            max-height: 100dvh !important;
+          }
+          .pelerin-sidebar nav {
+            -webkit-overflow-scrolling: touch !important;
+          }
+        }
       `}} />
 
       <div style={{ minHeight: '100vh', background: '#F5F2EC', fontFamily: 'var(--font-manrope, sans-serif)', color: '#1A1209' }}>
@@ -163,7 +172,7 @@ export default function PelerinLayout({ children }: { children: React.ReactNode 
             </div>
           </div>
 
-          <nav style={{ flex: 1, padding: '0.75rem 0', overflowY: 'auto' }}>
+          <nav style={{ flex: 1, padding: '0.75rem 0', overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch', minHeight: 0 }}>
             {NAV.map((group) => (
               <div key={group.section}>
                 <div style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(122,109,90,0.45)', padding: '1rem 1.5rem 0.4rem' }}>{group.section}</div>
@@ -172,7 +181,7 @@ export default function PelerinLayout({ children }: { children: React.ReactNode 
             ))}
           </nav>
 
-          <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid #EDE8DC', flexShrink: 0 }}>
+          <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid #EDE8DC', flexShrink: 0, background: 'white', position: 'relative', zIndex: 1 }}>
             <button className="sb-logout-btn" onClick={() => signOut({ callbackUrl: '/' })} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.82rem', fontWeight: 600, color: '#C0392B', background: 'none', border: 'none', cursor: 'pointer', width: '100%' }}>
               <IcoLogout c="#C0392B" /> Déconnexion
             </button>

@@ -62,7 +62,7 @@ const GUIDES_VEDETTE = [
     name: 'Naïm LAAMARI',
     location: 'Makkah · 8 ans · Responsable Terrain',
     rating: '5.0',
-    reviews: 5822,
+    reviews: 0,
     langs: ['🇫🇷 Français', '🇸🇦 Arabe', '🇬🇧 English', '🇲🇦 Darija'],
     price: '150€',
     badge: '★ OFFICIEL SAFARUMA',
@@ -281,7 +281,7 @@ export default function Home() {
           </p>
           <div className="reveal reveal-d4">
             <Link href="/guides" className="btn-hero-cta">
-              Vivre une Omra qui a du sens →
+              Et si ta Omra avait du sens ? →
             </Link>
           </div>
         </div>
@@ -357,29 +357,29 @@ export default function Home() {
 
                     {/* Badge principal */}
                     <div style={{
-                      display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-                      background: g.isOfficial ? 'linear-gradient(135deg, #C9A84C, #F0D897)' : g.badgeColor,
+                      display: 'inline-block',
+                      background: g.badgeColor,
                       color: g.badgeTextColor,
-                      fontSize: '0.62rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase',
-                      padding: '0.3rem 0.85rem', borderRadius: 8,
-                      marginBottom: g.isOfficial ? '0.5rem' : '0.875rem',
-                      boxShadow: g.isOfficial ? '0 2px 12px rgba(201,168,76,0.35)' : 'none',
+                      fontSize: '0.6rem',
+                      fontWeight: 800,
+                      letterSpacing: '0.08em',
+                      padding: '0.2rem 0.6rem',
+                      borderRadius: 50,
+                      marginBottom: g.isOfficial ? '0.4rem' : '0.75rem',
                     }}>
-                      {g.isOfficial && <span style={{ fontSize: '0.7rem' }}>★</span>}
                       {g.badge}
                     </div>
 
                     {/* Extra badges pour Naïm */}
                     {g.isOfficial && g.extraBadges.length > 0 && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.875rem' }}>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', background: 'rgba(6,95,70,0.25)', color: '#6EC68A', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '0.25rem 0.65rem', borderRadius: 6, border: '1px solid rgba(110,198,138,0.3)' }}>
-                          <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#6EC68A', display: 'inline-block' }} />
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', marginBottom: '0.75rem' }}>
+                        <span style={{ background: '#065F46', color: 'white', fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.06em', padding: '0.15rem 0.5rem', borderRadius: 50 }}>
                           {g.extraBadges[0]}
                         </span>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', background: 'rgba(201,168,76,0.15)', color: '#F0D897', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '0.25rem 0.65rem', borderRadius: 6, border: '1px solid rgba(240,216,151,0.25)' }}>
+                        <span style={{ background: '#C9A84C', color: '#1A1209', fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.06em', padding: '0.15rem 0.5rem', borderRadius: 50 }}>
                           {g.extraBadges[1]}
                         </span>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', background: 'rgba(30,58,95,0.4)', color: '#A8C8F0', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '0.25rem 0.65rem', borderRadius: 6, border: '1px solid rgba(168,200,240,0.2)' }}>
+                        <span style={{ background: '#1E3A5F', color: 'white', fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.06em', padding: '0.15rem 0.5rem', borderRadius: 50 }}>
                           {g.extraBadges[2]}
                         </span>
                       </div>
@@ -434,9 +434,13 @@ export default function Home() {
                     <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '0.5rem' }}>
                       <span style={{ color: 'var(--gold)', fontSize: '0.82rem', letterSpacing: 2 }}>★★★★★</span>
                       <span style={{ fontSize: '0.78rem', color: 'white', fontWeight: 700 }}>{g.rating}</span>
-                      <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)' }}>
-                        ({g.reviews.toLocaleString('fr-FR')} avis)
-                      </span>
+                      {g.isOfficial ? (
+                        <span style={{ fontSize: '0.62rem', background: '#C9A84C', color: '#1A1209', fontWeight: 800, padding: '0.1rem 0.5rem', borderRadius: 50 }}>
+                          NOTE PARFAITE
+                        </span>
+                      ) : (
+                        <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)' }}>({g.reviews} avis)</span>
+                      )}
                     </div>
 
                     {/* Languages */}
@@ -466,28 +470,9 @@ export default function Home() {
                   </div>
 
                   {/* CTA */}
-                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
-                    <Link
-                      href={`/guides/${g.slug}?action=reserver`}
-                      style={{
-                        flex: 1, textAlign: 'center', background: '#C9A84C', color: '#1A1209',
-                        padding: '0.65rem 0.75rem', borderRadius: 50, fontSize: '0.75rem',
-                        fontWeight: 700, textDecoration: 'none', letterSpacing: '0.03em',
-                      }}
-                    >
-                      Choisir ce guide
-                    </Link>
-                    <Link
-                      href={`/guides/${g.slug}`}
-                      style={{
-                        flex: 1, textAlign: 'center', background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.8)',
-                        padding: '0.65rem 0.75rem', borderRadius: 50, fontSize: '0.75rem',
-                        fontWeight: 600, textDecoration: 'none', border: '1px solid rgba(255,255,255,0.15)',
-                      }}
-                    >
-                      Voir le profil
-                    </Link>
-                  </div>
+                  <Link href={`/guides/${g.slug}`} className="guide-feat-btn">
+                    Voir le profil →
+                  </Link>
                 </div>
               </div>
             ))}

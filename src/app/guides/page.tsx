@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import Navbar from "@/components/Navbar";
@@ -253,6 +254,7 @@ function GuideAvatarSVG({ slug, gradient, initials, isWoman }: { slug: string; g
 }
 
 export default function GuideSearchPage() {
+  const router = useRouter();
   const [destination, setDestination] = useState<'all' | 'makkah' | 'madinah'>('all');
   const [guideOption, setGuideOption] = useState<'separate' | 'same'>('separate');
   const [selectedLang, setSelectedLang] = useState('');
@@ -445,8 +447,23 @@ export default function GuideSearchPage() {
               </div>
             )}
 
-            <button style={{ width: '100%', background: '#C9A84C', color: '#1A1209', border: 'none', borderRadius: 10, padding: '0.75rem', fontFamily: 'inherit', fontSize: '0.875rem', fontWeight: 700, cursor: 'pointer' }}>
-              Rechercher →
+            <button
+              onClick={() => {
+                if (destination === 'all' && guideOption === 'separate') {
+                  const params = new URLSearchParams();
+                  params.set('groupSize', String(groupSize));
+                  if (selectedLang) params.set('lang', selectedLang);
+                  if (guideGender) params.set('gender', guideGender);
+                  if (arrivalDate) params.set('arrivalDate', arrivalDate);
+                  if (departureDate) params.set('departureDate', departureDate);
+                  router.push(`/guides/tunnel?${params.toString()}`);
+                } else {
+                  document.querySelector('.guides-main')?.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+              style={{ width: '100%', background: '#C9A84C', color: '#1A1209', border: 'none', borderRadius: 10, padding: '0.75rem', fontFamily: 'inherit', fontSize: '0.875rem', fontWeight: 700, cursor: 'pointer' }}
+            >
+              {destination === 'all' && guideOption === 'separate' ? 'Choisir mes 2 guides →' : 'Rechercher →'}
             </button>
 
           </div>

@@ -1,104 +1,196 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
+
+const INITIAL_TASKS = [
+  { id: 1, category: 'Administratif', title: 'Passeport valide (+6 mois)', desc: 'Vérifiez la date d\'expiration de votre passeport.', done: false },
+  { id: 2, category: 'Administratif', title: 'Visa de Omra / eVisa Touristique', desc: 'Imprimez votre eVisa KSA ou Visa de Omra.', done: false },
+  { id: 3, category: 'Administratif', title: 'Vaccin Méningite (ACYW)', desc: 'Carnet de vaccination jaune international requis.', done: false },
+  { id: 4, category: 'Spirituel', title: 'Repentir sincère (Tawbah)', desc: 'Demander pardon à Allah et aux personnes lésées.', done: false },
+  { id: 5, category: 'Spirituel', title: 'Régler ses dettes', desc: 'S\'acquitter de ses dettes ou demander un délai.', done: false },
+  { id: 6, category: 'Spirituel', title: 'Apprendre les rites (Fiqh)', desc: 'Terminer le module 2 de la SAFARUMA Academy.', done: false },
+  { id: 7, category: 'Bagages', title: 'Acheter l\'Ihram (Hommes)', desc: '2 serviettes blanches non cousues.', done: false },
+  { id: 8, category: 'Bagages', title: 'Ceinture / Sacoche sécurisée', desc: 'Pour garder téléphone et argent sous l\'Ihram.', done: false },
+  { id: 9, category: 'Bagages', title: 'Sandales confortables', desc: 'Doivent laisser le talon et le dessus du pied découverts (hommes en Ihram).', done: false },
+];
+
+const CATEGORY_CONFIG: Record<string, { color: string; bg: string; border: string; icon: string }> = {
+  'Administratif': { color: '#1A4A8A', bg: '#EAF1FB', border: 'rgba(26,74,138,0.2)', icon: '📋' },
+  'Spirituel':     { color: '#1D5C3A', bg: '#E8F5EE', border: 'rgba(29,92,58,0.2)',  icon: '🤲' },
+  'Bagages':       { color: '#8B6914', bg: '#FAF3E0', border: 'rgba(201,168,76,0.3)', icon: '🧳' },
+};
 
 export default function PreparationChecklist() {
-  const [tasks, setTasks] = useState([
-    { id: 1, category: 'Administratif', title: 'Passeport valide (+6 mois)', desc: 'Vérifiez la date d\'expiration de votre passeport.', done: true },
-    { id: 2, category: 'Administratif', title: 'Visa de Omra / eVisa Touristique', desc: 'Imprimez votre eVisa KSA ou Visa de Omra.', done: true },
-    { id: 3, category: 'Administratif', title: 'Vaccin Méningite (ACYW)', desc: 'Carnet de vaccination jaune international requis.', done: false },
-    { id: 4, category: 'Spirituel', title: 'Repentir sincère (Tawbah)', desc: 'Demander pardon à Allah et aux personnes lésées.', done: true },
-    { id: 5, category: 'Spirituel', title: 'Régler ses dettes', desc: 'S\'acquitter de ses dettes ou demander un délai.', done: true },
-    { id: 6, category: 'Spirituel', title: 'Apprendre les rites (Fiqh)', desc: 'Terminer le module 2 de la SAFARUMA Academy.', done: false },
-    { id: 7, category: 'Bagages', title: 'Acheter l\'Ihram (Hommes)', desc: '2 serviettes blanches non cousues.', done: true },
-    { id: 8, category: 'Bagages', title: 'Ceinture / Sacoche sécurisée', desc: 'Pour garder téléphone et argent sous l\'Ihram.', done: false },
-    { id: 9, category: 'Bagages', title: 'Sandales confortables', desc: 'Doivent laisser le talon et le dessus du pied découverts pour les hommes en Ihram.', done: false },
-  ]);
+  const [tasks, setTasks] = useState(INITIAL_TASKS);
+  const [newTaskInputs, setNewTaskInputs] = useState<Record<string, string>>({});
+  const [showInput, setShowInput] = useState<Record<string, boolean>>({});
 
-  const toggleTask = (id: number) => {
-    setTasks(tasks.map(t => t.id === id ? { ...t, done: !t.done } : t));
+  const toggleTask = (id: number) =>
+    setTasks(ts => ts.map(t => t.id === id ? { ...t, done: !t.done } : t));
+
+  const addTask = (category: string) => {
+    const title = newTaskInputs[category]?.trim();
+    if (!title) return;
+    setTasks(ts => [...ts, { id: Date.now(), category, title, desc: '', done: false }]);
+    setNewTaskInputs(p => ({ ...p, [category]: '' }));
+    setShowInput(p => ({ ...p, [category]: false }));
   };
 
-  const progress = Math.round((tasks.filter(t => t.done).length / tasks.length) * 100);
-
+  const doneCount = tasks.filter(t => t.done).length;
+  const total = tasks.length;
+  const progress = total > 0 ? Math.round((doneCount / total) * 100) : 0;
   const categories = ['Administratif', 'Spirituel', 'Bagages'];
+  const circumference = 2 * Math.PI * 28;
 
   return (
     <>
-      <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <style dangerouslySetInnerHTML={{ __html: `
+        .cl-task { transition: border-color 0.15s, background 0.15s; }
+        .cl-task:hover { border-color: #C9A84C !important; }
+        .cl-add-btn { transition: background 0.15s, border-color 0.15s, color 0.15s; }
+        .cl-add-btn:hover { background: #FAF3E0 !important; border-color: #C9A84C !important; color: #8B6914 !important; }
+        @media (max-width: 768px) {
+          .cl-header { flex-direction: column !important; align-items: flex-start !important; }
+          .cl-progress-card { width: 100% !important; }
+          .cl-grid { grid-template-columns: 1fr !important; }
+        }
+      `}} />
+
+      {/* Header */}
+      <div className="cl-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1.25rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
         <div>
-          <h1 className="font-serif text-3xl md:text-4xl text-[#1A1209] mb-2">Ma Checklist de Omra</h1>
-          <p className="text-[#7A6D5A]">Préparez votre voyage spirituel sans oublier l'essentiel.</p>
+          <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', fontWeight: 600, color: '#1A1209', marginBottom: '0.35rem' }}>
+            Ma Checklist de la Omra
+          </h1>
+          <p style={{ fontSize: '0.875rem', color: '#7A6D5A' }}>Cochez chaque étape au fur et à mesure de votre préparation.</p>
         </div>
-        
-        <div className="bg-white border border-[#E8DFC8] rounded-2xl p-4 sm:p-5 flex items-center gap-6 shadow-sm w-full md:w-auto">
-          <div className="w-16 h-16 relative flex items-center justify-center shrink-0">
-            <svg className="absolute inset-0 w-full h-full -rotate-90">
-              <circle cx="32" cy="32" r="28" fill="none" stroke="#FAF3E0" strokeWidth="6" />
-              <circle cx="32" cy="32" r="28" fill="none" stroke="#1D5C3A" strokeWidth="6" strokeDasharray="175.9" strokeDashoffset={175.9 * (1 - progress / 100)} strokeLinecap="round" className="transition-all duration-1000" />
+
+        {/* Progress card */}
+        <div className="cl-progress-card" style={{ background: 'white', border: '1px solid #EDE8DC', borderRadius: 16, padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', boxShadow: '0 2px 8px rgba(26,18,9,0.04)', flexShrink: 0 }}>
+          <div style={{ position: 'relative', width: 64, height: 64, flexShrink: 0 }}>
+            <svg width="64" height="64" viewBox="0 0 64 64" style={{ transform: 'rotate(-90deg)' }}>
+              <circle cx="32" cy="32" r="28" fill="none" stroke="#F0EBD8" strokeWidth="6" />
+              <circle cx="32" cy="32" r="28" fill="none" stroke="#1D5C3A" strokeWidth="6"
+                strokeDasharray={circumference}
+                strokeDashoffset={circumference * (1 - progress / 100)}
+                strokeLinecap="round"
+                style={{ transition: 'stroke-dashoffset 0.6s ease' }}
+              />
             </svg>
-            <span className="font-serif font-bold text-[#1A1209]">{progress}%</span>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontWeight: 700, fontSize: '0.95rem', color: '#1A1209' }}>
+              {progress}%
+            </div>
           </div>
           <div>
-            <div className="text-[10px] font-bold tracking-widest uppercase text-[#1D5C3A] mb-1">Préparation globale</div>
-            <div className="font-serif text-2xl font-bold text-[#1A1209]">
-              {tasks.filter(t => t.done).length} / {tasks.length}
+            <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#1D5C3A', marginBottom: '0.2rem' }}>Préparation globale</div>
+            <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.6rem', fontWeight: 700, color: '#1A1209', lineHeight: 1 }}>
+              {doneCount} <span style={{ fontSize: '1rem', color: '#7A6D5A', fontWeight: 400 }}>/ {total}</span>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {categories.map(category => (
-          <div key={category} className="space-y-4">
-            <h2 className="font-serif text-xl border-b border-[#E8DFC8] pb-3 text-[#1A1209]">{category}</h2>
-            <div className="space-y-3">
-              {tasks.filter(t => t.category === category).map(task => (
-                <div 
-                  key={task.id} 
+      {/* Grid */}
+      <div className="cl-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.25rem' }}>
+        {categories.map(cat => {
+          const conf = CATEGORY_CONFIG[cat];
+          const catTasks = tasks.filter(t => t.category === cat);
+          const catDone = catTasks.filter(t => t.done).length;
+
+          return (
+            <div key={cat} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+
+              {/* Category header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '0.75rem', borderBottom: `2px solid ${conf.border}` }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ fontSize: '1.1rem' }}>{conf.icon}</span>
+                  <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 600, color: '#1A1209' }}>{cat}</h2>
+                </div>
+                <span style={{ fontSize: '0.68rem', fontWeight: 700, background: conf.bg, color: conf.color, border: `1px solid ${conf.border}`, padding: '0.15rem 0.55rem', borderRadius: 50 }}>
+                  {catDone}/{catTasks.length}
+                </span>
+              </div>
+
+              {/* Tasks */}
+              {catTasks.map(task => (
+                <div
+                  key={task.id}
+                  className="cl-task"
                   onClick={() => toggleTask(task.id)}
-                  className={`border rounded-xl p-4 cursor-pointer transition-all group ${task.done ? 'bg-[#FAF7F0] border-[#E8DFC8]' : 'bg-white border-[#C9A84C]/50 hover:border-[#C9A84C] shadow-sm'}`}
+                  style={{
+                    background: task.done ? '#FAF7F0' : 'white',
+                    border: `1px solid ${task.done ? '#EDE8DC' : '#E8DFC8'}`,
+                    borderRadius: 12, padding: '0.875rem 1rem',
+                    cursor: 'pointer', display: 'flex', alignItems: 'flex-start', gap: '0.75rem',
+                  }}
                 >
-                  <div className="flex items-start gap-4">
-                    <div className={`mt-0.5 w-6 h-6 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${task.done ? 'bg-[#1D5C3A] border-[#1D5C3A] text-white' : 'bg-transparent border-[#E8DFC8] group-hover:border-[#C9A84C]'}`}>
-                      {task.done && <span className="text-sm">✓</span>}
+                  <div style={{
+                    width: 22, height: 22, borderRadius: '50%', flexShrink: 0, marginTop: '0.1rem',
+                    background: task.done ? '#1D5C3A' : 'transparent',
+                    border: `2px solid ${task.done ? '#1D5C3A' : '#E8DFC8'}`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'all 0.15s',
+                  }}>
+                    {task.done && <span style={{ color: 'white', fontSize: '0.65rem', fontWeight: 900, lineHeight: 1 }}>✓</span>}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{
+                      fontSize: '0.82rem', fontWeight: 700, color: task.done ? '#7A6D5A' : '#1A1209',
+                      textDecoration: task.done ? 'line-through' : 'none', marginBottom: task.desc ? '0.2rem' : 0,
+                      lineHeight: 1.35,
+                    }}>
+                      {task.title}
                     </div>
-                    <div>
-                      <h4 className={`font-bold text-sm leading-tight mb-1 transition-colors ${task.done ? 'text-[#7A6D5A] line-through' : 'text-[#1A1209] group-hover:text-[#8B6914]'}`}>
-                        {task.title}
-                      </h4>
-                      <p className={`text-xs ${task.done ? 'text-[#7A6D5A]/50' : 'text-[#7A6D5A]'}`}>
+                    {task.desc && (
+                      <div style={{ fontSize: '0.72rem', color: task.done ? 'rgba(122,109,90,0.5)' : '#7A6D5A', lineHeight: 1.5 }}>
                         {task.desc}
-                      </p>
-                    </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
+
+              {/* Add task */}
+              {showInput[cat] ? (
+                <div style={{ display: 'flex', gap: '0.4rem' }}>
+                  <input
+                    autoFocus
+                    value={newTaskInputs[cat] || ''}
+                    onChange={e => setNewTaskInputs(p => ({ ...p, [cat]: e.target.value }))}
+                    onKeyDown={e => { if (e.key === 'Enter') addTask(cat); if (e.key === 'Escape') setShowInput(p => ({ ...p, [cat]: false })); }}
+                    placeholder="Nouvelle tâche..."
+                    style={{ flex: 1, padding: '0.55rem 0.75rem', border: '1.5px solid #C9A84C', borderRadius: 8, fontSize: '0.82rem', fontFamily: 'inherit', color: '#1A1209', outline: 'none', background: '#FDFBF7' }}
+                  />
+                  <button onClick={() => addTask(cat)} style={{ background: '#C9A84C', color: '#1A1209', border: 'none', borderRadius: 8, padding: '0.55rem 0.75rem', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer', fontFamily: 'inherit' }}>+</button>
+                  <button onClick={() => setShowInput(p => ({ ...p, [cat]: false }))} style={{ background: 'white', color: '#7A6D5A', border: '1px solid #E8DFC8', borderRadius: 8, padding: '0.55rem 0.75rem', fontSize: '0.82rem', cursor: 'pointer', fontFamily: 'inherit' }}>✕</button>
+                </div>
+              ) : (
+                <button
+                  className="cl-add-btn"
+                  onClick={() => setShowInput(p => ({ ...p, [cat]: true }))}
+                  style={{ width: '100%', padding: '0.6rem', border: '1.5px dashed #E8DFC8', borderRadius: 10, fontSize: '0.75rem', fontWeight: 700, color: '#7A6D5A', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit' }}
+                >
+                  + Ajouter une tâche
+                </button>
+              )}
             </div>
-            {/* Add custom item button */}
-            <button className="w-full py-3 border border-dashed border-[#E8DFC8] rounded-xl text-xs font-bold text-[#8B6914] hover:bg-[#FAF3E0] hover:border-[#C9A84C] transition-colors">
-              + Ajouter une tâche
-            </button>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      <div className="mt-12 bg-gradient-to-r from-[#1A1209] to-[#3D2A10] p-6 md:p-10 rounded-3xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8 text-white shadow-lg border border-[#C9A84C]/30">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_50%,rgba(201,168,76,0.15)_0%,transparent_60%)] pointer-events-none"></div>
-        <div className="relative z-10 max-w-xl">
-          <div className="text-[10px] bg-[#C9A84C] text-[#1A1209] px-3 py-1 rounded-full uppercase tracking-widest font-bold inline-block mb-4 shadow-sm">
-            Conseil d'expert
-          </div>
-          <h3 className="font-serif text-2xl mb-2">L'intention de l'Umrah (Niyyah)</h3>
-          <p className="text-white/70 text-sm leading-relaxed">
-             Préparer ses valises est important, mais la préparation du cœur l'est encore plus. N'oubliez pas de purifier votre intention : "Ô Allah! J'entends accomplir la 'umrah, facilite-la-moi et accepte-la de ma part."
+      {/* Bottom CTA */}
+      <div style={{ marginTop: '2rem', background: 'linear-gradient(135deg, #1A1209, #2D1F08)', borderRadius: 16, padding: '1.75rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem', flexWrap: 'wrap', border: '1px solid rgba(201,168,76,0.2)' }}>
+        <div>
+          <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: '0.4rem' }}>Conseil spirituel</div>
+          <h3 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', color: 'white', marginBottom: '0.4rem', fontWeight: 600 }}>L'intention de la Omra (Niyyah)</h3>
+          <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.65, maxWidth: 480 }}>
+            La préparation du cœur est plus importante que celle des valises. Purifiez votre intention avant le départ.
           </p>
         </div>
-        <div className="relative z-10 shrink-0">
-          <button className="bg-[#C9A84C] text-[#1A1209] px-6 py-3 rounded-full text-sm font-bold shadow-[0_4px_14px_0_rgba(201,168,76,0.39)] hover:bg-[#F0D897] transition-all">
-            Réviser l'''intention dans la SAFARUMA Academy
-          </button>
-        </div>
+        <Link href="/espace/academy" style={{ background: '#C9A84C', color: '#1A1209', padding: '0.7rem 1.5rem', borderRadius: 50, fontWeight: 700, fontSize: '0.8rem', textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}>
+          SAFARUMA Academy →
+        </Link>
       </div>
     </>
   );

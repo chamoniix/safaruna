@@ -1,187 +1,214 @@
 'use client';
 
-import Link from 'next/link';
 import { useState } from 'react';
 
-export default function SAFARUMAAcademy() {
-  const [activeCategory, setActiveCategory] = useState('Tous');
+const CATEGORIES = ['Tous', 'Rituels (Fiqh)', 'Histoire (Sīrah)', 'Spiritualité', 'Guides Pratiques'];
 
-  const categories = ['Tous', 'Rituels (Fiqh)', 'Histoire (Sīrah)', 'Spiritualité (Tazkiyah)', 'Guides Pratiques'];
+const BADGE_CONFIG: Record<string, { bg: string; color: string }> = {
+  'NOUVEAU':  { bg: '#C9A84C', color: '#1A1209' },
+  'EN COURS': { bg: '#1A4A8A', color: 'white' },
+  'TERMINÉ':  { bg: '#1D5C3A', color: 'white' },
+};
+
+const COURSES = [
+  { id: 1, cat: 'Rituels (Fiqh)',      title: "Les rites de la Omra : étape par étape",          duration: '45 min', modules: '4 modules', badge: 'EN COURS', progress: 45 },
+  { id: 2, cat: 'Histoire (Sīrah)',    title: "L'histoire de Zamzam et Hajar",                    duration: '28 min', modules: '2 modules', badge: 'EN COURS', progress: 80 },
+  { id: 3, cat: 'Rituels (Fiqh)',      title: "L'état de l'Ihram : règles et interdits",          duration: '45 min', modules: '4 modules', badge: 'NOUVEAU',  progress: 0  },
+  { id: 4, cat: 'Rituels (Fiqh)',      title: "Comment accomplir le Tawaf correctement",          duration: '32 min', modules: '3 modules', badge: 'EN COURS', progress: 30 },
+  { id: 5, cat: 'Rituels (Fiqh)',      title: "Le Sa'i entre Safa et Marwa",                      duration: '28 min', modules: '2 modules', badge: null,       progress: 0  },
+  { id: 6, cat: 'Rituels (Fiqh)',      title: "La fin de la Omra : rasage ou coupe",              duration: '15 min', modules: '1 module',  badge: 'TERMINÉ',  progress: 100},
+  { id: 7, cat: 'Histoire (Sīrah)',    title: "La biographie du Prophète ﷺ à Makkah",             duration: '2h 15m', modules: '8 modules', badge: 'NOUVEAU',  progress: 0  },
+  { id: 8, cat: 'Histoire (Sīrah)',    title: "La Bataille de Badr : leçon de foi",               duration: '55 min', modules: '3 modules', badge: null,       progress: 0  },
+  { id: 9, cat: 'Histoire (Sīrah)',    title: "Uhud : l'importance de l'obéissance",              duration: '48 min', modules: '3 modules', badge: null,       progress: 0  },
+  { id: 10, cat: 'Spiritualité',       title: "Purifier son intention avant le départ",           duration: '20 min', modules: '2 modules', badge: 'NOUVEAU',  progress: 0  },
+  { id: 11, cat: 'Spiritualité',       title: "La présence du cœur pendant les rituels",         duration: '35 min', modules: '3 modules', badge: null,       progress: 0  },
+  { id: 12, cat: 'Guides Pratiques',   title: "Conseils pratiques pour la Omra en famille",      duration: '25 min', modules: '2 modules', badge: null,       progress: 0  },
+];
+
+function BadgePill({ badge }: { badge: string }) {
+  const conf = BADGE_CONFIG[badge];
+  if (!conf) return null;
+  return (
+    <span style={{ background: conf.bg, color: conf.color, fontSize: '0.55rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '0.2rem 0.55rem', borderRadius: 50 }}>
+      {badge}
+    </span>
+  );
+}
+
+function PlayButton() {
+  return (
+    <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,0.2)', border: '1.5px solid rgba(255,255,255,0.4)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <span style={{ color: 'white', fontSize: '0.9rem', marginLeft: 3 }}>▶</span>
+    </div>
+  );
+}
+
+function CourseCard({ course, large }: { course: typeof COURSES[0]; large?: boolean }) {
+  const badgeConf = course.badge ? BADGE_CONFIG[course.badge] : null;
+  return (
+    <div style={{ background: 'white', border: '1px solid #EDE8DC', borderRadius: 14, overflow: 'hidden', cursor: 'pointer', transition: 'border-color 0.15s, box-shadow 0.15s', display: 'flex', flexDirection: large ? 'row' : 'column' }}>
+      {/* Thumbnail */}
+      <div style={{ position: 'relative', background: 'linear-gradient(135deg, #1A1209, #2D1F08)', flexShrink: 0, width: large ? 160 : '100%', aspectRatio: large ? undefined : '16/9', height: large ? 100 : undefined, minHeight: large ? 100 : undefined }}>
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}>
+          <PlayButton />
+        </div>
+        {badgeConf && (
+          <div style={{ position: 'absolute', top: 8, left: 8, zIndex: 3 }}>
+            <BadgePill badge={course.badge!} />
+          </div>
+        )}
+        <div style={{ position: 'absolute', bottom: 6, right: 8, zIndex: 3, background: 'rgba(0,0,0,0.6)', color: 'white', fontSize: '0.62rem', fontWeight: 700, padding: '0.15rem 0.45rem', borderRadius: 4 }}>
+          {course.duration}
+        </div>
+        {course.progress > 0 && (
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, background: 'rgba(255,255,255,0.15)', zIndex: 3 }}>
+            <div style={{ height: '100%', width: `${course.progress}%`, background: '#1D9E75' }} />
+          </div>
+        )}
+      </div>
+      {/* Info */}
+      <div style={{ padding: '0.875rem 1rem', flex: 1 }}>
+        <div style={{ fontSize: '0.62rem', fontWeight: 700, color: '#8B6914', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.3rem' }}>{course.modules}</div>
+        <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.35, marginBottom: large ? '0.5rem' : 0 }}>{course.title}</div>
+        {large && course.progress > 0 && (
+          <div style={{ marginTop: '0.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: '#7A6D5A', marginBottom: '0.25rem' }}>
+              <span>Progression</span><span style={{ color: '#1D5C3A', fontWeight: 700 }}>{course.progress}%</span>
+            </div>
+            <div style={{ height: 4, background: '#F0EBD8', borderRadius: 50, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${course.progress}%`, background: 'linear-gradient(90deg, #1D9E75, #1D5C3A)', borderRadius: 50 }} />
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function SAFARUMAAcademy() {
+  const [activeCat, setActiveCat] = useState('Tous');
+
+  const inProgress = COURSES.filter(c => c.badge === 'EN COURS');
+  const filtered = activeCat === 'Tous' ? COURSES : COURSES.filter(c => c.cat === activeCat);
+  const sections = activeCat === 'Tous'
+    ? ['Rituels (Fiqh)', 'Histoire (Sīrah)', 'Spiritualité', 'Guides Pratiques']
+    : [activeCat];
 
   return (
     <>
-      {/* HEADER HERO */}
-      <div className="bg-[#1A1209] rounded-3xl p-8 md:p-12 mb-10 overflow-hidden relative shadow-lg text-white">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1565552643954-b4bfdd1460dd?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80')] bg-cover bg-center opacity-20"></div>
-        <div className="absolute inset-0 bg-gradient-to-r from-[#1A1209] via-[#1A1209]/80 to-transparent"></div>
-        
-        <div className="relative z-10 max-w-2xl">
-          <div className="inline-block bg-[#C9A84C] text-[#1A1209] text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-4 shadow-sm">
-            Nouveau Module
-          </div>
-          <h1 className="font-serif text-3xl md:text-5xl mb-4 leading-tight">Comprendre le Tafsir des versets du Hajj & de la Omra</h1>
-          <p className="text-white/70 mb-8 leading-relaxed">
-            Plongez dans les profondeurs du Coran avec Cheikh Rachid pour comprendre la signification spirituelle derrière chaque action que vous accomplirez à Makkah.
+      <style dangerouslySetInnerHTML={{ __html: `
+        .ac-cat-btn { transition: background 0.15s, border-color 0.15s, color 0.15s; }
+        .ac-cat-btn:hover { border-color: #C9A84C !important; }
+        .ac-course:hover { border-color: #C9A84C !important; box-shadow: 0 4px 16px rgba(26,18,9,0.08) !important; }
+        .ac-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        @media (min-width: 900px) { .ac-grid { grid-template-columns: repeat(4, 1fr); } }
+        @media (max-width: 480px) { .ac-grid { grid-template-columns: 1fr; } }
+        .ac-progress-cards { display: grid; grid-template-columns: 1fr; gap: 0.875rem; }
+        @media (min-width: 640px) { .ac-progress-cards { grid-template-columns: 1fr 1fr; } }
+        .ac-cats { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.25rem; scrollbar-width: none; }
+        .ac-cats::-webkit-scrollbar { display: none; }
+      `}} />
+
+      {/* Hero */}
+      <div style={{ background: 'linear-gradient(135deg, #1A1209 0%, #2D1F08 100%)', borderRadius: 20, padding: '2rem', marginBottom: '1.75rem', position: 'relative', overflow: 'hidden', border: '1px solid rgba(201,168,76,0.2)' }}>
+        <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 80% 60% at 80% 50%, rgba(201,168,76,0.1) 0%, transparent 60%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', right: '1.5rem', top: '50%', transform: 'translateY(-50%)', fontFamily: 'serif', fontSize: '7rem', color: 'rgba(201,168,76,0.05)', lineHeight: 1, userSelect: 'none' }}>علم</div>
+        <div style={{ position: 'relative', zIndex: 1, maxWidth: 560 }}>
+          <span style={{ background: '#C9A84C', color: '#1A1209', fontSize: '0.58rem', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '0.2rem 0.7rem', borderRadius: 50, display: 'inline-block', marginBottom: '0.875rem' }}>Nouveau Module</span>
+          <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(1.4rem, 3vw, 2rem)', color: 'white', fontWeight: 600, lineHeight: 1.2, marginBottom: '0.75rem' }}>
+            Comprendre le Tafsir des versets du Hajj & de la Omra
+          </h1>
+          <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, marginBottom: '1.25rem' }}>
+            Plongez dans les profondeurs du Coran avec Cheikh Rachid pour comprendre la signification spirituelle de chaque action à Makkah.
           </p>
-          <div className="flex flex-wrap items-center gap-4">
-            <button className="bg-white text-[#1A1209] px-6 py-3 rounded-full text-sm font-bold shadow-md hover:bg-[#F0D897] transition-all flex items-center gap-2">
-              <span className="text">▶</span> Commencer le cours
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <button style={{ background: '#C9A84C', color: '#1A1209', border: 'none', borderRadius: 50, padding: '0.65rem 1.5rem', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              ▶ Commencer le cours
             </button>
-            <button className="bg-white/10 text-white border border-white/20 px-6 py-3 rounded-full text-sm font-bold hover:bg-white/20 transition-all">
-              + Ajouter à ma liste
+            <button style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 50, padding: '0.65rem 1.25rem', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+              + Ma liste
             </button>
           </div>
         </div>
       </div>
 
-      {/* CATEGORY NAV */}
-      <div className="flex overflow-x-auto hide-scrollbar gap-2 mb-8 pb-2">
-        {categories.map(c => (
-          <button 
-            key={c}
-            onClick={() => setActiveCategory(c)}
-            className={`whitespace-nowrap px-5 py-2 rounded-full text-sm font-bold transition-all ${activeCategory === c ? 'bg-[#1A1209] text-white shadow-md' : 'bg-white border border-[#E8DFC8] text-[#7A6D5A] hover:border-[#C9A84C]'}`}
+      {/* En cours */}
+      {inProgress.length > 0 && activeCat === 'Tous' && (
+        <section style={{ marginBottom: '2rem' }}>
+          <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.35rem', fontWeight: 600, color: '#1A1209', marginBottom: '0.875rem' }}>Reprendre</h2>
+          <div className="ac-progress-cards">
+            {inProgress.map(c => (
+              <div key={c.id} className="ac-course" style={{ background: 'white', border: '1px solid #EDE8DC', borderRadius: 14, overflow: 'hidden', cursor: 'pointer', display: 'flex', gap: 0 }}>
+                <div style={{ width: 110, flexShrink: 0, background: 'linear-gradient(135deg, #1A1209, #2D1F08)', position: 'relative' }}>
+                  <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><PlayButton /></div>
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, background: 'rgba(255,255,255,0.15)' }}>
+                    <div style={{ height: '100%', width: `${c.progress}%`, background: '#1D9E75' }} />
+                  </div>
+                </div>
+                <div style={{ flex: 1, padding: '0.875rem 1rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
+                    <BadgePill badge="EN COURS" />
+                    <span style={{ fontSize: '0.65rem', color: '#7A6D5A' }}>{c.duration}</span>
+                  </div>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.35, marginBottom: '0.5rem' }}>{c.title}</div>
+                  <div style={{ height: 4, background: '#F0EBD8', borderRadius: 50, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${c.progress}%`, background: 'linear-gradient(90deg, #1D9E75, #1D5C3A)', borderRadius: 50 }} />
+                  </div>
+                  <div style={{ fontSize: '0.62rem', color: '#1D5C3A', fontWeight: 700, marginTop: '0.25rem' }}>{c.progress}% terminé</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Catégories */}
+      <div className="ac-cats" style={{ marginBottom: '1.5rem' }}>
+        {CATEGORIES.map(cat => (
+          <button
+            key={cat}
+            className="ac-cat-btn"
+            onClick={() => setActiveCat(cat)}
+            style={{ flexShrink: 0, padding: '0.45rem 1rem', borderRadius: 50, fontSize: '0.78rem', fontWeight: activeCat === cat ? 700 : 500, border: `1.5px solid ${activeCat === cat ? '#1A1209' : '#E8DFC8'}`, background: activeCat === cat ? '#1A1209' : 'white', color: activeCat === cat ? '#F0D897' : '#7A6D5A', cursor: 'pointer', fontFamily: 'inherit' }}
           >
-            {c}
+            {cat}
           </button>
         ))}
       </div>
 
-      {/* CONTINUE WATCHING */}
-      {(activeCategory === 'Tous' || activeCategory === 'Rituels (Fiqh)') && (
-        <section className="mb-12">
-          <h2 className="font-serif text-2xl text-[#1A1209] mb-4">Reprendre la lecture</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <CourseCard
-              title="Les rites de la Omra : étape par étape"
-              image="https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-              progress={45} timeRemaining="12 min restants" badge="EN COURS"
-            />
-            <CourseCard
-              title="L'histoire de Zamzam et Hajar"
-              image="https://images.unsplash.com/photo-1542104432-885404987178?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
-              progress={80} timeRemaining="5 min restants" badge="EN COURS"
-            />
-          </div>
-        </section>
-      )}
-
-      {/* RITUELS */}
-      {(activeCategory === 'Tous' || activeCategory === 'Rituels (Fiqh)') && (
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-serif text-2xl text-[#1A1209]">Rituels (Fiqh) de la Omra</h2>
-            <button className="text-[10px] font-bold text-[#8B6914] uppercase tracking-wider hover:underline">Voir tout</button>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <SmallCourseCard title="L'État de l'Ihram : Règles et interdits" duration="45 min" modules="4 modules" image="https://images.unsplash.com/photo-1580418827493-f2b22c0a76cb?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" badge="NOUVEAU" />
-            <SmallCourseCard title="Comment accomplir le Tawaaf correctement" duration="32 min" modules="3 modules" image="https://images.unsplash.com/photo-1585036156171-384164a8c675?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" badge="EN COURS" progress={30} />
-            <SmallCourseCard title="Le Sa'i entre Safa et Marwa" duration="28 min" modules="2 modules" image="https://images.unsplash.com/photo-1627916602852-52ce648b2eb3?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" />
-            <SmallCourseCard title="La fin de la Omra : Rasage ou coupe" duration="15 min" modules="1 module" image="https://images.unsplash.com/photo-1563299796-1cda1e129184?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" badge="TERMINÉ" progress={100} />
-          </div>
-        </section>
-      )}
-
-      {/* HISTOIRE */}
-      {(activeCategory === 'Tous' || activeCategory === 'Histoire (Sīrah)') && (
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-serif text-2xl text-[#1A1209]">Histoire Islamique (Sīrah)</h2>
-            <button className="text-[10px] font-bold text-[#8B6914] uppercase tracking-wider hover:underline">Voir tout</button>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <SmallCourseCard title="La biographie du Prophète ﷺ à Makkah" duration="2h 15m" modules="8 modules" image="https://images.unsplash.com/photo-1565552643954-b4bfdd1460dd?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" badge="NOUVEAU" />
-            <SmallCourseCard title="La Bataille de Badr : Leçon de foi" duration="55 min" modules="3 modules" image="https://images.unsplash.com/photo-1579005981146-24f4693ae908?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" />
-            <SmallCourseCard title="Uhud : L'importance de l'obéissance" duration="48 min" modules="3 modules" image="https://images.unsplash.com/photo-1542104432-885404987178?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" />
-          </div>
-        </section>
-      )}
-
-      {/* SPIRITUALITÉ */}
-      {(activeCategory === 'Tous' || activeCategory === 'Spiritualité (Tazkiyah)') && (
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-serif text-2xl text-[#1A1209]">Spiritualité (Tazkiyah)</h2>
-            <button className="text-[10px] font-bold text-[#8B6914] uppercase tracking-wider hover:underline">Voir tout</button>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <SmallCourseCard title="Purifier son intention avant le départ" duration="20 min" modules="2 modules" image="https://images.unsplash.com/photo-1548407260-da850faa41e3?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" badge="NOUVEAU" />
-            <SmallCourseCard title="La présence du cœur pendant les rituels" duration="35 min" modules="3 modules" image="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" />
-          </div>
-        </section>
-      )}
-
-      {/* GUIDES PRATIQUES */}
-      {(activeCategory === 'Tous' || activeCategory === 'Guides Pratiques') && (
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-serif text-2xl text-[#1A1209]">Guides Pratiques</h2>
-            <button className="text-[10px] font-bold text-[#8B6914] uppercase tracking-wider hover:underline">Voir tout</button>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <SmallCourseCard title="Comment utiliser l'application SAFARUMA" duration="10 min" modules="1 module" image="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" badge="NOUVEAU" />
-            <SmallCourseCard title="Conseils pratiques pour la Omra en famille" duration="25 min" modules="2 modules" image="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" />
-          </div>
-        </section>
-      )}
-
+      {/* Sections */}
+      {sections.map(section => {
+        const sectionCourses = filtered.filter(c => c.cat === section);
+        if (sectionCourses.length === 0) return null;
+        return (
+          <section key={section} style={{ marginBottom: '2rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.875rem' }}>
+              <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.35rem', fontWeight: 600, color: '#1A1209' }}>{section}</h2>
+              <button style={{ fontSize: '0.68rem', fontWeight: 700, color: '#8B6914', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Voir tout</button>
+            </div>
+            <div className="ac-grid">
+              {sectionCourses.map(c => (
+                <div key={c.id} className="ac-course" style={{ background: 'white', border: '1px solid #EDE8DC', borderRadius: 12, overflow: 'hidden', cursor: 'pointer' }}>
+                  <div style={{ position: 'relative', background: 'linear-gradient(135deg, #1A1209, #2D1F08)', aspectRatio: '16/9' }}>
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2 }}><PlayButton /></div>
+                    {c.badge && <div style={{ position: 'absolute', top: 7, left: 7, zIndex: 3 }}><BadgePill badge={c.badge} /></div>}
+                    <div style={{ position: 'absolute', bottom: 6, right: 7, zIndex: 3, background: 'rgba(0,0,0,0.6)', color: 'white', fontSize: '0.58rem', fontWeight: 700, padding: '0.12rem 0.4rem', borderRadius: 4 }}>{c.duration}</div>
+                    {c.progress > 0 && (
+                      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: 3, background: 'rgba(255,255,255,0.15)', zIndex: 3 }}>
+                        <div style={{ height: '100%', width: `${c.progress}%`, background: '#1D9E75' }} />
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ padding: '0.75rem' }}>
+                    <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#8B6914', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.2rem' }}>{c.modules}</div>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.35 }}>{c.title}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+      })}
     </>
-  );
-}
-
-// Components
-
-function CourseCard({ title, image, progress, timeRemaining, badge }: any) {
-  const BADGE_STYLE: Record<string, { bg: string; color: string }> = {
-    'NOUVEAU':  { bg: '#C9A84C', color: '#1A1209' },
-    'EN COURS': { bg: '#1D4ED8', color: 'white' },
-    'TERMINÉ':  { bg: '#1D5C3A', color: 'white' },
-  };
-  const bs = badge ? BADGE_STYLE[badge] : null;
-  return (
-    <div className="bg-white border border-[#E8DFC8] rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row gap-4 hover:border-[#C9A84C] transition-all cursor-pointer group">
-      <div className="w-full sm:w-40 aspect-video bg-[#1A1209] rounded-xl relative overflow-hidden shrink-0">
-        {bs && <div style={{ position: 'absolute', top: 8, left: 8, background: bs.bg, color: bs.color, fontSize: '0.6rem', fontWeight: 800, padding: '0.15rem 0.5rem', borderRadius: 50, zIndex: 30, letterSpacing: '0.05em' }}>{badge}</div>}
-        <div className="absolute inset-0 bg-black/30 flex items-center justify-center z-10 group-hover:bg-black/10 transition-colors">
-          <div className="w-10 h-10 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center border border-white/50 group-hover:scale-110 transition-transform">
-            <span className="text-white text-sm ml-0.5">▶</span>
-          </div>
-        </div>
-        <img src={image} alt={title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-        <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/30 z-20">
-          <div className="h-full bg-[#1D9E75]" style={{ width: `${progress}%` }}></div>
-        </div>
-      </div>
-      <div className="flex-1 flex flex-col justify-center">
-        <h3 className="font-bold text-[#1A1209] mb-1 line-clamp-2 md:line-clamp-1 leading-tight">{title}</h3>
-        <p className="text-xs text-[#7A6D5A] mb-3">{timeRemaining}</p>
-      </div>
-    </div>
-  );
-}
-
-function SmallCourseCard({ title, duration, modules, image, badge, progress }: any) {
-  const BADGE_STYLE: Record<string, { bg: string; color: string }> = {
-    'NOUVEAU':  { bg: '#C9A84C', color: '#1A1209' },
-    'EN COURS': { bg: '#1D4ED8', color: 'white' },
-    'TERMINÉ':  { bg: '#1D5C3A', color: 'white' },
-  };
-  const bs = badge ? BADGE_STYLE[badge] : null;
-  return (
-    <div className="group cursor-pointer">
-      <div className="aspect-video bg-[#1A1209] rounded-xl relative overflow-hidden mb-3 border border-[#E8DFC8]">
-        {bs && <div style={{ position: 'absolute', top: 8, left: 8, background: bs.bg, color: bs.color, fontSize: '0.6rem', fontWeight: 800, padding: '0.15rem 0.5rem', borderRadius: 50, zIndex: 30, letterSpacing: '0.05em' }}>{badge}</div>}
-        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors z-10"></div>
-        <img src={image} alt={title} className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-        <div className="absolute bottom-2 right-2 bg-[#1A1209]/80 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-1 rounded z-20">{duration}</div>
-        {progress !== undefined && (
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20 z-20">
-            <div className="h-full bg-[#1D9E75]" style={{ width: `${progress}%` }}></div>
-          </div>
-        )}
-      </div>
-      <div className="text-[10px] text-[#8B6914] font-bold uppercase tracking-wider mb-1">{modules}</div>
-      <h3 className="font-bold text-[#1A1209] text-sm leading-tight group-hover:text-[#C9A84C] transition-colors">{title}</h3>
-    </div>
   );
 }

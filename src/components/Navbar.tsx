@@ -92,11 +92,12 @@ export default function Navbar() {
         .nb-btn-register:hover { background: #2D1F08; }
         .nb-hamburger {
           display: none; flex-direction: column; justify-content: center; gap: 5px;
-          background: none; border: none; cursor: pointer; padding: 4px; width: 36px; height: 36px;
+          background: none; border: 1.5px solid #E8DFC8; border-radius: 8px;
+          cursor: pointer; padding: 6px 8px; width: 40px; height: 36px;
         }
         .nb-hamburger span {
           display: block; height: 2px; background: #1A1209; border-radius: 2px;
-          transition: transform 0.2s, opacity 0.2s;
+          transition: transform 0.2s, opacity 0.2s; width: 100%;
         }
         .nb-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
         .nb-hamburger.open span:nth-child(2) { opacity: 0; }
@@ -137,7 +138,8 @@ export default function Navbar() {
         @media (max-width: 1023px) {
           .nb-links { display: none; }
           .nb-actions { display: none; }
-          .nb-hamburger { display: flex; }
+          .nb-hamburger { display: flex !important; }
+          .nb-bar { background: rgba(250,247,240,1) !important; padding: 0.9rem 1.25rem !important; }
         }
       `}} />
 

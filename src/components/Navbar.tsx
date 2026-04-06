@@ -23,7 +23,8 @@ export default function Navbar() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const hideBanner = HIDE_BANNER_PATHS.some(p => pathname.startsWith(p));
+  const SHOW_BANNER_PATHS = ['/', '/espace', '/guides', '/guide-omra', '/forfaits'];
+  const hideBanner = !SHOW_BANNER_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'));
   const role = (session?.user as any)?.role;
 
   const dashboardHref =
@@ -134,9 +135,10 @@ export default function Navbar() {
           font-size: 0.85rem; font-weight: 600; color: #1A1209; text-decoration: none;
           text-align: center; padding: 0.5rem 0;
         }
+        @media (min-width: 1024px) { .nb-actions { display: flex !important; } }
         @media (max-width: 1023px) {
           .nb-links { display: none; }
-          .nb-actions { display: none; }
+          .nb-actions { display: none !important; }
           .nb-hamburger { display: flex; }
         }
       `}} />
@@ -145,13 +147,10 @@ export default function Navbar() {
         {!hideBanner && (
           <div className="nb-banner">
             <span className="nb-banner-dot" />
-            <span className="nb-banner-desktop" style={{ display: 'none' }}>
-              🕌 Ramadan 2025 — Réservez votre guide dès maintenant et bénéficiez de{' '}
-              <Link href="/guides">disponibilités prioritaires</Link>
-              {' '}· Paiement sécurisé · Annulation gratuite 48h
-            </span>
             <span>
-              🕌 <Link href="/guides">Réservez votre guide Omra</Link>
+              🕌 Ramadan 2025 —{' '}
+              <Link href="/guides">Réservez votre guide Omra</Link>
+              {' '}· Paiement sécurisé · Annulation gratuite 48h
             </span>
           </div>
         )}

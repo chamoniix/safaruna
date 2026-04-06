@@ -5,7 +5,7 @@ const STATS = [
   { end: 320,   prefix: '',  suffix: '+', label: 'Guides certifiés',         duration: 1800 },
   { end: 15000, prefix: '',  suffix: '+', label: 'Pèlerins accompagnés',      duration: 2000 },
   { end: 98,    prefix: '',  suffix: '%', label: 'Satisfaction pèlerins',     duration: 1600 },
-  { end: 12,    prefix: '',  suffix: '',  label: 'Langues couvertes',          duration: 1400 },
+  { end: 35,    prefix: '',  suffix: '',  label: 'Langues couvertes',          duration: 1400 },
 ];
 
 function useCounting(end: number, duration: number) {

@@ -242,6 +242,34 @@ export function sendMessageNotification(opts: {
   });
 }
 
+// ─── 6. Reset mot de passe ──────────────────────────────────────
+
+export function sendPasswordReset(opts: {
+  to: string;
+  name: string;
+  resetUrl: string;
+}): Promise<void> {
+  const { to, name, resetUrl } = opts;
+  return sendEmail({
+    to: { email: to, name },
+    subject: 'Réinitialisation de votre mot de passe — SAFARUMA',
+    html: baseTemplate(`
+      ${heading('Réinitialiser votre mot de passe')}
+      ${p(`Bonjour${name ? ' ' + name : ''},`)}
+      ${p('Vous avez demandé la réinitialisation de votre mot de passe SAFARUMA. Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe.')}
+      ${divider()}
+      <div style="text-align:center;padding:16px 0;">
+        <a href="${resetUrl}" style="display:inline-block;background:#C9A84C;color:#1A1209;padding:14px 32px;border-radius:50px;font-size:14px;font-weight:800;text-decoration:none;letter-spacing:0.04em;">
+          Réinitialiser mon mot de passe →
+        </a>
+      </div>
+      ${divider()}
+      ${p('<small style="color:#9A8D7A;">Ce lien expire dans <strong>1 heure</strong>. Si vous n\'avez pas demandé cette réinitialisation, ignorez cet email — votre compte reste sécurisé.</small>')}
+      ${p('<small style="color:#9A8D7A;">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br><span style="color:#C9A84C;">' + resetUrl + '</span></small>')}
+    `),
+  });
+}
+
 // ─── 5. Rappel 7 jours avant départ ─────────────────────────────
 
 export function sendDepartureReminder(opts: {

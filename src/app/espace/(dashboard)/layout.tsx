@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { signOut } from 'next-auth/react';
+import NotificationBell from '@/components/NotificationBell';
 
 /* ── HEROICONS SVG (stroke, 18×18) ── */
 const IcoHome = ({ c }: { c: string }) => (
@@ -202,10 +203,7 @@ export default function PelerinLayout({ children }: { children: React.ReactNode 
               <span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 600, color: '#1A1209' }}>Espace Pèlerin</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <button style={{ position: 'relative', width: 38, height: 38, borderRadius: '50%', border: '1px solid #EDE8DC', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '1rem', flexShrink: 0 }}>
-                🔔
-                <span style={{ position: 'absolute', top: 8, right: 8, width: 7, height: 7, borderRadius: '50%', background: '#C9A84C', border: '2px solid white' }} />
-              </button>
+              <NotificationBell />
               <Link href="/guides" style={{ padding: '0.5rem 1.25rem', borderRadius: 50, fontSize: '0.75rem', fontWeight: 700, background: '#1A1209', color: '#F0D897', textDecoration: 'none', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>+ Nouveau guide</Link>
             </div>
           </header>

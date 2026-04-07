@@ -2,10 +2,12 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
+import type { Metadata } from 'next';
 
-export const metadata = {
-  title: "Blog SAFARUMA — Guides, conseils et spiritualité pour la Omra",
-  description: "Articles de fond sur la préparation de la Omra, les lieux saints, la spiritualité islamique et les conseils de nos guides certifiés.",
+export const metadata: Metadata = {
+  title: 'Blog — Hajj, Omra & lieux saints — SAFARUMA',
+  description: 'Actualités Hajj 2026, histoire des lieux saints, guides pratiques pour la Omra et témoignages de pèlerins francophones.',
+  alternates: { canonical: 'https://safaruma.com/blog' },
 };
 
 export const ARTICLES = [

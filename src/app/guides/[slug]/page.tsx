@@ -3,6 +3,31 @@ import Image from 'next/image';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import GuideProfileClient from './GuideProfileClient';
+import type { Metadata } from 'next';
+
+const GUIDE_META: Record<string, { name: string; title: string; desc: string }> = {
+  'naim-laamari':       { name: 'Naïm LAAMARI',       title: 'Guide Officiel SAFARUMA',          desc: "Responsable Terrain SAFARUMA à Makkah. 8 ans d'expérience, certifié mutawwif." },
+  'rachid-al-madani':   { name: 'Rachid Al-Madani',   title: 'Cheikh · Spécialiste Sîra',        desc: 'Spécialiste de la Sîra du Prophète ﷺ. 14 ans d\'expérience, 2400+ pèlerins accompagnés.' },
+  'fatima-al-omari':    { name: 'Fatima Al-Omari',    title: 'Guide femme · Familles',           desc: 'Guide femme certifiée, spécialisée dans l\'accompagnement des femmes et familles.' },
+  'youssouf-konate':    { name: 'Youssouf Konaté',    title: "Spécialiste Afrique de l'Ouest",   desc: "Guide francophone spécialisé pour les communautés d'Afrique de l'Ouest." },
+  'abdullah-ben-yusuf': { name: 'Abdullah Ben Yusuf', title: 'Diplômé · Université de Madinah',  desc: "Diplômé de l'Université Islamique de Madinah. Expert des ziyarat de Madinah." },
+  'samira-al-rashidi':  { name: 'Samira Al-Rashidi',  title: 'Spécialiste PMR · Madinah',        desc: 'Spécialisée dans l\'accompagnement des personnes à mobilité réduite à Madinah.' },
+};
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const g = GUIDE_META[params.slug];
+  if (!g) return { title: 'Guide — SAFARUMA' };
+  return {
+    title: `${g.name} — ${g.title} | SAFARUMA`,
+    description: g.desc,
+    alternates: { canonical: `https://safaruma.com/guides/${params.slug}` },
+    openGraph: {
+      title: `${g.name} — SAFARUMA`,
+      description: g.desc,
+      url: `https://safaruma.com/guides/${params.slug}`,
+    },
+  };
+}
 
 // Pre-render all guide pages at build time → no server-side DB lookup needed
 export async function generateStaticParams() {

@@ -16,7 +16,7 @@ function RejoindreContent() {
 
         {/* Badge parrainage */}
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: '#FAF3E0', border: '1px solid rgba(201,168,76,0.3)', color: '#8B6914', fontSize: '0.72rem', fontWeight: 700, padding: '0.4rem 1rem', borderRadius: 50, marginBottom: '1.5rem' }}>
-          🎁 Offre de parrainage — Code <strong style={{ color: '#C9A84C' }}>{ref}</strong>
+          🎁 {ref ? <>Offre de parrainage — Code <strong style={{ color: '#C9A84C' }}>{ref}</strong></> : 'Offre de bienvenue SAFARUMA'}
         </div>
 
         {/* Amount */}
@@ -25,7 +25,9 @@ function RejoindreContent() {
         </div>
         <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1A1209', marginBottom: '0.5rem' }}>offerts sur votre première réservation</div>
         <p style={{ fontSize: '0.85rem', color: '#7A6D5A', lineHeight: 1.7, marginBottom: '2rem', maxWidth: 380, margin: '0 auto 2rem' }}>
-          Un ami vous a invité à découvrir l&apos;Arabie Saoudite avec SAFARUMA. Créez votre compte et bénéficiez de 80€ de réduction automatiquement appliquée.
+          {ref
+            ? "Un ami vous a invité à découvrir l'Arabie Saoudite avec SAFARUMA. Créez votre compte et bénéficiez de 80€ de réduction automatiquement appliquée."
+            : "Rejoignez SAFARUMA et réservez votre guide privé pour la Omra. Des centaines de pèlerins nous font confiance chaque année."}
         </p>
 
         {/* CTA */}
@@ -49,7 +51,7 @@ function RejoindreContent() {
   );
 }
 
-export default function RejoинdrePage() {
+export default function RejoindrePageFR() {
   return (
     <>
       <Navbar />

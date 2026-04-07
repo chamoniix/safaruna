@@ -2,6 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Navbar from '@/components/Navbar';
@@ -63,10 +64,12 @@ function GuideRecapCard({ slug, city, cityColor, cityBg }: { slug: string; city:
 
 function CheckoutDualContent() {
   const searchParams = useSearchParams();
+  const { data: session } = useSession();
 
   const slugMadinah  = searchParams.get('guide_madinah') || '';
   const slugMakkah   = searchParams.get('guide_makkah') || '';
-  const personnes    = parseInt(searchParams.get('personnes') || '2');
+  const personnesRaw = parseInt(searchParams.get('personnes') || '2');
+  const personnes    = isNaN(personnesRaw) || personnesRaw < 1 ? 2 : Math.min(personnesRaw, 50);
   const transport    = searchParams.get('transport') || 'train';
   const arrivee      = searchParams.get('arrivee') || '';
   const depart       = searchParams.get('depart') || '';
@@ -74,9 +77,10 @@ function CheckoutDualContent() {
   const guideMadinah = GUIDES_DATA[slugMadinah];
   const guideMakkah  = GUIDES_DATA[slugMakkah];
 
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName]   = useState('');
-  const [email, setEmail]         = useState('');
+  const sessionUser = session?.user as any;
+  const [firstName, setFirstName] = useState(sessionUser?.firstName || sessionUser?.name?.split(' ')[0] || '');
+  const [lastName, setLastName]   = useState(sessionUser?.lastName || sessionUser?.name?.split(' ').slice(1).join(' ') || '');
+  const [email, setEmail]         = useState(sessionUser?.email || '');
   const [whatsapp, setWhatsapp]   = useState('');
   const [notes, setNotes]         = useState('');
   const [ihram, setIhram]         = useState(false);

@@ -11,6 +11,7 @@ export async function signup(formData: FormData) {
   const firstName = (formData.get('first_name') as string)?.trim();
   const lastName  = (formData.get('last_name')  as string)?.trim();
   const whatsapp  = (formData.get('whatsapp')   as string)?.trim() || null;
+  const refCode   = (formData.get('ref')        as string)?.trim() || null;
 
   if (!email || !password || password.length < 8) {
     redirect('/inscription?error=InvalidData');
@@ -42,8 +43,13 @@ export async function signup(formData: FormData) {
   // Envoyer email de bienvenue (fire-and-forget)
   sendWelcomePelerin(email, fullName).catch(() => {});
 
+  if (refCode) {
+    console.log(`[parrainage] Nouvel inscrit ${email} parrainé par code ${refCode}`);
+    // TODO: créer une entrée Referral en base quand Stripe est actif
+  }
+
   // Rediriger vers connexion avec message de succès
-  redirect('/connexion?registered=1');
+  redirect(refCode ? `/connexion?registered=1&ref=${refCode}` : '/connexion?registered=1');
 }
 
 export async function signout() {

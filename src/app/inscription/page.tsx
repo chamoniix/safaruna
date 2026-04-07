@@ -1,12 +1,15 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
-
+import { Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { signup } from '../connexion/actions';
 import { signIn } from 'next-auth/react';
 
-export default function RegisterPage() {
+function RegisterForm() {
+  const searchParams = useSearchParams();
+  const refCode = searchParams.get('ref') || '';
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: `
@@ -181,6 +184,9 @@ export default function RegisterPage() {
               </p>
             </div>
 
+            {/* Code parrainage — transmis silencieusement */}
+            <input type="hidden" name="ref" value={refCode} />
+
             {/* Submit */}
             <button formAction={signup} className="ins-btn-primary" style={{ marginTop: 4 }}>
               M&apos;inscrire avec Email
@@ -223,5 +229,13 @@ export default function RegisterPage() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterForm />
+    </Suspense>
   );
 }

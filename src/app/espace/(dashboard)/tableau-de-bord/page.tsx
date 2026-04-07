@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 
 const STATS = [
   { icon: '✦', iconBg: 'linear-gradient(135deg, #F0D897, #C9A84C)', iconColor: '#7A5200', value: '1', label: 'Omra réservée', sub: 'Juin 2025', href: '/espace/reservations' },
@@ -24,6 +25,9 @@ const MESSAGES = [
 ];
 
 export default function PelerinDashboard() {
+  const { data: session } = useSession();
+  const userName = (session?.user as any)?.firstName || session?.user?.name?.split(' ')[0] || 'Pèlerin';
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
 
@@ -55,30 +59,28 @@ export default function PelerinDashboard() {
               Prochain voyage
             </div>
             <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(1.8rem, 5vw, 3rem)', fontWeight: 600, color: 'white', lineHeight: 1.1, marginBottom: '0.5rem' }}>
-              Omra & Histoire
+              Bienvenue, {userName}
             </h1>
             <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.88rem', fontWeight: 500, marginBottom: '1.5rem' }}>
-              Départ le <span style={{ color: 'rgba(255,255,255,0.8)', fontWeight: 700 }}>Vendredi 10 Juin 2025</span> · Guide: <span style={{ color: '#F0D897' }}>Rachid Al-Madani</span>
+              Votre espace pèlerin SAFARUMA — préparez votre voyage spirituel.
             </p>
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-              <Link href="/espace/reservations/SAF-2025-012" style={{
+              <Link href="/guides" style={{
                 display: 'inline-block', background: '#C9A84C', color: '#1A1209',
                 padding: '0.7rem 1.5rem', borderRadius: 50, fontSize: '0.8rem', fontWeight: 700,
                 textDecoration: 'none', letterSpacing: '0.04em',
                 boxShadow: '0 4px 16px rgba(201,168,76,0.35)',
-              }}>Voir les détails</Link>
-              <Link href="/espace/messages" style={{
+              }}>Trouver mon guide →</Link>
+              <Link href="/espace/checklist" style={{
                 display: 'inline-block', background: 'rgba(255,255,255,0.08)', color: 'white',
                 padding: '0.7rem 1.5rem', borderRadius: 50, fontSize: '0.8rem', fontWeight: 600,
                 textDecoration: 'none', border: '1px solid rgba(255,255,255,0.15)',
-              }}>Contacter le guide</Link>
+              }}>Ma checklist</Link>
             </div>
           </div>
 
-          {/* Right: countdown */}
-          <div className="dash-countdown" style={{ textAlign: 'right', flexShrink: 0 }}>
-            <div className="dash-countdown-num" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(4rem, 10vw, 7rem)', fontWeight: 700, color: '#F0D897', lineHeight: 1, letterSpacing: '-0.02em' }}>47</div>
-            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', marginTop: '0.25rem' }}>Jours restants</div>
+          <div style={{ flexShrink: 0, textAlign: 'center' }}>
+            <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '3rem', color: 'rgba(201,168,76,0.3)', lineHeight: 1, direction: 'rtl' }}>بسم الله</div>
           </div>
         </div>
       </div>
@@ -136,36 +138,25 @@ export default function PelerinDashboard() {
         {/* Left column */}
         <div className="dash-grid" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-          {/* Next booking card */}
+          {/* CTA réservation */}
           <div style={{ background: 'white', borderRadius: 20, border: '1px solid #EDE8DC', overflow: 'hidden', boxShadow: '0 2px 12px rgba(26,18,9,0.05)' }}>
             <div style={{ background: 'linear-gradient(135deg, #0D0A06, #1A1209)', padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-              <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209', flexShrink: 0, border: '3px solid rgba(201,168,76,0.3)' }}>
-                RM
+              <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', flexShrink: 0 }}>
+                🕋
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: '0.2rem' }}>Guide certifié</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'white', fontFamily: 'var(--font-cormorant, serif)' }}>Cheikh Rachid Al-Madani</div>
-                <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>Makkah · Madinah · 14 ans d'expérience</div>
+                <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: '0.2rem' }}>Prochaine étape</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'white', fontFamily: 'var(--font-cormorant, serif)' }}>Réservez votre guide privé</div>
+                <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>6 guides certifiés disponibles · Répond en moins de 2h</div>
               </div>
-              <div style={{ background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 50, padding: '0.25rem 0.75rem', fontSize: '0.62rem', fontWeight: 700, color: '#F0D897', whiteSpace: 'nowrap' }}>⭐ 4.97</div>
             </div>
-
             <div style={{ padding: '1.25rem 1.5rem' }}>
-              <div className="dash-booking-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', marginBottom: '1.25rem' }}>
-                {[
-                  { label: 'Départ', value: '10 Juin 2025' },
-                  { label: 'Retour', value: '17 Juin 2025' },
-                  { label: 'Réservation', value: 'SAF-2025-012' },
-                ].map((d) => (
-                  <div key={d.label} className={d.label === 'Réservation' ? 'dash-booking-ref' : ''} style={{ background: '#FAF7F0', borderRadius: 12, padding: '0.75rem', border: '1px solid #EDE8DC' }}>
-                    <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.25rem' }}>{d.label}</div>
-                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1A1209' }}>{d.value}</div>
-                  </div>
-                ))}
-              </div>
+              <p style={{ fontSize: '0.85rem', color: '#7A6D5A', lineHeight: 1.7, marginBottom: '1.25rem' }}>
+                Choisissez un guide qui parle votre langue, connaît les lieux saints et transformera votre voyage en expérience inoubliable.
+              </p>
               <div style={{ display: 'flex', gap: '0.75rem' }}>
-                <Link href="/espace/reservations/SAF-2025-012" style={{ flex: 1, textAlign: 'center', background: '#1A1209', color: '#F0D897', padding: '0.65rem', borderRadius: 50, fontSize: '0.78rem', fontWeight: 700, textDecoration: 'none' }}>Plan de vol →</Link>
-                <Link href="/espace/messages" style={{ flex: 1, textAlign: 'center', background: '#FAF7F0', color: '#1A1209', padding: '0.65rem', borderRadius: 50, fontSize: '0.78rem', fontWeight: 600, textDecoration: 'none', border: '1px solid #EDE8DC' }}>Contacter</Link>
+                <Link href="/guides" style={{ flex: 1, textAlign: 'center', background: '#1A1209', color: '#F0D897', padding: '0.65rem', borderRadius: 50, fontSize: '0.78rem', fontWeight: 700, textDecoration: 'none' }}>Trouver mon guide →</Link>
+                <Link href="/guides/tunnel" style={{ flex: 1, textAlign: 'center', background: '#FAF7F0', color: '#1A1209', padding: '0.65rem', borderRadius: 50, fontSize: '0.78rem', fontWeight: 600, textDecoration: 'none', border: '1px solid #EDE8DC' }}>Makkah + Madinah</Link>
               </div>
             </div>
           </div>
@@ -312,7 +303,7 @@ export default function PelerinDashboard() {
                 { href: '/guides', icon: '✦', label: 'Nos guides', bg: 'linear-gradient(135deg, #F0D897, #C9A84C)', color: '#1A1209' },
                 { href: '/espace/favoris', icon: '♡', label: 'Favoris', bg: 'white', color: '#1A1209' },
                 { href: '/blog', icon: '📖', label: 'Blog', bg: 'white', color: '#1A1209' },
-                { href: '/espace/parrainage', icon: '🎁', label: '50€ offerts', bg: '#E8F5EE', color: '#1D5C3A' },
+                { href: '/espace/parrainage', icon: '🎁', label: '80€ offerts', bg: '#E8F5EE', color: '#1D5C3A' },
               ].map((l) => (
                 <Link key={l.href} href={l.href} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: l.bg, borderRadius: 14, padding: '0.875rem', border: '1px solid #EDE8DC', textDecoration: 'none', fontWeight: 600, fontSize: '0.78rem', color: l.color, boxShadow: '0 1px 4px rgba(26,18,9,0.04)' }}>
                   <span>{l.icon}</span>{l.label}

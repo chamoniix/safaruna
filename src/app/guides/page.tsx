@@ -900,8 +900,9 @@ function GuideCard({ guide: g, official }: { guide: GuideData; official?: boolea
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.35rem' }}>
               {official ? (
                 <>
-                  <span style={{ fontSize: '0.6rem', fontWeight: 800, background: '#1A1209', color: '#F0D897', padding: '0.2rem 0.65rem', borderRadius: 50 }}>★ 5.0 OFFICIEL</span>
-                  <span style={{ fontSize: '0.6rem', fontWeight: 700, background: '#065F46', color: 'white', padding: '0.15rem 0.55rem', borderRadius: 50 }}>GUIDE VÉRIFIÉ ✓</span>
+                  <span style={{ fontSize: '0.62rem', fontWeight: 800, background: '#FAF3E0', color: '#8B6914', border: '1px solid rgba(201,168,76,0.4)', padding: '0.2rem 0.65rem', borderRadius: 50, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>🛡 Certifié SAFARUMA</span>
+                  <span style={{ fontSize: '0.62rem', fontWeight: 700, background: '#E8F5EE', color: '#1D5C3A', border: '1px solid rgba(29,92,58,0.2)', padding: '0.2rem 0.65rem', borderRadius: 50 }}>✓ Guide Vérifié</span>
+                  <span style={{ fontSize: '0.62rem', fontWeight: 700, background: '#EEF2FF', color: '#1E3A5F', border: '1px solid rgba(30,58,95,0.2)', padding: '0.2rem 0.65rem', borderRadius: 50 }}>🎓 Formateur Certifié</span>
                 </>
               ) : (
                 <>

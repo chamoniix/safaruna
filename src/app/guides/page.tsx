@@ -810,12 +810,13 @@ function GuideCard({ guide: g, official }: { guide: GuideData; official?: boolea
           <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
           {/* Avatar */}
           <div style={{
-            position: 'absolute', bottom: official ? -18 : -14, left: '1.25rem',
-            width: official ? 60 : 46, height: official ? 60 : 46, borderRadius: '50%',
-            border: official ? '3px solid #C9A84C' : '3px solid white',
+            position: 'absolute', top: '50%', right: '1.25rem',
+            transform: 'translateY(-50%)',
+            width: official ? 64 : 52, height: official ? 64 : 52, borderRadius: '50%',
+            border: official ? '3px solid #C9A84C' : '3px solid rgba(255,255,255,0.6)',
             overflow: 'hidden',
             zIndex: 1,
-            boxShadow: official ? '0 0 0 3px #1A1209, 0 4px 16px rgba(201,168,76,0.4)' : 'none',
+            boxShadow: official ? '0 0 0 3px #1A1209, 0 4px 16px rgba(201,168,76,0.4)' : '0 2px 12px rgba(0,0,0,0.3)',
           }}>
             <GuideAvatarSVG
               slug={g.slug}
@@ -854,7 +855,7 @@ function GuideCard({ guide: g, official }: { guide: GuideData; official?: boolea
 
         {/* Body */}
         <div style={{ padding: '1.5rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.2rem', paddingTop: official ? '1.25rem' : '1rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.2rem', paddingTop: '0.25rem' }}>
             <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.2 }}>{g.name}</div>
             <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1A1209', whiteSpace: 'nowrap', flexShrink: 0 }}>
               <span style={{ color: '#C9A84C' }}>★</span> {g.rating}

@@ -147,13 +147,9 @@ export default function Navbar() {
         {!hideBanner && (
           <div className="nb-banner">
             <span className="nb-banner-dot" />
-            <span className="nb-banner-desktop" style={{ display: 'none' }}>
-              🕌 Ramadan 2025 — Réservez votre guide dès maintenant et bénéficiez de{' '}
-              <Link href="/guides">disponibilités prioritaires</Link>
-              {' '}· Paiement sécurisé · Annulation gratuite 48h
-            </span>
             <span>
-              🕌 <Link href="/guides">Réservez votre guide Omra</Link>
+              Au-delà de ce que vous imaginez —{' '}
+              <Link href="/guides">Découvrir →</Link>
             </span>
           </div>
         )}

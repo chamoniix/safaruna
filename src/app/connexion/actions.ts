@@ -1,60 +1,51 @@
-'use server'
+'use server';
 
-import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
-import { createClient } from '@/utils/supabase/server'
-import { sendWelcomePelerin } from '@/lib/email'
-
-export async function login(formData: FormData) {
-  const supabase = await createClient()
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
-  }
-
-  const { error } = await supabase.auth.signInWithPassword(data)
-
-  if (error) {
-    redirect('/connexion?error=InvalidCredentials')
-  }
-
-  revalidatePath('/', 'layout')
-  redirect('/espace/tableau-de-bord')
-}
+import { redirect } from 'next/navigation';
+import prisma from '@/lib/prisma';
+import bcrypt from 'bcryptjs';
+import { sendWelcomePelerin } from '@/lib/email';
 
 export async function signup(formData: FormData) {
-  const supabase = await createClient()
-  const whatsapp = formData.get('whatsapp') as string || null;
-  const data = {
-    email: formData.get('email') as string,
-    password: formData.get('password') as string,
-    options: {
-      data: {
-        role: 'pilgrim',
-        first_name: formData.get('first_name') as string,
-        last_name: formData.get('last_name') as string,
-        phone_whatsapp: whatsapp,
-      }
-    }
+  const email     = (formData.get('email')      as string)?.trim().toLowerCase();
+  const password  = (formData.get('password')   as string);
+  const firstName = (formData.get('first_name') as string)?.trim();
+  const lastName  = (formData.get('last_name')  as string)?.trim();
+  const whatsapp  = (formData.get('whatsapp')   as string)?.trim() || null;
+
+  if (!email || !password || password.length < 8) {
+    redirect('/inscription?error=InvalidData');
   }
 
-  const { error } = await supabase.auth.signUp(data)
-
-  if (error) {
-    redirect('/inscription?error=SignupFailed')
+  // Vérifier si l'email existe déjà
+  const existing = await prisma.user.findUnique({ where: { email } });
+  if (existing) {
+    redirect('/inscription?error=EmailAlreadyExists');
   }
 
-  const firstName = (data.options?.data?.first_name as string) ?? '';
-  const lastName  = (data.options?.data?.last_name  as string) ?? '';
-  const fullName  = [firstName, lastName].filter(Boolean).join(' ') || data.email.split('@')[0];
-  sendWelcomePelerin(data.email, fullName).catch(() => {}); // fire-and-forget
+  // Hasher le mot de passe
+  const passwordHash = await bcrypt.hash(password, 12);
+  const fullName = [firstName, lastName].filter(Boolean).join(' ') || email.split('@')[0];
 
-  revalidatePath('/', 'layout')
-  redirect('/espace/tableau-de-bord')
+  // Créer l'utilisateur dans Prisma
+  await prisma.user.create({
+    data: {
+      email,
+      name: fullName,
+      firstName,
+      lastName,
+      passwordHash,
+      phoneWhatsapp: whatsapp,
+      role: 'PELERIN',
+    },
+  });
+
+  // Envoyer email de bienvenue (fire-and-forget)
+  sendWelcomePelerin(email, fullName).catch(() => {});
+
+  // Rediriger vers connexion avec message de succès
+  redirect('/connexion?registered=1');
 }
 
 export async function signout() {
-  const supabase = await createClient()
-  await supabase.auth.signOut()
-  redirect('/connexion')
+  redirect('/connexion');
 }

@@ -9,6 +9,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect') || '/espace/tableau-de-bord';
+  const registered = searchParams.get('registered');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -76,6 +77,12 @@ function LoginForm() {
                 SAFAR<span style={{ color: '#C9A84C' }}>U</span>MA
               </Link>
             </div>
+
+            {registered && (
+              <div style={{ background: '#E8F5EE', border: '1px solid rgba(29,92,58,0.2)', borderRadius: 10, padding: '0.75rem 1rem', marginBottom: '1rem', fontSize: '0.85rem', color: '#1D5C3A', fontWeight: 600, textAlign: 'center' }}>
+                ✓ Compte créé avec succès ! Connectez-vous maintenant.
+              </div>
+            )}
 
             {error && (
               <div className="login-error" style={{ marginBottom: '1.25rem' }}>

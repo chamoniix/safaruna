@@ -23,7 +23,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const hideBanner = HIDE_BANNER_PATHS.some(p => pathname.startsWith(p));
+  const hideBanner = pathname ? HIDE_BANNER_PATHS.some(p => pathname.startsWith(p)) : false;
   const role = (session?.user as any)?.role;
 
   const dashboardHref =

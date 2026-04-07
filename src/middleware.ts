@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import { verifyAdminToken } from '@/lib/admin-auth';
 
-export async function proxy(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // ── Admin routes ──────────────────────────────────────
@@ -24,15 +24,17 @@ export async function proxy(req: NextRequest) {
   const role = (token?.role as string) || '';
 
   // ── Routes guide protégées → redirige vers /guide/connexion si pas GUIDE
-  if (pathname.startsWith('/guide/tableau-de-bord') ||
-      pathname.startsWith('/guide/missions') ||
-      pathname.startsWith('/guide/demandes') ||
-      pathname.startsWith('/guide/revenus') ||
-      pathname.startsWith('/guide/calendrier') ||
-      pathname.startsWith('/guide/messages') ||
-      pathname.startsWith('/guide/profil') ||
-      pathname.startsWith('/guide/avis') ||
-      pathname.startsWith('/guide/forfaits')) {
+  if (
+    pathname.startsWith('/guide/tableau-de-bord') ||
+    pathname.startsWith('/guide/missions') ||
+    pathname.startsWith('/guide/demandes') ||
+    pathname.startsWith('/guide/revenus') ||
+    pathname.startsWith('/guide/calendrier') ||
+    pathname.startsWith('/guide/messages') ||
+    pathname.startsWith('/guide/profil') ||
+    pathname.startsWith('/guide/avis') ||
+    pathname.startsWith('/guide/forfaits')
+  ) {
     if (!token || (role !== 'GUIDE' && role !== 'ADMIN')) {
       return NextResponse.redirect(new URL('/guide/connexion', req.url));
     }

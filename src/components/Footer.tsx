@@ -9,19 +9,28 @@ export default function Footer() {
       <div style={{
         display: 'flex',
         flexWrap: 'wrap',
-        gap: '0',
-        padding: '0',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '0.5rem 2rem',
+        padding: '1rem 1.5rem',
         borderBottom: '1px solid rgba(255,255,255,0.08)',
-        marginBottom: '0',
       }}>
         {([
-          { icon: <span style={{ color: 'rgba(201,168,76,0.8)', fontWeight: 700 }}>✓</span>, label: 'Guides mutawwif certifiés' },
-          { icon: <IconShield size={14} stroke="rgba(201,168,76,0.7)" />, label: 'Paiement sécurisé' },
-          { icon: <IconStar size={14} stroke="rgba(201,168,76,0.7)" />, label: 'Note 4.94/5 — 709 avis' },
-          { icon: <IconAccessibility size={14} stroke="rgba(201,168,76,0.7)" />, label: 'Accessibilité PMR' },
-        ] as { icon: React.ReactNode; label: string }[]).map(b => (
-          <div key={b.label} className="footer-badge-item">
-            {b.icon}
+          { icon: '✓', label: 'Guides mutawwif certifiés' },
+          { icon: '🛡', label: 'Paiement sécurisé' },
+          { icon: '★', label: 'Note 4.94/5 — 709 avis' },
+          { icon: '♿', label: 'Accessibilité PMR' },
+        ] as { icon: string; label: string }[]).map(b => (
+          <div key={b.label} style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            fontSize: '0.78rem',
+            fontWeight: 600,
+            color: 'rgba(240,216,151,0.7)',
+            whiteSpace: 'nowrap',
+          }}>
+            <span style={{ color: 'rgba(201,168,76,0.8)', fontSize: '0.85rem' }}>{b.icon}</span>
             {b.label}
           </div>
         ))}

@@ -17,7 +17,7 @@ interface BookingWidgetProps {
 }
 
 export default function BookingWidget({ slug, guideName, packages }: BookingWidgetProps) {
-  const [selectedPackage, setSelectedPackage] = useState(1);
+  const [selectedPackage, setSelectedPackage] = useState(0);
   const [groupSize, setGroupSize] = useState(2);
 
   // April 2026 calendar
@@ -71,8 +71,8 @@ export default function BookingWidget({ slug, guideName, packages }: BookingWidg
     return { ...base, border: '1px solid transparent' };
   };
 
-  const livePrice = packages[selectedPackage].price * groupSize;
-  const pkg = packages[selectedPackage];
+  const pkg = packages[selectedPackage] ?? packages[0];
+  const livePrice = pkg ? pkg.price * groupSize : 0;
 
   return (
     <div style={{
@@ -271,7 +271,7 @@ export default function BookingWidget({ slug, guideName, packages }: BookingWidg
 
         {/* CTA */}
         <Link
-          href={`/espace/checkout/${slug}?forfait=${selectedPackage}&personnes=${groupSize}`}
+          href={`/espace/checkout/${slug}?forfait=${selectedPackage}&personnes=${groupSize}${selectedDates.length >= 1 ? `&dateDebut=2026-04-${String(selectedDates[0]).padStart(2, '0')}` : ''}${selectedDates.length === 2 ? `&dateFin=2026-04-${String(selectedDates[1]).padStart(2, '0')}` : ''}`}
           style={{ display: 'block', textDecoration: 'none' }}
         >
           <button style={{

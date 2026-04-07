@@ -20,15 +20,35 @@ export default function BookingWidget({ slug, guideName, packages }: BookingWidg
   const [selectedPackage, setSelectedPackage] = useState(0);
   const [groupSize, setGroupSize] = useState(2);
 
-  // April 2026 calendar
-  const daysInMonth = 30;
-  const startDayOfWeek = 3; // Wednesday (0=Mon)
-  const today = 1;
-  const occupiedDates = [15, 16, 17, 18, 19];
+  const now = new Date();
+  const [calYear, setCalYear]   = useState(now.getFullYear());
+  const [calMonth, setCalMonth] = useState(now.getMonth()); // 0-indexed
+
+  const daysInMonth    = new Date(calYear, calMonth + 1, 0).getDate();
+  const startDayOfWeek = (new Date(calYear, calMonth, 1).getDay() + 6) % 7; // 0=Lundi
+  const todayDate      = now.getDate();
+  const isCurrentMonth = calYear === now.getFullYear() && calMonth === now.getMonth();
+  const occupiedDates: number[] = []; // À brancher sur les vraies dispo plus tard
+
+  const MONTHS_FR = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+
+  const prevMonth = () => {
+    if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1); }
+    else setCalMonth(m => m - 1);
+    setSelectedDates([]);
+  };
+  const nextMonth = () => {
+    if (calMonth === 11) { setCalMonth(0); setCalYear(y => y + 1); }
+    else setCalMonth(m => m + 1);
+    setSelectedDates([]);
+  };
+
+  // Empêcher navigation vers le passé
+  const isPrevDisabled = calYear === now.getFullYear() && calMonth <= now.getMonth();
 
   const [selectedDates, setSelectedDates] = useState<number[]>([]);
   const handleDateClick = (day: number) => {
-    if (day < today || occupiedDates.includes(day)) return;
+    if ((isCurrentMonth && day < todayDate) || occupiedDates.includes(day)) return;
     if (selectedDates.length === 0 || selectedDates.length === 2) {
       setSelectedDates([day]);
     } else {
@@ -52,7 +72,7 @@ export default function BookingWidget({ slug, guideName, packages }: BookingWidg
       transition: 'background 0.15s',
     };
 
-    if (day < today) {
+    if (isCurrentMonth && day < todayDate) {
       return { ...base, opacity: 0.3, cursor: 'not-allowed', textDecoration: 'line-through' };
     }
     if (occupiedDates.includes(day)) {
@@ -206,9 +226,18 @@ export default function BookingWidget({ slug, guideName, packages }: BookingWidg
           </div>
           <div style={{ background: 'var(--cream)', borderRadius: '12px', padding: '0.75rem', border: '1px solid var(--sand)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
-              <button style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: '1rem' }}>←</button>
-              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--deep)' }}>Avril 2026</span>
-              <button style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: '1rem' }}>→</button>
+              <button
+                onClick={prevMonth}
+                disabled={isPrevDisabled}
+                style={{ border: 'none', background: 'none', cursor: isPrevDisabled ? 'not-allowed' : 'pointer', color: isPrevDisabled ? 'var(--sand)' : 'var(--muted)', fontSize: '1rem' }}
+              >←</button>
+              <span style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--deep)' }}>
+                {MONTHS_FR[calMonth]} {calYear}
+              </span>
+              <button
+                onClick={nextMonth}
+                style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--muted)', fontSize: '1rem' }}
+              >→</button>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px', textAlign: 'center', marginBottom: '0.4rem' }}>
               {['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => (
@@ -230,10 +259,14 @@ export default function BookingWidget({ slug, guideName, packages }: BookingWidg
               ))}
             </div>
           </div>
-          {occupiedDates.length > 0 && (
-            <div style={{ fontSize: '0.68rem', color: 'var(--muted)', marginTop: '0.4rem' }}>
-              <span style={{ display: 'inline-block', width: '8px', height: '8px', background: 'var(--sand)', borderRadius: '2px', marginRight: '4px' }}></span>
-              Jours 15-19 : non disponibles
+          {selectedDates.length === 1 && (
+            <div style={{ fontSize: '0.68rem', color: 'var(--gold-dark)', marginTop: '0.4rem', fontWeight: 600 }}>
+              Sélectionnez la date de fin
+            </div>
+          )}
+          {selectedDates.length === 2 && (
+            <div style={{ fontSize: '0.68rem', color: 'var(--green)', marginTop: '0.4rem', fontWeight: 600 }}>
+              ✓ {selectedDates[1] - selectedDates[0] + 1} jours sélectionnés
             </div>
           )}
         </div>
@@ -271,7 +304,7 @@ export default function BookingWidget({ slug, guideName, packages }: BookingWidg
 
         {/* CTA */}
         <Link
-          href={`/espace/checkout/${slug}?forfait=${selectedPackage}&personnes=${groupSize}${selectedDates.length >= 1 ? `&dateDebut=2026-04-${String(selectedDates[0]).padStart(2, '0')}` : ''}${selectedDates.length === 2 ? `&dateFin=2026-04-${String(selectedDates[1]).padStart(2, '0')}` : ''}`}
+          href={`/espace/checkout/${slug}?forfait=${selectedPackage}&personnes=${groupSize}${selectedDates.length >= 1 ? `&dateDebut=${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(selectedDates[0]).padStart(2, '0')}` : ''}${selectedDates.length === 2 ? `&dateFin=${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(selectedDates[1]).padStart(2, '0')}` : ''}`}
           style={{ display: 'block', textDecoration: 'none' }}
         >
           <button style={{

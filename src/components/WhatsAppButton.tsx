@@ -1,6 +1,14 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
+
 export default function WhatsAppButton() {
+  const pathname = usePathname();
+  const HIDE_PATHS = ['/connexion', '/inscription', '/admin', '/guide/connexion', '/guide/inscription'];
+  const shouldHide = pathname ? HIDE_PATHS.some(p => pathname.startsWith(p)) : false;
+
+  if (shouldHide) return null;
+
   return (
     <a
       href="https://wa.me/message/ZGUPRJRNVJRGN1"

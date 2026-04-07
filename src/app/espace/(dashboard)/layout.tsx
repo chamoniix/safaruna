@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import NotificationBell from '@/components/NotificationBell';
 
 /* ── HEROICONS SVG (stroke, 18×18) ── */
@@ -68,13 +69,13 @@ const NAV: { section: string; items: NavItem[] }[] = [
   { section: 'Mon voyage', items: [
     { href: '/espace/tableau-de-bord', Icon: IcoHome,     label: 'Tableau de bord' },
     { href: '/espace/reservations',   Icon: IcoCalendar, label: 'Mes réservations' },
-    { href: '/espace/messages',       Icon: IcoChat,     label: 'Messages', badge: '2', badgeColor: '#C9A84C' },
+    { href: '/espace/messages',       Icon: IcoChat,     label: 'Messages' },
     { href: '/espace/favoris',        Icon: IcoHeart,    label: 'Mes favoris' },
   ]},
   { section: 'Spiritualité', items: [
     { href: '/espace/academy',    Icon: IcoCap,         label: 'SAFARUMA Academy' },
     { href: '/espace/dua',        Icon: IcoBook,        label: "Carnet de Du'a" },
-    { href: '/espace/checklist',  Icon: IcoCheckCircle, label: 'Ma Checklist', badge: '6/12', badgeColor: '#1D5C3A' },
+    { href: '/espace/checklist',  Icon: IcoCheckCircle, label: 'Ma Checklist' },
     { href: '/espace/guide-omra', Icon: IcoBook,        label: 'Guide complet la Omra' },
   ]},
   { section: 'Mon compte', items: [
@@ -90,6 +91,13 @@ export default function PelerinLayout({ children }: { children: React.ReactNode 
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const isActive = (p: string) => pathname === p || pathname.startsWith(p + '/');
+
+  const { data: session } = useSession();
+  const sessionUser = session?.user as any;
+  const firstName = sessionUser?.firstName || session?.user?.name?.split(' ')[0] || 'Pèlerin';
+  const lastName  = sessionUser?.lastName  || session?.user?.name?.split(' ').slice(1).join(' ') || '';
+  const fullName  = [firstName, lastName].filter(Boolean).join(' ');
+  const initials  = [firstName[0], lastName[0]].filter(Boolean).join('').toUpperCase() || 'P';
 
   const NavLink = ({ item }: { item: NavItem }) => {
     const active = isActive(item.href);
@@ -166,9 +174,9 @@ export default function PelerinLayout({ children }: { children: React.ReactNode 
           </div>
 
           <div style={{ padding: '1.25rem 1.5rem 1rem', borderBottom: '1px solid #EDE8DC', display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
-            <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#1A1209', flexShrink: 0, border: '2px solid #EDE8DC' }}>KL</div>
+            <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#1A1209', flexShrink: 0, border: '2px solid #EDE8DC' }}>{initials}</div>
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#1A1209', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Karim Lamrani</div>
+              <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#1A1209', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{fullName}</div>
               <Link href="/espace/profil" style={{ fontSize: '0.68rem', color: '#C9A84C', textDecoration: 'none', fontWeight: 600 }}>Modifier le profil →</Link>
             </div>
           </div>

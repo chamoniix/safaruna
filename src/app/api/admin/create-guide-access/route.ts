@@ -1,55 +1,56 @@
-import { NextRequest, NextResponse } from "next/server"
-import { PrismaClient } from "@prisma/client"
-import bcrypt from "bcryptjs"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-
-const prisma = new PrismaClient()
+import { NextRequest, NextResponse } from 'next/server';
+import bcrypt from 'bcryptjs';
+import { verifyAdminToken } from '@/lib/admin-auth';
+import prisma from '@/lib/prisma';
 
 function generatePassword(length = 12): string {
-  const chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#"
-  return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join("")
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#';
+  return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions)
-  if (!session || (session.user as any)?.role !== "ADMIN") {
-    return NextResponse.json({ error: "Non autorisé" }, { status: 401 })
+  // ── Vérifier le cookie admin_session (JWT custom) ──
+  const session = req.cookies.get('admin_session')?.value;
+  const secret  = process.env.ADMIN_JWT_SECRET ?? '';
+
+  if (!session || !(await verifyAdminToken(session, secret))) {
+    return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
   }
 
-  const { email, firstName, lastName, guideSlug } = await req.json()
+  const { email, firstName, lastName } = await req.json();
+
   if (!email || !firstName) {
-    return NextResponse.json({ error: "Email et prénom requis" }, { status: 400 })
+    return NextResponse.json({ error: 'Email et prénom requis' }, { status: 400 });
   }
 
-  const tempPassword = generatePassword()
-  const passwordHash = await bcrypt.hash(tempPassword, 12)
+  const tempPassword = generatePassword();
+  const passwordHash = await bcrypt.hash(tempPassword, 12);
 
   try {
     const user = await prisma.user.upsert({
       where: { email },
-      update: { passwordHash, role: "GUIDE", firstName, lastName: lastName || "" },
+      update: { passwordHash, role: 'GUIDE', firstName, lastName: lastName || '' },
       create: {
         email,
-        name: `${firstName} ${lastName || ""}`.trim(),
+        name: `${firstName} ${lastName || ''}`.trim(),
         firstName,
-        lastName: lastName || "",
+        lastName: lastName || '',
         passwordHash,
-        role: "GUIDE",
+        role: 'GUIDE',
       },
-    })
+    });
 
     // Envoyer email via Brevo
-    await fetch("https://api.brevo.com/v3/smtp/email", {
-      method: "POST",
+    await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
-        "api-key": process.env.BREVO_API_KEY || "",
+        'Content-Type': 'application/json',
+        'api-key': process.env.BREVO_API_KEY || '',
       },
       body: JSON.stringify({
-        sender: { name: "SAFARUMA", email: "noreply@safaruma.com" },
-        to: [{ email, name: `${firstName} ${lastName || ""}`.trim() }],
-        subject: "Vos accès Guide SAFARUMA",
+        sender: { name: 'SAFARUMA', email: 'noreply@safaruma.com' },
+        to: [{ email, name: `${firstName} ${lastName || ''}`.trim() }],
+        subject: 'Vos accès Guide SAFARUMA',
         htmlContent: `
           <div style="font-family: Arial, sans-serif; max-width: 520px; margin: 0 auto; background: #1A1209; color: white; border-radius: 12px; padding: 2rem;">
             <h1 style="font-size: 1.8rem; color: #C9A84C; margin-bottom: 0.5rem;">SAFARUMA</h1>
@@ -66,11 +67,13 @@ export async function POST(req: NextRequest) {
           </div>
         `,
       }),
-    })
+    });
 
-    return NextResponse.json({ success: true, userId: user.id, email, tempPassword })
+    // Ne PAS retourner tempPassword dans la réponse — déjà envoyé par email
+    return NextResponse.json({ success: true, userId: user.id, email });
+
   } catch (error) {
-    console.error(error)
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
+    console.error('[create-guide-access]', error);
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }

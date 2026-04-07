@@ -10,9 +10,9 @@ const STATS = [
 ];
 
 const CHECKLIST_ITEMS = [
-  { done: true,  label: 'Demander le visa Nusuk (eVisa)' },
-  { done: true,  label: 'Vaccin méningite ACYW' },
-  { done: true,  label: 'Réserver l\'hébergement' },
+  { done: false, label: 'Demander le visa Nusuk (eVisa)' },
+  { done: false, label: 'Vaccin méningite ACYW' },
+  { done: false, label: 'Réserver l\'hébergement' },
   { done: false, label: 'Acheter l\'Ihram (2 pièces blanches)' },
   { done: false, label: 'Mémoriser les du\'a du tawaf' },
   { done: false, label: 'Préparer la trousse médicale' },
@@ -269,12 +269,12 @@ export default function PelerinDashboard() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.875rem' }}>
               <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.25rem', fontWeight: 600, color: '#1A1209' }}>Préparation</h2>
-              <span style={{ background: '#E8F5EE', color: '#1D5C3A', fontSize: '0.65rem', fontWeight: 700, padding: '0.2rem 0.65rem', borderRadius: 50 }}>6 / 12</span>
+              <span style={{ background: '#F5F0E8', color: '#7A6D5A', fontSize: '0.65rem', fontWeight: 700, padding: '0.2rem 0.65rem', borderRadius: 50 }}>0 / 6</span>
             </div>
             <div style={{ background: 'white', borderRadius: 20, border: '1px solid #EDE8DC', padding: '1.25rem', boxShadow: '0 2px 8px rgba(26,18,9,0.04)' }}>
               {/* Progress bar */}
               <div style={{ height: 4, background: '#EDE8DC', borderRadius: 50, overflow: 'hidden', marginBottom: '1.25rem' }}>
-                <div style={{ height: '100%', width: '50%', background: 'linear-gradient(90deg, #C9A84C, #F0D897)', borderRadius: 50 }} />
+                <div style={{ height: '100%', width: '0%', background: 'linear-gradient(90deg, #C9A84C, #F0D897)', borderRadius: 50 }} />
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
                 {CHECKLIST_ITEMS.map((item) => (

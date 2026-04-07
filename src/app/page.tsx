@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
 import StatsSection from "@/components/StatsSection";
+import PersonaSection from "@/components/PersonaSection";
 import {
   IconMegaphone, IconEye, IconChat, IconGraduationCap, IconShield, IconUserGroup,
   IconMosque, IconMountain, IconBuilding, IconMap,
@@ -255,6 +256,27 @@ export default function Home() {
           STATS — animated counters
           ═══════════════════════════════════════════════════════ */}
       <StatsSection />
+
+      {/* ═══════════════════════════════════════════════════════
+          QUESTIONNEMENT — Personas / Ce voyage est pour vous
+          ═══════════════════════════════════════════════════════ */}
+      <section style={{ background: 'var(--cream)', padding: '6rem 4rem', borderTop: '1px solid var(--sand)' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
+            <span style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--gold-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--gold)', display: 'inline-block', animation: 'pulse 2s infinite' }} />
+              Ce voyage est pour vous
+            </span>
+          </div>
+          <h2 className="reveal reveal-d1" style={{ textAlign: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: 300, color: 'var(--deep)', margin: '0.75rem 0 0.5rem', lineHeight: 1.2 }}>
+            Peu importe <em style={{ color: 'var(--gold-dark)', fontStyle: 'italic' }}>où vous en êtes.</em>
+          </h2>
+          <p className="reveal reveal-d2" style={{ textAlign: 'center', color: 'var(--muted)', maxWidth: 480, margin: '0 auto 2rem', lineHeight: 1.75, fontSize: '0.9rem' }}>
+            Reconnaissez-vous dans l&apos;un de ces profils ?
+          </p>
+          <PersonaSection />
+        </div>
+      </section>
 
       {/* ═══════════════════════════════════════════════════════
           LE PROBLÈME — dark, text reveal

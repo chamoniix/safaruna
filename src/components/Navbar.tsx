@@ -148,8 +148,8 @@ export default function Navbar() {
           <div className="nb-banner">
             <span className="nb-banner-dot" />
             <span>
-              Au-delà de ce que vous imaginez —{' '}
-              <Link href="/guides">Découvrir →</Link>
+              La Omra n&apos;attend pas que vous soyez prêt —{' '}
+              <Link href="/guide-omra">Découvrir →</Link>
             </span>
           </div>
         )}

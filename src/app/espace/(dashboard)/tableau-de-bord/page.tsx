@@ -3,10 +3,10 @@
 import Link from 'next/link';
 
 const STATS = [
-  { icon: '✦', iconBg: 'linear-gradient(135deg, #F0D897, #C9A84C)', iconColor: '#7A5200', value: '1', label: 'Omra réservée', sub: 'Juin 2025' },
-  { icon: '▶', iconBg: 'linear-gradient(135deg, #9FE1CB, #1D9E75)', iconColor: 'white',  value: '45%', label: 'Academy', sub: 'Module 2/5' },
-  { icon: '☑', iconBg: 'linear-gradient(135deg, #A8C4FF, #1A4A8A)', iconColor: 'white',  value: '6/12', label: 'Checklist', sub: 'En cours' },
-  { icon: '◎', iconBg: 'linear-gradient(135deg, #F4A8A8, #C0392B)', iconColor: 'white',  value: '2', label: 'Messages', sub: 'Non lus' },
+  { icon: '✦', iconBg: 'linear-gradient(135deg, #F0D897, #C9A84C)', iconColor: '#7A5200', value: '1', label: 'Omra réservée', sub: 'Juin 2025', href: '/espace/reservations' },
+  { icon: '▶', iconBg: 'linear-gradient(135deg, #9FE1CB, #1D9E75)', iconColor: 'white',  value: '45%', label: 'Academy', sub: 'Module 2/5', href: '/espace/academy' },
+  { icon: '☑', iconBg: 'linear-gradient(135deg, #A8C4FF, #1A4A8A)', iconColor: 'white',  value: '6/12', label: 'Checklist', sub: 'En cours', href: '/espace/checklist' },
+  { icon: '◎', iconBg: 'linear-gradient(135deg, #F4A8A8, #C0392B)', iconColor: 'white',  value: '2', label: 'Messages', sub: 'Non lus', href: '/espace/messages' },
 ];
 
 const CHECKLIST_ITEMS = [
@@ -86,7 +86,10 @@ export default function PelerinDashboard() {
       {/* ── 4 STAT CARDS ── */}
       <div className="dash-stat-cards" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
         {STATS.map((s) => (
-          <div key={s.label} style={{ background: 'white', borderRadius: 18, padding: '1.4rem 1.5rem', border: '1px solid #EDE8DC', boxShadow: '0 2px 8px rgba(26,18,9,0.04)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <Link key={s.label} href={s.href} style={{ textDecoration: 'none', display: 'flex', background: 'white', borderRadius: 18, padding: '1.4rem 1.5rem', border: '1px solid #EDE8DC', boxShadow: '0 2px 8px rgba(26,18,9,0.04)', alignItems: 'center', gap: '1rem', transition: 'border-color 0.15s, transform 0.15s, box-shadow 0.15s', cursor: 'pointer' }}
+            onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = '#C9A84C'; el.style.transform = 'translateY(-2px)'; el.style.boxShadow = '0 6px 20px rgba(26,18,9,0.08)'; }}
+            onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = '#EDE8DC'; el.style.transform = ''; el.style.boxShadow = '0 2px 8px rgba(26,18,9,0.04)'; }}
+          >
             <div style={{ width: 46, height: 46, borderRadius: 14, background: s.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: s.iconColor, fontSize: '1rem', flexShrink: 0 }}>
               {s.icon}
             </div>
@@ -95,7 +98,7 @@ export default function PelerinDashboard() {
               <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.2 }}>{s.label}</div>
               <div style={{ fontSize: '0.65rem', color: '#7A6D5A', marginTop: 2 }}>{s.sub}</div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
 

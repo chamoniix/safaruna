@@ -197,7 +197,7 @@ function GuideAvatarSVG({ slug, gradient, initials, isWoman }: { slug: string; g
           src="/guide-avatar.png"
           alt="Naïm LAAMARI"
           fill
-          style={{ objectFit: 'cover', objectPosition: 'center top' }}
+          style={{ objectFit: 'cover', objectPosition: 'center 20%' }}
         />
       </div>
     );

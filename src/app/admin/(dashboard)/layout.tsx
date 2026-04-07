@@ -45,7 +45,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const currentNav = NAV.find(n => pathname === n.href || pathname.startsWith(n.href + '/'));
+  const currentNav = pathname ? NAV.find(n => pathname === n.href || pathname.startsWith(n.href + '/')) : undefined;
   const pageTitle = currentNav?.label ?? 'Administration';
 
   return (
@@ -96,7 +96,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
         {/* Nav */}
         <nav style={{ flex: 1, overflowY: 'auto', padding: '0.75rem' }}>
           {NAV.map(({ href, label, icon, badge }) => {
-            const active = pathname === href || pathname.startsWith(href + '/');
+            const active = pathname ? (pathname === href || pathname.startsWith(href + '/')) : false;
             return (
               <Link
                 key={href} href={href}

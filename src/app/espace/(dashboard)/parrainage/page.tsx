@@ -3,10 +3,13 @@
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 
-function generateRefCode(name: string): string {
-  const clean = (name || 'AMI').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 6);
-  const hash = Math.abs(Array.from(clean).reduce((acc, c) => acc * 31 + c.charCodeAt(0), 0) % 9999).toString().padStart(4, '0');
-  return `${clean}-${hash}`;
+function generateRefCode(name: string, userId: string): string {
+  const clean = (name || 'AMI').toUpperCase().replace(/[^A-Z]/g, '').slice(0, 5);
+  // Utiliser l'ID unique du user pour garantir l'unicité
+  const idHash = Math.abs(
+    Array.from(userId || '').reduce((acc, c) => acc * 31 + c.charCodeAt(0), 0) % 9999
+  ).toString().padStart(4, '0');
+  return `${clean}-${idHash}`;
 }
 
 const STEPS = [
@@ -23,7 +26,8 @@ const FAKE_HISTORY = [
 export default function ParrainagePage() {
   const { data: session } = useSession();
   const firstName = (session?.user as any)?.firstName || session?.user?.name?.split(' ')[0] || 'MON';
-  const refCode = generateRefCode(firstName);
+  const userId = (session?.user as any)?.id || session?.user?.email || 'default';
+  const refCode = generateRefCode(firstName, userId);
   const refUrl = `https://safaruma.com/rejoindre?ref=${refCode}`;
 
   const [copied, setCopied] = useState(false);

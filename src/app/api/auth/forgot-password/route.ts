@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+import prisma from '@/lib/prisma'
 import { sendPasswordReset } from '@/lib/email'
 import crypto from 'crypto'
-
-const prisma = new PrismaClient()
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,7 +29,8 @@ export async function POST(req: NextRequest) {
     })
 
     // Envoyer l'email
-    const resetUrl = `${process.env.NEXTAUTH_URL}/reinitialiser-mot-de-passe?token=${token}`
+    const baseUrl = process.env.NEXTAUTH_URL || 'https://safaruma.com'
+    const resetUrl = `${baseUrl}/reinitialiser-mot-de-passe?token=${token}`
     await sendPasswordReset({
       to: email,
       name: user.firstName || user.name || '',

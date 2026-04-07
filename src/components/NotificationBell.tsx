@@ -37,9 +37,16 @@ export default function NotificationBell() {
 
   const unreadCount = notifs.filter(n => !n.readAt).length;
 
+  const stopPolling = useRef(false);
+
   const fetchNotifs = async () => {
+    if (stopPolling.current) return;
     try {
       const res = await fetch('/api/notifications');
+      if (res.status === 401) {
+        stopPolling.current = true; // Arrêter le polling si non connecté
+        return;
+      }
       if (res.ok) {
         const data = await res.json();
         setNotifs(data.notifications || []);
@@ -50,7 +57,10 @@ export default function NotificationBell() {
   useEffect(() => {
     fetchNotifs();
     const interval = setInterval(fetchNotifs, 30000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      stopPolling.current = true;
+    };
   }, []);
 
   useEffect(() => {

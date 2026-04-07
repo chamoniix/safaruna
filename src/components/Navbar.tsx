@@ -7,9 +7,9 @@ import { useState } from 'react';
 
 const HIDE_BANNER_PATHS = ['/connexion', '/inscription', '/guide/connexion', '/guide/inscription', '/admin'];
 
-const NAV_LINKS = [
+const NAV_LINKS: { href: string; label: string; isAnchor?: boolean }[] = [
   { href: '/guides', label: 'Nos guides' },
-  { href: '/#packages', label: 'Forfaits' },
+  { href: '/#packages', label: 'Forfaits', isAnchor: true },
   { href: '/services', label: 'Services' },
   { href: '/guide-omra', label: 'Guide Omra' },
   { href: '/certification', label: 'Certification' },
@@ -161,7 +161,14 @@ export default function Navbar() {
 
           <div className="nb-links">
             {NAV_LINKS.map(l => (
-              <Link key={l.href} href={l.href}>{l.label}</Link>
+              <Link
+                key={l.href}
+                href={l.href}
+                onClick={l.isAnchor && pathname !== '/' ? (e) => {
+                  e.preventDefault();
+                  window.location.href = '/#packages';
+                } : undefined}
+              >{l.label}</Link>
             ))}
           </div>
 
@@ -193,7 +200,16 @@ export default function Navbar() {
 
         <div className={`nb-mobile-menu${menuOpen ? ' open' : ''}`}>
           {NAV_LINKS.map(l => (
-            <Link key={l.href} href={l.href} className="nb-mobile-link" onClick={() => setMenuOpen(false)}>
+            <Link
+              key={l.href}
+              href={l.href}
+              className="nb-mobile-link"
+              onClick={l.isAnchor && pathname !== '/' ? (e) => {
+                e.preventDefault();
+                setMenuOpen(false);
+                window.location.href = '/#packages';
+              } : () => setMenuOpen(false)}
+            >
               {l.label}
             </Link>
           ))}

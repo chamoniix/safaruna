@@ -88,9 +88,7 @@ export default function PelerinDashboard() {
       {/* ── 4 STAT CARDS ── */}
       <div className="dash-stat-cards" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
         {STATS.map((s) => (
-          <Link key={s.label} href={s.href} style={{ textDecoration: 'none', display: 'flex', background: 'white', borderRadius: 18, padding: '1.4rem 1.5rem', border: '1px solid #EDE8DC', boxShadow: '0 2px 8px rgba(26,18,9,0.04)', alignItems: 'center', gap: '1rem', transition: 'border-color 0.15s, transform 0.15s, box-shadow 0.15s', cursor: 'pointer' }}
-            onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = '#C9A84C'; el.style.transform = 'translateY(-2px)'; el.style.boxShadow = '0 6px 20px rgba(26,18,9,0.08)'; }}
-            onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = '#EDE8DC'; el.style.transform = ''; el.style.boxShadow = '0 2px 8px rgba(26,18,9,0.04)'; }}
+          <Link key={s.label} href={s.href} className="dash-stat-card" style={{ textDecoration: 'none', display: 'flex', background: 'white', borderRadius: 18, padding: '1.4rem 1.5rem', border: '1px solid #EDE8DC', boxShadow: '0 2px 8px rgba(26,18,9,0.04)', alignItems: 'center', gap: '1rem', cursor: 'pointer' }}
           >
             <div style={{ width: 46, height: 46, borderRadius: 14, background: s.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', color: s.iconColor, fontSize: '1rem', flexShrink: 0 }}>
               {s.icon}
@@ -110,6 +108,10 @@ export default function PelerinDashboard() {
           @media (max-width: 900px) {
             .dash-grid { grid-template-columns: 1fr !important; }
             .dash-main-grid { grid-template-columns: 1fr !important; }
+          }
+          .dash-stat-card { transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s; }
+          @media (hover: hover) {
+            .dash-stat-card:hover { border-color: #C9A84C; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(26,18,9,0.08); }
           }
           .play-btn:hover { transform: scale(1.12) !important; }
           .card-hover:hover { border-color: #C9A84C !important; }

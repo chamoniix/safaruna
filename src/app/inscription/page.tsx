@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { signup } from '../connexion/actions';
@@ -9,6 +9,7 @@ import { signIn } from 'next-auth/react';
 function RegisterForm() {
   const searchParams = useSearchParams();
   const refCode = searchParams.get('ref') || '';
+  const [pwdError, setPwdError] = useState('');
 
   return (
     <>
@@ -154,17 +155,13 @@ function RegisterForm() {
             {/* WhatsApp */}
             <div>
               <label className="ins-label" htmlFor="whatsapp">WhatsApp (optionnel)</label>
-              <div style={{ position: 'relative' }}>
-                <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: '0.85rem', color: '#7A6D5A', pointerEvents: 'none' }}>🇫🇷 +33</span>
-                <input
-                  className="ins-input"
-                  id="whatsapp"
-                  name="whatsapp"
-                  type="tel"
-                  placeholder="6 12 34 56 78"
-                  style={{ paddingLeft: '70px' }}
-                />
-              </div>
+              <input
+                className="ins-input"
+                id="whatsapp"
+                name="whatsapp"
+                type="tel"
+                placeholder="+33 6 12 34 56 78"
+              />
               <p style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 4, marginBottom: 0 }}>
                 Pour recevoir les confirmations et offres de guides
               </p>
@@ -173,8 +170,23 @@ function RegisterForm() {
             {/* Mot de passe */}
             <div>
               <label className="ins-label" htmlFor="password">Mot de passe</label>
-              <input className="ins-input" id="password" name="password" type="password" required placeholder="••••••••" />
-              <p style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 5, marginBottom: 0 }}>Minimum 8 caractères.</p>
+              <input
+                className="ins-input"
+                id="password"
+                name="password"
+                type="password"
+                required
+                placeholder="••••••••"
+                onBlur={(e) => {
+                  if (e.target.value && e.target.value.length < 8) {
+                    setPwdError('Le mot de passe doit contenir au moins 8 caractères.');
+                  } else {
+                    setPwdError('');
+                  }
+                }}
+              />
+              {pwdError && <p style={{ fontSize: '0.72rem', color: '#C0392B', marginTop: 4, marginBottom: 0 }}>{pwdError}</p>}
+              {!pwdError && <p style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 5, marginBottom: 0 }}>Minimum 8 caractères.</p>}
             </div>
 
             {/* Verset */}

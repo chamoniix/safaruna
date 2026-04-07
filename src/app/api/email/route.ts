@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 import {
   sendWelcomePelerin,
   sendWelcomeGuide,
@@ -8,6 +10,18 @@ import {
 } from '@/lib/email';
 
 export async function POST(req: NextRequest) {
+  // ── Vérification : clé interne OU session authentifiée ──
+  const internalKey = req.headers.get('x-internal-key');
+  const validKey = process.env.INTERNAL_API_KEY;
+
+  if (!internalKey || internalKey !== validKey) {
+    // Fallback : vérifier session NextAuth
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+    }
+  }
+
   try {
     const body = await req.json();
     const { type } = body;

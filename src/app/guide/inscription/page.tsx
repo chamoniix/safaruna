@@ -59,7 +59,7 @@ export default function GuideOnboarding() {
     if (guideEmail) {
       fetch('/api/email', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-internal-key': process.env.INTERNAL_API_KEY || '' },
         body: JSON.stringify({ type: 'welcome_guide', email: guideEmail, name: guideName || guideEmail.split('@')[0] }),
       }).catch(() => {});
     }

@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import { adminLogout } from '@/app/admin/login/actions';
 
 const NAV = [
@@ -55,7 +54,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
           position: fixed; top: 0; left: 0; height: 100vh; width: 240px;
           background: #0F0A05; z-index: 50; display: flex; flex-direction: column;
           border-right: 1px solid rgba(201,168,76,0.1);
-          transition: transform 0.25s ease;
+          transition: transform 0.25s ease; overflow: hidden;
         }
         .admin-main {
           margin-left: 240px; min-height: 100vh;
@@ -82,8 +81,8 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
 
         {/* Logo */}
         <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(201,168,76,0.12)' }}>
-          <div>
-            <Image src="/logo.png" alt="SAFARUMA" width={140} height={40} priority style={{ objectFit: 'contain' }} />
+          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.6rem', fontWeight: 700, color: 'white', letterSpacing: '0.05em' }}>
+            SAFAR<span style={{ color: '#C9A84C' }}>U</span>MA
           </div>
           <div style={{ fontSize: '0.55rem', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.25)', marginTop: '0.2rem' }}>
             Administration

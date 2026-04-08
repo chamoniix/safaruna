@@ -615,10 +615,10 @@ export default function GuideSearchPage() {
         }
         @media (max-width: 768px) {
           .guides-hero {
-            padding-top: 5.5rem;
-            padding-bottom: 2rem;
-            padding-left: 1rem;
-            padding-right: 1rem;
+            padding-top: 5rem !important;
+            padding-bottom: 1.5rem !important;
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
           }
         }
 
@@ -669,7 +669,7 @@ export default function GuideSearchPage() {
         /* Hide sidebar on tablet + mobile */
         @media (max-width: 1023px) {
           .guides-sidebar { display: none !important; }
-          .guides-main { padding: 1.25rem 1rem 5rem; }
+          .guides-main { flex-direction: column; padding: 1.25rem 1rem 5rem; }
         }
 
         /* Mobile filter bar */
@@ -759,6 +759,11 @@ export default function GuideSearchPage() {
           }
           .guides-search-bar .prefs-grid {
             grid-template-columns: 1fr !important;
+          }
+          .guides-trust-bar {
+            gap: 0.75rem;
+            padding: 0.6rem 0.75rem;
+            font-size: 0.68rem;
           }
         }
       `}} />

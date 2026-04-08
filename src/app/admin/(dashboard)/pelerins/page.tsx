@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 type Pelerin = {
   id: string;
@@ -127,7 +128,7 @@ export default function AdminPelerins() {
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 680 }}>
             <thead>
               <tr style={{ background: '#F5F3EF', borderBottom: '1px solid #E8DFC8' }}>
-                {['Pèlerin', 'Téléphone', 'Pays', 'Réservations', 'Total dépensé', 'Inscrit le', 'Dernière connexion'].map(h => (
+                {['Pèlerin', 'Téléphone', 'Pays', 'Réservations', 'Total dépensé', 'Inscrit le', 'Dernière connexion', ''].map(h => (
                   <th key={h} style={{ padding: '0.75rem 1.1rem', textAlign: 'left', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
@@ -136,7 +137,7 @@ export default function AdminPelerins() {
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} style={{ borderBottom: '1px solid #F0EBE0' }}>
-                    {Array.from({ length: 7 }).map((_, j) => (
+                    {Array.from({ length: 8 }).map((_, j) => (
                       <td key={j} style={{ padding: '1rem 1.1rem' }}>
                         <div style={{ height: 13, background: '#F0EDE8', borderRadius: 4, width: j === 0 ? 130 : 60 }} />
                       </td>
@@ -145,7 +146,7 @@ export default function AdminPelerins() {
                 ))
               ) : visible.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ padding: '3rem', textAlign: 'center', color: '#7A6D5A', fontSize: '0.85rem' }}>
+                  <td colSpan={8} style={{ padding: '3rem', textAlign: 'center', color: '#7A6D5A', fontSize: '0.85rem' }}>
                     Aucun pèlerin trouvé
                   </td>
                 </tr>
@@ -169,6 +170,11 @@ export default function AdminPelerins() {
                     </td>
                     <td style={{ padding: '0.875rem 1.1rem', fontSize: '0.75rem', color: '#7A6D5A', whiteSpace: 'nowrap' }}>{p.createdAt}</td>
                     <td style={{ padding: '0.875rem 1.1rem', fontSize: '0.75rem', color: '#9A8A7A', whiteSpace: 'nowrap' }}>{p.lastLogin || '—'}</td>
+                    <td style={{ padding: '0.875rem 1.1rem' }}>
+                      <Link href={`/admin/pelerins/${p.id}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.72rem', fontWeight: 700, color: '#7A6D5A', background: '#F5F2EC', border: '1px solid #E8DFC8', borderRadius: 6, padding: '0.3rem 0.65rem', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+                        Voir ↗
+                      </Link>
+                    </td>
                   </tr>
                 ))
               )}

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 type Guide = {
   id: string;
@@ -14,206 +15,213 @@ type Guide = {
   slug: string;
 };
 
-const STATUS: Record<string, { color: string; bg: string }> = {
-  'ACTIVE':      { color: '#16A34A', bg: '#DCFCE7' },
-  'DRAFT':       { color: '#D97706', bg: '#FEF3C7' },
-  'REVIEW':      { color: '#D97706', bg: '#FEF3C7' },
-  'SUSPENDED':   { color: '#DC2626', bg: '#FEE2E2' },
+const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+  ACTIVE:    { label: 'Actif',       color: '#1D5C3A', bg: '#D1FAE5' },
+  SUSPENDED: { label: 'Suspendu',    color: '#DC2626', bg: '#FEE2E2' },
+  REVIEW:    { label: 'En révision', color: '#92400E', bg: '#FEF3C7' },
+  DRAFT:     { label: 'Brouillon',   color: '#6B7280', bg: '#F3F4F6' },
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  'ACTIVE':    'ACTIF',
-  'DRAFT':     'EN ATTENTE',
-  'REVIEW':    'EN ATTENTE',
-  'SUSPENDED': 'SUSPENDU',
-};
-
-const card: React.CSSProperties = {
-  background: '#FFFFFF', borderRadius: 12,
-  boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-  border: '1px solid #E8DFC8', overflow: 'hidden',
-};
-
-export default function AdminGuides() {
-  const [guides, setGuides]   = useState<Guide[]>([]);
+export default function AdminGuidesPage() {
+  const [guides, setGuides] = useState<Guide[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter]   = useState('TOUS');
-  const [search, setSearch]   = useState('');
-  const [showModal, setShowModal] = useState(false);
-  const [form, setForm]       = useState({ email: '', firstName: '', lastName: '' });
-  const [creating, setCreating] = useState(false);
-  const [createMsg, setCreateMsg] = useState('');
+  const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [toggling, setToggling] = useState<string | null>(null);
 
   const fetchGuides = async () => {
     setLoading(true);
+    setError('');
     try {
       const res = await fetch('/api/admin/guides');
-      if (res.ok) {
-        const data = await res.json();
-        setGuides(data.guides || []);
-      }
-    } catch {}
+      if (!res.ok) throw new Error('Erreur ' + res.status);
+      const data = await res.json();
+      setGuides(data.guides || []);
+    } catch (e: any) {
+      setError(e.message || 'Erreur réseau');
+    }
     setLoading(false);
   };
 
   useEffect(() => { fetchGuides(); }, []);
 
-  const filters = ['TOUS', 'EN ATTENTE', 'ACTIF', 'SUSPENDU'];
+  const filtered = guides.filter(g => {
+    const matchSearch = !search ||
+      g.name.toLowerCase().includes(search.toLowerCase()) ||
+      g.email.toLowerCase().includes(search.toLowerCase()) ||
+      g.city.toLowerCase().includes(search.toLowerCase());
+    const matchStatus = statusFilter === 'ALL' || g.status === statusFilter;
+    return matchSearch && matchStatus;
+  });
 
-  const visible = guides
-    .filter(g => filter === 'TOUS' || STATUS_LABELS[g.status] === filter)
-    .filter(g => !search || g.name.toLowerCase().includes(search.toLowerCase()) || g.email.toLowerCase().includes(search.toLowerCase()));
-
-  const handleCreate = async () => {
-    if (!form.email || !form.firstName) return;
-    setCreating(true);
-    setCreateMsg('');
-    try {
-      const res = await fetch('/api/admin/create-guide-access', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setCreateMsg('✓ Guide créé — accès envoyé par email');
-        setForm({ email: '', firstName: '', lastName: '' });
-        fetchGuides();
-        setTimeout(() => { setShowModal(false); setCreateMsg(''); }, 2000);
-      } else {
-        setCreateMsg('Erreur : ' + (data.error || 'inconnue'));
-      }
-    } catch {
-      setCreateMsg('Erreur réseau');
-    }
-    setCreating(false);
+  const stats = {
+    total:    guides.length,
+    active:   guides.filter(g => g.status === 'ACTIVE').length,
+    review:   guides.filter(g => g.status === 'REVIEW').length,
+    suspended: guides.filter(g => g.status === 'SUSPENDED').length,
   };
 
-  const handleStatusChange = async (guideId: string, action: 'activate' | 'suspend') => {
+  const handleToggle = async (guide: Guide) => {
+    const action = guide.status === 'ACTIVE' ? 'suspend' : 'activate';
+    const label = action === 'suspend' ? 'suspendre' : 'activer';
+    if (!window.confirm(`Confirmer : ${label} le guide ${guide.name} ?`)) return;
+
+    setToggling(guide.id);
     try {
-      await fetch('/api/admin/guides', {
+      const res = await fetch('/api/admin/guides', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ guideId, action }),
+        body: JSON.stringify({ guideId: guide.id, action }),
       });
-      fetchGuides();
-    } catch {}
+      if (!res.ok) throw new Error();
+      await fetchGuides();
+    } catch {
+      alert('Erreur lors du changement de statut.');
+    }
+    setToggling(null);
   };
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+  const STAT_CARDS = [
+    { label: 'Total guides',  value: stats.total,    color: '#1A1209', bg: 'white' },
+    { label: 'Actifs',        value: stats.active,   color: '#1D5C3A', bg: '#D1FAE5' },
+    { label: 'En révision',   value: stats.review,   color: '#92400E', bg: '#FEF3C7' },
+    { label: 'Suspendus',     value: stats.suspended, color: '#DC2626', bg: '#FEE2E2' },
+  ];
 
-      {/* Toolbar */}
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', fontFamily: 'var(--font-manrope, sans-serif)' }}>
+
+      {/* Stats bar */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+        {STAT_CARDS.map(s => (
+          <div key={s.label} style={{ background: s.bg, border: '1px solid #E8DFC8', borderRadius: 12, padding: '1.25rem' }}>
+            <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.5rem' }}>{s.label}</div>
+            <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2.2rem', fontWeight: 700, color: s.color, lineHeight: 1 }}>
+              {loading ? '—' : s.value}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Search + Filter */}
       <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-        <div style={{ position: 'relative', flex: '1 1 220px', maxWidth: 320 }}>
+        <div style={{ position: 'relative', flex: '1 1 240px', maxWidth: 360 }}>
           <svg style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}
             width="15" height="15" fill="none" stroke="#7A6D5A" strokeWidth="2" viewBox="0 0 24 24">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
           </svg>
           <input
-            value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Rechercher un guide…"
-            style={{ width: '100%', padding: '0.55rem 1rem 0.55rem 2.2rem', boxSizing: 'border-box', background: '#FFFFFF', border: '1px solid #E8DFC8', borderRadius: 8, fontSize: '0.83rem', color: '#1A1209', outline: 'none', fontFamily: 'inherit' }}
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Rechercher par nom, email, ville…"
+            style={{ width: '100%', padding: '0.6rem 1rem 0.6rem 2.25rem', boxSizing: 'border-box', border: '1px solid #E8DFC8', borderRadius: 8, fontSize: '0.83rem', fontFamily: 'inherit', color: '#1A1209', background: 'white', outline: 'none' }}
           />
         </div>
-        <div style={{ display: 'flex', gap: '0.4rem' }}>
-          {filters.map(f => (
-            <button key={f} onClick={() => setFilter(f)} style={{ padding: '0.45rem 0.9rem', borderRadius: 20, cursor: 'pointer', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.04em', fontFamily: 'inherit', background: filter === f ? '#1A1209' : '#FFFFFF', color: filter === f ? '#F0D897' : '#7A6D5A', border: `1px solid ${filter === f ? '#1A1209' : '#E8DFC8'}` }}>
-              {f}
-            </button>
-          ))}
-        </div>
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <span style={{ fontSize: '0.78rem', color: '#7A6D5A' }}>{visible.length} guide{visible.length > 1 ? 's' : ''}</span>
-          <button onClick={() => setShowModal(true)} style={{ padding: '0.55rem 1.1rem', borderRadius: 8, border: 'none', background: '#1A1209', color: '#F0D897', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
-            + Créer un guide
-          </button>
-        </div>
+        <select
+          value={statusFilter}
+          onChange={e => setStatusFilter(e.target.value)}
+          style={{ padding: '0.6rem 1rem', border: '1px solid #E8DFC8', borderRadius: 8, fontSize: '0.83rem', fontFamily: 'inherit', color: '#1A1209', background: 'white', outline: 'none', cursor: 'pointer' }}
+        >
+          <option value="ALL">Tous les statuts</option>
+          <option value="ACTIVE">Actif</option>
+          <option value="REVIEW">En révision</option>
+          <option value="DRAFT">Brouillon</option>
+          <option value="SUSPENDED">Suspendu</option>
+        </select>
+        <span style={{ fontSize: '0.78rem', color: '#7A6D5A', marginLeft: 'auto' }}>
+          {loading ? '…' : `${filtered.length} guide${filtered.length !== 1 ? 's' : ''}`}
+        </span>
       </div>
 
+      {/* Error */}
+      {error && (
+        <div style={{ background: '#FEE2E2', border: '1px solid #FCA5A5', borderRadius: 8, padding: '0.75rem 1rem', fontSize: '0.83rem', color: '#DC2626' }}>
+          {error} — <button onClick={fetchGuides} style={{ color: '#DC2626', fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', textDecoration: 'underline' }}>Réessayer</button>
+        </div>
+      )}
+
       {/* Table */}
-      <div style={card}>
-        {loading ? (
-          <div style={{ padding: '3rem', textAlign: 'center', color: '#7A6D5A', fontSize: '0.85rem' }}>Chargement...</div>
-        ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div style={{ background: 'white', border: '1px solid #E8DFC8', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 720 }}>
             <thead>
-              <tr style={{ background: '#F5F3EF', borderBottom: '1px solid #E8DFC8' }}>
-                {['Guide', 'Ville', 'Langues', 'Réservations', 'Inscrit le', 'Statut', 'Actions'].map(h => (
-                  <th key={h} style={{ padding: '0.75rem 1.25rem', textAlign: 'left', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', whiteSpace: 'nowrap' }}>{h}</th>
+              <tr style={{ background: '#F5F2EC', borderBottom: '1px solid #E8DFC8' }}>
+                {['Nom / Email', 'Ville', 'Langues', 'Réservations', 'Inscrit le', 'Statut', 'Actions'].map(h => (
+                  <th key={h} style={{ padding: '0.75rem 1rem', textAlign: 'left', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
-              {visible.length === 0 && (
-                <tr><td colSpan={7} style={{ padding: '3rem', textAlign: 'center', color: '#7A6D5A', fontSize: '0.85rem' }}>Aucun guide trouvé</td></tr>
-              )}
-              {visible.map((g, i) => (
-                <tr key={g.id} style={{ background: i % 2 === 0 ? '#FFFFFF' : '#FAFAF8', borderBottom: '1px solid #F0EBE0' }}>
-                  <td style={{ padding: '1rem 1.25rem' }}>
-                    <div style={{ fontWeight: 600, color: '#1A1209', fontSize: '0.85rem' }}>{g.name}</div>
-                    <div style={{ fontSize: '0.7rem', color: '#7A6D5A', marginTop: 2 }}>{g.email}</div>
-                  </td>
-                  <td style={{ padding: '1rem 1.25rem', fontSize: '0.83rem', color: '#4A3F30' }}>{g.city || '—'}</td>
-                  <td style={{ padding: '1rem 1.25rem', fontSize: '0.78rem', color: '#7A6D5A' }}>{g.langs || '—'}</td>
-                  <td style={{ padding: '1rem 1.25rem', fontSize: '0.9rem', fontWeight: 700, color: '#1A1209' }}>{g.reservations}</td>
-                  <td style={{ padding: '1rem 1.25rem', fontSize: '0.78rem', color: '#7A6D5A' }}>{g.joined}</td>
-                  <td style={{ padding: '1rem 1.25rem' }}>
-                    <span style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.06em', padding: '0.3rem 0.65rem', borderRadius: 20, background: STATUS[g.status]?.bg || '#F5F5F5', color: STATUS[g.status]?.color || '#7A6D5A' }}>
-                      {STATUS_LABELS[g.status] || g.status}
-                    </span>
-                  </td>
-                  <td style={{ padding: '1rem 1.25rem' }}>
-                    <div style={{ display: 'flex', gap: '0.4rem' }}>
-                      {(g.status === 'DRAFT' || g.status === 'REVIEW') && (
-                        <button onClick={() => handleStatusChange(g.id, 'activate')} style={{ padding: '0.3rem 0.7rem', borderRadius: 6, border: '1px solid #16A34A', background: '#DCFCE7', color: '#16A34A', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Valider</button>
-                      )}
-                      {g.status === 'ACTIVE' && (
-                        <button onClick={() => handleStatusChange(g.id, 'suspend')} style={{ padding: '0.3rem 0.7rem', borderRadius: 6, border: '1px solid #DC2626', background: '#FEE2E2', color: '#DC2626', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Suspendre</button>
-                      )}
-                      {g.status === 'SUSPENDED' && (
-                        <button onClick={() => handleStatusChange(g.id, 'activate')} style={{ padding: '0.3rem 0.7rem', borderRadius: 6, border: '1px solid #16A34A', background: '#DCFCE7', color: '#16A34A', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Réactiver</button>
-                      )}
-                      <button style={{ padding: '0.3rem 0.7rem', borderRadius: 6, border: '1px solid #E8DFC8', background: '#FFFFFF', color: '#7A6D5A', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Voir</button>
-                    </div>
+              {loading ? (
+                Array.from({ length: 4 }).map((_, i) => (
+                  <tr key={i} style={{ borderBottom: '1px solid #F0EBE0' }}>
+                    {Array.from({ length: 7 }).map((_, j) => (
+                      <td key={j} style={{ padding: '1rem' }}>
+                        <div style={{ height: 14, background: '#F0EDE8', borderRadius: 4, width: j === 0 ? 140 : 60 }} />
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              ) : filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={7} style={{ padding: '3rem', textAlign: 'center', color: '#7A6D5A', fontSize: '0.85rem' }}>
+                    Aucun guide trouvé
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filtered.map((g, i) => {
+                  const sc = STATUS_CONFIG[g.status] || { label: g.status, color: '#6B7280', bg: '#F3F4F6' };
+                  const isActive = g.status === 'ACTIVE';
+                  const isToggling = toggling === g.id;
+                  return (
+                    <tr key={g.id} style={{ borderBottom: '1px solid #F0EBE0', background: i % 2 === 0 ? 'white' : '#FAFAF8' }}>
+                      <td style={{ padding: '0.875rem 1rem' }}>
+                        <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#1A1209' }}>{g.name || '—'}</div>
+                        <div style={{ fontSize: '0.7rem', color: '#7A6D5A', marginTop: 2 }}>{g.email}</div>
+                      </td>
+                      <td style={{ padding: '0.875rem 1rem', fontSize: '0.82rem', color: '#4A3F30' }}>{g.city || '—'}</td>
+                      <td style={{ padding: '0.875rem 1rem', fontSize: '0.75rem', color: '#7A6D5A', maxWidth: 140 }}>{g.langs || '—'}</td>
+                      <td style={{ padding: '0.875rem 1rem', fontSize: '0.9rem', fontWeight: 700, color: '#1A1209', textAlign: 'center' }}>{g.reservations}</td>
+                      <td style={{ padding: '0.875rem 1rem', fontSize: '0.75rem', color: '#7A6D5A', whiteSpace: 'nowrap' }}>{g.joined}</td>
+                      <td style={{ padding: '0.875rem 1rem' }}>
+                        <span style={{ display: 'inline-block', background: sc.bg, color: sc.color, fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.06em', padding: '0.28rem 0.65rem', borderRadius: 20, whiteSpace: 'nowrap' }}>
+                          {sc.label}
+                        </span>
+                      </td>
+                      <td style={{ padding: '0.875rem 1rem' }}>
+                        <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                          <button
+                            onClick={() => handleToggle(g)}
+                            disabled={isToggling}
+                            style={{
+                              padding: '6px 14px', borderRadius: 50, border: 'none', cursor: isToggling ? 'not-allowed' : 'pointer',
+                              background: isActive ? '#DC2626' : '#1D5C3A', color: 'white',
+                              fontSize: '0.7rem', fontWeight: 700, fontFamily: 'inherit',
+                              opacity: isToggling ? 0.6 : 1, whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {isToggling ? '…' : isActive ? 'Suspendre' : 'Activer'}
+                          </button>
+                          {g.slug && (
+                            <Link
+                              href={`/guides/${g.slug}`}
+                              target="_blank"
+                              style={{ padding: '6px 14px', borderRadius: 50, border: '1px solid #E8DFC8', background: 'white', color: '#7A6D5A', fontSize: '0.7rem', fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}
+                            >
+                              Voir ↗
+                            </Link>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
-        )}
-      </div>
-
-      {/* Modal créer guide */}
-      {showModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-          <div style={{ background: 'white', borderRadius: 16, padding: '2rem', width: '100%', maxWidth: 440, boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 700, color: '#1A1209', margin: 0 }}>Créer un accès guide</h2>
-              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7A6D5A', fontSize: '1.2rem' }}>✕</button>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
-              <div>
-                <label style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#7A6D5A', display: 'block', marginBottom: '0.3rem' }}>Prénom *</label>
-                <input value={form.firstName} onChange={e => setForm(f => ({ ...f, firstName: e.target.value }))} placeholder="Naïm" style={{ width: '100%', padding: '0.65rem 0.875rem', border: '1.5px solid #EDE8DC', borderRadius: 10, fontSize: '0.875rem', fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' }} />
-              </div>
-              <div>
-                <label style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#7A6D5A', display: 'block', marginBottom: '0.3rem' }}>Nom</label>
-                <input value={form.lastName} onChange={e => setForm(f => ({ ...f, lastName: e.target.value }))} placeholder="LAAMARI" style={{ width: '100%', padding: '0.65rem 0.875rem', border: '1.5px solid #EDE8DC', borderRadius: 10, fontSize: '0.875rem', fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' }} />
-              </div>
-              <div>
-                <label style={{ fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#7A6D5A', display: 'block', marginBottom: '0.3rem' }}>Email *</label>
-                <input value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="guide@email.com" type="email" style={{ width: '100%', padding: '0.65rem 0.875rem', border: '1.5px solid #EDE8DC', borderRadius: 10, fontSize: '0.875rem', fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' }} />
-              </div>
-              {createMsg && <div style={{ fontSize: '0.82rem', color: createMsg.startsWith('✓') ? '#16A34A' : '#DC2626', fontWeight: 600, textAlign: 'center' }}>{createMsg}</div>}
-              <button onClick={handleCreate} disabled={creating || !form.email || !form.firstName} style={{ padding: '0.8rem', background: '#1A1209', color: '#F0D897', border: 'none', borderRadius: 50, fontWeight: 700, fontSize: '0.875rem', cursor: creating ? 'not-allowed' : 'pointer', fontFamily: 'inherit', opacity: creating ? 0.7 : 1, marginTop: '0.5rem' }}>
-                {creating ? 'Création...' : 'Créer et envoyer les accès →'}
-              </button>
-              <p style={{ fontSize: '0.72rem', color: '#7A6D5A', textAlign: 'center', margin: 0 }}>Un email avec le mot de passe temporaire sera envoyé automatiquement.</p>
-            </div>
-          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

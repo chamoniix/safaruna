@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import GuideProfileClient from './GuideProfileClient';
 import type { Metadata } from 'next';
+import prisma from '@/lib/prisma';
 
 const GUIDE_META: Record<string, { name: string; title: string; desc: string }> = {
   'naim-laamari':       { name: 'Naïm LAAMARI',       title: 'Guide Officiel SAFARUMA',          desc: "Responsable Terrain SAFARUMA à Makkah. 8 ans d'expérience, certifié mutawwif." },
@@ -14,31 +15,70 @@ const GUIDE_META: Record<string, { name: string; title: string; desc: string }> 
   'samira-al-rashidi':  { name: 'Samira Al-Rashidi',  title: 'Spécialiste PMR · Madinah',        desc: 'Spécialisée dans l\'accompagnement des personnes à mobilité réduite à Madinah.' },
 };
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const g = GUIDE_META[params.slug];
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  try {
+    const guideData = await prisma.guideProfile.findUnique({
+      where: { slug },
+      include: { user: true },
+    });
+    if (guideData) {
+      const name = guideData.user.name
+        || `${guideData.user.firstName ?? ''} ${guideData.user.lastName ?? ''}`.trim()
+        || 'Guide';
+      const desc = guideData.bio || `Profil guide — ${name}`;
+      return {
+        title: `${name} — Guide | SAFARUMA`,
+        description: desc,
+        alternates: { canonical: `https://safaruma.com/guides/${slug}` },
+        openGraph: {
+          title: `${name} — SAFARUMA`,
+          description: desc,
+          url: `https://safaruma.com/guides/${slug}`,
+        },
+      };
+    }
+  } catch { /* fall through to hardcoded */ }
+  const g = GUIDE_META[slug];
   if (!g) return { title: 'Guide — SAFARUMA' };
   return {
     title: `${g.name} — ${g.title} | SAFARUMA`,
     description: g.desc,
-    alternates: { canonical: `https://safaruma.com/guides/${params.slug}` },
+    alternates: { canonical: `https://safaruma.com/guides/${slug}` },
     openGraph: {
       title: `${g.name} — SAFARUMA`,
       description: g.desc,
-      url: `https://safaruma.com/guides/${params.slug}`,
+      url: `https://safaruma.com/guides/${slug}`,
     },
   };
 }
 
-// Pre-render all guide pages at build time → no server-side DB lookup needed
+// Pre-render all guide pages at build time
 export async function generateStaticParams() {
-  return [
-    { slug: 'naim-laamari' },
-    { slug: 'rachid-al-madani' },
-    { slug: 'fatima-al-omari' },
-    { slug: 'youssouf-konate' },
-    { slug: 'abdullah-ben-yusuf' },
-    { slug: 'samira-al-rashidi' },
-  ];
+  try {
+    const guides = await prisma.guideProfile.findMany({
+      where: { slug: { not: null } },
+      select: { slug: true },
+    });
+    const dbSlugs = guides.filter(g => g.slug).map(g => ({ slug: g.slug! }));
+    // Merge with hardcoded slugs (deduped) so removed-from-DB guides don't 404
+    const hardcodedSlugs = [
+      'naim-laamari', 'rachid-al-madani', 'fatima-al-omari',
+      'youssouf-konate', 'abdullah-ben-yusuf', 'samira-al-rashidi',
+    ];
+    const seen = new Set(dbSlugs.map(s => s.slug));
+    for (const s of hardcodedSlugs) if (!seen.has(s)) dbSlugs.push({ slug: s });
+    return dbSlugs;
+  } catch {
+    return [
+      { slug: 'naim-laamari' },
+      { slug: 'rachid-al-madani' },
+      { slug: 'fatima-al-omari' },
+      { slug: 'youssouf-konate' },
+      { slug: 'abdullah-ben-yusuf' },
+      { slug: 'samira-al-rashidi' },
+    ];
+  }
 }
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
@@ -506,11 +546,78 @@ export default async function GuideProfilePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const guide = GUIDES[slug];
 
-  if (!guide) {
-    notFound();
+  // ── Fetch from Neon ───────────────────────────────────────────────────────
+  let guideData: Awaited<ReturnType<typeof prisma.guideProfile.findUnique>> & {
+    user: NonNullable<unknown>;
+    languages: NonNullable<unknown>[];
+    packages: NonNullable<unknown>[];
+  } | null = null;
+
+  try {
+    guideData = await prisma.guideProfile.findUnique({
+      where: { slug },
+      include: { user: true, languages: true, packages: true },
+    }) as typeof guideData;
+  } catch { /* DB error — fall through to hardcoded */ }
+
+  const hardcoded = GUIDES[slug] ?? null;
+  if (!guideData && !hardcoded) notFound();
+
+  // ── Build packages ────────────────────────────────────────────────────────
+  type PackageShape = { name: string; label: string; price: number; days: number; description: string; features: string[] };
+  let packages: PackageShape[];
+  const dbPackages = (guideData as any)?.packages ?? [];
+  if (dbPackages.length > 0) {
+    packages = dbPackages.map((p: any) => ({
+      name: p.name,
+      label: p.name,
+      price: p.pricePerPerson,
+      days: p.durationDays,
+      description: p.cancellationPolicy || '',
+      features: [],
+    }));
+  } else if (slug === 'naim-laamari') {
+    packages = NAIM_PACKAGES;
+  } else {
+    packages = PACKAGES;
   }
+
+  // ── Build reviews ─────────────────────────────────────────────────────────
+  const reviews = slug === 'naim-laamari' ? NAIM_REVIEWS : REVIEWS;
+
+  // ── Build guide object (Prisma preferred, hardcoded as fallback) ──────────
+  const dbUser = (guideData as any)?.user;
+  const dbLangs: any[] = (guideData as any)?.languages ?? [];
+  const prismaName = dbUser
+    ? (dbUser.name || `${dbUser.firstName ?? ''} ${dbUser.lastName ?? ''}`.trim()).trim()
+    : '';
+
+  const guide = {
+    name:         prismaName || hardcoded?.name || 'Guide SAFARUMA',
+    initials:     (prismaName || hardcoded?.name || 'GS').slice(0, 2).toUpperCase(),
+    location:     (guideData as any)?.city || hardcoded?.location || 'Arabie Saoudite',
+    experience:   (guideData as any)?.experienceYears ?? hardcoded?.experience ?? 0,
+    rating:       hardcoded?.rating ?? 5.0,
+    reviewCount:  hardcoded?.reviewCount ?? 0,
+    pilgrimsCount: hardcoded?.pilgrimsCount ?? '0',
+    returnRate:   hardcoded?.returnRate ?? 0,
+    speciality:   hardcoded?.speciality || (guideData as any)?.bio?.slice(0, 60) || '',
+    isOfficial:   slug === 'naim-laamari',
+    isWoman:      hardcoded?.isWoman ?? false,
+    languages:    dbLangs.length > 0
+                    ? dbLangs.map((l: any) => l.languageCode)
+                    : (hardcoded?.languages ?? []),
+    shortBio:     (guideData as any)?.bio || hardcoded?.shortBio || '',
+    bioFull:      hardcoded?.bioFull?.length
+                    ? hardcoded.bioFull
+                    : ((guideData as any)?.bio ? [(guideData as any).bio] : []),
+    certifications: hardcoded?.certifications?.length
+                    ? hardcoded.certifications
+                    : ((guideData as any)?.university ? [`Diplômé — ${(guideData as any).university}`] : []),
+    services:     hardcoded?.services ?? [],
+    gradient:     hardcoded?.gradient ?? 'linear-gradient(135deg, #F0D897, #C9A84C)',
+  };
 
   return (
     <>
@@ -771,9 +878,9 @@ export default async function GuideProfilePage({
           slug={slug}
           guideName={guide.name}
           isOfficial={guide.isOfficial ?? false}
-          packages={guide.isOfficial ? NAIM_PACKAGES : PACKAGES}
+          packages={packages}
           places={PLACES}
-          reviews={guide.isOfficial ? NAIM_REVIEWS : REVIEWS}
+          reviews={reviews}
           certifications={guide.certifications}
           services={guide.services}
           bioFull={guide.bioFull}

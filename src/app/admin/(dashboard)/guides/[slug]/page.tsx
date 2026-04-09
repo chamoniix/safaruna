@@ -64,10 +64,12 @@ export default function AdminGuideDetailPage() {
   // Access management
   const [genPassword, setGenPassword]     = useState(true);
   const [activating, setActivating]       = useState(false);
-  const [accessResult, setAccessResult]   = useState<{ password?: string; message: string; type: 'success' | 'error' } | null>(null);
+  const [accessResult, setAccessResult]   = useState<{ password?: string; guideEmail?: string; message: string; type: 'success' | 'error' } | null>(null);
 
-  const fetchGuide = async () => {
-    setLoading(true); setError('');
+  // silent=true → update data without showing the full-page skeleton (used for post-action refreshes)
+  const fetchGuide = async (silent = false) => {
+    if (!silent) setLoading(true);
+    setError('');
     try {
       const res = await fetch(`/api/admin/guides/${slug}`);
       if (!res.ok) throw new Error('Erreur ' + res.status);
@@ -80,7 +82,7 @@ export default function AdminGuideDetailPage() {
       setExpYears(g.experienceYears?.toString() || '');
       setStatus(g.status);
     } catch (e: any) { setError(e.message); }
-    setLoading(false);
+    if (!silent) setLoading(false);
   };
 
   useEffect(() => { if (slug) fetchGuide(); }, [slug]);
@@ -104,6 +106,7 @@ export default function AdminGuideDetailPage() {
   const handleAccess = async (action: 'activate' | 'suspend', overrideGenPw?: boolean) => {
     setActivating(true);
     setAccessResult(null);
+    const currentEmail = guide?.user.email || '';
     try {
       const generatePassword = overrideGenPw !== undefined ? overrideGenPw : genPassword;
       const res = await fetch(`/api/admin/guides/${slug}/activate`, {
@@ -113,8 +116,9 @@ export default function AdminGuideDetailPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erreur');
-      setAccessResult({ password: data.password, message: data.message, type: 'success' });
-      await fetchGuide();
+      // Set result BEFORE silent refresh so it stays visible
+      setAccessResult({ password: data.password, guideEmail: currentEmail, message: data.message, type: 'success' });
+      await fetchGuide(true); // silent: no skeleton flash
     } catch (e: any) {
       setAccessResult({ message: e.message, type: 'error' });
     }
@@ -152,7 +156,7 @@ export default function AdminGuideDetailPage() {
   if (error) return (
     <div style={{ background: '#FEE2E2', border: '1px solid #FCA5A5', borderRadius: 12, padding: '2rem', color: '#DC2626', textAlign: 'center' }}>
       {error}
-      <button onClick={fetchGuide} style={{ display: 'block', margin: '1rem auto 0', padding: '0.5rem 1.25rem', background: '#DC2626', color: 'white', border: 'none', borderRadius: 50, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700 }}>Réessayer</button>
+      <button onClick={() => fetchGuide()} style={{ display: 'block', margin: '1rem auto 0', padding: '0.5rem 1.25rem', background: '#DC2626', color: 'white', border: 'none', borderRadius: 50, cursor: 'pointer', fontFamily: 'inherit', fontWeight: 700 }}>Réessayer</button>
     </div>
   );
 
@@ -268,17 +272,26 @@ export default function AdminGuideDetailPage() {
             border: `1px solid ${accessResult.type === 'success' ? '#6EE7B7' : '#FCA5A5'}`,
             borderRadius: 10,
             padding: '1rem 1.25rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 8,
           }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: accessResult.type === 'success' ? '#1D5C3A' : '#DC2626', marginBottom: accessResult.password ? 8 : 0 }}>
-              {accessResult.type === 'success' ? '✅ ' : '✗ '}{accessResult.message}
+            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: accessResult.type === 'success' ? '#1D5C3A' : '#DC2626' }}>
+              {accessResult.type === 'success' ? '✅ ' : '✗ '}
+              {accessResult.password && accessResult.guideEmail
+                ? `Email envoyé à ${accessResult.guideEmail}`
+                : accessResult.message}
             </div>
             {accessResult.password && (
-              <div style={{ fontFamily: 'monospace', fontSize: '0.95rem', background: '#1A1209', color: '#F0D897', padding: '0.5rem 0.875rem', borderRadius: 6, display: 'inline-block', marginTop: 4 }}>
-                Mot de passe temporaire : <strong>{accessResult.password}</strong>
-              </div>
+              <>
+                <div style={{ fontFamily: 'monospace', fontSize: '0.9rem', background: '#1A1209', color: '#F0D897', padding: '0.5rem 0.875rem', borderRadius: 6, display: 'inline-block' }}>
+                  Mot de passe temporaire : <strong>{accessResult.password}</strong>
+                </div>
+                <div style={{ fontSize: '0.7rem', color: '#6B7280' }}>Visible une seule fois — disparaît au rechargement.</div>
+              </>
             )}
-            {accessResult.password && (
-              <div style={{ fontSize: '0.7rem', color: '#6B7280', marginTop: 8 }}>Visible une seule fois — disparaît au rechargement.</div>
+            {!accessResult.password && accessResult.type === 'success' && (
+              <div style={{ fontSize: '0.78rem', color: '#4A3F30' }}>{accessResult.message}</div>
             )}
           </div>
         )}

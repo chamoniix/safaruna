@@ -7,13 +7,35 @@ export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
 
-  const email = (session.user as any).email as string | undefined;
-  if (!email) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+  const email  = (session.user as any).email  as string | undefined;
+  const userId = (session.user as any).id      as string | undefined;
 
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) return NextResponse.json({ error: 'Introuvable' }, { status: 404 });
+  if (!email && !userId) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
 
   const now = new Date();
+
+  const user = await prisma.user.findFirst({
+    where: email ? { email } : { id: userId },
+  });
+
+  if (!user) {
+    // Google OAuth user exists in session but not yet in DB — upsert
+    await prisma.user.upsert({
+      where: { email: email! },
+      update: { lastLogin: now },
+      create: {
+        email: email!,
+        name: session.user.name || '',
+        role: 'PELERIN',
+        lastLogin: now,
+      },
+    });
+
+    return NextResponse.json({
+      stats: { total: 0, upcoming: 0, completed: 0, totalSpent: 0 },
+      reservations: [],
+    });
+  }
 
   const [reservations, totalSpentResult] = await Promise.all([
     prisma.reservation.findMany({

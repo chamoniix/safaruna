@@ -7,11 +7,15 @@ export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
 
-  const email = (session.user as any).email as string | undefined;
-  if (!email) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+  const email  = (session.user as any).email  as string | undefined;
+  const userId = (session.user as any).id      as string | undefined;
 
-  const user = await prisma.user.findUnique({
-    where: { email },
+  if (!email && !userId) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+
+  const now = new Date();
+
+  let user = await prisma.user.findFirst({
+    where: email ? { email } : { id: userId },
     include: {
       reservations: {
         orderBy: { createdAt: 'desc' },
@@ -33,11 +37,39 @@ export async function GET() {
     }
   });
 
-  if (!user) return NextResponse.json({ error: 'Utilisateur introuvable' }, { status: 404 });
+  if (!user) {
+    // Google OAuth user exists in session but not yet in DB — upsert
+    const upserted = await prisma.user.upsert({
+      where: { email: email! },
+      update: { lastLogin: now },
+      create: {
+        email: email!,
+        name: session.user.name || '',
+        role: 'PELERIN',
+        lastLogin: now,
+      },
+    });
 
-  const now = new Date();
+    return NextResponse.json({
+      user: {
+        id: upserted.id,
+        name: upserted.name || session.user.name || 'Pèlerin',
+        email: upserted.email || '',
+        firstName: null, lastName: null,
+        country: null, phoneWhatsapp: null,
+        createdAt: now.toLocaleDateString('fr-FR'),
+        initials: (upserted.name || session.user.name || 'P')[0].toUpperCase(),
+      },
+      stats: {
+        totalReservations: 0, upcomingReservations: 0,
+        completedReservations: 0, totalSpent: 0,
+      },
+      recentReservations: [],
+      unreadNotifications: 0,
+      notifications: [],
+    });
+  }
 
-  // Need all reservations for stats — fetch count queries separately
   const [totalReservations, upcomingReservations, completedReservations, spentResult] = await Promise.all([
     prisma.reservation.count({ where: { pelerinId: user.id } }),
     prisma.reservation.count({

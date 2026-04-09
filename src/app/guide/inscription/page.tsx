@@ -48,21 +48,60 @@ export default function GuideOnboarding() {
   const [currentStep, setCurrentStep] = useState(1);
   const [acceptedCharte, setAcceptedCharte] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [guideEmail, setGuideEmail] = useState('');
-  const [guideName, setGuideName] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+
+  // Step 1
+  const [prenom, setPrenom]           = useState('');
+  const [nom, setNom]                 = useState('');
+  const [guideEmail, setGuideEmail]   = useState('');
+  const [whatsapp, setWhatsapp]       = useState('');
+  const [city, setCity]               = useState('');
+  const [nationality, setNationality] = useState('');
+
+  // Step 2
+  const [selectedLangues, setSelectedLangues] = useState<string[]>([]);
+  const [experienceYears, setExperienceYears] = useState('');
+  const [bio, setBio]                         = useState('');
+
+  // Step 5
+  const [iban, setIban] = useState('');
+
+  const toggleLangue = (name: string) =>
+    setSelectedLangues(prev => prev.includes(name) ? prev.filter(l => l !== name) : [...prev, name]);
 
   const handleNext = () => setCurrentStep(p => Math.min(p + 1, 6));
   const handlePrev = () => setCurrentStep(p => Math.max(p - 1, 1));
-  const handleSubmit = (e: React.FormEvent) => {
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitted(true);
-    if (guideEmail) {
+    setSubmitting(true); setSubmitError('');
+    try {
+      const res = await fetch('/api/guide/inscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: prenom, lastName: nom, email: guideEmail,
+          whatsapp, city, nationality, bio,
+          experienceYears: experienceYears ? Number(experienceYears) : undefined,
+          languages: selectedLangues,
+          iban: iban || undefined,
+          acceptedCharte,
+        }),
+      });
+      if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Erreur'); }
+      const data = await res.json();
+      // Fire welcome email (best-effort)
       fetch('/api/email', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-internal-key': process.env.INTERNAL_API_KEY || '' },
-        body: JSON.stringify({ type: 'welcome_guide', email: guideEmail, name: guideName || guideEmail.split('@')[0] }),
+        headers: { 'Content-Type': 'application/json', 'x-internal-key': '' },
+        body: JSON.stringify({ type: 'welcome_guide', email: guideEmail, name: data.name || guideEmail.split('@')[0] }),
       }).catch(() => {});
+      setIsSubmitted(true);
+    } catch (err: any) {
+      setSubmitError(err.message);
     }
+    setSubmitting(false);
   };
 
   if (isSubmitted) {
@@ -258,19 +297,19 @@ export default function GuideOnboarding() {
                 </p>
                 <div className="ins-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
                   <Field label="Prénom">
-                    <input type="text" className="ins-input" style={inputStyle} placeholder="Youssouf" required onChange={e => setGuideName(n => e.target.value + (n.includes(' ') ? n.slice(n.indexOf(' ')) : ''))} />
+                    <input type="text" className="ins-input" style={inputStyle} placeholder="Youssouf" required value={prenom} onChange={e => setPrenom(e.target.value)} />
                   </Field>
                   <Field label="Nom">
-                    <input type="text" className="ins-input" style={inputStyle} placeholder="Konaté" required />
+                    <input type="text" className="ins-input" style={inputStyle} placeholder="Konaté" required value={nom} onChange={e => setNom(e.target.value)} />
                   </Field>
                   <Field label="WhatsApp">
-                    <input type="tel" className="ins-input" style={inputStyle} placeholder="+966 50 123 4567" required />
+                    <input type="tel" className="ins-input" style={inputStyle} placeholder="+966 50 123 4567" required value={whatsapp} onChange={e => setWhatsapp(e.target.value)} />
                   </Field>
                   <Field label="Adresse email">
-                    <input type="email" className="ins-input" style={inputStyle} placeholder="youssouf@exemple.com" required onChange={e => setGuideEmail(e.target.value)} />
+                    <input type="email" className="ins-input" style={inputStyle} placeholder="youssouf@exemple.com" required value={guideEmail} onChange={e => setGuideEmail(e.target.value)} />
                   </Field>
                   <Field label="Ville de résidence">
-                    <select className="ins-input" style={inputStyle} required>
+                    <select className="ins-input" style={inputStyle} required value={city} onChange={e => setCity(e.target.value)}>
                       <option value="">Sélectionner</option>
                       <option value="makkah">Makkah</option>
                       <option value="madinah">Madinah</option>
@@ -279,7 +318,7 @@ export default function GuideOnboarding() {
                     </select>
                   </Field>
                   <Field label="Nationalité">
-                    <input type="text" className="ins-input" style={inputStyle} placeholder="Sénégalaise" />
+                    <input type="text" className="ins-input" style={inputStyle} placeholder="Sénégalaise" value={nationality} onChange={e => setNationality(e.target.value)} />
                   </Field>
                 </div>
                 <Field label="Photo de profil (JPG/PNG · max 5 Mo)">
@@ -323,7 +362,7 @@ export default function GuideOnboarding() {
                         fontSize: '0.8rem', fontWeight: 500, color: '#1A1209',
                         transition: 'all 0.15s',
                       }}>
-                        <input type="checkbox" style={{ accentColor: '#C9A84C' }} />
+                        <input type="checkbox" style={{ accentColor: '#C9A84C' }} checked={selectedLangues.includes(l.name)} onChange={() => toggleLangue(l.name)} />
                         {l.flag} {l.name}
                       </label>
                     ))}
@@ -339,11 +378,11 @@ export default function GuideOnboarding() {
                     </select>
                   </Field>
                   <Field label="Années d'expérience">
-                    <input type="number" min="0" max="40" className="ins-input" style={inputStyle} placeholder="ex : 8" required />
+                    <input type="number" min="0" max="40" className="ins-input" style={inputStyle} placeholder="ex : 8" required value={experienceYears} onChange={e => setExperienceYears(e.target.value)} />
                   </Field>
                 </div>
                 <Field label="Biographie (visible par les pèlerins)">
-                  <textarea className="ins-input" style={{ ...inputStyle, height: 120, resize: 'vertical' }} placeholder="Présentez-vous, votre approche, votre rapport avec les Lieux Saints…" required />
+                  <textarea className="ins-input" style={{ ...inputStyle, height: 120, resize: 'vertical' }} placeholder="Présentez-vous, votre approche, votre rapport avec les Lieux Saints…" required value={bio} onChange={e => setBio(e.target.value)} />
                 </Field>
               </div>
             )}
@@ -576,6 +615,8 @@ export default function GuideOnboarding() {
                     style={{ ...inputStyle, fontFamily: 'monospace', letterSpacing: '0.08em', textTransform: 'uppercase' }}
                     placeholder="FR76 0000 0000 0000 0000 0000 000"
                     required
+                    value={iban}
+                    onChange={e => setIban(e.target.value)}
                   />
                 </div>
               </div>
@@ -638,6 +679,9 @@ export default function GuideOnboarding() {
             )}
 
             {/* ── NAV BUTTONS ── */}
+            {submitError && (
+              <div style={{ background: '#FEE2E2', border: '1px solid #FCA5A5', borderRadius: 8, padding: '0.75rem 1rem', fontSize: '0.83rem', color: '#DC2626', marginTop: '1rem' }}>{submitError}</div>
+            )}
             <div className="ins-nav-btns" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '3rem', paddingTop: '1.5rem', borderTop: '1px solid #E8DFC8' }}>
               {currentStep > 1 ? (
                 <button
@@ -658,16 +702,17 @@ export default function GuideOnboarding() {
               ) : (
                 <button
                   type="submit"
-                  disabled={!acceptedCharte}
+                  disabled={!acceptedCharte || submitting}
                   style={{
-                    padding: '0.85rem 2.25rem', borderRadius: 50, border: 'none', fontWeight: 700, fontSize: '0.875rem', cursor: acceptedCharte ? 'pointer' : 'not-allowed',
-                    background: acceptedCharte ? 'linear-gradient(135deg, #F0D897, #C9A84C)' : '#E8DFC8',
-                    color: acceptedCharte ? '#1A1209' : '#7A6D5A',
-                    boxShadow: acceptedCharte ? '0 8px 24px rgba(201,168,76,0.35)' : 'none',
+                    padding: '0.85rem 2.25rem', borderRadius: 50, border: 'none', fontWeight: 700, fontSize: '0.875rem',
+                    cursor: (acceptedCharte && !submitting) ? 'pointer' : 'not-allowed',
+                    background: (acceptedCharte && !submitting) ? 'linear-gradient(135deg, #F0D897, #C9A84C)' : '#E8DFC8',
+                    color: (acceptedCharte && !submitting) ? '#1A1209' : '#7A6D5A',
+                    boxShadow: (acceptedCharte && !submitting) ? '0 8px 24px rgba(201,168,76,0.35)' : 'none',
                     transition: 'all 0.2s',
                   }}
                 >
-                  Soumettre mon dossier ✓
+                  {submitting ? 'Envoi en cours…' : 'Soumettre mon dossier ✓'}
                 </button>
               )}
             </div>

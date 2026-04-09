@@ -61,6 +61,11 @@ export default function AdminGuideDetailPage() {
   const [pkgPrice, setPkgPrice]           = useState('');
   const [savingPkg, setSavingPkg]         = useState(false);
 
+  // Access management
+  const [genPassword, setGenPassword]     = useState(true);
+  const [activating, setActivating]       = useState(false);
+  const [accessResult, setAccessResult]   = useState<{ password?: string; message: string; type: 'success' | 'error' } | null>(null);
+
   const fetchGuide = async () => {
     setLoading(true); setError('');
     try {
@@ -94,6 +99,26 @@ export default function AdminGuideDetailPage() {
     } catch { setSaveMsg('✗ Erreur lors de la sauvegarde'); }
     setSaving(false);
     setTimeout(() => setSaveMsg(''), 3000);
+  };
+
+  const handleAccess = async (action: 'activate' | 'suspend', overrideGenPw?: boolean) => {
+    setActivating(true);
+    setAccessResult(null);
+    try {
+      const generatePassword = overrideGenPw !== undefined ? overrideGenPw : genPassword;
+      const res = await fetch(`/api/admin/guides/${slug}/activate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, generatePassword }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erreur');
+      setAccessResult({ password: data.password, message: data.message, type: 'success' });
+      await fetchGuide();
+    } catch (e: any) {
+      setAccessResult({ message: e.message, type: 'error' });
+    }
+    setActivating(false);
   };
 
   const handlePkgSave = async (pkgId: string) => {
@@ -180,6 +205,83 @@ export default function AdminGuideDetailPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Section 1b — Gestion des accès */}
+      <div style={{ ...sectionStyle, gap: '0.875rem' }}>
+        <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Gestion des accès</div>
+
+        {/* REVIEW or DRAFT → activate */}
+        {(guide.status === 'REVIEW' || guide.status === 'DRAFT') && (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer' }} onClick={() => setGenPassword(v => !v)}>
+              <div style={{ width: 18, height: 18, border: '2px solid #C9A84C', borderRadius: 4, background: genPassword ? '#C9A84C' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {genPassword && <span style={{ color: '#1A1209', fontSize: '0.7rem', fontWeight: 900 }}>✓</span>}
+              </div>
+              <span style={{ fontSize: '0.82rem', color: '#4A3F30' }}>Générer un nouveau mot de passe et envoyer par email</span>
+            </div>
+            <button
+              onClick={() => handleAccess('activate')}
+              disabled={activating}
+              style={{ padding: '0.7rem 1.75rem', background: activating ? '#9CA3AF' : '#1D5C3A', color: 'white', border: 'none', borderRadius: 50, fontWeight: 700, fontSize: '0.85rem', cursor: activating ? 'not-allowed' : 'pointer', fontFamily: 'inherit', alignSelf: 'flex-start' }}
+            >
+              {activating ? 'Validation…' : '✓ Valider le profil guide'}
+            </button>
+          </>
+        )}
+
+        {/* ACTIVE → suspend */}
+        {guide.status === 'ACTIVE' && (
+          <button
+            onClick={() => { if (confirm('Suspendre ce guide ?')) handleAccess('suspend'); }}
+            disabled={activating}
+            style={{ padding: '0.7rem 1.75rem', background: activating ? '#9CA3AF' : '#DC2626', color: 'white', border: 'none', borderRadius: 50, fontWeight: 700, fontSize: '0.85rem', cursor: activating ? 'not-allowed' : 'pointer', fontFamily: 'inherit', alignSelf: 'flex-start' }}
+          >
+            {activating ? '…' : 'Suspendre le profil'}
+          </button>
+        )}
+
+        {/* SUSPENDED → reactivate */}
+        {guide.status === 'SUSPENDED' && (
+          <button
+            onClick={() => handleAccess('activate', false)}
+            disabled={activating}
+            style={{ padding: '0.7rem 1.75rem', background: activating ? '#9CA3AF' : '#1D5C3A', color: 'white', border: 'none', borderRadius: 50, fontWeight: 700, fontSize: '0.85rem', cursor: activating ? 'not-allowed' : 'pointer', fontFamily: 'inherit', alignSelf: 'flex-start' }}
+          >
+            {activating ? '…' : 'Réactiver le profil'}
+          </button>
+        )}
+
+        {/* Regenerate password — always visible */}
+        <button
+          onClick={() => handleAccess('activate', true)}
+          disabled={activating}
+          style={{ padding: '0.5rem 1.25rem', background: 'white', color: '#7A6D5A', border: '1px solid #E8DFC8', borderRadius: 50, fontWeight: 600, fontSize: '0.78rem', cursor: activating ? 'not-allowed' : 'pointer', fontFamily: 'inherit', alignSelf: 'flex-start' }}
+        >
+          {activating ? '…' : '↻ Régénérer mot de passe'}
+        </button>
+
+        {/* Result banner */}
+        {accessResult && (
+          <div style={{
+            background: accessResult.type === 'success' ? '#D1FAE5' : '#FEE2E2',
+            border: `1px solid ${accessResult.type === 'success' ? '#6EE7B7' : '#FCA5A5'}`,
+            borderRadius: 10,
+            padding: '1rem 1.25rem',
+          }}>
+            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: accessResult.type === 'success' ? '#1D5C3A' : '#DC2626', marginBottom: accessResult.password ? 8 : 0 }}>
+              {accessResult.type === 'success' ? '✅ ' : '✗ '}{accessResult.message}
+            </div>
+            {accessResult.password && (
+              <div style={{ fontFamily: 'monospace', fontSize: '0.95rem', background: '#1A1209', color: '#F0D897', padding: '0.5rem 0.875rem', borderRadius: 6, display: 'inline-block', marginTop: 4 }}>
+                Mot de passe temporaire : <strong>{accessResult.password}</strong>
+              </div>
+            )}
+            {accessResult.password && (
+              <div style={{ fontSize: '0.7rem', color: '#6B7280', marginTop: 8 }}>Visible une seule fois — disparaît au rechargement.</div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Section 2 — Profil éditable */}

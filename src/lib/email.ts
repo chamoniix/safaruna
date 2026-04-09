@@ -170,7 +170,48 @@ export function sendWelcomeGuide(to: string, name: string): Promise<void> {
   });
 }
 
-// ─── 3. Confirmation de réservation ─────────────────────────────
+// ─── 3. Accès guide validé ──────────────────────────────────────
+
+export function sendGuideAccess(opts: {
+  to: string;
+  name: string;
+  email: string;
+  password: string;
+  loginUrl: string;
+}): Promise<void> {
+  const { to, name, email, password, loginUrl } = opts;
+  return sendEmail({
+    to: { email: to, name },
+    subject: 'Vos accès Guide SAFARUMA — Bienvenue !',
+    html: baseTemplate(`
+      ${heading(`Barak Allahu fik, ${name} !`)}
+      ${badge('PROFIL VALIDÉ ✓', '#1D5C3A')}
+      ${p('Votre dossier a été examiné et approuvé par l\'équipe SAFARUMA. Votre profil guide est maintenant actif et visible par les pèlerins.')}
+      ${divider()}
+      <div style="background:#1A1209;border-radius:12px;padding:24px;margin:16px 0;">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:16px;">Vos identifiants de connexion</div>
+        <table cellpadding="0" cellspacing="0" width="100%">
+          <tr>
+            <td style="font-size:12px;color:rgba(255,255,255,0.5);padding:6px 0;width:40%;">Email</td>
+            <td style="font-size:13px;color:#F0D897;font-weight:700;font-family:monospace;">${email}</td>
+          </tr>
+          <tr>
+            <td style="font-size:12px;color:rgba(255,255,255,0.5);padding:6px 0;">Mot de passe</td>
+            <td style="font-size:13px;color:#C9A84C;font-weight:700;font-family:monospace;">${password}</td>
+          </tr>
+        </table>
+        <div style="margin-top:12px;font-size:11px;color:rgba(255,255,255,0.3);">Changez votre mot de passe dès votre première connexion.</div>
+      </div>
+      ${divider()}
+      <div style="text-align:center;padding:8px 0;">
+        ${btn('Accéder à mon espace guide', loginUrl)}
+      </div>
+      ${p('<small style="color:#9A8D7A;">Conservez ces identifiants en lieu sûr. En cas de problème : <a href="mailto:guide@safaruma.com" style="color:#C9A84C;">guide@safaruma.com</a></small>')}
+    `),
+  });
+}
+
+// ─── 4. Confirmation de réservation ─────────────────────────────
 
 export function sendReservationConfirmation(opts: {
   to: string;

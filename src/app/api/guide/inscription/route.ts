@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
+import { sendWelcomeGuide } from '@/lib/email';
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
@@ -65,6 +66,9 @@ export async function POST(req: NextRequest) {
     },
     select: { id: true, email: true, firstName: true, lastName: true },
   });
+
+  // Envoyer email de bienvenue guide (fire-and-forget)
+  sendWelcomeGuide(email, `${firstName} ${lastName}`.trim()).catch(() => {});
 
   return NextResponse.json({ id: user.id, email: user.email, name: `${user.firstName} ${user.lastName}`.trim() }, { status: 201 });
 }

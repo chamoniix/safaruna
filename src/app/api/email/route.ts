@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import {
   sendWelcomePelerin,
   sendWelcomeGuide,
+  sendGuideAccess,
   sendReservationConfirmation,
   sendMessageNotification,
   sendDepartureReminder,
@@ -37,6 +38,12 @@ export async function POST(req: NextRequest) {
         const { email, name } = body;
         if (!email || !name) return NextResponse.json({ error: 'Missing email or name' }, { status: 400 });
         await sendWelcomeGuide(email, name);
+        break;
+      }
+      case 'guide_access': {
+        const { email: to, name, email: guideEmail, password, loginUrl } = body;
+        if (!to || !name || !password) return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+        await sendGuideAccess({ to, name, email: guideEmail, password, loginUrl: loginUrl ?? 'https://safaruma.com/guide/connexion' });
         break;
       }
       case 'reservation_confirmation': {

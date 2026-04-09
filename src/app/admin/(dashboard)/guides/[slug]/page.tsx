@@ -61,10 +61,14 @@ export default function AdminGuideDetailPage() {
   const [pkgPrice, setPkgPrice]           = useState('');
   const [savingPkg, setSavingPkg]         = useState(false);
 
-  // Access management
+  // Access management — validate / suspend / reactivate
   const [genPassword, setGenPassword]     = useState(true);
   const [activating, setActivating]       = useState(false);
-  const [accessResult, setAccessResult]   = useState<{ password?: string; guideEmail?: string; message: string; type: 'success' | 'error' } | null>(null);
+  const [accessResult, setAccessResult]   = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  // Regenerate password — independent state so it never interferes with other sections
+  const [newPassword, setNewPassword]     = useState('');
+  const [loadingAccess, setLoadingAccess] = useState(false);
 
   // silent=true → update data without showing the full-page skeleton (used for post-action refreshes)
   const fetchGuide = async (silent = false) => {
@@ -97,18 +101,16 @@ export default function AdminGuideDetailPage() {
       });
       if (!res.ok) throw new Error();
       setSaveMsg('✓ Modifications sauvegardées');
-      await fetchGuide();
+      await fetchGuide(true); // silent — no skeleton flash
     } catch { setSaveMsg('✗ Erreur lors de la sauvegarde'); }
     setSaving(false);
     setTimeout(() => setSaveMsg(''), 3000);
   };
 
-  const handleAccess = async (action: 'activate' | 'suspend', overrideGenPw?: boolean) => {
+  const handleAccess = async (action: 'activate' | 'suspend', generatePassword: boolean) => {
     setActivating(true);
     setAccessResult(null);
-    const currentEmail = guide?.user.email || '';
     try {
-      const generatePassword = overrideGenPw !== undefined ? overrideGenPw : genPassword;
       const res = await fetch(`/api/admin/guides/${slug}/activate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -116,13 +118,27 @@ export default function AdminGuideDetailPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erreur');
-      // Set result BEFORE silent refresh so it stays visible
-      setAccessResult({ password: data.password, guideEmail: currentEmail, message: data.message, type: 'success' });
-      await fetchGuide(true); // silent: no skeleton flash
+      setAccessResult({ message: data.message, type: 'success' });
+      await fetchGuide(true); // silent — keep sections visible
     } catch (e: any) {
       setAccessResult({ message: e.message, type: 'error' });
     }
     setActivating(false);
+  };
+
+  const handleRegenPassword = async () => {
+    setLoadingAccess(true);
+    setNewPassword('');
+    try {
+      const res = await fetch(`/api/admin/guides/${slug}/activate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'activate', generatePassword: true }),
+      });
+      const data = await res.json();
+      if (data.password) setNewPassword(data.password);
+    } catch { /* silent — password card won't show */ }
+    setLoadingAccess(false);
   };
 
   const handlePkgSave = async (pkgId: string) => {
@@ -135,7 +151,7 @@ export default function AdminGuideDetailPage() {
       });
       if (!res.ok) throw new Error();
       setEditingPkg(null);
-      await fetchGuide();
+      await fetchGuide(true); // silent — no skeleton flash
     } catch { alert('Erreur lors de la mise à jour du prix.'); }
     setSavingPkg(false);
   };
@@ -225,7 +241,7 @@ export default function AdminGuideDetailPage() {
               <span style={{ fontSize: '0.82rem', color: '#4A3F30' }}>Générer un nouveau mot de passe et envoyer par email</span>
             </div>
             <button
-              onClick={() => handleAccess('activate')}
+              onClick={() => handleAccess('activate', genPassword)}
               disabled={activating}
               style={{ padding: '0.7rem 1.75rem', background: activating ? '#9CA3AF' : '#1D5C3A', color: 'white', border: 'none', borderRadius: 50, fontWeight: 700, fontSize: '0.85rem', cursor: activating ? 'not-allowed' : 'pointer', fontFamily: 'inherit', alignSelf: 'flex-start' }}
             >
@@ -237,7 +253,7 @@ export default function AdminGuideDetailPage() {
         {/* ACTIVE → suspend */}
         {guide.status === 'ACTIVE' && (
           <button
-            onClick={() => { if (confirm('Suspendre ce guide ?')) handleAccess('suspend'); }}
+            onClick={() => { if (confirm('Suspendre ce guide ?')) handleAccess('suspend', false); }}
             disabled={activating}
             style={{ padding: '0.7rem 1.75rem', background: activating ? '#9CA3AF' : '#DC2626', color: 'white', border: 'none', borderRadius: 50, fontWeight: 700, fontSize: '0.85rem', cursor: activating ? 'not-allowed' : 'pointer', fontFamily: 'inherit', alignSelf: 'flex-start' }}
           >
@@ -256,43 +272,29 @@ export default function AdminGuideDetailPage() {
           </button>
         )}
 
-        {/* Regenerate password — always visible */}
+        {/* Action result banner (validate / suspend / reactivate) */}
+        {accessResult && (
+          <div style={{ background: accessResult.type === 'success' ? '#D1FAE5' : '#FEE2E2', border: `1px solid ${accessResult.type === 'success' ? '#6EE7B7' : '#FCA5A5'}`, borderRadius: 8, padding: '0.75rem 1rem', fontSize: '0.82rem', fontWeight: 600, color: accessResult.type === 'success' ? '#1D5C3A' : '#DC2626' }}>
+            {accessResult.type === 'success' ? '✅ ' : '✗ '}{accessResult.message}
+          </div>
+        )}
+
+        <div style={{ height: 1, background: '#F0EBE0' }} />
+
+        {/* Regenerate password — independent state */}
         <button
-          onClick={() => handleAccess('activate', true)}
-          disabled={activating}
-          style={{ padding: '0.5rem 1.25rem', background: 'white', color: '#7A6D5A', border: '1px solid #E8DFC8', borderRadius: 50, fontWeight: 600, fontSize: '0.78rem', cursor: activating ? 'not-allowed' : 'pointer', fontFamily: 'inherit', alignSelf: 'flex-start' }}
+          onClick={handleRegenPassword}
+          disabled={loadingAccess}
+          style={{ padding: '0.5rem 1.25rem', background: 'white', color: '#7A6D5A', border: '1px solid #E8DFC8', borderRadius: 50, fontWeight: 600, fontSize: '0.78rem', cursor: loadingAccess ? 'not-allowed' : 'pointer', fontFamily: 'inherit', alignSelf: 'flex-start' }}
         >
-          {activating ? '…' : '↻ Régénérer mot de passe'}
+          {loadingAccess ? '…' : '↻ Régénérer mot de passe'}
         </button>
 
-        {/* Result banner */}
-        {accessResult && (
-          <div style={{
-            background: accessResult.type === 'success' ? '#D1FAE5' : '#FEE2E2',
-            border: `1px solid ${accessResult.type === 'success' ? '#6EE7B7' : '#FCA5A5'}`,
-            borderRadius: 10,
-            padding: '1rem 1.25rem',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 8,
-          }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: accessResult.type === 'success' ? '#1D5C3A' : '#DC2626' }}>
-              {accessResult.type === 'success' ? '✅ ' : '✗ '}
-              {accessResult.password && accessResult.guideEmail
-                ? `Email envoyé à ${accessResult.guideEmail}`
-                : accessResult.message}
-            </div>
-            {accessResult.password && (
-              <>
-                <div style={{ fontFamily: 'monospace', fontSize: '0.9rem', background: '#1A1209', color: '#F0D897', padding: '0.5rem 0.875rem', borderRadius: 6, display: 'inline-block' }}>
-                  Mot de passe temporaire : <strong>{accessResult.password}</strong>
-                </div>
-                <div style={{ fontSize: '0.7rem', color: '#6B7280' }}>Visible une seule fois — disparaît au rechargement.</div>
-              </>
-            )}
-            {!accessResult.password && accessResult.type === 'success' && (
-              <div style={{ fontSize: '0.78rem', color: '#4A3F30' }}>{accessResult.message}</div>
-            )}
+        {newPassword && (
+          <div style={{ background: '#D1FAE5', border: '1px solid #6EE7B7', borderRadius: 8, padding: '0.875rem 1rem' }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1D5C3A', marginBottom: '0.25rem' }}>✅ Email envoyé — Mot de passe temporaire :</div>
+            <div style={{ fontFamily: 'monospace', fontSize: '1rem', fontWeight: 700, color: '#1A1209', letterSpacing: '0.08em' }}>{newPassword}</div>
+            <div style={{ fontSize: '0.65rem', color: '#7A6D5A', marginTop: '0.25rem' }}>Visible une seule fois — non enregistré</div>
           </div>
         )}
       </div>

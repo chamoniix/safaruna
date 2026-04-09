@@ -3,12 +3,20 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import { useSession, signOut } from 'next-auth/react';
 
 export default function GuideLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [isAvailable, setIsAvailable] = useState(true);
+  const { data: session } = useSession();
   const isActive = (p: string) => pathname === p || pathname.startsWith(p + '/');
+
+  const su = session?.user as any;
+  const displayName = su?.firstName && su?.lastName
+    ? `${su.firstName} ${su.lastName}`
+    : su?.name || su?.email || 'Guide';
+  const initials = displayName.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase() || 'G';
 
   return (
     <>
@@ -85,11 +93,11 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
           {/* Guide profile + availability toggle */}
           <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
             <div style={{ position: 'relative', flexShrink: 0 }}>
-              <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#1A1209' }}>RM</div>
+              <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#1A1209' }}>{initials}</div>
               <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10, borderRadius: '50%', background: isAvailable ? '#27AE60' : 'rgba(255,255,255,0.3)', border: '2px solid #1A1209' }} />
             </div>
             <div style={{ minWidth: 0, flex: 1 }}>
-              <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'white', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Rachid Al-Madani</div>
+              <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'white', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayName}</div>
               <div style={{ fontSize: '0.65rem', color: '#C9A84C', marginBottom: 6 }}>★★★★★ 4.97</div>
               {/* Toggle */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }} onClick={() => setIsAvailable(!isAvailable)}>
@@ -144,7 +152,7 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
 
           {/* Footer */}
           <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
-            <button style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.72rem', color: 'rgba(255,255,255,0.25)', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>↩ Déconnexion</button>
+            <button onClick={() => signOut({ callbackUrl: '/guide/connexion' })} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.72rem', color: 'rgba(255,255,255,0.25)', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>↩ Déconnexion</button>
           </div>
         </aside>
 

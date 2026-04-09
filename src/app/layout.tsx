@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import "./globals.css";
-import WhatsAppButton from "@/components/WhatsAppButton";
+import ConditionalWhatsApp from "@/components/ConditionalWhatsApp";
 import Providers from "@/components/Providers";
 
 const cormorant = Cormorant_Garamond({
@@ -56,7 +56,7 @@ export default function RootLayout({
         <Providers>
           {children}
         </Providers>
-        <WhatsAppButton />
+        <ConditionalWhatsApp />
       </body>
     </html>
   );

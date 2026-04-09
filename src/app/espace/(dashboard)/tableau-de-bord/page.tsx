@@ -60,7 +60,7 @@ export default function EspaceTableauDeBord() {
     fetch('/api/espace/dashboard')
       .then(r => { if (!r.ok) throw new Error('Erreur ' + r.status); return r.json(); })
       .then(d => { setData(d); setLoading(false); })
-      .catch((e: Error) => { setError(e.message); setLoading(false); });
+      .catch((e: Error) => { console.error('[espace/dashboard]', e); setError(e.message); setLoading(false); });
   };
 
   useEffect(() => { fetchData(); }, []);

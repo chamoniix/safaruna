@@ -24,7 +24,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
   const pageTitle = currentNav?.label ?? 'Administration';
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'var(--font-manrope, sans-serif)', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', height: '100vh', fontFamily: 'var(--font-manrope, sans-serif)', overflow: 'hidden' }}>
 
       {/* SIDEBAR */}
       <div style={{
@@ -106,7 +106,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
             </div>
           </div>
         </header>
-        <main style={{ flex: 1, padding: '2rem', overflowY: 'auto', overflowX: 'hidden' }}>
+        <main style={{ flex: 1, padding: '2rem', overflowY: 'auto', minHeight: 0 }}>
           {children}
         </main>
       </div>

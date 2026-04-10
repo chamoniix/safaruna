@@ -104,7 +104,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
             </div>
           </div>
         </header>
-        <main style={{ flex: 1, padding: '2rem' }}>
+        <main style={{ flex: 1, padding: '2rem', overflow: 'auto', minHeight: 0 }}>
           {children}
         </main>
       </div>

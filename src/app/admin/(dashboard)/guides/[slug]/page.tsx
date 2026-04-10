@@ -179,7 +179,7 @@ export default function AdminGuideDetailPage() {
   if (!guide) return null;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', fontFamily: 'var(--font-manrope, sans-serif)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', fontFamily: 'var(--font-manrope, sans-serif)', width: '100%', minHeight: 0, overflow: 'visible' }}>
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>

@@ -32,14 +32,31 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
         orderBy: { updatedAt: 'desc' },
         take: 5,
         include: {
-          pelerin: { select: { name: true, firstName: true, lastName: true, email: true } },
-          messages: { orderBy: { createdAt: 'desc' }, take: 1 },
+          messages: {
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+            include: {
+              sender: { select: { name: true, firstName: true, role: true } },
+            },
+          },
         },
       },
     },
   });
 
   if (!guide) return NextResponse.json({ error: 'Guide introuvable' }, { status: 404 });
+
+  const conversationIds = guide.conversationsAsGuide.map(c => c.id);
+  const conversationsWithPelerins = await prisma.conversation.findMany({
+    where: { id: { in: conversationIds } },
+    select: {
+      id: true,
+      pelerin: { select: { name: true, firstName: true, lastName: true, email: true } },
+    },
+  });
+  const pelerinMap = Object.fromEntries(
+    conversationsWithPelerins.map(c => [c.id, c.pelerin])
+  );
 
   const totalReservations = await prisma.reservation.count({ where: { guideProfileId: guide.id } });
   const revenueAgg = await prisma.reservation.aggregate({
@@ -85,7 +102,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
       })),
       conversations: guide.conversationsAsGuide.map(c => ({
         id: c.id,
-        pelerinName: c.pelerin.name || `${c.pelerin.firstName ?? ''} ${c.pelerin.lastName ?? ''}`.trim() || c.pelerin.email || '—',
+        pelerinName: (() => {
+          const p = pelerinMap[c.id];
+          if (!p) return '—';
+          return p.name || `${p.firstName ?? ''} ${p.lastName ?? ''}`.trim() || p.email || '—';
+        })(),
         lastMessage: c.messages[0]?.content?.slice(0, 80) || '',
         lastMessageAt: c.messages[0] ? new Date(c.messages[0].createdAt).toLocaleDateString('fr-FR') : '',
       })),

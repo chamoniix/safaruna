@@ -86,7 +86,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
       </div>
 
       {/* MAIN */}
-      <div style={{ marginLeft: 240, flex: 1, display: 'flex', flexDirection: 'column', background: '#F8F6F2' }}>
+      <div style={{ marginLeft: 240, flex: 1, display: 'flex', flexDirection: 'column', background: '#F8F6F2', height: '100vh', overflow: 'hidden' }}>
         <header style={{
           position: 'sticky', top: 0, zIndex: 50, background: 'white',
           borderBottom: '1px solid #E8DFC8', height: 60, padding: '0 2rem',
@@ -106,7 +106,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
             </div>
           </div>
         </header>
-        <main style={{ flex: 1, padding: '2rem', overflowY: 'auto', minHeight: 0, boxSizing: 'border-box' }}>
+        <main style={{ flex: 1, padding: '2rem', overflowY: 'auto', overflowX: 'hidden' }}>
           {children}
         </main>
       </div>

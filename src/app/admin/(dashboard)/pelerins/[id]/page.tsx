@@ -41,6 +41,12 @@ type PelerinDetail = {
     createdAt: string;
     readAt: string | null;
   }[];
+  conversations: {
+    id: string;
+    guideName: string;
+    lastMessage: string;
+    lastMessageAt: string;
+  }[];
 };
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
@@ -250,6 +256,33 @@ export default function PelerinDetailPage() {
                 </div>
               </div>
             ))}
+          </div>
+        </section>
+      )}
+
+      {/* Conversations */}
+      {!loading && data && data.conversations && data.conversations.length > 0 && (
+        <section>
+          <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.875rem' }}>
+            Conversations
+          </div>
+          <div style={{ ...card, overflow: 'hidden' }}>
+            {data.conversations.map((c, i) => {
+              const ini = c.guideName.slice(0, 2).toUpperCase();
+              return (
+                <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '0.875rem', padding: '0.875rem 1.1rem', borderBottom: i < data.conversations.length - 1 ? '1px solid #F0EBE0' : 'none' }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#E8DFC8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '0.9rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>{ini}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1A1209' }}>{c.guideName}</div>
+                    <div style={{ fontSize: '0.72rem', color: '#7A6D5A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.lastMessage || '—'}</div>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem', flexShrink: 0 }}>
+                    <span style={{ fontSize: '0.68rem', color: '#9A8A7A' }}>{c.lastMessageAt}</span>
+                    <a href={`/admin/messages?conv=${c.id}`} style={{ fontSize: '0.72rem', fontWeight: 700, color: '#C9A84C', textDecoration: 'none', border: '1px solid #E8DFC8', padding: '0.2rem 0.6rem', borderRadius: 20, background: 'white' }}>Voir →</a>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </section>
       )}

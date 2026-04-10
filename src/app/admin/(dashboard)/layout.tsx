@@ -10,9 +10,11 @@ const NAV = [
   { href: '/admin/guides',          label: 'Guides' },
   { href: '/admin/pelerins',        label: 'Pèlerins' },
   { href: '/admin/reservations',    label: 'Réservations' },
+  { href: '/admin/messages',        label: 'Messages' },
   { href: '/admin/litiges',         label: 'Litiges', badge: 2 },
   { href: '/admin/contenu',         label: 'Contenu' },
   { href: '/admin/revenus',         label: 'Revenus' },
+  { href: '/admin/commissions',     label: 'Commissions' },
   { href: '/admin/parametres',      label: 'Paramètres' },
 ];
 
@@ -22,7 +24,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
   const pageTitle = currentNav?.label ?? 'Administration';
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'var(--font-manrope, sans-serif)' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'var(--font-manrope, sans-serif)', overflow: 'hidden' }}>
 
       {/* SIDEBAR */}
       <div style={{
@@ -104,7 +106,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
             </div>
           </div>
         </header>
-        <main style={{ flex: 1, padding: '2rem', overflow: 'auto', minHeight: 0 }}>
+        <main style={{ flex: 1, padding: '2rem', overflowY: 'auto', minHeight: 0, boxSizing: 'border-box' }}>
           {children}
         </main>
       </div>

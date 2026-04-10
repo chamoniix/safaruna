@@ -11,6 +11,9 @@ type Guide = {
   id: string; slug: string; bio: string | null; city: string | null;
   nationality: string | null; experienceYears: number | null; status: string;
   responseTimeAvg: string | null; completionRate: number | null;
+  iban: string | null;
+  availabilities: { id: string; date: string; status: string }[];
+  conversations: { id: string; pelerinName: string; lastMessage: string; lastMessageAt: string }[];
   user: { name: string | null; firstName: string | null; lastName: string | null; email: string | null; createdAt: string };
   languages: Language[];
   packages: Package[];
@@ -69,6 +72,8 @@ export default function AdminGuideDetailPage() {
   // Regenerate password — independent state so it never interferes with other sections
   const [newPassword, setNewPassword]     = useState('');
   const [loadingAccess, setLoadingAccess] = useState(false);
+
+  const [ibanVisible, setIbanVisible] = useState(false);
 
   // silent=true → update data without showing the full-page skeleton (used for post-action refreshes)
   const fetchGuide = async (silent = false) => {
@@ -397,6 +402,82 @@ export default function AdminGuideDetailPage() {
           </div>
         </div>
       )}
+
+      {/* Section — Informations bancaires */}
+      <div style={{ background: '#FEF9EC', border: '1px solid #FCD34D', borderRadius: 12, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div>
+          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Informations bancaires</div>
+          <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>Données sensibles — accès restreint</div>
+        </div>
+        {!guide.iban ? (
+          <div style={{ color: '#9CA3AF', fontSize: '0.85rem' }}>Aucun IBAN renseigné</div>
+        ) : !ibanVisible ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <div style={{ fontFamily: 'monospace', color: '#7A6D5A' }}>FR76 •••• •••• •••• •••• •••• •••</div>
+            <button onClick={() => setIbanVisible(true)} style={{ background: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', borderRadius: 20, padding: '0.35rem 0.875rem', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Révéler</button>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <div style={{ fontFamily: 'monospace', fontSize: '1rem', fontWeight: 700, color: '#1A1209', letterSpacing: '0.08em' }}>{guide.iban}</div>
+            <button onClick={() => setIbanVisible(false)} style={{ background: 'white', color: '#7A6D5A', border: '1px solid #E8DFC8', borderRadius: 20, padding: '0.35rem 0.875rem', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Masquer</button>
+          </div>
+        )}
+      </div>
+
+      {/* Section — Disponibilités (30 prochains jours) */}
+      <div style={sectionStyle}>
+        <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Disponibilités (30 prochains jours)</div>
+        {guide.availabilities.length === 0 ? (
+          <div style={{ color: '#9CA3AF', fontSize: '0.85rem' }}>Aucune disponibilité renseignée</div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
+            {guide.availabilities.map(a => {
+              const dayNum = new Date(a.date).getDate();
+              const colors: Record<string, { bg: string; color: string }> = {
+                AVAILABLE:   { bg: '#D1FAE5', color: '#1D5C3A' },
+                BOOKED:      { bg: '#FEE2E2', color: '#DC2626' },
+                UNAVAILABLE: { bg: '#F3F4F6', color: '#9CA3AF' },
+              };
+              const c = colors[a.status] || colors.UNAVAILABLE;
+              const fullDate = new Date(a.date).toLocaleDateString('fr-FR');
+              return (
+                <div
+                  key={a.id}
+                  title={fullDate}
+                  style={{ width: 40, height: 40, borderRadius: 6, background: c.bg, color: c.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.78rem', fontWeight: 700, cursor: 'default' }}
+                >
+                  {dayNum}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Section — Conversations avec les pèlerins */}
+      <div style={sectionStyle}>
+        <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Conversations avec les pèlerins</div>
+        {guide.conversations.length === 0 ? (
+          <div style={{ color: '#9CA3AF', fontSize: '0.85rem' }}>Aucune conversation</div>
+        ) : (
+          guide.conversations.map((c, i) => {
+            const ini = c.pelerinName.slice(0, 2).toUpperCase();
+            return (
+              <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '0.875rem', padding: '0.75rem 0', borderBottom: i < guide.conversations.length - 1 ? '1px solid #F0EBE0' : 'none' }}>
+                <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#E8DFC8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '0.9rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>{ini}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1A1209' }}>{c.pelerinName}</div>
+                  <div style={{ fontSize: '0.72rem', color: '#7A6D5A', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.lastMessage || '—'}</div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem', flexShrink: 0 }}>
+                  <span style={{ fontSize: '0.68rem', color: '#9A8A7A' }}>{c.lastMessageAt}</span>
+                  <a href={`/admin/messages?conv=${c.id}`} style={{ fontSize: '0.72rem', fontWeight: 700, color: '#C9A84C', textDecoration: 'none', border: '1px solid #E8DFC8', padding: '0.2rem 0.6rem', borderRadius: 20, background: 'white' }}>Voir →</a>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
 
       {/* Section 4 — Réservations */}
       <div style={sectionStyle}>

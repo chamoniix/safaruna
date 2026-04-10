@@ -38,6 +38,14 @@ export async function GET(
         orderBy: { createdAt: 'desc' },
         take: 5,
       },
+      conversationsAsPelerin: {
+        orderBy: { updatedAt: 'desc' },
+        take: 5,
+        include: {
+          guideProfile: { include: { user: { select: { name: true, firstName: true } } } },
+          messages: { orderBy: { createdAt: 'desc' }, take: 1 },
+        },
+      },
     }
   });
 
@@ -92,6 +100,12 @@ export async function GET(
       message: n.message,
       createdAt: new Date(n.createdAt).toLocaleDateString('fr-FR'),
       readAt: n.readAt ? new Date(n.readAt).toLocaleDateString('fr-FR') : null,
+    })),
+    conversations: user.conversationsAsPelerin.map(c => ({
+      id: c.id,
+      guideName: c.guideProfile.user.name || c.guideProfile.user.firstName || '—',
+      lastMessage: c.messages[0]?.content?.slice(0, 80) || '',
+      lastMessageAt: c.messages[0] ? new Date(c.messages[0].createdAt).toLocaleDateString('fr-FR') : '',
     })),
   });
 }

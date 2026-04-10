@@ -49,15 +49,20 @@ export async function PATCH(req: NextRequest) {
   if (!await checkAdmin(req))
     return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
 
-  const { reservationId, status } = await req.json();
+  const { reservationId, status, motif } = await req.json();
 
   const validStatuses = ['PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED'];
   if (!validStatuses.includes(status))
     return NextResponse.json({ error: 'Statut invalide' }, { status: 400 });
 
+  const existing = await prisma.reservation.findUnique({ where: { id: reservationId }, select: { notes: true, status: true } });
+  const existingNotes = existing?.notes || '';
+  const noteEntry = `[Admin ${new Date().toLocaleDateString('fr-FR')}] ${motif || 'Modification admin'}`;
+  const newNotes = existingNotes ? `${noteEntry}\n${existingNotes}` : noteEntry;
+
   const reservation = await prisma.reservation.update({
     where: { id: reservationId },
-    data: { status },
+    data: { status, notes: newNotes },
     include: {
       pelerin: { select: { name: true, firstName: true, lastName: true, email: true } },
       guideProfile: {

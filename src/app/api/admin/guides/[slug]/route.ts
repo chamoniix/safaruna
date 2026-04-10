@@ -23,6 +23,19 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
         orderBy: { createdAt: 'desc' },
         include: { reviews: { select: { ratingOverall: true } } },
       },
+      availabilities: {
+        where: { date: { gte: new Date() } },
+        orderBy: { date: 'asc' },
+        take: 30,
+      },
+      conversationsAsGuide: {
+        orderBy: { updatedAt: 'desc' },
+        take: 5,
+        include: {
+          pelerin: { select: { name: true, firstName: true, lastName: true, email: true } },
+          messages: { orderBy: { createdAt: 'desc' }, take: 1 },
+        },
+      },
     },
   });
 
@@ -63,6 +76,18 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
         totalPrice: r.totalPrice,
         status: r.status,
         createdAt: r.createdAt,
+      })),
+      iban: guide.ibanEncrypted || null,
+      availabilities: guide.availabilities.map(a => ({
+        id: a.id,
+        date: a.date.toISOString().split('T')[0],
+        status: a.status,
+      })),
+      conversations: guide.conversationsAsGuide.map(c => ({
+        id: c.id,
+        pelerinName: c.pelerin.name || `${c.pelerin.firstName ?? ''} ${c.pelerin.lastName ?? ''}`.trim() || c.pelerin.email || '—',
+        lastMessage: c.messages[0]?.content?.slice(0, 80) || '',
+        lastMessageAt: c.messages[0] ? new Date(c.messages[0].createdAt).toLocaleDateString('fr-FR') : '',
       })),
       stats: {
         totalReservations,

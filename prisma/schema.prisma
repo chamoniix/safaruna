@@ -100,7 +100,8 @@ model GuideProfile {
   status            ProfileStatus @default(DRAFT)
   responseTimeAvg   String?
   completionRate    Int?     @default(0)
-  
+  commissionRate    Float    @default(0.15)
+
   // Relations
   packages          Package[]
   availabilities    Availability[]

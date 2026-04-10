@@ -39,7 +39,12 @@ export default function AdminReservations() {
   const [error, setError]               = useState('');
   const [filter, setFilter]             = useState('ALL');
   const [search, setSearch]             = useState('');
-  const [updating, setUpdating]         = useState<string | null>(null);
+
+  // Modal state
+  const [managingResa, setManagingResa]       = useState<Reservation | null>(null);
+  const [modalStatus, setModalStatus]         = useState('');
+  const [motif, setMotif]                     = useState('');
+  const [submittingModal, setSubmittingModal] = useState(false);
 
   const fetchReservations = async () => {
     setLoading(true); setError('');
@@ -70,21 +75,26 @@ export default function AdminReservations() {
     { label: 'Commissions (€)',    value: `${Math.round(activeResas.reduce((s, r) => s + r.commissionAmount, 0))} €`, color: '#1D5C3A', bg: '#D1FAE5' },
   ];
 
-  const handleStatusChange = async (r: Reservation, newStatus: string) => {
-    if (newStatus === r.status) return;
-    const sc = STATUS_CONFIG[newStatus];
-    if (!window.confirm(`Passer la réservation ${r.refNumber} en "${sc?.label ?? newStatus}" ?`)) return;
-    setUpdating(r.id);
+  const handleModal = async () => {
+    if (!managingResa) return;
+    if (motif.trim().length < 10) {
+      alert('Le motif doit faire au moins 10 caractères.');
+      return;
+    }
+    const sc = STATUS_CONFIG[modalStatus];
+    if (!window.confirm(`Passer en "${sc?.label ?? modalStatus}" ?`)) return;
+    setSubmittingModal(true);
     try {
       const res = await fetch('/api/admin/reservations', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reservationId: r.id, status: newStatus }),
+        body: JSON.stringify({ reservationId: managingResa.id, status: modalStatus, motif }),
       });
       if (!res.ok) throw new Error();
+      setManagingResa(null);
       await fetchReservations();
     } catch { alert('Erreur lors de la mise à jour du statut.'); }
-    setUpdating(null);
+    setSubmittingModal(false);
   };
 
   const totalRevenu     = Math.round(activeResas.reduce((s, r) => s + r.totalPrice, 0));
@@ -173,7 +183,6 @@ export default function AdminReservations() {
               ) : (
                 visible.map((r, i) => {
                   const sc = STATUS_CONFIG[r.status] || { label: r.status, color: '#6B7280', bg: '#F3F4F6' };
-                  const isUpdating = updating === r.id;
                   return (
                     <tr key={r.id} style={{ background: i % 2 === 0 ? 'white' : '#FAFAF8', borderBottom: '1px solid #F0EBE0' }}>
                       <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.75rem', fontWeight: 700, color: '#1A1209', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{r.refNumber}</td>
@@ -188,16 +197,12 @@ export default function AdminReservations() {
                         <span style={{ display: 'inline-block', background: sc.bg, color: sc.color, fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.06em', padding: '0.25rem 0.6rem', borderRadius: 20, whiteSpace: 'nowrap' }}>{sc.label}</span>
                       </td>
                       <td style={{ padding: '0.75rem 0.875rem' }}>
-                        <select
-                          value={r.status}
-                          disabled={isUpdating}
-                          onChange={e => handleStatusChange(r, e.target.value)}
-                          style={{ padding: '0.35rem 0.5rem', border: '1px solid #E8DFC8', borderRadius: 6, fontSize: '0.72rem', fontFamily: 'inherit', color: '#1A1209', background: 'white', cursor: isUpdating ? 'not-allowed' : 'pointer', opacity: isUpdating ? 0.5 : 1 }}
+                        <button
+                          onClick={() => { setManagingResa(r); setModalStatus(r.status); setMotif(''); }}
+                          style={{ padding: '0.35rem 0.75rem', background: '#1A1209', color: '#F0D897', border: 'none', borderRadius: 20, fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}
                         >
-                          {Object.entries(STATUS_CONFIG).map(([k, v]) => (
-                            <option key={k} value={k}>{v.label}</option>
-                          ))}
-                        </select>
+                          Gérer →
+                        </button>
                       </td>
                     </tr>
                   );
@@ -220,6 +225,70 @@ export default function AdminReservations() {
           </table>
         </div>
       </div>
+
+      {/* Modal */}
+      {managingResa && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9998, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: 'white', borderRadius: 16, padding: '2rem', maxWidth: 480, width: '90%', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            {/* Title */}
+            <div>
+              <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 700, color: '#1A1209' }}>
+                Modifier la réservation {managingResa.refNumber}
+              </div>
+            </div>
+            {/* Info */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+              <div style={{ fontSize: '0.78rem', color: '#7A6D5A' }}><span style={{ fontWeight: 700, color: '#4A3F30' }}>Pèlerin :</span> {managingResa.pelerin}</div>
+              <div style={{ fontSize: '0.78rem', color: '#7A6D5A' }}><span style={{ fontWeight: 700, color: '#4A3F30' }}>Guide :</span> {managingResa.guide}</div>
+              <div style={{ fontSize: '0.78rem', color: '#7A6D5A' }}><span style={{ fontWeight: 700, color: '#4A3F30' }}>Montant :</span> {managingResa.totalPrice} €</div>
+            </div>
+            {/* Select statut */}
+            <div>
+              <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: 6 }}>Nouveau statut</label>
+              <select
+                value={modalStatus}
+                onChange={e => setModalStatus(e.target.value)}
+                style={{ width: '100%', padding: '0.6rem 0.875rem', border: '1.5px solid #E8DFC8', borderRadius: 8, fontSize: '0.85rem', fontFamily: 'inherit', color: '#1A1209', background: 'white', outline: 'none', boxSizing: 'border-box' }}
+              >
+                {Object.entries(STATUS_CONFIG).map(([k, v]) => (
+                  <option key={k} value={k}>{v.label}</option>
+                ))}
+              </select>
+            </div>
+            {/* Motif */}
+            <div>
+              <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: 6 }}>Motif (obligatoire)</label>
+              <textarea
+                value={motif}
+                onChange={e => setMotif(e.target.value)}
+                rows={3}
+                placeholder="Ex: Pèlerin a contacté pour annulation…"
+                style={{ width: '100%', padding: '0.6rem 0.875rem', border: '1.5px solid #E8DFC8', borderRadius: 8, fontSize: '0.85rem', fontFamily: 'inherit', color: '#1A1209', background: 'white', outline: 'none', boxSizing: 'border-box', resize: 'vertical', lineHeight: 1.6 }}
+              />
+              <div style={{ fontSize: '0.65rem', color: motif.trim().length < 10 ? '#DC2626' : '#1D5C3A', marginTop: 4 }}>
+                {motif.trim().length} / 10 caractères minimum
+              </div>
+            </div>
+            {/* Buttons */}
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => setManagingResa(null)}
+                disabled={submittingModal}
+                style={{ padding: '0.65rem 1.25rem', background: 'white', color: '#7A6D5A', border: '1px solid #E8DFC8', borderRadius: 50, fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleModal}
+                disabled={submittingModal}
+                style={{ padding: '0.65rem 1.5rem', background: submittingModal ? '#9CA3AF' : '#1A1209', color: '#F0D897', border: 'none', borderRadius: 50, fontSize: '0.82rem', fontWeight: 700, cursor: submittingModal ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}
+              >
+                {submittingModal ? 'Confirmation…' : 'Confirmer'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import RBACGuard from '@/components/RBACGuard';
 
 type Language = { id: string; languageCode: string; level: string };
 type Package  = { id: string; name: string; pricePerPerson: number; durationDays: number; maxPeople: number };
@@ -404,25 +405,34 @@ export default function AdminGuideDetailPage() {
       )}
 
       {/* Section — Informations bancaires */}
-      <div style={{ background: '#FEF9EC', border: '1px solid #FCD34D', borderRadius: 12, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div>
-          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Informations bancaires</div>
-          <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>Données sensibles — accès restreint</div>
+      <RBACGuard
+        roles={['ADMIN']}
+        fallback={
+          <div style={{ background: '#FEE2E2', borderRadius: 12, padding: '1rem', fontSize: '0.82rem', color: '#DC2626' }}>
+            🔒 Accès restreint — Administrateurs uniquement
+          </div>
+        }
+      >
+        <div style={{ background: '#FEF9EC', border: '1px solid #FCD34D', borderRadius: 12, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div>
+            <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Informations bancaires</div>
+            <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>Données sensibles — accès restreint</div>
+          </div>
+          {!guide.iban ? (
+            <div style={{ color: '#9CA3AF', fontSize: '0.85rem' }}>Aucun IBAN renseigné</div>
+          ) : !ibanVisible ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <div style={{ fontFamily: 'monospace', color: '#7A6D5A' }}>FR76 •••• •••• •••• •••• •••• •••</div>
+              <button onClick={() => setIbanVisible(true)} style={{ background: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', borderRadius: 20, padding: '0.35rem 0.875rem', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Révéler</button>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <div style={{ fontFamily: 'monospace', fontSize: '1rem', fontWeight: 700, color: '#1A1209', letterSpacing: '0.08em' }}>{guide.iban}</div>
+              <button onClick={() => setIbanVisible(false)} style={{ background: 'white', color: '#7A6D5A', border: '1px solid #E8DFC8', borderRadius: 20, padding: '0.35rem 0.875rem', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Masquer</button>
+            </div>
+          )}
         </div>
-        {!guide.iban ? (
-          <div style={{ color: '#9CA3AF', fontSize: '0.85rem' }}>Aucun IBAN renseigné</div>
-        ) : !ibanVisible ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <div style={{ fontFamily: 'monospace', color: '#7A6D5A' }}>FR76 •••• •••• •••• •••• •••• •••</div>
-            <button onClick={() => setIbanVisible(true)} style={{ background: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', borderRadius: 20, padding: '0.35rem 0.875rem', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Révéler</button>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <div style={{ fontFamily: 'monospace', fontSize: '1rem', fontWeight: 700, color: '#1A1209', letterSpacing: '0.08em' }}>{guide.iban}</div>
-            <button onClick={() => setIbanVisible(false)} style={{ background: 'white', color: '#7A6D5A', border: '1px solid #E8DFC8', borderRadius: 20, padding: '0.35rem 0.875rem', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Masquer</button>
-          </div>
-        )}
-      </div>
+      </RBACGuard>
 
       {/* Section — Disponibilités (30 prochains jours) */}
       <div style={sectionStyle}>

@@ -21,7 +21,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
       reservations: {
         take: 10,
         orderBy: { createdAt: 'desc' },
-        include: { reviews: { select: { ratingOverall: true } } },
       },
       availabilities: {
         where: { date: { gte: new Date() } },
@@ -82,6 +81,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ slug
       status: guide.status,
       responseTimeAvg: guide.responseTimeAvg,
       completionRate: guide.completionRate,
+      commissionRate: guide.commissionRate,
       user: guide.user,
       languages: guide.languages,
       packages: guide.packages,

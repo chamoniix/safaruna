@@ -38,6 +38,7 @@ export async function GET(
           orderBy: { date: 'asc' },
           take: 30,
         },
+        places: { include: { place: { select: { id: true, slug: true, nameFr: true } } } },
       },
     });
 
@@ -117,6 +118,12 @@ export async function GET(
             ? new Date(c.messages[0].createdAt).toLocaleDateString('fr-FR')
             : '',
         })),
+        places: guide.places.map(p => ({
+          id: p.id,
+          placeId: p.placeId,
+          placeSlug: p.place.slug,
+          placeNameFr: p.place.nameFr,
+        })),
         interviewScore: guide.interviewScore,
         interviewNotes: guide.interviewNotes,
         interviewDate: guide.interviewDate
@@ -193,6 +200,53 @@ export async function PATCH(
         },
       });
       return NextResponse.json({ success: true });
+    }
+
+    // Ajouter une langue
+    if (body.addLanguage) {
+      await prisma.guideLanguage.create({
+        data: {
+          guideProfileId: guide.id,
+          languageCode: body.addLanguage.code,
+          level: body.addLanguage.level || 'NATIVE',
+        }
+      })
+      return NextResponse.json({ success: true })
+    }
+
+    // Supprimer une langue
+    if (body.deleteLanguageId) {
+      await prisma.guideLanguage.delete({
+        where: { id: body.deleteLanguageId }
+      })
+      return NextResponse.json({ success: true })
+    }
+
+    // Toggle lieu actif/inactif par slug de Place (présent = actif, absent = inactif)
+    if (body.togglePlaceSlug) {
+      const place = await prisma.place.findUnique({
+        where: { slug: body.togglePlaceSlug },
+      })
+      if (!place) return NextResponse.json({ error: 'Lieu introuvable' }, { status: 404 })
+      const existing = await prisma.guidePlace.findFirst({
+        where: {
+          guideProfileId: guide.id,
+          placeId: place.id,
+        }
+      })
+      if (existing) {
+        await prisma.guidePlace.delete({
+          where: { id: existing.id },
+        })
+      } else {
+        await prisma.guidePlace.create({
+          data: {
+            guideProfileId: guide.id,
+            placeId: place.id,
+          }
+        })
+      }
+      return NextResponse.json({ success: true })
     }
 
     await prisma.guideProfile.update({

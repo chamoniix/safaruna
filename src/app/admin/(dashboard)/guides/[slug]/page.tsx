@@ -7,6 +7,7 @@ import { useParams } from 'next/navigation';
 type Language = { id: string; languageCode: string; level: string };
 type Package  = { id: string; name: string; pricePerPerson: number; durationDays: number; maxPeople: number };
 type Reservation = { id: string; refNumber: string; startDate: string; nbPeople: number; totalPrice: number; status: string; createdAt: string };
+type GuidePlace = { id: string; placeId: string; placeSlug: string; placeNameFr: string };
 type Guide = {
   id: string; slug: string; bio: string | null; city: string | null;
   nationality: string | null; experienceYears: number | null; status: string;
@@ -18,6 +19,7 @@ type Guide = {
   languages: Language[];
   packages: Package[];
   reservations: Reservation[];
+  places: GuidePlace[];
   stats: { totalReservations: number; totalRevenue: number; avgRating: number | null };
   interviewScore: number | null;
   interviewNotes: string | null;
@@ -521,19 +523,60 @@ export default function AdminGuideDetailPage() {
           <textarea value={bio} onChange={e => setBio(e.target.value)} rows={4} style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.6 }} placeholder="Présentation du guide…" />
         </div>
 
-        {/* Langues */}
-        {guide.languages.length > 0 && (
-          <div>
-            <label style={labelStyle}>Langues</label>
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              {guide.languages.map(l => (
-                <span key={l.id} style={{ background: '#F5F0E8', border: '1px solid #E8DFC8', borderRadius: 20, padding: '0.3rem 0.75rem', fontSize: '0.75rem', fontWeight: 600, color: '#4A3F30' }}>
-                  {l.languageCode} <span style={{ color: '#9A8A7A', fontWeight: 400 }}>{l.level}</span>
-                </span>
-              ))}
-            </div>
+        {/* Langues parlées */}
+        <div>
+          <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.75rem' }}>Langues parlées</div>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
+            {guide.languages.map(l => (
+              <span key={l.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', background: '#F5F0E8', border: '1px solid #E8DFC8', borderRadius: 20, padding: '0.3rem 0.5rem 0.3rem 0.75rem', fontSize: '0.75rem', fontWeight: 600, color: '#4A3F30' }}>
+                {l.languageCode} — {l.level}
+                <button
+                  onClick={async () => {
+                    const res = await fetch(`/api/admin/guides/${slug}`, {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ deleteLanguageId: l.id }),
+                    })
+                    if (res.ok) fetchGuide(true)
+                  }}
+                  style={{ width: 16, height: 16, borderRadius: '50%', background: '#FEE2E2', color: '#DC2626', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 900, padding: 0, lineHeight: 1 }}
+                >✕</button>
+              </span>
+            ))}
+            {guide.languages.length === 0 && <span style={{ fontSize: '0.8rem', color: '#9CA3AF' }}>Aucune langue renseignée</span>}
           </div>
-        )}
+          {/* Ajout langue */}
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <input
+              id="lang-code-input"
+              placeholder="Code (fr, ar, en…)"
+              style={{ padding: '0.45rem 0.75rem', border: '1.5px solid #E8DFC8', borderRadius: 8, fontSize: '0.82rem', fontFamily: 'var(--font-manrope, sans-serif)', width: 140, outline: 'none' }}
+            />
+            <select
+              id="lang-level-select"
+              style={{ padding: '0.45rem 0.75rem', border: '1.5px solid #E8DFC8', borderRadius: 8, fontSize: '0.82rem', fontFamily: 'var(--font-manrope, sans-serif)', background: 'white', cursor: 'pointer', outline: 'none' }}
+            >
+              {['NATIVE','C2','C1','B2','B1'].map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
+            </select>
+            <button
+              onClick={async () => {
+                const codeEl = document.getElementById('lang-code-input') as HTMLInputElement
+                const levelEl = document.getElementById('lang-level-select') as HTMLSelectElement
+                const code = codeEl?.value?.trim().toLowerCase()
+                if (!code) return
+                const res = await fetch(`/api/admin/guides/${slug}`, {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ addLanguage: { code, level: levelEl?.value || 'NATIVE' } }),
+                })
+                if (res.ok) { codeEl.value = ''; fetchGuide(true) }
+              }}
+              style={{ padding: '0.45rem 1rem', background: '#1A1209', color: '#F0D897', border: 'none', borderRadius: 50, fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+            >
+              Ajouter
+            </button>
+          </div>
+        </div>
 
         {/* Save button */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', paddingTop: '0.5rem', borderTop: '1px solid #F0EBE0' }}>
@@ -544,6 +587,74 @@ export default function AdminGuideDetailPage() {
             <span style={{ fontSize: '0.82rem', fontWeight: 600, color: saveMsg.startsWith('✓') ? '#1D5C3A' : '#DC2626' }}>{saveMsg}</span>
           )}
         </div>
+      </div>
+
+      {/* Section — Lieux de visite */}
+      <div style={{ background: 'white', border: '1px solid #E8DFC8', borderRadius: 12, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div>
+          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Lieux de visite actifs</div>
+          <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>Activez ou désactivez les lieux que ce guide peut accompagner</div>
+        </div>
+        {[
+          { group: 'Makkah', places: [
+            { key: 'masjid-al-haram', label: 'Masjid Al-Haram' },
+            { key: 'kaaba', label: 'La Kaaba' },
+            { key: 'zamzam', label: 'Puits de Zamzam' },
+            { key: 'jabal-nour', label: 'Jabal Nour' },
+            { key: 'hira', label: 'Grotte de Hira' },
+            { key: 'jabal-thawr', label: 'Jabal Thawr' },
+            { key: 'arafat', label: 'Arafat' },
+            { key: 'muzdalifah', label: 'Muzdalifah' },
+            { key: 'mina', label: 'Mina' },
+            { key: 'safa-marwa', label: 'Safa & Marwa' },
+          ]},
+          { group: 'Madinah', places: [
+            { key: 'masjid-nabawi', label: 'Masjid An-Nabawi' },
+            { key: 'rawdah', label: 'La Rawdah' },
+            { key: 'masjid-quba', label: 'Masjid Quba' },
+            { key: 'baqi', label: 'Cimetière Al-Baqi' },
+            { key: 'ohoud', label: 'Mont Ohoud' },
+          ]},
+          { group: 'Historique', places: [
+            { key: 'badr', label: 'Badr' },
+            { key: 'khandaq', label: 'Al-Khandaq' },
+          ]},
+        ].map(group => (
+          <div key={group.group}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: '0.5rem' }}>{group.group}</div>
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              {group.places.map(place => {
+                const isActive = guide.places.some(p => p.placeSlug === place.key)
+                return (
+                  <button
+                    key={place.key}
+                    onClick={async () => {
+                      // Optimistic update
+                      const updated = isActive
+                        ? guide.places.filter(p => p.placeSlug !== place.key)
+                        : [...guide.places, { id: 'opt-' + place.key, placeId: '', placeSlug: place.key, placeNameFr: place.label }]
+                      setGuide({ ...guide, places: updated })
+                      await fetch(`/api/admin/guides/${slug}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ togglePlaceSlug: place.key }),
+                      })
+                      fetchGuide(true)
+                    }}
+                    style={{
+                      padding: '0.35rem 0.875rem', borderRadius: 20, border: `1px solid ${isActive ? '#1D5C3A' : '#E8DFC8'}`,
+                      background: isActive ? '#D1FAE5' : '#F3F4F6',
+                      color: isActive ? '#1D5C3A' : '#9CA3AF',
+                      fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                    }}
+                  >
+                    {isActive ? '✓ ' : ''}{place.label}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Section 3 — Packages */}

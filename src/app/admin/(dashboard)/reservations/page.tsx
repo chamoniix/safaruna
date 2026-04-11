@@ -46,6 +46,19 @@ export default function AdminReservations() {
   const [motif, setMotif]                     = useState('');
   const [submittingModal, setSubmittingModal] = useState(false);
 
+  // Transfer modal state
+  const [transferModal, setTransferModal] = useState<{
+    reservationId: string;
+    refNumber: string;
+    currentGuideName: string;
+    pelerinName: string;
+    startDate: string;
+  } | null>(null);
+  const [transferNewGuideId, setTransferNewGuideId] = useState('');
+  const [transferMotif, setTransferMotif] = useState('');
+  const [submittingTransfer, setSubmittingTransfer] = useState(false);
+  const [allGuides, setAllGuides] = useState<{ id: string; name: string; city: string }[]>([]);
+
   const fetchReservations = async () => {
     setLoading(true); setError('');
     try {
@@ -58,6 +71,17 @@ export default function AdminReservations() {
   };
 
   useEffect(() => { fetchReservations(); }, []);
+
+  useEffect(() => {
+    fetch('/api/admin/guides')
+      .then(r => r.json())
+      .then(data => {
+        setAllGuides((data.guides || [])
+          .filter((g: any) => g.status === 'ACTIVE')
+          .map((g: any) => ({ id: g.id, name: g.name, city: g.city })))
+      })
+      .catch(() => {})
+  }, []);
 
   const visible = reservations
     .filter(r => filter === 'ALL' || r.status === filter)
@@ -95,6 +119,38 @@ export default function AdminReservations() {
       await fetchReservations();
     } catch { alert('Erreur lors de la mise à jour du statut.'); }
     setSubmittingModal(false);
+  };
+
+  const handleTransfer = async () => {
+    if (!transferModal || !transferNewGuideId || !transferMotif.trim()) return;
+    if (transferMotif.trim().length < 10) {
+      alert('Le motif doit faire au moins 10 caractères.');
+      return;
+    }
+    if (!window.confirm(`Confirmer le transfert de la réservation ${transferModal.refNumber} vers ce nouveau guide ?`)) return;
+
+    setSubmittingTransfer(true);
+    try {
+      const res = await fetch('/api/admin/reservations/transfer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reservationId: transferModal.reservationId,
+          newGuideProfileId: transferNewGuideId,
+          motif: transferMotif,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erreur');
+      alert(`Réservation transférée vers ${data.newGuideName}`);
+      setTransferModal(null);
+      setTransferNewGuideId('');
+      setTransferMotif('');
+      window.location.reload();
+    } catch (e: any) {
+      alert('Erreur : ' + e.message);
+    }
+    setSubmittingTransfer(false);
   };
 
   const totalRevenu     = Math.round(activeResas.reduce((s, r) => s + r.totalPrice, 0));
@@ -197,12 +253,26 @@ export default function AdminReservations() {
                         <span style={{ display: 'inline-block', background: sc.bg, color: sc.color, fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.06em', padding: '0.25rem 0.6rem', borderRadius: 20, whiteSpace: 'nowrap' }}>{sc.label}</span>
                       </td>
                       <td style={{ padding: '0.75rem 0.875rem' }}>
-                        <button
-                          onClick={() => { setManagingResa(r); setModalStatus(r.status); setMotif(''); }}
-                          style={{ padding: '0.35rem 0.75rem', background: '#1A1209', color: '#F0D897', border: 'none', borderRadius: 20, fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}
-                        >
-                          Gérer →
-                        </button>
+                        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'nowrap', alignItems: 'center' }}>
+                          <button
+                            onClick={() => { setManagingResa(r); setModalStatus(r.status); setMotif(''); }}
+                            style={{ padding: '0.35rem 0.75rem', background: '#1A1209', color: '#F0D897', border: 'none', borderRadius: 20, fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}
+                          >
+                            Gérer →
+                          </button>
+                          <button
+                            onClick={() => setTransferModal({
+                              reservationId: r.id,
+                              refNumber: r.refNumber,
+                              currentGuideName: r.guide,
+                              pelerinName: r.pelerin,
+                              startDate: r.startDate,
+                            })}
+                            style={{ padding: '0.35rem 0.75rem', borderRadius: 20, border: '1px solid #E8DFC8', background: 'white', color: '#7A6D5A', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}
+                          >
+                            Transfert
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -284,6 +354,59 @@ export default function AdminReservations() {
                 style={{ padding: '0.65rem 1.5rem', background: submittingModal ? '#9CA3AF' : '#1A1209', color: '#F0D897', border: 'none', borderRadius: 50, fontSize: '0.82rem', fontWeight: 700, cursor: submittingModal ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}
               >
                 {submittingModal ? 'Confirmation…' : 'Confirmer'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Transfert */}
+      {transferModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div style={{ background: 'white', borderRadius: 16, padding: '2rem', maxWidth: 520, width: '100%', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
+            <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 700, color: '#1A1209', margin: '0 0 0.5rem' }}>Transférer la réservation</h2>
+            <div style={{ fontSize: '0.82rem', color: '#7A6D5A', marginBottom: '1.25rem' }}>
+              Réservation <strong>{transferModal.refNumber}</strong> · {transferModal.pelerinName} · {transferModal.startDate}
+            </div>
+            <div style={{ background: '#FEE2E2', border: '1px solid #FCA5A5', borderRadius: 8, padding: '0.75rem 1rem', fontSize: '0.82rem', color: '#DC2626', fontWeight: 600, marginBottom: '1.25rem' }}>
+              Guide actuel : {transferModal.currentGuideName}
+            </div>
+            <div style={{ marginBottom: '1rem' }}>
+              <label style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', display: 'block', marginBottom: 6 }}>Nouveau guide</label>
+              <select
+                value={transferNewGuideId}
+                onChange={e => setTransferNewGuideId(e.target.value)}
+                style={{ width: '100%', padding: '0.6rem 0.875rem', border: '1.5px solid #E8DFC8', borderRadius: 8, fontSize: '0.85rem', fontFamily: 'inherit', color: '#1A1209', background: 'white', outline: 'none', cursor: 'pointer', boxSizing: 'border-box' }}
+              >
+                <option value="">— Sélectionner un guide actif —</option>
+                {allGuides.map(g => (
+                  <option key={g.id} value={g.id}>{g.name}{g.city ? ` — ${g.city}` : ''}</option>
+                ))}
+              </select>
+            </div>
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', display: 'block', marginBottom: 6 }}>Motif du transfert</label>
+              <textarea
+                value={transferMotif}
+                onChange={e => setTransferMotif(e.target.value)}
+                rows={3}
+                placeholder="Ex: Guide indisponible pour urgence médicale..."
+                style={{ width: '100%', padding: '0.6rem 0.875rem', border: '1.5px solid #E8DFC8', borderRadius: 8, fontSize: '0.85rem', fontFamily: 'inherit', color: '#1A1209', background: 'white', outline: 'none', resize: 'vertical', boxSizing: 'border-box' }}
+              />
+            </div>
+            <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => { setTransferModal(null); setTransferNewGuideId(''); setTransferMotif(''); }}
+                style={{ padding: '0.65rem 1.5rem', borderRadius: 50, border: '1px solid #E8DFC8', background: 'white', color: '#7A6D5A', fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleTransfer}
+                disabled={submittingTransfer || !transferNewGuideId || !transferMotif.trim()}
+                style={{ padding: '0.65rem 1.75rem', borderRadius: 50, border: 'none', background: submittingTransfer ? '#9CA3AF' : '#1A1209', color: '#F0D897', fontSize: '0.85rem', fontWeight: 700, cursor: submittingTransfer ? 'not-allowed' : 'pointer', fontFamily: 'inherit' }}
+              >
+                {submittingTransfer ? 'Transfert…' : 'Confirmer le transfert'}
               </button>
             </div>
           </div>

@@ -38,7 +38,7 @@ export async function GET(
           orderBy: { date: 'asc' },
           take: 30,
         },
-        places: { include: { place: { select: { id: true, slug: true, nameFr: true } } } },
+        places: true,
       },
     });
 
@@ -120,9 +120,8 @@ export async function GET(
         })),
         places: guide.places.map(p => ({
           id: p.id,
-          placeId: p.placeId,
-          placeSlug: p.place.slug,
-          placeNameFr: p.place.nameFr,
+          placeKey: p.placeKey,
+          isActive: p.isActive,
         })),
         interviewScore: guide.interviewScore,
         interviewNotes: guide.interviewNotes,
@@ -222,28 +221,19 @@ export async function PATCH(
       return NextResponse.json({ success: true })
     }
 
-    // Toggle lieu actif/inactif par slug de Place (présent = actif, absent = inactif)
-    if (body.togglePlaceSlug) {
-      const place = await prisma.place.findUnique({
-        where: { slug: body.togglePlaceSlug },
-      })
-      if (!place) return NextResponse.json({ error: 'Lieu introuvable' }, { status: 404 })
+    // Toggle lieu actif/inactif
+    if (body.togglePlace) {
       const existing = await prisma.guidePlace.findFirst({
-        where: {
-          guideProfileId: guide.id,
-          placeId: place.id,
-        }
+        where: { guideProfileId: guide.id, placeKey: body.togglePlace },
       })
       if (existing) {
-        await prisma.guidePlace.delete({
+        await prisma.guidePlace.update({
           where: { id: existing.id },
+          data: { isActive: !existing.isActive },
         })
       } else {
         await prisma.guidePlace.create({
-          data: {
-            guideProfileId: guide.id,
-            placeId: place.id,
-          }
+          data: { guideProfileId: guide.id, placeKey: body.togglePlace, isActive: true },
         })
       }
       return NextResponse.json({ success: true })

@@ -83,7 +83,7 @@ async function main() {
 
   for (const place of allPlaces.filter(p => p.city === "Makkah")) {
     await prisma.guidePlace.createMany({
-      data: [{ guideProfileId: guide1Profile.id, placeId: place.id }],
+      data: [{ guideProfileId: guide1Profile.id, placeKey: place.slug }],
     })
   }
 
@@ -220,7 +220,7 @@ async function main() {
 
   for (const place of allPlaces.filter(p => p.city === "Madinah")) {
     await prisma.guidePlace.createMany({
-      data: [{ guideProfileId: guide4Profile.id, placeId: place.id }],
+      data: [{ guideProfileId: guide4Profile.id, placeKey: place.slug }],
     })
   }
 

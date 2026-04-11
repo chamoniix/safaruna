@@ -7,7 +7,7 @@ import { useParams } from 'next/navigation';
 type Language = { id: string; languageCode: string; level: string };
 type Package  = { id: string; name: string; pricePerPerson: number; durationDays: number; maxPeople: number };
 type Reservation = { id: string; refNumber: string; startDate: string; nbPeople: number; totalPrice: number; status: string; createdAt: string };
-type GuidePlace = { id: string; placeId: string; placeSlug: string; placeNameFr: string };
+type GuidePlace = { id: string; placeKey: string; isActive: boolean };
 type Guide = {
   id: string; slug: string; bio: string | null; city: string | null;
   nationality: string | null; experienceYears: number | null; status: string;
@@ -624,20 +624,21 @@ export default function AdminGuideDetailPage() {
             <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: '0.5rem' }}>{group.group}</div>
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
               {group.places.map(place => {
-                const isActive = guide.places.some(p => p.placeSlug === place.key)
+                const placeRecord = guide.places.find(p => p.placeKey === place.key)
+                const isActive = placeRecord?.isActive ?? false
                 return (
                   <button
                     key={place.key}
                     onClick={async () => {
                       // Optimistic update
-                      const updated = isActive
-                        ? guide.places.filter(p => p.placeSlug !== place.key)
-                        : [...guide.places, { id: 'opt-' + place.key, placeId: '', placeSlug: place.key, placeNameFr: place.label }]
+                      const updated = placeRecord
+                        ? guide.places.map(p => p.placeKey === place.key ? { ...p, isActive: !p.isActive } : p)
+                        : [...guide.places, { id: 'opt-' + place.key, placeKey: place.key, isActive: true }]
                       setGuide({ ...guide, places: updated })
                       await fetch(`/api/admin/guides/${slug}`, {
                         method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ togglePlaceSlug: place.key }),
+                        body: JSON.stringify({ togglePlace: place.key }),
                       })
                       fetchGuide(true)
                     }}

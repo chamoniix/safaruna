@@ -132,11 +132,14 @@ model GuideLanguage {
 }
 
 model GuidePlace {
-  id             String @id @default(cuid())
+  id             String      @id @default(cuid())
   guideProfileId String
   guideProfile   GuideProfile @relation(fields: [guideProfileId], references: [id], onDelete: Cascade)
-  placeId        String
-  place          Place  @relation(fields: [placeId], references: [id])
+  placeKey       String
+  isActive       Boolean     @default(true)
+  createdAt      DateTime    @default(now())
+
+  @@unique([guideProfileId, placeKey])
 }
 
 model Place {
@@ -146,10 +149,8 @@ model Place {
   nameAr      String?
   city        String
   category    String
-  description String  
-  duaText     String? 
-  
-  guidePlaces GuidePlace[]
+  description String
+  duaText     String?
 }
 
 model Package {
@@ -202,10 +203,16 @@ model Reservation {
   totalPrice        Float
   status            ReservationStatus @default(PENDING)
   stripePaymentId   String?
-  notes             String? 
+  notes             String?
+  selectedPlaces    Json?
+  selectedCities    String?
+  withTransport     Boolean  @default(false)
+  withCar           Boolean  @default(false)
+  gender            String?
+  langue            String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-  
+
   reviews           Review[]
 }
 
@@ -214,6 +221,13 @@ enum ReservationStatus {
   CONFIRMED
   COMPLETED
   CANCELLED
+}
+
+model PlacePrice {
+  id       String  @id @default(cuid())
+  placeKey String  @unique
+  price    Float   @default(50)
+  isActive Boolean @default(true)
 }
 
 // ---------------------------------------------------------

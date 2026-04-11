@@ -204,13 +204,21 @@ export default function AdminGuidesPage() {
                             {isToggling ? '…' : isActive ? 'Suspendre' : 'Activer'}
                           </button>
                           {g.slug && (
-                            <Link
-                              href={`/guides/${g.slug}`}
-                              target="_blank"
-                              style={{ padding: '6px 14px', borderRadius: 50, border: '1px solid #E8DFC8', background: 'white', color: '#7A6D5A', fontSize: '0.7rem', fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}
-                            >
-                              Voir ↗
-                            </Link>
+                            <>
+                              <Link
+                                href={`/admin/guides/${g.slug}`}
+                                style={{ padding: '6px 16px', borderRadius: 50, border: 'none', background: '#1A1209', color: '#F0D897', fontSize: '0.75rem', fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                              >
+                                Gérer ✏️
+                              </Link>
+                              <Link
+                                href={`/guides/${g.slug}`}
+                                target="_blank"
+                                style={{ padding: '6px 14px', borderRadius: 50, border: '1px solid #E8DFC8', background: 'white', color: '#7A6D5A', fontSize: '0.75rem', fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center' }}
+                              >
+                                Public ↗
+                              </Link>
+                            </>
                           )}
                         </div>
                       </td>

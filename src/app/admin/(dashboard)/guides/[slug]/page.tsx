@@ -14,7 +14,7 @@ type Guide = {
   iban: string | null;
   availabilities: { id: string; date: string; status: string }[];
   conversations: { id: string; pelerinName: string; lastMessage: string; lastMessageAt: string }[];
-  user: { name: string | null; firstName: string | null; lastName: string | null; email: string | null; createdAt: string };
+  user: { name: string | null; firstName: string | null; lastName: string | null; email: string | null; createdAt: string; phoneWhatsapp: string | null; image: string | null };
   languages: Language[];
   packages: Package[];
   reservations: Reservation[];
@@ -79,6 +79,14 @@ export default function AdminGuideDetailPage() {
 
   const [ibanVisible, setIbanVisible] = useState(false);
 
+  // Identity editing
+  const [firstName, setFirstName]           = useState('');
+  const [lastName, setLastName]             = useState('');
+  const [email, setEmail]                   = useState('');
+  const [phoneWhatsapp, setPhoneWhatsapp]   = useState('');
+  const [savingIdentity, setSavingIdentity] = useState(false);
+  const [identityMsg, setIdentityMsg]       = useState('');
+
   // Interview scoring
   const [interviewScore, setInterviewScore] = useState('');
   const [interviewNotes, setInterviewNotes] = useState('');
@@ -100,6 +108,10 @@ export default function AdminGuideDetailPage() {
       setNationality(g.nationality || '');
       setExpYears(g.experienceYears?.toString() || '');
       setStatus(g.status);
+      setFirstName(g.user.firstName || '');
+      setLastName(g.user.lastName || '');
+      setEmail(g.user.email || '');
+      setPhoneWhatsapp(g.user.phoneWhatsapp || '');
       setInterviewScore(g.interviewScore?.toString() || '');
       setInterviewNotes(g.interviewNotes || '');
     } catch (e: any) { setError(e.message); }
@@ -230,10 +242,16 @@ export default function AdminGuideDetailPage() {
       {/* Section 1 — Identité */}
       <div style={sectionStyle}>
         <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Identité</div>
+
+        {/* Avatar + infos rapides */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-          <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
-            {initials(guide)}
-          </div>
+          {guide.user.image ? (
+            <img src={guide.user.image} alt="" style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+          ) : (
+            <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
+              {initials(guide)}
+            </div>
+          )}
           <div>
             <div style={{ fontWeight: 700, fontSize: '1rem', color: '#1A1209' }}>{guide.user.name || '—'}</div>
             <div style={{ fontSize: '0.8rem', color: '#7A6D5A' }}>{guide.user.email}</div>
@@ -241,6 +259,58 @@ export default function AdminGuideDetailPage() {
               Inscrit le {new Date(guide.user.createdAt).toLocaleDateString('fr-FR')}
             </div>
           </div>
+          <div style={{ marginLeft: 'auto', fontSize: '0.72rem', color: '#9CA3AF', fontStyle: 'italic' }}>
+            Upload photo — fonctionnalité R2 à venir
+          </div>
+        </div>
+
+        <div style={{ height: 1, background: '#F0EBE0' }} />
+
+        {/* Formulaire identité éditable */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div>
+            <label style={labelStyle}>Prénom</label>
+            <input value={firstName} onChange={e => setFirstName(e.target.value)} style={inputStyle} placeholder="Prénom" />
+          </div>
+          <div>
+            <label style={labelStyle}>Nom</label>
+            <input value={lastName} onChange={e => setLastName(e.target.value)} style={inputStyle} placeholder="Nom" />
+          </div>
+          <div>
+            <label style={labelStyle}>Email</label>
+            <input value={email} onChange={e => setEmail(e.target.value)} type="email" style={inputStyle} placeholder="email@exemple.com" />
+          </div>
+          <div>
+            <label style={labelStyle}>WhatsApp</label>
+            <input value={phoneWhatsapp} onChange={e => setPhoneWhatsapp(e.target.value)} style={inputStyle} placeholder="+33 6 XX XX XX XX" />
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', paddingTop: '0.5rem', borderTop: '1px solid #F0EBE0' }}>
+          <button
+            onClick={async () => {
+              setSavingIdentity(true); setIdentityMsg('');
+              try {
+                const res = await fetch(`/api/admin/guides/${slug}`, {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ firstName, lastName, email, phoneWhatsapp }),
+                });
+                if (!res.ok) throw new Error();
+                setIdentityMsg('✓ Identité sauvegardée');
+                await fetchGuide(true);
+              } catch { setIdentityMsg('✗ Erreur lors de la sauvegarde'); }
+              setSavingIdentity(false);
+              setTimeout(() => setIdentityMsg(''), 3000);
+            }}
+            disabled={savingIdentity}
+            style={{ padding: '0.65rem 1.75rem', background: '#1A1209', color: '#F0D897', border: 'none', borderRadius: 50, fontWeight: 700, fontSize: '0.85rem', cursor: savingIdentity ? 'not-allowed' : 'pointer', fontFamily: 'inherit', opacity: savingIdentity ? 0.7 : 1 }}
+          >
+            {savingIdentity ? 'Sauvegarde…' : "Sauvegarder l'identité"}
+          </button>
+          {identityMsg && (
+            <span style={{ fontSize: '0.82rem', fontWeight: 600, color: identityMsg.startsWith('✓') ? '#1D5C3A' : '#DC2626' }}>{identityMsg}</span>
+          )}
         </div>
       </div>
 

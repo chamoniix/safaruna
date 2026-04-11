@@ -24,7 +24,8 @@ export async function GET(
         user: {
           select: {
             id: true, name: true, firstName: true,
-            lastName: true, email: true, createdAt: true
+            lastName: true, email: true, createdAt: true,
+            phoneWhatsapp: true, image: true
           }
         },
         languages: true,
@@ -84,7 +85,11 @@ export async function GET(
         responseTimeAvg: guide.responseTimeAvg,
         completionRate: guide.completionRate,
         commissionRate: (guide as any).commissionRate ?? 0.12,
-        user: guide.user,
+        user: {
+          ...guide.user,
+          phoneWhatsapp: guide.user.phoneWhatsapp || null,
+          image: guide.user.image || null,
+        },
         languages: guide.languages,
         packages: guide.packages,
         reservations: guide.reservations.map(r => ({
@@ -156,6 +161,20 @@ export async function PATCH(
     const guide = await prisma.guideProfile.findUnique({ where: { slug } });
     if (!guide)
       return NextResponse.json({ error: 'Guide introuvable' }, { status: 404 });
+
+    if (body.firstName !== undefined || body.lastName !== undefined ||
+        body.phoneWhatsapp !== undefined || body.email !== undefined) {
+      await prisma.user.update({
+        where: { id: guide.userId },
+        data: {
+          ...(body.firstName !== undefined && { firstName: body.firstName }),
+          ...(body.lastName !== undefined && { lastName: body.lastName }),
+          ...(body.phoneWhatsapp !== undefined && { phoneWhatsapp: body.phoneWhatsapp }),
+          ...(body.email !== undefined && { email: body.email }),
+        },
+      });
+      return NextResponse.json({ success: true });
+    }
 
     if (body.interviewScore !== undefined || body.interviewNotes !== undefined) {
       await prisma.guideProfile.update({

@@ -112,6 +112,12 @@ export async function GET(
             ? new Date(c.messages[0].createdAt).toLocaleDateString('fr-FR')
             : '',
         })),
+        interviewScore: guide.interviewScore,
+        interviewNotes: guide.interviewNotes,
+        interviewDate: guide.interviewDate
+          ? guide.interviewDate.toLocaleDateString('fr-FR')
+          : null,
+        interviewedBy: guide.interviewedBy,
         stats: {
           totalReservations,
           totalRevenue: Math.round(revenueAgg._sum.totalPrice || 0),
@@ -150,6 +156,25 @@ export async function PATCH(
     const guide = await prisma.guideProfile.findUnique({ where: { slug } });
     if (!guide)
       return NextResponse.json({ error: 'Guide introuvable' }, { status: 404 });
+
+    if (body.interviewScore !== undefined || body.interviewNotes !== undefined) {
+      await prisma.guideProfile.update({
+        where: { slug },
+        data: {
+          ...(body.interviewScore !== undefined && {
+            interviewScore: Number(body.interviewScore),
+          }),
+          ...(body.interviewNotes !== undefined && {
+            interviewNotes: body.interviewNotes,
+          }),
+          ...(body.interviewDate !== undefined && {
+            interviewDate: new Date(body.interviewDate),
+          }),
+          interviewedBy: 'admin@safaruma.com',
+        },
+      });
+      return NextResponse.json({ success: true });
+    }
 
     await prisma.guideProfile.update({
       where: { slug },

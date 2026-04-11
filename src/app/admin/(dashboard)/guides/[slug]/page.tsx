@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import RBACGuard from '@/components/RBACGuard';
 
 type Language = { id: string; languageCode: string; level: string };
 type Package  = { id: string; name: string; pricePerPerson: number; durationDays: number; maxPeople: number };
@@ -20,6 +19,10 @@ type Guide = {
   packages: Package[];
   reservations: Reservation[];
   stats: { totalReservations: number; totalRevenue: number; avgRating: number | null };
+  interviewScore: number | null;
+  interviewNotes: string | null;
+  interviewDate: string | null;
+  interviewedBy: string | null;
 };
 
 const RES_STATUS: Record<string, { label: string; color: string; bg: string }> = {
@@ -76,6 +79,12 @@ export default function AdminGuideDetailPage() {
 
   const [ibanVisible, setIbanVisible] = useState(false);
 
+  // Interview scoring
+  const [interviewScore, setInterviewScore] = useState('');
+  const [interviewNotes, setInterviewNotes] = useState('');
+  const [savingInterview, setSavingInterview] = useState(false);
+  const [interviewMsg, setInterviewMsg] = useState('');
+
   // silent=true → update data without showing the full-page skeleton (used for post-action refreshes)
   const fetchGuide = async (silent = false) => {
     if (!silent) setLoading(true);
@@ -91,6 +100,8 @@ export default function AdminGuideDetailPage() {
       setNationality(g.nationality || '');
       setExpYears(g.experienceYears?.toString() || '');
       setStatus(g.status);
+      setInterviewScore(g.interviewScore?.toString() || '');
+      setInterviewNotes(g.interviewNotes || '');
     } catch (e: any) { setError(e.message); }
     if (!silent) setLoading(false);
   };
@@ -305,6 +316,111 @@ export default function AdminGuideDetailPage() {
         )}
       </div>
 
+      {/* Section — Entretien & Évaluation */}
+      {(() => {
+        const score = interviewScore !== '' ? Number(interviewScore) : null;
+        const scoreColor = score === null ? '#7A6D5A'
+          : score >= 15 ? '#1D5C3A'
+          : score >= 10 ? '#92400E'
+          : '#DC2626';
+        const scoreBg = score === null ? '#F3F4F6'
+          : score >= 15 ? '#D1FAE5'
+          : score >= 10 ? '#FEF3C7'
+          : '#FEE2E2';
+
+        const handleSaveInterview = async () => {
+          setSavingInterview(true);
+          setInterviewMsg('');
+          try {
+            const res = await fetch(`/api/admin/guides/${slug}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                interviewScore: interviewScore !== '' ? Number(interviewScore) : undefined,
+                interviewNotes,
+                interviewDate: new Date().toISOString(),
+              }),
+            });
+            if (!res.ok) throw new Error();
+            setInterviewMsg('✓ Évaluation sauvegardée');
+            await fetchGuide(true);
+          } catch { setInterviewMsg('✗ Erreur lors de la sauvegarde'); }
+          setSavingInterview(false);
+          setTimeout(() => setInterviewMsg(''), 3000);
+        };
+
+        return (
+          <div style={{ background: '#F0F9FF', border: '1px solid #BAE6FD', borderRadius: 12, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div>
+              <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>🎤 Entretien & Évaluation</div>
+              <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>Ces informations sont privées — non visibles par le guide</div>
+            </div>
+
+            {guide.interviewDate ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <span style={{ background: '#D1FAE5', color: '#1D5C3A', fontSize: '0.72rem', fontWeight: 700, padding: '0.25rem 0.75rem', borderRadius: 20 }}>✓ Entretien complété</span>
+                <span style={{ fontSize: '0.78rem', color: '#4A3F30' }}>le {guide.interviewDate} par {guide.interviewedBy || 'admin'}</span>
+              </div>
+            ) : (
+              <span style={{ background: '#FEF3C7', color: '#92400E', fontSize: '0.72rem', fontWeight: 700, padding: '0.25rem 0.75rem', borderRadius: 20, alignSelf: 'flex-start' }}>⏳ Entretien à planifier</span>
+            )}
+
+            <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: '1rem', alignItems: 'start' }}>
+              <div>
+                <label style={labelStyle}>Note de l'entretien (/20)</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <input
+                    type="number" min={0} max={20}
+                    value={interviewScore}
+                    onChange={e => setInterviewScore(e.target.value)}
+                    style={{ ...inputStyle, width: 80 }}
+                    placeholder="—"
+                  />
+                  {score !== null && (
+                    <span style={{ background: scoreBg, color: scoreColor, fontWeight: 700, fontSize: '0.85rem', padding: '0.2rem 0.6rem', borderRadius: 8 }}>
+                      {score}/20
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div>
+                <label style={labelStyle}>Notes internes (test écrit + oral)</label>
+                <textarea
+                  value={interviewNotes}
+                  onChange={e => setInterviewNotes(e.target.value)}
+                  rows={5}
+                  style={{ ...inputStyle, resize: 'vertical', lineHeight: 1.6 }}
+                  placeholder="Observations sur le candidat, points forts, points faibles, résultat test écrit, résultat oral…"
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', paddingTop: '0.5rem', borderTop: '1px solid #BAE6FD' }}>
+              <button
+                onClick={handleSaveInterview}
+                disabled={savingInterview}
+                style={{ padding: '0.65rem 1.75rem', background: '#0369A1', color: 'white', border: 'none', borderRadius: 50, fontWeight: 700, fontSize: '0.85rem', cursor: savingInterview ? 'not-allowed' : 'pointer', fontFamily: 'inherit', opacity: savingInterview ? 0.7 : 1 }}
+              >
+                {savingInterview ? 'Sauvegarde…' : "Sauvegarder l'évaluation"}
+              </button>
+              {interviewMsg && (
+                <span style={{ fontSize: '0.82rem', fontWeight: 600, color: interviewMsg.startsWith('✓') ? '#1D5C3A' : '#DC2626' }}>{interviewMsg}</span>
+              )}
+            </div>
+
+            {score !== null && (
+              <div style={{ background: scoreBg, border: `1px solid ${scoreColor}33`, borderRadius: 8, padding: '0.75rem 1rem', fontSize: '0.82rem', fontWeight: 600, color: scoreColor }}>
+                {score >= 15
+                  ? '✅ Candidat recommandé — Peut être validé'
+                  : score >= 10
+                  ? '⚠️ Candidat acceptable — À valider avec précaution'
+                  : '❌ Candidat non recommandé'}
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
       {/* Section 2 — Profil éditable */}
       <div style={sectionStyle}>
         <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Profil guide</div>
@@ -405,34 +521,25 @@ export default function AdminGuideDetailPage() {
       )}
 
       {/* Section — Informations bancaires */}
-      <RBACGuard
-        roles={['ADMIN']}
-        fallback={
-          <div style={{ background: '#FEE2E2', borderRadius: 12, padding: '1rem', fontSize: '0.82rem', color: '#DC2626' }}>
-            🔒 Accès restreint — Administrateurs uniquement
-          </div>
-        }
-      >
-        <div style={{ background: '#FEF9EC', border: '1px solid #FCD34D', borderRadius: 12, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div>
-            <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Informations bancaires</div>
-            <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>Données sensibles — accès restreint</div>
-          </div>
-          {!guide.iban ? (
-            <div style={{ color: '#9CA3AF', fontSize: '0.85rem' }}>Aucun IBAN renseigné</div>
-          ) : !ibanVisible ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-              <div style={{ fontFamily: 'monospace', color: '#7A6D5A' }}>FR76 •••• •••• •••• •••• •••• •••</div>
-              <button onClick={() => setIbanVisible(true)} style={{ background: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', borderRadius: 20, padding: '0.35rem 0.875rem', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Révéler</button>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-              <div style={{ fontFamily: 'monospace', fontSize: '1rem', fontWeight: 700, color: '#1A1209', letterSpacing: '0.08em' }}>{guide.iban}</div>
-              <button onClick={() => setIbanVisible(false)} style={{ background: 'white', color: '#7A6D5A', border: '1px solid #E8DFC8', borderRadius: 20, padding: '0.35rem 0.875rem', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Masquer</button>
-            </div>
-          )}
+      <div style={{ background: '#FEF9EC', border: '1px solid #FCD34D', borderRadius: 12, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div>
+          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Informations bancaires</div>
+          <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>Données sensibles — accès restreint</div>
         </div>
-      </RBACGuard>
+        {!guide.iban ? (
+          <div style={{ color: '#9CA3AF', fontSize: '0.85rem' }}>Aucun IBAN renseigné</div>
+        ) : !ibanVisible ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <div style={{ fontFamily: 'monospace', color: '#7A6D5A' }}>FR76 •••• •••• •••• •••• •••• •••</div>
+            <button onClick={() => setIbanVisible(true)} style={{ background: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', borderRadius: 20, padding: '0.35rem 0.875rem', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Révéler</button>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <div style={{ fontFamily: 'monospace', fontSize: '1rem', fontWeight: 700, color: '#1A1209', letterSpacing: '0.08em' }}>{guide.iban}</div>
+            <button onClick={() => setIbanVisible(false)} style={{ background: 'white', color: '#7A6D5A', border: '1px solid #E8DFC8', borderRadius: 20, padding: '0.35rem 0.875rem', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Masquer</button>
+          </div>
+        )}
+      </div>
 
       {/* Section — Disponibilités (30 prochains jours) */}
       <div style={sectionStyle}>

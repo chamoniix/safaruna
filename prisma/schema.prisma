@@ -101,6 +101,10 @@ model GuideProfile {
   responseTimeAvg   String?
   completionRate    Int?     @default(0)
   commissionRate    Float    @default(0.15)
+  interviewScore    Int?
+  interviewNotes    String?
+  interviewDate     DateTime?
+  interviewedBy     String?
 
   // Relations
   packages          Package[]

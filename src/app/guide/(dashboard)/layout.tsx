@@ -120,6 +120,7 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
               ]},
               { section: 'Gestion', items: [
                 { href: '/guide/calendrier', icon: '◻', label: 'Calendrier' },
+                { href: '/guide/lieux',      icon: '📍', label: 'Lieux de visite' },
                 { href: '/guide/revenus',    icon: '◈', label: 'Mes revenus' },
                 { href: '/guide/avis',       icon: '★', label: 'Mes avis' },
               ]},

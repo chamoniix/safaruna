@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import BookingWidget from './BookingWidget';
+import { PLACES as LIB_PLACES } from '@/lib/places';
 
 interface Package {
   name: string;
@@ -39,6 +40,7 @@ interface GuideProfileClientProps {
   certifications: string[];
   services: string[];
   bioFull: string[];
+  activePlaceKeys?: string[];
 }
 
 const TAB_LABELS = ['Présentation', 'Lieux Saints', 'Forfaits', 'Avis'];
@@ -53,6 +55,7 @@ export default function GuideProfileClient({
   certifications,
   services,
   bioFull,
+  activePlaceKeys,
 }: GuideProfileClientProps) {
   const [activeTab, setActiveTab] = useState(0);
   const [selectedForfait, setSelectedForfait] = useState(1);
@@ -302,7 +305,7 @@ export default function GuideProfileClient({
                     Makkah Al-Mukarramah
                   </h3>
                 </div>
-                <PlaceGrid places={makkahPlaces} />
+                <PlaceGrid places={makkahPlaces} activePlaceKeys={activePlaceKeys} />
               </div>
 
               <div style={{ marginBottom: '2rem' }}>
@@ -312,7 +315,7 @@ export default function GuideProfileClient({
                     Al-Madinah Al-Munawwarah
                   </h3>
                 </div>
-                <PlaceGrid places={madinahPlaces} />
+                <PlaceGrid places={madinahPlaces} activePlaceKeys={activePlaceKeys} />
               </div>
 
               <div>
@@ -322,7 +325,7 @@ export default function GuideProfileClient({
                     Sites Historiques
                   </h3>
                 </div>
-                <PlaceGrid places={historiquePlaces} />
+                <PlaceGrid places={historiquePlaces} activePlaceKeys={activePlaceKeys} />
               </div>
             </div>
           )}
@@ -600,37 +603,71 @@ export default function GuideProfileClient({
   );
 }
 
-function PlaceGrid({ places }: { places: Place[] }) {
+function PlaceGrid({ places, activePlaceKeys }: { places: Place[]; activePlaceKeys?: string[] }) {
+  // Build a nameFr -> key map from the lib places for availability lookup
+  const nameFrToKey: Record<string, string> = {}
+  LIB_PLACES.forEach(p => { nameFrToKey[p.nameFr] = p.key })
+
+  const hasConfig = activePlaceKeys && activePlaceKeys.length > 0
+
   return (
     <div className="profile-places-grid">
-      {places.map((place, i) => (
-        <div key={i} style={{
-          background: 'white',
-          border: '1px solid var(--sand)',
-          borderRadius: '12px',
-          padding: '0.9rem 1rem',
-          transition: 'transform 0.15s, box-shadow 0.15s',
-        }}>
-          <div style={{ fontSize: '1.5rem', marginBottom: '0.4rem' }}>{place.emoji}</div>
-          <div style={{
-            fontSize: '0.65rem',
-            color: 'var(--muted)',
-            fontFamily: 'var(--font-cormorant), serif',
-            fontStyle: 'italic',
-            marginBottom: '0.15rem',
-            direction: 'rtl',
-            textAlign: 'right',
+      {places.map((place, i) => {
+        const placeKey = nameFrToKey[place.nameFr]
+        const libPlace = LIB_PLACES.find(p => p.nameFr === place.nameFr)
+        // If includedInBase, always active
+        const isBase = libPlace?.includedInBase ?? false
+        const isUnavailable = hasConfig && placeKey && !isBase && !activePlaceKeys!.includes(placeKey)
+
+        return (
+          <div key={i} style={{
+            background: 'white',
+            border: '1px solid var(--sand)',
+            borderRadius: '12px',
+            padding: '0.9rem 1rem',
+            transition: 'transform 0.15s, box-shadow 0.15s',
+            opacity: isUnavailable ? 0.4 : 1,
+            filter: isUnavailable ? 'grayscale(100%)' : 'none',
+            position: 'relative',
           }}>
-            {place.nameAr}
+            <div style={{ fontSize: '1.5rem', marginBottom: '0.4rem' }}>{place.emoji}</div>
+            <div style={{
+              fontSize: '0.65rem',
+              color: 'var(--muted)',
+              fontFamily: 'var(--font-cormorant), serif',
+              fontStyle: 'italic',
+              marginBottom: '0.15rem',
+              direction: 'rtl',
+              textAlign: 'right',
+            }}>
+              {place.nameAr}
+            </div>
+            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--deep)', marginBottom: '0.25rem' }}>
+              {place.nameFr}
+            </div>
+            <div style={{ fontSize: '0.72rem', color: 'var(--muted)', lineHeight: 1.5 }}>
+              {place.desc}
+            </div>
+            {isUnavailable && (
+              <div style={{
+                position: 'absolute',
+                top: '0.5rem',
+                right: '0.5rem',
+                fontSize: '0.55rem',
+                fontWeight: 700,
+                letterSpacing: '0.06em',
+                background: '#F3F4F6',
+                color: '#6B7280',
+                border: '1px solid #E5E7EB',
+                padding: '0.15rem 0.45rem',
+                borderRadius: 20,
+              }}>
+                Non disponible
+              </div>
+            )}
           </div>
-          <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--deep)', marginBottom: '0.25rem' }}>
-            {place.nameFr}
-          </div>
-          <div style={{ fontSize: '0.72rem', color: 'var(--muted)', lineHeight: 1.5 }}>
-            {place.desc}
-          </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   );
 }

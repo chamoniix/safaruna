@@ -561,6 +561,19 @@ export default async function GuideProfilePage({
     }) as typeof guideData;
   } catch { /* DB error — fall through to hardcoded */ }
 
+  // ── Fetch active guide places ─────────────────────────────────────────────
+  let activePlaceKeys: string[] = []
+  try {
+    if (guideData) {
+      const guidePlacesData = await prisma.guidePlace.findMany({
+        where: { guideProfileId: (guideData as any).id },
+      })
+      activePlaceKeys = guidePlacesData
+        .filter(p => p.isActive)
+        .map(p => p.placeKey)
+    }
+  } catch { /* DB error — show all places normally */ }
+
   const hardcoded = GUIDES[slug] ?? null;
   if (!guideData && !hardcoded) notFound();
 
@@ -884,6 +897,7 @@ export default async function GuideProfilePage({
           certifications={guide.certifications}
           services={guide.services}
           bioFull={guide.bioFull}
+          activePlaceKeys={activePlaceKeys}
         />
       </div>
 

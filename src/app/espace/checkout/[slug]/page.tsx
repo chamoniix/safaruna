@@ -575,6 +575,9 @@ export default function CheckoutPage() {
             )}
 
             {/* Voiture */}
+            <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginTop: '1.5rem', marginBottom: '0.75rem' }}>
+              Véhicule pour les visites
+            </div>
             <div
               onClick={() => setWithCar(c => !c)}
               style={{ background: withCar ? 'rgba(201,168,76,0.06)' : 'white', border: withCar ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', borderRadius: 12, padding: '1rem 1.25rem', cursor: 'pointer', marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '1rem' }}
@@ -583,7 +586,7 @@ export default function CheckoutPage() {
                 {withCar && <span style={{ color: 'white', fontSize: '0.75rem', fontWeight: 900 }}>✓</span>}
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1A1209' }}>🚗 Voiture du guide pour les visites</div>
+                <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1A1209' }}>Voiture privée — visites locales</div>
                 <div style={{ fontSize: '0.75rem', color: '#7A6D5A', marginTop: 2 }}>Recommandé pour Jabal Nour, Arafat, Badr · +45€/jour</div>
               </div>
               <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.1rem', fontWeight: 700, color: '#C9A84C' }}>+45€</div>

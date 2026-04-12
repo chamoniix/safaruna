@@ -72,8 +72,8 @@ export default function GuideProfileClient({
     fontFamily: 'var(--font-manrope), sans-serif',
     fontWeight: activeTab === i ? 700 : 500,
     fontSize: '0.85rem',
-    color: activeTab === i ? 'var(--deep)' : 'var(--muted)',
-    borderBottom: activeTab === i ? '2px solid var(--gold)' : '2px solid transparent',
+    color: activeTab === i ? '#1A1209' : '#7A6D5A',
+    borderBottom: activeTab === i ? '2px solid #C9A84C' : '2px solid transparent',
     transition: 'all 0.15s',
     whiteSpace: 'nowrap',
     flexShrink: 0,
@@ -94,7 +94,7 @@ export default function GuideProfileClient({
         }
         .profile-tabs-bar {
           display: flex;
-          border-bottom: 1px solid var(--sand);
+          border-bottom: 1px solid #E8DFC8;
           margin-bottom: 2rem;
           overflow-x: auto;
           -webkit-overflow-scrolling: touch;
@@ -138,7 +138,7 @@ export default function GuideProfileClient({
             right: 0;
             z-index: 50;
             background: white;
-            border-top: 1px solid var(--sand);
+            border-top: 1px solid #E8DFC8;
             padding: 0.875rem 1rem;
             box-shadow: 0 -4px 24px rgba(26,18,9,0.1);
           }
@@ -160,9 +160,10 @@ export default function GuideProfileClient({
             grid-template-columns: 1fr 1fr;
           }
         }
-        /* Fix overflow visibility */
+        /* Fix overflow visibility + background explicite */
         .profile-main-grid {
           overflow: visible !important;
+          background: #FAF7F0;
         }
         .profile-main-grid > div:first-child {
           overflow: visible !important;
@@ -235,7 +236,7 @@ export default function GuideProfileClient({
                 {bioFull.map((para, i) => (
                   <p key={i} style={{
                     fontSize: '0.95rem',
-                    color: 'var(--warm)',
+                    color: '#4A3F30',
                     lineHeight: 1.9,
                     marginBottom: '1.25rem',
                   }}>
@@ -249,7 +250,7 @@ export default function GuideProfileClient({
                   fontFamily: 'var(--font-cormorant), serif',
                   fontSize: '1.4rem',
                   fontWeight: 600,
-                  color: 'var(--deep)',
+                  color: '#1A1209',
                   marginBottom: '1rem',
                 }}>
                   Certifications &amp; Diplômes
@@ -261,11 +262,11 @@ export default function GuideProfileClient({
                       alignItems: 'flex-start',
                       gap: '0.6rem',
                       padding: '0.55rem 0',
-                      borderBottom: i < certifications.length - 1 ? '1px solid var(--sand)' : 'none',
+                      borderBottom: i < certifications.length - 1 ? '1px solid #E8DFC8' : 'none',
                       fontSize: '0.88rem',
-                      color: 'var(--warm)',
+                      color: '#4A3F30',
                     }}>
-                      <span style={{ color: 'var(--gold)', fontWeight: 700, flexShrink: 0, marginTop: '2px' }}>✓</span>
+                      <span style={{ color: '#C9A84C', fontWeight: 700, flexShrink: 0, marginTop: '2px' }}>✓</span>
                       {cert}
                     </li>
                   ))}
@@ -277,7 +278,7 @@ export default function GuideProfileClient({
                   fontFamily: 'var(--font-cormorant), serif',
                   fontSize: '1.4rem',
                   fontWeight: 600,
-                  color: 'var(--deep)',
+                  color: '#1A1209',
                   marginBottom: '1rem',
                 }}>
                   Services inclus
@@ -290,12 +291,12 @@ export default function GuideProfileClient({
                       gap: '0.5rem',
                       padding: '0.6rem 0.8rem',
                       background: 'white',
-                      border: '1px solid var(--sand)',
+                      border: '1px solid #E8DFC8',
                       borderRadius: '10px',
                       fontSize: '0.82rem',
-                      color: 'var(--warm)',
+                      color: '#4A3F30',
                     }}>
-                      <span style={{ color: 'var(--gold)', fontWeight: 700, fontSize: '0.9rem' }}>✓</span>
+                      <span style={{ color: '#C9A84C', fontWeight: 700, fontSize: '0.9rem' }}>✓</span>
                       {svc}
                     </div>
                   ))}
@@ -306,11 +307,11 @@ export default function GuideProfileClient({
 
           {/* TAB: LIEUX SAINTS */}
           {activeTab === 1 && (
-            <div style={{ minHeight: '50vh' }}>
+            <div style={{ minHeight: '50vh', background: '#FAF7F0', padding: '1rem 0' }}>
               <div style={{ marginBottom: '2rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                  <div style={{ width: '6px', height: '28px', background: 'var(--gold)', borderRadius: '3px' }}></div>
-                  <h3 style={{ fontFamily: 'var(--font-cormorant), serif', fontSize: '1.3rem', fontWeight: 600, color: 'var(--deep)' }}>
+                  <div style={{ width: '6px', height: '28px', background: '#C9A84C', borderRadius: '3px' }}></div>
+                  <h3 style={{ fontFamily: 'var(--font-cormorant), serif', fontSize: '1.3rem', fontWeight: 600, color: '#1A1209' }}>
                     Makkah Al-Mukarramah
                   </h3>
                 </div>
@@ -319,8 +320,8 @@ export default function GuideProfileClient({
 
               <div style={{ marginBottom: '2rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                  <div style={{ width: '6px', height: '28px', background: 'var(--deep)', borderRadius: '3px' }}></div>
-                  <h3 style={{ fontFamily: 'var(--font-cormorant), serif', fontSize: '1.3rem', fontWeight: 600, color: 'var(--deep)' }}>
+                  <div style={{ width: '6px', height: '28px', background: '#1A1209', borderRadius: '3px' }}></div>
+                  <h3 style={{ fontFamily: 'var(--font-cormorant), serif', fontSize: '1.3rem', fontWeight: 600, color: '#1A1209' }}>
                     Al-Madinah Al-Munawwarah
                   </h3>
                 </div>
@@ -329,8 +330,8 @@ export default function GuideProfileClient({
 
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-                  <div style={{ width: '6px', height: '28px', background: 'var(--muted)', borderRadius: '3px' }}></div>
-                  <h3 style={{ fontFamily: 'var(--font-cormorant), serif', fontSize: '1.3rem', fontWeight: 600, color: 'var(--deep)' }}>
+                  <div style={{ width: '6px', height: '28px', background: '#7A6D5A', borderRadius: '3px' }}></div>
+                  <h3 style={{ fontFamily: 'var(--font-cormorant), serif', fontSize: '1.3rem', fontWeight: 600, color: '#1A1209' }}>
                     Sites Historiques
                   </h3>
                 </div>
@@ -373,7 +374,7 @@ export default function GuideProfileClient({
               {packages.map((pkg, i) => (
                 <div key={i} style={{
                   background: 'white',
-                  border: i === 1 ? '2px solid var(--gold)' : '1.5px solid var(--sand)',
+                  border: i === 1 ? '2px solid #C9A84C' : '1.5px solid #E8DFC8',
                   borderRadius: '16px',
                   padding: '1.75rem',
                   position: 'relative',
@@ -384,8 +385,8 @@ export default function GuideProfileClient({
                       position: 'absolute',
                       top: '1rem',
                       right: '1rem',
-                      background: 'var(--gold)',
-                      color: 'var(--deep)',
+                      background: '#C9A84C',
+                      color: '#1A1209',
                       fontSize: '0.62rem',
                       fontWeight: 800,
                       letterSpacing: '0.1em',
@@ -401,16 +402,16 @@ export default function GuideProfileClient({
                         fontFamily: 'var(--font-cormorant), serif',
                         fontSize: '1.35rem',
                         fontWeight: 700,
-                        color: 'var(--deep)',
+                        color: '#1A1209',
                         marginBottom: '0.35rem',
                       }}>
                         {pkg.name}
                       </h3>
                       <span style={{
                         display: 'inline-block',
-                        background: 'var(--cream)',
-                        border: '1px solid var(--sand)',
-                        color: 'var(--muted)',
+                        background: '#FAF7F0',
+                        border: '1px solid #E8DFC8',
+                        color: '#7A6D5A',
                         fontSize: '0.72rem',
                         fontWeight: 600,
                         padding: '0.2rem 0.65rem',
@@ -424,16 +425,16 @@ export default function GuideProfileClient({
                         fontFamily: 'var(--font-cormorant), serif',
                         fontSize: '2rem',
                         fontWeight: 700,
-                        color: 'var(--deep)',
+                        color: '#1A1209',
                         lineHeight: 1,
                       }}>
                         {pkg.price}€
                       </div>
-                      <div style={{ fontSize: '0.72rem', color: 'var(--muted)', marginTop: '0.2rem' }}>par personne</div>
+                      <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: '0.2rem' }}>par personne</div>
                     </div>
                   </div>
 
-                  <p style={{ fontSize: '0.85rem', color: 'var(--muted)', lineHeight: 1.7, marginBottom: '1.25rem' }}>
+                  <p style={{ fontSize: '0.85rem', color: '#7A6D5A', lineHeight: 1.7, marginBottom: '1.25rem' }}>
                     {pkg.description}
                   </p>
 
@@ -444,11 +445,11 @@ export default function GuideProfileClient({
                         alignItems: 'flex-start',
                         gap: '0.5rem',
                         padding: '0.4rem 0',
-                        borderBottom: j < pkg.features.length - 1 ? '1px solid var(--sand)' : 'none',
+                        borderBottom: j < pkg.features.length - 1 ? '1px solid #E8DFC8' : 'none',
                         fontSize: '0.83rem',
-                        color: 'var(--warm)',
+                        color: '#4A3F30',
                       }}>
-                        <span style={{ color: 'var(--gold)', fontWeight: 700, flexShrink: 0 }}>✓</span>
+                        <span style={{ color: '#C9A84C', fontWeight: 700, flexShrink: 0 }}>✓</span>
                         {feat}
                       </li>
                     ))}
@@ -459,9 +460,9 @@ export default function GuideProfileClient({
                     style={{
                       width: '100%',
                       padding: '0.7rem 1.5rem',
-                      background: i === 1 ? 'var(--deep)' : 'transparent',
-                      color: i === 1 ? 'var(--gold-light)' : 'var(--deep)',
-                      border: i === 1 ? 'none' : '1.5px solid var(--deep)',
+                      background: i === 1 ? '#1A1209' : 'transparent',
+                      color: i === 1 ? '#F0D897' : '#1A1209',
+                      border: i === 1 ? 'none' : '1.5px solid #1A1209',
                       borderRadius: '50px',
                       fontFamily: 'var(--font-manrope), sans-serif',
                       fontWeight: 700,
@@ -484,7 +485,7 @@ export default function GuideProfileClient({
             <div style={{ minHeight: '50vh' }}>
               <div style={{
                 background: 'white',
-                border: '1px solid var(--sand)',
+                border: '1px solid #E8DFC8',
                 borderRadius: '16px',
                 padding: '1.5rem',
                 marginBottom: '1.5rem',
@@ -498,14 +499,14 @@ export default function GuideProfileClient({
                     fontFamily: 'var(--font-cormorant), serif',
                     fontSize: '3.5rem',
                     fontWeight: 700,
-                    color: 'var(--deep)',
+                    color: '#1A1209',
                     lineHeight: 1,
                     marginBottom: '0.25rem',
                   }}>
                     {isOfficial ? '5.0' : '4.97'}
                   </div>
-                  <div style={{ color: 'var(--gold)', fontSize: '1.1rem', letterSpacing: '2px', marginBottom: '0.25rem' }}>★★★★★</div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>{reviews.length} avis vérifiés</div>
+                  <div style={{ color: '#C9A84C', fontSize: '1.1rem', letterSpacing: '2px', marginBottom: '0.25rem' }}>★★★★★</div>
+                  <div style={{ fontSize: '0.75rem', color: '#7A6D5A' }}>{reviews.length} avis vérifiés</div>
                 </div>
                 <div style={{ flex: 1, minWidth: '180px' }}>
                   {[5, 4, 3, 2, 1].map(star => {
@@ -513,12 +514,12 @@ export default function GuideProfileClient({
                     const pct = reviews.length > 0 ? Math.round((count / reviews.length) * 100) : 0;
                     return (
                       <div key={star} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.3rem' }}>
-                        <span style={{ fontSize: '0.72rem', color: 'var(--muted)', width: '10px', textAlign: 'right' }}>{star}</span>
-                        <span style={{ color: 'var(--gold)', fontSize: '0.72rem' }}>★</span>
-                        <div style={{ flex: 1, height: '6px', background: 'var(--sand)', borderRadius: '3px', overflow: 'hidden' }}>
-                          <div style={{ width: `${pct}%`, height: '100%', background: 'var(--gold)', borderRadius: '3px' }}></div>
+                        <span style={{ fontSize: '0.72rem', color: '#7A6D5A', width: '10px', textAlign: 'right' }}>{star}</span>
+                        <span style={{ color: '#C9A84C', fontSize: '0.72rem' }}>★</span>
+                        <div style={{ flex: 1, height: '6px', background: '#E8DFC8', borderRadius: '3px', overflow: 'hidden' }}>
+                          <div style={{ width: `${pct}%`, height: '100%', background: '#C9A84C', borderRadius: '3px' }}></div>
                         </div>
-                        <span style={{ fontSize: '0.7rem', color: 'var(--muted)', width: '28px' }}>{pct}%</span>
+                        <span style={{ fontSize: '0.7rem', color: '#7A6D5A', width: '28px' }}>{pct}%</span>
                       </div>
                     );
                   })}
@@ -529,7 +530,7 @@ export default function GuideProfileClient({
                 {reviews.map((rev, i) => (
                   <div key={i} style={{
                     background: 'white',
-                    border: '1px solid var(--sand)',
+                    border: '1px solid #E8DFC8',
                     borderRadius: '14px',
                     padding: '1.25rem',
                   }}>
@@ -539,29 +540,29 @@ export default function GuideProfileClient({
                           width: '40px',
                           height: '40px',
                           borderRadius: '50%',
-                          background: 'var(--sand)',
+                          background: '#E8DFC8',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                           fontWeight: 700,
                           fontSize: '0.9rem',
-                          color: 'var(--warm)',
+                          color: '#4A3F30',
                           flexShrink: 0,
                         }}>
                           {rev.name.charAt(0)}
                         </div>
                         <div>
-                          <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--deep)' }}>
+                          <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#1A1209' }}>
                             {rev.name} <span style={{ fontSize: '1rem' }}>{rev.flag}</span>
                           </div>
-                          <div style={{ fontSize: '0.72rem', color: 'var(--muted)' }}>{rev.country} · {rev.date}</div>
+                          <div style={{ fontSize: '0.72rem', color: '#7A6D5A' }}>{rev.country} · {rev.date}</div>
                         </div>
                       </div>
-                      <div style={{ color: 'var(--gold)', fontSize: '0.85rem', letterSpacing: '1px', flexShrink: 0 }}>
+                      <div style={{ color: '#C9A84C', fontSize: '0.85rem', letterSpacing: '1px', flexShrink: 0 }}>
                         {'★'.repeat(rev.rating)}
                       </div>
                     </div>
-                    <p style={{ fontSize: '0.85rem', color: 'var(--warm)', lineHeight: 1.75 }}>
+                    <p style={{ fontSize: '0.85rem', color: '#4A3F30', lineHeight: 1.75 }}>
                       {rev.text}
                     </p>
                   </div>
@@ -585,9 +586,9 @@ export default function GuideProfileClient({
       <div className="profile-mobile-booking">
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '0.65rem', color: 'var(--muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>À partir de</div>
-            <div style={{ fontFamily: 'var(--font-cormorant), serif', fontSize: '1.5rem', fontWeight: 700, color: 'var(--deep)', lineHeight: 1 }}>
-              {packages[0].price}€ <span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-manrope)', fontWeight: 400, color: 'var(--muted)' }}>/ pers</span>
+            <div style={{ fontSize: '0.65rem', color: '#7A6D5A', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>À partir de</div>
+            <div style={{ fontFamily: 'var(--font-cormorant), serif', fontSize: '1.5rem', fontWeight: 700, color: '#1A1209', lineHeight: 1 }}>
+              {packages[0].price}€ <span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-manrope)', fontWeight: 400, color: '#7A6D5A' }}>/ pers</span>
             </div>
           </div>
           <a href={`/espace/checkout/${slug}`} style={{
@@ -630,19 +631,18 @@ function PlaceGrid({ places, activePlaceKeys }: { places: Place[]; activePlaceKe
 
         return (
           <div key={i} style={{
-            background: 'white',
-            border: '1px solid var(--sand)',
+            background: isUnavailable ? '#E5E7EB' : 'white',
+            border: '1px solid #E8DFC8',
             borderRadius: '12px',
             padding: '0.9rem 1rem',
             transition: 'transform 0.15s, box-shadow 0.15s',
-            opacity: isUnavailable ? 0.4 : 1,
-            filter: isUnavailable ? 'grayscale(100%)' : 'none',
+            opacity: isUnavailable ? 0.6 : 1,
             position: 'relative',
           }}>
             <div style={{ fontSize: '1.5rem', marginBottom: '0.4rem' }}>{place.emoji}</div>
             <div style={{
               fontSize: '0.65rem',
-              color: 'var(--muted)',
+              color: '#7A6D5A',
               fontFamily: 'var(--font-cormorant), serif',
               fontStyle: 'italic',
               marginBottom: '0.15rem',
@@ -651,24 +651,22 @@ function PlaceGrid({ places, activePlaceKeys }: { places: Place[]; activePlaceKe
             }}>
               {place.nameAr}
             </div>
-            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--deep)', marginBottom: '0.25rem' }}>
+            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1A1209', marginBottom: '0.25rem' }}>
               {place.nameFr}
             </div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--muted)', lineHeight: 1.5 }}>
+            <div style={{ fontSize: '0.72rem', color: '#7A6D5A', lineHeight: 1.5 }}>
               {place.desc}
             </div>
             {isUnavailable && (
               <div style={{
                 position: 'absolute',
-                top: '0.5rem',
-                right: '0.5rem',
-                fontSize: '0.55rem',
+                top: 8,
+                right: 8,
+                fontSize: '0.65rem',
                 fontWeight: 700,
-                letterSpacing: '0.06em',
-                background: '#F3F4F6',
-                color: '#6B7280',
-                border: '1px solid #E5E7EB',
-                padding: '0.15rem 0.45rem',
+                background: '#6B7280',
+                color: 'white',
+                padding: '0.2rem 0.6rem',
                 borderRadius: 20,
               }}>
                 Non disponible

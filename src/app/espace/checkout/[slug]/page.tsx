@@ -620,13 +620,13 @@ export default function CheckoutPage() {
             <button
               onClick={handleSubmit}
               disabled={submitting}
-              style={{ width: '100%', padding: '1.1rem', background: submitting ? '#9CA3AF' : '#C9A84C', color: '#1A1209', border: 'none', borderRadius: 12, fontFamily: 'inherit', fontWeight: 800, fontSize: '1rem', cursor: submitting ? 'not-allowed' : 'pointer', letterSpacing: '0.05em' }}
+              style={{ width: '100%', padding: '1.1rem', background: submitting ? '#9CA3AF' : 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)', color: '#FAF7F0', border: 'none', borderRadius: 12, fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 700, fontSize: '1.1rem', cursor: submitting ? 'not-allowed' : 'pointer', letterSpacing: '0.06em', boxShadow: submitting ? 'none' : '0 4px 20px rgba(201,168,76,0.4)' }}
             >
-              {submitting ? 'Envoi en cours…' : `Confirmer ma réservation — ${total.toLocaleString('fr-FR')}€`}
+              {submitting ? 'Envoi en cours…' : `Confirmer mon voyage · ${total.toLocaleString('fr-FR')} €`}
             </button>
 
             <div style={{ textAlign: 'center', fontSize: '0.72rem', color: '#9CA3AF', marginTop: '0.75rem' }}>
-              Sans engagement · Confirmation sous 24h · Annulation gratuite sous 48h
+              Paiement sécurisé · Annulation gratuite sous 48h
             </div>
           </div>
         )}

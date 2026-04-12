@@ -13,7 +13,7 @@ function ConfirmationContent() {
       <div style={{ maxWidth: 520, width: '100%', textAlign: 'center' }}>
 
         {/* Icône */}
-        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🤲</div>
+        <div style={{ fontSize: '3rem', marginBottom: '1rem', filter: 'drop-shadow(0 2px 8px rgba(201,168,76,0.3))' }}>🕌</div>
 
         {/* Titre arabe */}
         <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.5rem', color: '#C9A84C', marginBottom: '0.5rem', direction: 'rtl' }}>
@@ -26,8 +26,7 @@ function ConfirmationContent() {
 
         <p style={{ color: '#7A6D5A', fontSize: '0.95rem', lineHeight: 1.8, marginBottom: '1.5rem' }}>
           Votre demande de réservation a bien été enregistrée.
-          Votre guide a 24h pour confirmer votre voyage.
-          Vous recevrez un email de confirmation.
+          Vous recevrez un email de confirmation avec tous les détails de votre voyage.
         </p>
 
         {/* Numéro de réservation */}

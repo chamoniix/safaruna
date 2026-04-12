@@ -243,17 +243,16 @@ export default function CheckoutPage() {
       prev.includes(pk) ? prev.filter(p => p !== pk) : [...prev, pk]
     )
 
-  // Soumission
+  // Soumission — redirige vers Stripe Checkout
   const handleSubmit = async () => {
     setSubmitting(true)
     setError('')
     try {
-      const res = await fetch('/api/reservations/create', {
+      const res = await fetch('/api/stripe/create-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          guideSlug: selectedGuideSlug || slug,
-          guideSlugMadinah: cityChoice === 'BOTH' ? selectedGuideSlugMadinah : null,
+          guideSlug: slug,
           cityChoice,
           departDate,
           returnDate,
@@ -262,15 +261,16 @@ export default function CheckoutPage() {
           langue,
           selectedPlaces,
           transportOption,
-          prixTransport,
           withCar,
           totalPrice: total,
           packageName: basePackage?.name,
+          selectedGuideSlug,
+          selectedGuideSlugMadinah,
         }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Erreur')
-      router.push(`/espace/checkout/${slug}/confirmation?ref=${data.refNumber}`)
+      window.location.href = data.sessionUrl
     } catch (e: any) {
       setError(e.message)
       setSubmitting(false)
@@ -885,8 +885,12 @@ export default function CheckoutPage() {
               {submitting ? 'Envoi en cours…' : 'Confirmer mon voyage'}
             </button>
 
-            <div style={{ textAlign: 'center', fontSize: '0.72rem', color: '#9CA3AF', marginTop: '0.75rem' }}>
-              Paiement sécurisé · Annulation gratuite sous 48h
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '0.75rem', fontSize: '0.72rem', color: '#9CA3AF' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2">
+                <rect x="3" y="11" width="18" height="11" rx="2"/>
+                <path d="M7 11V7a5 5 0 0110 0v4"/>
+              </svg>
+              Paiement 100% sécurisé · Powered by Stripe
             </div>
           </div>
         )}

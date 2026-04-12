@@ -367,3 +367,11 @@ model PasswordResetToken {
   usedAt    DateTime?
   createdAt DateTime @default(now())
 }
+
+model ReservationDraft {
+  id        String   @id @default(cuid())
+  refNumber String   @unique
+  data      String   // JSON stringifié
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}

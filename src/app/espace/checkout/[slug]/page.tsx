@@ -137,7 +137,9 @@ export default function CheckoutPage() {
   const [loadingGuide, setLoadingGuide] = useState(true)
 
   // Étape 4 — Choix du guide
-  const [selectedGuideSlug, setSelectedGuideSlug] = useState<string>('')
+  const [selectedGuideSlug, setSelectedGuideSlug] = useState<string | null>(null)
+  const [selectedGuideSlugMadinah, setSelectedGuideSlugMadinah] = useState<string | null>(null)
+  const [guideSubStep, setGuideSubStep] = useState<1 | 2>(1)
   const [availableGuides, setAvailableGuides] = useState<any[]>([])
   const [loadingGuides, setLoadingGuides] = useState(false)
 
@@ -170,8 +172,14 @@ export default function CheckoutPage() {
 
   // Initialise selectedGuideSlug depuis l'URL
   useEffect(() => {
-    if (slug && !selectedGuideSlug) setSelectedGuideSlug(slug)
+    if (slug && selectedGuideSlug === null) setSelectedGuideSlug(slug)
   }, [slug]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Reset sous-étape guide si cityChoice change
+  useEffect(() => {
+    setGuideSubStep(1)
+    setSelectedGuideSlugMadinah(null)
+  }, [cityChoice])
 
   // Fetch données du guide sélectionné
   useEffect(() => {
@@ -245,6 +253,7 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           guideSlug: selectedGuideSlug || slug,
+          guideSlugMadinah: cityChoice === 'BOTH' ? selectedGuideSlugMadinah : null,
           cityChoice,
           departDate,
           returnDate,
@@ -641,67 +650,98 @@ export default function CheckoutPage() {
         )}
 
         {/* ── ÉTAPE 4 — VOTRE GUIDE ── */}
-        {step === 4 && (
-          <div>
-            {backBtn(3)}
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '1.8rem', fontWeight: 400, color: '#1A1209', marginBottom: '0.5rem' }}>
-              Choisissez votre guide
-            </h2>
-            <p style={{ color: '#7A6D5A', fontSize: '0.85rem', marginBottom: '1.5rem', lineHeight: 1.7 }}>
-              {cityChoice === 'BOTH'
-                ? 'Guide pour Makkah — vous pourrez choisir un guide différent pour Madinah ensuite'
-                : 'Guide pour votre séjour'}
-            </p>
+        {step === 4 && (() => {
+          const isMadinahSub = cityChoice === 'BOTH' && guideSubStep === 2
+          const currentSlug = isMadinahSub ? selectedGuideSlugMadinah : selectedGuideSlug
+          const setCurrentSlug = isMadinahSub ? setSelectedGuideSlugMadinah : setSelectedGuideSlug
 
-            {loadingGuides ? (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {[1, 2, 3].map(i => (
-                  <div key={i} style={{ background: '#E8DFC8', borderRadius: 12, padding: '1.25rem', height: 88, opacity: 0.5, animation: 'pulse 1.5s ease-in-out infinite' }} />
-                ))}
-                <style>{`@keyframes pulse { 0%,100%{opacity:0.5} 50%{opacity:0.8} }`}</style>
-              </div>
-            ) : availableGuides.length === 0 ? (
-              <div style={{ background: 'white', border: '1px solid #E8DFC8', borderRadius: 12, padding: '2rem', textAlign: 'center', color: '#7A6D5A', fontSize: '0.88rem' }}>
-                Aucun guide disponible pour vos critères. Votre guide actuel sera confirmé.
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {availableGuides.map(g => {
-                  const isSelected = selectedGuideSlug === g.slug
-                  return (
-                    <div
-                      key={g.slug}
-                      onClick={() => setSelectedGuideSlug(g.slug)}
-                      style={{ background: isSelected ? 'rgba(201,168,76,0.06)' : 'white', border: isSelected ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', borderRadius: 12, padding: '1rem 1.25rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem' }}
-                    >
-                      <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: '1rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
-                        {g.name?.slice(0, 2).toUpperCase()}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#1A1209' }}>{g.name}</div>
-                        <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>
-                          Guide SAFARUMA · {g.city}
-                          {g.languages && g.languages.length > 0 && (
-                            <span> · {g.languages.slice(0, 2).join(', ')}</span>
-                          )}
-                        </div>
-                        <div style={{ fontSize: '0.72rem', color: '#C9A84C', marginTop: 2, fontWeight: 600 }}>★ {g.rating}</div>
-                      </div>
-                      <button
-                        onClick={e => { e.stopPropagation(); setSelectedGuideSlug(g.slug) }}
-                        style={{ padding: '0.45rem 1rem', borderRadius: 50, border: 'none', background: isSelected ? '#1D5C3A' : '#E8DFC8', color: isSelected ? 'white' : '#4A3F30', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}
+          return (
+            <div>
+              {guideSubStep === 2
+                ? (
+                  <button
+                    onClick={() => setGuideSubStep(1)}
+                    style={{ background: 'none', border: 'none', color: '#7A6D5A', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600, marginBottom: '1.5rem', padding: 0, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                  >
+                    ← Retour
+                  </button>
+                )
+                : backBtn(3)
+              }
+
+              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '1.8rem', fontWeight: 400, color: '#1A1209', marginBottom: '0.5rem' }}>
+                {cityChoice === 'BOTH'
+                  ? guideSubStep === 1 ? 'Choisissez votre guide pour Makkah' : 'Choisissez votre guide pour Madinah'
+                  : 'Choisissez votre guide'}
+              </h2>
+              <p style={{ color: '#7A6D5A', fontSize: '0.85rem', marginBottom: '1.5rem', lineHeight: 1.7 }}>
+                {isMadinahSub
+                  ? 'Vous pouvez choisir le même guide ou un guide différent'
+                  : cityChoice !== 'BOTH' ? 'Guide pour votre séjour' : ''}
+              </p>
+
+              {loadingGuides ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {[1, 2, 3].map(i => (
+                    <div key={i} style={{ background: '#E8DFC8', borderRadius: 12, padding: '1.25rem', height: 88, opacity: 0.5, animation: 'pulse 1.5s ease-in-out infinite' }} />
+                  ))}
+                  <style>{`@keyframes pulse { 0%,100%{opacity:0.5} 50%{opacity:0.8} }`}</style>
+                </div>
+              ) : availableGuides.length === 0 ? (
+                <div style={{ background: 'white', border: '1px solid #E8DFC8', borderRadius: 12, padding: '2rem', textAlign: 'center', color: '#7A6D5A', fontSize: '0.88rem' }}>
+                  Aucun guide disponible pour vos critères. Votre guide actuel sera confirmé.
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  {availableGuides.map(g => {
+                    const isSelected = currentSlug === g.slug
+                    return (
+                      <div
+                        key={g.slug}
+                        onClick={() => setCurrentSlug(g.slug)}
+                        style={{ background: isSelected ? 'rgba(201,168,76,0.06)' : 'white', border: isSelected ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', borderRadius: 12, padding: '1rem 1.25rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem' }}
                       >
-                        {isSelected ? 'Sélectionné ✓' : 'Choisir'}
-                      </button>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
+                        <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: '1rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
+                          {g.name?.slice(0, 2).toUpperCase()}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#1A1209' }}>{g.name}</div>
+                          <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>
+                            Guide SAFARUMA · {g.city}
+                            {g.languages && g.languages.length > 0 && (
+                              <span> · {g.languages.slice(0, 2).join(', ')}</span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: '0.72rem', color: '#C9A84C', marginTop: 2, fontWeight: 600 }}>★ {g.rating}</div>
+                        </div>
+                        <button
+                          onClick={e => { e.stopPropagation(); setCurrentSlug(g.slug) }}
+                          style={{ padding: '0.45rem 1rem', borderRadius: 50, border: 'none', background: isSelected ? '#1D5C3A' : '#E8DFC8', color: isSelected ? 'white' : '#4A3F30', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}
+                        >
+                          {isSelected ? 'Sélectionné ✓' : 'Choisir'}
+                        </button>
+                      </div>
+                    )
+                  })}
 
-            {nextBtn('Voir le récapitulatif', () => setStep(5), !selectedGuideSlug)}
-          </div>
-        )}
+                  {currentSlug && (
+                    <button
+                      onClick={() => setCurrentSlug(null)}
+                      style={{ background: 'none', border: 'none', color: '#9CA3AF', fontSize: '0.75rem', cursor: 'pointer', marginTop: '0.75rem', textDecoration: 'underline', fontFamily: 'inherit' }}
+                    >
+                      Choisir un autre guide
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {cityChoice === 'BOTH' && guideSubStep === 1
+                ? nextBtn('Continuer', () => setGuideSubStep(2), !selectedGuideSlug)
+                : nextBtn('Voir le récapitulatif', () => setStep(5), !currentSlug)
+              }
+            </div>
+          )
+        })()}
 
         {/* ── ÉTAPE 5 — RÉCAP & PAIEMENT ── */}
         {step === 5 && (
@@ -711,8 +751,34 @@ export default function CheckoutPage() {
               Récapitulatif de votre voyage
             </h2>
 
-            {/* Guide card */}
-            {guide && (
+            {/* Guide card(s) */}
+            {guide && cityChoice === 'BOTH' ? (
+              <div style={{ background: '#1A1209', borderRadius: 16, padding: '1.25rem 1.5rem', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: '0.95rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
+                    {guide.name?.slice(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.72rem', color: 'rgba(201,168,76,0.6)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Guide Makkah</div>
+                    <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'white' }}>{guide.name}</div>
+                  </div>
+                </div>
+                {selectedGuideSlugMadinah && (() => {
+                  const gM = availableGuides.find(g => g.slug === selectedGuideSlugMadinah)
+                  return gM ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.75rem' }}>
+                      <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: '0.95rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
+                        {gM.name?.slice(0, 2).toUpperCase()}
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.72rem', color: 'rgba(201,168,76,0.6)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Guide Madinah</div>
+                        <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'white' }}>{gM.name}</div>
+                      </div>
+                    </div>
+                  ) : null
+                })()}
+              </div>
+            ) : guide ? (
               <div style={{ background: '#1A1209', borderRadius: 16, padding: '1.25rem 1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
                   {guide.name?.slice(0, 2).toUpperCase()}
@@ -722,7 +788,7 @@ export default function CheckoutPage() {
                   <div style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.55)' }}>Guide SAFARUMA · {guide.city}</div>
                 </div>
               </div>
-            )}
+            ) : null}
 
             {/* Tableau prix */}
             <div style={{ background: 'white', border: '1px solid #E8DFC8', borderRadius: 16, overflow: 'hidden', marginBottom: '1.5rem' }}>

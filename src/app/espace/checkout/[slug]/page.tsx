@@ -467,7 +467,7 @@ export default function CheckoutPage() {
                   <div style={{ flex: 1, textAlign: 'center', fontWeight: 700, fontSize: '1rem', color: '#1A1209', borderLeft: '1px solid #E8DFC8', borderRight: '1px solid #E8DFC8', padding: '0.75rem 0' }}>
                     {nbPersonnes} {nbPersonnes === 1 ? 'personne' : 'personnes'}
                   </div>
-                  <button onClick={() => setNbPersonnes(n => Math.min(12, n + 1))} style={{ width: 48, height: 48, border: 'none', background: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#1A1209', fontFamily: 'inherit' }}>+</button>
+                  <button onClick={() => setNbPersonnes(n => Math.min(20, n + 1))} style={{ width: 48, height: 48, border: 'none', background: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#1A1209', fontFamily: 'inherit' }}>+</button>
                 </div>
               </div>
 
@@ -791,6 +791,49 @@ export default function CheckoutPage() {
                 </div>
               </div>
             ) : null}
+
+            {/* Stepper personnes */}
+            <div style={{
+              display: 'flex', alignItems: 'center',
+              justifyContent: 'space-between',
+              background: 'white',
+              border: '1px solid #E8DFC8',
+              borderRadius: 12,
+              padding: '0.875rem 1.25rem',
+              marginBottom: '1rem',
+            }}>
+              <div style={{ fontSize: '0.82rem', fontWeight: 600, color: '#1A1209' }}>
+                Nombre de personnes
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <button
+                  onClick={() => setNbPersonnes(n => Math.max(1, n - 1))}
+                  style={{
+                    width: 32, height: 32, borderRadius: '50%',
+                    border: '1.5px solid #E8DFC8', background: 'white',
+                    fontSize: '1.1rem', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#1A1209', fontFamily: 'inherit',
+                  }}
+                >−</button>
+                <span style={{
+                  fontSize: '0.95rem', fontWeight: 700,
+                  color: '#1A1209', minWidth: 80, textAlign: 'center',
+                }}>
+                  {nbPersonnes} {nbPersonnes === 1 ? 'personne' : 'personnes'}
+                </span>
+                <button
+                  onClick={() => setNbPersonnes(n => Math.min(20, n + 1))}
+                  style={{
+                    width: 32, height: 32, borderRadius: '50%',
+                    border: '1.5px solid #E8DFC8', background: 'white',
+                    fontSize: '1.1rem', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: '#1A1209', fontFamily: 'inherit',
+                  }}
+                >+</button>
+              </div>
+            </div>
 
             {/* Tableau prix */}
             <div style={{ background: 'white', border: '1px solid #E8DFC8', borderRadius: 16, overflow: 'hidden', marginBottom: '1.5rem' }}>

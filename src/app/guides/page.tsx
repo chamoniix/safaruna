@@ -358,7 +358,6 @@ export default function GuideSearchPage() {
           { icon: '✓', label: 'Guides certifiés' },
           { icon: '🛡', label: 'Paiement sécurisé' },
           { icon: '★', label: '4.94/5 · 709 avis' },
-          { icon: '⏱', label: 'Réponse < 2h' },
         ].map(b => (
           <span key={b.label} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', fontWeight: 600, color: '#5A4535' }}>
             <span style={{ color: '#C9A84C', fontSize: '0.85rem' }}>{b.icon}</span>

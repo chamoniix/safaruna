@@ -33,6 +33,68 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }
   CANCELLED: { label: 'Annulée',    color: '#DC2626', bg: '#FEE2E2' },
 };
 
+const TIMELINE_STEPS = [
+  { key: 'PENDING',   label: 'Demande reçue',  icon: '📋' },
+  { key: 'CONFIRMED', label: 'Confirmé',        icon: '✅' },
+  { key: 'UPCOMING',  label: 'Départ imminent', icon: '🛫' },
+  { key: 'COMPLETED', label: 'Terminé',         icon: '⭐' },
+];
+
+function ReservationTimeline({ status }: { status: string }) {
+  const activeIdx = TIMELINE_STEPS.findIndex(s => s.key === status);
+  const displayIdx = activeIdx === -1 ? 0 : activeIdx;
+
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center',
+      gap: 0, margin: '1rem 0',
+      overflowX: 'auto', paddingBottom: '0.25rem',
+    }}>
+      {TIMELINE_STEPS.map((step, idx) => {
+        const done = idx < displayIdx;
+        const active = idx === displayIdx;
+        return (
+          <div key={step.key} style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flex: 1 }}>
+              <div style={{
+                width: 36, height: 36, borderRadius: '50%',
+                background: done ? '#1D5C3A' : active ? '#C9A84C' : '#F3F4F6',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: done ? '0.75rem' : '1rem',
+                color: done ? 'white' : active ? '#1A1209' : '#9CA3AF',
+                fontWeight: 700,
+                border: active ? '2px solid #C9A84C' : 'none',
+                flexShrink: 0,
+              }}>
+                {done ? '✓' : step.icon}
+              </div>
+              <div style={{
+                fontSize: '0.65rem',
+                color: active ? '#C9A84C' : done ? '#1D5C3A' : '#9CA3AF',
+                fontWeight: active ? 700 : 500,
+                marginTop: '0.35rem',
+                textAlign: 'center',
+                whiteSpace: 'nowrap',
+              }}>
+                {step.label}
+              </div>
+            </div>
+            {idx < TIMELINE_STEPS.length - 1 && (
+              <div style={{
+                height: 2, flex: 1,
+                background: done ? '#1D5C3A' : '#E8DFC8',
+                margin: '0 0.25rem',
+                marginBottom: '1.25rem',
+                minWidth: 20,
+              }} />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 const card: React.CSSProperties = {
   background: 'white',
   border: '1px solid #E8DFC8',
@@ -171,33 +233,37 @@ export default function EspaceTableauDeBord() {
             </Link>
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 620 }}>
-              <thead>
-                <tr style={{ background: '#F5F2EC', borderBottom: '1px solid #E8DFC8' }}>
-                  {['Guide', 'Forfait', 'Date départ', 'Pers.', 'Montant', 'Statut'].map(h => (
-                    <th key={h} style={{ padding: '0.75rem 0.875rem', textAlign: 'left', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', whiteSpace: 'nowrap' }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {recentReservations.map((r, i) => {
-                  const sc = STATUS_CONFIG[r.status] || { label: r.status, color: '#6B7280', bg: '#F3F4F6' };
-                  return (
-                    <tr key={r.id} style={{ background: i % 2 === 0 ? 'white' : '#FAFAF8', borderBottom: '1px solid #F0EBE0' }}>
-                      <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.82rem', fontWeight: 600, color: '#1A1209', whiteSpace: 'nowrap' }}>{r.guideName}</td>
-                      <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.75rem', color: '#7A6D5A' }}>{r.packageName}</td>
-                      <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.75rem', color: '#4A3F30', whiteSpace: 'nowrap' }}>{r.startDate}</td>
-                      <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.82rem', color: '#1A1209', textAlign: 'center' }}>{r.nbPeople}</td>
-                      <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.85rem', fontWeight: 700, color: '#1A1209', whiteSpace: 'nowrap' }}>{r.totalPrice} €</td>
-                      <td style={{ padding: '0.75rem 0.875rem' }}>
-                        <span style={{ display: 'inline-block', background: sc.bg, color: sc.color, fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.06em', padding: '0.25rem 0.6rem', borderRadius: 20, whiteSpace: 'nowrap' }}>{sc.label}</span>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+            {recentReservations.map((r, i) => {
+              const sc = STATUS_CONFIG[r.status] || { label: r.status, color: '#6B7280', bg: '#F3F4F6' };
+              const isCancelled = r.status === 'CANCELLED';
+              return (
+                <div key={r.id} style={{ padding: '1rem 1.25rem', borderBottom: i < recentReservations.length - 1 ? '1px solid #F0EBE0' : 'none' }}>
+                  {/* Header row */}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem' }}>
+                    <div>
+                      <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1A1209' }}>{r.guideName}</div>
+                      <div style={{ fontSize: '0.68rem', color: '#7A6D5A', marginTop: 2 }}>{r.refNumber} · {r.packageName}</div>
+                    </div>
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1A1209' }}>{r.totalPrice} €</div>
+                      <div style={{ fontSize: '0.68rem', color: '#7A6D5A', marginTop: 2 }}>{r.nbPeople} pers. · {r.startDate}</div>
+                    </div>
+                  </div>
+
+                  {/* Timeline ou badge annulée */}
+                  {isCancelled ? (
+                    <div style={{ marginTop: '0.75rem' }}>
+                      <span style={{ display: 'inline-block', background: sc.bg, color: sc.color, fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.06em', padding: '0.3rem 0.75rem', borderRadius: 20 }}>
+                        Annulée
+                      </span>
+                    </div>
+                  ) : (
+                    <ReservationTimeline status={r.status} />
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

@@ -219,12 +219,14 @@ export default function CheckoutPage() {
   const prixLieux = extraPlaces.reduce((sum, pk) => sum + (placePrices[pk] ?? 50), 0) * nbPersonnes
   const prixTransport = cityChoice === 'BOTH'
     ? transportOption === 'TRAIN' ? 80 * nbPersonnes
-    : transportOption === 'TAXI_RT' ? 300
-    : transportOption === 'TAXI_ONE' ? 200
+    : transportOption === 'TAXI_RT' ? 240
+    : transportOption === 'TAXI_ONE' ? 240
     : 0
     : 0
-  const prixVoiture = withCar ? 45 : 0
-  const total = prixBase + prixLieux + prixTransport + prixVoiture
+  const prixVoiture = withCar ? 280 : 0
+  const TARIF_GROUPE = 200
+  const prixGroupe = nbPersonnes > 6 ? TARIF_GROUPE : 0
+  const total = prixBase + prixLieux + prixTransport + prixVoiture + prixGroupe
 
   // Lieux supplémentaires disponibles par catégorie
   const getAvailablePlaces = (category: 'MAKKAH' | 'MADINAH' | 'HISTORIQUE'): Place[] => {
@@ -586,8 +588,8 @@ export default function CheckoutPage() {
                 {([
                   { key: 'NONE' as TransportOption, title: 'Sans transport', desc: 'Je gère mes déplacements moi-même', price: 'Gratuit' },
                   { key: 'TRAIN' as TransportOption, title: '🚄 Train Haramayn', desc: 'Aller-retour Makkah ↔ Madinah · Rapide et confortable', price: `+${80 * nbPersonnes}€`, perPerson: '80€/pers' },
-                  { key: 'TAXI_RT' as TransportOption, title: '🚕 Taxi privé — Aller-retour', desc: 'Makkah ↔ Madinah · Véhicule privatisé pour votre groupe', price: '+300€', perPerson: 'forfait groupe' },
-                  { key: 'TAXI_ONE' as TransportOption, title: '🚕 Taxi privé — Aller simple', desc: 'Makkah → Madinah OU Madinah → Makkah', price: '+200€', perPerson: 'forfait groupe' },
+                  { key: 'TAXI_RT' as TransportOption, title: '🚕 Taxi privé — Aller-retour', desc: 'Makkah ↔ Madinah · Véhicule privatisé pour votre groupe', price: '+240€', perPerson: 'forfait groupe' },
+                  { key: 'TAXI_ONE' as TransportOption, title: '🚕 Taxi privé — Aller simple', desc: 'Makkah → Madinah OU Madinah → Makkah', price: '+240€', perPerson: 'forfait groupe' },
                 ] as { key: TransportOption; title: string; desc: string; price: string; perPerson?: string }[]).map(opt => (
                   <div
                     key={opt.key}
@@ -623,7 +625,7 @@ export default function CheckoutPage() {
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1A1209' }}>Voiture privée — visites locales</div>
-                <div style={{ fontSize: '0.75rem', color: '#7A6D5A', marginTop: 2 }}>Recommandé pour Jabal Nour, Arafat, Badr · +45€/jour</div>
+                <div style={{ fontSize: '0.75rem', color: '#7A6D5A', marginTop: 2 }}>Recommandé pour Jabal Nour, Arafat, Badr · +280€/jour</div>
               </div>
               <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.1rem', fontWeight: 700, color: '#C9A84C' }}>+45€</div>
             </div>
@@ -828,7 +830,17 @@ export default function CheckoutPage() {
               {withCar && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 1.25rem', borderBottom: '1px solid #F5F0E8' }}>
                   <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>🚗 Voiture du guide</div>
-                  <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>45€</div>
+                  <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>280€</div>
+                </div>
+              )}
+
+              {nbPersonnes > 6 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 1.25rem', borderBottom: '1px solid #F5F0E8' }}>
+                  <div>
+                    <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>Supplément groupe (+6 personnes)</div>
+                    <div style={{ fontSize: '0.7rem', color: '#7A6D5A', marginTop: 2 }}>Forfait groupe</div>
+                  </div>
+                  <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{TARIF_GROUPE}€</div>
                 </div>
               )}
 

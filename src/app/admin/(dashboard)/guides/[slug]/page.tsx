@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { PLACES } from '@/lib/places';
 
 type Language = { id: string; languageCode: string; level: string };
 type Package  = { id: string; name: string; pricePerPerson: number; durationDays: number; maxPeople: number };
@@ -95,6 +96,10 @@ export default function AdminGuideDetailPage() {
   const [savingInterview, setSavingInterview] = useState(false);
   const [interviewMsg, setInterviewMsg] = useState('');
 
+  // Lieux toggles
+  const [placesMap, setPlacesMap] = useState<Record<string, boolean>>({});
+  const [togglingPlace, setTogglingPlace] = useState<string | null>(null);
+
   // silent=true → update data without showing the full-page skeleton (used for post-action refreshes)
   const fetchGuide = async (silent = false) => {
     if (!silent) setLoading(true);
@@ -116,6 +121,9 @@ export default function AdminGuideDetailPage() {
       setPhoneWhatsapp(g.user.phoneWhatsapp || '');
       setInterviewScore(g.interviewScore?.toString() || '');
       setInterviewNotes(g.interviewNotes || '');
+      const map: Record<string, boolean> = {};
+      g.places?.forEach((p: any) => { map[p.placeKey] = p.isActive; });
+      setPlacesMap(map);
     } catch (e: any) { setError(e.message); }
     if (!silent) setLoading(false);
   };
@@ -185,6 +193,18 @@ export default function AdminGuideDetailPage() {
       await fetchGuide(true); // silent — no skeleton flash
     } catch { alert('Erreur lors de la mise à jour du prix.'); }
     setSavingPkg(false);
+  };
+
+  const handleTogglePlace = async (placeKey: string) => {
+    setTogglingPlace(placeKey);
+    setPlacesMap(prev => ({ ...prev, [placeKey]: !prev[placeKey] }));
+    await fetch(`/api/admin/guides/${slug}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ togglePlace: placeKey }),
+    });
+    setTogglingPlace(null);
+    await fetchGuide(true);
   };
 
   const initials = (g: Guide) => {
@@ -592,70 +612,46 @@ export default function AdminGuideDetailPage() {
       {/* Section — Lieux de visite */}
       <div style={{ background: 'white', border: '1px solid #E8DFC8', borderRadius: 12, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div>
-          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Lieux de visite actifs</div>
-          <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>Activez ou désactivez les lieux que ce guide peut accompagner</div>
+          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Lieux de visite</div>
+          <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>Lieux activés par ce guide pour les réservations</div>
         </div>
-        {[
-          { group: 'Makkah', places: [
-            { key: 'masjid-al-haram', label: 'Masjid Al-Haram' },
-            { key: 'kaaba', label: 'La Kaaba' },
-            { key: 'zamzam', label: 'Puits de Zamzam' },
-            { key: 'jabal-nour', label: 'Jabal Nour' },
-            { key: 'hira', label: 'Grotte de Hira' },
-            { key: 'jabal-thawr', label: 'Jabal Thawr' },
-            { key: 'arafat', label: 'Arafat' },
-            { key: 'muzdalifah', label: 'Muzdalifah' },
-            { key: 'mina', label: 'Mina' },
-            { key: 'safa-marwa', label: 'Safa & Marwa' },
-          ]},
-          { group: 'Madinah', places: [
-            { key: 'masjid-nabawi', label: 'Masjid An-Nabawi' },
-            { key: 'rawdah', label: 'La Rawdah' },
-            { key: 'masjid-quba', label: 'Masjid Quba' },
-            { key: 'baqi', label: 'Cimetière Al-Baqi' },
-            { key: 'ohoud', label: 'Mont Ohoud' },
-          ]},
-          { group: 'Historique', places: [
-            { key: 'badr', label: 'Badr' },
-            { key: 'khandaq', label: 'Al-Khandaq' },
-          ]},
-        ].map(group => (
-          <div key={group.group}>
-            <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: '0.5rem' }}>{group.group}</div>
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              {group.places.map(place => {
-                const placeRecord = guide.places.find(p => p.placeKey === place.key)
-                const isActive = placeRecord?.isActive ?? false
-                return (
-                  <button
-                    key={place.key}
-                    onClick={async () => {
-                      // Optimistic update
-                      const updated = placeRecord
-                        ? guide.places.map(p => p.placeKey === place.key ? { ...p, isActive: !p.isActive } : p)
-                        : [...guide.places, { id: 'opt-' + place.key, placeKey: place.key, isActive: true }]
-                      setGuide({ ...guide, places: updated })
-                      await fetch(`/api/admin/guides/${slug}`, {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ togglePlace: place.key }),
-                      })
-                      fetchGuide(true)
-                    }}
-                    style={{
-                      padding: '0.35rem 0.875rem', borderRadius: 20, border: `1px solid ${isActive ? '#1D5C3A' : '#E8DFC8'}`,
-                      background: isActive ? '#D1FAE5' : '#F3F4F6',
-                      color: isActive ? '#1D5C3A' : '#9CA3AF',
-                      fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
-                    }}
-                  >
-                    {isActive ? '✓ ' : ''}{place.label}
-                  </button>
-                )
-              })}
+        {(['MAKKAH', 'MADINAH', 'HISTORIQUE'] as const).map(cat => {
+          const catPlaces = PLACES.filter(p => p.category === cat);
+          const catLabel = cat === 'MAKKAH' ? 'Makkah' : cat === 'MADINAH' ? 'Madinah' : 'Sites historiques';
+          return (
+            <div key={cat}>
+              <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: '0.5rem' }}>{catLabel}</div>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                {catPlaces.map(place => {
+                  const isActive = placesMap[place.key] ?? false;
+                  const isToggling = togglingPlace === place.key;
+                  return (
+                    <button
+                      key={place.key}
+                      onClick={() => handleTogglePlace(place.key)}
+                      disabled={isToggling}
+                      style={{
+                        padding: '0.35rem 0.875rem', borderRadius: 20,
+                        border: `1px solid ${isActive ? '#1D5C3A' : '#E8DFC8'}`,
+                        background: isActive ? '#D1FAE5' : '#F3F4F6',
+                        color: isActive ? '#1D5C3A' : '#9CA3AF',
+                        fontSize: '0.75rem', fontWeight: 600, cursor: isToggling ? 'wait' : 'pointer',
+                        fontFamily: 'inherit', opacity: isToggling ? 0.6 : 1, transition: 'all 0.15s',
+                        display: 'flex', alignItems: 'center', gap: '0.3rem',
+                      }}
+                    >
+                      <span>{place.emoji}</span>
+                      {isActive ? '✓ ' : ''}{place.nameFr}
+                      {place.includedInBase && (
+                        <span style={{ fontSize: '0.55rem', fontWeight: 700, color: '#8B6914', background: '#FEF9EC', border: '1px solid #FCD34D', borderRadius: 10, padding: '0.1rem 0.3rem', marginLeft: 2 }}>★</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Section 3 — Packages */}

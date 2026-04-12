@@ -10,7 +10,7 @@ import { BASE_PACKAGES, getPackageForCity, type CityChoice } from '@/lib/package
 type Gender = 'HOMME' | 'FEMME' | 'MIXTE'
 type TransportOption = 'NONE' | 'TRAIN' | 'TAXI_RT' | 'TAXI_ONE'
 
-const STEPS = ['Destination', 'Dates & Profil', 'Visites', 'Récap']
+const STEPS = ['Destination', 'Dates & Profil', 'Visites', 'Votre guide', 'Récap']
 
 // ── Composant PlaceSelector ───────────────────────
 function PlaceSelector({
@@ -136,6 +136,11 @@ export default function CheckoutPage() {
   const [placePrices, setPlacePrices] = useState<Record<string, number>>({})
   const [loadingGuide, setLoadingGuide] = useState(true)
 
+  // Étape 4 — Choix du guide
+  const [selectedGuideSlug, setSelectedGuideSlug] = useState<string>('')
+  const [availableGuides, setAvailableGuides] = useState<any[]>([])
+  const [loadingGuides, setLoadingGuides] = useState(false)
+
   // Étape 1
   const [cityChoice, setCityChoice] = useState<CityChoice | null>(null)
 
@@ -163,10 +168,17 @@ export default function CheckoutPage() {
     }
   }, [status, slug, router])
 
-  // Fetch guide
+  // Initialise selectedGuideSlug depuis l'URL
   useEffect(() => {
-    if (!slug) return
-    fetch(`/api/guide/public/${slug}`)
+    if (slug && !selectedGuideSlug) setSelectedGuideSlug(slug)
+  }, [slug]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fetch données du guide sélectionné
+  useEffect(() => {
+    const target = selectedGuideSlug || slug
+    if (!target) return
+    setLoadingGuide(true)
+    fetch(`/api/guide/public/${target}`)
       .then(r => r.json())
       .then(data => {
         setGuide(data.guide)
@@ -174,7 +186,21 @@ export default function CheckoutPage() {
         setPlacePrices(data.placePrices || {})
       })
       .finally(() => setLoadingGuide(false))
-  }, [slug])
+  }, [selectedGuideSlug, slug])
+
+  // Fetch guides disponibles à l'entrée de l'étape 4
+  useEffect(() => {
+    if (step !== 4 || availableGuides.length > 0) return
+    setLoadingGuides(true)
+    fetch('/api/guides/available?' + new URLSearchParams({
+      city: cityChoice || '',
+      langue,
+      gender,
+    }))
+      .then(r => r.json())
+      .then(d => setAvailableGuides(d.guides || []))
+      .finally(() => setLoadingGuides(false))
+  }, [step]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Package de base
   const basePackage = cityChoice ? getPackageForCity(cityChoice) : null
@@ -218,7 +244,7 @@ export default function CheckoutPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          guideSlug: slug,
+          guideSlug: selectedGuideSlug || slug,
           cityChoice,
           departDate,
           returnDate,
@@ -613,10 +639,73 @@ export default function CheckoutPage() {
           </div>
         )}
 
-        {/* ── ÉTAPE 4 — RÉCAP & PAIEMENT ── */}
+        {/* ── ÉTAPE 4 — VOTRE GUIDE ── */}
         {step === 4 && (
           <div>
             {backBtn(3)}
+            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '1.8rem', fontWeight: 400, color: '#1A1209', marginBottom: '0.5rem' }}>
+              Choisissez votre guide
+            </h2>
+            <p style={{ color: '#7A6D5A', fontSize: '0.85rem', marginBottom: '1.5rem', lineHeight: 1.7 }}>
+              {cityChoice === 'BOTH'
+                ? 'Guide pour Makkah — vous pourrez choisir un guide différent pour Madinah ensuite'
+                : 'Guide pour votre séjour'}
+            </p>
+
+            {loadingGuides ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {[1, 2, 3].map(i => (
+                  <div key={i} style={{ background: '#E8DFC8', borderRadius: 12, padding: '1.25rem', height: 88, opacity: 0.5, animation: 'pulse 1.5s ease-in-out infinite' }} />
+                ))}
+                <style>{`@keyframes pulse { 0%,100%{opacity:0.5} 50%{opacity:0.8} }`}</style>
+              </div>
+            ) : availableGuides.length === 0 ? (
+              <div style={{ background: 'white', border: '1px solid #E8DFC8', borderRadius: 12, padding: '2rem', textAlign: 'center', color: '#7A6D5A', fontSize: '0.88rem' }}>
+                Aucun guide disponible pour vos critères. Votre guide actuel sera confirmé.
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {availableGuides.map(g => {
+                  const isSelected = selectedGuideSlug === g.slug
+                  return (
+                    <div
+                      key={g.slug}
+                      onClick={() => setSelectedGuideSlug(g.slug)}
+                      style={{ background: isSelected ? 'rgba(201,168,76,0.06)' : 'white', border: isSelected ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', borderRadius: 12, padding: '1rem 1.25rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem' }}
+                    >
+                      <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: '1rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
+                        {g.name?.slice(0, 2).toUpperCase()}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#1A1209' }}>{g.name}</div>
+                        <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>
+                          Guide SAFARUMA · {g.city}
+                          {g.languages && g.languages.length > 0 && (
+                            <span> · {g.languages.slice(0, 2).join(', ')}</span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: '0.72rem', color: '#C9A84C', marginTop: 2, fontWeight: 600 }}>★ {g.rating}</div>
+                      </div>
+                      <button
+                        onClick={e => { e.stopPropagation(); setSelectedGuideSlug(g.slug) }}
+                        style={{ padding: '0.45rem 1rem', borderRadius: 50, border: 'none', background: isSelected ? '#1D5C3A' : '#E8DFC8', color: isSelected ? 'white' : '#4A3F30', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}
+                      >
+                        {isSelected ? 'Sélectionné ✓' : 'Choisir'}
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            {nextBtn('Voir le récapitulatif', () => setStep(5), !selectedGuideSlug)}
+          </div>
+        )}
+
+        {/* ── ÉTAPE 5 — RÉCAP & PAIEMENT ── */}
+        {step === 5 && (
+          <div>
+            {backBtn(4)}
             <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '1.8rem', fontWeight: 400, color: '#1A1209', marginBottom: '2rem' }}>
               Récapitulatif de votre voyage
             </h2>

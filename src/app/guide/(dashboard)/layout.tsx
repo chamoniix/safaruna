@@ -44,7 +44,8 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
         .guide-main {
           margin-left: 260px !important;
           width: calc(100% - 260px) !important;
-          min-height: 100vh;
+          height: 100vh;
+          overflow: hidden;
           display: flex;
           flex-direction: column;
         }
@@ -75,7 +76,7 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
         }
       `}} />
 
-      <div style={{ minHeight: '100vh', background: '#F5F2EC', fontFamily: 'var(--font-manrope, sans-serif)', color: '#1A1209' }}>
+      <div style={{ height: '100vh', overflow: 'hidden', background: '#F5F2EC', fontFamily: 'var(--font-manrope, sans-serif)', color: '#1A1209' }}>
 
         {/* ── SIDEBAR GUIDE (dark) ── */}
         <aside className={`guide-sidebar${open ? ' is-open' : ''}`}>
@@ -181,7 +182,7 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
             </div>
           </header>
 
-          <main style={{ flex: 1, padding: '2rem 1.75rem', maxWidth: 1200, width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
+          <main style={{ flex: 1, overflowY: 'auto', minHeight: 0, padding: '2rem 1.75rem', maxWidth: 1200, width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
             {children}
           </main>
         </div>

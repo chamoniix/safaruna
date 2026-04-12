@@ -211,7 +211,7 @@ export default function Home() {
             animation: 'fadeInUp 0.9s 1.6s ease both', opacity: 0,
           }}>
             <Link href="/guides" className="btn-hero-cta">
-              Trouver mon guide →
+              Trouver mon guide
             </Link>
           </div>
 
@@ -303,7 +303,7 @@ export default function Home() {
           </p>
           <div className="reveal reveal-d4">
             <Link href="/guides" className="btn-hero-cta">
-              Et si ta Omra avait du sens ? →
+              Et si ta Omra avait du sens ?
             </Link>
           </div>
         </div>
@@ -493,7 +493,7 @@ export default function Home() {
 
                   {/* CTA */}
                   <Link href={`/guides/${g.slug}`} className="guide-feat-btn">
-                    Voir le profil →
+                    Voir le profil
                   </Link>
                 </div>
               </div>
@@ -502,7 +502,7 @@ export default function Home() {
 
           <div className="reveal" style={{ textAlign: 'center', marginTop: '3rem' }}>
             <Link href="/guides" className="btn-primary" style={{ fontSize: '0.88rem' }}>
-              Voir tous les guides →
+              Voir tous les guides
             </Link>
           </div>
         </div>
@@ -537,7 +537,7 @@ export default function Home() {
           </div>
           <div className="reveal" style={{ textAlign: 'center', marginTop: '3rem' }}>
             <Link href="/lieux-saints" className="btn-secondary">
-              Découvrir tous les lieux →
+              Découvrir tous les lieux
             </Link>
           </div>
         </div>
@@ -573,7 +573,7 @@ export default function Home() {
 
           <div className="reveal" style={{ marginTop: '3rem' }}>
             <Link href="/charte" style={{ fontSize: '0.8rem', color: 'rgba(201,168,76,0.6)', textDecoration: 'none', letterSpacing: '0.08em', borderBottom: '1px solid rgba(201,168,76,0.3)', paddingBottom: '0.2rem' }}>
-              Lire la Charte SAFARUMA →
+              Lire la Charte SAFARUMA
             </Link>
           </div>
         </div>
@@ -642,7 +642,7 @@ export default function Home() {
                 </ul>
                 <div className="pkg-price">{p.price} <small>{p.sub}</small></div>
                 <Link href="/guides" className="btn-primary" style={{ marginTop: '1.5rem', display: 'inline-block', fontSize: '0.85rem' }}>
-                  Trouver un guide →
+                  Trouver un guide
                 </Link>
               </div>
             ))}
@@ -679,7 +679,7 @@ export default function Home() {
                   ))}
                 </div>
               </div>
-              <span className="guide-omra-cta" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'var(--gold)', color: 'var(--deep)', fontWeight: 700, fontSize: '0.82rem', padding: '0.65rem 1.4rem', borderRadius: 8, marginTop: '1.25rem' }}>Lire le guide →</span>
+              <span className="guide-omra-cta" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: 'var(--gold)', color: 'var(--deep)', fontWeight: 700, fontSize: '0.82rem', padding: '0.65rem 1.4rem', borderRadius: 8, marginTop: '1.25rem' }}>Lire le guide</span>
             </div>
           </Link>
         </div>
@@ -700,7 +700,7 @@ export default function Home() {
         </p>
         <div className="reveal reveal-d3" style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           <Link href="/guides" className="btn-hero-cta" style={{ background: 'var(--gold)', color: 'var(--deep)', borderColor: 'var(--gold)' }}>
-            Trouver mon guide →
+            Trouver mon guide
           </Link>
         </div>
       </section>

@@ -8,6 +8,7 @@ import { BASE_PACKAGES, getPackageForCity, type CityChoice } from '@/lib/package
 
 // ── Types ─────────────────────────────────────────
 type Gender = 'HOMME' | 'FEMME' | 'MIXTE'
+type TransportOption = 'NONE' | 'TRAIN' | 'TAXI_RT' | 'TAXI_ONE'
 
 const STEPS = ['Destination', 'Dates & Profil', 'Visites', 'Récap']
 
@@ -78,6 +79,50 @@ function PlaceSelector({
   )
 }
 
+// ── Icônes Genre ──────────────────────────────────
+const GenderIcon = ({ type }: { type: Gender }) => {
+  if (type === 'HOMME') return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M8 20v-4a4 4 0 018 0v4"/>
+    </svg>
+  )
+  if (type === 'FEMME') return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M8 20v-4a4 4 0 018 0v4"/>
+      <circle cx="12" cy="8" r="1.5" fill="currentColor"/>
+    </svg>
+  )
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+      <circle cx="9" cy="8" r="3"/>
+      <circle cx="15" cy="8" r="3"/>
+      <path d="M6 20v-3a3 3 0 016 0v3"/>
+      <path d="M12 20v-3a3 3 0 016 0v3"/>
+    </svg>
+  )
+}
+
+// ── Icônes Drapeaux ───────────────────────────────
+const FlagIcon = ({ code }: { code: string }) => {
+  const colors: Record<string, string[]> = {
+    fr: ['#002395', '#FFFFFF', '#ED2939'],
+    ar: ['#006C35', '#006C35', '#FFFFFF'],
+    en: ['#012169', '#FFFFFF', '#C8102E'],
+    wo: ['#00853F', '#FDEF42', '#E31B23'],
+  }
+  const [c1, c2, c3] = colors[code] || ['#666', '#999', '#CCC']
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20">
+      <circle cx="10" cy="10" r="10" fill={c1}/>
+      <rect x="6.5" y="0" width="7" height="20" fill={c2}/>
+      <rect x="13" y="0" width="7" height="20" fill={c3}/>
+      <circle cx="10" cy="10" r="10" fill="none" stroke="rgba(0,0,0,0.1)" strokeWidth="0.5"/>
+    </svg>
+  )
+}
+
 // ── Page principale ───────────────────────────────
 export default function CheckoutPage() {
   const params = useParams<{ slug: string }>()
@@ -96,13 +141,14 @@ export default function CheckoutPage() {
 
   // Étape 2
   const [departDate, setDepartDate] = useState('')
+  const [returnDate, setReturnDate] = useState('')
   const [nbPersonnes, setNbPersonnes] = useState(1)
   const [gender, setGender] = useState<Gender>('MIXTE')
   const [langue, setLangue] = useState('fr')
 
   // Étape 3
   const [selectedPlaces, setSelectedPlaces] = useState<string[]>([])
-  const [withTransport, setWithTransport] = useState(false)
+  const [transportOption, setTransportOption] = useState<TransportOption>('NONE')
   const [withCar, setWithCar] = useState(false)
   const [detailPlace, setDetailPlace] = useState<string | null>(null)
 
@@ -137,7 +183,12 @@ export default function CheckoutPage() {
   const prixBase = (basePackage?.basePrice ?? 0) * nbPersonnes
   const extraPlaces = selectedPlaces.filter(pk => !basePackage?.includedPlaces.includes(pk))
   const prixLieux = extraPlaces.reduce((sum, pk) => sum + (placePrices[pk] ?? 50), 0) * nbPersonnes
-  const prixTransport = withTransport && cityChoice === 'BOTH' ? 80 * nbPersonnes : 0
+  const prixTransport = cityChoice === 'BOTH'
+    ? transportOption === 'TRAIN' ? 80 * nbPersonnes
+    : transportOption === 'TAXI_RT' ? 300
+    : transportOption === 'TAXI_ONE' ? 200
+    : 0
+    : 0
   const prixVoiture = withCar ? 45 : 0
   const total = prixBase + prixLieux + prixTransport + prixVoiture
 
@@ -170,11 +221,13 @@ export default function CheckoutPage() {
           guideSlug: slug,
           cityChoice,
           departDate,
+          returnDate,
           nbPersonnes,
           gender,
           langue,
           selectedPlaces,
-          withTransport,
+          transportOption,
+          prixTransport,
           withCar,
           totalPrice: total,
           packageName: basePackage?.name,
@@ -325,7 +378,7 @@ export default function CheckoutPage() {
               </a>
             </div>
 
-            {nextBtn('Continuer →', () => setStep(2), !cityChoice)}
+            {nextBtn('Continuer', () => setStep(2), !cityChoice)}
           </div>
         )}
 
@@ -352,6 +405,20 @@ export default function CheckoutPage() {
                 />
               </div>
 
+              {/* Date retour */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.5rem' }}>
+                  Date de retour *
+                </label>
+                <input
+                  type="date"
+                  value={returnDate}
+                  min={departDate || new Date().toISOString().split('T')[0]}
+                  onChange={e => setReturnDate(e.target.value)}
+                  style={{ width: '100%', padding: '0.75rem 1rem', border: '1.5px solid #E8DFC8', borderRadius: 10, fontSize: '0.9rem', fontFamily: 'inherit', color: '#1A1209', background: 'white', boxSizing: 'border-box' }}
+                />
+              </div>
+
               {/* Nb personnes */}
               <div>
                 <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.5rem' }}>
@@ -373,8 +440,13 @@ export default function CheckoutPage() {
                 </label>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   {(['HOMME', 'FEMME', 'MIXTE'] as Gender[]).map(g => (
-                    <button key={g} onClick={() => setGender(g)} style={{ flex: 1, padding: '0.65rem', border: gender === g ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', borderRadius: 10, background: gender === g ? 'rgba(201,168,76,0.08)' : 'white', color: gender === g ? '#8B6914' : '#7A6D5A', fontWeight: gender === g ? 700 : 500, fontSize: '0.82rem', cursor: 'pointer', fontFamily: 'inherit' }}>
-                      {g === 'HOMME' ? '👨 Homme' : g === 'FEMME' ? '👩 Femme' : '👨‍👩 Mixte'}
+                    <button
+                      key={g}
+                      onClick={() => setGender(g)}
+                      style={{ flex: 1, padding: '0.75rem 0.5rem', border: gender === g ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', borderRadius: 10, background: gender === g ? 'rgba(201,168,76,0.08)' : 'white', color: gender === g ? '#8B6914' : '#7A6D5A', fontWeight: gender === g ? 700 : 500, fontSize: '0.82rem', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
+                    >
+                      <GenderIcon type={g} />
+                      {g === 'HOMME' ? 'Homme' : g === 'FEMME' ? 'Femme' : 'Mixte'}
                     </button>
                   ))}
                 </div>
@@ -386,8 +458,18 @@ export default function CheckoutPage() {
                   Langue préférée
                 </label>
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  {[{ code: 'fr', label: '🇫🇷 Français' }, { code: 'ar', label: '🇸🇦 Arabe' }, { code: 'en', label: '🇬🇧 English' }, { code: 'wo', label: '🇸🇳 Wolof' }].map(l => (
-                    <button key={l.code} onClick={() => setLangue(l.code)} style={{ padding: '0.5rem 1rem', border: langue === l.code ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', borderRadius: 50, background: langue === l.code ? 'rgba(201,168,76,0.08)' : 'white', color: langue === l.code ? '#8B6914' : '#7A6D5A', fontWeight: langue === l.code ? 700 : 500, fontSize: '0.82rem', cursor: 'pointer', fontFamily: 'inherit' }}>
+                  {[
+                    { code: 'fr', label: 'Français' },
+                    { code: 'ar', label: 'Arabe' },
+                    { code: 'en', label: 'English' },
+                    { code: 'wo', label: 'Wolof' },
+                  ].map(l => (
+                    <button
+                      key={l.code}
+                      onClick={() => setLangue(l.code)}
+                      style={{ padding: '0.5rem 1rem', border: langue === l.code ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', borderRadius: 50, background: langue === l.code ? 'rgba(201,168,76,0.08)' : 'white', color: langue === l.code ? '#8B6914' : '#7A6D5A', fontWeight: langue === l.code ? 700 : 500, fontSize: '0.82rem', cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+                    >
+                      <FlagIcon code={l.code} />
                       {l.label}
                     </button>
                   ))}
@@ -395,7 +477,7 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {nextBtn('Continuer →', () => setStep(3), !departDate)}
+            {nextBtn('Continuer', () => setStep(3), !departDate || !returnDate)}
           </div>
         )}
 
@@ -459,20 +541,36 @@ export default function CheckoutPage() {
               />
             )}
 
-            {/* Train Haramayn */}
+            {/* Transport Makkah ↔ Madinah */}
             {cityChoice === 'BOTH' && (
-              <div
-                onClick={() => setWithTransport(t => !t)}
-                style={{ background: withTransport ? 'rgba(201,168,76,0.06)' : 'white', border: withTransport ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', borderRadius: 12, padding: '1rem 1.25rem', cursor: 'pointer', marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}
-              >
-                <div style={{ width: 20, height: 20, borderRadius: 4, border: '2px solid #C9A84C', flexShrink: 0, background: withTransport ? '#C9A84C' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {withTransport && <span style={{ color: 'white', fontSize: '0.75rem', fontWeight: 900 }}>✓</span>}
+              <div style={{ marginTop: '1rem' }}>
+                <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.75rem' }}>
+                  Transport Makkah ↔ Madinah
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1A1209' }}>🚄 Train Haramayn — Makkah ↔ Madinah</div>
-                  <div style={{ fontSize: '0.75rem', color: '#7A6D5A', marginTop: 2 }}>Requis pour le voyage complet · +80€/personne</div>
-                </div>
-                <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.1rem', fontWeight: 700, color: '#C9A84C' }}>+{80 * nbPersonnes}€</div>
+                {([
+                  { key: 'NONE' as TransportOption, title: 'Sans transport', desc: 'Je gère mes déplacements moi-même', price: 'Gratuit' },
+                  { key: 'TRAIN' as TransportOption, title: '🚄 Train Haramayn', desc: 'Aller-retour Makkah ↔ Madinah · Rapide et confortable', price: `+${80 * nbPersonnes}€`, perPerson: '80€/pers' },
+                  { key: 'TAXI_RT' as TransportOption, title: '🚕 Taxi privé — Aller-retour', desc: 'Makkah ↔ Madinah · Véhicule privatisé pour votre groupe', price: '+300€', perPerson: 'forfait groupe' },
+                  { key: 'TAXI_ONE' as TransportOption, title: '🚕 Taxi privé — Aller simple', desc: 'Makkah → Madinah OU Madinah → Makkah', price: '+200€', perPerson: 'forfait groupe' },
+                ] as { key: TransportOption; title: string; desc: string; price: string; perPerson?: string }[]).map(opt => (
+                  <div
+                    key={opt.key}
+                    onClick={() => setTransportOption(opt.key)}
+                    style={{ background: transportOption === opt.key ? 'rgba(201,168,76,0.06)' : 'white', border: transportOption === opt.key ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', borderRadius: 12, padding: '1rem 1.25rem', cursor: 'pointer', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}
+                  >
+                    <div style={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid #C9A84C', flexShrink: 0, background: transportOption === opt.key ? '#C9A84C' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {transportOption === opt.key && <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'white' }} />}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1A1209' }}>{opt.title}</div>
+                      <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>
+                        {opt.desc}
+                        {opt.perPerson && <span style={{ color: '#C9A84C', fontWeight: 600 }}> · {opt.perPerson}</span>}
+                      </div>
+                    </div>
+                    <div style={{ fontFamily: 'Georgia, serif', fontSize: '1rem', fontWeight: 700, color: opt.key === 'NONE' ? '#9CA3AF' : '#C9A84C' }}>{opt.price}</div>
+                  </div>
+                ))}
               </div>
             )}
 
@@ -508,7 +606,7 @@ export default function CheckoutPage() {
               ) : null
             })()}
 
-            {nextBtn('Voir le récapitulatif →', () => setStep(4))}
+            {nextBtn('Voir le récapitulatif', () => setStep(4))}
           </div>
         )}
 
@@ -559,9 +657,11 @@ export default function CheckoutPage() {
                 ) : null
               })}
 
-              {withTransport && (
+              {transportOption !== 'NONE' && cityChoice === 'BOTH' && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 1.25rem', borderBottom: '1px solid #F5F0E8' }}>
-                  <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>🚄 Train Haramayn</div>
+                  <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>
+                    {transportOption === 'TRAIN' ? '🚄 Train Haramayn A/R' : transportOption === 'TAXI_RT' ? '🚕 Taxi privé A/R' : '🚕 Taxi privé aller simple'}
+                  </div>
                   <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{prixTransport}€</div>
                 </div>
               )}
@@ -593,6 +693,7 @@ export default function CheckoutPage() {
               {[
                 ['Destination', cityChoice === 'BOTH' ? 'Makkah + Madinah' : cityChoice === 'MAKKAH' ? 'Makkah' : 'Madinah'],
                 ['Date de départ', new Date(departDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })],
+                ['Date de retour', new Date(returnDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })],
                 ['Personnes', `${nbPersonnes} personne${nbPersonnes > 1 ? 's' : ''}`],
                 ['Profil', gender],
                 ['Langue', langue === 'fr' ? 'Français' : langue === 'ar' ? 'Arabe' : langue === 'en' ? 'English' : 'Wolof'],
@@ -622,7 +723,7 @@ export default function CheckoutPage() {
               disabled={submitting}
               style={{ width: '100%', padding: '1.1rem', background: submitting ? '#9CA3AF' : 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)', color: '#FAF7F0', border: 'none', borderRadius: 12, fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 700, fontSize: '1.1rem', cursor: submitting ? 'not-allowed' : 'pointer', letterSpacing: '0.06em', boxShadow: submitting ? 'none' : '0 4px 20px rgba(201,168,76,0.4)' }}
             >
-              {submitting ? 'Envoi en cours…' : `Confirmer mon voyage · ${total.toLocaleString('fr-FR')} €`}
+              {submitting ? 'Envoi en cours…' : 'Confirmer mon voyage'}
             </button>
 
             <div style={{ textAlign: 'center', fontSize: '0.72rem', color: '#9CA3AF', marginTop: '0.75rem' }}>

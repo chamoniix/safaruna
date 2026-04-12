@@ -16,7 +16,7 @@ export default function Footer() {
         borderBottom: '1px solid rgba(255,255,255,0.08)',
       }}>
         {([
-          { icon: '✓', label: 'Guides mutawwif certifiés' },
+          { icon: '✓', label: 'Guides certifiés SAFARUMA' },
           { icon: '🛡', label: 'Paiement sécurisé' },
           { icon: '★', label: 'Note 4.94/5 — 709 avis' },
           { icon: '♿', label: 'Accessibilité PMR' },

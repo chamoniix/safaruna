@@ -7,7 +7,7 @@ import type { Metadata } from 'next';
 import prisma from '@/lib/prisma';
 
 const GUIDE_META: Record<string, { name: string; title: string; desc: string }> = {
-  'naim-laamari':       { name: 'Naïm LAAMARI',       title: 'Guide Officiel SAFARUMA',          desc: "Responsable Terrain SAFARUMA à Makkah. 8 ans d'expérience, certifié mutawwif." },
+  'naim-laamari':       { name: 'Naïm LAAMARI',       title: 'Guide Officiel SAFARUMA',          desc: "Responsable Terrain SAFARUMA à Makkah. 8 ans d'expérience, guide certifié." },
   'rachid-al-madani':   { name: 'Rachid Al-Madani',   title: 'Cheikh · Spécialiste Sîra',        desc: 'Spécialiste de la Sîra du Prophète ﷺ. 14 ans d\'expérience, 2400+ pèlerins accompagnés.' },
   'fatima-al-omari':    { name: 'Fatima Al-Omari',    title: 'Guide femme · Familles',           desc: 'Guide femme certifiée, spécialisée dans l\'accompagnement des femmes et familles.' },
   'youssouf-konate':    { name: 'Youssouf Konaté',    title: "Spécialiste Afrique de l'Ouest",   desc: "Guide francophone spécialisé pour les communautés d'Afrique de l'Ouest." },
@@ -327,7 +327,7 @@ const GUIDES: Record<string, {
     ],
     certifications: [
       'Diplôme en Sciences Islamiques — Histoire des Lieux Saints',
-      'Licence officielle de Guide Mutawwif — Ministère du Hajj et de la Omra',
+      'Licence officielle de Guide — Ministère du Hajj et de la Omra',
       'Responsable Terrain Certifié — SAFARUMA',
       'Formateur et Certificateur des Guides SAFARUMA à Makkah',
       'Certification Gestion de Crise — Autorité du Haram',
@@ -366,7 +366,7 @@ const GUIDES: Record<string, {
     ],
     certifications: [
       'Master en Sciences Islamiques — Université Islamique de Médine',
-      "Licence officielle de Guide Mutawwif — Ministère du Hajj et de l\'Omra",
+      "Licence officielle de Guide Certifié — Ministère du Hajj et de l\'Omra",
       'Certification Secourisme Avancé — Croissant Rouge Saoudien',
       'Attestation Protocole PMR — Autorité de Masjid Al-Haram',
     ],
@@ -398,14 +398,14 @@ const GUIDES: Record<string, {
     shortBio:
       'Guide certifiée et femme au parcours exceptionnel. Fatima accompagne les femmes seules et les familles avec une approche bienveillante et rassurante, idéale pour un premier voyage à La Mecque.',
     bioFull: [
-      "Fatima Al-Omari, diplômée en études islamiques de l\'Université Mohammed VI de Rabat, a rejoint l\'équipe des guides mutawwif de Makkah en 2017, devenant l\'une des premières femmes francophones certifiées dans ce domaine.",
+      "Fatima Al-Omari, diplômée en études islamiques de l\'Université Mohammed VI de Rabat, a rejoint l\'équipe des guides certifiés de Makkah en 2017, devenant l\'une des premières femmes francophones certifiées dans ce domaine.",
       'Sa spécialité : accompagner les femmes voyageant seules ou en groupe féminin, ainsi que les familles avec de jeunes enfants. Son approche douce et structurée crée un cadre rassurant pour les pèlerins à leur premier voyage.',
       "Elle maîtrise parfaitement les rituels féminins de l\'Omra et est habituée à accompagner des groupes aux besoins variés, y compris des personnes âgées ou à mobilité réduite.",
       'Fatima propose également des ateliers de préparation spirituelle en ligne avant le départ, pour que chaque pèlerin arrive bien préparé et serein.',
     ],
     certifications: [
       'Licence en Études Islamiques — Université Mohammed VI, Rabat',
-      "Guide Mutawwif certifiée — Ministère du Hajj et de l\'Omra",
+      "Guide Certifié — Ministère du Hajj et de l\'Omra",
       'Formation Accompagnement Femmes Seules — Centre islamique de Makkah',
       'Certification Premiers Secours — Croissant Rouge Saoudien',
     ],
@@ -443,7 +443,7 @@ const GUIDES: Record<string, {
     ],
     certifications: [
       "Diplôme d\'études islamiques — Institut Islamique de Touba",
-      "Guide Mutawwif certifié — Ministère du Hajj et de l\'Omra",
+      "Guide Certifié — Ministère du Hajj et de l\'Omra",
       'Certification Accompagnement Multiculturel — ISESCO',
       'Secourisme de Base — Croissant Rouge Saoudien',
     ],
@@ -481,7 +481,7 @@ const GUIDES: Record<string, {
     ],
     certifications: [
       'Doctorat en Sciences du Hadith — Université Islamique de Médine',
-      "Guide Mutawwif Senior — Ministère du Hajj et de l\'Omra (15 ans)",
+      "Guide Certifié Senior — Ministère du Hajj et de l\'Omra (15 ans)",
       'Ijaza en récitation coranique (Hafs)',
       'Certification Secourisme Avancé — Croissant Rouge Saoudien',
     ],
@@ -520,7 +520,7 @@ const GUIDES: Record<string, {
     ],
     certifications: [
       'Licence en Études Islamiques — Institut Supérieur de Théologie de Tunis',
-      "Guide Mutawwif certifiée — Ministère du Hajj et de l\'Omra",
+      "Guide Certifié — Ministère du Hajj et de l\'Omra",
       'Diplôme de Kinésithérapie — ISSPL Tunis',
       'Certification Accompagnement PMR en lieux saints — Autorité du Haram',
     ],

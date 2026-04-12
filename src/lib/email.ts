@@ -47,7 +47,7 @@ export async function sendEmail({ to, subject, html }: EmailPayload): Promise<vo
 
 // ─── Template helpers ───────────────────────────────────────────
 
-function baseTemplate(content: string): string {
+export function baseTemplate(content: string): string {
   return `<!DOCTYPE html>
 <html lang="fr">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SAFARUMA</title></head>
@@ -92,23 +92,23 @@ function baseTemplate(content: string): string {
 </html>`;
 }
 
-function btn(text: string, url: string): string {
+export function btn(text: string, url: string): string {
   return `<a href="${url}" style="display:inline-block;background:#1A1209;color:#F0D897;padding:12px 28px;border-radius:50px;font-size:13px;font-weight:700;text-decoration:none;letter-spacing:0.04em;margin-top:8px;">${text}</a>`;
 }
 
-function heading(text: string): string {
+export function heading(text: string): string {
   return `<h1 style="font-family:Georgia,serif;font-size:26px;font-weight:400;color:#1A1209;margin:0 0 8px;">${text}</h1>`;
 }
 
-function p(text: string): string {
+export function p(text: string): string {
   return `<p style="font-size:14px;color:#4A3F30;line-height:1.7;margin:12px 0;">${text}</p>`;
 }
 
-function divider(): string {
+export function divider(): string {
   return `<div style="height:1px;background:#E8DFC8;margin:24px 0;"></div>`;
 }
 
-function badge(text: string, color = '#C9A84C'): string {
+export function badge(text: string, color = '#C9A84C'): string {
   return `<span style="display:inline-block;background:${color}22;color:${color};font-size:11px;font-weight:700;letter-spacing:0.08em;padding:4px 12px;border-radius:20px;">${text}</span>`;
 }
 

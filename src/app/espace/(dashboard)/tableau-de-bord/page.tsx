@@ -33,11 +33,52 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }
   CANCELLED: { label: 'Annulée',    color: '#DC2626', bg: '#FEE2E2' },
 };
 
-const TIMELINE_STEPS = [
-  { key: 'PENDING',   label: 'Demande reçue',  icon: '📋' },
-  { key: 'CONFIRMED', label: 'Confirmé',        icon: '✅' },
-  { key: 'UPCOMING',  label: 'Départ imminent', icon: '🛫' },
-  { key: 'COMPLETED', label: 'Terminé',         icon: '⭐' },
+const TIMELINE_STEPS: { key: string; label: string; icon: React.ReactNode }[] = [
+  {
+    key: 'PENDING',
+    label: 'Demande reçue',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+        <polyline points="14,2 14,8 20,8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+      </svg>
+    ),
+  },
+  {
+    key: 'CONFIRMED',
+    label: 'Confirmé',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+        <polyline points="22,4 12,14.01 9,11.01"/>
+      </svg>
+    ),
+  },
+  {
+    key: 'UPCOMING',
+    label: 'Départ imminent',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        <path d="M22 2L11 13"/>
+        <path d="M22 2L15 22 11 13 2 9l20-7z"/>
+      </svg>
+    ),
+  },
+  {
+    key: 'COMPLETED',
+    label: 'Terminé',
+    icon: (
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26 12,2"/>
+      </svg>
+    ),
+  },
 ];
 
 function ReservationTimeline({ status }: { status: string }) {
@@ -60,7 +101,7 @@ function ReservationTimeline({ status }: { status: string }) {
                 width: 36, height: 36, borderRadius: '50%',
                 background: done ? '#1D5C3A' : active ? '#C9A84C' : '#F3F4F6',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: done ? '0.75rem' : '1rem',
+                fontSize: '0.75rem',
                 color: done ? 'white' : active ? '#1A1209' : '#9CA3AF',
                 fontWeight: 700,
                 border: active ? '2px solid #C9A84C' : 'none',

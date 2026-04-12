@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 
 type Mission = {
   id: string;
@@ -139,7 +140,7 @@ export default function GuideMissions() {
             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 820 }}>
               <thead>
                 <tr style={{ background: '#F5F2EC', borderBottom: '1px solid #E8DFC8' }}>
-                  {['Réf', 'Pèlerin', 'Package', 'Dates', 'Pers.', 'Montant', 'Avis', 'Statut'].map(h => (
+                  {['Réf', 'Pèlerin', 'Package', 'Dates', 'Pers.', 'Montant', 'Avis', 'Statut', ''].map(h => (
                     <th key={h} style={{ padding: '0.75rem 0.875rem', textAlign: 'left', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
                 </tr>
@@ -175,6 +176,14 @@ export default function GuideMissions() {
                       </td>
                       <td style={{ padding: '0.75rem 0.875rem' }}>
                         <span style={{ display: 'inline-block', background: sc.bg, color: sc.color, fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.06em', padding: '0.25rem 0.6rem', borderRadius: 20, whiteSpace: 'nowrap' }}>{sc.label}</span>
+                      </td>
+                      <td style={{ padding: '0.75rem 0.875rem', whiteSpace: 'nowrap' }}>
+                        <Link
+                          href={`/guide/missions/${r.id}`}
+                          style={{ display: 'inline-block', padding: '0.35rem 0.875rem', borderRadius: 50, border: '1.5px solid #E8DFC8', background: 'white', color: '#1A1209', fontSize: '0.72rem', fontWeight: 700, textDecoration: 'none', fontFamily: 'inherit' }}
+                        >
+                          Voir les détails
+                        </Link>
                       </td>
                     </tr>
                   );

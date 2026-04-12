@@ -273,6 +273,72 @@ export default function GuideOmraClient() {
             <p className="go-reveal go-reveal-d2">
               La Omra commence bien avant d'embarquer dans l'avion. Une préparation sérieuse — spirituelle, physique et logistique — fait toute la différence entre un voyage accompli mécaniquement et une expérience qui transforme.
             </p>
+
+            {/* Questions Ihram & Miqat */}
+            <div className="go-steps go-reveal">
+
+              <div className="go-step">
+                <div className="go-step-num">1</div>
+                <div className="go-step-body">
+                  <h3>Quand dois-je enfiler l'Ihram ?</h3>
+                  <p>
+                    Avant de franchir le <strong>Miqat</strong> — la frontière
+                    sacrée à partir de laquelle il est interdit d'entrer
+                    sans être en état de sacralisation. Dans l'avion,
+                    l'équipage vous préviendra avant le passage.
+                    La règle d'or : <strong>enfilez l'Ihram avant même
+                    de monter dans l'avion</strong> pour ne prendre aucun risque.
+                  </p>
+                </div>
+              </div>
+
+              <div className="go-step">
+                <div className="go-step-num">2</div>
+                <div className="go-step-body">
+                  <h3>Puis-je enlever l'Ihram à l'arrivée pour me reposer ?</h3>
+                  <p>
+                    <strong>Non.</strong> Une fois l'Ihram enfilé et la Niyyah
+                    prononcée au Miqat, vous êtes en état de sacralisation.
+                    Vous ne pouvez plus l'enlever avant d'avoir accompli
+                    la Omra complète — même si vous souhaitez vous reposer
+                    à l'hôtel d'abord. Vous pouvez vous reposer en Ihram,
+                    mais l'enlever avant la Omra est interdit et entraîne
+                    une pénalité (<em>Fidya</em>).
+                  </p>
+                </div>
+              </div>
+
+              <div className="go-step">
+                <div className="go-step-num">3</div>
+                <div className="go-step-body">
+                  <h3>Comment prononcer l'intention (Niyyah) ?</h3>
+                  <p>
+                    La Niyyah se prononce au moment du passage du Miqat.
+                    En arabe : <strong style={{ fontFamily: 'Tajawal, serif',
+                    fontSize: '1.1rem', direction: 'rtl', display: 'inline-block' }}>
+                    لَبَّيْكَ اللَّهُمَّ عُمْرَةً</strong>
+                    <br/>
+                    <em>&quot;Labbayka Allahumma &apos;Umratan&quot;</em> —
+                    &quot;Me voici, ô Allah, pour la Omra.&quot;
+                    Suivi du Talbiyah que vous répéterez jusqu'au début du Tawaf.
+                  </p>
+                </div>
+              </div>
+
+            </div>
+
+            <div className="go-alert go-reveal">
+              <span className="go-alert-icon">✦</span>
+              <p>
+                <strong>Il existe 5 Miqats terrestres</strong> selon votre pays
+                d'origine et votre itinéraire. Les pèlerins français passent
+                en général par <em>Qarn Al-Manazil</em> (vol direct) ou
+                <em> Yalamlam</em> (via Dubaï). Le guide complet détaille
+                chaque Miqat, la procédure dans l'avion, et tout ce qu'il
+                faut savoir sur l'état de sacralisation.
+              </p>
+            </div>
+
           </section>
 
           {/* PAYWALL */}

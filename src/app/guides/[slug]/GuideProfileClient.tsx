@@ -159,6 +159,14 @@ export default function GuideProfileClient({
             grid-template-columns: 1fr 1fr;
           }
         }
+        /* Fix overflow visibility */
+        .profile-main-grid {
+          overflow: visible !important;
+        }
+        .profile-main-grid > div:first-child {
+          overflow: visible !important;
+          min-height: 0;
+        }
       `}} />
 
       <div className="profile-main-grid">

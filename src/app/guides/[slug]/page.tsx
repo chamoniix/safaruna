@@ -886,7 +886,7 @@ export default async function GuideProfilePage({
       </section>
 
       {/* MAIN CONTENT — client component handles tabs + booking widget */}
-      <div style={{ background: 'var(--cream)', minHeight: '60vh' }}>
+      <div style={{ background: 'var(--cream)', minHeight: '80vh' }}>
         <GuideProfileClient
           slug={slug}
           guideName={guide.name}

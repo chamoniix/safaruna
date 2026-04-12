@@ -80,7 +80,7 @@ export default function GuideProfileClient({
   });
 
   return (
-    <>
+    <div style={{ minHeight: '70vh' }}>
       <style dangerouslySetInnerHTML={{ __html: `
         .profile-main-grid {
           max-width: 1200px;
@@ -90,6 +90,7 @@ export default function GuideProfileClient({
           grid-template-columns: 1fr 340px;
           gap: 2.5rem;
           align-items: start;
+          min-height: 600px;
         }
         .profile-tabs-bar {
           display: flex;
@@ -183,7 +184,7 @@ export default function GuideProfileClient({
 
           {/* TAB: PRESENTATION */}
           {activeTab === 0 && (
-            <div>
+            <div style={{ minHeight: '50vh' }}>
               {/* ── RESPONSABLE TERRAIN CARD (officiel uniquement) ── */}
               {isOfficial && (
                 <div style={{
@@ -305,7 +306,7 @@ export default function GuideProfileClient({
 
           {/* TAB: LIEUX SAINTS */}
           {activeTab === 1 && (
-            <div>
+            <div style={{ minHeight: '50vh' }}>
               <div style={{ marginBottom: '2rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
                   <div style={{ width: '6px', height: '28px', background: 'var(--gold)', borderRadius: '3px' }}></div>
@@ -340,7 +341,7 @@ export default function GuideProfileClient({
 
           {/* TAB: FORFAITS */}
           {activeTab === 2 && (
-            <div>
+            <div style={{ minHeight: '50vh' }}>
             {/* Durées officielles des rites */}
             <div style={{ background: '#1A1209', borderRadius: 14, padding: '1.25rem 1.5rem', marginBottom: '1.5rem' }}>
               <div style={{ fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(201,168,76,0.7)', marginBottom: '0.6rem' }}>
@@ -480,7 +481,7 @@ export default function GuideProfileClient({
 
           {/* TAB: AVIS */}
           {activeTab === 3 && (
-            <div>
+            <div style={{ minHeight: '50vh' }}>
               <div style={{
                 background: 'white',
                 border: '1px solid var(--sand)',
@@ -607,7 +608,7 @@ export default function GuideProfileClient({
           </a>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

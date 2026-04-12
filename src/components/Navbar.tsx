@@ -11,7 +11,7 @@ const NAV_LINKS: { href: string; label: string; isAnchor?: boolean }[] = [
   { href: '/guides', label: 'Nos guides' },
   { href: '/#packages', label: 'Forfaits', isAnchor: true },
   { href: '/services', label: 'Services' },
-  { href: '/guide-omra', label: 'Guide Omra' },
+  { href: '/guide-omra', label: 'Ebook Omra' },
   { href: '/certification', label: 'Certification' },
   { href: '/blog', label: 'Blog' },
   { href: '/faq', label: 'FAQ' },
@@ -149,7 +149,7 @@ export default function Navbar() {
             <span className="nb-banner-dot" />
             <span>
               La Omra n&apos;attend pas que vous soyez prêt —{' '}
-              <Link href="/guide-omra">Découvrir →</Link>
+              <Link href="/guide-omra">Découvrir</Link>
             </span>
           </div>
         )}

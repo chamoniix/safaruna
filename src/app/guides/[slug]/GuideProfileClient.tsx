@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import BookingWidget from './BookingWidget';
 import { PLACES as LIB_PLACES } from '@/lib/places';
 
 interface Package {
@@ -43,7 +42,7 @@ interface GuideProfileClientProps {
   activePlaceKeys?: string[];
 }
 
-const TAB_LABELS = ['Présentation', 'Lieux Saints', 'Forfaits', 'Avis'];
+const TAB_LABELS = ['Présentation', 'Lieux Saints', 'Avis'];
 
 export default function GuideProfileClient({
   slug,
@@ -58,7 +57,6 @@ export default function GuideProfileClient({
   activePlaceKeys,
 }: GuideProfileClientProps) {
   const [activeTab, setActiveTab] = useState(0);
-  const [selectedForfait, setSelectedForfait] = useState(1);
 
   const makkahPlaces = places.filter(p => p.category === 'MAKKAH');
   const madinahPlaces = places.filter(p => p.category === 'MADINAH');
@@ -340,148 +338,8 @@ export default function GuideProfileClient({
             </div>
           )}
 
-          {/* TAB: FORFAITS */}
-          {activeTab === 2 && (
-            <div style={{ minHeight: '50vh' }}>
-            {/* Durées officielles des rites */}
-            <div style={{ background: '#1A1209', borderRadius: 14, padding: '1.25rem 1.5rem', marginBottom: '1.5rem' }}>
-              <div style={{ fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(201,168,76,0.7)', marginBottom: '0.6rem' }}>
-                Durées officielles des rites de la Omra
-              </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                {[
-                  { label: 'Ihram + Niyyah au Meeqat', time: '30-45 min' },
-                  { label: 'Tawaf (7 tours Kaaba)', time: '1h30 – 3h' },
-                  { label: "Sa'i Safa & Marwa (7×)", time: '45 min – 1h30' },
-                  { label: 'Tahallul (rasage/coupe)', time: '15-30 min' },
-                  { label: 'OMRA COMPLÈTE', time: '4h – 6h selon affluence', highlight: true },
-                ].map((r: { label: string; time: string; highlight?: boolean }) => (
-                  <span key={r.label} style={{
-                    display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
-                    background: r.highlight ? 'rgba(201,168,76,0.15)' : 'rgba(255,255,255,0.06)',
-                    border: r.highlight ? '1px solid rgba(201,168,76,0.5)' : '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: 50, padding: '0.3rem 0.85rem',
-                    fontSize: '0.72rem', color: r.highlight ? '#F0D897' : 'rgba(255,255,255,0.75)',
-                    fontWeight: r.highlight ? 700 : 500,
-                  }}>
-                    {r.label}
-                    <strong style={{ color: r.highlight ? '#C9A84C' : 'rgba(255,255,255,0.5)' }}>· {r.time}</strong>
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className="profile-packages-grid">
-              {packages.map((pkg, i) => (
-                <div key={i} style={{
-                  background: 'white',
-                  border: i === 1 ? '2px solid #C9A84C' : '1.5px solid #E8DFC8',
-                  borderRadius: '16px',
-                  padding: '1.75rem',
-                  position: 'relative',
-                  overflow: 'hidden',
-                }}>
-                  {i === 1 && (
-                    <div style={{
-                      position: 'absolute',
-                      top: '1rem',
-                      right: '1rem',
-                      background: '#C9A84C',
-                      color: '#1A1209',
-                      fontSize: '0.62rem',
-                      fontWeight: 800,
-                      letterSpacing: '0.1em',
-                      padding: '0.25rem 0.65rem',
-                      borderRadius: '50px',
-                    }}>
-                      RECOMMANDÉ
-                    </div>
-                  )}
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem', gap: '1rem', flexWrap: 'wrap' }}>
-                    <div>
-                      <h3 style={{
-                        fontFamily: 'var(--font-cormorant), serif',
-                        fontSize: '1.35rem',
-                        fontWeight: 700,
-                        color: '#1A1209',
-                        marginBottom: '0.35rem',
-                      }}>
-                        {pkg.name}
-                      </h3>
-                      <span style={{
-                        display: 'inline-block',
-                        background: '#FAF7F0',
-                        border: '1px solid #E8DFC8',
-                        color: '#7A6D5A',
-                        fontSize: '0.72rem',
-                        fontWeight: 600,
-                        padding: '0.2rem 0.65rem',
-                        borderRadius: '50px',
-                      }}>
-                        {pkg.days} {pkg.days === 1 ? 'jour' : 'jours'}
-                      </span>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{
-                        fontFamily: 'var(--font-cormorant), serif',
-                        fontSize: '2rem',
-                        fontWeight: 700,
-                        color: '#1A1209',
-                        lineHeight: 1,
-                      }}>
-                        {pkg.price}€
-                      </div>
-                      <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: '0.2rem' }}>par personne</div>
-                    </div>
-                  </div>
-
-                  <p style={{ fontSize: '0.85rem', color: '#7A6D5A', lineHeight: 1.7, marginBottom: '1.25rem' }}>
-                    {pkg.description}
-                  </p>
-
-                  <ul style={{ listStyle: 'none', padding: 0, marginBottom: '1.5rem' }}>
-                    {pkg.features.map((feat, j) => (
-                      <li key={j} style={{
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        gap: '0.5rem',
-                        padding: '0.4rem 0',
-                        borderBottom: j < pkg.features.length - 1 ? '1px solid #E8DFC8' : 'none',
-                        fontSize: '0.83rem',
-                        color: '#4A3F30',
-                      }}>
-                        <span style={{ color: '#C9A84C', fontWeight: 700, flexShrink: 0 }}>✓</span>
-                        {feat}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <button
-                    onClick={() => setSelectedForfait(i)}
-                    style={{
-                      width: '100%',
-                      padding: '0.7rem 1.5rem',
-                      background: i === 1 ? '#1A1209' : 'transparent',
-                      color: i === 1 ? '#F0D897' : '#1A1209',
-                      border: i === 1 ? 'none' : '1.5px solid #1A1209',
-                      borderRadius: '50px',
-                      fontFamily: 'var(--font-manrope), sans-serif',
-                      fontWeight: 700,
-                      fontSize: '0.82rem',
-                      letterSpacing: '0.05em',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                    }}
-                  >
-                    Sélectionner ce forfait
-                  </button>
-                </div>
-              ))}
-            </div>
-            </div>
-          )}
-
           {/* TAB: AVIS */}
-          {activeTab === 3 && (
+          {activeTab === 2 && (
             <div style={{ minHeight: '50vh' }}>
               <div style={{
                 background: 'white',
@@ -572,42 +430,37 @@ export default function GuideProfileClient({
           )}
         </div>
 
-        {/* RIGHT SIDE — Booking Widget (desktop) */}
+        {/* RIGHT SIDE — Bouton réserver (desktop) */}
         <div className="profile-booking-sticky">
-          <BookingWidget
-            slug={slug}
-            guideName={guideName}
-            packages={packages.map(p => ({ name: p.name, price: p.price, days: p.days, label: p.label }))}
-          />
+          <div style={{ position: 'sticky', top: '90px', background: 'white', borderRadius: '20px', border: '1px solid #E8DFC8', boxShadow: '0 8px 32px rgba(26,18,9,0.08)', padding: '1.5rem', textAlign: 'center' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#D1FAE5', color: '#1D5C3A', fontSize: '0.75rem', fontWeight: 700, padding: '0.3rem 0.875rem', borderRadius: 50, marginBottom: '1.25rem' }}>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#1D5C3A', display: 'inline-block' }}/>
+              Disponible
+            </div>
+            <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 600, color: '#1A1209', marginBottom: '1.25rem', lineHeight: 1.4 }}>
+              Réserver avec<br/>{guideName}
+            </div>
+            <a
+              href={`/espace/checkout/${slug}`}
+              style={{ display: 'block', padding: '0.875rem 1.5rem', background: 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)', color: '#1A1209', borderRadius: 12, fontFamily: 'var(--font-manrope, sans-serif)', fontWeight: 800, fontSize: '0.88rem', letterSpacing: '0.05em', textDecoration: 'none', boxShadow: '0 4px 16px rgba(201,168,76,0.3)' }}
+            >
+              Réserver ce guide
+            </a>
+            <div style={{ marginTop: '1rem', fontSize: '0.72rem', color: '#9CA3AF', lineHeight: 1.6 }}>
+              Guide certifié SAFARUMA · Paiement sécurisé
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Mobile booking bar (fixed bottom) */}
       <div className="profile-mobile-booking">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '0.65rem', color: '#7A6D5A', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>À partir de</div>
-            <div style={{ fontFamily: 'var(--font-cormorant), serif', fontSize: '1.5rem', fontWeight: 700, color: '#1A1209', lineHeight: 1 }}>
-              {packages[0].price}€ <span style={{ fontSize: '0.75rem', fontFamily: 'var(--font-manrope)', fontWeight: 400, color: '#7A6D5A' }}>/ pers</span>
-            </div>
-          </div>
-          <a href={`/espace/checkout/${slug}`} style={{
-            background: '#C9A84C',
-            color: '#1A1209',
-            fontFamily: 'var(--font-manrope), sans-serif',
-            fontWeight: 800,
-            fontSize: '0.85rem',
-            letterSpacing: '0.05em',
-            textTransform: 'uppercase',
-            padding: '0.875rem 1.75rem',
-            borderRadius: '50px',
-            textDecoration: 'none',
-            display: 'inline-block',
-            whiteSpace: 'nowrap',
-          }}>
-            Réserver →
-          </a>
-        </div>
+        <a
+          href={`/espace/checkout/${slug}`}
+          style={{ display: 'block', width: '100%', padding: '0.875rem', background: 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)', color: '#1A1209', borderRadius: 50, fontFamily: 'var(--font-manrope, sans-serif)', fontWeight: 800, fontSize: '0.88rem', textDecoration: 'none', textAlign: 'center', letterSpacing: '0.05em', boxSizing: 'border-box' }}
+        >
+          Réserver ce guide
+        </a>
       </div>
     </div>
   );

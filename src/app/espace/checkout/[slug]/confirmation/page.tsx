@@ -44,16 +44,6 @@ function ConfirmationContent() {
           Vous recevrez un email de confirmation avec tous les détails de votre voyage.
         </p>
 
-        {/* Numéro de réservation */}
-        <div style={{ background: '#1A1209', borderRadius: 16, padding: '1.25rem 2rem', marginBottom: '2rem' }}>
-          <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(201,168,76,0.6)', marginBottom: '0.5rem' }}>
-            Numéro de réservation
-          </div>
-          <div style={{ fontFamily: 'monospace', fontSize: '1.5rem', fontWeight: 700, color: '#F0D897', letterSpacing: '0.1em' }}>
-            {ref}
-          </div>
-        </div>
-
         {/* Du'a du voyageur */}
         <div style={{ background: 'white', border: '1px solid #E8DFC8', borderRadius: 16, padding: '1.5rem', marginBottom: '2rem' }}>
           <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: '1rem' }}>
@@ -64,6 +54,16 @@ function ConfirmationContent() {
           </div>
           <div style={{ fontSize: '0.82rem', color: '#7A6D5A', fontStyle: 'italic', lineHeight: 1.7 }}>
             « Gloire à Celui qui nous a soumis cela, alors que nous n&apos;en étions pas capables. »
+          </div>
+        </div>
+
+        {/* Numéro de réservation */}
+        <div style={{ background: '#1A1209', borderRadius: 16, padding: '1.25rem 2rem', marginBottom: '2rem' }}>
+          <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(201,168,76,0.6)', marginBottom: '0.5rem' }}>
+            Numéro de réservation
+          </div>
+          <div style={{ fontFamily: 'monospace', fontSize: '1.5rem', fontWeight: 700, color: '#F0D897', letterSpacing: '0.1em' }}>
+            {ref}
           </div>
         </div>
 

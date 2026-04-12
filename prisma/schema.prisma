@@ -375,3 +375,14 @@ model ReservationDraft {
   expiresAt DateTime
   createdAt DateTime @default(now())
 }
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  actor     String   // email ou "system" ou "stripe"
+  actorRole String   // "ADMIN" | "GUIDE" | "CLIENT" | "SYSTEM"
+  action    String   // "RESERVATION_CREATED" | "PAYMENT_CONFIRMED" etc.
+  target    String?  // refNumber, placeKey, userId...
+  detail    String?  // JSON ou texte libre
+  ip        String?
+}

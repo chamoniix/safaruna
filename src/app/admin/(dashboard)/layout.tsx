@@ -16,6 +16,7 @@ const NAV = [
   { href: '/admin/revenus',         label: 'Revenus' },
   { href: '/admin/commissions',     label: 'Commissions' },
   { href: '/admin/lieux',           label: 'Lieux & Tarifs' },
+  { href: '/admin/audit',           label: 'Audit' },
   { href: '/admin/parametres',      label: 'Paramètres' },
 ];
 

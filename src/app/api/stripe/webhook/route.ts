@@ -2,6 +2,7 @@ import Stripe from 'stripe'
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { sendEmail } from '@/lib/email'
+import { createAuditLog } from '@/lib/audit'
 
 export const config = { api: { bodyParser: false } }
 
@@ -102,6 +103,15 @@ export async function POST(req: NextRequest) {
 
     // 6. Supprime le draft
     await prisma.reservationDraft.delete({ where: { refNumber } })
+
+    // 7. Audit log
+    await createAuditLog({
+      actor: session.customer_email || 'stripe',
+      actorRole: 'CLIENT',
+      action: 'PAYMENT_CONFIRMED',
+      target: refNumber,
+      detail: `${data.totalPrice}€ · ${data.cityChoice}`,
+    })
 
     // 7. Emails
     const guideName =

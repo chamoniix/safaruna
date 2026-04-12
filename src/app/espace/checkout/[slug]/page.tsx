@@ -340,9 +340,10 @@ export default function CheckoutPage() {
 
   // ── Rendu ─────────────────────────────────────
   return (
-    <div style={{ minHeight: '100vh', background: '#FAF7F0', fontFamily: 'Arial, sans-serif' }}>
+    <div style={{ height: '100vh', background: '#FAF7F0', fontFamily: 'Arial, sans-serif', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <ProgressBar />
 
+      <div style={{ flex: 1, overflowY: 'auto' }}>
       <div style={{ maxWidth: 680, margin: '0 auto', padding: '2rem 1.5rem 6rem' }}>
 
         {/* ── ÉTAPE 1 — DESTINATION ── */}
@@ -823,6 +824,7 @@ export default function CheckoutPage() {
             </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   )

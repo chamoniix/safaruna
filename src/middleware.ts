@@ -5,13 +5,23 @@ import { verifyAdminToken } from '@/lib/admin-auth';
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // ── Admin routes ──────────────────────────────────────
+  // ── Admin page routes ─────────────────────────────────
   if (pathname.startsWith('/admin')) {
     if (pathname === '/admin/login') return NextResponse.next();
     const session = req.cookies.get('admin_session')?.value;
     const secret  = process.env.ADMIN_JWT_SECRET ?? '';
     if (!session || !(await verifyAdminToken(session, secret))) {
       return NextResponse.redirect(new URL('/admin/login', req.url));
+    }
+    return NextResponse.next();
+  }
+
+  // ── Admin API routes (defense-in-depth) ───────────────
+  if (pathname.startsWith('/api/admin')) {
+    const session = req.cookies.get('admin_session')?.value;
+    const secret  = process.env.ADMIN_JWT_SECRET ?? '';
+    if (!session || !(await verifyAdminToken(session, secret))) {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
     }
     return NextResponse.next();
   }
@@ -54,5 +64,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/espace/:path*', '/guide/:path*', '/admin/:path*'],
+  matcher: ['/espace/:path*', '/guide/:path*', '/admin/:path*', '/api/admin/:path*'],
 };

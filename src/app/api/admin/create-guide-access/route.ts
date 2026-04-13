@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { verifyAdminToken } from '@/lib/admin-auth';
+import { checkAdmin } from '@/lib/check-admin';
 import prisma from '@/lib/prisma';
 
 function generatePassword(length = 12): string {
@@ -9,13 +9,8 @@ function generatePassword(length = 12): string {
 }
 
 export async function POST(req: NextRequest) {
-  // ── Vérifier le cookie admin_session (JWT custom) ──
-  const session = req.cookies.get('admin_session')?.value;
-  const secret  = process.env.ADMIN_JWT_SECRET ?? '';
-
-  if (!session || !(await verifyAdminToken(session, secret))) {
+  if (!await checkAdmin(req))
     return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-  }
 
   const { email, firstName, lastName } = await req.json();
 

@@ -1,13 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyAdminToken } from '@/lib/admin-auth'
+import { checkAdmin } from '@/lib/check-admin'
 import prisma from '@/lib/prisma'
 import { PLACES } from '@/lib/places'
-
-async function checkAdmin(req: NextRequest) {
-  const session = req.cookies.get('admin_session')?.value
-  const secret = process.env.ADMIN_JWT_SECRET ?? ''
-  return session && await verifyAdminToken(session, secret)
-}
 
 export async function GET(req: NextRequest) {
   if (!await checkAdmin(req))

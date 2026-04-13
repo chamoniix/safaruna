@@ -18,7 +18,7 @@ function RegisterForm() {
     <>
       <style dangerouslySetInnerHTML={{ __html: `
         .inscription-wrap {
-          min-height: 100vh;
+          min-height: auto;
           background: #FAF7F0;
           display: flex;
           align-items: flex-start;
@@ -27,6 +27,9 @@ function RegisterForm() {
           font-family: var(--font-manrope, sans-serif);
           box-sizing: border-box;
           overflow-x: hidden;
+        }
+        @media (min-width: 768px) {
+          .inscription-wrap { min-height: 100vh; }
         }
         .inscription-card {
           width: 100%;

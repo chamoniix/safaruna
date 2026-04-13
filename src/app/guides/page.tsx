@@ -465,7 +465,7 @@ export default function GuideSearchPage() {
               }}>
                 Guide pour
               </div>
-              <div style={{ display: 'flex', gap: '0.4rem' }}>
+              <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', overflowX: 'hidden' }}>
                 {[
                   { val: '', label: 'Tous' },
                   { val: 'HOMME', label: 'Hommes' },

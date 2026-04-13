@@ -26,6 +26,7 @@ function RegisterForm() {
           padding: 48px 16px 48px;
           font-family: var(--font-manrope, sans-serif);
           box-sizing: border-box;
+          overflow-x: hidden;
         }
         .inscription-card {
           width: 100%;

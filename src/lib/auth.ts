@@ -44,6 +44,7 @@ export const authOptions: AuthOptions = {
             name: user.name,
             firstName: user.firstName,
             role: "GUIDE",
+            emailVerified: user.emailVerified,
           }
         } catch {
           return null
@@ -73,6 +74,7 @@ export const authOptions: AuthOptions = {
             name: user.name,
             firstName: user.firstName,
             role: "PELERIN",
+            emailVerified: user.emailVerified,
           }
         } catch {
           return null
@@ -86,6 +88,7 @@ export const authOptions: AuthOptions = {
         token.id = user.id
         token.role = (user as any).role || "PELERIN"
         token.firstName = (user as any).firstName || null
+        token.emailVerified = (user as any).emailVerified ?? null
       }
       if (account?.provider === "google") {
         token.role = "PELERIN"
@@ -97,6 +100,7 @@ export const authOptions: AuthOptions = {
         (session.user as any).id = token.id as string;
         (session.user as any).role = token.role as string;
         (session.user as any).firstName = token.firstName as string | null;
+        (session.user as any).emailVerified = token.emailVerified ?? null;
       }
       return session
     },

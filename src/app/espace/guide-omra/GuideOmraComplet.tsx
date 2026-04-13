@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -60,6 +61,8 @@ const CHECKLIST = [
 ];
 
 export default function GuideOmraComplet() {
+  const { data: session } = useSession();
+  const emailVerified = session?.user?.emailVerified;
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const [progress, setProgress] = useState(0);
@@ -242,6 +245,33 @@ export default function GuideOmraComplet() {
       </div>
 
       <Navbar />
+
+      {/* Email verification banner */}
+      {session && !emailVerified && (
+        <div style={{
+          background: '#FEF9EC', border: '1px solid #C9A84C',
+          borderRadius: 12, padding: '1rem 1.25rem',
+          margin: '1rem 1.5rem', textAlign: 'center',
+        }}>
+          <div style={{ fontWeight: 700, color: '#1A1209', marginBottom: '0.5rem' }}>
+            ✉️ Confirmez votre email pour accéder à votre espace
+          </div>
+          <div style={{ color: '#7A6D5A', fontSize: '0.82rem', marginBottom: '1rem' }}>
+            Un email de confirmation vous a été envoyé.
+          </div>
+          <button
+            onClick={() => fetch('/api/resend-verification', { method: 'POST' })}
+            style={{
+              background: '#C9A84C', color: '#1A1209',
+              border: 'none', padding: '0.6rem 1.25rem',
+              borderRadius: 50, fontWeight: 700,
+              fontSize: '0.82rem', cursor: 'pointer',
+            }}
+          >
+            Renvoyer l'email de confirmation
+          </button>
+        </div>
+      )}
 
       {/* Hero */}
       <section className="go-hero">

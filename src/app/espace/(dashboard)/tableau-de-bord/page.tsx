@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 
 type DashboardData = {
@@ -152,6 +153,36 @@ function Skeleton({ w, h = 14 }: { w?: number | string; h?: number }) {
   return <div style={{ height: h, background: '#F0EDE8', borderRadius: 4, width: w ?? '100%' }} />;
 }
 
+function EmailVerificationBanner() {
+  const { data: session } = useSession();
+  if (!session || session.user?.emailVerified) return null;
+  return (
+    <div style={{
+      background: '#FEF9EC', border: '1px solid #C9A84C',
+      borderRadius: 12, padding: '1rem 1.25rem',
+      marginBottom: '1.5rem', textAlign: 'center',
+    }}>
+      <div style={{ fontWeight: 700, color: '#1A1209', marginBottom: '0.5rem' }}>
+        ✉️ Confirmez votre email pour accéder à votre espace
+      </div>
+      <div style={{ color: '#7A6D5A', fontSize: '0.82rem', marginBottom: '1rem' }}>
+        Un email de confirmation vous a été envoyé.
+      </div>
+      <button
+        onClick={() => fetch('/api/resend-verification', { method: 'POST' })}
+        style={{
+          background: '#C9A84C', color: '#1A1209',
+          border: 'none', padding: '0.6rem 1.25rem',
+          borderRadius: 50, fontWeight: 700,
+          fontSize: '0.82rem', cursor: 'pointer',
+        }}
+      >
+        Renvoyer l'email de confirmation
+      </button>
+    </div>
+  );
+}
+
 export default function EspaceTableauDeBord() {
   const [data, setData]       = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -216,6 +247,8 @@ export default function EspaceTableauDeBord() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', fontFamily: 'var(--font-manrope, sans-serif)' }}>
+
+      <EmailVerificationBanner />
 
       <div style={{ ...card, padding: '1.25rem 1.5rem' }}>
         <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.6rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.2 }}>

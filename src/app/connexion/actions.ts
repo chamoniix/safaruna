@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import { sendWelcomePelerin } from '@/lib/email';
+import { sendEmail, sendWelcomePelerin } from '@/lib/email';
 
 export async function signup(formData: FormData) {
   const email     = (formData.get('email')      as string)?.trim().toLowerCase();
@@ -40,16 +40,52 @@ export async function signup(formData: FormData) {
     },
   });
 
-  // Envoyer email de bienvenue (fire-and-forget)
-  sendWelcomePelerin(email, fullName).catch(() => {});
-
   if (refCode) {
     console.log(`[parrainage] Nouvel inscrit ${email} parrainé par code ${refCode}`);
     // TODO: créer une entrée Referral en base quand Stripe est actif
   }
 
-  // Rediriger vers connexion avec message de succès
-  redirect(refCode ? `/connexion?registered=1&ref=${refCode}` : '/connexion?registered=1');
+  // Générer et sauvegarder le token de vérification
+  const token = crypto.randomUUID();
+  await prisma.emailVerificationToken.create({
+    data: {
+      token,
+      email,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24h
+    },
+  });
+
+  // Envoyer l'email de confirmation (fire-and-forget)
+  sendEmail({
+    to: { email, name: `${firstName} ${lastName}` },
+    subject: 'Confirmez votre adresse email — SAFARUMA',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto;">
+        <h2 style="color: #1A1209;">Bienvenue sur SAFARUMA 🕋</h2>
+        <p>Cliquez sur le bouton ci-dessous pour confirmer
+           votre adresse email et accéder à votre espace.</p>
+        <a href="https://safaruma.com/verify-email?token=${token}"
+           style="display: inline-block; background: #C9A84C;
+           color: #1A1209; padding: 0.85rem 2rem; border-radius: 50px;
+           font-weight: 700; text-decoration: none; margin: 1.5rem 0;">
+          Confirmer mon adresse email
+        </a>
+        <p style="color: #7A6D5A; font-size: 0.85rem;">
+          Ce lien expire dans 24h. Si vous n'avez pas créé de compte,
+          ignorez cet email.
+        </p>
+      </div>
+    `,
+  }).catch(() => {});
+
+  // Envoyer email de bienvenue (fire-and-forget)
+  sendWelcomePelerin(email, fullName).catch(() => {});
+
+  // Rediriger vers connexion avec message de vérification
+  redirect(refCode
+    ? `/connexion?registered=1&verify=1&ref=${refCode}`
+    : '/connexion?registered=1&verify=1'
+  );
 }
 
 export async function signout() {

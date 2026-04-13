@@ -10,6 +10,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect') || '/espace/tableau-de-bord';
   const registered = searchParams.get('registered');
+  const verify = searchParams.get('verify');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -78,9 +79,33 @@ function LoginForm() {
               </Link>
             </div>
 
-            {registered && (
+            {registered && !verify && (
               <div style={{ background: '#E8F5EE', border: '1px solid rgba(29,92,58,0.2)', borderRadius: 10, padding: '0.75rem 1rem', marginBottom: '1rem', fontSize: '0.85rem', color: '#1D5C3A', fontWeight: 600, textAlign: 'center' }}>
                 ✓ Compte créé avec succès ! Connectez-vous maintenant.
+              </div>
+            )}
+
+            {verify && (
+              <div style={{
+                background: '#FEF9EC',
+                border: '1px solid #C9A84C',
+                borderRadius: 12,
+                padding: '1rem 1.25rem',
+                marginBottom: '1.5rem',
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '0.75rem',
+              }}>
+                <span style={{ fontSize: '1.1rem' }}>📬</span>
+                <div>
+                  <div style={{ fontWeight: 700, color: '#1A1209', fontSize: '0.88rem', marginBottom: '0.25rem' }}>
+                    Vérifiez votre boîte mail
+                  </div>
+                  <div style={{ color: '#7A6D5A', fontSize: '0.82rem', lineHeight: 1.6 }}>
+                    Un email de confirmation a été envoyé.
+                    Cliquez sur le lien pour activer votre compte.
+                  </div>
+                </div>
               </div>
             )}
 

@@ -3,7 +3,7 @@
 import { redirect } from 'next/navigation';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
-import { sendEmail, sendWelcomePelerin } from '@/lib/email';
+import { sendEmail } from '@/lib/email';
 
 export async function signup(formData: FormData) {
   const email     = (formData.get('email')      as string)?.trim().toLowerCase();
@@ -77,9 +77,6 @@ export async function signup(formData: FormData) {
       </div>
     `,
   }).catch(() => {});
-
-  // Envoyer email de bienvenue (fire-and-forget)
-  sendWelcomePelerin(email, fullName).catch(() => {});
 
   // Rediriger vers connexion avec message de vérification
   redirect(refCode

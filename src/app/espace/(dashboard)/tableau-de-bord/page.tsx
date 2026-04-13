@@ -292,7 +292,7 @@ export default function EspaceTableauDeBord() {
       <div style={{ ...card, overflow: 'hidden' }}>
         <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid #F0EBE0', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.3rem', fontWeight: 700, color: '#1A1209' }}>Mes dernières réservations</div>
-          <Link href="/espace/reservations" style={{ fontSize: '0.72rem', fontWeight: 700, color: '#C9A84C', textDecoration: 'none' }}>Voir toutes →</Link>
+          <Link href="/espace/reservations" style={{ fontSize: '0.72rem', fontWeight: 700, color: '#C9A84C', textDecoration: 'none' }}>Voir toutes</Link>
         </div>
 
         {recentReservations.length === 0 ? (

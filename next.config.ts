@@ -30,6 +30,10 @@ const nextConfig: NextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
           },
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://*.sentry.io; frame-src https://js.stripe.com https://checkout.stripe.com; img-src 'self' data: https:; connect-src 'self' https://api.stripe.com https://*.sentry.io https://*.ingest.de.sentry.io; font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+          },
         ],
       },
     ]

@@ -78,7 +78,15 @@ function VerifyEmailContent() {
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense>
+    <Suspense fallback={
+      <div style={{
+        minHeight: '100vh', display: 'flex',
+        alignItems: 'center', justifyContent: 'center',
+        background: '#FAF7F0',
+      }}>
+        <div style={{ color: '#7A6D5A' }}>Chargement...</div>
+      </div>
+    }>
       <VerifyEmailContent />
     </Suspense>
   )

@@ -463,11 +463,11 @@ export default function GuideSearchPage() {
       <Navbar />
 
       {/* ── HERO ── */}
-      <div className="guides-hero" style={{ background: '#1A1209', position: 'relative', overflow: 'hidden' }}>
+      <div className="guides-hero" style={{ background: '#1A1209', position: 'relative', overflow: 'visible' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 80% 120% at 50% 110%, rgba(201,168,76,0.14) 0%, transparent 65%)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', right: '4rem', top: '50%', transform: 'translateY(-50%)', fontFamily: 'serif', fontSize: '10rem', color: 'rgba(201,168,76,0.05)', userSelect: 'none', pointerEvents: 'none', lineHeight: 1 }}>مرشد</div>
 
-        <div style={{ maxWidth: 860, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+        <div style={{ maxWidth: 860, margin: '0 auto', position: 'relative', zIndex: 50 }}>
           <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(240,216,151,0.55)', marginBottom: '0.75rem', textAlign: 'center' }}>
             Trouver mon guide privé
           </div>
@@ -1039,7 +1039,7 @@ function GuideCard({ guide: g, official }: { guide: GuideData; official?: boolea
           </div>
 
           <div style={{ marginTop: '0.875rem', background: '#1A1209', color: '#F0D897', textAlign: 'center', padding: '0.7rem', borderRadius: 50, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.04em' }}>
-            Voir le profil →
+            Voir le profil
           </div>
         </div>
       </div>

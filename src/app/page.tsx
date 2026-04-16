@@ -689,8 +689,8 @@ export default function Home() {
           CTA FINAL
           ═══════════════════════════════════════════════════════ */}
       <section className="cta-section">
-        <div className="reveal" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(4rem, 15vw, 10rem)', color: 'rgba(201,168,76,0.05)', lineHeight: 1, direction: 'rtl', userSelect: 'none', marginBottom: '0.5rem' }}>
-          سفرنا
+        <div className="reveal" style={{ fontFamily: '"Scheherazade New", "Amiri", serif', fontSize: 'clamp(4rem, 15vw, 10rem)', color: 'rgba(201,168,76,0.05)', lineHeight: 1, direction: 'rtl', userSelect: 'none', marginBottom: '0.5rem', WebkitFontSmoothing: 'antialiased', textRendering: 'optimizeLegibility' }}>
+          سَفَرُوما
         </div>
         <h2 className="reveal reveal-d1" style={{ color: 'white', marginTop: '-1rem' }}>
           Ta Omra mérite mieux.

@@ -77,6 +77,7 @@ const GUIDES_DATA = [
     avatarGradient: 'linear-gradient(135deg, #F0D897, #C9A84C)',
     available: true,
     isOfficial: true,
+    specialisteEnfants: false,
   },
   {
     slug: 'rachid-al-madani',
@@ -99,6 +100,7 @@ const GUIDES_DATA = [
     gradient: 'linear-gradient(135deg, #2D1F08, #1A1209)',
     avatarGradient: 'linear-gradient(135deg, #F0D897, #C9A84C)',
     available: true,
+    specialisteEnfants: false,
   },
   {
     slug: 'fatima-al-omari',
@@ -121,6 +123,7 @@ const GUIDES_DATA = [
     gradient: 'linear-gradient(135deg, #082818, #1D5C3A)',
     avatarGradient: 'linear-gradient(135deg, #9FE1CB, #1D9E75)',
     available: true,
+    specialisteEnfants: true,
   },
   {
     slug: 'youssouf-konate',
@@ -143,6 +146,7 @@ const GUIDES_DATA = [
     gradient: 'linear-gradient(135deg, #1A2810, #2D4A1A)',
     avatarGradient: 'linear-gradient(135deg, #D4E8A0, #5A8A20)',
     available: true,
+    specialisteEnfants: false,
   },
   {
     slug: 'abdullah-ben-yusuf',
@@ -165,6 +169,7 @@ const GUIDES_DATA = [
     gradient: 'linear-gradient(135deg, #0A1830, #1A4A8A)',
     avatarGradient: 'linear-gradient(135deg, #A0C4F0, #1A6AC9)',
     available: false,
+    specialisteEnfants: false,
   },
   {
     slug: 'samira-al-rashidi',
@@ -187,6 +192,7 @@ const GUIDES_DATA = [
     gradient: 'linear-gradient(135deg, #28081A, #7A2D8A)',
     avatarGradient: 'linear-gradient(135deg, #F0A8C0, #A81D5C)',
     available: true,
+    specialisteEnfants: false,
   },
 ];
 
@@ -317,7 +323,7 @@ export default function GuideSearchPage() {
   const [dateArrivee, setDateArrivee] = useState<Date | null>(null);
   const [dateDepart, setDateDepart] = useState<Date | null>(null);
   const [calOffset, setCalOffset] = useState(0);
-  const [openPop, setOpenPop] = useState<'destination' | 'calendar' | 'voyageurs' | null>(null);
+  const [openPop, setOpenPop] = useState<'dest' | 'cal' | 'langue' | 'voy' | null>(null);
   const [nbPersonnes, setNbPersonnes] = useState(1);
   const [pmr, setPmr] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -331,17 +337,40 @@ export default function GuideSearchPage() {
   const barRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    function handleOut(e: MouseEvent) {
+    const handleClick = (e: MouseEvent) => {
       if (barRef.current && !barRef.current.contains(e.target as Node)) setOpenPop(null);
-    }
-    if (openPop) document.addEventListener('mousedown', handleOut);
-    return () => document.removeEventListener('mousedown', handleOut);
+    };
+    if (openPop) document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
   }, [openPop]);
 
   const fmt = (d: Date | null) => d ? d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : null;
-  const destLabel = selectedCity === 'MAKKAH' ? 'Makkah' : selectedCity === 'MADINAH' ? 'Madinah' : selectedCity === 'BOTH' ? 'Makkah + Madinah' : 'Destination';
+  const destLabel: React.ReactNode = selectedCity === 'MAKKAH' ? 'Makkah'
+    : selectedCity === 'MADINAH' ? 'Madinah'
+    : selectedCity === 'BOTH' ? (
+      <span style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+        <span style={{ padding: '2px 8px', borderRadius: 4, background: 'rgba(201,168,76,.12)', fontSize: 11, color: '#8B6914', fontWeight: 700 }}>Makkah</span>
+        <span style={{ padding: '2px 8px', borderRadius: 4, background: 'rgba(201,168,76,.12)', fontSize: 11, color: '#8B6914', fontWeight: 700 }}>Madinah</span>
+      </span>
+    ) : 'Destination';
   const calLabel = dateArrivee ? `${fmt(dateArrivee)}${dateDepart ? ' → ' + fmt(dateDepart) : ''}` : 'Dates';
   const voyLabel = nbPersonnes > 1 || pmr ? `${nbPersonnes} pers${pmr ? ' · PMR' : ''}` : 'Voyageurs';
+
+  const langCodes: Record<string, string> = {
+    fr: 'Français', ar: 'Arabe', en: 'English', darija: 'Darija',
+    wolof: 'Wolof', bambara: 'Bambara', algerien: 'Algérien',
+    tunisien: 'Tunisien', urdu: 'Urdu', hindi: 'Hindi',
+    turk: 'Türkçe', russe: 'Russe', mandarin: 'Mandarin',
+    espanol: 'Español', deutsch: 'Deutsch',
+  };
+  const langueLabel = selectedLangue === 'fr' ? '🇫🇷 Français'
+    : selectedLangue === 'ar' ? '🇸🇦 Arabe'
+    : selectedLangue === 'en' ? '🇬🇧 English'
+    : selectedLangue === 'darija' ? '🇲🇦 Darija'
+    : selectedLangue === 'wolof' ? '🇸🇳 Wolof'
+    : selectedLangue === 'bambara' ? '🌍 Bambara'
+    : selectedLangue ? selectedLangue
+    : 'Toutes langues';
 
   const toggleSpe = (s: string) => setSelectedSpecialites(p => p.includes(s) ? p.filter(x => x !== s) : [...p, s]);
   const toggleLieu = (l: string) => setSelectedLieux(p => p.includes(l) ? p.filter(x => x !== l) : [...p, l]);
@@ -359,14 +388,17 @@ export default function GuideSearchPage() {
     if (selectedCity === 'BOTH' && !(g.zones.includes('makkah') && g.zones.includes('madinah'))) return false;
     if (selectedGender === 'HOMME' && g.gender !== 'homme') return false;
     if (selectedGender === 'FEMME' && g.gender !== 'femme') return false;
-    if (selectedLangue && !g.languages.some(l => l === selectedLangue)) return false;
+    if (selectedLangue) {
+      const match = langCodes[selectedLangue] || selectedLangue;
+      if (!g.languages.some(l => l.includes(match))) return false;
+    }
     if (g.price > selectedBudget) return false;
     if (selectedNote && g.rating < parseFloat(selectedNote)) return false;
     if (pmr && !g.services.some(s => s.includes('PMR'))) return false;
-    if (selectedSpecialites.includes('PMR') && !g.services.some(s => s.includes('PMR'))) return false;
-    if (selectedSpecialites.includes('Familles') && !g.services.some(s => s.toLowerCase().includes('famil'))) return false;
-    if (selectedSpecialites.includes('Darija') && !g.languages.some(l => l.includes('Darija'))) return false;
-    if (selectedSpecialites.includes('Wolof') && !g.languages.some(l => l.includes('Wolof'))) return false;
+    if (selectedSpecialites.includes('pmr') && !g.services.some(s => s.includes('PMR'))) return false;
+    if (selectedSpecialites.includes('famille') && !g.services.some(s => s.toLowerCase().includes('famil'))) return false;
+    if (selectedSpecialites.includes('groupe') && !g.services.some(s => s.toLowerCase().includes('group') || s.toLowerCase().includes('van'))) return false;
+    if (selectedSpecialites.includes('enfants') && !(g.specialisteEnfants || g.services.some(s => s.toLowerCase().includes('enfant') || s.toLowerCase().includes('famille')))) return false;
     return true;
   });
   const filteredOfficial = filteredGuides.filter(g => g.isOfficial);
@@ -381,13 +413,27 @@ export default function GuideSearchPage() {
           style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 10, padding: '0.5rem 0.75rem', fontSize: '0.82rem', color: '#1A1209', background: 'white', fontFamily: 'inherit', cursor: 'pointer', outline: 'none' }}
         >
           <option value="">Toutes les langues</option>
-          {LANGUES.map(l => <option key={l} value={l}>{l}</option>)}
+          <option value="fr">🇫🇷 Français</option>
+          <option value="ar">🇸🇦 Arabe</option>
+          <option value="en">🇬🇧 English</option>
+          <option value="darija">🇲🇦 Darija (Maroc)</option>
+          <option value="wolof">🇸🇳 Wolof</option>
+          <option value="bambara">🌍 Bambara</option>
+          <option value="algerien">🇩🇿 Algérien</option>
+          <option value="tunisien">🇹🇳 Tunisien</option>
+          <option value="urdu">🇵🇰 Urdu</option>
+          <option value="hindi">🇮🇳 Hindi</option>
+          <option value="turk">🇹🇷 Türkçe</option>
+          <option value="russe">🇷🇺 Russe</option>
+          <option value="mandarin">🇨🇳 Mandarin</option>
+          <option value="espanol">🇪🇸 Español</option>
+          <option value="deutsch">🇩🇪 Deutsch</option>
         </select>
       </FilterCard>
 
       <FilterCard title="Guide pour">
         <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-          {[{ val: '', label: 'Tous' }, { val: 'HOMME', label: 'Hommes' }, { val: 'FEMME', label: 'Femmes' }, { val: 'MIXTE', label: 'Mixte' }].map(opt => (
+          {[{ val: '', label: 'Tous' }, { val: 'HOMME', label: 'Hommes' }, { val: 'FEMME', label: 'Femmes' }].map(opt => (
             <button key={opt.val} onClick={() => setSelectedGender(opt.val)} style={{ padding: '0.4rem 0.875rem', borderRadius: 50, border: selectedGender === opt.val ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', background: selectedGender === opt.val ? 'rgba(201,168,76,0.08)' : 'white', color: selectedGender === opt.val ? '#8B6914' : '#7A6D5A', fontWeight: selectedGender === opt.val ? 700 : 500, fontSize: '0.78rem', cursor: 'pointer', fontFamily: 'inherit' }}>{opt.label}</button>
           ))}
         </div>
@@ -405,10 +451,15 @@ export default function GuideSearchPage() {
       </FilterCard>
 
       <FilterCard title="Spécialités">
-        {(['PMR', 'Familles', 'Darija', 'Wolof'] as string[]).map(s => (
-          <label key={s} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.3rem 0', cursor: 'pointer' }}>
-            <input type="checkbox" checked={selectedSpecialites.includes(s)} onChange={() => toggleSpe(s)} style={{ width: 14, height: 14, accentColor: '#C9A84C', cursor: 'pointer' }} />
-            <span style={{ fontSize: '0.82rem', color: '#1A1209' }}>{s}</span>
+        {([
+          { val: 'pmr', label: '♿ PMR / Mobilité réduite' },
+          { val: 'famille', label: '👨‍👩‍👧 Familles (max 6 pers.)' },
+          { val: 'groupe', label: '👥 Groupes (+7 pers.)' },
+          { val: 'enfants', label: '🧒 Spécialiste enfants' },
+        ]).map(s => (
+          <label key={s.val} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.3rem 0', cursor: 'pointer' }}>
+            <input type="checkbox" checked={selectedSpecialites.includes(s.val)} onChange={() => toggleSpe(s.val)} style={{ width: 14, height: 14, accentColor: '#C9A84C', cursor: 'pointer' }} />
+            <span style={{ fontSize: '0.82rem', color: '#1A1209' }}>{s.label}</span>
           </label>
         ))}
       </FilterCard>
@@ -483,7 +534,7 @@ export default function GuideSearchPage() {
             <div className="guides-search-pill">
               {/* Destination */}
               <button
-                onClick={() => setOpenPop(openPop === 'destination' ? null : 'destination')}
+                onClick={() => setOpenPop(openPop === 'dest' ? null : 'dest')}
                 className="search-seg"
                 style={{ borderRight: '1px solid #E8DFC8' }}
               >
@@ -493,7 +544,7 @@ export default function GuideSearchPage() {
 
               {/* Dates */}
               <button
-                onClick={() => setOpenPop(openPop === 'calendar' ? null : 'calendar')}
+                onClick={() => setOpenPop(openPop === 'cal' ? null : 'cal')}
                 className="search-seg"
                 style={{ borderRight: '1px solid #E8DFC8' }}
               >
@@ -501,9 +552,19 @@ export default function GuideSearchPage() {
                 <div className="search-seg-val" style={{ color: dateArrivee ? '#1A1209' : '#9A8A7A', fontWeight: dateArrivee ? 700 : 400 }}>{calLabel}</div>
               </button>
 
+              {/* Langue */}
+              <button
+                onClick={() => setOpenPop(openPop === 'langue' ? null : 'langue')}
+                className="search-seg"
+                style={{ borderRight: '1px solid #E8DFC8' }}
+              >
+                <div className="search-seg-label">Langue</div>
+                <div className="search-seg-val" style={{ color: selectedLangue ? '#1A1209' : '#9A8A7A', fontWeight: selectedLangue ? 700 : 400 }}>{langueLabel}</div>
+              </button>
+
               {/* Voyageurs */}
               <button
-                onClick={() => setOpenPop(openPop === 'voyageurs' ? null : 'voyageurs')}
+                onClick={() => setOpenPop(openPop === 'voy' ? null : 'voy')}
                 className="search-seg"
               >
                 <div className="search-seg-label">Voyageurs</div>
@@ -523,14 +584,19 @@ export default function GuideSearchPage() {
             </div>
 
             {/* ── Destination popup ── */}
-            {openPop === 'destination' && (
+            {openPop === 'dest' && (
               <div className="search-popup" style={{ left: 0 }}>
                 <div style={{ fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7A6D5A', marginBottom: '0.75rem' }}>Choisir une destination</div>
                 {[
-                  { val: '', label: 'Toutes les villes', icon: '🌍' },
-                  { val: 'MAKKAH', label: 'Makkah Al-Mukarramah', icon: '🕋' },
-                  { val: 'MADINAH', label: 'Madinah Al-Munawwarah', icon: '🕌' },
-                  { val: 'BOTH', label: 'Makkah + Madinah', icon: '✈️' },
+                  { val: '', label: <span>Toutes</span>, icon: '🌍' },
+                  { val: 'MAKKAH', label: <span>Makkah</span>, icon: '🕋' },
+                  { val: 'MADINAH', label: <span>Madinah</span>, icon: '🕌' },
+                  { val: 'BOTH', label: (
+                    <span style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                      <span style={{ padding: '1px 7px', borderRadius: 4, background: 'rgba(201,168,76,.12)', fontSize: 10, color: '#8B6914', fontWeight: 700 }}>Makkah</span>
+                      <span style={{ padding: '1px 7px', borderRadius: 4, background: 'rgba(201,168,76,.12)', fontSize: 10, color: '#8B6914', fontWeight: 700 }}>Madinah</span>
+                    </span>
+                  ), icon: '✈️' },
                 ].map(opt => (
                   <button key={opt.val} onClick={() => { setSelectedCity(opt.val); setOpenPop(null); }} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', width: '100%', padding: '0.7rem', border: selectedCity === opt.val ? '2px solid #C9A84C' : '1.5px solid transparent', borderRadius: 12, background: selectedCity === opt.val ? 'rgba(201,168,76,0.07)' : 'transparent', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', marginBottom: '0.2rem', transition: 'background 0.12s' }}>
                     <span style={{ fontSize: '1.2rem' }}>{opt.icon}</span>
@@ -541,7 +607,7 @@ export default function GuideSearchPage() {
             )}
 
             {/* ── Calendar popup ── */}
-            {openPop === 'calendar' && (
+            {openPop === 'cal' && (
               <div className="search-popup" style={{ left: '50%', transform: 'translateX(-50%)' }}>
                 <CalendarPicker
                   dateArrivee={dateArrivee} setDateArrivee={setDateArrivee}
@@ -556,8 +622,39 @@ export default function GuideSearchPage() {
               </div>
             )}
 
+            {/* ── Langue popup ── */}
+            {openPop === 'langue' && (
+              <div style={{ position: 'absolute', top: 'calc(100% + 8px)', left: '33%', width: 280, background: 'white', borderRadius: 16, border: '1px solid #E8DFC8', padding: 18, zIndex: 200, boxShadow: '0 12px 40px rgba(26,18,9,.15)' }}>
+                <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: 10 }}>
+                  Langue du guide
+                </div>
+                <select
+                  value={selectedLangue}
+                  onChange={e => { setSelectedLangue(e.target.value); setOpenPop(null); }}
+                  style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 8, padding: '8px 10px', fontSize: 12, background: 'white', color: '#1A1209', fontFamily: 'inherit', cursor: 'pointer', outline: 'none' }}
+                >
+                  <option value="">Toutes les langues</option>
+                  <option value="fr">🇫🇷 Français</option>
+                  <option value="ar">🇸🇦 Arabe</option>
+                  <option value="en">🇬🇧 English</option>
+                  <option value="darija">🇲🇦 Darija (Maroc)</option>
+                  <option value="wolof">🇸🇳 Wolof</option>
+                  <option value="bambara">🌍 Bambara</option>
+                  <option value="algerien">🇩🇿 Algérien</option>
+                  <option value="tunisien">🇹🇳 Tunisien</option>
+                  <option value="urdu">🇵🇰 Urdu</option>
+                  <option value="hindi">🇮🇳 Hindi</option>
+                  <option value="turk">🇹🇷 Türkçe</option>
+                  <option value="russe">🇷🇺 Russe</option>
+                  <option value="mandarin">🇨🇳 Mandarin</option>
+                  <option value="espanol">🇪🇸 Español</option>
+                  <option value="deutsch">🇩🇪 Deutsch</option>
+                </select>
+              </div>
+            )}
+
             {/* ── Voyageurs popup ── */}
-            {openPop === 'voyageurs' && (
+            {openPop === 'voy' && (
               <div className="search-popup" style={{ right: 0 }}>
                 <div style={{ fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7A6D5A', marginBottom: '1rem' }}>Voyageurs</div>
 

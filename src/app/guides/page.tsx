@@ -606,7 +606,7 @@ export default function GuideSearchPage() {
             Ton voyage, dans <em style={{ fontStyle: 'italic', color: '#C9A84C' }}>ta langue</em>
           </h1>
           <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', marginBottom: '2rem' }}>
-            {GUIDES_DATA.length} guides certifiés · Makkah, Madinah, Badr & plus
+            Guides certifiés · Makkah, Madinah, Badr & plus
           </p>
 
           {/* ── Search bar ── */}
@@ -771,9 +771,36 @@ export default function GuideSearchPage() {
 
       {/* ── TRUST BAR ── */}
       <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', padding: '0.75rem 1.5rem', background: '#F5F0E8', borderBottom: '1px solid #E8DFC8', flexWrap: 'wrap' }}>
-        {[{ icon: '✓', label: 'Guides certifiés' }, { icon: '🛡', label: 'Paiement sécurisé' }, { icon: '★', label: '4.94/5 · 709 avis' }].map(b => (
-          <span key={b.label} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', fontWeight: 600, color: '#5A4535' }}>
-            <span style={{ color: '#C9A84C', fontSize: '0.85rem' }}>{b.icon}</span>
+        {[
+          {
+            label: 'Guides certifiés',
+            icon: (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <polyline points="9,12 11,14 15,10"/>
+              </svg>
+            ),
+          },
+          {
+            label: 'Paiement sécurisé',
+            icon: (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                <line x1="1" y1="10" x2="23" y2="10"/>
+              </svg>
+            ),
+          },
+          {
+            label: '4.9 · 12 890 avis',
+            icon: (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="#C9A84C" stroke="#C9A84C" strokeWidth="1">
+                <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+              </svg>
+            ),
+          },
+        ].map(b => (
+          <span key={b.label} style={{ display: 'flex', alignItems: 'center', gap: '.4rem', fontSize: '.75rem', fontWeight: 600, color: '#5A4535' }}>
+            <span style={{ color: '#C9A84C', display: 'flex', alignItems: 'center' }}>{b.icon}</span>
             {b.label}
           </span>
         ))}
@@ -784,7 +811,7 @@ export default function GuideSearchPage() {
 
         {/* Sidebar — only when hasSearched */}
         {hasSearched && (
-          <aside className="guides-sidebar">
+          <aside className="guides-sidebar" style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 100px)' }}>
             <FiltersContent />
           </aside>
         )}

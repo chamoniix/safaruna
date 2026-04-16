@@ -200,8 +200,22 @@ const GUIDES_DATA = [
 function GuideAvatarSVG({ slug, gradient, initials, isWoman }: { slug: string; gradient: string; initials: string; isWoman?: boolean }) {
   if (slug === 'naim-laamari') {
     return (
-      <div style={{ width: 46, height: 46, borderRadius: '50%', overflow: 'hidden', position: 'relative' }}>
-        <Image src="/guide-avatar.png" alt="Naïm LAAMARI" fill style={{ objectFit: 'cover', objectPosition: 'center 20%' }} />
+      <div style={{
+        width: '100%', height: '100%',
+        borderRadius: '50%',
+        overflow: 'hidden',
+        position: 'relative',
+      }}>
+        <Image
+          src="/guide-avatar.png"
+          alt="Naïm LAAMARI"
+          fill
+          style={{
+            objectFit: 'cover',
+            objectPosition: 'center 10%',
+            transform: 'scale(1.15)',
+          }}
+        />
       </div>
     );
   }
@@ -451,17 +465,83 @@ export default function GuideSearchPage() {
       </FilterCard>
 
       <FilterCard title="Spécialités">
-        {([
-          { val: 'pmr', label: '♿ PMR / Mobilité réduite' },
-          { val: 'famille', label: '👨‍👩‍👧 Familles (max 6 pers.)' },
-          { val: 'groupe', label: '👥 Groupes (+7 pers.)' },
-          { val: 'enfants', label: '🧒 Spécialiste enfants' },
-        ]).map(s => (
-          <label key={s.val} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.3rem 0', cursor: 'pointer' }}>
-            <input type="checkbox" checked={selectedSpecialites.includes(s.val)} onChange={() => toggleSpe(s.val)} style={{ width: 14, height: 14, accentColor: '#C9A84C', cursor: 'pointer' }} />
-            <span style={{ fontSize: '0.82rem', color: '#1A1209' }}>{s.label}</span>
-          </label>
-        ))}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {[
+            {
+              val: 'pmr',
+              label: 'PMR / Mobilité réduite',
+              icon: (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <circle cx="12" cy="5" r="2"/>
+                  <path d="M12 7v6l3 3"/>
+                  <circle cx="9" cy="19" r="3"/>
+                  <path d="M15 14h3l1 4"/>
+                </svg>
+              ),
+            },
+            {
+              val: 'famille',
+              label: 'Familles (max 6 pers.)',
+              icon: (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 010 7.75"/>
+                </svg>
+              ),
+            },
+            {
+              val: 'groupe',
+              label: 'Groupes (+7 pers.)',
+              icon: (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/>
+                  <circle cx="17" cy="9" r="3"/>
+                  <path d="M21 21v-1a3 3 0 00-3-3h-1"/>
+                </svg>
+              ),
+            },
+            {
+              val: 'enfants',
+              label: 'Spécialiste enfants',
+              icon: (
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <path d="M12 2a5 5 0 100 10A5 5 0 0012 2z"/>
+                  <path d="M9 14l-2 7h10l-2-7"/>
+                  <path d="M9 17h6"/>
+                </svg>
+              ),
+            },
+          ].map(s => {
+            const active = selectedSpecialites.includes(s.val);
+            return (
+              <button
+                key={s.val}
+                onClick={() => setSelectedSpecialites(prev =>
+                  active ? prev.filter(x => x !== s.val) : [...prev, s.val]
+                )}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  padding: '6px 12px', borderRadius: 50,
+                  border: active ? '2px solid #C9A84C' : '1.5px solid #E8DFC8',
+                  background: active ? 'rgba(201,168,76,.1)' : 'white',
+                  color: active ? '#8B6914' : '#7A6D5A',
+                  fontWeight: active ? 700 : 500,
+                  fontSize: 11, cursor: 'pointer',
+                  fontFamily: 'inherit', textAlign: 'left',
+                  width: '100%', transition: 'all .15s',
+                }}
+              >
+                <span style={{ color: active ? '#C9A84C' : '#7A6D5A', flexShrink: 0, display: 'flex' }}>
+                  {s.icon}
+                </span>
+                {s.label}
+              </button>
+            );
+          })}
+        </div>
       </FilterCard>
 
       <FilterCard title="Lieux saints">

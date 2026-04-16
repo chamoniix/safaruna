@@ -689,9 +689,31 @@ export default function Home() {
           CTA FINAL
           ═══════════════════════════════════════════════════════ */}
       <section className="cta-section">
-        <div className="reveal" style={{ fontFamily: '"Scheherazade New", "Amiri", serif', fontSize: 'clamp(4rem, 15vw, 10rem)', color: 'rgba(201,168,76,0.05)', lineHeight: 1, direction: 'rtl', userSelect: 'none', marginBottom: '0.5rem', WebkitFontSmoothing: 'antialiased', textRendering: 'optimizeLegibility' }}>
-          سَفَرُوما
-        </div>
+        <svg
+          viewBox="0 0 600 120"
+          xmlns="http://www.w3.org/2000/svg"
+          style={{
+            width: 'clamp(300px, 60vw, 700px)',
+            opacity: 0.06,
+            display: 'block',
+            margin: '0 auto 0.5rem',
+            pointerEvents: 'none',
+            userSelect: 'none',
+          }}
+          aria-hidden="true"
+        >
+          <text
+            x="50%"
+            y="85"
+            textAnchor="middle"
+            fontFamily='"Scheherazade New", "Amiri", serif'
+            fontSize="100"
+            fill="#C9A84C"
+            direction="rtl"
+          >
+            سفاروما
+          </text>
+        </svg>
         <h2 className="reveal reveal-d1" style={{ color: 'white', marginTop: '-1rem' }}>
           Ta Omra mérite mieux.
         </h2>

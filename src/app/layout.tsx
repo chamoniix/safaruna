@@ -52,6 +52,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className={`${cormorant.variable} ${manrope.variable}`}>
+      <head>
+        <link href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet" />
+      </head>
       <body className="antialiased font-sans bg-[var(--cream)] text-[var(--deep)]">
         <Providers>
           {children}

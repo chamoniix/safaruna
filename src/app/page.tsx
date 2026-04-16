@@ -526,7 +526,7 @@ export default function Home() {
                 <div className="place-arabic-bg" aria-hidden="true">{l.nameAr}</div>
                 <div style={{ position: 'relative', zIndex: 1 }}>
                   <div style={{ marginBottom: '0.75rem' }}>{l.icon}</div>
-                  <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--gold-dark)', marginBottom: '0.2rem' }}>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C9A84C', WebkitTextFillColor: '#C9A84C', fontFamily: '"Scheherazade New", "Amiri", serif', marginBottom: '0.2rem' }}>
                     {l.nameAr}
                   </div>
                   <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--deep)', marginBottom: '0.5rem' }}>{l.nameFr}</h3>
@@ -549,7 +549,7 @@ export default function Home() {
       <section style={{ background: 'var(--deep)', padding: '6rem 4rem', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 70% 90% at 50% 100%, rgba(201,168,76,0.06) 0%, transparent 55%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-          <div className="reveal" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(2rem, 5vw, 4rem)', color: 'rgba(201,168,76,0.35)', lineHeight: 1, marginBottom: '1rem', direction: 'rtl' }}>
+          <div className="reveal" style={{ fontFamily: '"Scheherazade New", "Amiri", "Traditional Arabic", serif', fontSize: 'clamp(2rem, 5vw, 4rem)', color: '#C9A84C', WebkitTextFillColor: '#C9A84C', lineHeight: 1, marginBottom: '1rem', direction: 'rtl', textRendering: 'optimizeLegibility', WebkitFontSmoothing: 'antialiased', unicodeBidi: 'embed' }}>
             وَمَن يُعَظِّمْ شَعَائِرَ اللَّهِ
           </div>
           <p className="reveal reveal-d1" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontStyle: 'italic', color: 'rgba(255,255,255,0.65)', lineHeight: 1.6, marginBottom: '0.75rem' }}>

@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { IconCar, IconVan, IconTrain, IconShield, IconStar, IconPerson, IconUserGroup, IconClock, IconAccessibility, IconMap } from '@/components/Icons';
+import { IconStar, IconAccessibility, IconMap } from '@/components/Icons';
 
 const LANGUES = [
   '🇫🇷 Français',
@@ -45,6 +45,15 @@ const LANGUES = [
   '🌿 Mooré',
 ];
 
+const LIEUX_OPTIONS = [
+  'Masjid al-Haram', 'Kaaba', 'Zamzam', 'Safa & Marwa',
+  'Mina', 'Arafat', 'Muzdalifah', 'Jabal Nur', 'Jabal Thawr',
+  'Jabal Rahmah', 'Masjid al-Nabawi', 'Rawdah', 'Masjid Quba',
+  'Masjid al-Qiblatayn', 'Baqi', 'Uhud', 'Masjid al-Fath',
+  'Masjid Bilal', 'Masjid Ali', 'Masjid Abi Bakr', 'Masjid Omar',
+  'Al-Baqi', 'Train Haramain', 'Bir Uthman', 'Bir Ali (Miqat)', 'Masjid al-Ijabah',
+];
+
 const GUIDES_DATA = [
   {
     slug: 'naim-laamari',
@@ -58,7 +67,7 @@ const GUIDES_DATA = [
     rating: 5.0,
     reviews: 0,
     pilgrims: 'OFFICIEL',
-    languages: ['🇫🇷 Français', '🇸🇦 Arabe', '🇬🇧 English', '🇲🇦 Darija'],
+    languages: ['🇫🇷 Français', '🇸🇦 Arabe', '🇬🇧 English', '🇲🇦 Darija (Maroc)'],
     services: ['Rituels Omra', 'Histoire islamique', 'PMR', 'Gestion de crise'],
     price: 150,
     priceSub: 'dès 150€/pers',
@@ -103,7 +112,7 @@ const GUIDES_DATA = [
     rating: 4.95,
     reviews: 178,
     pilgrims: '860+',
-    languages: ['🇫🇷 Français', '🇲🇦 Darija'],
+    languages: ['🇫🇷 Français', '🇲🇦 Darija (Maroc)'],
     services: ['Guide femme', 'Rituels Omra', 'Van 9pl', 'Familles'],
     price: 320,
     priceSub: '/ pers · 3j',
@@ -181,42 +190,22 @@ const GUIDES_DATA = [
   },
 ];
 
-// ─── SVG Avatars ───────────────────────────────────────────────────────────────
+// ─── SVG Avatars ──────────────────────────────────────────────────────────────
 function GuideAvatarSVG({ slug, gradient, initials, isWoman }: { slug: string; gradient: string; initials: string; isWoman?: boolean }) {
   if (slug === 'naim-laamari') {
     return (
-      <div style={{
-        width: 46,
-        height: 46,
-        borderRadius: '50%',
-        overflow: 'hidden',
-        position: 'relative',
-      }}>
-        <Image
-          src="/guide-avatar.png"
-          alt="Naïm LAAMARI"
-          fill
-          style={{ objectFit: 'cover', objectPosition: 'center 20%' }}
-        />
+      <div style={{ width: 46, height: 46, borderRadius: '50%', overflow: 'hidden', position: 'relative' }}>
+        <Image src="/guide-avatar.png" alt="Naïm LAAMARI" fill style={{ objectFit: 'cover', objectPosition: 'center 20%' }} />
       </div>
     );
   }
-
   const bgMap: Record<string, string> = {
-    'naim-laamari':     '#1A1209',
-    'rachid-al-madani': '#1A3A2A',
-    'youssouf-konate':  '#2A1A3A',
-    'abdullah-ben-yusuf':'#1A2A3A',
-    'fatima-al-omari':  '#3A1A2A',
-    'samira-al-rashidi':'#2A3A1A',
+    'rachid-al-madani': '#1A3A2A', 'youssouf-konate': '#2A1A3A',
+    'abdullah-ben-yusuf': '#1A2A3A', 'fatima-al-omari': '#3A1A2A', 'samira-al-rashidi': '#2A3A1A',
   };
   const kefMap: Record<string, string> = {
-    'naim-laamari':     '#C9A84C',
-    'rachid-al-madani': '#9FE1CB',
-    'youssouf-konate':  '#D4A0E0',
-    'abdullah-ben-yusuf':'#A0C4F0',
-    'fatima-al-omari':  '#F0A8C0',
-    'samira-al-rashidi':'#A8D4A0',
+    'rachid-al-madani': '#9FE1CB', 'youssouf-konate': '#D4A0E0',
+    'abdullah-ben-yusuf': '#A0C4F0', 'fatima-al-omari': '#F0A8C0', 'samira-al-rashidi': '#A8D4A0',
   };
   const bg = bgMap[slug] || '#1A1209';
   const accent = kefMap[slug] || '#C9A84C';
@@ -225,39 +214,144 @@ function GuideAvatarSVG({ slug, gradient, initials, isWoman }: { slug: string; g
     return (
       <svg width="46" height="46" viewBox="0 0 46 46" fill="none">
         <rect width="46" height="46" rx="23" fill={bg} />
-        {/* Head */}
         <circle cx="23" cy="14" r="6" fill="white" opacity="0.92" />
-        {/* Hijab */}
         <ellipse cx="23" cy="13" rx="9" ry="6" fill={accent} opacity="0.85" />
         <path d="M14 14 Q14 26 16 30 Q19 34 23 34 Q27 34 30 30 Q32 26 32 14" fill={accent} opacity="0.55" />
-        {/* Body/abaya */}
         <path d="M16 26 Q14 34 14 40 L32 40 Q32 34 30 26 Q27 22 23 22 Q19 22 16 26Z" fill="white" opacity="0.82" />
       </svg>
     );
   }
-
   return (
     <svg width="46" height="46" viewBox="0 0 46 46" fill="none">
       <rect width="46" height="46" rx="23" fill={bg} />
-      {/* Keffieh */}
       <ellipse cx="23" cy="11" rx="10" ry="5.5" fill={accent} opacity="0.9" />
       <path d="M13 11 Q13 16 15 18 L31 18 Q33 16 33 11" fill={accent} opacity="0.7" />
-      {/* Head */}
       <circle cx="23" cy="14" r="6" fill="white" opacity="0.92" />
-      {/* Keffieh band */}
       <rect x="14" y="10" width="18" height="3" rx="1.5" fill={accent} opacity="0.95" />
-      {/* Thobe / body */}
       <path d="M15 24 Q13 34 13 42 L33 42 Q33 34 31 24 Q28 20 23 20 Q18 20 15 24Z" fill="white" opacity="0.85" />
     </svg>
   );
 }
 
+// ─── Calendar Picker ──────────────────────────────────────────────────────────
+function CalendarPicker({ dateArrivee, setDateArrivee, dateDepart, setDateDepart, calOffset, setCalOffset }: {
+  dateArrivee: Date | null; setDateArrivee: (d: Date | null) => void;
+  dateDepart: Date | null; setDateDepart: (d: Date | null) => void;
+  calOffset: number; setCalOffset: (n: number) => void;
+}) {
+  const [pickStep, setPickStep] = useState(0);
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const base = new Date(today.getFullYear(), today.getMonth() + calOffset, 1);
+  const year = base.getFullYear();
+  const month = base.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDay = (new Date(year, month, 1).getDay() + 6) % 7; // Mon=0
+
+  const MONTHS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  const DAYS = ['L','M','M','J','V','S','D'];
+
+  const handleDay = (day: number) => {
+    const d = new Date(year, month, day);
+    if (d < today) return;
+    if (pickStep === 0 || (dateArrivee && d <= dateArrivee)) {
+      setDateArrivee(d); setDateDepart(null); setPickStep(1);
+    } else {
+      setDateDepart(d); setPickStep(0);
+    }
+  };
+
+  const isStart = (day: number) => dateArrivee?.getTime() === new Date(year, month, day).getTime();
+  const isEnd = (day: number) => dateDepart?.getTime() === new Date(year, month, day).getTime();
+  const inRange = (day: number) => {
+    const d = new Date(year, month, day);
+    return !!(dateArrivee && dateDepart && d > dateArrivee && d < dateDepart);
+  };
+  const isPast = (day: number) => new Date(year, month, day) < today;
+
+  const cells = Array.from({ length: firstDay + daysInMonth }, (_, i) => i < firstDay ? null : i - firstDay + 1);
+
+  return (
+    <div style={{ padding: '1rem 1.25rem', minWidth: 290 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+        <button
+          onClick={() => calOffset > 0 && setCalOffset(calOffset - 1)}
+          style={{ width: 30, height: 30, border: '1.5px solid #E8DFC8', borderRadius: 8, background: 'white', cursor: calOffset > 0 ? 'pointer' : 'not-allowed', color: calOffset > 0 ? '#1A1209' : '#ccc', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >‹</button>
+        <span style={{ fontWeight: 700, fontSize: '0.875rem', color: '#1A1209' }}>{MONTHS[month]} {year}</span>
+        <button
+          onClick={() => setCalOffset(calOffset + 1)}
+          style={{ width: 30, height: 30, border: '1.5px solid #E8DFC8', borderRadius: 8, background: 'white', cursor: 'pointer', color: '#1A1209', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >›</button>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px', textAlign: 'center' }}>
+        {DAYS.map((d, i) => <div key={i} style={{ fontSize: '0.62rem', fontWeight: 700, color: '#7A6D5A', padding: '0.25rem 0' }}>{d}</div>)}
+        {cells.map((day, i) => {
+          if (!day) return <div key={i} />;
+          const s = isStart(day), e = isEnd(day), r = inRange(day), p = isPast(day);
+          return (
+            <button key={i} onClick={() => !p && handleDay(day)} style={{
+              width: 34, height: 34, border: 'none', cursor: p ? 'not-allowed' : 'pointer',
+              borderRadius: (s || e) ? '50%' : r ? '0' : '50%',
+              background: (s || e) ? '#1A1209' : r ? 'rgba(201,168,76,0.15)' : 'transparent',
+              color: (s || e) ? '#F0D897' : p ? '#ccc' : '#1A1209',
+              fontSize: '0.8rem', fontWeight: (s || e) ? 700 : 400,
+            }}>{day}</button>
+          );
+        })}
+      </div>
+      <div style={{ fontSize: '0.7rem', color: '#7A6D5A', textAlign: 'center', marginTop: '0.6rem' }}>
+        {pickStep === 1 ? 'Maintenant choisissez la date de départ' : 'Choisissez la date d\'arrivée'}
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
 export default function GuideSearchPage() {
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedLangue, setSelectedLangue] = useState('');
   const [selectedGender, setSelectedGender] = useState('');
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [budget, setBudget] = useState(800);
+  const [selectedBudget, setSelectedBudget] = useState(800);
+
+  const [dateArrivee, setDateArrivee] = useState<Date | null>(null);
+  const [dateDepart, setDateDepart] = useState<Date | null>(null);
+  const [calOffset, setCalOffset] = useState(0);
+  const [openPop, setOpenPop] = useState<'destination' | 'calendar' | 'voyageurs' | null>(null);
+  const [nbPersonnes, setNbPersonnes] = useState(1);
+  const [pmr, setPmr] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+
+  const [selectedNote, setSelectedNote] = useState('');
+  const [selectedSpecialites, setSelectedSpecialites] = useState<string[]>([]);
+  const [selectedLieux, setSelectedLieux] = useState<string[]>([]);
+  const [lieuxDropOpen, setLieuxDropOpen] = useState(false);
+  const [sortBy, setSortBy] = useState('recommande');
+
+  const barRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleOut(e: MouseEvent) {
+      if (barRef.current && !barRef.current.contains(e.target as Node)) setOpenPop(null);
+    }
+    if (openPop) document.addEventListener('mousedown', handleOut);
+    return () => document.removeEventListener('mousedown', handleOut);
+  }, [openPop]);
+
+  const fmt = (d: Date | null) => d ? d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) : null;
+  const destLabel = selectedCity === 'MAKKAH' ? 'Makkah' : selectedCity === 'MADINAH' ? 'Madinah' : selectedCity === 'BOTH' ? 'Makkah + Madinah' : 'Destination';
+  const calLabel = dateArrivee ? `${fmt(dateArrivee)}${dateDepart ? ' → ' + fmt(dateDepart) : ''}` : 'Dates';
+  const voyLabel = nbPersonnes > 1 || pmr ? `${nbPersonnes} pers${pmr ? ' · PMR' : ''}` : 'Voyageurs';
+
+  const toggleSpe = (s: string) => setSelectedSpecialites(p => p.includes(s) ? p.filter(x => x !== s) : [...p, s]);
+  const toggleLieu = (l: string) => setSelectedLieux(p => p.includes(l) ? p.filter(x => x !== l) : [...p, l]);
+
+  const resetFilters = () => {
+    setSelectedCity(''); setSelectedLangue(''); setSelectedGender('');
+    setSelectedBudget(800); setSelectedNote(''); setSelectedSpecialites([]);
+    setSelectedLieux([]); setPmr(false); setNbPersonnes(1);
+    setDateArrivee(null); setDateDepart(null); setHasSearched(false);
+  };
 
   const filteredGuides = GUIDES_DATA.filter(g => {
     if (selectedCity === 'MAKKAH' && !g.zones.includes('makkah')) return false;
@@ -265,9 +359,14 @@ export default function GuideSearchPage() {
     if (selectedCity === 'BOTH' && !(g.zones.includes('makkah') && g.zones.includes('madinah'))) return false;
     if (selectedGender === 'HOMME' && g.gender !== 'homme') return false;
     if (selectedGender === 'FEMME' && g.gender !== 'femme') return false;
-    if (selectedLangue === 'fr' && !g.languages.some(l => l.includes('Français'))) return false;
-    if (selectedLangue === 'ar' && !g.languages.some(l => l.includes('Arabe'))) return false;
-    if (selectedLangue === 'en' && !g.languages.some(l => l.includes('English'))) return false;
+    if (selectedLangue && !g.languages.some(l => l === selectedLangue)) return false;
+    if (g.price > selectedBudget) return false;
+    if (selectedNote && g.rating < parseFloat(selectedNote)) return false;
+    if (pmr && !g.services.some(s => s.includes('PMR'))) return false;
+    if (selectedSpecialites.includes('PMR') && !g.services.some(s => s.includes('PMR'))) return false;
+    if (selectedSpecialites.includes('Familles') && !g.services.some(s => s.toLowerCase().includes('famil'))) return false;
+    if (selectedSpecialites.includes('Darija') && !g.languages.some(l => l.includes('Darija'))) return false;
+    if (selectedSpecialites.includes('Wolof') && !g.languages.some(l => l.includes('Wolof'))) return false;
     return true;
   });
   const filteredOfficial = filteredGuides.filter(g => g.isOfficial);
@@ -275,56 +374,87 @@ export default function GuideSearchPage() {
 
   const FiltersContent = () => (
     <>
+      <FilterCard title="Langue">
+        <select
+          value={selectedLangue}
+          onChange={e => setSelectedLangue(e.target.value)}
+          style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 10, padding: '0.5rem 0.75rem', fontSize: '0.82rem', color: '#1A1209', background: 'white', fontFamily: 'inherit', cursor: 'pointer', outline: 'none' }}
+        >
+          <option value="">Toutes les langues</option>
+          {LANGUES.map(l => <option key={l} value={l}>{l}</option>)}
+        </select>
+      </FilterCard>
+
+      <FilterCard title="Guide pour">
+        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+          {[{ val: '', label: 'Tous' }, { val: 'HOMME', label: 'Hommes' }, { val: 'FEMME', label: 'Femmes' }, { val: 'MIXTE', label: 'Mixte' }].map(opt => (
+            <button key={opt.val} onClick={() => setSelectedGender(opt.val)} style={{ padding: '0.4rem 0.875rem', borderRadius: 50, border: selectedGender === opt.val ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', background: selectedGender === opt.val ? 'rgba(201,168,76,0.08)' : 'white', color: selectedGender === opt.val ? '#8B6914' : '#7A6D5A', fontWeight: selectedGender === opt.val ? 700 : 500, fontSize: '0.78rem', cursor: 'pointer', fontFamily: 'inherit' }}>{opt.label}</button>
+          ))}
+        </div>
+      </FilterCard>
+
       <FilterCard title="Budget">
         <div style={{ marginBottom: '0.35rem', display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: '#7A6D5A' }}>
           <span>Prix / personne</span>
-          <strong style={{ color: '#1A1209' }}>{budget}€ max</strong>
+          <strong style={{ color: '#1A1209' }}>{selectedBudget}€ max</strong>
         </div>
-        <input
-          type="range" min="100" max="1500" value={budget} step="50"
-          onChange={e => setBudget(Number(e.target.value))}
-          style={{ width: '100%', accentColor: '#C9A84C', cursor: 'pointer' }}
-        />
+        <input type="range" min="100" max="1500" value={selectedBudget} step="50" onChange={e => setSelectedBudget(Number(e.target.value))} style={{ width: '100%', accentColor: '#C9A84C', cursor: 'pointer' }} />
         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: '#7A6D5A', marginTop: '0.25rem' }}>
           <span>100€</span><span>1 500€</span>
         </div>
       </FilterCard>
 
-      <FilterCard title="Transport">
-        {([
-          { icon: <IconCar size={14} stroke="#7A6D5A" />, label: 'Voiture privée', count: 187 },
-          { icon: <IconVan size={14} stroke="#7A6D5A" />, label: 'Van 7–12 places', count: 94 },
-          { icon: <IconTrain size={14} stroke="#7A6D5A" />, label: 'Train Haramain', count: 63 },
-        ] as Array<{ icon: React.ReactNode; label: string; count: number }>).map(o => (
-          <FilterOpt key={o.label} icon={o.icon} label={o.label} count={o.count} />
+      <FilterCard title="Spécialités">
+        {(['PMR', 'Familles', 'Darija', 'Wolof'] as string[]).map(s => (
+          <label key={s} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.3rem 0', cursor: 'pointer' }}>
+            <input type="checkbox" checked={selectedSpecialites.includes(s)} onChange={() => toggleSpe(s)} style={{ width: 14, height: 14, accentColor: '#C9A84C', cursor: 'pointer' }} />
+            <span style={{ fontSize: '0.82rem', color: '#1A1209' }}>{s}</span>
+          </label>
         ))}
       </FilterCard>
 
-      <FilterCard title="Langues">
-        {LANGUES.slice(0, 10).map(l => (
-          <FilterOpt key={l} label={l} count={Math.floor(Math.random() * 200) + 20} />
-        ))}
+      <FilterCard title="Lieux saints">
+        <div style={{ position: 'relative' }}>
+          <button onClick={() => setLieuxDropOpen(v => !v)} style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 10, padding: '0.5rem 0.75rem', fontSize: '0.82rem', color: '#7A6D5A', background: 'white', fontFamily: 'inherit', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', outline: 'none' }}>
+            <span>{selectedLieux.length > 0 ? `${selectedLieux.length} lieu(x)` : 'Sélectionner'}</span>
+            <span style={{ fontSize: '0.6rem' }}>{lieuxDropOpen ? '▲' : '▼'}</span>
+          </button>
+          {lieuxDropOpen && (
+            <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1.5px solid #E8DFC8', borderRadius: 12, marginTop: 4, maxHeight: 180, overflowY: 'auto', zIndex: 50, boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+              {LIEUX_OPTIONS.map(l => (
+                <label key={l} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.4rem 0.75rem', cursor: 'pointer', borderBottom: '1px solid #F5F0E8' }}>
+                  <input type="checkbox" checked={selectedLieux.includes(l)} onChange={() => toggleLieu(l)} style={{ width: 13, height: 13, accentColor: '#C9A84C' }} />
+                  <span style={{ fontSize: '0.78rem', color: '#1A1209' }}>{l}</span>
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+        {selectedLieux.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', marginTop: '0.5rem' }}>
+            {selectedLieux.map(l => (
+              <span key={l} style={{ fontSize: '0.62rem', padding: '0.2rem 0.5rem', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 50, color: '#8B6914', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                {l}
+                <button onClick={() => toggleLieu(l)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8B6914', padding: 0, lineHeight: 1, fontSize: '0.7rem' }}>✕</button>
+              </span>
+            ))}
+          </div>
+        )}
       </FilterCard>
 
       <FilterCard title="Note minimale">
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-          {['4.5+', '4.7+', '4.9+'].map(r => (
-            <button key={r} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.3rem 0.75rem', borderRadius: 50, border: '1.5px solid #E8DFC8', background: 'transparent', fontSize: '0.75rem', cursor: 'pointer', color: '#7A6D5A', fontWeight: 500 }}>
-              <IconStar size={12} stroke="#C9A84C" /> {r}
+          {['4.5', '4.7', '4.9'].map(r => (
+            <button key={r} onClick={() => setSelectedNote(selectedNote === r ? '' : r)} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.3rem 0.75rem', borderRadius: 50, border: selectedNote === r ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', background: selectedNote === r ? 'rgba(201,168,76,0.08)' : 'transparent', fontSize: '0.75rem', cursor: 'pointer', color: selectedNote === r ? '#8B6914' : '#7A6D5A', fontWeight: selectedNote === r ? 700 : 500, fontFamily: 'inherit' }}>
+              <IconStar size={12} stroke="#C9A84C" /> {r}+
             </button>
           ))}
         </div>
       </FilterCard>
 
-      <FilterCard title="Spécialités">
-        {([
-          { icon: <IconPerson size={14} stroke="#7A6D5A" />, label: 'Guide femme', count: 48 },
-          { icon: <IconAccessibility size={14} stroke="#7A6D5A" />, label: 'Adapté PMR', count: 17 },
-          { icon: <IconUserGroup size={14} stroke="#7A6D5A" />, label: 'Spécialiste familles', count: 130 },
-        ] as Array<{ icon: React.ReactNode; label: string; count: number }>).map(o => (
-          <FilterOpt key={o.label} icon={o.icon} label={o.label} count={o.count} />
-        ))}
-      </FilterCard>
+      <button onClick={resetFilters} style={{ width: '100%', padding: '0.6rem', border: '1.5px solid #E8DFC8', borderRadius: 50, background: 'transparent', color: '#7A6D5A', fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', marginTop: '0.25rem' }}>
+        Réinitialiser
+      </button>
     </>
   );
 
@@ -344,21 +474,127 @@ export default function GuideSearchPage() {
           <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(2rem, 5vw, 3.2rem)', fontWeight: 300, color: 'white', textAlign: 'center', marginBottom: '0.5rem', lineHeight: 1.1 }}>
             Ton voyage, dans <em style={{ fontStyle: 'italic', color: '#C9A84C' }}>ta langue</em>
           </h1>
-          <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', marginBottom: '2.5rem' }}>
+          <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', marginBottom: '2rem' }}>
             {GUIDES_DATA.length} guides certifiés · Makkah, Madinah, Badr & plus
           </p>
 
+          {/* ── Search bar ── */}
+          <div ref={barRef} style={{ position: 'relative' }}>
+            <div className="guides-search-pill">
+              {/* Destination */}
+              <button
+                onClick={() => setOpenPop(openPop === 'destination' ? null : 'destination')}
+                className="search-seg"
+                style={{ borderRight: '1px solid #E8DFC8' }}
+              >
+                <div className="search-seg-label">Destination</div>
+                <div className="search-seg-val" style={{ color: selectedCity ? '#1A1209' : '#9A8A7A', fontWeight: selectedCity ? 700 : 400 }}>{destLabel}</div>
+              </button>
 
+              {/* Dates */}
+              <button
+                onClick={() => setOpenPop(openPop === 'calendar' ? null : 'calendar')}
+                className="search-seg"
+                style={{ borderRight: '1px solid #E8DFC8' }}
+              >
+                <div className="search-seg-label">Dates</div>
+                <div className="search-seg-val" style={{ color: dateArrivee ? '#1A1209' : '#9A8A7A', fontWeight: dateArrivee ? 700 : 400 }}>{calLabel}</div>
+              </button>
+
+              {/* Voyageurs */}
+              <button
+                onClick={() => setOpenPop(openPop === 'voyageurs' ? null : 'voyageurs')}
+                className="search-seg"
+              >
+                <div className="search-seg-label">Voyageurs</div>
+                <div className="search-seg-val" style={{ color: (nbPersonnes > 1 || pmr) ? '#1A1209' : '#9A8A7A', fontWeight: (nbPersonnes > 1 || pmr) ? 700 : 400 }}>{voyLabel}</div>
+              </button>
+
+              {/* Chercher */}
+              <button
+                onClick={() => { setHasSearched(true); setOpenPop(null); }}
+                className="search-btn"
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+                </svg>
+                <span className="search-btn-label">Chercher</span>
+              </button>
+            </div>
+
+            {/* ── Destination popup ── */}
+            {openPop === 'destination' && (
+              <div className="search-popup" style={{ left: 0 }}>
+                <div style={{ fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7A6D5A', marginBottom: '0.75rem' }}>Choisir une destination</div>
+                {[
+                  { val: '', label: 'Toutes les villes', icon: '🌍' },
+                  { val: 'MAKKAH', label: 'Makkah Al-Mukarramah', icon: '🕋' },
+                  { val: 'MADINAH', label: 'Madinah Al-Munawwarah', icon: '🕌' },
+                  { val: 'BOTH', label: 'Makkah + Madinah', icon: '✈️' },
+                ].map(opt => (
+                  <button key={opt.val} onClick={() => { setSelectedCity(opt.val); setOpenPop(null); }} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', width: '100%', padding: '0.7rem', border: selectedCity === opt.val ? '2px solid #C9A84C' : '1.5px solid transparent', borderRadius: 12, background: selectedCity === opt.val ? 'rgba(201,168,76,0.07)' : 'transparent', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', marginBottom: '0.2rem', transition: 'background 0.12s' }}>
+                    <span style={{ fontSize: '1.2rem' }}>{opt.icon}</span>
+                    <span style={{ fontSize: '0.875rem', fontWeight: selectedCity === opt.val ? 700 : 500, color: selectedCity === opt.val ? '#8B6914' : '#1A1209' }}>{opt.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* ── Calendar popup ── */}
+            {openPop === 'calendar' && (
+              <div className="search-popup" style={{ left: '50%', transform: 'translateX(-50%)' }}>
+                <CalendarPicker
+                  dateArrivee={dateArrivee} setDateArrivee={setDateArrivee}
+                  dateDepart={dateDepart} setDateDepart={setDateDepart}
+                  calOffset={calOffset} setCalOffset={setCalOffset}
+                />
+                {dateArrivee && dateDepart && (
+                  <div style={{ padding: '0 1.25rem 0.875rem', display: 'flex', justifyContent: 'flex-end' }}>
+                    <button onClick={() => setOpenPop(null)} style={{ padding: '0.45rem 1.25rem', background: '#1A1209', color: '#F0D897', border: 'none', borderRadius: 50, fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Confirmer</button>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── Voyageurs popup ── */}
+            {openPop === 'voyageurs' && (
+              <div className="search-popup" style={{ right: 0 }}>
+                <div style={{ fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7A6D5A', marginBottom: '1rem' }}>Voyageurs</div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                  <div>
+                    <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1A1209' }}>Personnes</div>
+                    <div style={{ fontSize: '0.72rem', color: '#7A6D5A' }}>Adultes et enfants</div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <button onClick={() => setNbPersonnes(Math.max(1, nbPersonnes - 1))} style={{ width: 32, height: 32, borderRadius: '50%', border: '1.5px solid #E8DFC8', background: 'white', cursor: nbPersonnes > 1 ? 'pointer' : 'not-allowed', color: nbPersonnes > 1 ? '#1A1209' : '#ccc', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                    <span style={{ fontSize: '1rem', fontWeight: 700, color: '#1A1209', minWidth: 20, textAlign: 'center' }}>{nbPersonnes}</span>
+                    <button onClick={() => setNbPersonnes(Math.min(50, nbPersonnes + 1))} style={{ width: 32, height: 32, borderRadius: '50%', border: '1.5px solid #E8DFC8', background: 'white', cursor: 'pointer', color: '#1A1209', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1A1209' }}>Mobilité réduite (PMR)</div>
+                    <div style={{ fontSize: '0.72rem', color: '#7A6D5A' }}>Guide spécialisé requis</div>
+                  </div>
+                  <div onClick={() => setPmr(!pmr)} style={{ width: 44, height: 24, borderRadius: 12, background: pmr ? '#1A1209' : '#E8DFC8', position: 'relative', cursor: 'pointer', transition: 'background 0.2s', flexShrink: 0 }}>
+                    <div style={{ position: 'absolute', top: 3, left: pmr ? 23 : 3, width: 18, height: 18, borderRadius: '50%', background: pmr ? '#C9A84C' : 'white', transition: 'left 0.2s', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
+                  </div>
+                </div>
+
+                <button onClick={() => setOpenPop(null)} style={{ width: '100%', marginTop: '1.25rem', padding: '0.55rem', background: '#1A1209', color: '#F0D897', border: 'none', borderRadius: 50, fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+                  Confirmer
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* ── TRUST BAR ── */}
       <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', padding: '0.75rem 1.5rem', background: '#F5F0E8', borderBottom: '1px solid #E8DFC8', flexWrap: 'wrap' }}>
-        {[
-          { icon: '✓', label: 'Guides certifiés' },
-          { icon: '🛡', label: 'Paiement sécurisé' },
-          { icon: '★', label: '4.94/5 · 709 avis' },
-        ].map(b => (
+        {[{ icon: '✓', label: 'Guides certifiés' }, { icon: '🛡', label: 'Paiement sécurisé' }, { icon: '★', label: '4.94/5 · 709 avis' }].map(b => (
           <span key={b.label} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.75rem', fontWeight: 600, color: '#5A4535' }}>
             <span style={{ color: '#C9A84C', fontSize: '0.85rem' }}>{b.icon}</span>
             {b.label}
@@ -366,173 +602,59 @@ export default function GuideSearchPage() {
         ))}
       </div>
 
-      {/* ── FILTRES ── */}
-      <div style={{ padding: '0 1.5rem' }}>
-        <div style={{
-          background: 'white',
-          borderRadius: 20,
-          border: '1px solid #E8DFC8',
-          boxShadow: '0 4px 24px rgba(26,18,9,0.06)',
-          padding: '1.5rem',
-          marginBottom: '2rem',
-          maxWidth: 720,
-          margin: '0 auto 2rem',
-        }}>
-          {/* Ligne 1 — Ville */}
-          <div style={{ marginBottom: '1rem' }}>
-            <div style={{
-              fontSize: '0.68rem', fontWeight: 700,
-              letterSpacing: '0.1em', textTransform: 'uppercase',
-              color: '#7A6D5A', marginBottom: '0.5rem',
-            }}>
-              Destination
-            </div>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              {[
-                { val: '', label: 'Toutes' },
-                { val: 'MAKKAH', label: 'Makkah' },
-                { val: 'MADINAH', label: 'Madinah' },
-                { val: 'BOTH', label: 'Les deux' },
-              ].map(opt => (
-                <button
-                  key={opt.val}
-                  onClick={() => setSelectedCity(opt.val)}
-                  style={{
-                    padding: '0.45rem 1rem',
-                    borderRadius: 50,
-                    border: selectedCity === opt.val
-                      ? '2px solid #C9A84C' : '1.5px solid #E8DFC8',
-                    background: selectedCity === opt.val
-                      ? 'rgba(201,168,76,0.08)' : 'white',
-                    color: selectedCity === opt.val ? '#8B6914' : '#7A6D5A',
-                    fontWeight: selectedCity === opt.val ? 700 : 500,
-                    fontSize: '0.82rem',
-                    cursor: 'pointer',
-                    fontFamily: 'inherit',
-                  }}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Ligne 2 — Langue + Genre */}
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: 200 }}>
-              <div style={{
-                fontSize: '0.68rem', fontWeight: 700,
-                letterSpacing: '0.1em', textTransform: 'uppercase',
-                color: '#7A6D5A', marginBottom: '0.5rem',
-              }}>
-                Langue
-              </div>
-              <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                {[
-                  { val: '', label: 'Toutes' },
-                  { val: 'fr', label: 'Français' },
-                  { val: 'ar', label: 'Arabe' },
-                  { val: 'en', label: 'English' },
-                ].map(opt => (
-                  <button
-                    key={opt.val}
-                    onClick={() => setSelectedLangue(opt.val)}
-                    style={{
-                      padding: '0.4rem 0.875rem',
-                      borderRadius: 50,
-                      border: selectedLangue === opt.val
-                        ? '2px solid #C9A84C' : '1.5px solid #E8DFC8',
-                      background: selectedLangue === opt.val
-                        ? 'rgba(201,168,76,0.08)' : 'white',
-                      color: selectedLangue === opt.val ? '#8B6914' : '#7A6D5A',
-                      fontWeight: selectedLangue === opt.val ? 700 : 500,
-                      fontSize: '0.78rem',
-                      cursor: 'pointer',
-                      fontFamily: 'inherit',
-                    }}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div style={{ flex: 1, minWidth: 200 }}>
-              <div style={{
-                fontSize: '0.68rem', fontWeight: 700,
-                letterSpacing: '0.1em', textTransform: 'uppercase',
-                color: '#7A6D5A', marginBottom: '0.5rem',
-              }}>
-                Guide pour
-              </div>
-              <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', overflowX: 'hidden' }}>
-                {[
-                  { val: '', label: 'Tous' },
-                  { val: 'HOMME', label: 'Hommes' },
-                  { val: 'FEMME', label: 'Femmes' },
-                  { val: 'MIXTE', label: 'Mixte' },
-                ].map(opt => (
-                  <button
-                    key={opt.val}
-                    onClick={() => setSelectedGender(opt.val)}
-                    style={{
-                      padding: '0.4rem 0.875rem',
-                      borderRadius: 50,
-                      border: selectedGender === opt.val
-                        ? '2px solid #C9A84C' : '1.5px solid #E8DFC8',
-                      background: selectedGender === opt.val
-                        ? 'rgba(201,168,76,0.08)' : 'white',
-                      color: selectedGender === opt.val ? '#8B6914' : '#7A6D5A',
-                      fontWeight: selectedGender === opt.val ? 700 : 500,
-                      fontSize: '0.78rem',
-                      cursor: 'pointer',
-                      fontFamily: 'inherit',
-                    }}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── MAIN CONTENT ── */}
+      {/* ── MAIN ── */}
       <div className="guides-main">
 
-        {/* ── SIDEBAR (desktop only) ── */}
-        <aside className="guides-sidebar">
-          <FiltersContent />
-        </aside>
+        {/* Sidebar — only when hasSearched */}
+        {hasSearched && (
+          <aside className="guides-sidebar">
+            <FiltersContent />
+          </aside>
+        )}
 
-        {/* ── RESULTS ── */}
+        {/* Results */}
         <div style={{ flex: 1, minWidth: 0 }}>
 
-          {/* Mobile filter button + count */}
-          <div className="guides-mobile-bar">
-            <p style={{ fontSize: '0.875rem', color: '#7A6D5A', margin: 0 }}>
-              <strong style={{ color: '#1A1209' }}>{filteredGuides.length}</strong> guide{filteredGuides.length > 1 ? 's' : ''} trouvé{filteredGuides.length > 1 ? 's' : ''}
-            </p>
-            <button
-              onClick={() => setFiltersOpen(true)}
-              className="guides-filter-btn"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
-              </svg>
-              Filtres
-            </button>
-          </div>
+          {/* Results bar */}
+          {hasSearched ? (
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <p style={{ fontSize: '0.875rem', color: '#7A6D5A', margin: 0 }}>
+                <strong style={{ color: '#1A1209' }}>{filteredGuides.length}</strong> guide{filteredGuides.length !== 1 ? 's' : ''} trouvé{filteredGuides.length !== 1 ? 's' : ''}
+                {selectedCity === 'MAKKAH' ? ' · Makkah' : selectedCity === 'MADINAH' ? ' · Madinah' : selectedCity === 'BOTH' ? ' · Makkah + Madinah' : ''}
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ fontSize: '0.78rem', color: '#7A6D5A', whiteSpace: 'nowrap' }}>Trier par</span>
+                <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={{ border: '1.5px solid #E8DFC8', borderRadius: 8, padding: '0.35rem 0.65rem', fontSize: '0.78rem', color: '#1A1209', background: 'white', fontFamily: 'inherit', cursor: 'pointer', outline: 'none' }}>
+                  <option value="recommande">Recommandé</option>
+                  <option value="note">Meilleure note</option>
+                  <option value="prix_asc">Prix croissant</option>
+                  <option value="prix_desc">Prix décroissant</option>
+                  <option value="experience">Expérience</option>
+                </select>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="guides-mobile-bar">
+                <p style={{ fontSize: '0.875rem', color: '#7A6D5A', margin: 0 }}>
+                  <strong style={{ color: '#1A1209' }}>{filteredGuides.length}</strong> guide{filteredGuides.length > 1 ? 's' : ''} disponible{filteredGuides.length > 1 ? 's' : ''}
+                </p>
+                <button onClick={() => setFiltersOpen(true)} className="guides-filter-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
+                  </svg>
+                  Filtres
+                </button>
+              </div>
+              <div className="guides-desktop-count">
+                <p style={{ fontSize: '0.875rem', color: '#7A6D5A', margin: 0 }}>
+                  <strong style={{ color: '#1A1209' }}>{filteredGuides.length}</strong> guide{filteredGuides.length > 1 ? 's' : ''} disponible{filteredGuides.length > 1 ? 's' : ''}
+                </p>
+              </div>
+            </>
+          )}
 
-          {/* Desktop count */}
-          <div className="guides-desktop-count">
-            <p style={{ fontSize: '0.875rem', color: '#7A6D5A', margin: 0 }}>
-              <strong style={{ color: '#1A1209' }}>{filteredGuides.length}</strong> guide{filteredGuides.length > 1 ? 's' : ''} trouvé{filteredGuides.length > 1 ? 's' : ''}
-            </p>
-          </div>
-
-          {/* Official guide — full-width featured card */}
+          {/* Official guide */}
           {filteredOfficial.map(g => (
             <div key={g.slug} className="guide-official-wrap">
               <div className="guide-official-label">★ RESPONSABLE OFFICIEL SAFARUMA</div>
@@ -548,21 +670,15 @@ export default function GuideSearchPage() {
               </div>
               <div style={{ fontSize: '0.85rem' }}>
                 Modifie les filtres ou{' '}
-                <button
-                  onClick={() => { setSelectedCity(''); setSelectedLangue(''); setSelectedGender(''); }}
-                  style={{ color: '#C9A84C', fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.85rem', textDecoration: 'underline' }}
-                >
+                <button onClick={resetFilters} style={{ color: '#C9A84C', fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.85rem', textDecoration: 'underline' }}>
                   voir tous les guides
                 </button>
               </div>
             </div>
           )}
 
-          {/* Cards grid */}
           <div className="guides-grid">
-            {filteredNonOfficial.map(g => (
-              <GuideCard key={g.slug} guide={g} />
-            ))}
+            {filteredNonOfficial.map(g => <GuideCard key={g.slug} guide={g} />)}
           </div>
 
           <div style={{ textAlign: 'center', marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #E8DFC8' }}>
@@ -573,38 +689,20 @@ export default function GuideSearchPage() {
         </div>
       </div>
 
-      {/* ── BOTTOM SHEET (mobile/tablet filters) ── */}
+      {/* ── BOTTOM SHEET (mobile) ── */}
       {filtersOpen && (
         <>
-          {/* Backdrop */}
-          <div
-            onClick={() => setFiltersOpen(false)}
-            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 200, backdropFilter: 'blur(2px)' }}
-          />
-          {/* Sheet */}
-          <div style={{
-            position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 201,
-            background: 'white', borderRadius: '24px 24px 0 0',
-            maxHeight: '85vh', overflowY: 'auto',
-            padding: '0 1.25rem 2rem',
-            boxShadow: '0 -8px 40px rgba(0,0,0,0.2)',
-            animation: 'slideUp 0.25s ease',
-          }}>
-            {/* Handle */}
+          <div onClick={() => setFiltersOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 200, backdropFilter: 'blur(2px)' }} />
+          <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 201, background: 'white', borderRadius: '24px 24px 0 0', maxHeight: '85vh', overflowY: 'auto', padding: '0 1.25rem 2rem', boxShadow: '0 -8px 40px rgba(0,0,0,0.2)', animation: 'slideUp 0.25s ease' }}>
             <div style={{ textAlign: 'center', padding: '0.875rem 0 1rem' }}>
               <div style={{ width: 40, height: 4, borderRadius: 2, background: '#E8DFC8', margin: '0 auto' }} />
             </div>
-            {/* Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
               <span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 700, color: '#1A1209' }}>Filtres</span>
               <button onClick={() => setFiltersOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7A6D5A', fontSize: '1.2rem' }}>✕</button>
             </div>
             <FiltersContent />
-            {/* Apply */}
-            <button
-              onClick={() => setFiltersOpen(false)}
-              style={{ width: '100%', height: 52, background: '#1A1209', color: '#F0D897', border: 'none', borderRadius: 50, fontFamily: 'inherit', fontSize: '0.95rem', fontWeight: 700, cursor: 'pointer', marginTop: '0.5rem' }}
-            >
+            <button onClick={() => setFiltersOpen(false)} style={{ width: '100%', height: 52, background: '#1A1209', color: '#F0D897', border: 'none', borderRadius: 50, fontFamily: 'inherit', fontSize: '0.95rem', fontWeight: 700, cursor: 'pointer', marginTop: '0.5rem' }}>
               Appliquer les filtres
             </button>
           </div>
@@ -618,46 +716,119 @@ export default function GuideSearchPage() {
           to   { transform: translateY(0); }
         }
 
-        /* Hero responsive */
+        /* Hero */
         .guides-hero {
-          padding-top: 8rem;
-          padding-bottom: 3rem;
-          padding-left: 1.5rem;
-          padding-right: 1.5rem;
+          padding: 8rem 1.5rem 3rem;
         }
         @media (max-width: 768px) {
-          .guides-hero {
-            padding-top: 5rem !important;
-            padding-bottom: 1.5rem !important;
-            padding-left: 1rem !important;
-            padding-right: 1rem !important;
+          .guides-hero { padding: 5rem 1rem 2rem !important; }
+        }
+
+        /* Search pill */
+        .guides-search-pill {
+          display: flex;
+          align-items: center;
+          background: white;
+          border-radius: 100px;
+          padding: 0.35rem 0.35rem 0.35rem 1.25rem;
+          box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+          gap: 0;
+        }
+        @media (max-width: 640px) {
+          .guides-search-pill {
+            flex-direction: column;
+            border-radius: 20px;
+            padding: 0.5rem;
+            gap: 0;
           }
         }
 
-        /* Search bar */
-        .guides-search-bar {
+        /* Search segments */
+        .search-seg {
+          flex: 1 1 auto;
+          min-width: 0;
+          background: transparent;
+          border: none;
+          cursor: pointer;
+          text-align: left;
+          padding: 0.5rem 1.1rem 0.5rem 0.75rem;
+          font-family: inherit;
+          outline: none;
+        }
+        @media (max-width: 640px) {
+          .search-seg {
+            width: 100%;
+            padding: 0.65rem 0.75rem;
+            border-right: none !important;
+            border-bottom: 1px solid #E8DFC8;
+          }
+          .search-seg:last-of-type { border-bottom: none; }
+        }
+        .search-seg-label {
+          font-size: 0.58rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          color: #7A6D5A;
+          margin-bottom: 2px;
+        }
+        .search-seg-val {
+          font-size: 0.875rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        /* Search button */
+        .search-btn {
+          flex-shrink: 0;
+          height: 48px;
+          padding: 0 1.5rem;
+          background: #1A1209;
+          color: #F0D897;
+          border: none;
+          border-radius: 50px;
+          font-size: 0.875rem;
+          font-weight: 700;
+          cursor: pointer;
+          font-family: inherit;
+          display: flex;
+          align-items: center;
+          gap: 0.4rem;
+          letter-spacing: 0.02em;
+          white-space: nowrap;
+          transition: opacity 0.15s;
+        }
+        .search-btn:hover { opacity: 0.88; }
+        @media (max-width: 640px) {
+          .search-btn {
+            width: 100%;
+            justify-content: center;
+            border-radius: 14px;
+            height: 46px;
+            margin-top: 0.35rem;
+          }
+        }
+        .search-btn-label { display: inline; }
+
+        /* Popup */
+        .search-popup {
+          position: absolute;
+          top: calc(100% + 10px);
           background: white;
           border-radius: 20px;
-          padding: 1rem 1.25rem;
-          display: flex;
-          flex-direction: column;
-          box-shadow: 0 24px 60px rgba(0,0,0,0.3);
-          margin-bottom: 1.5rem;
+          box-shadow: 0 16px 48px rgba(0,0,0,0.18);
+          border: 1px solid #E8DFC8;
+          z-index: 200;
+          min-width: 260px;
+          padding: 1.25rem;
         }
-        @media (max-width: 768px) {
-          .guides-search-bar {
-            padding: 0.875rem;
-            border-radius: 14px;
-          }
-          .guide-official-card {
-            border-radius: 0 12px 12px 12px !important;
-          }
-          .guide-official-card .guide-card-banner {
-            height: 120px !important;
-          }
-          .guides-main {
-            padding: 1rem 0.875rem 5rem;
-            gap: 0;
+        @media (max-width: 640px) {
+          .search-popup {
+            left: 0 !important;
+            right: 0 !important;
+            transform: none !important;
+            border-radius: 0 0 16px 16px;
           }
         }
 
@@ -670,18 +841,19 @@ export default function GuideSearchPage() {
           gap: 2rem;
           align-items: flex-start;
         }
+        @media (max-width: 1023px) {
+          .guides-main { flex-direction: column; padding: 1.25rem 1rem 5rem; }
+        }
 
-        /* Sidebar — desktop only */
+        /* Sidebar */
         .guides-sidebar {
           width: 280px;
           flex-shrink: 0;
           position: sticky;
           top: 80px;
         }
-        /* Hide sidebar on tablet + mobile */
         @media (max-width: 1023px) {
           .guides-sidebar { display: none !important; }
-          .guides-main { flex-direction: column; padding: 1.25rem 1rem 5rem; }
         }
 
         /* Mobile filter bar */
@@ -696,13 +868,11 @@ export default function GuideSearchPage() {
           .guides-mobile-bar { display: flex; }
         }
 
-        /* Desktop count */
         .guides-desktop-count { margin-bottom: 1rem; }
         @media (max-width: 1023px) {
           .guides-desktop-count { display: none; }
         }
 
-        /* Filter button pill */
         .guides-filter-btn {
           display: flex;
           align-items: center;
@@ -716,15 +886,13 @@ export default function GuideSearchPage() {
           font-size: 0.82rem;
           font-weight: 700;
           cursor: pointer;
-          transition: border-color 0.15s;
           white-space: nowrap;
+          transition: border-color 0.15s;
         }
         .guides-filter-btn:hover { border-color: #C9A84C; }
 
-        /* Official guide featured block */
-        .guide-official-wrap {
-          margin-bottom: 1.5rem;
-        }
+        /* Official wrap */
+        .guide-official-wrap { margin-bottom: 1.5rem; }
         .guide-official-label {
           display: inline-block;
           background: #1A1209;
@@ -735,16 +903,13 @@ export default function GuideSearchPage() {
           text-transform: uppercase;
           padding: 0.35rem 1rem;
           border-radius: 50px 50px 0 0;
-          margin-bottom: 0;
         }
         .guide-official-card {
           border: 2px solid #C9A84C !important;
           border-radius: 0 18px 18px 18px !important;
           box-shadow: 0 8px 40px rgba(201,168,76,0.18) !important;
         }
-        .guide-official-card .guide-card-banner {
-          height: 120px !important;
-        }
+        .guide-official-card .guide-card-banner { height: 120px !important; }
 
         /* Cards grid */
         .guides-grid {
@@ -753,30 +918,15 @@ export default function GuideSearchPage() {
           gap: 1.25rem;
         }
         @media (max-width: 767px) {
-          .guides-grid {
-            grid-template-columns: 1fr;
-            gap: 1rem;
-          }
+          .guides-grid { grid-template-columns: 1fr; gap: 1rem; }
         }
 
-        /* Guide card banner */
         .guide-card-banner { height: 100px; }
-        @media (max-width: 767px) {
-          .guide-card-banner { height: 100px; }
-        }
 
-        @media (max-width: 480px) {
-          .guides-search-bar .dates-grid {
-            grid-template-columns: 1fr !important;
-          }
-          .guides-search-bar .prefs-grid {
-            grid-template-columns: 1fr !important;
-          }
-          .guides-trust-bar {
-            gap: 0.75rem;
-            padding: 0.6rem 0.75rem;
-            font-size: 0.68rem;
-          }
+        @media (max-width: 768px) {
+          .guide-official-card { border-radius: 0 12px 12px 12px !important; }
+          .guide-official-card .guide-card-banner { height: 120px !important; }
+          .guides-main { padding: 1rem 0.875rem 5rem; gap: 0; }
         }
       `}} />
 
@@ -785,7 +935,7 @@ export default function GuideSearchPage() {
   );
 }
 
-/* ─── Sub-components ──────────────────────────────────────────────── */
+/* ─── Sub-components ─────────────────────────────────────────────────────── */
 
 function FilterCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -795,19 +945,6 @@ function FilterCard({ title, children }: { title: string; children: React.ReactN
       </div>
       {children}
     </div>
-  );
-}
-
-function FilterOpt({ icon, label, count }: { icon?: React.ReactNode; label: string; count: number }) {
-  return (
-    <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.3rem 0', cursor: 'pointer' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-        <input type="checkbox" style={{ width: 14, height: 14, accentColor: '#C9A84C', cursor: 'pointer' }} />
-        {icon && <span style={{ display: 'inline-flex', alignItems: 'center' }}>{icon}</span>}
-        <span style={{ fontSize: '0.82rem', color: '#1A1209' }}>{label}</span>
-      </div>
-      <span style={{ fontSize: '0.68rem', color: '#7A6D5A', background: '#F5F0E8', padding: '0.1rem 0.45rem', borderRadius: 50 }}>{count}</span>
-    </label>
   );
 }
 
@@ -825,48 +962,22 @@ function GuideCard({ guide: g, official }: { guide: GuideData; official?: boolea
         {/* Banner */}
         <div className="guide-card-banner" style={{ background: g.gradient, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
           <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
-          {/* Avatar */}
-          <div style={{
-            position: 'absolute', top: '50%', right: '1.25rem',
-            transform: 'translateY(-50%)',
-            width: official ? 64 : 52, height: official ? 64 : 52, borderRadius: '50%',
-            border: official ? '3px solid #C9A84C' : '3px solid rgba(255,255,255,0.6)',
-            overflow: 'hidden',
-            zIndex: 1,
-            boxShadow: official ? '0 0 0 3px #1A1209, 0 4px 16px rgba(201,168,76,0.4)' : '0 2px 12px rgba(0,0,0,0.3)',
-          }}>
-            <GuideAvatarSVG
-              slug={g.slug}
-              gradient={g.gradient}
-              initials={g.initials}
-              isWoman={g.slug === 'fatima-al-omari' || g.slug === 'samira-al-rashidi'}
-            />
+          <div style={{ position: 'absolute', top: '50%', right: '1.25rem', transform: 'translateY(-50%)', width: official ? 64 : 52, height: official ? 64 : 52, borderRadius: '50%', border: official ? '3px solid #C9A84C' : '3px solid rgba(255,255,255,0.6)', overflow: 'hidden', zIndex: 1, boxShadow: official ? '0 0 0 3px #1A1209, 0 4px 16px rgba(201,168,76,0.4)' : '0 2px 12px rgba(0,0,0,0.3)' }}>
+            <GuideAvatarSVG slug={g.slug} gradient={g.gradient} initials={g.initials} isWoman={g.slug === 'fatima-al-omari' || g.slug === 'samira-al-rashidi'} />
           </div>
-          {/* Available dot */}
           <div style={{ position: 'absolute', bottom: 8, right: 12, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
             <div style={{ width: 7, height: 7, borderRadius: '50%', background: g.available ? '#27AE60' : '#aaa', border: '1.5px solid rgba(255,255,255,0.5)' }} />
             <span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>{g.available ? 'Disponible' : 'Indisponible'}</span>
           </div>
-          {/* Badge(s) */}
           {official ? (
             <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-              <span style={{ background: '#1A1209', color: '#F0D897', fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0.2rem 0.55rem', borderRadius: 50, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                🛡 OFFICIEL SAFARUMA
-              </span>
-              <span style={{ background: '#065F46', color: 'white', fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0.2rem 0.55rem', borderRadius: 50 }}>
-                GUIDE VÉRIFIÉ ✓
-              </span>
-              <span style={{ background: '#C9A84C', color: '#1A1209', fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0.2rem 0.55rem', borderRadius: 50 }}>
-                RESPONSABLE TERRAIN
-              </span>
-              <span style={{ background: '#1E3A5F', color: 'white', fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0.2rem 0.55rem', borderRadius: 50 }}>
-                FORMATEUR CERTIFIÉ
-              </span>
+              <span style={{ background: '#1A1209', color: '#F0D897', fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0.2rem 0.55rem', borderRadius: 50, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>🛡 OFFICIEL SAFARUMA</span>
+              <span style={{ background: '#065F46', color: 'white', fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0.2rem 0.55rem', borderRadius: 50 }}>GUIDE VÉRIFIÉ ✓</span>
+              <span style={{ background: '#C9A84C', color: '#1A1209', fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0.2rem 0.55rem', borderRadius: 50 }}>RESPONSABLE TERRAIN</span>
+              <span style={{ background: '#1E3A5F', color: 'white', fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0.2rem 0.55rem', borderRadius: 50 }}>FORMATEUR CERTIFIÉ</span>
             </div>
           ) : g.badge ? (
-            <div style={{ position: 'absolute', top: 10, right: 10, background: g.badgeColor, color: '#fff', fontSize: '0.55rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0.2rem 0.55rem', borderRadius: 50 }}>
-              {g.badge}
-            </div>
+            <div style={{ position: 'absolute', top: 10, right: 10, background: g.badgeColor, color: '#fff', fontSize: '0.55rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0.2rem 0.55rem', borderRadius: 50 }}>{g.badge}</div>
           ) : null}
         </div>
 
@@ -884,21 +995,18 @@ function GuideCard({ guide: g, official }: { guide: GuideData; official?: boolea
             <IconMap size={12} stroke="#7A6D5A" /> {g.location} · {g.experience} ans
           </div>
 
-          {/* Languages */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', marginBottom: '0.7rem' }}>
             {g.languages.map((l, i) => (
               <span key={l} style={{ fontSize: '0.65rem', fontWeight: 600, padding: '0.15rem 0.55rem', borderRadius: 50, background: i === 0 ? '#FAF3E0' : '#F5F0E8', border: `1px solid ${i === 0 ? 'rgba(201,168,76,0.4)' : 'transparent'}`, color: i === 0 ? '#8B6914' : '#7A6D5A' }}>{l}</span>
             ))}
           </div>
 
-          {/* Services */}
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', marginBottom: '0.9rem' }}>
             {g.services.map(s => (
               <span key={s} style={{ fontSize: '0.65rem', color: '#7A6D5A', background: '#F5F0E8', padding: '0.15rem 0.5rem', borderRadius: 5 }}>{s}</span>
             ))}
           </div>
 
-          {/* Footer */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #F0EBD8', paddingTop: '0.85rem', marginTop: 'auto' }}>
             <div>
               {official ? (
@@ -930,7 +1038,6 @@ function GuideCard({ guide: g, official }: { guide: GuideData; official?: boolea
             </div>
           </div>
 
-          {/* CTA */}
           <div style={{ marginTop: '0.875rem', background: '#1A1209', color: '#F0D897', textAlign: 'center', padding: '0.7rem', borderRadius: 50, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.04em' }}>
             Voir le profil →
           </div>

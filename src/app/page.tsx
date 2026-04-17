@@ -260,7 +260,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════
           QUESTIONNEMENT — Personas / Ce voyage est pour vous
           ═══════════════════════════════════════════════════════ */}
-      <section style={{ background: 'var(--cream)', padding: '6rem 4rem', borderTop: '1px solid var(--sand)' }}>
+      <section style={{ background: 'var(--cream)', padding: 'clamp(2.5rem, 6vw, 6rem) clamp(1rem, 4vw, 4rem)', borderTop: '1px solid var(--sand)' }}>
         <div style={{ maxWidth: 900, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
             <span style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--gold-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
@@ -281,7 +281,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════
           LE PROBLÈME — dark, text reveal
           ═══════════════════════════════════════════════════════ */}
-      <section style={{ background: 'var(--deep)', padding: '7rem 4rem', position: 'relative', overflow: 'hidden' }}>
+      <section style={{ background: 'var(--deep)', padding: 'clamp(2.5rem, 6vw, 7rem) clamp(1rem, 4vw, 4rem)', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 60% 80% at 50% 50%, rgba(201,168,76,0.05) 0%, transparent 65%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: 820, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(201,168,76,0.5)', marginBottom: '1.5rem' }} className="reveal">
@@ -312,7 +312,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════
           DIFFÉRENCIATEURS vs autres plateformes
           ═══════════════════════════════════════════════════════ */}
-      <section style={{ background: 'var(--cream)', padding: '6rem 4rem' }}>
+      <section style={{ background: 'var(--cream)', padding: 'clamp(2.5rem, 6vw, 6rem) clamp(1rem, 4vw, 4rem)' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <div className="section-label reveal" style={{ textAlign: 'center' }}>Pourquoi SAFARUMA</div>
           <h2 className="reveal reveal-d1" style={{ textAlign: 'center', marginBottom: '0.75rem' }}>
@@ -340,7 +340,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════
           GUIDES EN VEDETTE — cards hover overlay
           ═══════════════════════════════════════════════════════ */}
-      <section style={{ background: 'white', padding: '6rem 4rem', borderTop: '1px solid var(--sand)' }}>
+      <section style={{ background: 'white', padding: 'clamp(2.5rem, 6vw, 6rem) clamp(1rem, 4vw, 4rem)', borderTop: '1px solid var(--sand)' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <div className="section-label reveal">Nos guides</div>
           <h2 className="reveal reveal-d1">
@@ -511,7 +511,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════
           LIEUX SAINTS — 6 cards avec hover arabique
           ═══════════════════════════════════════════════════════ */}
-      <section style={{ background: 'var(--cream)', padding: '6rem 4rem', borderTop: '1px solid var(--sand)' }}>
+      <section style={{ background: 'var(--cream)', padding: 'clamp(2.5rem, 6vw, 6rem) clamp(1rem, 4vw, 4rem)', borderTop: '1px solid var(--sand)' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <div className="section-label reveal">Les lieux saints</div>
           <h2 className="reveal reveal-d1">
@@ -546,7 +546,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════
           CHARTE ISLAMIQUE
           ═══════════════════════════════════════════════════════ */}
-      <section style={{ background: 'var(--deep)', padding: '6rem 4rem', position: 'relative', overflow: 'hidden' }}>
+      <section style={{ background: 'var(--deep)', padding: 'clamp(2.5rem, 6vw, 6rem) clamp(1rem, 4vw, 4rem)', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 70% 90% at 50% 100%, rgba(201,168,76,0.06) 0%, transparent 55%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
           <div className="reveal" style={{ fontFamily: '"Scheherazade New", "Amiri", "Traditional Arabic", serif', fontSize: 'clamp(2rem, 5vw, 4rem)', color: '#C9A84C', WebkitTextFillColor: '#C9A84C', lineHeight: 1, marginBottom: '1rem', direction: 'rtl', textRendering: 'optimizeLegibility', WebkitFontSmoothing: 'antialiased', unicodeBidi: 'embed' }}>
@@ -582,7 +582,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════
           TÉMOIGNAGES — border gauche dorée
           ═══════════════════════════════════════════════════════ */}
-      <section style={{ background: 'white', padding: '6rem 4rem', borderTop: '1px solid var(--sand)' }}>
+      <section style={{ background: 'white', padding: 'clamp(2.5rem, 6vw, 6rem) clamp(1rem, 4vw, 4rem)', borderTop: '1px solid var(--sand)' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <div className="section-label reveal">Témoignages</div>
           <h2 className="reveal reveal-d1" style={{ marginBottom: '3rem' }}>
@@ -619,7 +619,7 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════════
           FORFAITS — 3 cards
           ═══════════════════════════════════════════════════════ */}
-      <section id="packages" style={{ background: 'var(--cream)', padding: '6rem 4rem', borderTop: '1px solid var(--sand)' }}>
+      <section id="packages" style={{ background: 'var(--cream)', padding: 'clamp(2.5rem, 6vw, 6rem) clamp(1rem, 4vw, 4rem)', borderTop: '1px solid var(--sand)' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <div className="section-label reveal" style={{ textAlign: 'center' }}>Nos forfaits</div>
           <h2 className="reveal reveal-d1" style={{ textAlign: 'center', marginBottom: '0.5rem' }}>

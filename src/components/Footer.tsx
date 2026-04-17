@@ -1,14 +1,17 @@
 import Link from "next/link";
 import React from "react";
-import { IconShield, IconStar, IconAccessibility } from "@/components/Icons";
+import { IconShield, IconStar, IconAccessibility, IconCheck } from "@/components/Icons";
 
 export default function Footer() {
   return (
     <footer>
       {/* Trust badges strip */}
-      <div style={{
+      <div className="footer-trust" style={{
         display: 'flex',
-        flexWrap: 'wrap',
+        flexWrap: 'nowrap',
+        overflowX: 'auto',
+        WebkitOverflowScrolling: 'touch' as const,
+        scrollbarWidth: 'none' as const,
         alignItems: 'center',
         justifyContent: 'center',
         gap: '0.5rem 2rem',
@@ -16,11 +19,11 @@ export default function Footer() {
         borderBottom: '1px solid rgba(255,255,255,0.08)',
       }}>
         {([
-          { icon: '✓', label: 'Guides certifiés SAFARUMA' },
-          { icon: '🛡', label: 'Paiement sécurisé' },
-          { icon: '★', label: 'Note 4.94/5 — 709 avis' },
-          { icon: '♿', label: 'Accessibilité PMR' },
-        ] as { icon: string; label: string }[]).map(b => (
+          { icon: <IconCheck size={14} stroke="rgba(201,168,76,0.8)" />, label: 'Guides certifiés SAFARUMA' },
+          { icon: <IconShield size={14} stroke="rgba(201,168,76,0.8)" />, label: 'Paiement sécurisé' },
+          { icon: <IconStar size={14} stroke="rgba(201,168,76,0.8)" />, label: 'Note 4.94/5 — 709 avis' },
+          { icon: <IconAccessibility size={14} stroke="rgba(201,168,76,0.8)" />, label: 'Accessibilité PMR' },
+        ] as { icon: React.ReactNode; label: string }[]).map(b => (
           <div key={b.label} style={{
             display: 'flex',
             alignItems: 'center',
@@ -29,8 +32,9 @@ export default function Footer() {
             fontWeight: 600,
             color: 'rgba(240,216,151,0.7)',
             whiteSpace: 'nowrap',
+            flexShrink: 0,
           }}>
-            <span style={{ color: 'rgba(201,168,76,0.8)', fontSize: '0.85rem' }}>{b.icon}</span>
+            {b.icon}
             {b.label}
           </div>
         ))}

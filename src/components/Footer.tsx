@@ -12,6 +12,10 @@ export default function Footer() {
         gap: '0.75rem',
         padding: '1rem 1.5rem',
         borderBottom: '1px solid rgba(255,255,255,0.08)',
+        justifyContent: 'center',
+        maxWidth: 600,
+        margin: '0 auto',
+        width: '100%',
       }}>
         {([
           { icon: <IconCheck size={14} stroke="rgba(201,168,76,0.8)" />, label: 'Guides certifiés SAFARUMA' },

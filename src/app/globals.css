@@ -167,6 +167,9 @@ footer { background: var(--warm); padding: 3rem 4rem 2rem; color: rgba(255,255,2
     grid-template-columns: repeat(2, 1fr) !important;
     gap: 0.6rem !important;
     padding: 0.875rem 1rem !important;
+    max-width: 480px !important;
+    margin: 0 auto !important;
+    width: calc(100% - 2rem) !important;
   }
   .footer-trust > div {
     font-size: 0.68rem !important;

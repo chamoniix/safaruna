@@ -176,6 +176,19 @@ footer { background: var(--warm); padding: 3rem 4rem 2rem; color: rgba(255,255,2
     padding: 0.5rem 0.5rem !important;
     justify-content: flex-start !important;
   }
+  .footer-col ul {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+  .footer-col ul li {
+    display: block !important;
+    width: 100% !important;
+  }
+  .footer-col ul li a {
+    white-space: normal !important;
+    word-break: break-word !important;
+  }
 }
 
 /* ── HERO FULL ─────────────────────────────────────────────────────────────── */

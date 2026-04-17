@@ -7,14 +7,9 @@ export default function Footer() {
     <footer>
       {/* Trust badges strip */}
       <div className="footer-trust" style={{
-        display: 'flex',
-        flexWrap: 'nowrap',
-        overflowX: 'auto',
-        WebkitOverflowScrolling: 'touch' as const,
-        scrollbarWidth: 'none' as const,
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '0.5rem 2rem',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(4, 1fr)',
+        gap: '0.75rem',
         padding: '1rem 1.5rem',
         borderBottom: '1px solid rgba(255,255,255,0.08)',
       }}>
@@ -27,12 +22,16 @@ export default function Footer() {
           <div key={b.label} style={{
             display: 'flex',
             alignItems: 'center',
+            justifyContent: 'center',
             gap: '0.4rem',
-            fontSize: '0.78rem',
+            fontSize: '0.72rem',
             fontWeight: 600,
             color: 'rgba(240,216,151,0.7)',
             whiteSpace: 'nowrap',
-            flexShrink: 0,
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(201,168,76,0.1)',
+            borderRadius: 8,
+            padding: '0.5rem 0.75rem',
           }}>
             {b.icon}
             {b.label}

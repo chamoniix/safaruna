@@ -8,7 +8,7 @@ import StatsSection from "@/components/StatsSection";
 import PersonaSection from "@/components/PersonaSection";
 import {
   IconMegaphone, IconEye, IconChat, IconGraduationCap, IconShield, IconUserGroup,
-  IconMosque, IconMountain, IconBuilding, IconMap,
+  IconMosque, IconMountain, IconBuilding, IconMap, IconAccessibility,
   IconBookOpen, IconStar, IconMoon, IconSparkles, IconHandshake,
 } from "@/components/Icons";
 
@@ -47,9 +47,15 @@ const DIFFERENCIATEURS: Array<{ icon: React.ReactNode; title: string; desc: stri
   },
   {
     icon: <IconUserGroup size={24} stroke="#C9A84C" />,
-    title: 'Petits groupes max 8',
-    desc: "Jamais 40 personnes dans un bus. Maximum 8 pèlerins par guide — pour que chaque question ait une réponse, chaque moment compte.",
-    vs: "Agences traditionnelles : groupes de 20 à 50",
+    title: 'Voiture privée · 7 pèlerins max',
+    desc: "Un 4x4 ou van privé pour vous seuls. Maximum 7 pèlerins par guide — pour que chaque question ait une réponse et chaque moment compte. Au-delà de 7, nous organisons un minivan ou bus dédié.",
+    vs: "Agences traditionnelles : groupes de 20 à 50 personnes dans un bus",
+  },
+  {
+    icon: <IconAccessibility size={24} stroke="#C9A84C" />,
+    title: 'Prise en charge PMR & mobilité réduite',
+    desc: "Fauteuil roulant, mobilité réduite, parent âgé, grossesse avancée — votre guide prend tout en charge. Transport adapté, poussée du fauteuil pendant le tawaf et le sa'i, coordination avec les services du Haram, hôtel accessible. Votre famille mérite de vivre sa Omra, pas de la regarder de loin.",
+    vs: "Groupes classiques : aucune prise en charge individuelle, rythme imposé à tous",
   },
 ];
 
@@ -347,7 +353,7 @@ export default function Home() {
             Des guides qui <em>parlent ta langue</em>
           </h2>
           <p className="reveal reveal-d2" style={{ color: 'var(--muted)', maxWidth: 520, lineHeight: 1.75, marginBottom: '3rem', fontSize: '0.9rem' }}>
-            Chaque guide est certifié mutawwif, vérifié par notre équipe et évalué par des centaines de pèlerins réels.
+            Chaque guide est Certifié SAFARUMA, vérifié par notre équipe et évalué par des centaines de pèlerins réels.
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
@@ -630,9 +636,9 @@ export default function Home() {
           </p>
           <div className="packages-grid">
             {([
-              { icon: <IconMoon size={28} stroke="currentColor" />, title: 'Omra Essentielle', featured: false, price: '280€', sub: '/ pers · 2–3 jours', features: ["Rituels expliqués (tawaf, sa'i)", "Masjid Al-Haram & Zamzam", "Livret du'a illustré", "Disponibilité 24h/24", "1 à 8 personnes"] },
+              { icon: <IconMoon size={28} stroke="currentColor" />, title: 'Omra Essentielle', featured: false, price: '280€', sub: '/ pers · 2–3 jours', features: ["Rituels expliqués (tawaf, sa'i)", "Masjid Al-Haram & Zamzam", "Livret du'a illustré", "Disponibilité 24h/24", "1 à 7 personnes · voiture privée"] },
               { icon: <IconMosque size={28} stroke="currentColor" />, title: 'Omra & Histoire', featured: true, price: '450€', sub: '/ pers · 5 jours', features: ["Tout Essentielle inclus", "Voiture privée 7 places", "Jabal Al-Nour, Thawr, Uhud", "Train Haramain Makkah ↔ Madinah", "Masjid Quba, Al-Baqi', Rawdah", "Conférence Sîra (1h)"] },
-              { icon: <IconSparkles size={28} stroke="currentColor" />, title: 'Grand Voyage', featured: false, price: '780€', sub: '/ pers · 10 jours', features: ["Tout Omra & Histoire inclus", "Makkah + Madinah + Badr + Ohoud", "Adapté PMR disponible", "Hôtel 5★ à 200m du Haram", "Album photo souvenir", "1 à 12 personnes"] },
+              { icon: <IconSparkles size={28} stroke="currentColor" />, title: 'Grand Voyage', featured: false, price: '780€', sub: '/ pers · 10 jours', features: ["Tout Omra & Histoire inclus", "Makkah + Madinah + Badr + Ohoud", "Adapté PMR disponible", "Hôtel 5★ à 200m du Haram", "Album photo souvenir", "Groupes jusqu'à 20 pers. · minivan dédié"] },
             ] as { icon: React.ReactNode; title: string; featured: boolean; price: string; sub: string; features: string[] }[]).map((p, i) => (
               <div key={p.title} className={`package-card ${p.featured ? 'featured' : ''} reveal reveal-d${i + 1}`}>
                 <div className="package-icon">{p.icon}</div>

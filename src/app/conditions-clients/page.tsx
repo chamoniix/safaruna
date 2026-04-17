@@ -92,7 +92,7 @@ export default function ConditionsClients() {
         <div className="legal-box-gold">
           <div className="box-title">La Promesse SAFARUMA</div>
           <ul style={{ ...ul, marginBottom: 0 }}>
-            <li style={li}><strong>Guides 100% vérifiés</strong> : identité, certifications Mutawwif, casier judiciaire</li>
+            <li style={li}><strong>Guides 100% vérifiés</strong> : identité, Certifié SAFARUMA, casier judiciaire</li>
             <li style={li}><strong>Paiements sécurisés</strong> via Stripe (PCI-DSS niveau 1) — jamais stockés chez SAFARUMA</li>
             <li style={li}><strong>Argent protégé</strong> en séquestre jusqu'à la fin de la mission</li>
             <li style={li}><strong>Arbitrage rapide</strong> en cas de litige (48h)</li>

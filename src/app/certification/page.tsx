@@ -8,7 +8,7 @@ export const metadata: Metadata = {
   keywords: [
     "certification guide omra",
     "guide certifié safaruma",
-    "mutawwif certifié",
+    "guide certifié safaruma",
     "badge guide omra",
     "formation guide pèlerinage",
     "certification islamique guide",

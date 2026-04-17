@@ -546,7 +546,7 @@ export default function CertificationClient() {
           <p style={{ fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--cp-gold)", marginBottom: "1.25rem" }} className="cert-reveal">Rejoindre SAFARUMA</p>
           <h2 className="cert-reveal cert-reveal-d1">Passez la certification.<br />Devenez un guide reconnu.</h2>
           <p className="cert-reveal cert-reveal-d2">
-            Vous êtes guide mutawwif et souhaitez obtenir la certification SAFARUMA ? Déposez votre candidature — le processus est gratuit et ouvert toute l'année.
+            Vous souhaitez obtenir la certification SAFARUMA ? Déposez votre candidature — le processus est gratuit et ouvert toute l'année.
           </p>
           <div className="cert-btn-row cert-reveal cert-reveal-d3">
             <Link href="/guide/inscription" className="cert-btn-gold">Passer la certification →</Link>

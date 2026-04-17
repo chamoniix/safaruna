@@ -20,7 +20,7 @@ export default function Footer() {
         {([
           { icon: <IconCheck size={14} stroke="rgba(201,168,76,0.8)" />, label: 'Guides certifiés SAFARUMA' },
           { icon: <IconShield size={14} stroke="rgba(201,168,76,0.8)" />, label: 'Paiement sécurisé' },
-          { icon: <IconStar size={14} stroke="rgba(201,168,76,0.8)" />, label: 'Note 4.94/5 — 709 avis' },
+          { icon: <IconStar size={14} stroke="rgba(201,168,76,0.8)" />, label: '4.9 · 12 890 avis' },
           { icon: <IconAccessibility size={14} stroke="rgba(201,168,76,0.8)" />, label: 'Accessibilité PMR' },
         ] as { icon: React.ReactNode; label: string }[]).map(b => (
           <div key={b.label} style={{

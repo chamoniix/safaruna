@@ -329,7 +329,7 @@ export default function BookingWidget({ slug, guideName, packages }: BookingWidg
         {/* Trust badges */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginTop: '1rem', padding: '0.75rem', background: 'var(--cream)', borderRadius: 10, border: '1px solid var(--sand)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.72rem', color: 'var(--warm)', fontWeight: 600 }}>
-            <span style={{ color: 'var(--green)' }}>✓</span> Guide mutawwif certifié
+            <span style={{ color: 'var(--green)' }}>✓</span> Guide Certifié SAFARUMA
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.72rem', color: 'var(--warm)', fontWeight: 600 }}>
             <span style={{ color: 'var(--gold-dark)' }}>🛡️</span> Paiement 100% sécurisé

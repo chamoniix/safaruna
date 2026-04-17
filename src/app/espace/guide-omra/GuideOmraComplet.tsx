@@ -27,7 +27,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Peut-on faire la Omra sans guide privé ?",
-    a: "Oui, techniquement. Mais sans guide, on risque d'accomplir les rituels mécaniquement, sans en comprendre la profondeur. Un guide mutawwif francophone vous explique chaque geste, vous enseigne les du'as appropriées et vous accompagne spirituellement — une différence fondamentale.",
+    a: "Oui, techniquement. Mais sans guide, on risque d'accomplir les rituels mécaniquement, sans en comprendre la profondeur. Un guide Certifié SAFARUMA francophone vous explique chaque geste, vous enseigne les du'as appropriées et vous accompagne spirituellement — une différence fondamentale.",
   },
   {
     q: "Quelle est la différence entre la Omra et le Hajj ?",

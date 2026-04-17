@@ -153,7 +153,7 @@ export function sendWelcomeGuide(to: string, name: string): Promise<void> {
     subject: 'Candidature reçue — SAFARUMA Guide',
     html: baseTemplate(`
       ${heading(`Barak Allahu fik, ${name} !`)}
-      ${p('BarakAllahu fik. L\'équipe SAFARUMA a bien reçu votre candidature en tant que guide Mutawwif. Nous l\'examinerons insha\'Allah et vous contacterons sous <strong>48h</strong>.')}
+      ${p('BarakAllahu fik. L\'équipe SAFARUMA a bien reçu votre candidature en tant que guide Certifié SAFARUMA. Nous l\'examinerons insha\'Allah et vous contacterons sous <strong>48h</strong>.')}
       ${divider()}
       <div style="background:#FAF7F0;border-left:3px solid #C9A84C;padding:16px 20px;border-radius:0 12px 12px 0;margin:16px 0;">
         <div style="font-size:12px;font-weight:700;color:#C9A84C;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">Prochaines étapes</div>

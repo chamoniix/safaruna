@@ -34,7 +34,7 @@ export default function CharteIslamique() {
         <h2 style={h2}>Préambule</h2>
         <p style={p}>Cette charte est le fondement de la confiance que les pèlerins placent en vous. Elle dépasse le cadre du simple accord commercial — elle est un pacte moral, une promesse faite devant Allah ﷻ, qui voit et sait ce que cachent les cœurs.</p>
         <p style={p}>Le pèlerin qui vous confie son Omra est souvent à l'un des moments les plus importants de sa vie spirituelle. Il vous confie sa sécurité, sa famille, et la qualité de son expérience sacrée. Cette responsabilité est immense.</p>
-        <p style={p}>La Charte de Confiance SAFARUMA n'est pas une contrainte imposée de l'extérieur — c'est le reflet de ce que tout bon Mutawwif porte déjà dans son cœur.</p>
+        <p style={p}>La Charte de Confiance SAFARUMA n'est pas une contrainte imposée de l'extérieur — c'est le reflet de ce que tout bon guide Certifié SAFARUMA porte déjà dans son cœur.</p>
       </section>
 
       <section id="engagements">

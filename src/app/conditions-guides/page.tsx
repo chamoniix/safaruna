@@ -22,7 +22,7 @@ export default function ConditionsGuides() {
 
       <section id="obligations">
         <h2 style={h2}>1. Obligations du Guide</h2>
-        <p style={p}>En rejoignant SAFARUMA en tant que Guide (Mutawwif), vous vous engagez à respecter les obligations suivantes :</p>
+        <p style={p}>En rejoignant SAFARUMA en tant que Guide Certifié SAFARUMA, vous vous engagez à respecter les obligations suivantes :</p>
 
         <h3 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209', margin: '1.5rem 0 0.75rem' }}>Professionnalisme</h3>
         <ul style={ul}>

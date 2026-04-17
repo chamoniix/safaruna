@@ -606,7 +606,7 @@ export default function GuideSearchPage() {
             Ton voyage, dans <em style={{ fontStyle: 'italic', color: '#C9A84C' }}>ta langue</em>
           </h1>
           <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', marginBottom: '2rem' }}>
-            Guides certifiés · Makkah, Madinah, Badr & plus
+            Sélection rigoureuse · Entretien physique · Certifiés SAFARUMA · Makkah, Madinah & plus
           </p>
 
           {/* ── Search bar ── */}

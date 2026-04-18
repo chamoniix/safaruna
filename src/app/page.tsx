@@ -140,6 +140,8 @@ const TEMOIGNAGES = [
   },
 ];
 
+const nbDisponibles = 8;
+
 export default function Home() {
   return (
     <>
@@ -465,9 +467,13 @@ export default function Home() {
                     <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', marginBottom: '0.5rem' }}>
                       <span style={{ color: 'var(--gold)', fontSize: '0.82rem', letterSpacing: 2 }}>★★★★★</span>
                       <span style={{ fontSize: '0.78rem', color: 'white', fontWeight: 700 }}>{g.rating}</span>
-                      {g.isOfficial ? (
+                      {g.isOfficial && g.reviews > 0 ? (
                         <span style={{ fontSize: '0.62rem', background: '#C9A84C', color: '#1A1209', fontWeight: 800, padding: '0.1rem 0.5rem', borderRadius: 50 }}>
                           NOTE PARFAITE
+                        </span>
+                      ) : g.isOfficial ? (
+                        <span style={{ fontSize: '.62rem', background: 'rgba(201,168,76,.1)', color: '#8B6914', padding: '.1rem .5rem', borderRadius: 50, border: '1px solid rgba(201,168,76,.3)' }}>
+                          Guide Officiel
                         </span>
                       ) : (
                         <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.4)' }}>({g.reviews} avis)</span>
@@ -729,10 +735,14 @@ export default function Home() {
         <p className="reveal reveal-d2" style={{ color: 'rgba(255,255,255,0.45)', maxWidth: 480, margin: '1rem auto 2.5rem', lineHeight: 1.85, fontSize: '0.95rem' }}>
           Rejoins des milliers de pèlerins francophones qui ont vécu une Omra privée, profonde et inoubliable avec un guide qui a consacré sa vie à ce moment.
         </p>
-        <div className="reveal reveal-d3" style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+        <div className="reveal reveal-d3" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '.75rem' }}>
           <Link href="/guides" className="btn-hero-cta" style={{ background: 'var(--gold)', color: 'var(--deep)', borderColor: 'var(--gold)' }}>
             Trouver mon guide
           </Link>
+          <span style={{ fontSize: '.72rem', color: 'rgba(255,255,255,.3)', display: 'flex', alignItems: 'center', gap: '.4rem' }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#27AE60', display: 'inline-block', animation: 'pulse 2s infinite' }} />
+            {nbDisponibles} guides disponibles ce mois
+          </span>
         </div>
       </section>
 

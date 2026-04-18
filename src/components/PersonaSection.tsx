@@ -7,6 +7,19 @@ const PERSONAS = [
   {
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+    ),
+    title: 'En famille',
+    desc: '"Je veux emmener mes proches mais j\'ai peur de mal organiser."',
+    response: "Partir en famille est l'un des voyages les plus puissants. Nos guides sont habitués — enfants, personnes âgées, PMR. Ils s'adaptent à chaque membre du groupe et gèrent tous les imprévus.",
+  },
+  {
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z"/>
         <circle cx="12" cy="9" r="2.5"/>
       </svg>
@@ -23,9 +36,9 @@ const PERSONAS = [
         <line x1="12" y1="17" x2="12.01" y2="17"/>
       </svg>
     ),
-    title: "Je m'intéresse à l'Islam",
-    desc: '"Je veux comprendre, découvrir, mais je ne sais pas si c\'est pour moi."',
-    response: "Vous n'avez pas besoin de tout savoir avant de partir. Nos guides répondent à chaque question, même les plus simples, sans jugement. Ce voyage peut être votre première rencontre profonde avec cette tradition.",
+    title: "Converti·e récemment",
+    desc: '"Je veux faire la Omra mais j\'ai encore beaucoup à apprendre."',
+    response: "Vous n'avez pas besoin de tout savoir avant de partir. Nos guides répondent à chaque question, sans jugement, sans comparaison. Ce voyage peut être votre première rencontre profonde et transformante avec cette tradition.",
   },
   {
     icon: (
@@ -39,19 +52,6 @@ const PERSONAS = [
     title: 'Mes origines spirituelles',
     desc: '"L\'histoire de ces lieux sacrés m\'intrigue. Je veux comprendre d\'où vient tout ça."',
     response: "Ces lieux portent des millénaires d'histoire spirituelle. Ibrahim, Hajar, le Prophète ﷺ — nos guides vous racontent ces récits sur les lieux mêmes où ils se sont passés. Une expérience que nulle lecture ne peut remplacer.",
-  },
-  {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-        <circle cx="9" cy="7" r="4"/>
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-      </svg>
-    ),
-    title: 'En famille',
-    desc: '"Je veux emmener mes proches mais j\'ai peur de mal organiser."',
-    response: "Partir en famille est l'un des voyages les plus puissants. Nos guides sont habitués — enfants, personnes âgées, PMR. Ils s'adaptent à chaque membre du groupe et gèrent tous les imprévus.",
   },
   {
     icon: (

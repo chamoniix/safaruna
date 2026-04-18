@@ -301,14 +301,14 @@ export default function Home() {
             fontSize: 'clamp(2rem, 4.5vw, 3.2rem)',
             fontWeight: 300, color: 'white', lineHeight: 1.15, marginBottom: '2.5rem',
           }}>
-            90% des pèlerins font la Omra<br />
+            La majorité des pèlerins font la Omra<br />
             <em style={{ color: 'var(--gold)', fontStyle: 'italic' }}>sans vraiment la comprendre.</em>
           </h2>
           <p className="reveal reveal-d2" style={{ color: 'rgba(255,255,255,0.55)', lineHeight: 1.9, fontSize: '1rem', marginBottom: '1.5rem' }}>
             35 personnes dans un bus. Un guide qui parle arabe. Tu imites les gestes de ceux devant toi. Tu tournes autour de la Kaaba en ne sachant pas vraiment pourquoi tu tournes. Tu récites des du&apos;a que tu n&apos;as jamais apprises. Tu rentres chez toi avec une belle photo, mais quelque chose manque.
           </p>
           <p className="reveal reveal-d3" style={{ color: 'rgba(255,255,255,0.55)', lineHeight: 1.9, fontSize: '1rem', marginBottom: '3rem' }}>
-            Ce n&apos;est pas la Omra qui était mauvaise. C&apos;est le format. Un voyage d&apos;une telle profondeur mérite un guide qui prend le temps — <em style={{ color: 'rgba(240,216,151,0.8)' }}>ton temps</em> — pour tout t&apos;expliquer, dans ta langue, à ton rythme.
+            Ce n&apos;est pas la Omra qui était mauvaise. C&apos;est le format. Ce voyage mérite un guide qui prend le temps — <em style={{ color: 'rgba(240,216,151,0.8)' }}>ton temps</em> — pour tout t&apos;expliquer, dans ta langue, à ton rythme.
           </p>
           <div className="reveal reveal-d4">
             <Link href="/guides" className="btn-hero-cta">

@@ -196,9 +196,9 @@ export default function Home() {
             marginBottom: '1.5rem',
             animation: 'fadeInUp 0.9s 1.2s ease both', opacity: 0,
           }}>
-            Le voyage vers tes origines
+            Vis ta Omra dans ta langue,
             <br />
-            <em style={{ color: 'var(--gold)', fontStyle: 'italic' }}>commence ici.</em>
+            <em style={{ color: 'var(--gold)', fontStyle: 'italic' }}>guidé comme tu le mérites.</em>
           </h1>
 
           <p style={{
@@ -207,7 +207,7 @@ export default function Home() {
             maxWidth: 520, margin: '0 auto 2.5rem',
             animation: 'fadeInUp 0.9s 1.4s ease both', opacity: 0,
           }}>
-            Un guide privé certifié, qui parle ta langue, t&apos;explique chaque rituel, et transforme ton voyage en expérience spirituelle inoubliable.
+            Un guide privé certifié, qui parle ta langue, t&apos;explique chaque rituel de la Omra — et fait de ce voyage le plus important de ta vie.
           </p>
 
           {/* CTAs */}
@@ -220,6 +220,9 @@ export default function Home() {
               Trouver mon guide
             </Link>
           </div>
+          <p style={{ fontSize: '.72rem', color: 'rgba(255,255,255,.35)', marginTop: '.5rem', textAlign: 'center' }}>
+            Sans engagement · Réservation sécurisée
+          </p>
 
           {/* Live trust mini-row */}
           <div style={{

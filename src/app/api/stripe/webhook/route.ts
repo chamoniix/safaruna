@@ -4,8 +4,6 @@ import prisma from '@/lib/prisma'
 import { sendEmail } from '@/lib/email'
 import { createAuditLog } from '@/lib/audit'
 
-export const config = { api: { bodyParser: false } }
-
 export async function POST(req: NextRequest) {
   const stripeKey = process.env.STRIPE_SECRET_KEY
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
@@ -44,8 +42,13 @@ export async function POST(req: NextRequest) {
     const data = JSON.parse(draft.data)
 
     // 2. Récupère le guide
+    const guideSlug = data.selectedGuideSlug || data.guideSlug
+    if (!guideSlug) {
+      console.error('Slug guide manquant dans le draft', refNumber)
+      return NextResponse.json({ error: 'Slug guide manquant' }, { status: 400 })
+    }
     const guide = await prisma.guideProfile.findUnique({
-      where: { slug: data.selectedGuideSlug || data.guideSlug },
+      where: { slug: guideSlug },
       include: { user: true, packages: true },
     })
     if (!guide) {
@@ -53,8 +56,12 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. Récupère le pèlerin
+    if (!session.customer_email) {
+      console.error('customer_email manquant dans la session Stripe', session.id)
+      return NextResponse.json({ error: 'Email pèlerin manquant' }, { status: 400 })
+    }
     const pelerin = await prisma.user.findUnique({
-      where: { email: session.customer_email! },
+      where: { email: session.customer_email },
     })
     if (!pelerin) {
       return NextResponse.json({ error: 'Pèlerin non trouvé' }, { status: 404 })

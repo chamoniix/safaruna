@@ -27,6 +27,38 @@ export async function POST(req: NextRequest) {
   if (!totalPrice || totalPrice <= 0)
     return NextResponse.json({ error: 'Montant invalide' }, { status: 400 })
 
+  // ── Validation du prix côté serveur ──────────────────────────────────────
+  // Le prix doit être calculé à partir de la base de données, jamais depuis le client
+  const effectiveSlug = selectedGuideSlug || guideSlug
+  if (!effectiveSlug || !packageName || !nbPersonnes) {
+    return NextResponse.json({ error: 'Paramètres de réservation manquants' }, { status: 400 })
+  }
+
+  const guideProfile = await prisma.guideProfile.findUnique({
+    where: { slug: effectiveSlug },
+    include: { packages: true },
+  })
+
+  if (!guideProfile || guideProfile.status !== 'ACTIVE') {
+    return NextResponse.json({ error: 'Guide non disponible' }, { status: 400 })
+  }
+
+  const pkg = guideProfile.packages.find(
+    (p) => p.name.toLowerCase().trim() === String(packageName).toLowerCase().trim()
+  )
+
+  if (!pkg) {
+    return NextResponse.json({ error: 'Forfait introuvable' }, { status: 400 })
+  }
+
+  const expectedPrice = pkg.pricePerPerson * Number(nbPersonnes)
+  // Tolérance de 1€ pour les arrondis éventuels
+  if (Math.abs(totalPrice - expectedPrice) > 1) {
+    console.error(`[SECURITY] Prix client ${totalPrice}€ ≠ prix serveur ${expectedPrice}€ pour ${effectiveSlug}/${packageName}`)
+    return NextResponse.json({ error: 'Montant invalide' }, { status: 400 })
+  }
+  // ─────────────────────────────────────────────────────────────────────────
+
   // Génère refNumber
   const refNumber =
     'SAF-' +
@@ -80,6 +112,6 @@ export async function POST(req: NextRequest) {
     })
   } catch (err) {
     console.error('[stripe/create-session]', err)
-    return NextResponse.json({ error: 'Erreur serveur', details: String(err) }, { status: 500 })
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 })
   }
 }

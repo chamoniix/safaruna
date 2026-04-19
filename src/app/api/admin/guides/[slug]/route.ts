@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkAdmin } from '@/lib/check-admin';
 import prisma from '@/lib/prisma';
+import { decrypt } from '@/lib/crypto';
 
 export async function GET(
   req: NextRequest,
@@ -96,9 +97,16 @@ export async function GET(
           status: r.status,
           createdAt: r.createdAt,
         })),
-        ibanMasked: guide.ibanEncrypted
-          ? '••••' + guide.ibanEncrypted.slice(-4)
-          : null,
+        ibanMasked: (() => {
+          if (!guide.ibanEncrypted) return null
+          try {
+            const plain = decrypt(guide.ibanEncrypted)
+            return '••••' + plain.slice(-4)
+          } catch {
+            // Legacy plaintext IBAN (before encryption migration)
+            return '••••' + guide.ibanEncrypted.slice(-4)
+          }
+        })(),
         availabilities: guide.availabilities.map(a => ({
           id: a.id,
           date: a.date.toISOString().split('T')[0],

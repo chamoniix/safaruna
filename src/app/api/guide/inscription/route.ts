@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { sendWelcomeGuide } from '@/lib/email';
+import { encrypt } from '@/lib/crypto';
 import { z } from 'zod';
 
 const inscriptionSchema = z.object({
@@ -66,7 +67,7 @@ export async function POST(req: NextRequest) {
           city: city ?? undefined,
           nationality: nationality ?? undefined,
           experienceYears: experienceYears ? Number(experienceYears) : undefined,
-          ibanEncrypted: iban ?? undefined,
+          ibanEncrypted: iban ? encrypt(iban) : undefined,
           status: 'REVIEW',
           languages: {
             create: Array.isArray(languages) && languages.length > 0

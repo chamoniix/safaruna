@@ -36,7 +36,9 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://*.sentry.io; frame-src https://js.stripe.com https://checkout.stripe.com; img-src 'self' data: https:; connect-src 'self' https://api.stripe.com https://*.sentry.io https://*.ingest.de.sentry.io; font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+            // unsafe-inline script-src: requis par Next.js hydration (migration nonce à prévoir)
+            // unsafe-eval retiré : non nécessaire en production
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com https://*.sentry.io; frame-src https://js.stripe.com https://checkout.stripe.com; img-src 'self' data: https:; connect-src 'self' https://api.stripe.com https://*.sentry.io https://*.ingest.de.sentry.io; font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; object-src 'none'; base-uri 'self'; form-action 'self' https://checkout.stripe.com; upgrade-insecure-requests",
           },
         ],
       },

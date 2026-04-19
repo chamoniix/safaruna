@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
+import { apiRatelimit, checkRateLimit } from '@/lib/ratelimit';
 
 export async function GET(
   _req: NextRequest,
@@ -71,6 +72,9 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const limited = await checkRateLimit(req, apiRatelimit)
+  if (limited) return limited
+
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
 

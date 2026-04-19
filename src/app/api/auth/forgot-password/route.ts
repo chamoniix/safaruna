@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { sendPasswordReset } from '@/lib/email'
+import { authRatelimit, checkRateLimit } from '@/lib/ratelimit'
 import crypto from 'crypto'
 
 export async function POST(req: NextRequest) {
+  const limited = await checkRateLimit(req, authRatelimit)
+  if (limited) return limited
+
   try {
     const { email } = await req.json()
     if (!email) return NextResponse.json({ error: 'Email requis' }, { status: 400 })

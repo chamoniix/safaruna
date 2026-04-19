@@ -3,8 +3,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { apiRatelimit, checkRateLimit } from '@/lib/ratelimit'
 
 export async function POST(req: NextRequest) {
+  const limited = await checkRateLimit(req, apiRatelimit)
+  if (limited) return limited
+
   const stripeKey = process.env.STRIPE_SECRET_KEY
   if (!stripeKey)
     return NextResponse.json({ error: 'Stripe non configuré' }, { status: 500 })

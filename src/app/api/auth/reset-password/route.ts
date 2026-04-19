@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import { authRatelimit, checkRateLimit } from '@/lib/ratelimit'
 
 export async function POST(req: NextRequest) {
+  const limited = await checkRateLimit(req, authRatelimit)
+  if (limited) return limited
+
   try {
     const { token, password } = await req.json()
     if (!token || !password) return NextResponse.json({ error: 'Token et mot de passe requis' }, { status: 400 })

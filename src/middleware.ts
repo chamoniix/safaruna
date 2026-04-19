@@ -9,8 +9,8 @@ export async function middleware(req: NextRequest) {
   if (pathname.startsWith('/admin')) {
     if (pathname === '/admin/login') return NextResponse.next();
     const session = req.cookies.get('admin_session')?.value;
-    const secret  = process.env.ADMIN_JWT_SECRET ?? '';
-    if (!session || !(await verifyAdminToken(session, secret))) {
+    const secret  = process.env.ADMIN_JWT_SECRET;
+    if (!secret || !session || !(await verifyAdminToken(session, secret))) {
       return NextResponse.redirect(new URL('/admin/login', req.url));
     }
     return NextResponse.next();
@@ -19,8 +19,8 @@ export async function middleware(req: NextRequest) {
   // ── Admin API routes (defense-in-depth) ───────────────
   if (pathname.startsWith('/api/admin')) {
     const session = req.cookies.get('admin_session')?.value;
-    const secret  = process.env.ADMIN_JWT_SECRET ?? '';
-    if (!session || !(await verifyAdminToken(session, secret))) {
+    const secret  = process.env.ADMIN_JWT_SECRET;
+    if (!secret || !session || !(await verifyAdminToken(session, secret))) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
     }
     return NextResponse.next();
@@ -30,7 +30,7 @@ export async function middleware(req: NextRequest) {
   if (pathname === '/guide/inscription') return NextResponse.next();
   if (pathname === '/guide/connexion') return NextResponse.next();
 
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET ?? '' });
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET ?? 'fallback-dev-only' });
   const role = (token?.role as string) || '';
 
   // ── Routes guide protégées → redirige vers /guide/connexion si pas GUIDE

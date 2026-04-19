@@ -14,8 +14,15 @@ export async function checkAdmin(req: NextRequest): Promise<boolean> {
   // Priority 1: valid admin JWT cookie (custom admin login)
   const adminToken = req.cookies.get('admin_session')?.value
   if (adminToken) {
-    const isValid = await verifyAdminToken(adminToken, process.env.ADMIN_JWT_SECRET ?? '')
+    const secret = process.env.ADMIN_JWT_SECRET
+    if (!secret) {
+      console.error('[SECURITY] ADMIN_JWT_SECRET manquant — accès admin refusé')
+      return false
+    }
+    const isValid = await verifyAdminToken(adminToken, secret)
     if (isValid) return true
+    // Cookie présent mais invalide → refus immédiat, pas de fallback NextAuth
+    return false
   }
 
   // Priority 2: NextAuth session (future-proof ADMIN role)

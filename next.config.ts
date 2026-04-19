@@ -34,12 +34,8 @@ const nextConfig: NextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=(), payment=(self "https://js.stripe.com")',
           },
-          {
-            key: 'Content-Security-Policy',
-            // unsafe-inline script-src: requis par Next.js hydration (migration nonce à prévoir)
-            // unsafe-eval retiré : non nécessaire en production
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com https://*.sentry.io; frame-src https://js.stripe.com https://checkout.stripe.com; img-src 'self' data: https:; connect-src 'self' https://api.stripe.com https://*.sentry.io https://*.ingest.de.sentry.io; font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; object-src 'none'; base-uri 'self'; form-action 'self' https://checkout.stripe.com; upgrade-insecure-requests",
-          },
+          // Content-Security-Policy is set dynamically by middleware (nonce-based)
+          // to eliminate 'unsafe-inline' from script-src.
         ],
       },
     ]

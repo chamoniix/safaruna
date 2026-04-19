@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { headers } from "next/headers";
 import "./globals.css";
 import ConditionalWhatsApp from "@/components/ConditionalWhatsApp";
 import Providers from "@/components/Providers";
@@ -45,11 +46,15 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Reading headers opts this layout into dynamic rendering, which is required
+  // for Next.js to extract and apply the per-request nonce from the CSP header.
+  const nonce = (await headers()).get('x-nonce') ?? '';
+  void nonce; // nonce is consumed automatically by Next.js from the CSP header
   return (
     <html lang="fr" className={`${cormorant.variable} ${manrope.variable}`}>
       <head>

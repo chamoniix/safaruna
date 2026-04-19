@@ -96,7 +96,9 @@ export async function GET(
           status: r.status,
           createdAt: r.createdAt,
         })),
-        iban: guide.ibanEncrypted || null,
+        ibanMasked: guide.ibanEncrypted
+          ? '••••' + guide.ibanEncrypted.slice(-4)
+          : null,
         availabilities: guide.availabilities.map(a => ({
           id: a.id,
           date: a.date.toISOString().split('T')[0],
@@ -133,7 +135,7 @@ export async function GET(
   } catch (err) {
     console.error('[admin/guides/slug GET]', err);
     return NextResponse.json(
-      { error: 'Erreur serveur', details: String(err) },
+      { error: 'Erreur serveur' },
       { status: 500 }
     );
   }

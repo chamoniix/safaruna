@@ -13,7 +13,7 @@ type Guide = {
   id: string; slug: string; bio: string | null; city: string | null;
   nationality: string | null; experienceYears: number | null; status: string;
   responseTimeAvg: string | null; completionRate: number | null;
-  iban: string | null;
+  ibanMasked: string | null;
   availabilities: { id: string; date: string; status: string }[];
   conversations: { id: string; pelerinName: string; lastMessage: string; lastMessageAt: string }[];
   user: { name: string | null; firstName: string | null; lastName: string | null; email: string | null; createdAt: string; phoneWhatsapp: string | null; image: string | null };
@@ -80,7 +80,6 @@ export default function AdminGuideDetailPage() {
   const [newPassword, setNewPassword]     = useState('');
   const [loadingAccess, setLoadingAccess] = useState(false);
 
-  const [ibanVisible, setIbanVisible] = useState(false);
 
   // Identity editing
   const [firstName, setFirstName]           = useState('');
@@ -704,17 +703,11 @@ export default function AdminGuideDetailPage() {
           <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Informations bancaires</div>
           <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>Données sensibles — accès restreint</div>
         </div>
-        {!guide.iban ? (
+        {!guide.ibanMasked ? (
           <div style={{ color: '#9CA3AF', fontSize: '0.85rem' }}>Aucun IBAN renseigné</div>
-        ) : !ibanVisible ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <div style={{ fontFamily: 'monospace', color: '#7A6D5A' }}>FR76 •••• •••• •••• •••• •••• •••</div>
-            <button onClick={() => setIbanVisible(true)} style={{ background: '#FEF3C7', color: '#92400E', border: '1px solid #FDE68A', borderRadius: 20, padding: '0.35rem 0.875rem', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Révéler</button>
-          </div>
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <div style={{ fontFamily: 'monospace', fontSize: '1rem', fontWeight: 700, color: '#1A1209', letterSpacing: '0.08em' }}>{guide.iban}</div>
-            <button onClick={() => setIbanVisible(false)} style={{ background: 'white', color: '#7A6D5A', border: '1px solid #E8DFC8', borderRadius: 20, padding: '0.35rem 0.875rem', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>Masquer</button>
+          <div style={{ fontFamily: 'monospace', color: '#7A6D5A', fontSize: '0.95rem' }}>
+            •••• •••• {guide.ibanMasked}
           </div>
         )}
       </div>

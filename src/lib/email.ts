@@ -2,6 +2,18 @@
 
 const BREVO_URL = 'https://api.brevo.com/v3/smtp/email';
 
+// ─── Sécurité : échappement HTML ────────────────────────────────
+// Toutes les données dynamiques (noms, messages, etc.) passent par
+// cette fonction avant injection dans les templates HTML.
+function escapeHtml(str: unknown): string {
+  return String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 interface EmailPayload {
   to: { email: string; name?: string };
   subject: string;
@@ -119,7 +131,7 @@ export function sendWelcomePelerin(to: string, name: string): Promise<void> {
     to: { email: to, name },
     subject: 'Bienvenue sur SAFARUMA — Votre compte est créé',
     html: baseTemplate(`
-      ${heading(`Bienvenue, ${name} !`)}
+      ${heading(`Bienvenue, ${escapeHtml(name)} !`)}
       ${p('Votre compte pèlerin a été créé avec succès. Vous rejoignez une communauté de confiance dédiée à accompagner les pèlerins lors de leur Omra.')}
       ${divider()}
       <table cellpadding="0" cellspacing="0" width="100%" style="margin:16px 0;">
@@ -152,7 +164,7 @@ export function sendWelcomeGuide(to: string, name: string): Promise<void> {
     to: { email: to, name },
     subject: 'Candidature reçue — SAFARUMA Guide',
     html: baseTemplate(`
-      ${heading(`Barak Allahu fik, ${name} !`)}
+      ${heading(`Barak Allahu fik, ${escapeHtml(name)} !`)}
       ${p('BarakAllahu fik. L\'équipe SAFARUMA a bien reçu votre candidature en tant que guide Certifié SAFARUMA. Nous l\'examinerons insha\'Allah et vous contacterons sous <strong>48h</strong>.')}
       ${divider()}
       <div style="background:#FAF7F0;border-left:3px solid #C9A84C;padding:16px 20px;border-radius:0 12px 12px 0;margin:16px 0;">
@@ -184,7 +196,7 @@ export function sendGuideAccess(opts: {
     to: { email: to, name },
     subject: 'Vos accès Guide SAFARUMA — Bienvenue !',
     html: baseTemplate(`
-      ${heading(`Barak Allahu fik, ${name} !`)}
+      ${heading(`Barak Allahu fik, ${escapeHtml(name)} !`)}
       ${badge('PROFIL VALIDÉ ✓', '#1D5C3A')}
       ${p('Votre dossier a été examiné et approuvé par l\'équipe SAFARUMA. Votre profil guide est maintenant actif et visible par les pèlerins.')}
       ${divider()}
@@ -193,11 +205,11 @@ export function sendGuideAccess(opts: {
         <table cellpadding="0" cellspacing="0" width="100%">
           <tr>
             <td style="font-size:12px;color:rgba(255,255,255,0.5);padding:6px 0;width:40%;">Email</td>
-            <td style="font-size:13px;color:#F0D897;font-weight:700;font-family:monospace;">${email}</td>
+            <td style="font-size:13px;color:#F0D897;font-weight:700;font-family:monospace;">${escapeHtml(email)}</td>
           </tr>
           <tr>
             <td style="font-size:12px;color:rgba(255,255,255,0.5);padding:6px 0;">Mot de passe</td>
-            <td style="font-size:13px;color:#C9A84C;font-weight:700;font-family:monospace;">${password}</td>
+            <td style="font-size:13px;color:#C9A84C;font-weight:700;font-family:monospace;">${escapeHtml(password)}</td>
           </tr>
         </table>
         <div style="margin-top:12px;font-size:11px;color:rgba(255,255,255,0.3);">Changez votre mot de passe dès votre première connexion.</div>
@@ -229,14 +241,14 @@ export function sendReservationConfirmation(opts: {
     html: baseTemplate(`
       ${heading('Réservation confirmée')}
       ${badge('CONFIRMÉE', '#4CAF9A')}
-      ${p(`Votre réservation avec <strong>${guideName}</strong> est confirmée. Qu'Allah accepte votre Omra et vous facilite le voyage.`)}
+      ${p(`Votre réservation avec <strong>${escapeHtml(guideName)}</strong> est confirmée. Qu'Allah accepte votre Omra et vous facilite le voyage.`)}
       ${divider()}
       <table cellpadding="0" cellspacing="0" width="100%">
         ${[
-          ['Référence', reservationId],
-          ['Guide', guideName],
-          ['Date de départ', departureDate],
-          ['Durée', `${nights} nuits`],
+          ['Référence', escapeHtml(reservationId)],
+          ['Guide', escapeHtml(guideName)],
+          ['Date de départ', escapeHtml(departureDate)],
+          ['Durée', `${escapeHtml(nights)} nuits`],
           ['Montant total', `${amount.toLocaleString('fr-FR')} €`],
         ].map(([k, v]) => `
           <tr>
@@ -269,10 +281,10 @@ export function sendMessageNotification(opts: {
     subject: `Nouveau message de ${senderName}`,
     html: baseTemplate(`
       ${heading('Nouveau message')}
-      ${p(`<strong>${senderName}</strong> vous a envoyé un message sur SAFARUMA :`)}
+      ${p(`<strong>${escapeHtml(senderName)}</strong> vous a envoyé un message sur SAFARUMA :`)}
       <div style="background:#FAF7F0;border:1px solid #E8DFC8;border-radius:12px;padding:20px;margin:16px 0;">
-        <div style="font-size:14px;color:#4A3F30;line-height:1.7;font-style:italic;">"${preview}"</div>
-        <div style="margin-top:12px;font-size:12px;color:#9A8D7A;">— ${senderName}</div>
+        <div style="font-size:14px;color:#4A3F30;line-height:1.7;font-style:italic;">"${escapeHtml(preview)}"</div>
+        <div style="margin-top:12px;font-size:12px;color:#9A8D7A;">— ${escapeHtml(senderName)}</div>
       </div>
       ${divider()}
       <div style="text-align:center;padding:8px 0;">
@@ -296,7 +308,7 @@ export function sendPasswordReset(opts: {
     subject: 'Réinitialisation de votre mot de passe — SAFARUMA',
     html: baseTemplate(`
       ${heading('Réinitialiser votre mot de passe')}
-      ${p(`Bonjour${name ? ' ' + name : ''},`)}
+      ${p(`Bonjour${name ? ' ' + escapeHtml(name) : ''},`)}
       ${p('Vous avez demandé la réinitialisation de votre mot de passe SAFARUMA. Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe.')}
       ${divider()}
       <div style="text-align:center;padding:16px 0;">
@@ -328,17 +340,17 @@ export function sendDepartureReminder(opts: {
     html: baseTemplate(`
       ${heading('Votre départ approche')}
       ${badge('J - 7', '#7B6CF6')}
-      ${p(`Qu'Allah vous facilite le voyage. Votre Omra avec <strong>${guideName}</strong> est dans <strong>7 jours</strong>.`)}
+      ${p(`Qu'Allah vous facilite le voyage. Votre Omra avec <strong>${escapeHtml(guideName)}</strong> est dans <strong>7 jours</strong>.`)}
       ${divider()}
       <div style="background:#1A1209;border-radius:12px;padding:24px;margin:16px 0;text-align:center;">
         <div style="font-size:12px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:8px;">Date de départ</div>
-        <div style="font-family:Georgia,serif;font-size:28px;color:#F0D897;font-weight:300;">${departureDate}</div>
+        <div style="font-family:Georgia,serif;font-size:28px;color:#F0D897;font-weight:300;">${escapeHtml(departureDate)}</div>
       </div>
       ${divider()}
       <div style="background:#FAF7F0;border-radius:12px;padding:20px;margin:16px 0;">
         <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#C9A84C;margin-bottom:12px;">Contact de votre guide</div>
-        <div style="font-size:14px;font-weight:600;color:#1A1209;">${guideName}</div>
-        <div style="font-size:13px;color:#7A6D5A;margin-top:4px;">WhatsApp : <a href="https://wa.me/${guidePhone.replace(/\s/g,'')}" style="color:#C9A84C;">${guidePhone}</a></div>
+        <div style="font-size:14px;font-weight:600;color:#1A1209;">${escapeHtml(guideName)}</div>
+        <div style="font-size:13px;color:#7A6D5A;margin-top:4px;">WhatsApp : <a href="https://wa.me/${encodeURIComponent(guidePhone.replace(/\s/g,''))}" style="color:#C9A84C;">${escapeHtml(guidePhone)}</a></div>
       </div>
       <div style="background:#FAF7F0;border-radius:12px;padding:20px;margin:16px 0;">
         <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#C9A84C;margin-bottom:12px;">Checklist avant départ</div>

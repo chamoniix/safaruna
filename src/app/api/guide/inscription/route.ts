@@ -2,17 +2,29 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { sendWelcomeGuide } from '@/lib/email';
+import { z } from 'zod';
+
+const inscriptionSchema = z.object({
+  firstName:       z.string().min(1).max(50),
+  lastName:        z.string().min(1).max(50),
+  email:           z.string().email().max(254),
+  whatsapp:        z.string().max(20).optional(),
+  city:            z.string().max(100).optional(),
+  nationality:     z.string().max(100).optional(),
+  bio:             z.string().max(2000).optional(),
+  experienceYears: z.number().int().min(0).max(60).optional(),
+  languages:       z.array(z.string().max(10)).max(20).optional(),
+  iban:            z.string().max(34).regex(/^[A-Z]{2}\d{2}[A-Z0-9]+$/, 'IBAN invalide').optional().or(z.literal('')),
+  acceptedCharte:  z.literal(true, { error: 'Vous devez accepter la charte islamique.' }),
+});
 
 export async function POST(req: NextRequest) {
-  const body = await req.json();
-  const { firstName, lastName, email, whatsapp, city, nationality, bio, experienceYears, languages, iban, acceptedCharte } = body;
-
-  if (!acceptedCharte) {
-    return NextResponse.json({ error: 'Vous devez accepter la charte islamique.' }, { status: 400 });
+  const raw = await req.json();
+  const parsed = inscriptionSchema.safeParse(raw);
+  if (!parsed.success) {
+    return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Données invalides' }, { status: 400 });
   }
-  if (!firstName || !lastName || !email) {
-    return NextResponse.json({ error: 'Prénom, nom et email sont obligatoires.' }, { status: 400 });
-  }
+  const { firstName, lastName, email, whatsapp, city, nationality, bio, experienceYears, languages, iban } = parsed.data;
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {

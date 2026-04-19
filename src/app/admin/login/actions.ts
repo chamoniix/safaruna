@@ -27,7 +27,7 @@ export async function adminLogin(formData: FormData) {
   store.set('admin_session', token, {
     httpOnly: true,
     secure:   process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    sameSite: 'strict',
     maxAge:   8 * 3600,
     path:     '/',
   });

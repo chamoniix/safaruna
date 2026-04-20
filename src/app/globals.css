@@ -404,7 +404,7 @@ footer div::-webkit-scrollbar { display: none; }
   .footer-top {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0;
+    gap: 2rem;
     padding: 0;
   }
   .footer-brand {
@@ -459,4 +459,46 @@ footer div::-webkit-scrollbar { display: none; }
   .guide-omra-inner { flex-direction: column !important; gap: 1rem !important; }
   .guide-omra-tags { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; width: 100%; }
   .guide-omra-cta { display: block; width: 100%; text-align: center; margin-top: 0.5rem; }
+  footer {
+    padding: 32px 20px 24px !important;
+  }
+  .footer-top {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 2rem !important;
+    padding-bottom: 1.5rem !important;
+  }
+  .footer-brand {
+    grid-column: 1 / -1;
+    padding: 0 0 1.5rem 0 !important;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 0.5rem;
+  }
+  .footer-brand p {
+    font-size: 0.8rem !important;
+    line-height: 1.6 !important;
+  }
+  .footer-col {
+    padding: 0.75rem 0 !important;
+  }
+  .footer-col h4 {
+    margin-bottom: 0.75rem !important;
+    font-size: 0.75rem !important;
+  }
+  .footer-col ul li {
+    margin-bottom: 0.75rem !important;
+  }
+  .footer-col ul li a {
+    font-size: 0.82rem !important;
+    line-height: 1.5 !important;
+  }
+  .footer-bottom {
+    padding-top: 1.25rem !important;
+    gap: 0.5rem !important;
+    flex-direction: column !important;
+    text-align: center !important;
+  }
+  .footer-social-section {
+    padding-top: 1.25rem !important;
+    margin-bottom: 1.25rem !important;
+  }
 }

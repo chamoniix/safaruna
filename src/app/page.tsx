@@ -353,9 +353,21 @@ export default function Home() {
           <h2 className="reveal reveal-d1">
             Des guides qui <em>parlent ta langue</em>
           </h2>
-          <p className="reveal reveal-d2" style={{ color: 'var(--muted)', maxWidth: 520, lineHeight: 1.75, marginBottom: '3rem', fontSize: '0.9rem' }}>
-            Moins d&apos;1 guide sur 10 est accepté. Chaque candidat passe un entretien exigeant avant d&apos;obtenir la <Link href="/certification" style={{ color: 'var(--gold-dark)', textDecoration: 'underline' }}>Certification SAFARUMA</Link>.
-          </p>
+          <div className="reveal reveal-d2" style={{ maxWidth: 520, marginBottom: '3rem' }}>
+            <p style={{ color: 'var(--muted)', lineHeight: 1.75, fontSize: '0.9rem', margin: '0 0 0.75rem' }}>
+              Moins d&apos;1 guide sur 10 est accepté. Chaque candidat passe un entretien exigeant avant d&apos;obtenir la Certification SAFARUMA.
+            </p>
+            <Link href="/certification" style={{
+              display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+              fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.06em',
+              color: 'var(--gold-dark)', textDecoration: 'none',
+              border: '1px solid var(--gold-dark)', borderRadius: 50,
+              padding: '0.3rem 0.85rem',
+              transition: 'background 0.2s, color 0.2s',
+            }}>
+              En savoir plus sur la certification →
+            </Link>
+          </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
             {GUIDES_VEDETTE.map((g, i) => (

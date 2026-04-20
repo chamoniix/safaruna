@@ -605,7 +605,7 @@ export default function Home() {
                   ))}
                 </div>
                 <div style={{ fontSize: '.75rem', color: 'var(--muted)', marginBottom: '1.25rem' }}>
-                  Dès{' '}<span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: 'var(--deep)' }}>99€</span>{' '}· pack complet
+                  <span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: 'var(--deep)' }}>99€</span>{' '}pour toute votre famille ou vos proches · max 7
                 </div>
                 <div style={{ display: 'inline-block', background: 'var(--deep)', color: '#F0D897', fontSize: '.78rem', fontWeight: 700, padding: '.6rem 1.25rem', borderRadius: 50, letterSpacing: '.04em' }}>
                   Choisir mon guide
@@ -637,7 +637,7 @@ export default function Home() {
                   ))}
                 </div>
                 <div style={{ fontSize: '.75rem', color: 'var(--muted)', marginBottom: '1.25rem' }}>
-                  Dès{' '}<span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: 'var(--deep)' }}>99€</span>{' '}· pack complet
+                  <span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: 'var(--deep)' }}>99€</span>{' '}pour toute votre famille ou vos proches · max 7
                 </div>
                 <div style={{ display: 'inline-block', background: '#C9A84C', color: '#1A1209', fontSize: '.78rem', fontWeight: 700, padding: '.6rem 1.25rem', borderRadius: 50, letterSpacing: '.04em' }}>
                   Choisir mon guide
@@ -666,7 +666,7 @@ export default function Home() {
                   ))}
                 </div>
                 <div style={{ fontSize: '.75rem', color: 'var(--muted)', marginBottom: '1.25rem' }}>
-                  Dès{' '}<span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: 'var(--deep)' }}>99€</span>{' '}+ 39€ PMR
+                  <span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: 'var(--deep)' }}>99€</span>{' '}+ 39€ PMR · pour toute votre famille ou vos proches · max 7
                 </div>
                 <div style={{ display: 'inline-block', background: 'var(--deep)', color: '#F0D897', fontSize: '.78rem', fontWeight: 700, padding: '.6rem 1.25rem', borderRadius: 50, letterSpacing: '.04em' }}>
                   Choisir mon guide

@@ -532,6 +532,163 @@ export default function Home() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
+          TÉMOIGNAGES — border gauche dorée
+          ═══════════════════════════════════════════════════════ */}
+      <section style={{ background: 'white', padding: 'clamp(2.5rem, 6vw, 6rem) clamp(1rem, 4vw, 4rem)', borderTop: '1px solid var(--sand)' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div className="section-label reveal">Témoignages</div>
+          <h2 className="reveal reveal-d1" style={{ marginBottom: '3rem' }}>
+            Ce que disent nos <em>pèlerins</em>
+          </h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '1.5rem' }}>
+            {TEMOIGNAGES.map((t, i) => (
+              <div key={t.name} className={`reveal reveal-d${i + 1}`} style={{
+                background: 'var(--cream)', borderRadius: 16, padding: '1.75rem',
+                borderLeft: '3px solid var(--gold)',
+                boxShadow: '0 2px 12px rgba(26,18,9,0.04)',
+              }}>
+                <div style={{ color: 'var(--gold)', fontSize: '1.5rem', lineHeight: 1, marginBottom: '1rem', fontFamily: 'var(--font-cormorant, serif)' }}>&ldquo;</div>
+                <p style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.05rem', fontStyle: 'italic', color: 'var(--deep)', lineHeight: 1.65, marginBottom: '1.5rem' }}>{t.text}</p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--sand)', paddingTop: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--sand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.82rem', color: 'var(--warm)', flexShrink: 0 }}>{t.init}</div>
+                    <div>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--deep)' }}>{t.name}</div>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--muted)' }}>{t.city}</div>
+                    </div>
+                  </div>
+                  <div>
+                    <div style={{ color: 'var(--gold)', fontSize: '0.72rem', letterSpacing: 2, textAlign: 'right' }}>{'★'.repeat(t.rating)}</div>
+                    <div style={{ fontSize: '0.65rem', color: 'var(--muted)', textAlign: 'right' }}>{t.date}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          PORTES D'ENTRÉE ÉMOTIONNELLES
+          ═══════════════════════════════════════════════════════ */}
+      <section style={{ background: 'var(--cream)', padding: 'clamp(2.5rem, 6vw, 6rem) clamp(1rem, 4vw, 4rem)', borderTop: '1px solid var(--sand)' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+
+          <div className="section-label reveal" style={{ textAlign: 'center' }}>Quelle Omra vous ressemble ?</div>
+          <h2 className="reveal reveal-d1" style={{ textAlign: 'center', marginBottom: '.5rem' }}>
+            Choisissez <em>votre expérience</em>
+          </h2>
+          <p className="reveal reveal-d2" style={{ textAlign: 'center', color: 'var(--muted)', maxWidth: 480, margin: '0 auto 3rem', lineHeight: 1.75, fontSize: '.9rem' }}>
+            Pas un forfait rigide, une expérience construite autour de vous.
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
+
+            {/* CARTE 1 — Ma première Omra */}
+            <Link href="/guides" className="reveal reveal-d1" style={{ textDecoration: 'none' }}>
+              <div style={{ background: 'white', border: '1px solid var(--sand)', borderRadius: 16, padding: '1.75rem', height: '100%', cursor: 'pointer' }}>
+                <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#FAF3E0', border: '1px solid rgba(201,168,76,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+                  <IconMoon size={20} stroke="#C9A84C" />
+                </div>
+                <span style={{ display: 'inline-block', fontSize: '.65rem', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: '#8B6914', background: 'rgba(201,168,76,.12)', padding: '.2rem .6rem', borderRadius: 50, marginBottom: '.75rem' }}>
+                  Ma première Omra
+                </span>
+                <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--deep)', marginBottom: '.5rem' }}>
+                  Comprendre chaque geste, dans ta langue
+                </h3>
+                <p style={{ fontSize: '.82rem', color: 'var(--muted)', lineHeight: 1.7, marginBottom: '1rem' }}>
+                  Un guide privé certifié qui t&apos;explique chaque rituel de la Omra. Tawaf, sa&apos;i, du&apos;as, tu rentres transformé.
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.3rem', marginBottom: '1rem' }}>
+                  {['Makkah', '1 à 7 pers.', 'Guide privé'].map(t => (
+                    <span key={t} style={{ fontSize: '.65rem', fontWeight: 700, color: '#8B6914', background: 'rgba(201,168,76,.1)', border: '1px solid rgba(201,168,76,.2)', padding: '.15rem .5rem', borderRadius: 50 }}>{t}</span>
+                  ))}
+                </div>
+                <div style={{ fontSize: '.75rem', color: 'var(--muted)', marginBottom: '1.25rem' }}>
+                  Dès{' '}<span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: 'var(--deep)' }}>99€</span>{' '}· pack complet
+                </div>
+                <div style={{ display: 'inline-block', background: 'var(--deep)', color: '#F0D897', fontSize: '.78rem', fontWeight: 700, padding: '.6rem 1.25rem', borderRadius: 50, letterSpacing: '.04em' }}>
+                  Choisir mon guide
+                </div>
+              </div>
+            </Link>
+
+            {/* CARTE 2 — En famille (featured) */}
+            <Link href="/guides" className="reveal reveal-d2" style={{ textDecoration: 'none', position: 'relative' }}>
+              <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', background: '#C9A84C', color: '#1A1209', fontSize: '.6rem', fontWeight: 800, padding: '.2rem .75rem', borderRadius: 50, whiteSpace: 'nowrap', zIndex: 1 }}>
+                Le plus choisi
+              </div>
+              <div style={{ background: 'white', border: '2px solid #C9A84C', borderRadius: 16, padding: '1.75rem', height: '100%', cursor: 'pointer' }}>
+                <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#1A1209', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+                  <IconUserGroup size={20} stroke="#C9A84C" />
+                </div>
+                <span style={{ display: 'inline-block', fontSize: '.65rem', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: '#F0D897', background: '#1A1209', padding: '.2rem .6rem', borderRadius: 50, marginBottom: '.75rem' }}>
+                  L&apos;Omra en famille
+                </span>
+                <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--deep)', marginBottom: '.5rem' }}>
+                  Un moment que toute la famille vivra
+                </h3>
+                <p style={{ fontSize: '.82rem', color: 'var(--muted)', lineHeight: 1.7, marginBottom: '1rem' }}>
+                  Guide adapté aux enfants, aux personnes âgées et PMR. Makkah et Madinah à votre rythme, dans votre langue.
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.3rem', marginBottom: '1rem' }}>
+                  {['Makkah + Madinah', 'Famille', 'PMR'].map(t => (
+                    <span key={t} style={{ fontSize: '.65rem', fontWeight: 700, color: '#8B6914', background: 'rgba(201,168,76,.1)', border: '1px solid rgba(201,168,76,.2)', padding: '.15rem .5rem', borderRadius: 50 }}>{t}</span>
+                  ))}
+                </div>
+                <div style={{ fontSize: '.75rem', color: 'var(--muted)', marginBottom: '1.25rem' }}>
+                  Dès{' '}<span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: 'var(--deep)' }}>99€</span>{' '}· pack complet
+                </div>
+                <div style={{ display: 'inline-block', background: '#C9A84C', color: '#1A1209', fontSize: '.78rem', fontWeight: 700, padding: '.6rem 1.25rem', borderRadius: 50, letterSpacing: '.04em' }}>
+                  Choisir mon guide
+                </div>
+              </div>
+            </Link>
+
+            {/* CARTE 3 — PMR & parents */}
+            <Link href="/guides?pmr=true" className="reveal reveal-d3" style={{ textDecoration: 'none' }}>
+              <div style={{ background: 'white', border: '1px solid var(--sand)', borderRadius: 16, padding: '1.75rem', height: '100%', cursor: 'pointer' }}>
+                <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#F0F8F5', border: '1px solid rgba(29,92,58,.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
+                  <IconAccessibility size={20} stroke="#C9A84C" />
+                </div>
+                <span style={{ display: 'inline-block', fontSize: '.65rem', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: '#1D5C3A', background: 'rgba(29,92,58,.1)', padding: '.2rem .6rem', borderRadius: 50, marginBottom: '.75rem' }}>
+                  Omra PMR &amp; parents
+                </span>
+                <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--deep)', marginBottom: '.5rem' }}>
+                  Votre parent mérite de faire le tawaf
+                </h3>
+                <p style={{ fontSize: '.82rem', color: 'var(--muted)', lineHeight: 1.7, marginBottom: '1rem' }}>
+                  Fauteuil roulant, mobilité réduite, personne âgée, prise en charge totale. Guide PMR certifié SAFARUMA. Tawaf en fauteuil inclus.
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.3rem', marginBottom: '1rem' }}>
+                  {['PMR inclus', 'Transport adapté', 'Tawaf fauteuil'].map(t => (
+                    <span key={t} style={{ fontSize: '.65rem', fontWeight: 700, color: '#8B6914', background: 'rgba(201,168,76,.1)', border: '1px solid rgba(201,168,76,.2)', padding: '.15rem .5rem', borderRadius: 50 }}>{t}</span>
+                  ))}
+                </div>
+                <div style={{ fontSize: '.75rem', color: 'var(--muted)', marginBottom: '1.25rem' }}>
+                  Dès{' '}<span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: 'var(--deep)' }}>99€</span>{' '}+ 39€ PMR
+                </div>
+                <div style={{ display: 'inline-block', background: 'var(--deep)', color: '#F0D897', fontSize: '.78rem', fontWeight: 700, padding: '.6rem 1.25rem', borderRadius: 50, letterSpacing: '.04em' }}>
+                  Choisir mon guide
+                </div>
+              </div>
+            </Link>
+
+          </div>
+
+          <div style={{ background: 'white', border: '1px solid var(--sand)', borderRadius: 12, padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }} className="reveal">
+            <p style={{ fontSize: '.85rem', color: 'var(--muted)', margin: 0 }}>
+              Vous avez une demande spécifique ? Composez votre Omra librement.
+            </p>
+            <Link href="/guides" className="btn-secondary" style={{ fontSize: '.82rem', whiteSpace: 'nowrap' }}>
+              Voir tous les guides
+            </Link>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
           LIEUX SAINTS — 6 cards avec hover arabique
           ═══════════════════════════════════════════════════════ */}
       <section style={{ background: 'var(--cream)', padding: 'clamp(2.5rem, 6vw, 6rem) clamp(1rem, 4vw, 4rem)', borderTop: '1px solid var(--sand)' }}>
@@ -621,163 +778,6 @@ export default function Home() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════
-          TÉMOIGNAGES — border gauche dorée
-          ═══════════════════════════════════════════════════════ */}
-      <section style={{ background: 'white', padding: 'clamp(2.5rem, 6vw, 6rem) clamp(1rem, 4vw, 4rem)', borderTop: '1px solid var(--sand)' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <div className="section-label reveal">Témoignages</div>
-          <h2 className="reveal reveal-d1" style={{ marginBottom: '3rem' }}>
-            Ce que disent nos <em>pèlerins</em>
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '1.5rem' }}>
-            {TEMOIGNAGES.map((t, i) => (
-              <div key={t.name} className={`reveal reveal-d${i + 1}`} style={{
-                background: 'var(--cream)', borderRadius: 16, padding: '1.75rem',
-                borderLeft: '3px solid var(--gold)',
-                boxShadow: '0 2px 12px rgba(26,18,9,0.04)',
-              }}>
-                <div style={{ color: 'var(--gold)', fontSize: '1.5rem', lineHeight: 1, marginBottom: '1rem', fontFamily: 'var(--font-cormorant, serif)' }}>&ldquo;</div>
-                <p style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.05rem', fontStyle: 'italic', color: 'var(--deep)', lineHeight: 1.65, marginBottom: '1.5rem' }}>{t.text}</p>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--sand)', paddingTop: '1rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--sand)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.82rem', color: 'var(--warm)', flexShrink: 0 }}>{t.init}</div>
-                    <div>
-                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--deep)' }}>{t.name}</div>
-                      <div style={{ fontSize: '0.7rem', color: 'var(--muted)' }}>{t.city}</div>
-                    </div>
-                  </div>
-                  <div>
-                    <div style={{ color: 'var(--gold)', fontSize: '0.72rem', letterSpacing: 2, textAlign: 'right' }}>{'★'.repeat(t.rating)}</div>
-                    <div style={{ fontSize: '0.65rem', color: 'var(--muted)', textAlign: 'right' }}>{t.date}</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════
-          PORTES D'ENTRÉE ÉMOTIONNELLES
-          ═══════════════════════════════════════════════════════ */}
-      <section style={{ background: 'var(--cream)', padding: 'clamp(2.5rem, 6vw, 6rem) clamp(1rem, 4vw, 4rem)', borderTop: '1px solid var(--sand)' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-
-          <div className="section-label reveal" style={{ textAlign: 'center' }}>Quelle Omra vous ressemble ?</div>
-          <h2 className="reveal reveal-d1" style={{ textAlign: 'center', marginBottom: '.5rem' }}>
-            Choisissez <em>votre expérience</em>
-          </h2>
-          <p className="reveal reveal-d2" style={{ textAlign: 'center', color: 'var(--muted)', maxWidth: 480, margin: '0 auto 3rem', lineHeight: 1.75, fontSize: '.9rem' }}>
-            Pas un forfait rigide — une expérience construite autour de vous.
-          </p>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem', marginBottom: '1.5rem' }}>
-
-            {/* CARTE 1 — Ma première Omra */}
-            <Link href="/guides" className="reveal reveal-d1" style={{ textDecoration: 'none' }}>
-              <div style={{ background: 'white', border: '1px solid var(--sand)', borderRadius: 16, padding: '1.75rem', height: '100%', cursor: 'pointer' }}>
-                <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#FAF3E0', border: '1px solid rgba(201,168,76,.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
-                  <IconMoon size={20} stroke="#C9A84C" />
-                </div>
-                <span style={{ display: 'inline-block', fontSize: '.65rem', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: '#8B6914', background: 'rgba(201,168,76,.12)', padding: '.2rem .6rem', borderRadius: 50, marginBottom: '.75rem' }}>
-                  Ma première Omra
-                </span>
-                <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--deep)', marginBottom: '.5rem' }}>
-                  Comprendre chaque geste, dans ta langue
-                </h3>
-                <p style={{ fontSize: '.82rem', color: 'var(--muted)', lineHeight: 1.7, marginBottom: '1rem' }}>
-                  Un guide privé certifié qui t&apos;explique chaque rituel de la Omra. Tawaf, sa&apos;i, du&apos;as — tu rentres transformé.
-                </p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.3rem', marginBottom: '1rem' }}>
-                  {['Makkah', '1 à 7 pers.', 'Guide privé'].map(t => (
-                    <span key={t} style={{ fontSize: '.65rem', fontWeight: 700, color: '#8B6914', background: 'rgba(201,168,76,.1)', border: '1px solid rgba(201,168,76,.2)', padding: '.15rem .5rem', borderRadius: 50 }}>{t}</span>
-                  ))}
-                </div>
-                <div style={{ fontSize: '.75rem', color: 'var(--muted)', marginBottom: '1.25rem' }}>
-                  Dès{' '}<span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: 'var(--deep)' }}>99€</span>{' '}· pack complet
-                </div>
-                <div style={{ display: 'inline-block', background: 'var(--deep)', color: '#F0D897', fontSize: '.78rem', fontWeight: 700, padding: '.6rem 1.25rem', borderRadius: 50, letterSpacing: '.04em' }}>
-                  Choisir mon guide
-                </div>
-              </div>
-            </Link>
-
-            {/* CARTE 2 — En famille (featured) */}
-            <Link href="/guides" className="reveal reveal-d2" style={{ textDecoration: 'none', position: 'relative' }}>
-              <div style={{ position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)', background: '#C9A84C', color: '#1A1209', fontSize: '.6rem', fontWeight: 800, padding: '.2rem .75rem', borderRadius: 50, whiteSpace: 'nowrap', zIndex: 1 }}>
-                Le plus choisi
-              </div>
-              <div style={{ background: 'white', border: '2px solid #C9A84C', borderRadius: 16, padding: '1.75rem', height: '100%', cursor: 'pointer' }}>
-                <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#1A1209', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
-                  <IconUserGroup size={20} stroke="#C9A84C" />
-                </div>
-                <span style={{ display: 'inline-block', fontSize: '.65rem', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: '#F0D897', background: '#1A1209', padding: '.2rem .6rem', borderRadius: 50, marginBottom: '.75rem' }}>
-                  L&apos;Omra en famille
-                </span>
-                <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--deep)', marginBottom: '.5rem' }}>
-                  Un moment que toute la famille vivra
-                </h3>
-                <p style={{ fontSize: '.82rem', color: 'var(--muted)', lineHeight: 1.7, marginBottom: '1rem' }}>
-                  Guide adapté aux enfants, aux personnes âgées et PMR. Makkah et Madinah à votre rythme, dans votre langue.
-                </p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.3rem', marginBottom: '1rem' }}>
-                  {['Makkah + Madinah', 'Famille', 'PMR'].map(t => (
-                    <span key={t} style={{ fontSize: '.65rem', fontWeight: 700, color: '#8B6914', background: 'rgba(201,168,76,.1)', border: '1px solid rgba(201,168,76,.2)', padding: '.15rem .5rem', borderRadius: 50 }}>{t}</span>
-                  ))}
-                </div>
-                <div style={{ fontSize: '.75rem', color: 'var(--muted)', marginBottom: '1.25rem' }}>
-                  Dès{' '}<span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: 'var(--deep)' }}>99€</span>{' '}· pack complet
-                </div>
-                <div style={{ display: 'inline-block', background: '#C9A84C', color: '#1A1209', fontSize: '.78rem', fontWeight: 700, padding: '.6rem 1.25rem', borderRadius: 50, letterSpacing: '.04em' }}>
-                  Choisir mon guide
-                </div>
-              </div>
-            </Link>
-
-            {/* CARTE 3 — PMR & parents */}
-            <Link href="/guides?pmr=true" className="reveal reveal-d3" style={{ textDecoration: 'none' }}>
-              <div style={{ background: 'white', border: '1px solid var(--sand)', borderRadius: 16, padding: '1.75rem', height: '100%', cursor: 'pointer' }}>
-                <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#F0F8F5', border: '1px solid rgba(29,92,58,.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem' }}>
-                  <IconAccessibility size={20} stroke="#C9A84C" />
-                </div>
-                <span style={{ display: 'inline-block', fontSize: '.65rem', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: '#1D5C3A', background: 'rgba(29,92,58,.1)', padding: '.2rem .6rem', borderRadius: 50, marginBottom: '.75rem' }}>
-                  Omra PMR &amp; parents
-                </span>
-                <h3 style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--deep)', marginBottom: '.5rem' }}>
-                  Votre parent mérite de faire le tawaf
-                </h3>
-                <p style={{ fontSize: '.82rem', color: 'var(--muted)', lineHeight: 1.7, marginBottom: '1rem' }}>
-                  Fauteuil roulant, mobilité réduite, personne âgée — prise en charge totale. Guide PMR certifié SAFARUMA. Tawaf en fauteuil inclus.
-                </p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '.3rem', marginBottom: '1rem' }}>
-                  {['PMR inclus', 'Transport adapté', 'Tawaf fauteuil'].map(t => (
-                    <span key={t} style={{ fontSize: '.65rem', fontWeight: 700, color: '#8B6914', background: 'rgba(201,168,76,.1)', border: '1px solid rgba(201,168,76,.2)', padding: '.15rem .5rem', borderRadius: 50 }}>{t}</span>
-                  ))}
-                </div>
-                <div style={{ fontSize: '.75rem', color: 'var(--muted)', marginBottom: '1.25rem' }}>
-                  Dès{' '}<span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: 'var(--deep)' }}>99€</span>{' '}+ 39€ PMR
-                </div>
-                <div style={{ display: 'inline-block', background: 'var(--deep)', color: '#F0D897', fontSize: '.78rem', fontWeight: 700, padding: '.6rem 1.25rem', borderRadius: 50, letterSpacing: '.04em' }}>
-                  Choisir mon guide
-                </div>
-              </div>
-            </Link>
-
-          </div>
-
-          <div style={{ background: 'white', border: '1px solid var(--sand)', borderRadius: 12, padding: '1rem 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }} className="reveal">
-            <p style={{ fontSize: '.85rem', color: 'var(--muted)', margin: 0 }}>
-              Vous avez une demande spécifique ? Composez votre Omra librement.
-            </p>
-            <Link href="/guides" className="btn-secondary" style={{ fontSize: '.82rem', whiteSpace: 'nowrap' }}>
-              Voir tous les guides
-            </Link>
-          </div>
-
-        </div>
-      </section>
-
-      {/* ═══════════════════════════════════════════════════════
           GUIDE OMRA — carte premium
           ═══════════════════════════════════════════════════════ */}
       <section className="guide-omra-promo-card-section" style={{ background: 'var(--cream)', padding: '2rem 2rem', borderTop: '1px solid var(--sand)' }}>
@@ -798,7 +798,7 @@ export default function Home() {
                 <div style={{ flex: 1, minWidth: 220 }}>
                   <span style={{ display: 'inline-block', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(201,168,76,0.85)', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', padding: '0.22rem 0.65rem', borderRadius: 4, marginBottom: '0.7rem' }}>Guide de la Omra</span>
                   <h3 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(1.4rem, 3vw, 1.9rem)', color: 'white', margin: '0 0 0.65rem', lineHeight: 1.2, fontWeight: 400 }}>Guide complet de la Omra</h3>
-                  <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.8, margin: 0 }}>Ihram, Tawaf, Sa&apos;i, Tahallul — chaque rituel expliqué avec ses du&apos;as, significations spirituelles et checklist de préparation.</p>
+                  <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.8, margin: 0 }}>Ihram, Tawaf, Sa&apos;i, Tahallul, chaque rituel expliqué avec ses du&apos;as, significations spirituelles et checklist de préparation.</p>
                 </div>
                 <div className="guide-omra-tags" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem', flexShrink: 0 }}>
                   {['Ihram & Talbiyyah', 'Tawaf — 7 tours', "Sa'i — Safa & Marwa", 'Tahallul', "Du'as essentielles", 'Checklist complète'].map(tag => (

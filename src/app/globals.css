@@ -99,19 +99,6 @@ h2 em { font-style: italic; color: var(--gold-dark); }
 .guide-price-dark small { font-family: var(--font-manrope), 'Manrope', sans-serif; font-size: 0.7rem; color: rgba(255,255,255,0.4); font-weight: 400; }
 .btn-book-dark { background: var(--gold); color: var(--deep); padding: 0.5rem 1.1rem; border-radius: 50px; font-size: 0.78rem; font-weight: 700; border: none; cursor: pointer; letter-spacing: 0.05em; text-transform: uppercase; transition: all 0.2s; text-decoration: none; display: inline-block; }
 .btn-book-dark:hover { background: white; }
-.packages-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 3rem; }
-.package-card { background: white; border-radius: var(--radius); padding: 2rem; border: 1.5px solid var(--sand); position: relative; overflow: hidden; }
-.package-card.featured { border-color: var(--gold); }
-.package-card.featured::before { content: 'POPULAIRE'; position: absolute; top: 1rem; right: 1rem; background: var(--gold); color: var(--deep); font-size: 0.62rem; font-weight: 800; letter-spacing: 0.1em; padding: 0.25rem 0.6rem; border-radius: 50px; }
-.package-icon { font-size: 2rem; margin-bottom: 1rem; }
-.package-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.3rem; }
-.package-card .pkg-sub { font-size: 0.82rem; color: var(--muted); margin-bottom: 1.5rem; }
-.pkg-features { list-style: none; margin-bottom: 1.5rem; }
-.pkg-features li { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.83rem; padding: 0.4rem 0; border-bottom: 1px solid var(--sand); }
-.pkg-features li:last-child { border: none; }
-.pkg-check { color: var(--gold); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
-.pkg-price { font-family: var(--font-cormorant), 'Cormorant Garamond', serif; font-size: 2.2rem; font-weight: 600; color: var(--deep); }
-.pkg-price small { font-family: var(--font-manrope), 'Manrope', sans-serif; font-size: 0.8rem; color: var(--muted); font-weight: 400; }
 .trust-section { background: var(--sand); border-radius: 2rem; margin: 0 2rem; padding: 4rem; text-align: center; }
 .quran-quote { font-family: var(--font-cormorant), 'Cormorant Garamond', serif; font-size: 1.5rem; font-style: italic; color: var(--deep); max-width: 680px; margin: 0 auto 1rem; line-height: 1.5; }
 .quran-ref { font-size: 0.78rem; color: var(--muted); margin-bottom: 2rem; }
@@ -301,7 +288,6 @@ footer { background: var(--warm); padding: 3rem 4rem 2rem; color: rgba(255,255,2
   nav { padding: 0.75rem 1rem; }
   .logo { font-size: 1.4rem; }
   section { padding: 3.5rem 1.25rem; }
-  .packages-grid { grid-template-columns: 1fr; }
   .revenue-grid { grid-template-columns: 1fr 1fr; }
   .footer-top { grid-template-columns: 1fr 1fr; gap: 1.25rem; }
   .footer-brand { grid-column: 1 / -1; }

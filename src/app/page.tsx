@@ -595,8 +595,26 @@ export default function Home() {
           </div>
 
           <div className="reveal" style={{ marginTop: '3rem' }}>
-            <Link href="/charte-islamique" style={{ fontSize: '0.8rem', color: 'rgba(201,168,76,0.6)', textDecoration: 'none', letterSpacing: '0.08em', borderBottom: '1px solid rgba(201,168,76,0.3)', paddingBottom: '0.2rem' }}>
-              Lire la Charte SAFARUMA
+            <Link href="/charte-islamique" style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              padding: '0.65rem 1.5rem',
+              borderRadius: 50,
+              border: '1.5px solid rgba(201,168,76,0.5)',
+              color: '#C9A84C',
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              letterSpacing: '0.06em',
+              textDecoration: 'none',
+              fontFamily: 'inherit',
+            }}>
+              <svg width="13" height="13" viewBox="0 0 24 24"
+                fill="none" stroke="currentColor" strokeWidth="2"
+                strokeLinecap="round">
+                <polyline points="20,6 9,17 4,12"/>
+              </svg>
+              Nos guides s&apos;engagent
             </Link>
           </div>
         </div>

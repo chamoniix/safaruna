@@ -306,7 +306,7 @@ export default function Home() {
             35 personnes dans un bus. Tu imites les gestes de ceux devant toi. Tu tournes autour de la Kaaba en ne sachant pas vraiment pourquoi tu tournes. Tu cherches un sens à ce que tu vis. Tu rentres chez toi avec une belle photo, mais quelque chose manque.
           </p>
           <p className="reveal reveal-d3" style={{ color: 'rgba(255,255,255,0.55)', lineHeight: 1.9, fontSize: '1rem', marginBottom: '3rem' }}>
-            Ce n&apos;est pas la Omra qui était mauvaise. C&apos;est le format. Ce voyage mérite un guide qui prend <em style={{ color: 'rgba(240,216,151,0.8)' }}>ton temps</em> pour tout t&apos;expliquer, dans ta langue, à ton rythme.
+            Ce n&apos;est pas la Omra qui était mauvaise. C&apos;est le format. Ce voyage mérite un guide qui prend <em style={{ color: 'rgba(240,216,151,0.8)' }}>ton temps</em>{' '}pour tout t&apos;expliquer, dans ta langue, à ton rythme.
           </p>
           <div className="reveal reveal-d4">
             <Link href="/guides" className="btn-hero-cta">
@@ -327,7 +327,7 @@ export default function Home() {
             <em>qu&apos;aucune autre plateforme n&apos;offre</em>
           </h2>
           <p className="reveal reveal-d2" style={{ textAlign: 'center', color: 'var(--muted)', maxWidth: 520, margin: '0 auto 3.5rem', lineHeight: 1.75, fontSize: '0.9rem' }}>
-            Nous avons construit SAFARUMA en partant d&apos;une question : qu&apos;est-ce qui rend vraiment une Omra inoubliable ?
+            Nous avons construit SAFARUMA en partant d&apos;une question&nbsp;: qu&apos;est-ce qui rend vraiment une Omra inoubliable&nbsp;?
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem' }}>
             {DIFFERENCIATEURS.map((d, i) => (
@@ -529,7 +529,7 @@ export default function Home() {
             <em>26 lieux</em> que ton guide<br />te fera vivre autrement
           </h2>
           <p className="reveal reveal-d2" style={{ color: 'var(--muted)', maxWidth: 520, lineHeight: 1.75, marginBottom: '3rem', fontSize: '0.9rem' }}>
-            De la grotte de Hira où la première révélation descendit, à Masjid Quba, première mosquée de l&apos;Islam — chaque lieu cache une histoire que ton guide te fera vivre de l&apos;intérieur.
+            De la grotte de Hira où la première révélation descendit, à Masjid Quba, première mosquée de l&apos;Islam. Chaque lieu cache une histoire que ton guide te fera vivre de l&apos;intérieur.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
             {LIEUX_VEDETTE.map((l, i) => (

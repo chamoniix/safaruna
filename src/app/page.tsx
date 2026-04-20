@@ -209,7 +209,7 @@ export default function Home() {
             maxWidth: 520, margin: '0 auto 2.5rem',
             animation: 'fadeInUp 0.9s 1.4s ease both', opacity: 0,
           }}>
-            Un guide privé certifié, qui parle ta langue, t&apos;explique chaque rituel de la Omra — et fait de ce voyage le plus important de ta vie.
+            Un guide privé certifié, qui parle ta langue, t&apos;explique chaque rituel de la Omra et fait de ce voyage le plus important de ta vie.
           </p>
 
           {/* CTAs */}

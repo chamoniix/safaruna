@@ -124,9 +124,6 @@ export default function PersonaSection() {
         <Link href="/guide-omra" style={{ display: 'inline-block', background: '#1A1209', color: '#F0D897', padding: '0.8rem 2rem', borderRadius: 50, fontSize: '0.875rem', fontWeight: 700, textDecoration: 'none', letterSpacing: '0.04em' }}>
           La Omra n&apos;attend pas que vous soyez prêt
         </Link>
-        <div style={{ marginTop: '0.75rem', fontSize: '0.72rem', color: '#7A6D5A' }}>
-          Gratuit · Sans engagement · Réponse à toutes vos questions
-        </div>
       </div>
     </>
   );

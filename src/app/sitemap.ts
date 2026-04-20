@@ -9,11 +9,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
     // ── Fiches guides ──
     { url: 'https://safaruma.com/guides/naim-laamari',       lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },
-    { url: 'https://safaruma.com/guides/rachid-al-madani',   lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },
-    { url: 'https://safaruma.com/guides/fatima-al-omari',    lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },
-    { url: 'https://safaruma.com/guides/youssouf-konate',    lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },
-    { url: 'https://safaruma.com/guides/abdullah-ben-yusuf', lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },
-    { url: 'https://safaruma.com/guides/samira-al-rashidi',  lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },
 
     // ── Pages contenu ──
     { url: 'https://safaruma.com/lieux-saints',              lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },

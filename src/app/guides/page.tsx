@@ -249,6 +249,13 @@ export default function GuideSearchPage() {
   const [nbPersonnes, setNbPersonnes] = useState(1);
   const [pmr, setPmr] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth <= 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   const [selectedNote, setSelectedNote] = useState('');
   const [selectedSpecialites, setSelectedSpecialites] = useState<string[]>([]);
@@ -572,27 +579,39 @@ export default function GuideSearchPage() {
             </div>
 
             {/* ── Destination popup ── */}
-            {openPop === 'dest' && (
-              <div className="search-popup" style={{ left: 0 }}>
-                <div style={{ fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7A6D5A', marginBottom: '0.75rem' }}>Choisir une destination</div>
-                {[
-                  { val: '', label: <span>Toutes</span>, icon: '🌍' },
-                  { val: 'MAKKAH', label: <span>Makkah</span>, icon: '🕋' },
-                  { val: 'MADINAH', label: <span>Madinah</span>, icon: '🕌' },
-                  { val: 'BOTH', label: (
-                    <span style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                      <span style={{ padding: '1px 7px', borderRadius: 4, background: 'rgba(201,168,76,.12)', fontSize: 10, color: '#8B6914', fontWeight: 700 }}>Makkah</span>
-                      <span style={{ padding: '1px 7px', borderRadius: 4, background: 'rgba(201,168,76,.12)', fontSize: 10, color: '#8B6914', fontWeight: 700 }}>Madinah</span>
-                    </span>
-                  ), icon: '✈️' },
-                ].map(opt => (
-                  <button key={opt.val} onClick={() => { setSelectedCity(opt.val); setOpenPop(null); }} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', width: '100%', padding: '0.7rem', border: selectedCity === opt.val ? '2px solid #C9A84C' : '1.5px solid transparent', borderRadius: 12, background: selectedCity === opt.val ? 'rgba(201,168,76,0.07)' : 'transparent', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', marginBottom: '0.2rem', transition: 'background 0.12s' }}>
-                    <span style={{ fontSize: '1.2rem' }}>{opt.icon}</span>
-                    <span style={{ fontSize: '0.875rem', fontWeight: selectedCity === opt.val ? 700 : 500, color: selectedCity === opt.val ? '#8B6914' : '#1A1209' }}>{opt.label}</span>
-                  </button>
-                ))}
-              </div>
-            )}
+            {openPop === 'dest' && (() => {
+              const DEST_OPTIONS = [
+                { val: '', label: 'Toutes', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1.8" strokeLinecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> },
+                { val: 'MAKKAH', label: 'Makkah', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1.8" strokeLinecap="round"><path d="M3 10l9-7 9 7v11a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><polyline points="9,21 9,12 15,12 15,21"/></svg> },
+                { val: 'MADINAH', label: 'Madinah', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1.8" strokeLinecap="round"><path d="M12 3a6 6 0 0 1 6 6c0 4-6 9-6 9s-6-5-6-9a6 6 0 0 1 6-6z"/><path d="M5 21h14"/><path d="M12 3v2"/></svg> },
+                { val: 'BOTH', label: 'Makkah + Madinah', icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1.8" strokeLinecap="round"><path d="M8 2a4 4 0 0 1 4 4c0 3-4 7-4 7S4 9 4 6a4 4 0 0 1 4-4z"/><path d="M16 6a4 4 0 0 1 4 4c0 3-4 7-4 7s-4-4-4-7a4 4 0 0 1 4-4z"/></svg> },
+              ];
+              const inner = (
+                <>
+                  {DEST_OPTIONS.map(opt => (
+                    <button key={opt.val} onClick={() => { setSelectedCity(opt.val); setOpenPop(null); }} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', width: '100%', padding: '0.85rem', border: selectedCity === opt.val ? '2px solid #C9A84C' : '1.5px solid transparent', borderRadius: 12, background: selectedCity === opt.val ? 'rgba(201,168,76,0.07)' : 'transparent', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', marginBottom: '0.3rem', transition: 'background 0.12s' }}>
+                      <span style={{ flexShrink: 0 }}>{opt.icon}</span>
+                      <span style={{ fontSize: '0.9rem', fontWeight: selectedCity === opt.val ? 700 : 500, color: selectedCity === opt.val ? '#8B6914' : '#1A1209' }}>{opt.label}</span>
+                    </button>
+                  ))}
+                </>
+              );
+              if (isMobile) return (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, background: 'white', overflowY: 'auto', padding: '1.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                    <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 600, color: '#1A1209' }}>Choisir une destination</div>
+                    <button onClick={() => setOpenPop(null)} style={{ background: 'none', border: '1.5px solid #E8DFC8', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', fontSize: '1rem', color: '#1A1209', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+                  </div>
+                  {inner}
+                </div>
+              );
+              return (
+                <div className="search-popup" style={{ left: 0 }}>
+                  <div style={{ fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7A6D5A', marginBottom: '0.75rem' }}>Choisir une destination</div>
+                  {inner}
+                </div>
+              );
+            })()}
 
             {/* ── Calendar popup ── */}
             {openPop === 'cal' && (
@@ -611,68 +630,99 @@ export default function GuideSearchPage() {
             )}
 
             {/* ── Langue popup ── */}
-            {openPop === 'langue' && (
-              <div style={{ position: 'absolute', top: 'calc(100% + 8px)', left: '33%', width: 280, background: 'white', borderRadius: 16, border: '1px solid #E8DFC8', padding: 18, zIndex: 200, boxShadow: '0 12px 40px rgba(26,18,9,.15)' }}>
-                <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: 10 }}>
-                  Langue du guide
+            {openPop === 'langue' && (() => {
+              const LANGUE_OPTIONS = [
+                { val: '', label: 'Toutes les langues' },
+                { val: 'fr', label: 'Français' },
+                { val: 'ar', label: 'Arabe' },
+                { val: 'en', label: 'English' },
+                { val: 'darija', label: 'Darija (Maroc)' },
+                { val: 'wolof', label: 'Wolof' },
+                { val: 'bambara', label: 'Bambara' },
+                { val: 'algerien', label: 'Algérien' },
+                { val: 'tunisien', label: 'Tunisien' },
+                { val: 'urdu', label: 'Urdu' },
+                { val: 'hindi', label: 'Hindi' },
+                { val: 'turk', label: 'Türkçe' },
+                { val: 'russe', label: 'Russe' },
+                { val: 'mandarin', label: 'Mandarin' },
+                { val: 'espanol', label: 'Español' },
+                { val: 'deutsch', label: 'Deutsch' },
+              ];
+              const inner = (
+                <>
+                  {LANGUE_OPTIONS.map(opt => (
+                    <button key={opt.val} onClick={() => { setSelectedLangue(opt.val); setOpenPop(null); }} style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '0.85rem', border: selectedLangue === opt.val ? '2px solid #C9A84C' : '1.5px solid transparent', borderRadius: 12, background: selectedLangue === opt.val ? 'rgba(201,168,76,0.07)' : 'transparent', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', marginBottom: '0.3rem', transition: 'background 0.12s' }}>
+                      <span style={{ fontSize: '0.9rem', fontWeight: selectedLangue === opt.val ? 700 : 500, color: selectedLangue === opt.val ? '#8B6914' : '#1A1209' }}>{opt.label}</span>
+                    </button>
+                  ))}
+                </>
+              );
+              if (isMobile) return (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, background: 'white', overflowY: 'auto', padding: '1.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                    <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 600, color: '#1A1209' }}>Choisir une langue</div>
+                    <button onClick={() => setOpenPop(null)} style={{ background: 'none', border: '1.5px solid #E8DFC8', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', fontSize: '1rem', color: '#1A1209', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+                  </div>
+                  {inner}
                 </div>
-                <select
-                  value={selectedLangue}
-                  onChange={e => { setSelectedLangue(e.target.value); setOpenPop(null); }}
-                  style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 8, padding: '8px 10px', fontSize: 12, background: 'white', color: '#1A1209', fontFamily: 'inherit', cursor: 'pointer', outline: 'none' }}
-                >
-                  <option value="">Toutes les langues</option>
-                  <option value="fr">🇫🇷 Français</option>
-                  <option value="ar">🇸🇦 Arabe</option>
-                  <option value="en">🇬🇧 English</option>
-                  <option value="darija">🇲🇦 Darija (Maroc)</option>
-                  <option value="wolof">🇸🇳 Wolof</option>
-                  <option value="bambara">🌍 Bambara</option>
-                  <option value="algerien">🇩🇿 Algérien</option>
-                  <option value="tunisien">🇹🇳 Tunisien</option>
-                  <option value="urdu">🇵🇰 Urdu</option>
-                  <option value="hindi">🇮🇳 Hindi</option>
-                  <option value="turk">🇹🇷 Türkçe</option>
-                  <option value="russe">🇷🇺 Russe</option>
-                  <option value="mandarin">🇨🇳 Mandarin</option>
-                  <option value="espanol">🇪🇸 Español</option>
-                  <option value="deutsch">🇩🇪 Deutsch</option>
-                </select>
-              </div>
-            )}
+              );
+              return (
+                <div className="search-popup" style={{ left: '33%' }}>
+                  <div style={{ fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7A6D5A', marginBottom: '0.75rem' }}>Langue du guide</div>
+                  {inner}
+                </div>
+              );
+            })()}
 
             {/* ── Voyageurs popup ── */}
-            {openPop === 'voy' && (
-              <div className="search-popup" style={{ right: 0 }}>
-                <div style={{ fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7A6D5A', marginBottom: '1rem' }}>Voyageurs</div>
+            {openPop === 'voy' && (() => {
+              const inner = (
+                <>
+                  <div style={{ fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7A6D5A', marginBottom: '1rem' }}>Voyageurs</div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                  <div>
-                    <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1A1209' }}>Personnes</div>
-                    <div style={{ fontSize: '0.72rem', color: '#7A6D5A' }}>Adultes et enfants</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                    <div>
+                      <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1A1209' }}>Personnes</div>
+                      <div style={{ fontSize: '0.72rem', color: '#7A6D5A' }}>1 à 7 personnes · voiture privée</div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <button onClick={() => setNbPersonnes(Math.max(1, nbPersonnes - 1))} style={{ width: 32, height: 32, borderRadius: '50%', border: '1.5px solid #E8DFC8', background: 'white', cursor: nbPersonnes > 1 ? 'pointer' : 'not-allowed', color: nbPersonnes > 1 ? '#1A1209' : '#ccc', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                      <span style={{ fontSize: '1rem', fontWeight: 700, color: '#1A1209', minWidth: 20, textAlign: 'center' }}>{nbPersonnes}</span>
+                      <button onClick={() => setNbPersonnes(Math.min(7, nbPersonnes + 1))} style={{ width: 32, height: 32, borderRadius: '50%', border: '1.5px solid #E8DFC8', background: 'white', cursor: nbPersonnes < 7 ? 'pointer' : 'not-allowed', color: nbPersonnes < 7 ? '#1A1209' : '#ccc', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <button onClick={() => setNbPersonnes(Math.max(1, nbPersonnes - 1))} style={{ width: 32, height: 32, borderRadius: '50%', border: '1.5px solid #E8DFC8', background: 'white', cursor: nbPersonnes > 1 ? 'pointer' : 'not-allowed', color: nbPersonnes > 1 ? '#1A1209' : '#ccc', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
-                    <span style={{ fontSize: '1rem', fontWeight: 700, color: '#1A1209', minWidth: 20, textAlign: 'center' }}>{nbPersonnes}</span>
-                    <button onClick={() => setNbPersonnes(Math.min(50, nbPersonnes + 1))} style={{ width: 32, height: 32, borderRadius: '50%', border: '1.5px solid #E8DFC8', background: 'white', cursor: 'pointer', color: '#1A1209', fontSize: '1.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1A1209' }}>Mobilité réduite (PMR)</div>
+                      <div style={{ fontSize: '0.72rem', color: '#7A6D5A' }}>Guide spécialisé requis</div>
+                    </div>
+                    <div onClick={() => setPmr(!pmr)} style={{ width: 44, height: 24, borderRadius: 12, background: pmr ? '#1A1209' : '#E8DFC8', position: 'relative', cursor: 'pointer', transition: 'background 0.2s', flexShrink: 0 }}>
+                      <div style={{ position: 'absolute', top: 3, left: pmr ? 23 : 3, width: 18, height: 18, borderRadius: '50%', background: pmr ? '#C9A84C' : 'white', transition: 'left 0.2s', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
+                    </div>
                   </div>
+
+                  <button onClick={() => setOpenPop(null)} style={{ width: '100%', marginTop: '1.25rem', padding: '0.55rem', background: '#1A1209', color: '#F0D897', border: 'none', borderRadius: 50, fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+                    Confirmer
+                  </button>
+                </>
+              );
+              if (isMobile) return (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, background: 'white', overflowY: 'auto', padding: '1.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                    <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 600, color: '#1A1209' }}>Voyageurs</div>
+                    <button onClick={() => setOpenPop(null)} style={{ background: 'none', border: '1.5px solid #E8DFC8', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', fontSize: '1rem', color: '#1A1209', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+                  </div>
+                  {inner}
                 </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1A1209' }}>Mobilité réduite (PMR)</div>
-                    <div style={{ fontSize: '0.72rem', color: '#7A6D5A' }}>Guide spécialisé requis</div>
-                  </div>
-                  <div onClick={() => setPmr(!pmr)} style={{ width: 44, height: 24, borderRadius: 12, background: pmr ? '#1A1209' : '#E8DFC8', position: 'relative', cursor: 'pointer', transition: 'background 0.2s', flexShrink: 0 }}>
-                    <div style={{ position: 'absolute', top: 3, left: pmr ? 23 : 3, width: 18, height: 18, borderRadius: '50%', background: pmr ? '#C9A84C' : 'white', transition: 'left 0.2s', boxShadow: '0 1px 4px rgba(0,0,0,0.2)' }} />
-                  </div>
+              );
+              return (
+                <div className="search-popup" style={{ right: 0 }}>
+                  {inner}
                 </div>
-
-                <button onClick={() => setOpenPop(null)} style={{ width: '100%', marginTop: '1.25rem', padding: '0.55rem', background: '#1A1209', color: '#F0D897', border: 'none', borderRadius: 50, fontSize: '0.85rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
-                  Confirmer
-                </button>
-              </div>
-            )}
+              );
+            })()}
           </div>
         </div>
       </div>

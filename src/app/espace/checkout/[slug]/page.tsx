@@ -213,10 +213,10 @@ export default function CheckoutPage() {
   // Package de base
   const basePackage = cityChoice ? getPackageForCity(cityChoice) : null
 
-  // Calcul prix
-  const prixBase = (basePackage?.basePrice ?? 0) * nbPersonnes
+  // Calcul prix — forfait flat 1-7 personnes
+  const prixBase = basePackage?.basePrice ?? 0
   const extraPlaces = selectedPlaces.filter(pk => !basePackage?.includedPlaces.includes(pk))
-  const prixLieux = extraPlaces.reduce((sum, pk) => sum + (placePrices[pk] ?? 50), 0) * nbPersonnes
+  const prixLieux = extraPlaces.reduce((sum, pk) => sum + (placePrices[pk] ?? 50), 0)
   const prixTransport = cityChoice === 'BOTH'
     ? transportOption === 'TRAIN' ? 80 * nbPersonnes
     : transportOption === 'TAXI_RT' ? 240
@@ -225,7 +225,7 @@ export default function CheckoutPage() {
     : 0
   const prixVoiture = withCar ? 280 : 0
   const TARIF_GROUPE = 200
-  const prixGroupe = nbPersonnes > 6 ? TARIF_GROUPE : 0
+  const prixGroupe = nbPersonnes > 7 ? TARIF_GROUPE : 0
   const total = prixBase + prixLieux + prixTransport + prixVoiture + prixGroupe
 
   // Lieux supplémentaires disponibles par catégorie
@@ -393,7 +393,7 @@ export default function CheckoutPage() {
                   </p>
                   <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.5rem', fontWeight: 700, color: '#C9A84C' }}>
                     À partir de {pkg.basePrice}€
-                    <span style={{ fontSize: '0.75rem', color: '#7A6D5A', fontFamily: 'Arial, sans-serif', fontWeight: 400, marginLeft: 4 }}>/ personne</span>
+                    <span style={{ fontSize: '0.75rem', color: '#7A6D5A', fontFamily: 'Arial, sans-serif', fontWeight: 400, marginLeft: 4 }}>/ groupe (1-7 pers.)</span>
                   </div>
                 </div>
               ))}
@@ -841,7 +841,7 @@ export default function CheckoutPage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 1.25rem', borderBottom: '1px solid #F5F0E8' }}>
                 <div>
                   <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1A1209' }}>{basePackage?.name}</div>
-                  <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>{nbPersonnes} × {basePackage?.basePrice}€</div>
+                  <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>Forfait 1-7 personnes</div>
                 </div>
                 <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>{prixBase}€</div>
               </div>
@@ -854,9 +854,9 @@ export default function CheckoutPage() {
                   <div key={pk} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 1.25rem', borderBottom: '1px solid #F5F0E8' }}>
                     <div>
                       <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>{place.emoji} {place.nameFr}</div>
-                      <div style={{ fontSize: '0.7rem', color: '#7A6D5A', marginTop: 2 }}>{nbPersonnes} × {prix}€</div>
+                      <div style={{ fontSize: '0.7rem', color: '#7A6D5A', marginTop: 2 }}>Visite supplémentaire</div>
                     </div>
-                    <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{prix * nbPersonnes}€</div>
+                    <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{prix}€</div>
                   </div>
                 ) : null
               })}

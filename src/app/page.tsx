@@ -28,16 +28,22 @@ const DIFFERENCIATEURS: Array<{ icon: React.ReactNode; title: string; desc: stri
     vs: "Agences : photo et prénom, c'est tout",
   },
   {
-    icon: <IconChat size={24} stroke="#C9A84C" />,
-    title: 'Messagerie directe',
-    desc: "Tu échanges avec ton guide avant de payer. Pose tes questions, vérifie sa disponibilité, ressens si le courant passe.",
-    vs: "Agences : tu pais d'abord, tu rencontres après",
+    icon: <IconAccessibility size={24} stroke="#C9A84C" />,
+    title: 'Prise en charge PMR & mobilité réduite',
+    desc: "Fauteuil roulant, mobilité réduite, parent âgé, grossesse avancée — votre guide prend tout en charge. Transport adapté, poussée du fauteuil pendant le tawaf et le sa'i, coordination avec les services du Haram, hôtel accessible. Votre famille mérite de vivre sa Omra, pas de la regarder de loin.",
+    vs: "Groupes classiques : aucune prise en charge individuelle, rythme imposé à tous",
   },
   {
     icon: <IconGraduationCap size={24} stroke="#C9A84C" />,
     title: 'Academy islamique',
     desc: "Apprends les rituels, l'histoire, les du'a avant de partir. 30+ leçons vidéo accessibles dans ton espace pèlerin.",
     vs: "Autres plateformes : aucune préparation spirituelle",
+  },
+  {
+    icon: <IconChat size={24} stroke="#C9A84C" />,
+    title: 'Assistance en temps réel',
+    desc: "On répond à toutes vos questions. Nos guides et nos équipes sont là pour que votre voyage soit le plus agréable.",
+    vs: "Agences : tu pais d'abord, tu rencontres après",
   },
   {
     icon: <IconShield size={24} stroke="#C9A84C" />,
@@ -50,12 +56,6 @@ const DIFFERENCIATEURS: Array<{ icon: React.ReactNode; title: string; desc: stri
     title: 'Voiture privée · 7 pèlerins max',
     desc: "Un 4x4 ou van privé pour vous seuls. Maximum 7 pèlerins par guide — pour que chaque question ait une réponse et chaque moment compte. Au-delà de 7, nous organisons un minivan ou bus dédié.",
     vs: "Agences traditionnelles : groupes de 20 à 50 personnes dans un bus",
-  },
-  {
-    icon: <IconAccessibility size={24} stroke="#C9A84C" />,
-    title: 'Prise en charge PMR & mobilité réduite',
-    desc: "Fauteuil roulant, mobilité réduite, parent âgé, grossesse avancée — votre guide prend tout en charge. Transport adapté, poussée du fauteuil pendant le tawaf et le sa'i, coordination avec les services du Haram, hôtel accessible. Votre famille mérite de vivre sa Omra, pas de la regarder de loin.",
-    vs: "Groupes classiques : aucune prise en charge individuelle, rythme imposé à tous",
   },
 ];
 
@@ -222,9 +222,6 @@ export default function Home() {
               Trouver mon guide
             </Link>
           </div>
-          <p style={{ fontSize: '.72rem', color: 'rgba(255,255,255,.35)', marginTop: '.5rem', textAlign: 'center' }}>
-            Sans engagement · Réservation sécurisée
-          </p>
 
           {/* Live trust mini-row */}
           <div style={{
@@ -258,7 +255,6 @@ export default function Home() {
 
         {/* Scroll indicator */}
         <div className="scroll-indicator" aria-hidden="true">
-          <span>Découvrir</span>
           <div className="scroll-dot" />
         </div>
       </section>
@@ -307,10 +303,10 @@ export default function Home() {
             <em style={{ color: 'var(--gold)', fontStyle: 'italic' }}>sans vraiment la comprendre.</em>
           </h2>
           <p className="reveal reveal-d2" style={{ color: 'rgba(255,255,255,0.55)', lineHeight: 1.9, fontSize: '1rem', marginBottom: '1.5rem' }}>
-            35 personnes dans un bus. Un guide qui parle arabe. Tu imites les gestes de ceux devant toi. Tu tournes autour de la Kaaba en ne sachant pas vraiment pourquoi tu tournes. Tu récites des du&apos;a que tu n&apos;as jamais apprises. Tu rentres chez toi avec une belle photo, mais quelque chose manque.
+            35 personnes dans un bus. Tu imites les gestes de ceux devant toi. Tu tournes autour de la Kaaba en ne sachant pas vraiment pourquoi tu tournes. Tu cherches un sens à ce que tu vis. Tu rentres chez toi avec une belle photo, mais quelque chose manque.
           </p>
           <p className="reveal reveal-d3" style={{ color: 'rgba(255,255,255,0.55)', lineHeight: 1.9, fontSize: '1rem', marginBottom: '3rem' }}>
-            Ce n&apos;est pas la Omra qui était mauvaise. C&apos;est le format. Ce voyage mérite un guide qui prend le temps — <em style={{ color: 'rgba(240,216,151,0.8)' }}>ton temps</em> — pour tout t&apos;expliquer, dans ta langue, à ton rythme.
+            Ce n&apos;est pas la Omra qui était mauvaise. C&apos;est le format. Ce voyage mérite un guide qui prend <em style={{ color: 'rgba(240,216,151,0.8)' }}>ton temps</em> pour tout t&apos;expliquer, dans ta langue, à ton rythme.
           </p>
           <div className="reveal reveal-d4">
             <Link href="/guides" className="btn-hero-cta">
@@ -331,7 +327,7 @@ export default function Home() {
             <em>qu&apos;aucune autre plateforme n&apos;offre</em>
           </h2>
           <p className="reveal reveal-d2" style={{ textAlign: 'center', color: 'var(--muted)', maxWidth: 520, margin: '0 auto 3.5rem', lineHeight: 1.75, fontSize: '0.9rem' }}>
-            Nous avons construit SAFARUMA en partant d&apos;une question : qu&apos;est-ce qui rend vraiment un pèlerinage inoubliable ?
+            Nous avons construit SAFARUMA en partant d&apos;une question : qu&apos;est-ce qui rend vraiment une Omra inoubliable ?
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem' }}>
             {DIFFERENCIATEURS.map((d, i) => (
@@ -358,7 +354,7 @@ export default function Home() {
             Des guides qui <em>parlent ta langue</em>
           </h2>
           <p className="reveal reveal-d2" style={{ color: 'var(--muted)', maxWidth: 520, lineHeight: 1.75, marginBottom: '3rem', fontSize: '0.9rem' }}>
-            Chaque guide est Certifié SAFARUMA, vérifié par notre équipe et évalué par des centaines de pèlerins réels.
+            Moins d&apos;1 guide sur 10 est accepté. Chaque candidat passe un entretien exigeant avant d&apos;obtenir la <Link href="/certification" style={{ color: 'var(--gold-dark)', textDecoration: 'underline' }}>Certification SAFARUMA</Link>.
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
@@ -533,7 +529,7 @@ export default function Home() {
             <em>26 lieux</em> que ton guide<br />te fera vivre autrement
           </h2>
           <p className="reveal reveal-d2" style={{ color: 'var(--muted)', maxWidth: 520, lineHeight: 1.75, marginBottom: '3rem', fontSize: '0.9rem' }}>
-            Au-delà du Masjid Al-Haram, il existe des dizaines de sites chargés d&apos;histoire. Ton guide certifié te les fait découvrir avec la profondeur qu&apos;ils méritent.
+            De la grotte de Hira où la première révélation descendit, à Masjid Quba, première mosquée de l&apos;Islam — chaque lieu cache une histoire que ton guide te fera vivre de l&apos;intérieur.
           </p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
             {LIEUX_VEDETTE.map((l, i) => (
@@ -568,7 +564,7 @@ export default function Home() {
             وَمَن يُعَظِّمْ شَعَائِرَ اللَّهِ
           </div>
           <p className="reveal reveal-d1" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontStyle: 'italic', color: 'rgba(255,255,255,0.65)', lineHeight: 1.6, marginBottom: '0.75rem' }}>
-            &ldquo;Et quiconque honore les rites sacrés d&apos;Allah — c&apos;est assurément le fruit de la piété des cœurs.&rdquo;
+            &ldquo;Et quiconque honore les rites sacrés d&apos;Allah, c&apos;est assurément le fruit de la piété des cœurs.&rdquo;
           </p>
           <p className="reveal reveal-d2" style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.3)', marginBottom: '4rem' }}>Sourate Al-Hajj · 22:32</p>
 
@@ -587,7 +583,7 @@ export default function Home() {
           </div>
 
           <div className="reveal" style={{ marginTop: '3rem' }}>
-            <Link href="/charte" style={{ fontSize: '0.8rem', color: 'rgba(201,168,76,0.6)', textDecoration: 'none', letterSpacing: '0.08em', borderBottom: '1px solid rgba(201,168,76,0.3)', paddingBottom: '0.2rem' }}>
+            <Link href="/charte-islamique" style={{ fontSize: '0.8rem', color: 'rgba(201,168,76,0.6)', textDecoration: 'none', letterSpacing: '0.08em', borderBottom: '1px solid rgba(201,168,76,0.3)', paddingBottom: '0.2rem' }}>
               Lire la Charte SAFARUMA
             </Link>
           </div>
@@ -641,7 +637,7 @@ export default function Home() {
             Un programme pour <em>chaque pèlerin</em>
           </h2>
           <p className="reveal reveal-d2" style={{ textAlign: 'center', color: 'var(--muted)', maxWidth: 480, margin: '0 auto 3rem', lineHeight: 1.75, fontSize: '0.9rem' }}>
-            3 jours ou 10 jours, solo ou famille — il existe un forfait fait pour toi.
+            Ton Omra. Ton rythme. Ton guide.
           </p>
           <div className="packages-grid">
             {([
@@ -684,7 +680,7 @@ export default function Home() {
               <div style={{ position: 'absolute', top: '50%', right: '2rem', transform: 'translateY(-50%)', fontFamily: 'var(--font-cormorant, serif)', fontSize: '6rem', color: 'rgba(201,168,76,0.05)', direction: 'rtl', pointerEvents: 'none', lineHeight: 1 }}>عمرة</div>
               <div className="guide-omra-inner" style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap', position: 'relative' }}>
                 <div style={{ flex: 1, minWidth: 220 }}>
-                  <span style={{ display: 'inline-block', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(201,168,76,0.85)', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', padding: '0.22rem 0.65rem', borderRadius: 4, marginBottom: '0.7rem' }}>Guide gratuit</span>
+                  <span style={{ display: 'inline-block', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(201,168,76,0.85)', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', padding: '0.22rem 0.65rem', borderRadius: 4, marginBottom: '0.7rem' }}>Guide de la Omra</span>
                   <h3 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(1.4rem, 3vw, 1.9rem)', color: 'white', margin: '0 0 0.65rem', lineHeight: 1.2, fontWeight: 400 }}>Guide complet de la Omra</h3>
                   <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.8, margin: 0 }}>Ihram, Tawaf, Sa&apos;i, Tahallul — chaque rituel expliqué avec ses du&apos;as, significations spirituelles et checklist de préparation.</p>
                 </div>
@@ -733,7 +729,7 @@ export default function Home() {
           Ta Omra mérite mieux.
         </h2>
         <p className="reveal reveal-d2" style={{ color: 'rgba(255,255,255,0.45)', maxWidth: 480, margin: '1rem auto 2.5rem', lineHeight: 1.85, fontSize: '0.95rem' }}>
-          Rejoins des milliers de pèlerins francophones qui ont vécu une Omra privée, profonde et inoubliable avec un guide qui a consacré sa vie à ce moment.
+          Rejoins des milliers de pèlerins à travers le monde qui ont vécu une Omra privée, profonde et inoubliable avec un guide qui a consacré sa vie à ce moment.
         </p>
         <div className="reveal reveal-d3" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '.75rem' }}>
           <Link href="/guides" className="btn-hero-cta" style={{ background: 'var(--gold)', color: 'var(--deep)', borderColor: 'var(--gold)' }}>

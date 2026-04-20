@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { apiRatelimit, checkRateLimit } from '@/lib/ratelimit'
+import { BASE_PACKAGES } from '@/lib/packages'
 
 export async function POST(req: NextRequest) {
   const limited = await checkRateLimit(req, apiRatelimit)
@@ -26,6 +27,9 @@ export async function POST(req: NextRequest) {
     totalPrice,
     packageName,
     selectedGuideSlug,
+    selectedPlaces,
+    transportOption,
+    withCar,
   } = body
 
   if (!totalPrice || totalPrice <= 0)
@@ -55,7 +59,37 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Forfait introuvable' }, { status: 400 })
   }
 
-  const expectedPrice = pkg.pricePerPerson * Number(nbPersonnes)
+  // Prix de base = forfait flat 1-7 personnes
+  const expectedBase = pkg.pricePerPerson
+
+  // Lieux supplémentaires (flat, pas par personne)
+  const libPkg = BASE_PACKAGES.find(p => p.name.toLowerCase().trim() === String(packageName).toLowerCase().trim())
+  const includedPlaces: string[] = libPkg?.includedPlaces ?? []
+  const extraPlaceKeys: string[] = Array.isArray(selectedPlaces)
+    ? selectedPlaces.filter((pk: string) => !includedPlaces.includes(pk))
+    : []
+  let extraPlacesTotal = 0
+  if (extraPlaceKeys.length > 0) {
+    const placePriceRecords = await prisma.placePrice.findMany({
+      where: { placeKey: { in: extraPlaceKeys }, isActive: true },
+    })
+    extraPlacesTotal = extraPlaceKeys.reduce((sum, pk) => {
+      const rec = placePriceRecords.find(r => r.placeKey === pk)
+      return sum + (rec?.price ?? 50)
+    }, 0)
+  }
+
+  // Transport
+  const nbP = Number(nbPersonnes)
+  const prixTransport = cityChoice === 'BOTH'
+    ? transportOption === 'TRAIN' ? 80 * nbP
+    : (transportOption === 'TAXI_RT' || transportOption === 'TAXI_ONE') ? 240
+    : 0
+    : 0
+  const prixVoiture = withCar ? 280 : 0
+  const prixGroupe = nbP > 7 ? 200 : 0
+
+  const expectedPrice = expectedBase + extraPlacesTotal + prixTransport + prixVoiture + prixGroupe
   // Tolérance de 1€ pour les arrondis éventuels
   if (Math.abs(totalPrice - expectedPrice) > 1) {
     console.error(`[SECURITY] Prix client ${totalPrice}€ ≠ prix serveur ${expectedPrice}€ pour ${effectiveSlug}/${packageName}`)

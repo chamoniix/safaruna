@@ -50,7 +50,7 @@ export default function Footer() {
               SAFAR<span>U</span>MA
             </span>
           </Link>
-          <p>La première plateforme dédiée aux guides privés pour la Omra. Rituels, histoire, spiritualité — vivez-les en profondeur.</p>
+          <p>La première plateforme dédiée aux guides privés pour la Omra. Rituels, histoire, spiritualité. Vivez-les en profondeur.</p>
         </div>
         <div className="footer-col">
           <h4>Pèlerins</h4>
@@ -142,7 +142,7 @@ export default function Footer() {
       </div>
 
       <div className="footer-bottom">
-        <span className="copy">© 2025 HOLDINGAI LTD · SAFARUMA est une marque de HOLDINGAI LTD · Co. No. 16382871 · England &amp; Wales</span>
+        <span className="copy">© 2025 HOLDINGAI LTD · SAFARUMA est une marque de HOLDINGAI LTD · Co. No. 16382871 · <span style={{ whiteSpace: 'nowrap' }}>England &amp; Wales</span></span>
         <span style={{ color: "rgba(255,255,255,0.3)" }}>Made with respect for the Deen</span>
       </div>
     </footer>

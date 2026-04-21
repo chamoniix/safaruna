@@ -22,11 +22,7 @@ export const metadata: Metadata = {
   title: "SAFARUMA — Le voyage vers tes origines commence ici.",
   description: "SAFARUMA connecte les voyageurs avec des guides privés certifiés pour vivre la Omra, découvrir l'histoire de l'Islam et retrouver ses origines spirituelles. 320 guides certifiés, 12 langues.",
   keywords: ["omra", "guide omra", "umrah", "guide privé", "arabie saoudite", "makkah", "madinah", "pèlerinage", "guide islamique"],
-  icons: {
-    icon: '/icon-logo.png',
-    shortcut: '/icon-logo.png',
-    apple: '/icon-logo.png',
-  },
+
   openGraph: {
     title: 'SAFARUMA — Le voyage vers tes origines commence ici',
     description: 'Guides privés certifiés pour la Omra, la découverte historique et le tourisme spirituel.',
@@ -58,6 +54,8 @@ export default async function RootLayout({
   return (
     <html lang="fr" className={`${cormorant.variable} ${manrope.variable}`}>
       <head>
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
         <link href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="antialiased font-sans bg-[var(--cream)] text-[var(--deep)]">

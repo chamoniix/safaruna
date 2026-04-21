@@ -597,13 +597,17 @@ export default function GuideSearchPage() {
                 </>
               );
               if (isMobile) return (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, background: 'white', overflowY: 'auto', padding: '1.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                    <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 600, color: '#1A1209' }}>Choisir une destination</div>
-                    <button onClick={() => setOpenPop(null)} style={{ background: 'none', border: '1.5px solid #E8DFC8', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', fontSize: '1rem', color: '#1A1209', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+                <>
+                  <div onClick={() => setOpenPop(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 999 }} />
+                  <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000, background: 'white', borderRadius: '20px 20px 0 0', padding: '1rem 1.25rem 2.5rem', maxHeight: '70vh', overflowY: 'auto' }}>
+                    <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(0,0,0,0.12)', margin: '0 auto 1.25rem' }} />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--deep)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Destination</span>
+                      <button onClick={() => setOpenPop(null)} style={{ background: '#F5F0E8', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', fontSize: 14, color: '#7A6D5A' }}>✕</button>
+                    </div>
+                    {inner}
                   </div>
-                  {inner}
-                </div>
+                </>
               );
               return (
                 <div className="search-popup" style={{ left: 0 }}>
@@ -614,20 +618,40 @@ export default function GuideSearchPage() {
             })()}
 
             {/* ── Calendar popup ── */}
-            {openPop === 'cal' && (
-              <div className="search-popup" style={{ left: '50%', transform: 'translateX(-50%)' }}>
-                <CalendarPicker
-                  dateArrivee={dateArrivee} setDateArrivee={setDateArrivee}
-                  dateDepart={dateDepart} setDateDepart={setDateDepart}
-                  calOffset={calOffset} setCalOffset={setCalOffset}
-                />
-                {dateArrivee && dateDepart && (
-                  <div style={{ padding: '0 1.25rem 0.875rem', display: 'flex', justifyContent: 'flex-end' }}>
-                    <button onClick={() => setOpenPop(null)} style={{ padding: '0.45rem 1.25rem', background: '#1A1209', color: '#F0D897', border: 'none', borderRadius: 50, fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Confirmer</button>
+            {openPop === 'cal' && (() => {
+              const inner = (
+                <>
+                  <CalendarPicker
+                    dateArrivee={dateArrivee} setDateArrivee={setDateArrivee}
+                    dateDepart={dateDepart} setDateDepart={setDateDepart}
+                    calOffset={calOffset} setCalOffset={setCalOffset}
+                  />
+                  {dateArrivee && dateDepart && (
+                    <div style={{ padding: '0 1.25rem 0.875rem', display: 'flex', justifyContent: 'flex-end' }}>
+                      <button onClick={() => setOpenPop(null)} style={{ padding: '0.45rem 1.25rem', background: '#1A1209', color: '#F0D897', border: 'none', borderRadius: 50, fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Confirmer</button>
+                    </div>
+                  )}
+                </>
+              );
+              if (isMobile) return (
+                <>
+                  <div onClick={() => setOpenPop(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 999 }} />
+                  <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000, background: 'white', borderRadius: '20px 20px 0 0', padding: '1rem 1.25rem 2.5rem', maxHeight: '70vh', overflowY: 'auto' }}>
+                    <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(0,0,0,0.12)', margin: '0 auto 1.25rem' }} />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--deep)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Dates</span>
+                      <button onClick={() => setOpenPop(null)} style={{ background: '#F5F0E8', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', fontSize: 14, color: '#7A6D5A' }}>✕</button>
+                    </div>
+                    {inner}
                   </div>
-                )}
-              </div>
-            )}
+                </>
+              );
+              return (
+                <div className="search-popup" style={{ left: '50%', transform: 'translateX(-50%)' }}>
+                  {inner}
+                </div>
+              );
+            })()}
 
             {/* ── Langue popup ── */}
             {openPop === 'langue' && (() => {
@@ -659,13 +683,17 @@ export default function GuideSearchPage() {
                 </>
               );
               if (isMobile) return (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, background: 'white', overflowY: 'auto', padding: '1.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                    <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 600, color: '#1A1209' }}>Choisir une langue</div>
-                    <button onClick={() => setOpenPop(null)} style={{ background: 'none', border: '1.5px solid #E8DFC8', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', fontSize: '1rem', color: '#1A1209', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+                <>
+                  <div onClick={() => setOpenPop(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 999 }} />
+                  <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000, background: 'white', borderRadius: '20px 20px 0 0', padding: '1rem 1.25rem 2.5rem', maxHeight: '70vh', overflowY: 'auto' }}>
+                    <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(0,0,0,0.12)', margin: '0 auto 1.25rem' }} />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--deep)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Langue</span>
+                      <button onClick={() => setOpenPop(null)} style={{ background: '#F5F0E8', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', fontSize: 14, color: '#7A6D5A' }}>✕</button>
+                    </div>
+                    {inner}
                   </div>
-                  {inner}
-                </div>
+                </>
               );
               return (
                 <div className="search-popup" style={{ left: '33%' }}>
@@ -709,13 +737,17 @@ export default function GuideSearchPage() {
                 </>
               );
               if (isMobile) return (
-                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, background: 'white', overflowY: 'auto', padding: '1.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-                    <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 600, color: '#1A1209' }}>Voyageurs</div>
-                    <button onClick={() => setOpenPop(null)} style={{ background: 'none', border: '1.5px solid #E8DFC8', borderRadius: '50%', width: 36, height: 36, cursor: 'pointer', fontSize: '1rem', color: '#1A1209', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+                <>
+                  <div onClick={() => setOpenPop(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 999 }} />
+                  <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000, background: 'white', borderRadius: '20px 20px 0 0', padding: '1rem 1.25rem 2.5rem', maxHeight: '70vh', overflowY: 'auto' }}>
+                    <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(0,0,0,0.12)', margin: '0 auto 1.25rem' }} />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--deep)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Voyageurs</span>
+                      <button onClick={() => setOpenPop(null)} style={{ background: '#F5F0E8', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', fontSize: 14, color: '#7A6D5A' }}>✕</button>
+                    </div>
+                    {inner}
                   </div>
-                  {inner}
-                </div>
+                </>
               );
               return (
                 <div className="search-popup" style={{ right: 0 }}>

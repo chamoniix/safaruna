@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { PLACES, type Place } from '@/lib/places'
@@ -280,38 +280,72 @@ export default function CheckoutPage() {
   }
 
   // ── Barre de progression ──────────────────────
-  const ProgressBar = () => (
-    <div style={{
-      position: 'sticky', top: 0, zIndex: 40, background: 'white',
-      borderBottom: '1px solid #E8DFC8', padding: '1rem 2rem',
-      display: 'flex', gap: '0.5rem', alignItems: 'center', justifyContent: 'center',
-    }}>
-      {STEPS.map((s, i) => {
-        const n = i + 1
-        const done = step > n
-        const active = step === n
-        return (
-          <div key={s} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <div style={{
-              width: 28, height: 28, borderRadius: '50%',
+  const ProgressBar = () => {
+    const items: React.ReactNode[] = []
+    STEPS.forEach((s, i) => {
+      const n = i + 1
+      const done = step > n
+      const active = step === n
+      items.push(
+        <div key={`step-${i}`} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+          <div
+            className="ck-circle"
+            style={{
+              borderRadius: '50%',
               background: done ? '#1D5C3A' : active ? '#C9A84C' : '#E8DFC8',
-              color: done || active ? 'white' : '#9CA3AF',
+              color: (done || active) ? 'white' : '#9CA3AF',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '0.75rem', fontWeight: 700, flexShrink: 0,
-            }}>
-              {done ? '✓' : n}
-            </div>
-            <span style={{ fontSize: '0.72rem', fontWeight: active ? 700 : 500, color: active ? '#1A1209' : '#9CA3AF' }}>
-              {s}
-            </span>
-            {i < STEPS.length - 1 && (
-              <div style={{ width: 24, height: 2, background: done ? '#1D5C3A' : '#E8DFC8', borderRadius: 1 }} />
-            )}
+              fontWeight: 700, flexShrink: 0,
+            }}
+          >
+            {done ? '✓' : n}
           </div>
+          <span
+            className={active ? 'ck-lbl-on' : 'ck-lbl-off'}
+            style={{ fontWeight: active ? 700 : 500, color: active ? '#1A1209' : '#9CA3AF', textAlign: 'center' }}
+          >
+            {s}
+          </span>
+        </div>
+      )
+      if (i < STEPS.length - 1) {
+        items.push(
+          <div
+            key={`ck-c-${i}`}
+            className="ck-con"
+            style={{ background: done ? '#1D5C3A' : '#E8DFC8', borderRadius: 1, alignSelf: 'flex-start', marginTop: 14 }}
+          />
         )
-      })}
-    </div>
-  )
+      }
+    })
+    return (
+      <>
+        <style dangerouslySetInnerHTML={{ __html: `
+          .ck-bar { padding: 1rem 2rem; }
+          .ck-circle { width: 28px; height: 28px; font-size: 0.75rem; }
+          .ck-lbl-on, .ck-lbl-off { font-size: 0.72rem; }
+          .ck-con { width: 24px; height: 2px; flex-shrink: 0; }
+          @media (max-width: 640px) {
+            .ck-bar { padding: 10px 12px; }
+            .ck-circle { width: 28px; height: 28px; font-size: 11px; }
+            .ck-lbl-off { display: none; }
+            .ck-lbl-on { font-size: 10px; font-weight: 700; }
+            .ck-con { width: auto; flex: 1; height: 1px; min-width: 8px; }
+          }
+        `}} />
+        <div
+          className="ck-bar"
+          style={{
+            position: 'sticky', top: 0, zIndex: 40, background: 'white',
+            borderBottom: '1px solid #E8DFC8',
+            display: 'flex', gap: 0, alignItems: 'flex-start', justifyContent: 'center',
+          }}
+        >
+          {items}
+        </div>
+      </>
+    )
+  }
 
   // ── Loading ───────────────────────────────────
   if (loadingGuide || status === 'loading') {

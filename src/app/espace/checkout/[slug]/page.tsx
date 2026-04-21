@@ -6,7 +6,7 @@ import { useSession } from 'next-auth/react'
 import { DayPicker, DateRange } from 'react-day-picker'
 import { format, differenceInDays } from 'date-fns'
 import { fr as frLocale } from 'date-fns/locale'
-import 'react-day-picker/dist/style.css'
+import 'react-day-picker/style.css'
 import { PLACES, type Place } from '@/lib/places'
 import { BASE_PACKAGES, getPackageForCity, type CityChoice } from '@/lib/packages'
 

@@ -54,8 +54,6 @@ export default async function RootLayout({
   return (
     <html lang="fr" className={`${cormorant.variable} ${manrope.variable}`}>
       <head>
-        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-        <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
         <link href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="antialiased font-sans bg-[var(--cream)] text-[var(--deep)]">

@@ -127,6 +127,26 @@ const FlagIcon = ({ code }: { code: string }) => {
   )
 }
 
+const LANGUES = [
+  { code: 'fr', label: 'Français' },
+  { code: 'ar', label: 'Arabe' },
+  { code: 'en', label: 'English' },
+  { code: 'wo', label: 'Wolof' },
+  { code: 'dz', label: 'Darija (Maroc)' },
+  { code: 'bm', label: 'Bambara' },
+  { code: 'dja', label: 'Algérien' },
+  { code: 'tn', label: 'Tunisien' },
+  { code: 'ur', label: 'Urdu' },
+  { code: 'ha', label: 'Haoussa' },
+  { code: 'id', label: 'Indonésien' },
+  { code: 'tr', label: 'Turc' },
+  { code: 'ber', label: 'Tamazight' },
+  { code: 'so', label: 'Somali' },
+  { code: 'ff', label: 'Peul' },
+  { code: 'bn', label: 'Bengali' },
+  { code: 'sw', label: 'Swahili' },
+]
+
 // ── Page principale ───────────────────────────────
 export default function CheckoutPage() {
   const params = useParams<{ slug: string }>()
@@ -155,6 +175,7 @@ export default function CheckoutPage() {
   const [nbPersonnes, setNbPersonnes] = useState(1)
   const [gender, setGender] = useState<Gender>('MIXTE')
   const [langue, setLangue] = useState('fr')
+  const [showAllLangues, setShowAllLangues] = useState(false)
 
   // Étape 3
   const [selectedPlaces, setSelectedPlaces] = useState<string[]>([])
@@ -563,12 +584,7 @@ export default function CheckoutPage() {
                   Langue préférée
                 </label>
                 <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  {[
-                    { code: 'fr', label: 'Français' },
-                    { code: 'ar', label: 'Arabe' },
-                    { code: 'en', label: 'English' },
-                    { code: 'wo', label: 'Wolof' },
-                  ].map(l => (
+                  {LANGUES.slice(0, 4).map(l => (
                     <button
                       key={l.code}
                       onClick={() => setLangue(l.code)}
@@ -579,6 +595,19 @@ export default function CheckoutPage() {
                     </button>
                   ))}
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setShowAllLangues(true)}
+                  style={{ background: 'white', border: '1px solid #E8DFC8', borderRadius: 50, padding: '6px 14px', fontSize: 11, color: '#7A6D5A', cursor: 'pointer', fontFamily: 'inherit', marginTop: 8, display: 'flex', alignItems: 'center', gap: 6 }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/>
+                  </svg>
+                  {langue && !['fr', 'ar', 'en', 'wo'].includes(langue)
+                    ? `✓ ${LANGUES.find(l => l.code === langue)?.label}`
+                    : 'Voir toutes les langues'}
+                </button>
               </div>
             </div>
 
@@ -977,7 +1006,7 @@ export default function CheckoutPage() {
                 ['Date de retour', range?.to ? format(range.to, 'd MMMM yyyy', { locale: frLocale }) : '—'],
                 ['Personnes', `${nbPersonnes} personne${nbPersonnes > 1 ? 's' : ''}`],
                 ['Profil', gender],
-                ['Langue', langue === 'fr' ? 'Français' : langue === 'ar' ? 'Arabe' : langue === 'en' ? 'English' : 'Wolof'],
+                ['Langue', LANGUES.find(l => l.code === langue)?.label ?? langue],
               ].map(([k, v]) => (
                 <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.4rem 0', borderBottom: '1px solid #F5F0E8', fontSize: '0.83rem' }}>
                   <span style={{ color: '#7A6D5A' }}>{k}</span>
@@ -1018,6 +1047,41 @@ export default function CheckoutPage() {
         )}
       </div>
       </div>
+
+      {/* ── Bottom sheet — Toutes les langues ── */}
+      {showAllLangues && (
+        <>
+          <div
+            onClick={() => setShowAllLangues(false)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 999 }}
+          />
+          <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000, background: 'white', borderRadius: '20px 20px 0 0', padding: '1.25rem 1.25rem 2.5rem', maxHeight: '75vh', overflowY: 'auto' }}>
+            <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(0,0,0,0.1)', margin: '0 auto 1.25rem' }} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <span style={{ fontSize: 13, fontWeight: 700, color: '#1A1209', textTransform: 'uppercase', letterSpacing: '.06em' }}>Langue préférée</span>
+              <button
+                type="button"
+                onClick={() => setShowAllLangues(false)}
+                style={{ background: '#F5F0E8', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', fontSize: 14, color: '#7A6D5A' }}
+              >✕</button>
+            </div>
+            {LANGUES.map(l => (
+              <div
+                key={l.code}
+                onClick={() => { setLangue(l.code); setShowAllLangues(false) }}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0', borderBottom: '1px solid #F0EBD8', cursor: 'pointer', fontSize: 14, color: langue === l.code ? '#C9A84C' : '#1A1209', fontWeight: langue === l.code ? 700 : 400 }}
+              >
+                <span>{l.label}</span>
+                {langue === l.code && (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="2.5" strokeLinecap="round">
+                    <polyline points="20,6 9,17 4,12"/>
+                  </svg>
+                )}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   )
 }

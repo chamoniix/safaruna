@@ -3,6 +3,10 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import { DayPicker, DateRange } from 'react-day-picker'
+import { format, differenceInDays } from 'date-fns'
+import { fr as frLocale } from 'date-fns/locale'
+import 'react-day-picker/dist/style.css'
 import { PLACES, type Place } from '@/lib/places'
 import { BASE_PACKAGES, getPackageForCity, type CityChoice } from '@/lib/packages'
 
@@ -147,8 +151,7 @@ export default function CheckoutPage() {
   const [cityChoice, setCityChoice] = useState<CityChoice | null>(null)
 
   // Étape 2
-  const [departDate, setDepartDate] = useState('')
-  const [returnDate, setReturnDate] = useState('')
+  const [range, setRange] = useState<DateRange | undefined>()
   const [nbPersonnes, setNbPersonnes] = useState(1)
   const [gender, setGender] = useState<Gender>('MIXTE')
   const [langue, setLangue] = useState('fr')
@@ -256,8 +259,8 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           guideSlug: slug,
           cityChoice,
-          departDate,
-          returnDate,
+          departDate: range?.from,
+          returnDate: range?.to,
           nbPersonnes,
           gender,
           langue,
@@ -463,32 +466,62 @@ export default function CheckoutPage() {
             </h2>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-              {/* Date */}
+              {/* Range picker dates */}
               <div>
-                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.5rem' }}>
-                  Date de départ *
+                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.75rem' }}>
+                  Dates du séjour *
                 </label>
-                <input
-                  type="date"
-                  value={departDate}
-                  min={new Date().toISOString().split('T')[0]}
-                  onChange={e => setDepartDate(e.target.value)}
-                  style={{ width: '100%', padding: '0.75rem 1rem', border: '1.5px solid #E8DFC8', borderRadius: 10, fontSize: '0.9rem', fontFamily: 'inherit', color: '#1A1209', background: 'white', boxSizing: 'border-box' }}
-                />
-              </div>
 
-              {/* Date retour */}
-              <div>
-                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.5rem' }}>
-                  Date de retour *
-                </label>
-                <input
-                  type="date"
-                  value={returnDate}
-                  min={departDate || new Date().toISOString().split('T')[0]}
-                  onChange={e => setReturnDate(e.target.value)}
-                  style={{ width: '100%', padding: '0.75rem 1rem', border: '1.5px solid #E8DFC8', borderRadius: 10, fontSize: '0.9rem', fontFamily: 'inherit', color: '#1A1209', background: 'white', boxSizing: 'border-box' }}
-                />
+                {/* Affichage de la sélection */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
+                  <div style={{ background: '#FAF7F0', border: range?.from ? '1.5px solid #C9A84C' : '1px solid #E8DFC8', borderRadius: 10, padding: '10px 14px' }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: 3 }}>Arrivée</div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: range?.from ? '#1A1209' : '#B0A090' }}>
+                      {range?.from ? format(range.from, 'd MMM yyyy', { locale: frLocale }) : 'Choisir'}
+                    </div>
+                  </div>
+                  <div style={{ background: '#FAF7F0', border: range?.to ? '1.5px solid #C9A84C' : '1px solid #E8DFC8', borderRadius: 10, padding: '10px 14px' }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: 3 }}>Départ</div>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: range?.to ? '#1A1209' : '#B0A090' }}>
+                      {range?.to ? format(range.to, 'd MMM yyyy', { locale: frLocale }) : 'Choisir'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Durée calculée */}
+                {range?.from && range?.to && (
+                  <div style={{ textAlign: 'center', fontSize: 11, color: '#8B6914', background: 'rgba(201,168,76,.1)', borderRadius: 50, padding: '4px 12px', display: 'inline-block', marginBottom: 12 }}>
+                    {differenceInDays(range.to, range.from)} nuits
+                  </div>
+                )}
+
+                {/* Calendrier range picker */}
+                <div style={{ border: '1px solid #E8DFC8', borderRadius: 12, overflow: 'hidden', marginBottom: 8 }}>
+                  <DayPicker
+                    mode="range"
+                    selected={range}
+                    onSelect={setRange}
+                    locale={frLocale}
+                    disabled={{ before: new Date() }}
+                    numberOfMonths={1}
+                    showOutsideDays={false}
+                    modifiersStyles={{
+                      selected: { backgroundColor: '#C9A84C', color: '#1A1209', fontWeight: 700 },
+                      range_middle: { backgroundColor: 'rgba(201,168,76,.15)', color: '#1A1209' },
+                      range_start: { backgroundColor: '#C9A84C', borderRadius: '50%', color: '#1A1209' },
+                      range_end: { backgroundColor: '#C9A84C', borderRadius: '50%', color: '#1A1209' },
+                    }}
+                    styles={{
+                      root: { width: '100%', fontFamily: 'inherit' },
+                      month: { width: '100%' },
+                      table: { width: '100%' },
+                      head_cell: { fontSize: 11, color: '#7A6D5A', fontWeight: 600 },
+                      day: { fontSize: 13, width: 36, height: 36, borderRadius: '50%' },
+                      caption_label: { fontSize: 14, fontWeight: 700, color: '#1A1209' },
+                      nav_button: { color: '#C9A84C', border: '1px solid #E8DFC8', borderRadius: 8 },
+                    }}
+                  />
+                </div>
               </div>
 
               {/* Nb personnes */}
@@ -549,7 +582,7 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {nextBtn('Continuer', () => setStep(3), !departDate || !returnDate)}
+            {nextBtn('Continuer', () => setStep(3), !range?.from || !range?.to)}
           </div>
         )}
 
@@ -940,8 +973,8 @@ export default function CheckoutPage() {
               </div>
               {[
                 ['Destination', cityChoice === 'BOTH' ? 'Makkah + Madinah' : cityChoice === 'MAKKAH' ? 'Makkah' : 'Madinah'],
-                ['Date de départ', new Date(departDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })],
-                ['Date de retour', new Date(returnDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })],
+                ['Date de départ', range?.from ? format(range.from, 'd MMMM yyyy', { locale: frLocale }) : '—'],
+                ['Date de retour', range?.to ? format(range.to, 'd MMMM yyyy', { locale: frLocale }) : '—'],
                 ['Personnes', `${nbPersonnes} personne${nbPersonnes > 1 ? 's' : ''}`],
                 ['Profil', gender],
                 ['Langue', langue === 'fr' ? 'Français' : langue === 'ar' ? 'Arabe' : langue === 'en' ? 'English' : 'Wolof'],

@@ -19,6 +19,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Données invalides' }, { status: 400 });
   }
 
+  if (comment.length > 2000) {
+    return NextResponse.json({ error: 'Commentaire trop long (max 2000 caractères)' }, { status: 400 });
+  }
+
   const reservation = await prisma.reservation.findUnique({
     where: { id: reservationId },
     include: { reviews: { select: { id: true } } },

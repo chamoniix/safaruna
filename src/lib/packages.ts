@@ -35,7 +35,7 @@ export const BASE_PACKAGES: BasePackage[] = [
     name: 'Voyage complet — Makkah + Madinah',
     cities: 'BOTH',
     emoji: '✨',
-    description: "Le voyage complet : Omra à Makkah + découverte de Madinah. Train Haramayn inclus.",
+    description: "Le voyage complet : Omra à Makkah + découverte de Madinah. Train Haramayn disponible en option.",
     includedPlaces: [
       'masjid-al-haram', 'kaaba', 'zamzam', 'safa-marwa',
       'masjid-nabawi', 'rawdah',

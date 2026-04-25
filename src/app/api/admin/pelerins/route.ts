@@ -5,12 +5,18 @@ import prisma from '@/lib/prisma';
 export async function GET(req: NextRequest) {
   if (!await checkAdmin(req)) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
 
+  const page = Number(req.nextUrl.searchParams.get('page') || '1')
+  const take = 50
+  const skip = (page - 1) * take
+
   const users = await prisma.user.findMany({
     where: { role: 'PELERIN' },
     include: {
       reservations: { select: { id: true, totalPrice: true, status: true } },
     },
     orderBy: { createdAt: 'desc' },
+    take,
+    skip,
   });
 
   return NextResponse.json({
@@ -31,5 +37,7 @@ export async function GET(req: NextRequest) {
           .reduce((sum, r) => sum + r.totalPrice, 0)
       ),
     })),
+    page,
+    pageSize: take,
   });
 }

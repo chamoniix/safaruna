@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json()
   const {
-    guideSlug, cityChoice, departDate, nbPersonnes,
+    guideSlug, cityChoice, departDate, returnDate, nbPersonnes,
     gender, langue, selectedPlaces, withTransport, withCar,
     totalPrice, packageName,
   } = body
@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
         guideProfileId: guide.id,
         packageId: pkg.id,
         startDate: new Date(departDate),
-        endDate: new Date(departDate),
+        endDate: returnDate ? new Date(returnDate) : new Date(departDate),
         nbPeople: nbPersonnes,
         basePrice: totalPrice,
         commissionAmount: commission,

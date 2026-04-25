@@ -1,14 +1,29 @@
 import { MetadataRoute } from 'next'
+import prisma from '@/lib/prisma'
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const guides = await prisma.guideProfile.findMany({
+    where: { status: 'ACTIVE' },
+    select: { slug: true },
+  })
+
+  const guideUrls: MetadataRoute.Sitemap = guides
+    .filter(g => g.slug)
+    .map(g => ({
+      url: `https://safaruma.com/guides/${g.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: 0.8,
+    }))
+
   return [
     // ── Pages principales ──
     { url: 'https://safaruma.com',                           lastModified: new Date(), changeFrequency: 'daily',   priority: 1.0 },
     { url: 'https://safaruma.com/guides',                    lastModified: new Date(), changeFrequency: 'daily',   priority: 0.9 },
     { url: 'https://safaruma.com/guide-omra',                lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.9 },
 
-    // ── Fiches guides ──
-    { url: 'https://safaruma.com/guides/naim-laamari',       lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },
+    // ── Fiches guides (dynamiques) ──
+    ...guideUrls,
 
     // ── Pages contenu ──
     { url: 'https://safaruma.com/lieux-saints',              lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },

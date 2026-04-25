@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { DayPicker, DateRange } from 'react-day-picker'
@@ -167,6 +167,7 @@ export default function CheckoutPage() {
   const [guideSubStep, setGuideSubStep] = useState<1 | 2>(1)
   const [availableGuides, setAvailableGuides] = useState<any[]>([])
   const [loadingGuides, setLoadingGuides] = useState(false)
+  const guideFetchKey = useRef('')
 
   // Étape 1
   const [cityChoice, setCityChoice] = useState<CityChoice | null>(null)
@@ -245,17 +246,20 @@ export default function CheckoutPage() {
 
   // Fetch données du guide sélectionné
   useEffect(() => {
+    const controller = new AbortController()
     const target = selectedGuideSlug || slug
     if (!target) return
     setLoadingGuide(true)
-    fetch(`/api/guide/public/${target}`)
-      .then(r => r.json())
+    fetch(`/api/guide/public/${target}`, { signal: controller.signal })
+      .then(r => { if (!r.ok) throw new Error('Guide introuvable'); return r.json() })
       .then(data => {
         setGuide(data.guide)
         setActivePlaces(data.activePlaces || [])
         setPlacePrices(data.placePrices || {})
       })
+      .catch(e => { if (e.name !== 'AbortError') { setGuide(null) } })
       .finally(() => setLoadingGuide(false))
+    return () => controller.abort()
   }, [selectedGuideSlug, slug])
 
   // Fetch données du guide Madinah quand sélectionné
@@ -268,7 +272,9 @@ export default function CheckoutPage() {
 
   // Fetch guides disponibles à l'entrée de l'étape 4
   useEffect(() => {
-    if (step !== 4 || availableGuides.length > 0) return
+    const fetchKey = [step, cityChoice, langue, gender].join('-')
+    if (step !== 4 || fetchKey === guideFetchKey.current) return
+    guideFetchKey.current = fetchKey
     setLoadingGuides(true)
     fetch('/api/guides/available?' + new URLSearchParams({
       city: cityChoice || '',
@@ -278,7 +284,7 @@ export default function CheckoutPage() {
       .then(r => r.json())
       .then(d => setAvailableGuides(d.guides || []))
       .finally(() => setLoadingGuides(false))
-  }, [step]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [step, cityChoice, langue, gender])
 
   // Package de base
   const basePackage = cityChoice ? getPackageForCity(cityChoice) : null
@@ -364,7 +370,7 @@ export default function CheckoutPage() {
             style={{
               borderRadius: '50%',
               background: done ? '#1D5C3A' : active ? '#C9A84C' : '#E8DFC8',
-              color: (done || active) ? 'white' : '#9CA3AF',
+              color: (done || active) ? 'white' : '#7A6D5A',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontWeight: 700, flexShrink: 0,
             }}
@@ -373,7 +379,7 @@ export default function CheckoutPage() {
           </div>
           <span
             className={active ? 'ck-lbl-on' : 'ck-lbl-off'}
-            style={{ fontWeight: active ? 700 : 500, color: active ? '#1A1209' : '#9CA3AF', textAlign: 'center' }}
+            style={{ fontWeight: active ? 700 : 500, color: active ? '#1A1209' : '#7A6D5A', textAlign: 'center' }}
           >
             {s}
           </span>
@@ -444,7 +450,7 @@ export default function CheckoutPage() {
       style={{
         width: '100%', padding: '1rem',
         background: disabled ? '#E8DFC8' : '#1A1209',
-        color: disabled ? '#9CA3AF' : '#F0D897',
+        color: disabled ? '#7A6D5A' : '#F0D897',
         border: 'none', borderRadius: 50,
         fontFamily: 'inherit', fontWeight: 700, fontSize: '0.95rem',
         cursor: disabled ? 'not-allowed' : 'pointer', marginTop: '2rem',
@@ -544,13 +550,13 @@ export default function CheckoutPage() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
                   <div style={{ background: '#FAF7F0', border: range?.from ? '1.5px solid #C9A84C' : '1px solid #E8DFC8', borderRadius: 10, padding: '10px 14px' }}>
                     <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: 3 }}>Arrivée</div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: range?.from ? '#1A1209' : '#B0A090' }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: range?.from ? '#1A1209' : '#7A6D5A' }}>
                       {range?.from ? format(range.from, 'd MMM yyyy', { locale: frLocale }) : 'Choisir'}
                     </div>
                   </div>
                   <div style={{ background: '#FAF7F0', border: range?.to ? '1.5px solid #C9A84C' : '1px solid #E8DFC8', borderRadius: 10, padding: '10px 14px' }}>
                     <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: 3 }}>Départ</div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: range?.to ? '#1A1209' : '#B0A090' }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: range?.to ? '#1A1209' : '#7A6D5A' }}>
                       {range?.to ? format(range.to, 'd MMM yyyy', { locale: frLocale }) : 'Choisir'}
                     </div>
                   </div>
@@ -749,7 +755,7 @@ export default function CheckoutPage() {
                         {opt.perPerson && <span style={{ color: '#C9A84C', fontWeight: 600 }}> · {opt.perPerson}</span>}
                       </div>
                     </div>
-                    <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: opt.key === 'NONE' ? '#9CA3AF' : '#C9A84C' }}>{opt.price}</div>
+                    <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: opt.key === 'NONE' ? '#7A6D5A' : '#C9A84C' }}>{opt.price}</div>
                   </div>
                 ))}
               </div>
@@ -780,10 +786,10 @@ export default function CheckoutPage() {
                 <div style={{ position: 'fixed', top: 0, right: 0, width: 320, height: '100vh', background: 'white', boxShadow: '-4px 0 24px rgba(0,0,0,0.12)', zIndex: 100, padding: '2rem 1.5rem', overflowY: 'auto' }}>
                   <button onClick={() => setDetailPlace(null)} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', marginBottom: '1rem', color: '#7A6D5A' }}>✕</button>
                   <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>{place.emoji}</div>
-                  <div style={{ fontFamily: 'serif', fontSize: '1rem', color: '#9CA3AF', direction: 'rtl', marginBottom: '0.5rem' }}>{place.nameAr}</div>
+                  <div style={{ fontFamily: 'serif', fontSize: '1rem', color: '#7A6D5A', direction: 'rtl', marginBottom: '0.5rem' }}>{place.nameAr}</div>
                   <h3 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.5rem', color: '#1A1209', marginBottom: '0.75rem' }}>{place.nameFr}</h3>
                   <p style={{ fontSize: '0.88rem', color: '#4A3F30', lineHeight: 1.8 }}>{place.desc}</p>
-                  <div style={{ marginTop: '1.5rem', padding: '0.75rem 1rem', background: '#FEF9EC', borderRadius: 8, fontSize: '0.85rem', fontWeight: 700, color: '#8B6914' }}>
+                  <div style={{ marginTop: '1.5rem', padding: '0.75rem 1rem', background: '#FAF3E0', borderRadius: 8, fontSize: '0.85rem', fontWeight: 700, color: '#8B6914' }}>
                     Tarif : {placePrices[place.key] ?? 50}€ / personne
                   </div>
                 </div>
@@ -886,7 +892,7 @@ export default function CheckoutPage() {
                   {currentSlug && (
                     <button
                       onClick={() => setCurrentSlug(null)}
-                      style={{ background: 'none', border: 'none', color: '#9CA3AF', fontSize: '0.75rem', cursor: 'pointer', marginTop: '0.75rem', textDecoration: 'underline', fontFamily: 'inherit' }}
+                      style={{ background: 'none', border: 'none', color: '#7A6D5A', fontSize: '0.75rem', cursor: 'pointer', marginTop: '0.75rem', textDecoration: 'underline', fontFamily: 'inherit' }}
                     >
                       Choisir un autre guide
                     </button>
@@ -1081,7 +1087,7 @@ export default function CheckoutPage() {
             </div>
 
             {error && (
-              <div style={{ background: '#FEE2E2', border: '1px solid #FCA5A5', borderRadius: 8, padding: '0.75rem 1rem', fontSize: '0.82rem', color: '#DC2626', marginBottom: '1rem', fontWeight: 600 }}>
+              <div style={{ background: '#FDECEA', border: '1px solid rgba(192,57,43,0.3)', borderRadius: 8, padding: '0.75rem 1rem', fontSize: '0.82rem', color: '#C0392B', marginBottom: '1rem', fontWeight: 600 }}>
                 {error}
               </div>
             )}
@@ -1089,13 +1095,13 @@ export default function CheckoutPage() {
             <button
               onClick={handleSubmit}
               disabled={submitting}
-              style={{ width: '100%', padding: '1.1rem', background: submitting ? '#9CA3AF' : 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)', color: '#FAF7F0', border: 'none', borderRadius: 50, fontFamily: 'var(--font-cormorant, serif)', fontWeight: 700, fontSize: '1.1rem', cursor: submitting ? 'not-allowed' : 'pointer', letterSpacing: '0.06em', boxShadow: submitting ? 'none' : '0 4px 20px rgba(201,168,76,0.4)' }}
+              style={{ width: '100%', padding: '1.1rem', background: submitting ? '#7A6D5A' : 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)', color: '#FAF7F0', border: 'none', borderRadius: 50, fontFamily: 'var(--font-cormorant, serif)', fontWeight: 700, fontSize: '1.1rem', cursor: submitting ? 'not-allowed' : 'pointer', letterSpacing: '0.06em', boxShadow: submitting ? 'none' : '0 4px 20px rgba(201,168,76,0.4)' }}
             >
               {submitting ? 'Envoi en cours…' : `Payer ${total.toLocaleString('fr-FR')}€`}
             </button>
 
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '0.75rem', fontSize: '0.72rem', color: '#9CA3AF' }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '0.75rem', fontSize: '0.72rem', color: '#7A6D5A' }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7A6D5A" strokeWidth="2">
                 <rect x="3" y="11" width="18" height="11" rx="2"/>
                 <path d="M7 11V7a5 5 0 0110 0v4"/>
               </svg>

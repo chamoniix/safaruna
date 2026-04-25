@@ -187,6 +187,20 @@ export async function PATCH(
     }
 
     if (body.interviewScore !== undefined || body.interviewNotes !== undefined) {
+      // Extrait l'email de l'admin depuis le token JWT
+      let adminEmail = 'admin@safaruma.com'
+      try {
+        const adminToken = req.cookies.get('admin_session')?.value
+        if (adminToken) {
+          const payloadB64 = adminToken.split('.')[1]
+          if (payloadB64) {
+            const payloadJson = atob(payloadB64.replace(/-/g, '+').replace(/_/g, '/'))
+            const payload = JSON.parse(payloadJson)
+            if (payload.email) adminEmail = payload.email
+          }
+        }
+      } catch { /* garde le fallback */ }
+
       await prisma.guideProfile.update({
         where: { slug },
         data: {
@@ -199,7 +213,7 @@ export async function PATCH(
           ...(body.interviewDate !== undefined && {
             interviewDate: new Date(body.interviewDate),
           }),
-          interviewedBy: 'admin@safaruma.com',
+          interviewedBy: adminEmail,
         },
       });
       return NextResponse.json({ success: true });

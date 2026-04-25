@@ -56,6 +56,7 @@ export async function signup(formData: FormData) {
   });
 
   // Envoyer l'email de confirmation (fire-and-forget)
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://safaruma.com'
   sendEmail({
     to: { email, name: `${firstName} ${lastName}` },
     subject: 'Confirmez votre adresse email — SAFARUMA',
@@ -64,7 +65,7 @@ export async function signup(formData: FormData) {
         <h2 style="color: #1A1209;">Bienvenue sur SAFARUMA 🕋</h2>
         <p>Cliquez sur le bouton ci-dessous pour confirmer
            votre adresse email et accéder à votre espace.</p>
-        <a href="https://safaruma.com/verify-email?token=${token}"
+        <a href="${baseUrl}/verify-email?token=${token}"
            style="display: inline-block; background: #C9A84C;
            color: #1A1209; padding: 0.85rem 2rem; border-radius: 50px;
            font-weight: 700; text-decoration: none; margin: 1.5rem 0;">

@@ -43,7 +43,7 @@ const DIFFERENCIATEURS: Array<{ icon: React.ReactNode; title: string; desc: stri
     icon: <IconChat size={24} stroke="#C9A84C" />,
     title: 'Assistance en temps réel',
     desc: "On répond à toutes vos questions. Nos guides et nos équipes sont là pour que votre voyage soit le plus agréable.",
-    vs: "Agences : tu pais d'abord, tu rencontres après",
+    vs: "Agences : tu paies d'abord, tu rencontres après",
   },
   {
     icon: <IconShield size={24} stroke="#C9A84C" />,
@@ -77,42 +77,6 @@ const GUIDES_VEDETTE = [
     badgeTextColor: '#1A1209',
     isOfficial: true,
     extraBadges: ['GUIDE VÉRIFIÉ ✓', 'RESPONSABLE TERRAIN', 'FORMATEUR CERTIFIÉ'],
-  },
-  {
-    slug: 'rachid-al-madani',
-    initials: 'RA',
-    hasPhoto: false,
-    gradient: 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)',
-    bgGradient: 'linear-gradient(160deg, #1A1209 0%, #2D1F08 60%, #1A0E04 100%)',
-    name: 'Cheikh Rachid Al-Madani',
-    location: 'Makkah · Madinah · 14 ans',
-    rating: '4.97',
-    reviews: 214,
-    langs: ['🇫🇷 Français', '🇸🇦 Arabe', '🇬🇧 English'],
-    price: '280€',
-    badge: 'Top Guide',
-    badgeColor: '#C9A84C',
-    badgeTextColor: '#1A1209',
-    isOfficial: false,
-    extraBadges: [],
-  },
-  {
-    slug: 'fatima-al-omari',
-    initials: 'FA',
-    hasPhoto: false,
-    gradient: 'linear-gradient(135deg, #9FE1CB 0%, #1D9E75 100%)',
-    bgGradient: 'linear-gradient(160deg, #082818 0%, #1D5C3A 60%, #082818 100%)',
-    name: 'Ustadha Fatima Al-Omari',
-    location: 'Makkah · 8 ans',
-    rating: '4.95',
-    reviews: 178,
-    langs: ['🇫🇷 Français', '🇲🇦 Darija'],
-    price: '320€',
-    badge: 'Guide Femme',
-    badgeColor: '#1D9E75',
-    badgeTextColor: '#ffffff',
-    isOfficial: false,
-    extraBadges: [],
   },
 ];
 
@@ -183,7 +147,7 @@ export default function Home() {
           <div style={{
             fontFamily: 'var(--font-cormorant, serif)',
             fontSize: '1rem', letterSpacing: '0.15em',
-            color: 'rgba(201,168,76,0.6)',
+            color: 'rgba(201,168,76,0.85)',
             marginBottom: '1rem',
             animation: 'fadeIn 0.8s 1.0s ease both', opacity: 0,
           }}>
@@ -204,7 +168,7 @@ export default function Home() {
           </h1>
 
           <p style={{
-            color: 'rgba(255,255,255,0.45)',
+            color: 'rgba(255,255,255,0.7)',
             fontSize: '1rem', lineHeight: 1.8,
             maxWidth: 520, margin: '0 auto 2.5rem',
             animation: 'fadeInUp 0.9s 1.4s ease both', opacity: 0,
@@ -233,7 +197,7 @@ export default function Home() {
               <span className="live-dot" />
               <span>147 pèlerins ont réservé cette semaine</span>
             </div>
-            <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.25)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.65)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               <span style={{ color: 'var(--gold)' }}>★★★★★</span> 4.96 · 709 avis vérifiés
             </span>
           </div>
@@ -243,7 +207,7 @@ export default function Home() {
             fontFamily: 'var(--font-cormorant, serif)',
             fontStyle: 'italic',
             fontSize: '0.95rem',
-            color: 'rgba(240,216,151,0.5)',
+            color: 'rgba(240,216,151,0.85)',
             maxWidth: 480,
             margin: '0 auto',
             lineHeight: 1.7,
@@ -302,10 +266,10 @@ export default function Home() {
             La majorité des pèlerins font la Omra<br />
             <em style={{ color: 'var(--gold)', fontStyle: 'italic' }}>sans vraiment la comprendre.</em>
           </h2>
-          <p className="reveal reveal-d2" style={{ color: 'rgba(255,255,255,0.55)', lineHeight: 1.9, fontSize: '1rem', marginBottom: '1.5rem' }}>
+          <p className="reveal reveal-d2" style={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.9, fontSize: '1rem', marginBottom: '1.5rem' }}>
             35 personnes dans un bus. Tu imites les gestes de ceux devant toi. Tu tournes autour de la Kaaba en ne sachant pas vraiment pourquoi tu tournes. Tu cherches un sens à ce que tu vis. Tu rentres chez toi avec une belle photo, mais quelque chose manque.
           </p>
-          <p className="reveal reveal-d3" style={{ color: 'rgba(255,255,255,0.55)', lineHeight: 1.9, fontSize: '1rem', marginBottom: '3rem' }}>
+          <p className="reveal reveal-d3" style={{ color: 'rgba(255,255,255,0.75)', lineHeight: 1.9, fontSize: '1rem', marginBottom: '3rem' }}>
             Ce n&apos;est pas la Omra qui était mauvaise. C&apos;est le format. Ce voyage mérite un guide qui prend <em style={{ color: 'rgba(240,216,151,0.8)' }}>ton temps</em>{' '}pour tout t&apos;expliquer, dans ta langue, à ton rythme.
           </p>
           <div className="reveal reveal-d4">
@@ -414,13 +378,13 @@ export default function Home() {
                     {/* Extra badges pour Naïm */}
                     {g.isOfficial && g.extraBadges.length > 0 && (
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', marginBottom: '0.75rem' }}>
-                        <span style={{ background: '#065F46', color: 'white', fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.06em', padding: '0.15rem 0.5rem', borderRadius: 50 }}>
+                        <span style={{ background: '#1D5C3A', color: 'white', fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.06em', padding: '0.15rem 0.5rem', borderRadius: 50 }}>
                           {g.extraBadges[0]}
                         </span>
                         <span style={{ background: '#C9A84C', color: '#1A1209', fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.06em', padding: '0.15rem 0.5rem', borderRadius: 50 }}>
                           {g.extraBadges[1]}
                         </span>
-                        <span style={{ background: '#1E3A5F', color: 'white', fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.06em', padding: '0.15rem 0.5rem', borderRadius: 50 }}>
+                        <span style={{ background: '#1A4A8A', color: 'white', fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.06em', padding: '0.15rem 0.5rem', borderRadius: 50 }}>
                           {g.extraBadges[2]}
                         </span>
                       </div>
@@ -467,7 +431,7 @@ export default function Home() {
                       )}
                       <div>
                         <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'white' }}>{g.name}</div>
-                        <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.55)' }}>{g.location}</div>
+                        <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.75)' }}>{g.location}</div>
                       </div>
                     </div>
 
@@ -503,7 +467,7 @@ export default function Home() {
                     </div>
 
                     {/* Price */}
-                    <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', marginTop: '0.5rem' }}>
+                    <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.7)', marginTop: '0.5rem' }}>
                       À partir de{' '}
                       <span style={{
                         fontFamily: 'var(--font-cormorant, serif)',
@@ -521,6 +485,40 @@ export default function Home() {
                 </div>
               </div>
             ))}
+
+            {/* CTA card — Rejoindre notre réseau */}
+            <div className="guide-feat-card reveal reveal-d2" style={{ background: 'linear-gradient(160deg, #0A1A0F 0%, #0E2A16 60%, #0A1A0F 100%)', border: '1px solid rgba(29,158,117,0.3)', boxShadow: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 280 }}>
+              <div style={{ textAlign: 'center', padding: '2rem 1.5rem' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🌿</div>
+                <div style={{ fontSize: '0.6rem', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#1D9E75', marginBottom: '0.75rem' }}>Vous êtes guide ?</div>
+                <h3 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.35rem', fontWeight: 400, color: 'white', lineHeight: 1.3, marginBottom: '0.75rem' }}>
+                  Rejoindre notre réseau de guides
+                </h3>
+                <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, marginBottom: '1.5rem' }}>
+                  Partagez votre connaissance des lieux saints. Rejoignez les guides certifiés SAFARUMA.
+                </p>
+                <Link href="/devenir-guide" style={{ display: 'inline-block', background: '#1D9E75', color: 'white', fontSize: '0.78rem', fontWeight: 700, padding: '0.6rem 1.5rem', borderRadius: 50, textDecoration: 'none', letterSpacing: '0.04em' }}>
+                  Postuler maintenant →
+                </Link>
+              </div>
+            </div>
+
+            {/* CTA card — Tous les guides */}
+            <div className="guide-feat-card reveal reveal-d3" style={{ background: 'linear-gradient(160deg, #1A1209 0%, #2D1F08 60%, #1A0E04 100%)', border: '1px solid rgba(201,168,76,0.15)', boxShadow: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 280 }}>
+              <div style={{ textAlign: 'center', padding: '2rem 1.5rem' }}>
+                <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>✨</div>
+                <div style={{ fontSize: '0.6rem', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(201,168,76,0.7)', marginBottom: '0.75rem' }}>Prochainement</div>
+                <h3 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.35rem', fontWeight: 400, color: 'white', lineHeight: 1.3, marginBottom: '0.75rem' }}>
+                  De nouveaux guides arrivent bientôt
+                </h3>
+                <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, marginBottom: '1.5rem' }}>
+                  Notre sélection s&apos;agrandit. Chaque guide est certifié après un processus rigoureux.
+                </p>
+                <Link href="/guides" style={{ display: 'inline-block', background: 'rgba(201,168,76,0.12)', color: '#C9A84C', fontSize: '0.78rem', fontWeight: 700, padding: '0.6rem 1.5rem', borderRadius: 50, textDecoration: 'none', letterSpacing: '0.04em', border: '1px solid rgba(201,168,76,0.3)' }}>
+                  Voir tous les guides →
+                </Link>
+              </div>
+            </div>
           </div>
 
           <div className="reveal" style={{ textAlign: 'center', marginTop: '3rem' }}>
@@ -784,7 +782,7 @@ export default function Home() {
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
           <Link href="/guide-omra" style={{ textDecoration: 'none', display: 'block' }}>
             <div className="reveal guide-omra-promo-card" style={{
-              background: 'linear-gradient(135deg, #1A1209 0%, #2C1810 100%)',
+              background: 'linear-gradient(135deg, #1A1209 0%, #2D1F08 100%)',
               border: '1px solid rgba(201,168,76,0.3)',
               borderRadius: 16,
               padding: '2rem 2.5rem',
@@ -798,7 +796,7 @@ export default function Home() {
                 <div style={{ flex: 1, minWidth: 220 }}>
                   <span style={{ display: 'inline-block', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(201,168,76,0.85)', background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)', padding: '0.22rem 0.65rem', borderRadius: 4, marginBottom: '0.7rem' }}>Guide de la Omra</span>
                   <h3 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(1.4rem, 3vw, 1.9rem)', color: 'white', margin: '0 0 0.65rem', lineHeight: 1.2, fontWeight: 400 }}>Guide complet de la Omra</h3>
-                  <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.8, margin: 0 }}>Ihram, Tawaf, Sa&apos;i, Tahallul, chaque rituel expliqué avec ses du&apos;as, significations spirituelles et checklist de préparation.</p>
+                  <p style={{ fontSize: '0.82rem', color: 'rgba(255,255,255,0.7)', lineHeight: 1.8, margin: 0 }}>Ihram, Tawaf, Sa&apos;i, Tahallul, chaque rituel expliqué avec ses du&apos;as, significations spirituelles et checklist de préparation.</p>
                 </div>
                 <div className="guide-omra-tags" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.4rem', flexShrink: 0 }}>
                   {['Ihram & Talbiyyah', 'Tawaf — 7 tours', "Sa'i — Safa & Marwa", 'Tahallul', "Du'as essentielles", 'Checklist complète'].map(tag => (
@@ -844,7 +842,7 @@ export default function Home() {
         <h2 className="reveal reveal-d1" style={{ color: 'white', marginTop: '-1rem' }}>
           Ta Omra mérite mieux.
         </h2>
-        <p className="reveal reveal-d2" style={{ color: 'rgba(255,255,255,0.45)', maxWidth: 480, margin: '1rem auto 2.5rem', lineHeight: 1.85, fontSize: '0.95rem' }}>
+        <p className="reveal reveal-d2" style={{ color: 'rgba(255,255,255,0.7)', maxWidth: 480, margin: '1rem auto 2.5rem', lineHeight: 1.85, fontSize: '0.95rem' }}>
           Rejoins des milliers de pèlerins à travers le monde qui ont vécu une Omra privée, profonde et inoubliable avec un guide qui a consacré sa vie à ce moment.
         </p>
         <div className="reveal reveal-d3" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '.75rem' }}>
@@ -852,7 +850,7 @@ export default function Home() {
             Trouver mon guide
           </Link>
           <span style={{ fontSize: '.72rem', color: 'rgba(255,255,255,.3)', display: 'flex', alignItems: 'center', gap: '.4rem' }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#27AE60', display: 'inline-block', animation: 'pulse 2s infinite' }} />
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#27AE60', display: 'inline-block', animation: 'pulseOpacity 2s infinite' }} />
             {nbDisponibles} guides disponibles ce mois
           </span>
         </div>

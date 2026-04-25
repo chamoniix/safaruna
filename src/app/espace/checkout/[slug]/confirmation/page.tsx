@@ -1,12 +1,63 @@
 'use client'
 
-import { Suspense } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 function ConfirmationContent() {
   const params = useSearchParams()
   const ref = params.get('ref') || 'SAF-XXX'
+  const payment = params.get('payment')
+
+  const [verified, setVerified] = useState<'pending' | 'confirmed' | 'failed'>('pending')
+
+  useEffect(() => {
+    if (!ref || ref === 'SAF-XXX' || payment !== 'success') {
+      setVerified('failed')
+      return
+    }
+    const checkReservation = async () => {
+      try {
+        const res = await fetch(`/api/espace/reservations?ref=${encodeURIComponent(ref)}`)
+        if (res.ok) {
+          const data = await res.json()
+          const reservations = data.reservations || data
+          const found = Array.isArray(reservations)
+            ? reservations.some((r: { refNumber?: string; status?: string }) => r.refNumber === ref)
+            : data.refNumber === ref
+          setVerified(found ? 'confirmed' : 'pending')
+        } else {
+          // API indisponible — on affiche quand même la confirmation si payment=success
+          setVerified('confirmed')
+        }
+      } catch {
+        // Erreur réseau — on ne casse pas le flow
+        setVerified('confirmed')
+      }
+    }
+    checkReservation()
+  }, [ref, payment])
+
+  if (verified === 'pending') {
+    return (
+      <div style={{ minHeight: '100vh', background: '#FAF7F0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', fontFamily: 'Arial, sans-serif', gap: '1.5rem' }}>
+        <div style={{ width: 40, height: 40, borderRadius: '50%', border: '3px solid #E8DFC8', borderTopColor: '#C9A84C', animation: 'spin 0.8s linear infinite' }} />
+        <p style={{ color: '#7A6D5A', fontSize: '0.95rem' }}>Confirmation en cours...</p>
+        <p style={{ color: '#9CA3AF', fontSize: '0.8rem' }}>Veuillez patienter, nous vérifions votre réservation.</p>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    )
+  }
+
+  if (verified === 'failed') {
+    return (
+      <div style={{ minHeight: '100vh', background: '#FAF7F0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', fontFamily: 'Arial, sans-serif', gap: '1rem' }}>
+        <p style={{ color: '#7A6D5A', fontSize: '1rem' }}>Nous n&apos;avons pas pu confirmer votre réservation.</p>
+        <p style={{ color: '#9CA3AF', fontSize: '0.85rem' }}>Si vous avez effectué un paiement, contactez-nous avec votre référence : <strong>{ref}</strong></p>
+        <Link href="/espace/reservations" style={{ color: '#C9A84C', fontWeight: 700, textDecoration: 'underline' }}>Voir mes réservations</Link>
+      </div>
+    )
+  }
 
   return (
     <div style={{ minHeight: '100vh', background: '#FAF7F0', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', fontFamily: 'Arial, sans-serif' }}>

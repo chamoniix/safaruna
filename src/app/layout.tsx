@@ -57,8 +57,11 @@ export default async function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet" />
       </head>
       <body className="antialiased font-sans bg-[var(--cream)] text-[var(--deep)]">
+        <a href="#main-content" className="skip-link">Passer au contenu principal</a>
         <Providers>
-          {children}
+          <main id="main-content">
+            {children}
+          </main>
         </Providers>
         <ConditionalWhatsApp />
       </body>

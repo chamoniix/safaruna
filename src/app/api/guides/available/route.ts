@@ -8,7 +8,10 @@ export async function GET(req: NextRequest) {
 
   try {
     const guides = await prisma.guideProfile.findMany({
-      where: { status: 'ACTIVE' },
+      where: {
+        status: 'ACTIVE',
+        ...(langue ? { languages: { some: { languageCode: langue } } } : {}),
+      },
       include: {
         user: {
           select: {

@@ -68,6 +68,11 @@ export async function GET(req: NextRequest) {
 
     if (!isJ3 && !isJ1) continue
 
+    // Anti-doublon : vérifie optionsJson pour les flags de notification
+    const opts = (resa as any).optionsJson as Record<string, unknown> | null ?? {}
+    const flagKey = isJ1 ? 'notifiedJ1' : 'notifiedJ3'
+    if (opts[flagKey]) continue // déjà envoyé, on skip
+
     const label = isJ1 ? 'demain' : 'dans 3 jours'
     const pelerinName = resa.pelerin.name ||
       `${resa.pelerin.firstName ?? ''} ${resa.pelerin.lastName ?? ''}`.trim() ||
@@ -75,12 +80,14 @@ export async function GET(req: NextRequest) {
     const guideName = resa.guideProfile.user.name ||
       `${resa.guideProfile.user.firstName ?? ''} ${resa.guideProfile.user.lastName ?? ''}`.trim()
 
+    let emailSentForResa = false
+
     // Email pèlerin
     if (resa.pelerin.email) {
       try {
         await sendEmail({
           to: { email: resa.pelerin.email, name: pelerinName },
-          subject: `🕋 Rappel — Votre voyage commence ${label} · ${resa.refNumber}`,
+          subject: `Rappel — Votre voyage commence ${label} · ${resa.refNumber}`,
           html: `
             <h2>Votre voyage commence ${label} !</h2>
             <p>Référence : <strong>${resa.refNumber}</strong></p>
@@ -101,6 +108,7 @@ export async function GET(req: NextRequest) {
           `,
         })
         sent++
+        emailSentForResa = true
       } catch (e) { console.error('Email pèlerin notif error:', e) }
     }
 
@@ -132,9 +140,25 @@ export async function GET(req: NextRequest) {
           `,
         })
         sent++
+        emailSentForResa = true
       } catch (e) { console.error('Email guide notif error:', e) }
     }
+
+    // Marque le flag anti-doublon dans optionsJson
+    if (emailSentForResa) {
+      try {
+        await prisma.reservation.update({
+          where: { id: resa.id },
+          data: { optionsJson: { ...opts, [flagKey]: true } as any },
+        })
+      } catch (e) { console.error('Update optionsJson notif error:', e) }
+    }
   }
+
+  // Nettoyage des drafts expirés
+  await prisma.reservationDraft.deleteMany({
+    where: { expiresAt: { lt: new Date() } }
+  })
 
   return NextResponse.json({
     success: true,

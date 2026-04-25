@@ -96,8 +96,8 @@ const GUIDES_DATA = [
     price: 0,
     priceSub: '',
     badge: 'Bientôt',
-    badgeColor: '#9CA3AF',
-    gradient: 'linear-gradient(135deg, #2A2A2A, #3A3A3A)',
+    badgeColor: '#7A6D5A',
+    gradient: 'linear-gradient(135deg, #1A1209, #4A3F30)',
     avatarGradient: 'linear-gradient(135deg, #E8E8E8, #C8C8C8)',
     available: false,
     specialisteEnfants: false,
@@ -312,6 +312,7 @@ export default function GuideSearchPage() {
   };
 
   const filteredGuides = GUIDES_DATA.filter(g => {
+    if (g.available === false) return false;
     if (selectedCity === 'MAKKAH' && !g.zones.includes('makkah')) return false;
     if (selectedCity === 'MADINAH' && !g.zones.includes('madinah')) return false;
     if (selectedCity === 'BOTH' && !(g.zones.includes('makkah') && g.zones.includes('madinah'))) return false;
@@ -330,6 +331,7 @@ export default function GuideSearchPage() {
     if (selectedSpecialites.includes('enfants') && !(g.specialisteEnfants || g.services.some(s => s.toLowerCase().includes('enfant') || s.toLowerCase().includes('famille')))) return false;
     return true;
   });
+  const comingSoonGuides = GUIDES_DATA.filter(g => g.available === false);
   const filteredOfficial = filteredGuides.filter(g => g.isOfficial);
   const filteredNonOfficial = filteredGuides.filter(g => !g.isOfficial);
 
@@ -466,9 +468,9 @@ export default function GuideSearchPage() {
             <span style={{ fontSize: '0.6rem' }}>{lieuxDropOpen ? '▲' : '▼'}</span>
           </button>
           {lieuxDropOpen && (
-            <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1.5px solid #E8DFC8', borderRadius: 12, marginTop: 4, maxHeight: 180, overflowY: 'auto', zIndex: 50, boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+            <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1.5px solid #E8DFC8', borderRadius: 12, marginTop: 4, maxHeight: 180, overflowY: 'auto', zIndex: 50, boxShadow: '0 8px 24px rgba(26,18,9,0.12)' }}>
               {LIEUX_OPTIONS.map(l => (
-                <label key={l} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.4rem 0.75rem', cursor: 'pointer', borderBottom: '1px solid #F5F0E8' }}>
+                <label key={l} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.4rem 0.75rem', cursor: 'pointer', borderBottom: '1px solid #E8DFC8' }}>
                   <input type="checkbox" checked={selectedLieux.includes(l)} onChange={() => toggleLieu(l)} style={{ width: 13, height: 13, accentColor: '#C9A84C' }} />
                   <span style={{ fontSize: '0.78rem', color: '#1A1209' }}>{l}</span>
                 </label>
@@ -520,7 +522,7 @@ export default function GuideSearchPage() {
           <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(2rem, 5vw, 3.2rem)', fontWeight: 300, color: 'white', textAlign: 'center', marginBottom: '0.5rem', lineHeight: 1.1 }}>
             Ton voyage, dans <em style={{ fontStyle: 'italic', color: '#C9A84C' }}>ta langue</em>
           </h1>
-          <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', marginBottom: '2rem' }}>
+          <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.65)', fontSize: '0.9rem', marginBottom: '2rem' }}>
             Sélection rigoureuse · Entretien physique · Certifiés SAFARUMA · Makkah, Madinah & plus
           </p>
 
@@ -600,10 +602,10 @@ export default function GuideSearchPage() {
                 <>
                   <div onClick={() => setOpenPop(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 999 }} />
                   <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000, background: 'white', borderRadius: '20px 20px 0 0', padding: '1rem 1.25rem 2.5rem', maxHeight: '70vh', overflowY: 'auto' }}>
-                    <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(0,0,0,0.12)', margin: '0 auto 1.25rem' }} />
+                    <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(26,18,9,0.12)', margin: '0 auto 1.25rem' }} />
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
                       <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--deep)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Destination</span>
-                      <button onClick={() => setOpenPop(null)} style={{ background: '#F5F0E8', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', fontSize: 14, color: '#7A6D5A' }}>✕</button>
+                      <button onClick={() => setOpenPop(null)} style={{ background: '#E8DFC8', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', fontSize: 14, color: '#7A6D5A' }}>✕</button>
                     </div>
                     {inner}
                   </div>
@@ -637,10 +639,10 @@ export default function GuideSearchPage() {
                 <>
                   <div onClick={() => setOpenPop(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 999 }} />
                   <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000, background: 'white', borderRadius: '20px 20px 0 0', padding: '1rem 1.25rem 2.5rem', maxHeight: '70vh', overflowY: 'auto' }}>
-                    <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(0,0,0,0.12)', margin: '0 auto 1.25rem' }} />
+                    <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(26,18,9,0.12)', margin: '0 auto 1.25rem' }} />
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
                       <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--deep)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Dates</span>
-                      <button onClick={() => setOpenPop(null)} style={{ background: '#F5F0E8', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', fontSize: 14, color: '#7A6D5A' }}>✕</button>
+                      <button onClick={() => setOpenPop(null)} style={{ background: '#E8DFC8', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', fontSize: 14, color: '#7A6D5A' }}>✕</button>
                     </div>
                     {inner}
                   </div>
@@ -686,10 +688,10 @@ export default function GuideSearchPage() {
                 <>
                   <div onClick={() => setOpenPop(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 999 }} />
                   <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000, background: 'white', borderRadius: '20px 20px 0 0', padding: '1rem 1.25rem 2.5rem', maxHeight: '70vh', overflowY: 'auto' }}>
-                    <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(0,0,0,0.12)', margin: '0 auto 1.25rem' }} />
+                    <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(26,18,9,0.12)', margin: '0 auto 1.25rem' }} />
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
                       <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--deep)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Langue</span>
-                      <button onClick={() => setOpenPop(null)} style={{ background: '#F5F0E8', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', fontSize: 14, color: '#7A6D5A' }}>✕</button>
+                      <button onClick={() => setOpenPop(null)} style={{ background: '#E8DFC8', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', fontSize: 14, color: '#7A6D5A' }}>✕</button>
                     </div>
                     {inner}
                   </div>
@@ -740,10 +742,10 @@ export default function GuideSearchPage() {
                 <>
                   <div onClick={() => setOpenPop(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 999 }} />
                   <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000, background: 'white', borderRadius: '20px 20px 0 0', padding: '1rem 1.25rem 2.5rem', maxHeight: '70vh', overflowY: 'auto' }}>
-                    <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(0,0,0,0.12)', margin: '0 auto 1.25rem' }} />
+                    <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(26,18,9,0.12)', margin: '0 auto 1.25rem' }} />
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
                       <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--deep)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Voyageurs</span>
-                      <button onClick={() => setOpenPop(null)} style={{ background: '#F5F0E8', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', fontSize: 14, color: '#7A6D5A' }}>✕</button>
+                      <button onClick={() => setOpenPop(null)} style={{ background: '#E8DFC8', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', fontSize: 14, color: '#7A6D5A' }}>✕</button>
                     </div>
                     {inner}
                   </div>
@@ -760,7 +762,7 @@ export default function GuideSearchPage() {
       </div>
 
       {/* ── TRUST BAR ── */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', padding: '0.75rem 1.5rem', background: '#F5F0E8', borderBottom: '1px solid #E8DFC8', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', padding: '0.75rem 1.5rem', background: '#E8DFC8', borderBottom: '1px solid #E8DFC8', flexWrap: 'wrap' }}>
         {[
           {
             label: 'Guides certifiés',
@@ -789,7 +791,7 @@ export default function GuideSearchPage() {
             ),
           },
         ].map(b => (
-          <span key={b.label} style={{ display: 'flex', alignItems: 'center', gap: '.4rem', fontSize: '.75rem', fontWeight: 600, color: '#5A4535' }}>
+          <span key={b.label} style={{ display: 'flex', alignItems: 'center', gap: '.4rem', fontSize: '.75rem', fontWeight: 600, color: '#7A6D5A' }}>
             <span style={{ color: '#C9A84C', display: 'flex', alignItems: 'center' }}>{b.icon}</span>
             {b.label}
           </span>
@@ -874,6 +876,36 @@ export default function GuideSearchPage() {
           <div className="guides-grid">
             {filteredNonOfficial.map(g => <GuideCard key={g.slug} guide={g} />)}
           </div>
+
+          {/* ── Section Prochainement ── */}
+          {comingSoonGuides.length > 0 && (
+            <div style={{ marginTop: '3rem', paddingTop: '2rem', borderTop: '2px dashed #E8DFC8' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
+                <span style={{ fontSize: '0.6rem', fontWeight: 800, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#7A6D5A', background: '#E8DFC8', padding: '0.25rem 0.75rem', borderRadius: 50 }}>
+                  Prochainement
+                </span>
+                <span style={{ fontSize: '0.78rem', color: '#7A6D5A' }}>Ces guides seront bientôt disponibles</span>
+              </div>
+              <div className="guides-grid" style={{ opacity: 0.55 }}>
+                {comingSoonGuides.map(g => (
+                  <div key={g.slug} style={{ background: '#F9FAFB', border: '1.5px dashed #E5E7EB', borderRadius: 16, padding: '1.5rem', pointerEvents: 'none', userSelect: 'none' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                      <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#E8DFC8', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', color: '#7A6D5A', fontWeight: 700 }}>
+                        {g.initials}
+                      </div>
+                      <div>
+                        <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#6B7280' }}>{g.name}</div>
+                        <div style={{ fontSize: '0.72rem', color: '#7A6D5A' }}>{g.title}</div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'inline-block', background: '#E8DFC8', color: '#7A6D5A', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.08em', padding: '0.2rem 0.6rem', borderRadius: 50 }}>
+                      Bientôt disponible
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div style={{ textAlign: 'center', marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #E8DFC8' }}>
             <Link href="/guides" style={{ display: 'inline-block', background: '#1A1209', color: '#F0D897', padding: '0.75rem 2rem', borderRadius: 50, fontSize: '0.85rem', fontWeight: 700, textDecoration: 'none', letterSpacing: '0.04em' }}>
@@ -1160,7 +1192,7 @@ function GuideCard({ guide: g, official }: { guide: GuideData; official?: boolea
             <GuideAvatarSVG slug={g.slug} gradient={g.gradient} initials={g.initials} isWoman={g.slug === 'fatima-al-omari' || g.slug === 'samira-al-rashidi'} />
           </div>
           <div style={{ position: 'absolute', bottom: 8, right: 12, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-            <div style={{ width: 7, height: 7, borderRadius: '50%', background: g.available ? '#27AE60' : '#aaa', border: '1.5px solid rgba(255,255,255,0.5)' }} />
+            <div style={{ width: 7, height: 7, borderRadius: '50%', background: g.available ? '#27AE60' : '#aaa', border: '1.5px solid rgba(255,255,255,0.7)' }} />
             <span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>{g.available ? 'Disponible' : 'Indisponible'}</span>
           </div>
           {official ? (
@@ -1191,13 +1223,13 @@ function GuideCard({ guide: g, official }: { guide: GuideData; official?: boolea
 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', marginBottom: '0.7rem' }}>
             {g.languages.map((l, i) => (
-              <span key={l} style={{ fontSize: '0.65rem', fontWeight: 600, padding: '0.15rem 0.55rem', borderRadius: 50, background: i === 0 ? '#FAF3E0' : '#F5F0E8', border: `1px solid ${i === 0 ? 'rgba(201,168,76,0.4)' : 'transparent'}`, color: i === 0 ? '#8B6914' : '#7A6D5A' }}>{l}</span>
+              <span key={l} style={{ fontSize: '0.65rem', fontWeight: 600, padding: '0.15rem 0.55rem', borderRadius: 50, background: i === 0 ? '#FAF3E0' : '#E8DFC8', border: `1px solid ${i === 0 ? 'rgba(201,168,76,0.4)' : 'transparent'}`, color: i === 0 ? '#8B6914' : '#7A6D5A' }}>{l}</span>
             ))}
           </div>
 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', marginBottom: '0.9rem' }}>
             {g.services.map(s => (
-              <span key={s} style={{ fontSize: '0.65rem', color: '#7A6D5A', background: '#F5F0E8', padding: '0.15rem 0.5rem', borderRadius: 5 }}>{s}</span>
+              <span key={s} style={{ fontSize: '0.65rem', color: '#7A6D5A', background: '#E8DFC8', padding: '0.15rem 0.5rem', borderRadius: 5 }}>{s}</span>
             ))}
           </div>
 

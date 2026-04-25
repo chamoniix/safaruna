@@ -5,9 +5,14 @@ import prisma from '@/lib/prisma';
 export async function GET(req: NextRequest) {
   if (!await checkAdmin(req)) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
 
+  const page = Number(req.nextUrl.searchParams.get('page') || '1')
+  const take = 50
+  const skip = (page - 1) * take
+
   const conversations = await prisma.conversation.findMany({
     orderBy: { updatedAt: 'desc' },
-    take: 100,
+    take,
+    skip,
     include: {
       pelerin: { select: { name: true, firstName: true, lastName: true, email: true } },
       guideProfile: { include: { user: { select: { name: true, firstName: true } } } },
@@ -38,5 +43,7 @@ export async function GET(req: NextRequest) {
       total: conversations.length,
       today: conversations.filter(c => c.messages[0] && new Date(c.messages[0].createdAt).toDateString() === today).length,
     },
+    page,
+    pageSize: take,
   });
 }

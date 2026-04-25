@@ -13,23 +13,25 @@ export async function GET(req: NextRequest) {
     orderBy: { user: { name: 'asc' } },
   });
 
-  const revenueData = await Promise.all(
-    guides.map(g =>
-      prisma.reservation.aggregate({
-        where: { guideProfileId: g.id, status: { in: ['CONFIRMED', 'COMPLETED'] } },
-        _sum: { totalPrice: true },
-      })
-    )
+  const revenueByGuide = await prisma.reservation.groupBy({
+    by: ['guideProfileId'],
+    _sum: { totalPrice: true, commissionAmount: true },
+    where: { status: { in: ['CONFIRMED', 'COMPLETED'] } },
+  });
+
+  const revenueMap = new Map(
+    revenueByGuide.map(r => [r.guideProfileId, r._sum])
   );
 
   return NextResponse.json({
-    guides: guides.map((g, i) => ({
+    guides: guides.map(g => ({
       id: g.id,
       slug: g.slug,
       name: g.user.name || `${g.user.firstName ?? ''} ${g.user.lastName ?? ''}`.trim() || '—',
       commissionRate: g.commissionRate,
       totalReservations: g._count.reservations,
-      totalRevenue: Math.round(revenueData[i]._sum.totalPrice ?? 0),
+      totalRevenue: Math.round(revenueMap.get(g.id)?.totalPrice ?? 0),
+      totalCommission: Math.round(revenueMap.get(g.id)?.commissionAmount ?? 0),
     })),
   });
 }

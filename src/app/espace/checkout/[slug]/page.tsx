@@ -65,7 +65,7 @@ function PlaceSelector({
                 <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>{place.desc}</div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem', flexShrink: 0 }}>
-                <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.1rem', fontWeight: 700, color: '#C9A84C' }}>
+                <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#C9A84C' }}>
                   +{prix}€
                 </div>
                 <button
@@ -159,6 +159,7 @@ export default function CheckoutPage() {
   const [activePlaces, setActivePlaces] = useState<string[]>([])
   const [placePrices, setPlacePrices] = useState<Record<string, number>>({})
   const [loadingGuide, setLoadingGuide] = useState(true)
+  const [guideDataMadinah, setGuideDataMadinah] = useState<any>(null)
 
   // Étape 4 — Choix du guide
   const [selectedGuideSlug, setSelectedGuideSlug] = useState<string | null>(null)
@@ -219,6 +220,14 @@ export default function CheckoutPage() {
       })
       .finally(() => setLoadingGuide(false))
   }, [selectedGuideSlug, slug])
+
+  // Fetch données du guide Madinah quand sélectionné
+  useEffect(() => {
+    if (!selectedGuideSlugMadinah) return
+    fetch(`/api/guide/public/${selectedGuideSlugMadinah}`)
+      .then(r => r.json())
+      .then(data => setGuideDataMadinah(data.guide ?? null))
+  }, [selectedGuideSlugMadinah])
 
   // Fetch guides disponibles à l'entrée de l'étape 4
   useEffect(() => {
@@ -398,7 +407,7 @@ export default function CheckoutPage() {
         width: '100%', padding: '1rem',
         background: disabled ? '#E8DFC8' : '#1A1209',
         color: disabled ? '#9CA3AF' : '#F0D897',
-        border: 'none', borderRadius: 12,
+        border: 'none', borderRadius: 50,
         fontFamily: 'inherit', fontWeight: 700, fontSize: '0.95rem',
         cursor: disabled ? 'not-allowed' : 'pointer', marginTop: '2rem',
       }}
@@ -409,7 +418,7 @@ export default function CheckoutPage() {
 
   // ── Rendu ─────────────────────────────────────
   return (
-    <div style={{ height: '100vh', background: '#FAF7F0', fontFamily: 'Arial, sans-serif', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <div style={{ height: '100vh', background: '#FAF7F0', fontFamily: 'var(--font-manrope, sans-serif)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <ProgressBar />
 
       <div style={{ flex: 1, overflowY: 'auto' }}>
@@ -418,7 +427,7 @@ export default function CheckoutPage() {
         {/* ── ÉTAPE 1 — DESTINATION ── */}
         {step === 1 && (
           <div>
-            <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '2rem', fontWeight: 400, color: '#1A1209', marginBottom: '0.5rem' }}>
+            <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2rem', fontWeight: 400, color: '#1A1209', marginBottom: '0.5rem' }}>
               Où souhaitez-vous vous rendre ?
             </h1>
             <p style={{ color: '#7A6D5A', fontSize: '0.9rem', marginBottom: '2rem', lineHeight: 1.7 }}>
@@ -443,22 +452,22 @@ export default function CheckoutPage() {
                     </div>
                   )}
                   <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>{pkg.emoji}</div>
-                  <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.3rem', fontWeight: 700, color: '#1A1209', marginBottom: '0.4rem' }}>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.3rem', fontWeight: 700, color: '#1A1209', marginBottom: '0.4rem' }}>
                     {pkg.name}
                   </div>
                   <p style={{ fontSize: '0.83rem', color: '#7A6D5A', lineHeight: 1.7, marginBottom: '0.75rem' }}>
                     {pkg.description}
                   </p>
-                  <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.5rem', fontWeight: 700, color: '#C9A84C' }}>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.5rem', fontWeight: 700, color: '#C9A84C' }}>
                     À partir de {pkg.basePrice}€
-                    <span style={{ fontSize: '0.75rem', color: '#7A6D5A', fontFamily: 'Arial, sans-serif', fontWeight: 400, marginLeft: 4 }}>/ groupe (1-7 pers.)</span>
+                    <span style={{ fontSize: '0.75rem', color: '#7A6D5A', fontFamily: 'inherit', fontWeight: 400, marginLeft: 4 }}>/ groupe (1-7 pers.)</span>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 12, padding: '1rem 1.25rem', marginBottom: '2rem' }}>
-              <div style={{ fontSize: '0.82rem', color: '#1D5C3A', fontWeight: 600, marginBottom: '0.3rem' }}>
+            <div style={{ background: '#FAF8F0', border: '1px solid #E8DFC8', borderRadius: 12, padding: '1rem 1.25rem', marginBottom: '2rem' }}>
+              <div style={{ fontSize: '0.82rem', color: '#8B6914', fontWeight: 600, marginBottom: '0.3rem' }}>
                 💡 Vous ne savez pas quoi choisir ?
               </div>
               <div style={{ fontSize: '0.78rem', color: '#4A3F30', lineHeight: 1.7 }}>
@@ -482,7 +491,7 @@ export default function CheckoutPage() {
         {step === 2 && (
           <div>
             {backBtn(1)}
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '1.8rem', fontWeight: 400, color: '#1A1209', marginBottom: '2rem' }}>
+            <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', fontWeight: 400, color: '#1A1209', marginBottom: '2rem' }}>
               Votre voyage
             </h2>
 
@@ -619,7 +628,7 @@ export default function CheckoutPage() {
         {step === 3 && (
           <div>
             {backBtn(2)}
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '1.8rem', fontWeight: 400, color: '#1A1209', marginBottom: '0.5rem' }}>
+            <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', fontWeight: 400, color: '#1A1209', marginBottom: '0.5rem' }}>
               Personnalisez votre voyage
             </h2>
             <p style={{ color: '#7A6D5A', fontSize: '0.85rem', marginBottom: '1.5rem', lineHeight: 1.7 }}>
@@ -627,15 +636,15 @@ export default function CheckoutPage() {
             </p>
 
             {/* Lieux inclus */}
-            <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 12, padding: '1rem 1.25rem', marginBottom: '1.5rem' }}>
-              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#1D5C3A', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
+            <div style={{ background: '#FAF8F0', border: '1px solid #E8DFC8', borderRadius: 12, padding: '1rem 1.25rem', marginBottom: '1.5rem' }}>
+              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#8B6914', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
                 ✓ Inclus dans votre package
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                 {basePackage?.includedPlaces.map(pk => {
                   const place = PLACES.find(p => p.key === pk)
                   return place ? (
-                    <span key={pk} style={{ background: '#D1FAE5', color: '#1D5C3A', fontSize: '0.75rem', fontWeight: 600, padding: '0.3rem 0.75rem', borderRadius: 50 }}>
+                    <span key={pk} style={{ background: 'rgba(201,168,76,0.12)', color: '#8B6914', fontSize: '0.75rem', fontWeight: 600, padding: '0.3rem 0.75rem', borderRadius: 50, border: '1px solid rgba(201,168,76,0.25)' }}>
                       {place.emoji} {place.nameFr}
                     </span>
                   ) : null
@@ -702,7 +711,7 @@ export default function CheckoutPage() {
                         {opt.perPerson && <span style={{ color: '#C9A84C', fontWeight: 600 }}> · {opt.perPerson}</span>}
                       </div>
                     </div>
-                    <div style={{ fontFamily: 'Georgia, serif', fontSize: '1rem', fontWeight: 700, color: opt.key === 'NONE' ? '#9CA3AF' : '#C9A84C' }}>{opt.price}</div>
+                    <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: opt.key === 'NONE' ? '#9CA3AF' : '#C9A84C' }}>{opt.price}</div>
                   </div>
                 ))}
               </div>
@@ -723,7 +732,7 @@ export default function CheckoutPage() {
                 <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1A1209' }}>Voiture privée — visites locales</div>
                 <div style={{ fontSize: '0.75rem', color: '#7A6D5A', marginTop: 2 }}>Recommandé pour Jabal Nour, Arafat, Badr · tarif forfait</div>
               </div>
-              <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.1rem', fontWeight: 700, color: '#C9A84C' }}>+280€</div>
+              <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#C9A84C' }}>+280€</div>
             </div>
 
             {/* Drawer détail lieu */}
@@ -734,7 +743,7 @@ export default function CheckoutPage() {
                   <button onClick={() => setDetailPlace(null)} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', marginBottom: '1rem', color: '#7A6D5A' }}>✕</button>
                   <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>{place.emoji}</div>
                   <div style={{ fontFamily: 'serif', fontSize: '1rem', color: '#9CA3AF', direction: 'rtl', marginBottom: '0.5rem' }}>{place.nameAr}</div>
-                  <h3 style={{ fontFamily: 'Georgia, serif', fontSize: '1.5rem', color: '#1A1209', marginBottom: '0.75rem' }}>{place.nameFr}</h3>
+                  <h3 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.5rem', color: '#1A1209', marginBottom: '0.75rem' }}>{place.nameFr}</h3>
                   <p style={{ fontSize: '0.88rem', color: '#4A3F30', lineHeight: 1.8 }}>{place.desc}</p>
                   <div style={{ marginTop: '1.5rem', padding: '0.75rem 1rem', background: '#FEF9EC', borderRadius: 8, fontSize: '0.85rem', fontWeight: 700, color: '#8B6914' }}>
                     Tarif : {placePrices[place.key] ?? 50}€ / personne
@@ -767,7 +776,7 @@ export default function CheckoutPage() {
                 : backBtn(3)
               }
 
-              <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '1.8rem', fontWeight: 400, color: '#1A1209', marginBottom: '0.5rem' }}>
+              <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', fontWeight: 400, color: '#1A1209', marginBottom: '0.5rem' }}>
                 {cityChoice === 'BOTH'
                   ? guideSubStep === 1 ? 'Choisissez votre guide pour Makkah' : 'Choisissez votre guide pour Madinah'
                   : 'Choisissez votre guide'}
@@ -799,7 +808,7 @@ export default function CheckoutPage() {
                         onClick={() => setCurrentSlug(g.slug)}
                         style={{ background: isSelected ? 'rgba(201,168,76,0.06)' : 'white', border: isSelected ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', borderRadius: 12, padding: '1rem 1.25rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '1rem' }}
                       >
-                        <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: '1rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
+                        <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
                           {g.name?.slice(0, 2).toUpperCase()}
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
@@ -845,7 +854,7 @@ export default function CheckoutPage() {
         {step === 5 && (
           <div>
             {backBtn(4)}
-            <h2 style={{ fontFamily: 'Georgia, serif', fontSize: '1.8rem', fontWeight: 400, color: '#1A1209', marginBottom: '2rem' }}>
+            <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', fontWeight: 400, color: '#1A1209', marginBottom: '2rem' }}>
               Récapitulatif de votre voyage
             </h2>
 
@@ -853,7 +862,7 @@ export default function CheckoutPage() {
             {guide && cityChoice === 'BOTH' ? (
               <div style={{ background: '#1A1209', borderRadius: 16, padding: '1.25rem 1.5rem', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: '0.95rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
+                  <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '0.95rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
                     {guide.name?.slice(0, 2).toUpperCase()}
                   </div>
                   <div>
@@ -861,24 +870,21 @@ export default function CheckoutPage() {
                     <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'white' }}>{guide.name}</div>
                   </div>
                 </div>
-                {selectedGuideSlugMadinah && (() => {
-                  const gM = availableGuides.find(g => g.slug === selectedGuideSlugMadinah)
-                  return gM ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.75rem' }}>
-                      <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: '0.95rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
-                        {gM.name?.slice(0, 2).toUpperCase()}
-                      </div>
-                      <div>
-                        <div style={{ fontSize: '0.72rem', color: 'rgba(201,168,76,0.6)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Guide Madinah</div>
-                        <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'white' }}>{gM.name}</div>
-                      </div>
+                {guideDataMadinah && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.75rem' }}>
+                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '0.95rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
+                      {guideDataMadinah.name?.slice(0, 2).toUpperCase()}
                     </div>
-                  ) : null
-                })()}
+                    <div>
+                      <div style={{ fontSize: '0.72rem', color: 'rgba(201,168,76,0.6)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Guide Madinah</div>
+                      <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'white' }}>{guideDataMadinah.name}</div>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : guide ? (
               <div style={{ background: '#1A1209', borderRadius: 16, padding: '1.25rem 1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Georgia, serif', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
+                <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
                   {guide.name?.slice(0, 2).toUpperCase()}
                 </div>
                 <div>
@@ -939,7 +945,7 @@ export default function CheckoutPage() {
                   <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1A1209' }}>{basePackage?.name}</div>
                   <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>Forfait 1-7 personnes</div>
                 </div>
-                <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>{prixBase}€</div>
+                <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>{prixBase}€</div>
               </div>
 
               {/* Visites supp */}
@@ -952,7 +958,7 @@ export default function CheckoutPage() {
                       <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>{place.emoji} {place.nameFr}</div>
                       <div style={{ fontSize: '0.7rem', color: '#7A6D5A', marginTop: 2 }}>Visite supplémentaire</div>
                     </div>
-                    <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{prix}€</div>
+                    <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{prix}€</div>
                   </div>
                 ) : null
               })}
@@ -962,14 +968,14 @@ export default function CheckoutPage() {
                   <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>
                     {transportOption === 'TRAIN' ? '🚄 Train Haramayn A/R' : transportOption === 'TAXI_RT' ? '🚕 Taxi privé A/R' : '🚕 Taxi privé aller simple'}
                   </div>
-                  <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{prixTransport}€</div>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{prixTransport}€</div>
                 </div>
               )}
 
               {withCar && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 1.25rem', borderBottom: '1px solid #F5F0E8' }}>
                   <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>🚗 Voiture du guide</div>
-                  <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>280€</div>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>280€</div>
                 </div>
               )}
 
@@ -979,7 +985,7 @@ export default function CheckoutPage() {
                     <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>Supplément groupe (8+ personnes)</div>
                     <div style={{ fontSize: '0.7rem', color: '#7A6D5A', marginTop: 2 }}>Forfait groupe</div>
                   </div>
-                  <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{TARIF_GROUPE}€</div>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{TARIF_GROUPE}€</div>
                 </div>
               )}
 
@@ -989,7 +995,7 @@ export default function CheckoutPage() {
                   <div style={{ fontSize: '0.88rem', fontWeight: 800, color: '#1A1209' }}>TOTAL</div>
                   <div style={{ fontSize: '0.7rem', color: '#7A6D5A' }}>Pour {nbPersonnes} personne{nbPersonnes > 1 ? 's' : ''}</div>
                 </div>
-                <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.75rem', fontWeight: 700, color: '#C9A84C' }}>
+                <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.75rem', fontWeight: 700, color: '#C9A84C' }}>
                   {total.toLocaleString('fr-FR')}€
                 </div>
               </div>
@@ -1016,9 +1022,9 @@ export default function CheckoutPage() {
             </div>
 
             {/* Trust badges */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', padding: '0.75rem 1rem', background: '#F0FDF4', borderRadius: 10, border: '1px solid #BBF7D0', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', padding: '0.75rem 1rem', background: '#FAF8F0', borderRadius: 10, border: '1px solid #E8DFC8', marginBottom: '1.5rem' }}>
               {['✓ Guide Certifié SAFARUMA', '✓ Annulation gratuite sous 48h', '✓ Paiement 100% sécurisé', '✓ Confirmation sous 24h'].map(t => (
-                <div key={t} style={{ fontSize: '0.78rem', color: '#1D5C3A', fontWeight: 600 }}>{t}</div>
+                <div key={t} style={{ fontSize: '0.78rem', color: '#8B6914', fontWeight: 600 }}>{t}</div>
               ))}
             </div>
 
@@ -1031,9 +1037,9 @@ export default function CheckoutPage() {
             <button
               onClick={handleSubmit}
               disabled={submitting}
-              style={{ width: '100%', padding: '1.1rem', background: submitting ? '#9CA3AF' : 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)', color: '#FAF7F0', border: 'none', borderRadius: 12, fontFamily: "'Cormorant Garamond', Georgia, serif", fontWeight: 700, fontSize: '1.1rem', cursor: submitting ? 'not-allowed' : 'pointer', letterSpacing: '0.06em', boxShadow: submitting ? 'none' : '0 4px 20px rgba(201,168,76,0.4)' }}
+              style={{ width: '100%', padding: '1.1rem', background: submitting ? '#9CA3AF' : 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)', color: '#FAF7F0', border: 'none', borderRadius: 50, fontFamily: 'var(--font-cormorant, serif)', fontWeight: 700, fontSize: '1.1rem', cursor: submitting ? 'not-allowed' : 'pointer', letterSpacing: '0.06em', boxShadow: submitting ? 'none' : '0 4px 20px rgba(201,168,76,0.4)' }}
             >
-              {submitting ? 'Envoi en cours…' : 'Confirmer mon voyage'}
+              {submitting ? 'Envoi en cours…' : `Payer ${total.toLocaleString('fr-FR')}€`}
             </button>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '0.75rem', fontSize: '0.72rem', color: '#9CA3AF' }}>

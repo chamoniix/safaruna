@@ -1062,7 +1062,7 @@ export default function CheckoutPage() {
               )}
 
               {cityChoice === 'BOTH' && guideSubStep === 1
-                ? nextBtn('Continuer', () => setGuideSubStep(2), !selectedGuideSlug)
+                ? nextBtn('Continuer', () => { setSelectedGuideSlugMadinah(selectedGuideSlug); setGuideSubStep(2) }, !selectedGuideSlug)
                 : nextBtn('Voir le récapitulatif', () => setStep(5), !currentSlug)
               }
             </div>
@@ -1079,30 +1079,32 @@ export default function CheckoutPage() {
 
             {/* Guide card(s) */}
             {guide && cityChoice === 'BOTH' ? (
-              <div style={{ background: '#1A1209', borderRadius: 16, padding: '1.25rem 1.5rem', marginBottom: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem', marginBottom: '1.5rem' }}>
+                {/* Guide Makkah — fond sombre doré */}
+                <div style={{ background: 'linear-gradient(135deg, #1A1209 0%, #2C1F10 100%)', borderRadius: 14, padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', border: '1px solid rgba(201,168,76,0.3)' }}>
                   <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '0.95rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
                     {guide.name?.slice(0, 2).toUpperCase()}
                   </div>
                   <div>
-                    <div style={{ fontSize: '0.72rem', color: 'rgba(201,168,76,0.6)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Guide Makkah</div>
+                    <div style={{ fontSize: '0.68rem', color: '#C9A84C', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 2 }}>🕋 Guide La Mecque</div>
                     <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'white' }}>{guide.name}</div>
                   </div>
                 </div>
+                {/* Guide Madinah — fond vert émeraude */}
                 {guideDataMadinah && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '0.75rem' }}>
-                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '0.95rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
+                  <div style={{ background: 'linear-gradient(135deg, #0F3320 0%, #1D5C3A 100%)', borderRadius: 14, padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', border: '1px solid rgba(29,92,58,0.6)' }}>
+                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'linear-gradient(135deg, #6FCF97, #27AE60)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '0.95rem', fontWeight: 700, color: 'white', flexShrink: 0 }}>
                       {guideDataMadinah.name?.slice(0, 2).toUpperCase()}
                     </div>
                     <div>
-                      <div style={{ fontSize: '0.72rem', color: 'rgba(201,168,76,0.6)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Guide Madinah</div>
+                      <div style={{ fontSize: '0.68rem', color: '#6FCF97', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 2 }}>🕌 Guide Médine</div>
                       <div style={{ fontSize: '0.92rem', fontWeight: 700, color: 'white' }}>{guideDataMadinah.name}</div>
                     </div>
                   </div>
                 )}
               </div>
             ) : guide ? (
-              <div style={{ background: '#1A1209', borderRadius: 16, padding: '1.25rem 1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ background: 'linear-gradient(135deg, #1A1209 0%, #2C1F10 100%)', borderRadius: 16, padding: '1.25rem 1.5rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', border: '1px solid rgba(201,168,76,0.3)' }}>
                 <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
                   {guide.name?.slice(0, 2).toUpperCase()}
                 </div>

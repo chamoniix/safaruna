@@ -38,7 +38,10 @@ export async function POST(
         '!';
       const hash = await bcrypt.hash(password, 10);
 
-      await prisma.user.update({ where: { id: guide.user.id }, data: { passwordHash: hash } });
+      await prisma.user.update({
+        where: { id: guide.user.id },
+        data: { passwordHash: hash, emailVerified: new Date() },
+      });
 
       const userEmail = guide.user.email ?? '';
       const userName = guide.user.name || guide.user.firstName || 'Guide';

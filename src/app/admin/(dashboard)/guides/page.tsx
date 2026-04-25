@@ -30,6 +30,15 @@ export default function AdminGuidesPage() {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [toggling, setToggling] = useState<string | null>(null);
 
+  // Create guide modal
+  const [showCreate, setShowCreate]     = useState(false);
+  const [createFirst, setCreateFirst]   = useState('');
+  const [createLast, setCreateLast]     = useState('');
+  const [createEmail, setCreateEmail]   = useState('');
+  const [creating, setCreating]         = useState(false);
+  const [createResult, setCreateResult] = useState<{ password: string; slug: string } | null>(null);
+  const [createError, setCreateError]   = useState('');
+
   const fetchGuides = async () => {
     setLoading(true);
     setError('');
@@ -45,6 +54,27 @@ export default function AdminGuidesPage() {
   };
 
   useEffect(() => { fetchGuides(); }, []);
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreating(true);
+    setCreateError('');
+    setCreateResult(null);
+    try {
+      const res = await fetch('/api/admin/guides', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstName: createFirst, lastName: createLast, email: createEmail }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erreur');
+      setCreateResult({ password: data.password, slug: data.slug });
+      await fetchGuides();
+    } catch (e: any) {
+      setCreateError(e.message);
+    }
+    setCreating(false);
+  };
 
   const filtered = guides.filter(g => {
     const matchSearch = !search ||
@@ -89,8 +119,65 @@ export default function AdminGuidesPage() {
     { label: 'Suspendus',     value: stats.suspended, color: '#DC2626', bg: '#FEE2E2' },
   ];
 
+  const inp: React.CSSProperties = {
+    width: '100%', padding: '0.6rem 0.875rem', border: '1px solid #E8DFC8',
+    borderRadius: 8, fontSize: '0.85rem', fontFamily: 'inherit',
+    color: '#1A1209', background: 'white', boxSizing: 'border-box', outline: 'none',
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', fontFamily: 'var(--font-manrope, sans-serif)' }}>
+
+      {/* Modal créer guide */}
+      {showCreate && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+          onClick={e => { if (e.target === e.currentTarget) { setShowCreate(false); setCreateResult(null); setCreateError(''); } }}>
+          <div style={{ background: 'white', borderRadius: 16, padding: '1.75rem', width: '100%', maxWidth: 440, boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 700, color: '#1A1209' }}>Créer un guide</div>
+              <button onClick={() => { setShowCreate(false); setCreateResult(null); setCreateError(''); }} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: '#7A6D5A', lineHeight: 1 }}>✕</button>
+            </div>
+
+            {!createResult ? (
+              <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <div>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.3rem' }}>Prénom *</div>
+                    <input style={inp} value={createFirst} onChange={e => setCreateFirst(e.target.value)} placeholder="Naïm" required />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.3rem' }}>Nom</div>
+                    <input style={inp} value={createLast} onChange={e => setCreateLast(e.target.value)} placeholder="Laamari" />
+                  </div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.3rem' }}>Email *</div>
+                  <input style={inp} type="email" value={createEmail} onChange={e => setCreateEmail(e.target.value)} placeholder="guide@email.com" required />
+                </div>
+                {createError && <div style={{ fontSize: '0.8rem', color: '#DC2626', background: '#FEE2E2', padding: '0.5rem 0.75rem', borderRadius: 6 }}>{createError}</div>}
+                <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', marginTop: '0.25rem' }}>
+                  <button type="button" onClick={() => setShowCreate(false)} style={{ padding: '0.6rem 1.25rem', borderRadius: 50, border: '1px solid #E8DFC8', background: 'white', cursor: 'pointer', fontSize: '0.83rem', color: '#7A6D5A' }}>Annuler</button>
+                  <button type="submit" disabled={creating} style={{ padding: '0.6rem 1.5rem', borderRadius: 50, border: 'none', background: creating ? '#E8DFC8' : '#1A1209', color: creating ? '#7A6D5A' : '#F0D897', cursor: creating ? 'not-allowed' : 'pointer', fontSize: '0.83rem', fontWeight: 700 }}>
+                    {creating ? 'Création…' : 'Créer le guide'}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ background: '#D1FAE5', border: '1px solid #6EE7B7', borderRadius: 8, padding: '0.75rem 1rem', fontSize: '0.83rem', color: '#1D5C3A', fontWeight: 600 }}>
+                  ✓ Guide créé avec succès
+                </div>
+                <div style={{ background: '#FAF3E0', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 8, padding: '0.875rem 1rem' }}>
+                  <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.25rem' }}>Mot de passe temporaire</div>
+                  <div style={{ fontFamily: 'monospace', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209', letterSpacing: '0.08em' }}>{createResult.password}</div>
+                  <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: '0.35rem' }}>Envoyé par email · Profil : /guides/{createResult.slug}</div>
+                </div>
+                <button onClick={() => { setShowCreate(false); setCreateResult(null); setCreateFirst(''); setCreateLast(''); setCreateEmail(''); }} style={{ padding: '0.6rem 1.5rem', borderRadius: 50, border: 'none', background: '#1A1209', color: '#F0D897', cursor: 'pointer', fontSize: '0.83rem', fontWeight: 700, alignSelf: 'flex-end' }}>Fermer</button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Stats bar */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
@@ -129,9 +216,15 @@ export default function AdminGuidesPage() {
           <option value="DRAFT">Brouillon</option>
           <option value="SUSPENDED">Suspendu</option>
         </select>
-        <span style={{ fontSize: '0.78rem', color: '#7A6D5A', marginLeft: 'auto' }}>
+        <span style={{ fontSize: '0.78rem', color: '#7A6D5A' }}>
           {loading ? '…' : `${filtered.length} guide${filtered.length !== 1 ? 's' : ''}`}
         </span>
+        <button
+          onClick={() => { setShowCreate(true); setCreateResult(null); setCreateError(''); setCreateFirst(''); setCreateLast(''); setCreateEmail(''); }}
+          style={{ marginLeft: 'auto', padding: '0.55rem 1.25rem', borderRadius: 50, border: 'none', background: '#1A1209', color: '#F0D897', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 700, whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+        >
+          + Créer un guide
+        </button>
       </div>
 
       {/* Error */}

@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
   try {
     const user = await prisma.user.upsert({
       where: { email },
-      update: { passwordHash, role: 'GUIDE', firstName, lastName: lastName || '' },
+      update: { passwordHash, role: 'GUIDE', firstName, lastName: lastName || '', emailVerified: new Date() },
       create: {
         email,
         name: `${firstName} ${lastName || ''}`.trim(),
@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
         lastName: lastName || '',
         passwordHash,
         role: 'GUIDE',
+        emailVerified: new Date(),
       },
     });
 

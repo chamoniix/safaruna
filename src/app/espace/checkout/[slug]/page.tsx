@@ -721,9 +721,9 @@ export default function CheckoutPage() {
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1A1209' }}>Voiture privée — visites locales</div>
-                <div style={{ fontSize: '0.75rem', color: '#7A6D5A', marginTop: 2 }}>Recommandé pour Jabal Nour, Arafat, Badr · +280€/jour</div>
+                <div style={{ fontSize: '0.75rem', color: '#7A6D5A', marginTop: 2 }}>Recommandé pour Jabal Nour, Arafat, Badr · tarif forfait</div>
               </div>
-              <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.1rem', fontWeight: 700, color: '#C9A84C' }}>+45€</div>
+              <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.1rem', fontWeight: 700, color: '#C9A84C' }}>+280€</div>
             </div>
 
             {/* Drawer détail lieu */}
@@ -973,10 +973,10 @@ export default function CheckoutPage() {
                 </div>
               )}
 
-              {nbPersonnes > 6 && (
+              {nbPersonnes > 7 && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 1.25rem', borderBottom: '1px solid #F5F0E8' }}>
                   <div>
-                    <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>Supplément groupe (+6 personnes)</div>
+                    <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>Supplément groupe (8+ personnes)</div>
                     <div style={{ fontSize: '0.7rem', color: '#7A6D5A', marginTop: 2 }}>Forfait groupe</div>
                   </div>
                   <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{TARIF_GROUPE}€</div>

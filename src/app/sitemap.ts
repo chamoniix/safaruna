@@ -2,10 +2,13 @@ import { MetadataRoute } from 'next'
 import prisma from '@/lib/prisma'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const guides = await prisma.guideProfile.findMany({
-    where: { status: 'ACTIVE' },
-    select: { slug: true },
-  })
+  let guides: { slug: string | null }[] = []
+  try {
+    guides = await prisma.guideProfile.findMany({
+      where: { status: 'ACTIVE' },
+      select: { slug: true },
+    })
+  } catch { /* DB non disponible au build — sitemap sans guides dynamiques */ }
 
   const guideUrls: MetadataRoute.Sitemap = guides
     .filter(g => g.slug)

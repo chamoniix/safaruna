@@ -232,6 +232,290 @@ function CalendarPicker({ dateArrivee, setDateArrivee, dateDepart, setDateDepart
   );
 }
 
+// ─── Bottom Navigation Bar ────────────────────────────────────────────────────
+function BottomNav({ active }: { active: 'accueil' | 'guides' | 'connexion' }) {
+  const tabs = [
+    {
+      key: 'accueil' as const,
+      label: 'Accueil',
+      href: '/',
+      icon: (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9,22 9,12 15,12 15,22"/>
+        </svg>
+      ),
+    },
+    {
+      key: 'guides' as const,
+      label: 'Guides',
+      href: '/guides',
+      icon: (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      ),
+    },
+    {
+      key: 'connexion' as const,
+      label: 'Connexion',
+      href: '/connexion',
+      icon: (
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+          <polyline points="10,17 15,12 10,7"/>
+          <line x1="15" y1="12" x2="3" y2="12"/>
+        </svg>
+      ),
+    },
+  ];
+
+  return (
+    <nav style={{
+      position: 'fixed',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      zIndex: 500,
+      height: 'calc(80px + env(safe-area-inset-bottom))',
+      background: 'rgba(250,243,224,0.95)',
+      backdropFilter: 'blur(20px)',
+      WebkitBackdropFilter: 'blur(20px)',
+      borderTop: '1px solid rgba(201,168,76,0.2)',
+      display: 'flex',
+      alignItems: 'flex-start',
+      paddingTop: '8px',
+      paddingBottom: 'env(safe-area-inset-bottom)',
+    } as React.CSSProperties}>
+      {tabs.map(tab => {
+        const isActive = active === tab.key;
+        return (
+          <Link
+            key={tab.key}
+            href={tab.href}
+            style={{
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '4px',
+              textDecoration: 'none',
+              color: isActive ? '#C9A84C' : 'rgba(26,18,9,0.4)',
+              WebkitTapHighlightColor: 'transparent',
+              transition: 'color 0.3s cubic-bezier(0.16,1,0.3,1)',
+              position: 'relative',
+              paddingBottom: '4px',
+            } as React.CSSProperties}
+          >
+            <span style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'transform 0.3s cubic-bezier(0.16,1,0.3,1)',
+              transform: isActive ? 'translateY(-1px)' : 'none',
+            }}>
+              {tab.icon}
+            </span>
+            <span style={{
+              fontSize: '10px',
+              fontWeight: isActive ? 700 : 500,
+              letterSpacing: '0.02em',
+              lineHeight: 1,
+            }}>
+              {tab.label}
+            </span>
+            {isActive && (
+              <span style={{
+                position: 'absolute',
+                bottom: 0,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                width: 6,
+                height: 6,
+                borderRadius: '50%',
+                background: '#C9A84C',
+              }} />
+            )}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+// ─── Inline Sticky Header ─────────────────────────────────────────────────────
+function InlineHeader({
+  activeFiltersCount,
+  onFiltersOpen,
+}: {
+  activeFiltersCount: number;
+  onFiltersOpen: () => void;
+}) {
+  return (
+    <div style={{
+      position: 'sticky',
+      top: 0,
+      zIndex: 100,
+      background: 'rgba(250,243,224,0.97)',
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
+      borderBottom: '1px solid rgba(201,168,76,0.15)',
+      padding: '0 1rem',
+      height: 56,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    } as React.CSSProperties}>
+      <h1 style={{
+        fontFamily: 'var(--font-cormorant, serif)',
+        fontSize: '1.35rem',
+        fontWeight: 600,
+        color: '#1A1209',
+        margin: 0,
+        lineHeight: 1,
+      }}>
+        Nos guides
+      </h1>
+      <button
+        onClick={onFiltersOpen}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.4rem',
+          padding: '0.45rem 1rem',
+          borderRadius: 50,
+          border: activeFiltersCount > 0 ? '1.5px solid #C9A84C' : '1.5px solid rgba(201,168,76,0.35)',
+          background: activeFiltersCount > 0 ? 'rgba(201,168,76,0.1)' : 'transparent',
+          color: activeFiltersCount > 0 ? '#8B6914' : '#1A1209',
+          fontFamily: 'inherit',
+          fontSize: '0.78rem',
+          fontWeight: 600,
+          cursor: 'pointer',
+          WebkitTapHighlightColor: 'transparent',
+          position: 'relative',
+        } as React.CSSProperties}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="4" y1="6" x2="20" y2="6"/>
+          <line x1="8" y1="12" x2="16" y2="12"/>
+          <line x1="11" y1="18" x2="13" y2="18"/>
+        </svg>
+        Filtres
+        {activeFiltersCount > 0 && (
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: 18,
+            height: 18,
+            borderRadius: '50%',
+            background: '#C9A84C',
+            color: 'white',
+            fontSize: '0.6rem',
+            fontWeight: 800,
+            lineHeight: 1,
+          }}>
+            {activeFiltersCount}
+          </span>
+        )}
+      </button>
+    </div>
+  );
+}
+
+// ─── Quick Filter Chips ───────────────────────────────────────────────────────
+function QuickFilterChips({
+  selectedCity,
+  setSelectedCity,
+  selectedLangue,
+  setSelectedLangue,
+}: {
+  selectedCity: string;
+  setSelectedCity: (v: string) => void;
+  selectedLangue: string;
+  setSelectedLangue: (v: string) => void;
+}) {
+  const destChips = [
+    { val: '', label: 'Toutes' },
+    { val: 'MAKKAH', label: 'Makkah' },
+    { val: 'MADINAH', label: 'Madinah' },
+    { val: 'BOTH', label: 'Makkah + Madinah' },
+  ];
+  const langChips = [
+    { val: '', label: 'Toutes langues' },
+    { val: 'fr', label: 'Français' },
+    { val: 'ar', label: 'Arabe' },
+    { val: 'en', label: 'English' },
+    { val: 'darija', label: 'Darija' },
+    { val: 'wolof', label: 'Wolof' },
+  ];
+
+  return (
+    <div style={{
+      overflowX: 'auto',
+      WebkitOverflowScrolling: 'touch',
+      scrollbarWidth: 'none',
+      msOverflowStyle: 'none',
+      padding: '0.625rem 1rem',
+      borderBottom: '1px solid rgba(201,168,76,0.1)',
+      background: 'rgba(250,243,224,0.6)',
+    } as React.CSSProperties}>
+      <div style={{ display: 'flex', gap: '0.5rem', width: 'max-content', alignItems: 'center' }}>
+        <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#7A6D5A', whiteSpace: 'nowrap', marginRight: '0.25rem' }}>Dest.</span>
+        {destChips.map(chip => (
+          <button
+            key={chip.val}
+            onClick={() => setSelectedCity(chip.val)}
+            style={{
+              padding: '0.3rem 0.875rem',
+              borderRadius: 50,
+              border: selectedCity === chip.val ? '1.5px solid #C9A84C' : '1.5px solid rgba(201,168,76,0.25)',
+              background: selectedCity === chip.val ? '#C9A84C' : 'white',
+              color: selectedCity === chip.val ? 'white' : '#7A6D5A',
+              fontSize: '0.72rem',
+              fontWeight: selectedCity === chip.val ? 700 : 500,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              WebkitTapHighlightColor: 'transparent',
+              fontFamily: 'inherit',
+              transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)',
+            } as React.CSSProperties}
+          >
+            {chip.label}
+          </button>
+        ))}
+        <span style={{ width: 1, height: 20, background: 'rgba(201,168,76,0.25)', flexShrink: 0, marginInline: '0.25rem' }} />
+        <span style={{ fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#7A6D5A', whiteSpace: 'nowrap', marginRight: '0.25rem' }}>Langue</span>
+        {langChips.map(chip => (
+          <button
+            key={chip.val}
+            onClick={() => setSelectedLangue(chip.val)}
+            style={{
+              padding: '0.3rem 0.875rem',
+              borderRadius: 50,
+              border: selectedLangue === chip.val ? '1.5px solid #1D5C3A' : '1.5px solid rgba(201,168,76,0.25)',
+              background: selectedLangue === chip.val ? '#1D5C3A' : 'white',
+              color: selectedLangue === chip.val ? 'white' : '#7A6D5A',
+              fontSize: '0.72rem',
+              fontWeight: selectedLangue === chip.val ? 700 : 500,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              WebkitTapHighlightColor: 'transparent',
+              fontFamily: 'inherit',
+              transition: 'all 0.2s cubic-bezier(0.16,1,0.3,1)',
+            } as React.CSSProperties}
+          >
+            {chip.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function GuideSearchPage() {
   const [selectedCity, setSelectedCity] = useState('');
@@ -299,7 +583,6 @@ export default function GuideSearchPage() {
     : selectedLangue ? selectedLangue
     : 'Toutes langues';
 
-  const toggleSpe = (s: string) => setSelectedSpecialites(p => p.includes(s) ? p.filter(x => x !== s) : [...p, s]);
   const toggleLieu = (l: string) => setSelectedLieux(p => p.includes(l) ? p.filter(x => x !== l) : [...p, l]);
 
   const resetFilters = () => {
@@ -308,6 +591,18 @@ export default function GuideSearchPage() {
     setSelectedLieux([]); setPmr(false); setNbPersonnes(1);
     setDateArrivee(null); setDateDepart(null); setHasSearched(false);
   };
+
+  // Count active filters for badge
+  const activeFiltersCount = [
+    selectedCity !== '',
+    selectedLangue !== '',
+    selectedGender !== '',
+    selectedBudget !== 800,
+    selectedNote !== '',
+    selectedSpecialites.length > 0,
+    selectedLieux.length > 0,
+    pmr,
+  ].filter(Boolean).length;
 
   const filteredGuides = GUIDES_DATA.filter(g => {
     if (g.available === false) return false;
@@ -333,6 +628,9 @@ export default function GuideSearchPage() {
   const filteredOfficial = filteredGuides.filter(g => g.isOfficial);
   const filteredNonOfficial = filteredGuides.filter(g => !g.isOfficial);
 
+  // Bottom offset for mobile popups to clear the bottom nav
+  const mobileSheetBottom = 'calc(80px + env(safe-area-inset-bottom))';
+
   const FiltersContent = () => (
     <>
       <FilterCard title="Langue">
@@ -342,21 +640,21 @@ export default function GuideSearchPage() {
           style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 10, padding: '0.5rem 0.75rem', fontSize: '0.82rem', color: '#1A1209', background: 'white', fontFamily: 'inherit', cursor: 'pointer', outline: 'none' }}
         >
           <option value="">Toutes les langues</option>
-          <option value="fr">🇫🇷 Français</option>
-          <option value="ar">🇸🇦 Arabe</option>
-          <option value="en">🇬🇧 English</option>
-          <option value="darija">🇲🇦 Darija (Maroc)</option>
-          <option value="wolof">🇸🇳 Wolof</option>
-          <option value="bambara">🌍 Bambara</option>
-          <option value="algerien">🇩🇿 Algérien</option>
-          <option value="tunisien">🇹🇳 Tunisien</option>
-          <option value="urdu">🇵🇰 Urdu</option>
-          <option value="hindi">🇮🇳 Hindi</option>
-          <option value="turk">🇹🇷 Türkçe</option>
-          <option value="russe">🇷🇺 Russe</option>
-          <option value="mandarin">🇨🇳 Mandarin</option>
-          <option value="espanol">🇪🇸 Español</option>
-          <option value="deutsch">🇩🇪 Deutsch</option>
+          <option value="fr">Français</option>
+          <option value="ar">Arabe</option>
+          <option value="en">English</option>
+          <option value="darija">Darija (Maroc)</option>
+          <option value="wolof">Wolof</option>
+          <option value="bambara">Bambara</option>
+          <option value="algerien">Algérien</option>
+          <option value="tunisien">Tunisien</option>
+          <option value="urdu">Urdu</option>
+          <option value="hindi">Hindi</option>
+          <option value="turk">Türkçe</option>
+          <option value="russe">Russe</option>
+          <option value="mandarin">Mandarin</option>
+          <option value="espanol">Español</option>
+          <option value="deutsch">Deutsch</option>
         </select>
       </FilterCard>
 
@@ -505,7 +803,27 @@ export default function GuideSearchPage() {
   );
 
   return (
-    <div style={{ fontFamily: 'var(--font-manrope, Manrope, sans-serif)', background: '#FAF7F0', color: '#1A1209', minHeight: '100vh', paddingBottom: 'calc(80px + env(safe-area-inset-bottom))' }}>
+    <div style={{
+      fontFamily: 'var(--font-manrope, Manrope, sans-serif)',
+      background: '#FAF3E0',
+      color: '#1A1209',
+      minHeight: '100vh',
+      paddingBottom: 'calc(80px + env(safe-area-inset-bottom))',
+    }}>
+
+      {/* ── INLINE STICKY HEADER ── */}
+      <InlineHeader
+        activeFiltersCount={activeFiltersCount}
+        onFiltersOpen={() => setFiltersOpen(true)}
+      />
+
+      {/* ── QUICK FILTER CHIPS ── */}
+      <QuickFilterChips
+        selectedCity={selectedCity}
+        setSelectedCity={setSelectedCity}
+        selectedLangue={selectedLangue}
+        setSelectedLangue={setSelectedLangue}
+      />
 
       {/* ── HERO ── */}
       <div className="guides-hero" style={{ background: '#1A1209', position: 'relative', overflow: 'visible' }}>
@@ -516,9 +834,9 @@ export default function GuideSearchPage() {
           <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(240,216,151,0.55)', marginBottom: '0.75rem', textAlign: 'center' }}>
             Trouver mon guide privé
           </div>
-          <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(2rem, 5vw, 3.2rem)', fontWeight: 300, color: 'white', textAlign: 'center', marginBottom: '0.5rem', lineHeight: 1.1 }}>
+          <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(2rem, 5vw, 3.2rem)', fontWeight: 300, color: 'white', textAlign: 'center', marginBottom: '0.5rem', lineHeight: 1.1 }}>
             Ton voyage, dans <em style={{ fontStyle: 'italic', color: '#C9A84C' }}>ta langue</em>
-          </h1>
+          </h2>
           <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.65)', fontSize: '0.9rem', marginBottom: '2rem' }}>
             Sélection rigoureuse · Entretien physique · Certifiés SAFARUMA · Makkah, Madinah & plus
           </p>
@@ -598,10 +916,10 @@ export default function GuideSearchPage() {
               if (isMobile) return (
                 <>
                   <div onClick={() => setOpenPop(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 999 }} />
-                  <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000, background: 'white', borderRadius: '20px 20px 0 0', padding: '1rem 1.25rem 2.5rem', maxHeight: '70vh', overflowY: 'auto' }}>
+                  <div style={{ position: 'fixed', bottom: mobileSheetBottom, left: 0, right: 0, zIndex: 1000, background: 'white', borderRadius: '20px 20px 0 0', padding: '1rem 1.25rem 2.5rem', maxHeight: '60vh', overflowY: 'auto' }}>
                     <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(26,18,9,0.12)', margin: '0 auto 1.25rem' }} />
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--deep)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Destination</span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1A1209', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Destination</span>
                       <button onClick={() => setOpenPop(null)} style={{ background: '#E8DFC8', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', fontSize: 14, color: '#7A6D5A' }}>✕</button>
                     </div>
                     {inner}
@@ -635,10 +953,10 @@ export default function GuideSearchPage() {
               if (isMobile) return (
                 <>
                   <div onClick={() => setOpenPop(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 999 }} />
-                  <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000, background: 'white', borderRadius: '20px 20px 0 0', padding: '1rem 1.25rem 2.5rem', maxHeight: '70vh', overflowY: 'auto' }}>
+                  <div style={{ position: 'fixed', bottom: mobileSheetBottom, left: 0, right: 0, zIndex: 1000, background: 'white', borderRadius: '20px 20px 0 0', padding: '1rem 1.25rem 2.5rem', maxHeight: '60vh', overflowY: 'auto' }}>
                     <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(26,18,9,0.12)', margin: '0 auto 1.25rem' }} />
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--deep)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Dates</span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1A1209', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Dates</span>
                       <button onClick={() => setOpenPop(null)} style={{ background: '#E8DFC8', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', fontSize: 14, color: '#7A6D5A' }}>✕</button>
                     </div>
                     {inner}
@@ -684,10 +1002,10 @@ export default function GuideSearchPage() {
               if (isMobile) return (
                 <>
                   <div onClick={() => setOpenPop(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 999 }} />
-                  <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000, background: 'white', borderRadius: '20px 20px 0 0', padding: '1rem 1.25rem 2.5rem', maxHeight: '70vh', overflowY: 'auto' }}>
+                  <div style={{ position: 'fixed', bottom: mobileSheetBottom, left: 0, right: 0, zIndex: 1000, background: 'white', borderRadius: '20px 20px 0 0', padding: '1rem 1.25rem 2.5rem', maxHeight: '60vh', overflowY: 'auto' }}>
                     <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(26,18,9,0.12)', margin: '0 auto 1.25rem' }} />
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--deep)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Langue</span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1A1209', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Langue</span>
                       <button onClick={() => setOpenPop(null)} style={{ background: '#E8DFC8', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', fontSize: 14, color: '#7A6D5A' }}>✕</button>
                     </div>
                     {inner}
@@ -738,10 +1056,10 @@ export default function GuideSearchPage() {
               if (isMobile) return (
                 <>
                   <div onClick={() => setOpenPop(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 999 }} />
-                  <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 1000, background: 'white', borderRadius: '20px 20px 0 0', padding: '1rem 1.25rem 2.5rem', maxHeight: '70vh', overflowY: 'auto' }}>
+                  <div style={{ position: 'fixed', bottom: mobileSheetBottom, left: 0, right: 0, zIndex: 1000, background: 'white', borderRadius: '20px 20px 0 0', padding: '1rem 1.25rem 2.5rem', maxHeight: '60vh', overflowY: 'auto' }}>
                     <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(26,18,9,0.12)', margin: '0 auto 1.25rem' }} />
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--deep)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Voyageurs</span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1A1209', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Voyageurs</span>
                       <button onClick={() => setOpenPop(null)} style={{ background: '#E8DFC8', border: 'none', borderRadius: '50%', width: 28, height: 28, cursor: 'pointer', fontSize: 14, color: '#7A6D5A' }}>✕</button>
                     </div>
                     {inner}
@@ -837,6 +1155,11 @@ export default function GuideSearchPage() {
                     <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
                   </svg>
                   Filtres
+                  {activeFiltersCount > 0 && (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 16, height: 16, borderRadius: '50%', background: '#C9A84C', color: 'white', fontSize: '0.55rem', fontWeight: 800 }}>
+                      {activeFiltersCount}
+                    </span>
+                  )}
                 </button>
               </div>
               <div className="guides-desktop-count">
@@ -912,11 +1235,24 @@ export default function GuideSearchPage() {
         </div>
       </div>
 
-      {/* ── BOTTOM SHEET (mobile) ── */}
+      {/* ── BOTTOM SHEET (mobile) — filtres ── */}
       {filtersOpen && (
         <>
           <div onClick={() => setFiltersOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 200, backdropFilter: 'blur(2px)' }} />
-          <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 201, background: 'white', borderRadius: '24px 24px 0 0', maxHeight: '85vh', overflowY: 'auto', padding: '0 1.25rem 2rem', boxShadow: '0 -8px 40px rgba(0,0,0,0.2)', animation: 'slideUp 0.25s ease' }}>
+          <div style={{
+            position: 'fixed',
+            bottom: mobileSheetBottom,
+            left: 0,
+            right: 0,
+            zIndex: 201,
+            background: 'white',
+            borderRadius: '24px 24px 0 0',
+            maxHeight: '75vh',
+            overflowY: 'auto',
+            padding: '0 1.25rem 2rem',
+            boxShadow: '0 -8px 40px rgba(0,0,0,0.2)',
+            animation: 'slideUp 0.25s ease',
+          }}>
             <div style={{ textAlign: 'center', padding: '0.875rem 0 1rem' }}>
               <div style={{ width: 40, height: 4, borderRadius: 2, background: '#E8DFC8', margin: '0 auto' }} />
             </div>
@@ -932,6 +1268,9 @@ export default function GuideSearchPage() {
         </>
       )}
 
+      {/* ── BOTTOM NAV ── */}
+      <BottomNav active="guides" />
+
       {/* ── CSS ── */}
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes slideUp {
@@ -941,10 +1280,10 @@ export default function GuideSearchPage() {
 
         /* Hero */
         .guides-hero {
-          padding: 8rem 1.5rem 3rem;
+          padding: 3rem 1.5rem 3rem;
         }
         @media (max-width: 768px) {
-          .guides-hero { padding: 5rem 1rem 2rem !important; }
+          .guides-hero { padding: 2rem 1rem 2rem !important; }
         }
 
         /* Search pill */
@@ -1059,13 +1398,13 @@ export default function GuideSearchPage() {
         .guides-main {
           max-width: 1280px;
           margin: 0 auto;
-          padding: 2.5rem 1.5rem 6rem;
+          padding: 2.5rem 1.5rem 2rem;
           display: flex;
           gap: 2rem;
           align-items: flex-start;
         }
         @media (max-width: 1023px) {
-          .guides-main { flex-direction: column; padding: 1.25rem 1rem 5rem; }
+          .guides-main { flex-direction: column; padding: 1.25rem 1rem 2rem; }
         }
 
         /* Sidebar */
@@ -1149,62 +1488,9 @@ export default function GuideSearchPage() {
         @media (max-width: 768px) {
           .guide-official-card { border-radius: 0 12px 12px 12px !important; }
           .guide-official-card .guide-card-banner { height: 120px !important; }
-          .guides-main { padding: 1rem 0.875rem 5rem; gap: 0; }
+          .guides-main { padding: 1rem 0.875rem 2rem; gap: 0; }
         }
       `}} />
-
-      {/* ── BOTTOM NAV ── */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        .guides-bottom-nav {
-          position: fixed; bottom: 0; left: 0; right: 0;
-          height: calc(80px + env(safe-area-inset-bottom));
-          padding-bottom: env(safe-area-inset-bottom);
-          background: rgba(255,255,255,0.92);
-          backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-          border-top: 1px solid rgba(201,168,76,0.2);
-          display: flex; align-items: flex-start; justify-content: space-around;
-          z-index: 100; user-select: none;
-        }
-        .guides-tab {
-          -webkit-tap-highlight-color: transparent;
-          display: flex; flex-direction: column; align-items: center; justify-content: center;
-          gap: 4px; flex: 1; height: 80px; text-decoration: none;
-          cursor: pointer; position: relative; padding-top: 12px;
-          transition: transform 0.2s cubic-bezier(0.16,1,0.3,1);
-          color: rgba(26,18,9,0.4);
-        }
-        .guides-tab:active { transform: scale(0.92); }
-        .guides-tab.is-active { color: #C9A84C; }
-        .guides-tab-label { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.01em; line-height: 1; }
-        .guides-tab-dot {
-          position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
-          width: 4px; height: 4px; border-radius: 50%; background: #C9A84C;
-        }
-      `}} />
-      <nav className="guides-bottom-nav" aria-label="Navigation">
-        <Link href="/" className="guides-tab">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-            <polyline points="9 22 9 12 15 12 15 22"/>
-          </svg>
-          <span className="guides-tab-label">Accueil</span>
-        </Link>
-        <Link href="/guides" className="guides-tab is-active" aria-current="page">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="#C9A84C" stroke="#C9A84C" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            <line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>
-          </svg>
-          <span className="guides-tab-label">Guides</span>
-          <span className="guides-tab-dot" aria-hidden="true" />
-        </Link>
-        <Link href="/connexion" className="guides-tab">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-            <circle cx="12" cy="7" r="4"/>
-          </svg>
-          <span className="guides-tab-label">Connexion</span>
-        </Link>
-      </nav>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { PLACES } from '@/lib/places';
+import { GUIDE_LANGUAGES, LANG_CODE_TO_LABEL } from '@/lib/languages';
 
 type Language = { id: string; languageCode: string; level: string };
 type Package  = { id: string; name: string; pricePerPerson: number; durationDays: number; maxPeople: number };
@@ -94,6 +95,11 @@ export default function AdminGuideDetailPage() {
   const [interviewNotes, setInterviewNotes] = useState('');
   const [savingInterview, setSavingInterview] = useState(false);
   const [interviewMsg, setInterviewMsg] = useState('');
+
+  // Langue add form state
+  const [langCode, setLangCode]   = useState('');
+  const [langLevel, setLangLevel] = useState('NATIVE');
+  const [addingLang, setAddingLang] = useState(false);
 
   // Lieux toggles
   const [placesMap, setPlacesMap] = useState<Record<string, boolean>>({});
@@ -545,54 +551,66 @@ export default function AdminGuideDetailPage() {
         {/* Langues parlées */}
         <div>
           <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.75rem' }}>Langues parlées</div>
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
+
+          {/* Chips — langues déjà sélectionnées */}
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.75rem', minHeight: 32 }}>
+            {guide.languages.length === 0 && (
+              <span style={{ fontSize: '0.8rem', color: '#9CA3AF', alignSelf: 'center' }}>Aucune langue renseignée</span>
+            )}
             {guide.languages.map(l => (
               <span key={l.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', background: '#F5F0E8', border: '1px solid #E8DFC8', borderRadius: 20, padding: '0.3rem 0.5rem 0.3rem 0.75rem', fontSize: '0.75rem', fontWeight: 600, color: '#4A3F30' }}>
-                {l.languageCode} — {l.level}
+                {LANG_CODE_TO_LABEL[l.languageCode] ?? l.languageCode}
+                <span style={{ fontSize: '0.65rem', color: '#7A6D5A', fontWeight: 500 }}>· {l.level}</span>
                 <button
                   onClick={async () => {
                     const res = await fetch(`/api/admin/guides/${slug}`, {
                       method: 'PATCH',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ deleteLanguageId: l.id }),
-                    })
-                    if (res.ok) fetchGuide(true)
+                    });
+                    if (res.ok) fetchGuide(true);
                   }}
                   style={{ width: 16, height: 16, borderRadius: '50%', background: '#FEE2E2', color: '#DC2626', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 900, padding: 0, lineHeight: 1 }}
                 >✕</button>
               </span>
             ))}
-            {guide.languages.length === 0 && <span style={{ fontSize: '0.8rem', color: '#9CA3AF' }}>Aucune langue renseignée</span>}
           </div>
-          {/* Ajout langue */}
+
+          {/* Ajout langue — dropdown */}
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-            <input
-              id="lang-code-input"
-              placeholder="Code (fr, ar, en…)"
-              style={{ padding: '0.45rem 0.75rem', border: '1.5px solid #E8DFC8', borderRadius: 8, fontSize: '0.82rem', fontFamily: 'var(--font-manrope, sans-serif)', width: 140, outline: 'none' }}
-            />
             <select
-              id="lang-level-select"
+              value={langCode}
+              onChange={e => setLangCode(e.target.value)}
+              style={{ padding: '0.45rem 0.75rem', border: '1.5px solid #E8DFC8', borderRadius: 8, fontSize: '0.82rem', fontFamily: 'var(--font-manrope, sans-serif)', background: 'white', cursor: 'pointer', outline: 'none', minWidth: 200 }}
+            >
+              <option value="">— Choisir une langue —</option>
+              {GUIDE_LANGUAGES.filter(l => !guide.languages.some(gl => gl.languageCode === l.code)).map(l => (
+                <option key={l.code} value={l.code}>{l.label}</option>
+              ))}
+            </select>
+            <select
+              value={langLevel}
+              onChange={e => setLangLevel(e.target.value)}
               style={{ padding: '0.45rem 0.75rem', border: '1.5px solid #E8DFC8', borderRadius: 8, fontSize: '0.82rem', fontFamily: 'var(--font-manrope, sans-serif)', background: 'white', cursor: 'pointer', outline: 'none' }}
             >
               {['NATIVE','C2','C1','B2','B1'].map(lvl => <option key={lvl} value={lvl}>{lvl}</option>)}
             </select>
             <button
+              disabled={!langCode || addingLang}
               onClick={async () => {
-                const codeEl = document.getElementById('lang-code-input') as HTMLInputElement
-                const levelEl = document.getElementById('lang-level-select') as HTMLSelectElement
-                const code = codeEl?.value?.trim().toLowerCase()
-                if (!code) return
+                if (!langCode) return;
+                setAddingLang(true);
                 const res = await fetch(`/api/admin/guides/${slug}`, {
                   method: 'PATCH',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ addLanguage: { code, level: levelEl?.value || 'NATIVE' } }),
-                })
-                if (res.ok) { codeEl.value = ''; fetchGuide(true) }
+                  body: JSON.stringify({ addLanguage: { code: langCode, level: langLevel } }),
+                });
+                if (res.ok) { setLangCode(''); setLangLevel('NATIVE'); fetchGuide(true); }
+                setAddingLang(false);
               }}
-              style={{ padding: '0.45rem 1rem', background: '#1A1209', color: '#F0D897', border: 'none', borderRadius: 50, fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+              style={{ padding: '0.45rem 1rem', background: (!langCode || addingLang) ? '#E8DFC8' : '#1A1209', color: (!langCode || addingLang) ? '#7A6D5A' : '#F0D897', border: 'none', borderRadius: 50, fontSize: '0.78rem', fontWeight: 700, cursor: (!langCode || addingLang) ? 'not-allowed' : 'pointer', fontFamily: 'inherit', transition: 'background 0.15s' }}
             >
-              Ajouter
+              {addingLang ? '…' : 'Ajouter'}
             </button>
           </div>
         </div>

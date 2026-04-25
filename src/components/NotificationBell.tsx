@@ -106,7 +106,7 @@ export default function NotificationBell() {
       <button
         onClick={() => { setOpen(o => !o); if (!open) fetchNotifs(); }}
         style={{
-          position: 'relative', width: 38, height: 38, borderRadius: '50%',
+          position: 'relative', width: 44, height: 44, borderRadius: '50%',
           border: '1px solid #EDE8DC', background: open ? '#FAF3E0' : 'white',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           cursor: 'pointer', transition: 'background 0.15s', flexShrink: 0,

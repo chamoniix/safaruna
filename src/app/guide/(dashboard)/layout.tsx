@@ -115,9 +115,9 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
             {[
               { section: 'Tableau de bord', items: [
                 { href: '/guide/tableau-de-bord', icon: '⌂', label: 'Accueil' },
-                { href: '/guide/demandes',        icon: '📥', label: 'Nouvelles demandes', badge: '3', badgeColor: '#C0392B' },
+                { href: '/guide/demandes',        icon: '📥', label: 'Nouvelles demandes' },
                 { href: '/guide/missions',        icon: '✦', label: 'Mes missions' },
-                { href: '/guide/messages',        icon: '◎', label: 'Messages', badge: '5', badgeColor: '#C9A84C' },
+                { href: '/guide/messages',        icon: '◎', label: 'Messages' },
               ]},
               { section: 'Gestion', items: [
                 { href: '/guide/calendrier', icon: '◻', label: 'Calendrier' },
@@ -145,7 +145,6 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
                   <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className="g-nav-link" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.55rem 1.5rem', textDecoration: 'none', fontSize: '0.82rem', fontWeight: isActive(item.href) ? 700 : 400, color: isActive(item.href) ? '#F0D897' : 'rgba(255,255,255,0.5)', background: isActive(item.href) ? 'rgba(201,168,76,0.12)' : 'transparent', borderLeft: `2px solid ${isActive(item.href) ? '#C9A84C' : 'transparent'}` }}>
                     <span style={{ width: 16, textAlign: 'center', fontSize: '0.85rem', flexShrink: 0 }}>{item.icon}</span>
                     <span style={{ flex: 1 }}>{item.label}</span>
-                    {item.badge && <span style={{ background: item.badgeColor, color: 'white', fontSize: '0.58rem', fontWeight: 700, padding: '0.15rem 0.45rem', borderRadius: 50, minWidth: 16, textAlign: 'center' }}>{item.badge}</span>}
                   </Link>
                 ))}
               </div>
@@ -166,7 +165,7 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
           {/* Topbar */}
           <header style={{ position: 'sticky', top: 0, zIndex: 40, background: 'rgba(245,242,236,0.94)', backdropFilter: 'blur(16px)', borderBottom: '1px solid #EDE8DC', padding: '0.9rem 1.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <button className="guide-hamburger" onClick={() => setOpen(true)} style={{ width: 38, height: 38, borderRadius: 10, border: '1px solid #EDE8DC', background: 'white', cursor: 'pointer', gap: 4, flexShrink: 0, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <button className="guide-hamburger" onClick={() => setOpen(true)} style={{ width: 44, height: 44, borderRadius: 10, border: '1px solid #EDE8DC', background: 'white', cursor: 'pointer', gap: 4, flexShrink: 0, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 <span style={{ display: 'block', width: 16, height: 1.5, background: '#1A1209', borderRadius: 2 }} />
                 <span style={{ display: 'block', width: 12, height: 1.5, background: '#1A1209', borderRadius: 2 }} />
                 <span style={{ display: 'block', width: 16, height: 1.5, background: '#1A1209', borderRadius: 2 }} />
@@ -174,7 +173,7 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
               <span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 600, color: '#1A1209' }}>Espace Guide</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <button style={{ position: 'relative', width: 38, height: 38, borderRadius: '50%', border: '1px solid #EDE8DC', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '1rem', flexShrink: 0 }}>
+              <button style={{ position: 'relative', width: 44, height: 44, borderRadius: '50%', border: '1px solid #EDE8DC', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '1rem', flexShrink: 0 }}>
                 🔔
                 <span style={{ position: 'absolute', top: 8, right: 8, width: 7, height: 7, borderRadius: '50%', background: '#C0392B', border: '2px solid white' }} />
               </button>

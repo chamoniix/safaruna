@@ -26,8 +26,8 @@ export default function AdminCommissions() {
 
   const handleSave = async (guideId: string) => {
     const pct = Number(rates[guideId]);
-    if (isNaN(pct) || pct < 5 || pct > 50) {
-      setFeedback(f => ({ ...f, [guideId]: { ok: false, msg: 'Taux invalide (5-50%)' } }));
+    if (isNaN(pct) || pct < 1 || pct > 50) {
+      setFeedback(f => ({ ...f, [guideId]: { ok: false, msg: 'Taux invalide (1-50%)' } }));
       return;
     }
     setSaving(guideId);

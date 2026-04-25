@@ -1,15 +1,5 @@
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import { redirect } from 'next/navigation';
 
-export default function Page() {
-  return (
-    <>
-      <Navbar />
-      <div className="container" style={{ padding: '8rem 2rem', minHeight: '60vh' }}>
-        <h1>GUIDE - MESSAGES - DETAIL</h1>
-        <p className="mt-4 text-muted">Page en construction. Cette page contiendra les éléments de guide - messages - Detail.</p>
-      </div>
-      <Footer />
-    </>
-  );
+export default function GuideMessageThread({ params }: { params: { id: string } }) {
+  redirect(`/guide/messages`);
 }

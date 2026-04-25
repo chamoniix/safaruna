@@ -13,6 +13,7 @@ const NAV = [
   { href: '/admin/messages',        label: 'Messages' },
   { href: '/admin/litiges',         label: 'Litiges', badge: 2 },
   { href: '/admin/contenu',         label: 'Contenu' },
+  { href: '/admin/stats',           label: 'Statistiques' },
   { href: '/admin/revenus',         label: 'Revenus' },
   { href: '/admin/commissions',     label: 'Commissions' },
   { href: '/admin/lieux',           label: 'Lieux & Tarifs' },

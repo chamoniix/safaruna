@@ -89,6 +89,38 @@ export const authOptions: AuthOptions = {
     }),
   ],
   callbacks: {
+    async signIn({ user, account }) {
+      if (account?.provider === "google" && user.email) {
+        try {
+          const existing = await prisma.user.findUnique({ where: { email: user.email } });
+          if (!existing) {
+            const created = await prisma.user.create({
+              data: {
+                email: user.email,
+                name: user.name ?? null,
+                image: user.image ?? null,
+                role: "PELERIN",
+                emailVerified: new Date(),
+              },
+            });
+            user.id = created.id;
+          } else {
+            user.id = existing.id;
+            // Set emailVerified if missing (first Google login after email/password account)
+            if (!existing.emailVerified) {
+              await prisma.user.update({
+                where: { id: existing.id },
+                data: { emailVerified: new Date() },
+              });
+            }
+          }
+        } catch (e) {
+          console.error('[auth] Google signIn upsert error', e);
+          return false;
+        }
+      }
+      return true;
+    },
     async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id
@@ -98,6 +130,16 @@ export const authOptions: AuthOptions = {
       }
       if (account?.provider === "google") {
         token.role = "PELERIN"
+        // Google verifies emails — always mark as verified
+        token.emailVerified = new Date()
+        // Resolve DB id from email (Google's OAuth id ≠ our DB id)
+        if (user?.email) {
+          const dbUser = await prisma.user.findUnique({ where: { email: user.email }, select: { id: true, firstName: true } });
+          if (dbUser) {
+            token.id = dbUser.id;
+            token.firstName = dbUser.firstName ?? null;
+          }
+        }
       }
       return token
     },

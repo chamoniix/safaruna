@@ -33,6 +33,7 @@ interface GuideProfileClientProps {
   slug: string;
   guideName: string;
   isOfficial: boolean;
+  rating: number;
   packages: Package[];
   places: Place[];
   reviews: Review[];
@@ -48,6 +49,7 @@ export default function GuideProfileClient({
   slug,
   guideName,
   isOfficial,
+  rating,
   packages,
   places,
   reviews,
@@ -361,7 +363,7 @@ export default function GuideProfileClient({
                     lineHeight: 1,
                     marginBottom: '0.25rem',
                   }}>
-                    {isOfficial ? '5.0' : '4.97'}
+                    {rating.toFixed(1)}
                   </div>
                   <div style={{ color: '#C9A84C', fontSize: '1.1rem', letterSpacing: '2px', marginBottom: '0.25rem' }}>★★★★★</div>
                   <div style={{ fontSize: '0.75rem', color: '#7A6D5A' }}>{reviews.length} avis vérifiés</div>

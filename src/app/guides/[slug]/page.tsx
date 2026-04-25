@@ -370,6 +370,23 @@ export default async function GuideProfilePage({
     }
   } catch { /* DB error — show all places normally */ }
 
+  // ── Fetch real rating from reviews ────────────────────────────────────────
+  let realRating: number | null = null
+  let realReviewCount = 0
+  try {
+    if (guideData) {
+      const agg = await prisma.review.aggregate({
+        where: { reservation: { guideProfileId: (guideData as any).id } },
+        _avg: { ratingOverall: true },
+        _count: { ratingOverall: true },
+      })
+      if (agg._count.ratingOverall > 0) {
+        realRating = Math.round((agg._avg.ratingOverall ?? 0) * 10) / 10
+        realReviewCount = agg._count.ratingOverall
+      }
+    }
+  } catch { /* DB error — fall through to hardcoded */ }
+
   const hardcoded = GUIDES[slug] ?? null;
   if (!guideData && !hardcoded) notFound();
 
@@ -407,8 +424,8 @@ export default async function GuideProfilePage({
     initials:     (prismaName || hardcoded?.name || 'GS').slice(0, 2).toUpperCase(),
     location:     (guideData as any)?.city || hardcoded?.location || 'Arabie Saoudite',
     experience:   (guideData as any)?.experienceYears ?? hardcoded?.experience ?? 0,
-    rating:       hardcoded?.rating ?? 5.0,
-    reviewCount:  hardcoded?.reviewCount ?? 0,
+    rating:       realRating ?? hardcoded?.rating ?? 5.0,
+    reviewCount:  realReviewCount || (hardcoded?.reviewCount ?? 0),
     pilgrimsCount: hardcoded?.pilgrimsCount ?? '0',
     returnRate:   hardcoded?.returnRate ?? 0,
     speciality:   hardcoded?.speciality || (guideData as any)?.bio?.slice(0, 60) || '',
@@ -687,6 +704,7 @@ export default async function GuideProfilePage({
           slug={slug}
           guideName={guide.name}
           isOfficial={guide.isOfficial ?? false}
+          rating={guide.rating}
           packages={packages}
           places={PLACES}
           reviews={reviews}

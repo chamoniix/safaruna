@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { GUIDE_LANGUAGES, LANG_CODE_TO_LABEL } from '@/lib/languages';
 
 type Profile = {
   id: string;
@@ -21,14 +22,6 @@ type Profile = {
   createdAt: string;
 };
 
-const LANG_LABELS: Record<string, string> = {
-  fr: 'Français', ar: 'Arabe', en: 'Anglais', tr: 'Turc', ur: 'Ourdou',
-  id: 'Indonésien', ms: 'Malais', de: 'Allemand', es: 'Espagnol',
-};
-
-const LEVEL_LABELS: Record<string, string> = {
-  NATIVE: 'Natif', C2: 'C2', C1: 'C1', B2: 'B2', B1: 'B1',
-};
 
 const card: React.CSSProperties = {
   background: 'white',
@@ -78,6 +71,12 @@ export default function GuideProfil() {
   const [nationality, setNationality] = useState('');
   const [experienceYears, setExperienceYears] = useState('');
 
+  // Languages
+  const [languages, setLanguages] = useState<{ id: string; languageCode: string; level: string }[]>([]);
+  const [langAdding, setLangAdding] = useState(false);
+  const [langError, setLangError] = useState('');
+  const selectRef = useRef<HTMLSelectElement>(null);
+
   useEffect(() => {
     fetch('/api/guide/profil')
       .then(r => { if (!r.ok) throw new Error('Erreur ' + r.status); return r.json(); })
@@ -92,6 +91,7 @@ export default function GuideProfil() {
         setCity(p.city || '');
         setNationality(p.nationality || '');
         setExperienceYears(p.experienceYears?.toString() || '');
+        setLanguages(p.languages);
         setLoading(false);
       })
       .catch((e: Error) => { setError(e.message); setLoading(false); });
@@ -115,6 +115,37 @@ export default function GuideProfil() {
       setSaveError(e instanceof Error ? e.message : 'Erreur inconnue');
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleAddLanguage(code: string) {
+    if (!code) return;
+    setLangAdding(true);
+    setLangError('');
+    try {
+      const res = await fetch('/api/guide/profil/languages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ languageCode: code }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error || 'Erreur');
+      const data = await res.json();
+      setLanguages(prev => [...prev, data.language]);
+      if (selectRef.current) selectRef.current.value = '';
+    } catch (e: unknown) {
+      setLangError(e instanceof Error ? e.message : 'Erreur');
+    } finally {
+      setLangAdding(false);
+    }
+  }
+
+  async function handleRemoveLanguage(id: string) {
+    try {
+      const res = await fetch(`/api/guide/profil/languages?id=${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error();
+      setLanguages(prev => prev.filter(l => l.id !== id));
+    } catch {
+      setLangError('Impossible de supprimer cette langue.');
     }
   }
 
@@ -236,22 +267,59 @@ export default function GuideProfil() {
         </div>
       </form>
 
-      {/* Languages (read-only) */}
-      {profile.languages.length > 0 && (
-        <div style={{ ...card, overflow: 'hidden' }}>
-          <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid #F0EBE0' }}>
-            <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Langues parlées</div>
-            <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>Contactez le support pour modifier vos langues</div>
-          </div>
-          <div style={{ padding: '1rem 1.25rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-            {profile.languages.map(l => (
-              <span key={l.id} style={{ background: '#F5F2EC', border: '1px solid #E8DFC8', borderRadius: 20, padding: '0.3rem 0.875rem', fontSize: '0.78rem', fontWeight: 600, color: '#4A3F30' }}>
-                {LANG_LABELS[l.languageCode] || l.languageCode} · {LEVEL_LABELS[l.level] || l.level}
-              </span>
-            ))}
-          </div>
+      {/* Languages — interactive */}
+      <div style={{ ...card, overflow: 'hidden' }}>
+        <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid #F0EBE0' }}>
+          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Langues parlées</div>
+          <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>Sélectionnez vos langues une par une</div>
         </div>
-      )}
+        <div style={{ padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+
+          {/* Chips des langues sélectionnées */}
+          {languages.length > 0 && (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+              {languages.map(l => (
+                <span
+                  key={l.id}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#FAF3E0', border: '1px solid rgba(201,168,76,0.4)', borderRadius: 20, padding: '0.3rem 0.5rem 0.3rem 0.875rem', fontSize: '0.78rem', fontWeight: 600, color: '#4A3F30' }}
+                >
+                  {LANG_CODE_TO_LABEL[l.languageCode] || l.languageCode}
+                  <button
+                    onClick={() => handleRemoveLanguage(l.id)}
+                    aria-label={`Supprimer ${LANG_CODE_TO_LABEL[l.languageCode] || l.languageCode}`}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 0.1rem', lineHeight: 1, color: '#9A8A7A', fontSize: '0.9rem', display: 'flex', alignItems: 'center' }}
+                  >
+                    ✕
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Dropdown d'ajout */}
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <select
+              ref={selectRef}
+              defaultValue=""
+              onChange={e => { if (e.target.value) handleAddLanguage(e.target.value); }}
+              disabled={langAdding}
+              style={{ ...input, flex: 1, cursor: 'pointer', appearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237A6D5A' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.875rem center', paddingRight: '2.25rem' }}
+            >
+              <option value="" disabled>Ajouter une langue…</option>
+              {GUIDE_LANGUAGES.filter(l => !languages.some(selected => selected.languageCode === l.code)).map(l => (
+                <option key={l.code} value={l.code}>{l.label}</option>
+              ))}
+            </select>
+            {langAdding && (
+              <span style={{ fontSize: '0.75rem', color: '#7A6D5A', whiteSpace: 'nowrap' }}>Ajout…</span>
+            )}
+          </div>
+
+          {langError && (
+            <div style={{ fontSize: '0.78rem', color: '#DC2626' }}>{langError}</div>
+          )}
+        </div>
+      </div>
 
       {/* Security */}
       <div style={{ ...card, padding: '1rem 1.25rem', background: '#F5F2EC' }}>

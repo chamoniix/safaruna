@@ -3,8 +3,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import { IconStar, IconAccessibility, IconMap } from '@/components/Icons';
 
 const LANGUES = [
@@ -507,8 +505,7 @@ export default function GuideSearchPage() {
   );
 
   return (
-    <div style={{ fontFamily: 'var(--font-manrope, Manrope, sans-serif)', background: '#FAF7F0', color: '#1A1209', minHeight: '100vh' }}>
-      <Navbar />
+    <div style={{ fontFamily: 'var(--font-manrope, Manrope, sans-serif)', background: '#FAF7F0', color: '#1A1209', minHeight: '100vh', paddingBottom: 'calc(80px + env(safe-area-inset-bottom))' }}>
 
       {/* ── HERO ── */}
       <div className="guides-hero" style={{ background: '#1A1209', position: 'relative', overflow: 'visible' }}>
@@ -1156,7 +1153,58 @@ export default function GuideSearchPage() {
         }
       `}} />
 
-      <Footer />
+      {/* ── BOTTOM NAV ── */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        .guides-bottom-nav {
+          position: fixed; bottom: 0; left: 0; right: 0;
+          height: calc(80px + env(safe-area-inset-bottom));
+          padding-bottom: env(safe-area-inset-bottom);
+          background: rgba(255,255,255,0.92);
+          backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+          border-top: 1px solid rgba(201,168,76,0.2);
+          display: flex; align-items: flex-start; justify-content: space-around;
+          z-index: 100; user-select: none;
+        }
+        .guides-tab {
+          -webkit-tap-highlight-color: transparent;
+          display: flex; flex-direction: column; align-items: center; justify-content: center;
+          gap: 4px; flex: 1; height: 80px; text-decoration: none;
+          cursor: pointer; position: relative; padding-top: 12px;
+          transition: transform 0.2s cubic-bezier(0.16,1,0.3,1);
+          color: rgba(26,18,9,0.4);
+        }
+        .guides-tab:active { transform: scale(0.92); }
+        .guides-tab.is-active { color: #C9A84C; }
+        .guides-tab-label { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.01em; line-height: 1; }
+        .guides-tab-dot {
+          position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
+          width: 4px; height: 4px; border-radius: 50%; background: #C9A84C;
+        }
+      `}} />
+      <nav className="guides-bottom-nav" aria-label="Navigation">
+        <Link href="/" className="guides-tab">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+          <span className="guides-tab-label">Accueil</span>
+        </Link>
+        <Link href="/guides" className="guides-tab is-active" aria-current="page">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#C9A84C" stroke="#C9A84C" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            <line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>
+          </svg>
+          <span className="guides-tab-label">Guides</span>
+          <span className="guides-tab-dot" aria-hidden="true" />
+        </Link>
+        <Link href="/connexion" className="guides-tab">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          <span className="guides-tab-label">Connexion</span>
+        </Link>
+      </nav>
     </div>
   );
 }

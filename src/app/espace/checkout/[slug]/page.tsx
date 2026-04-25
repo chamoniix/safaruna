@@ -195,6 +195,43 @@ export default function CheckoutPage() {
     }
   }, [status, slug, router])
 
+  // Restaurer l'état depuis sessionStorage
+  useEffect(() => {
+    if (!slug) return
+    try {
+      const saved = sessionStorage.getItem(`checkout-${slug}`)
+      if (!saved) return
+      const s = JSON.parse(saved)
+      if (s.step) setStep(s.step)
+      if (s.cityChoice) setCityChoice(s.cityChoice)
+      if (s.range) setRange({
+        from: s.range.from ? new Date(s.range.from) : undefined,
+        to: s.range.to ? new Date(s.range.to) : undefined,
+      })
+      if (s.nbPersonnes) setNbPersonnes(s.nbPersonnes)
+      if (s.gender) setGender(s.gender)
+      if (s.langue) setLangue(s.langue)
+      if (s.selectedPlaces) setSelectedPlaces(s.selectedPlaces)
+      if (s.transportOption) setTransportOption(s.transportOption)
+      if (s.withCar !== undefined) setWithCar(s.withCar)
+      if (s.selectedGuideSlug) setSelectedGuideSlug(s.selectedGuideSlug)
+      if (s.selectedGuideSlugMadinah) setSelectedGuideSlugMadinah(s.selectedGuideSlugMadinah)
+    } catch { /* ignore */ }
+  }, [slug]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Sauvegarder l'état dans sessionStorage
+  useEffect(() => {
+    if (!slug) return
+    try {
+      sessionStorage.setItem(`checkout-${slug}`, JSON.stringify({
+        step, cityChoice,
+        range: range ? { from: range.from?.toISOString(), to: range.to?.toISOString() } : undefined,
+        nbPersonnes, gender, langue, selectedPlaces, transportOption, withCar,
+        selectedGuideSlug, selectedGuideSlugMadinah,
+      }))
+    } catch { /* ignore */ }
+  }, [slug, step, cityChoice, range, nbPersonnes, gender, langue, selectedPlaces, transportOption, withCar, selectedGuideSlug, selectedGuideSlugMadinah])
+
   // Initialise selectedGuideSlug depuis l'URL
   useEffect(() => {
     if (slug && selectedGuideSlug === null) setSelectedGuideSlug(slug)
@@ -305,6 +342,7 @@ export default function CheckoutPage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Erreur')
+      try { sessionStorage.removeItem(`checkout-${slug}`) } catch { /* ignore */ }
       window.location.href = data.sessionUrl
     } catch (e: any) {
       setError(e.message)
@@ -795,8 +833,22 @@ export default function CheckoutPage() {
                   <style>{`@keyframes pulse { 0%,100%{opacity:0.5} 50%{opacity:0.8} }`}</style>
                 </div>
               ) : availableGuides.length === 0 ? (
-                <div style={{ background: 'white', border: '1px solid #E8DFC8', borderRadius: 12, padding: '2rem', textAlign: 'center', color: '#7A6D5A', fontSize: '0.88rem' }}>
-                  Aucun guide disponible pour vos critères. Votre guide actuel sera confirmé.
+                <div style={{ background: '#FAF8F0', border: '1px solid #E8DFC8', borderRadius: 16, padding: '2rem 1.5rem', textAlign: 'center' }}>
+                  <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>🕌</div>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209', marginBottom: '0.5rem' }}>
+                    Votre guide sera confirmé
+                  </div>
+                  <div style={{ fontSize: '0.82rem', color: '#7A6D5A', lineHeight: 1.7, marginBottom: '1.25rem' }}>
+                    Aucun guide disponible pour vos critères actuels. Notre équipe sélectionnera le guide le plus adapté à votre profil sous 24h.
+                  </div>
+                  <a
+                    href="https://wa.me/33600000000"
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#25D366', color: 'white', fontSize: '0.78rem', fontWeight: 700, padding: '0.6rem 1.25rem', borderRadius: 50, textDecoration: 'none' }}
+                  >
+                    📱 Être conseillé sur WhatsApp
+                  </a>
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>

@@ -55,15 +55,15 @@ export async function POST(req: NextRequest) {
     (p) => p.name.toLowerCase().trim() === String(packageName).toLowerCase().trim()
   )
 
-  if (!pkg) {
+  // Lieux supplémentaires (flat, pas par personne)
+  const libPkg = BASE_PACKAGES.find(p => p.name.toLowerCase().trim() === String(packageName).toLowerCase().trim())
+
+  if (!pkg && !libPkg) {
     return NextResponse.json({ error: 'Forfait introuvable' }, { status: 400 })
   }
 
-  // Prix de base = forfait flat 1-7 personnes
-  const expectedBase = pkg.pricePerPerson
-
-  // Lieux supplémentaires (flat, pas par personne)
-  const libPkg = BASE_PACKAGES.find(p => p.name.toLowerCase().trim() === String(packageName).toLowerCase().trim())
+  // Prix de base : guide-specific si dispo, sinon BASE_PACKAGES
+  const expectedBase = pkg?.pricePerPerson ?? libPkg!.basePrice
   const includedPlaces: string[] = libPkg?.includedPlaces ?? []
   const extraPlaceKeys: string[] = Array.isArray(selectedPlaces)
     ? selectedPlaces.filter((pk: string) => !includedPlaces.includes(pk))
@@ -118,6 +118,7 @@ export async function POST(req: NextRequest) {
       : cityChoice === 'MAKKAH' ? 'Makkah' : 'Madinah'
 
     // Crée la Stripe Checkout Session
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || new URL(req.url).origin
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: 'payment',
       line_items: [
@@ -138,8 +139,8 @@ export async function POST(req: NextRequest) {
         refNumber,
         guideSlug: selectedGuideSlug || guideSlug,
       },
-      success_url: `https://safaruma.com/espace/checkout/${guideSlug}/confirmation?ref=${refNumber}&payment=success`,
-      cancel_url: `https://safaruma.com/espace/checkout/${guideSlug}?cancelled=1`,
+      success_url: `${baseUrl}/espace/checkout/${guideSlug}/confirmation?ref=${refNumber}&payment=success`,
+      cancel_url: `${baseUrl}/espace/checkout/${guideSlug}?cancelled=1`,
       customer_email: userSession.user.email || undefined,
       expires_at: Math.floor(Date.now() / 1000) + 1800,
     })

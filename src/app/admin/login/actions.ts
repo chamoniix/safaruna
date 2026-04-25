@@ -3,6 +3,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createAdminToken } from '@/lib/admin-auth';
+import { timingSafeEqual } from 'crypto';
 
 export async function adminLogin(formData: FormData) {
   const email    = (formData.get('email')    as string)?.trim();
@@ -18,7 +19,14 @@ export async function adminLogin(formData: FormData) {
     redirect('/admin/login?error=1');
   }
 
-  if (email !== validEmail || password !== validPassword) {
+  // Comparaison timing-safe pour éviter les timing attacks
+  const emailBuf = Buffer.from(email || '')
+  const validEmailBuf = Buffer.from(validEmail)
+  const passBuf = Buffer.from(password || '')
+  const validPassBuf = Buffer.from(validPassword)
+  const emailMatch = emailBuf.length === validEmailBuf.length && timingSafeEqual(emailBuf, validEmailBuf)
+  const passMatch = passBuf.length === validPassBuf.length && timingSafeEqual(passBuf, validPassBuf)
+  if (!emailMatch || !passMatch) {
     redirect('/admin/login?error=1');
   }
 

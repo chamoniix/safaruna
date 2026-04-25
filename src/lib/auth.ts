@@ -31,6 +31,7 @@ export const authOptions: AuthOptions = {
             where: { email: credentials.email },
           })
           if (!user || user.role !== "GUIDE") return null
+          if (!user.emailVerified) return null
           if (!user.passwordHash) return null
           const isValid = await bcrypt.compare(credentials.password, user.passwordHash)
           if (!isValid) return null
@@ -65,9 +66,14 @@ export const authOptions: AuthOptions = {
             where: { email: credentials.email },
           })
           if (!user || user.role !== "PELERIN") return null
+          if (!user.emailVerified) return null
           if (!user.passwordHash) return null
           const isValid = await bcrypt.compare(credentials.password, user.passwordHash)
           if (!isValid) return null
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { lastLogin: new Date() },
+          })
           return {
             id: user.id,
             email: user.email,

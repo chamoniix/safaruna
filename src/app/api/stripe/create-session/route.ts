@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
     totalPrice,
     packageName,
     selectedGuideSlug,
+    selectedGuideSlugMadinah,
     selectedPlaces,
     transportOption,
     withCar,
@@ -34,6 +35,10 @@ export async function POST(req: NextRequest) {
 
   if (!totalPrice || totalPrice <= 0)
     return NextResponse.json({ error: 'Montant invalide' }, { status: 400 })
+
+  const nbP = Number(nbPersonnes)
+  if (!Number.isInteger(nbP) || nbP < 1 || nbP > 20)
+    return NextResponse.json({ error: 'Nombre de personnes invalide' }, { status: 400 })
 
   // ── Validation du prix côté serveur ──────────────────────────────────────
   // Le prix doit être calculé à partir de la base de données, jamais depuis le client
@@ -80,7 +85,6 @@ export async function POST(req: NextRequest) {
   }
 
   // Transport
-  const nbP = Number(nbPersonnes)
   const prixTransport = cityChoice === 'BOTH'
     ? transportOption === 'TRAIN' ? 80 * nbP
     : (transportOption === 'TAXI_RT' || transportOption === 'TAXI_ONE') ? 240
@@ -138,6 +142,8 @@ export async function POST(req: NextRequest) {
       metadata: {
         refNumber,
         guideSlug: selectedGuideSlug || guideSlug,
+        guideSlugMadinah: selectedGuideSlugMadinah || '',
+        pelerinEmail: userSession.user.email || '',
       },
       success_url: `${baseUrl}/espace/checkout/${guideSlug}/confirmation?ref=${refNumber}&payment=success`,
       cancel_url: `${baseUrl}/espace/checkout/${guideSlug}?cancelled=1`,

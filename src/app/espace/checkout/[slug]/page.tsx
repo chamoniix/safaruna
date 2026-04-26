@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { DayPicker, DateRange } from 'react-day-picker'
 import { format, differenceInDays } from 'date-fns'
@@ -211,6 +211,7 @@ export default function CheckoutPage() {
   const params = useParams<{ slug: string }>()
   const slug = params.slug
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { data: session, status } = useSession()
 
   const [step, setStep] = useState(1)
@@ -314,6 +315,14 @@ export default function CheckoutPage() {
   useEffect(() => {
     if (slug && selectedGuideSlug === null) setSelectedGuideSlug(slug)
   }, [slug]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Initialise selectedGuideSlugMadinah depuis ?pair= (vient du profil guide)
+  useEffect(() => {
+    const pairSlug = searchParams.get('pair')
+    if (pairSlug && selectedGuideSlugMadinah === null) {
+      setSelectedGuideSlugMadinah(pairSlug)
+    }
+  }, [searchParams]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Reset sous-étape guide si cityChoice change
   useEffect(() => {

@@ -445,6 +445,12 @@ export default async function GuideProfilePage({
     gradient:     hardcoded?.gradient ?? 'linear-gradient(135deg, #F0D897, #C9A84C)',
   };
 
+  const locUp = guide.location.toUpperCase();
+  const guideCityDerived: 'MAKKAH' | 'MADINAH' | null =
+    locUp.includes('MAKKAH') ? 'MAKKAH' :
+    locUp.includes('MADINAH') ? 'MADINAH' :
+    null;
+
   return (
     <>
       <Navbar />
@@ -712,6 +718,7 @@ export default async function GuideProfilePage({
           services={guide.services}
           bioFull={guide.bioFull}
           activePlaceKeys={activePlaceKeys}
+          guideCity={guideCityDerived ?? undefined}
         />
       </div>
 

@@ -41,7 +41,19 @@ interface GuideProfileClientProps {
   services: string[];
   bioFull: string[];
   activePlaceKeys?: string[];
+  guideCity?: 'MAKKAH' | 'MADINAH';
 }
+
+const COMPANION_GUIDES: Record<'MAKKAH' | 'MADINAH', Array<{ slug: string; name: string; specialty: string; initials: string }>> = {
+  MAKKAH: [
+    { slug: 'naim-laamari', name: 'Naïm LAAMARI', specialty: 'Guide Officiel · Responsable Terrain', initials: 'NL' },
+  ],
+  MADINAH: [
+    { slug: 'rachid-al-madani', name: 'Rachid Al-Madani', specialty: 'Cheikh · Spécialiste Sîra', initials: 'RA' },
+    { slug: 'fatima-al-omari', name: 'Fatima Al-Omari', specialty: 'Guide femme · Familles', initials: 'FA' },
+    { slug: 'abdullah-ben-yusuf', name: 'Abdullah Ben Yusuf', specialty: 'Diplômé · Univ. Madinah', initials: 'AB' },
+  ],
+};
 
 const TAB_LABELS = ['Présentation', 'Lieux Saints', 'Avis'];
 
@@ -57,8 +69,20 @@ export default function GuideProfileClient({
   services,
   bioFull,
   activePlaceKeys,
+  guideCity,
 }: GuideProfileClientProps) {
   const [activeTab, setActiveTab] = useState(0);
+  const [companionSlug, setCompanionSlug] = useState<string | null>(null);
+
+  const companionCity: 'MAKKAH' | 'MADINAH' | null =
+    guideCity === 'MAKKAH' ? 'MADINAH' :
+    guideCity === 'MADINAH' ? 'MAKKAH' :
+    null;
+  const companionCityLabel = companionCity === 'MAKKAH' ? 'La Mecque' : companionCity === 'MADINAH' ? 'Médine' : null;
+  const companions = companionCity ? COMPANION_GUIDES[companionCity] : [];
+  const checkoutHref = companionSlug
+    ? `/espace/checkout/${slug}?pair=${companionSlug}`
+    : `/espace/checkout/${slug}`;
 
   const makkahPlaces = places.filter(p => p.category === 'MAKKAH');
   const madinahPlaces = places.filter(p => p.category === 'MADINAH');
@@ -442,11 +466,90 @@ export default function GuideProfileClient({
             <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 600, color: '#1A1209', marginBottom: '1.25rem', lineHeight: 1.4 }}>
               Réserver avec<br/>{guideName}
             </div>
+
+            {/* Companion guide section */}
+            {companions.length > 0 && companionCityLabel && (
+              <div style={{ marginBottom: '1.25rem', textAlign: 'left' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.6rem' }}>
+                  <div style={{ flex: 1, height: 1, background: '#E8DFC8' }} />
+                  <span style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9CA3AF', whiteSpace: 'nowrap' }}>
+                    Pèlerinage complet
+                  </span>
+                  <div style={{ flex: 1, height: 1, background: '#E8DFC8' }} />
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#6B5F50', marginBottom: '0.75rem', lineHeight: 1.5 }}>
+                  Ajoutez un guide pour <strong>{companionCityLabel}</strong> et réservez votre duo en une fois.
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {companions.map(c => {
+                    const isSelected = companionSlug === c.slug;
+                    return (
+                      <button
+                        key={c.slug}
+                        onClick={() => setCompanionSlug(isSelected ? null : c.slug)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.75rem',
+                          padding: '0.65rem 0.8rem',
+                          borderRadius: 12,
+                          border: isSelected ? '1.5px solid #10B981' : '1.5px solid #E8DFC8',
+                          background: isSelected ? 'rgba(16,185,129,0.06)' : 'var(--cream, #FAF7F0)',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          width: '100%',
+                          transition: 'all 0.15s',
+                          fontFamily: 'var(--font-manrope, sans-serif)',
+                        }}
+                      >
+                        <div style={{
+                          width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+                          background: isSelected ? 'linear-gradient(135deg,#10B981,#1D5C3A)' : 'linear-gradient(135deg,#E8DFC8,#C9A84C)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: '0.7rem', fontWeight: 700, color: isSelected ? 'white' : '#1A1209',
+                        }}>
+                          {c.initials}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.2 }}>{c.name}</div>
+                          <div style={{ fontSize: '0.68rem', color: '#9CA3AF', lineHeight: 1.3, marginTop: '0.1rem' }}>{c.specialty}</div>
+                        </div>
+                        <div style={{
+                          width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
+                          border: isSelected ? '2px solid #10B981' : '2px solid #E8DFC8',
+                          background: isSelected ? '#10B981' : 'transparent',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: '0.65rem', color: 'white',
+                        }}>
+                          {isSelected && '✓'}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+                {companionSlug && (
+                  <div style={{ marginTop: '0.5rem', fontSize: '0.7rem', color: '#10B981', fontWeight: 600, textAlign: 'center' }}>
+                    ✓ Duo sélectionné · Réservez les deux en une fois
+                  </div>
+                )}
+              </div>
+            )}
+
             <a
-              href={`/espace/checkout/${slug}`}
-              style={{ display: 'block', padding: '0.875rem 1.5rem', background: 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)', color: '#1A1209', borderRadius: 12, fontFamily: 'var(--font-manrope, sans-serif)', fontWeight: 800, fontSize: '0.88rem', letterSpacing: '0.05em', textDecoration: 'none', boxShadow: '0 4px 16px rgba(201,168,76,0.3)' }}
+              href={checkoutHref}
+              style={{
+                display: 'block', padding: '0.875rem 1.5rem',
+                background: companionSlug
+                  ? 'linear-gradient(135deg, #10B981 0%, #1D5C3A 100%)'
+                  : 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)',
+                color: companionSlug ? 'white' : '#1A1209',
+                borderRadius: 12, fontFamily: 'var(--font-manrope, sans-serif)', fontWeight: 800,
+                fontSize: '0.88rem', letterSpacing: '0.05em', textDecoration: 'none',
+                boxShadow: companionSlug ? '0 4px 16px rgba(16,185,129,0.3)' : '0 4px 16px rgba(201,168,76,0.3)',
+                transition: 'all 0.2s',
+              }}
             >
-              Réserver ce guide
+              {companionSlug ? 'Réserver mon duo 🕋🌿' : 'Réserver ce guide'}
             </a>
             <div style={{ marginTop: '1rem', fontSize: '0.72rem', color: '#9CA3AF', lineHeight: 1.6 }}>
               Guide certifié SAFARUMA · Paiement sécurisé
@@ -458,10 +561,19 @@ export default function GuideProfileClient({
       {/* Mobile booking bar (fixed bottom) */}
       <div className="profile-mobile-booking">
         <a
-          href={`/espace/checkout/${slug}`}
-          style={{ display: 'block', width: '100%', padding: '0.875rem', background: 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)', color: '#1A1209', borderRadius: 50, fontFamily: 'var(--font-manrope, sans-serif)', fontWeight: 800, fontSize: '0.88rem', textDecoration: 'none', textAlign: 'center', letterSpacing: '0.05em', boxSizing: 'border-box' }}
+          href={checkoutHref}
+          style={{
+            display: 'block', width: '100%', padding: '0.875rem',
+            background: companionSlug
+              ? 'linear-gradient(135deg, #10B981 0%, #1D5C3A 100%)'
+              : 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)',
+            color: companionSlug ? 'white' : '#1A1209',
+            borderRadius: 50, fontFamily: 'var(--font-manrope, sans-serif)', fontWeight: 800,
+            fontSize: '0.88rem', textDecoration: 'none', textAlign: 'center',
+            letterSpacing: '0.05em', boxSizing: 'border-box',
+          }}
         >
-          Réserver ce guide
+          {companionSlug ? 'Réserver mon duo 🕋🌿' : 'Réserver ce guide'}
         </a>
       </div>
     </div>

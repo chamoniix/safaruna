@@ -325,11 +325,11 @@ export default function CheckoutPage() {
     }
   }, [searchParams]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Reset sous-étape guide si cityChoice change
+  // Reset sous-étape guide si cityChoice change (sauf si on revient avec ?pair=)
   useEffect(() => {
     setGuideSubStep(1)
-    setSelectedGuideSlugMadinah(null)
-  }, [cityChoice])
+    if (!searchParams.get('pair')) setSelectedGuideSlugMadinah(null)
+  }, [cityChoice]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Fetch données du guide sélectionné
   useEffect(() => {
@@ -1338,8 +1338,36 @@ export default function CheckoutPage() {
                 </div>
               )}
 
-              {/* Liste des guides */}
-              {loadingGuides ? (
+              {/* ── Résumé duo quand les deux guides sont choisis (BOTH) ── */}
+              {cityChoice === 'BOTH' && bothDone && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem', marginBottom: '1.25rem' }}>
+                  {/* Guide Makkah */}
+                  <div style={{ background: 'linear-gradient(135deg, #1A1209 0%, #2C1F10 100%)', borderRadius: 14, padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', border: '1px solid rgba(201,168,76,0.4)' }}>
+                    <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
+                      {(guide?.name || selectedGuideSlug || '')?.slice(0, 2).toUpperCase()}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '0.65rem', color: '#C9A84C', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 2 }}>🕋 Guide La Mecque</div>
+                      <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'white' }}>{guide?.name || selectedGuideSlug}</div>
+                    </div>
+                    <button onClick={() => setSelectedGuideSlug(null)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem', cursor: 'pointer', borderRadius: '50%', width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>✕</button>
+                  </div>
+                  {/* Guide Médine */}
+                  <div style={{ background: 'linear-gradient(135deg, #0F3320 0%, #1D5C3A 100%)', borderRadius: 14, padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', border: '1px solid rgba(29,92,58,0.6)' }}>
+                    <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'linear-gradient(135deg, #6FCF97, #27AE60)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: 'white', flexShrink: 0 }}>
+                      {(guideDataMadinah?.name || selectedGuideSlugMadinah || '')?.slice(0, 2).toUpperCase()}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: '0.65rem', color: '#6FCF97', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 2 }}>🌿 Guide Médine</div>
+                      <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'white' }}>{guideDataMadinah?.name || selectedGuideSlugMadinah}</div>
+                    </div>
+                    <button onClick={() => setSelectedGuideSlugMadinah(null)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: '0.75rem', cursor: 'pointer', borderRadius: '50%', width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>✕</button>
+                  </div>
+                </div>
+              )}
+
+              {/* Liste des guides (cachée quand duo complet) */}
+              {!(cityChoice === 'BOTH' && bothDone) && (loadingGuides ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   {[1, 2, 3].map(i => (
                     <div key={i} style={{ background: '#E8DFC8', borderRadius: 12, height: 90, opacity: 0.5, animation: 'pulse 1.5s ease-in-out infinite' }} />
@@ -1430,7 +1458,7 @@ export default function CheckoutPage() {
                     )
                   })}
                 </div>
-              )}
+              ))}
 
               {nextBtn(
                 cityChoice === 'BOTH' ? 'Continuer' : 'Voir le récapitulatif',

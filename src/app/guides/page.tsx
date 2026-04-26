@@ -845,13 +845,13 @@ export default function GuideSearchPage() {
 
           {/* Context banner when coming from checkout */}
           {returnSlug && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(29,92,58,0.08)', border: '1.5px solid rgba(29,92,58,0.3)', borderRadius: 12, padding: '0.75rem 1rem', marginBottom: '1.25rem' }}>
-              <span style={{ fontSize: '1.1rem' }}>🌿</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(29,92,58,0.08)', border: '1.5px solid rgba(29,92,58,0.3)', borderRadius: 12, padding: '0.875rem 1rem', marginBottom: '1.25rem' }}>
+              <span style={{ fontSize: '1.3rem', flexShrink: 0 }}>🌿</span>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1D5C3A' }}>Choisir un guide pour Médine</div>
-                <div style={{ fontSize: '0.72rem', color: '#4A7A5A', marginTop: '0.1rem' }}>Cliquez sur &ldquo;Choisir pour Médine&rdquo; pour compléter votre duo.</div>
+                <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#1D5C3A' }}>Choisissez votre guide pour Médine</div>
+                <div style={{ fontSize: '0.72rem', color: '#4A7A5A', marginTop: '0.15rem' }}>Sur chaque fiche, appuyez sur le bouton vert pour le sélectionner.</div>
               </div>
-              <Link href={`/espace/checkout/${returnSlug}`} style={{ fontSize: '0.72rem', color: '#1D5C3A', fontWeight: 700, textDecoration: 'underline', whiteSpace: 'nowrap' }}>
+              <Link href={`/espace/checkout/${returnSlug}`} style={{ fontSize: '0.72rem', color: '#1D5C3A', fontWeight: 700, textDecoration: 'none', background: 'rgba(29,92,58,0.12)', padding: '0.35rem 0.75rem', borderRadius: 50, whiteSpace: 'nowrap', border: '1px solid rgba(29,92,58,0.3)' }}>
                 ← Retour
               </Link>
             </div>

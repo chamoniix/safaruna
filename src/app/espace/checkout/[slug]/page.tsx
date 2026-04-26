@@ -547,20 +547,52 @@ export default function CheckoutPage() {
   )
 
   const nextBtn = (label: string, onClick: () => void, disabled = false) => (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      style={{
-        width: '100%', padding: '1rem',
-        background: disabled ? '#E8DFC8' : '#1A1209',
-        color: disabled ? '#7A6D5A' : '#F0D897',
-        border: 'none', borderRadius: 50,
-        fontFamily: 'inherit', fontWeight: 700, fontSize: '0.95rem',
-        cursor: disabled ? 'not-allowed' : 'pointer', marginTop: '2rem',
-      }}
-    >
-      {label}
-    </button>
+    <>
+      <style>{`
+        .safaruna-next-btn {
+          position: relative; overflow: hidden;
+          transition: background 0.2s, transform 0.12s, box-shadow 0.2s;
+        }
+        .safaruna-next-btn:not(:disabled):hover {
+          background: #2D1F08 !important;
+          box-shadow: 0 6px 24px rgba(26,18,9,0.35);
+          transform: translateY(-1px);
+        }
+        .safaruna-next-btn:not(:disabled):active {
+          transform: scale(0.97) translateY(0);
+          box-shadow: 0 2px 8px rgba(26,18,9,0.2);
+        }
+        .safaruna-next-btn::after {
+          content: '';
+          position: absolute;
+          top: 0; left: -75%;
+          width: 50%; height: 100%;
+          background: linear-gradient(120deg, transparent 0%, rgba(240,216,151,0.18) 50%, transparent 100%);
+          transform: skewX(-20deg);
+          transition: none;
+        }
+        .safaruna-next-btn:not(:disabled):hover::after {
+          left: 125%;
+          transition: left 0.55s ease;
+        }
+      `}</style>
+      <button
+        onClick={onClick}
+        disabled={disabled}
+        className="safaruna-next-btn"
+        style={{
+          width: '100%', padding: '1rem',
+          background: disabled ? '#E8DFC8' : '#1A1209',
+          color: disabled ? '#7A6D5A' : '#F0D897',
+          border: 'none', borderRadius: 50,
+          fontFamily: 'inherit', fontWeight: 700, fontSize: '0.95rem',
+          cursor: disabled ? 'not-allowed' : 'pointer', marginTop: '2rem',
+          letterSpacing: '0.04em',
+        }}
+      >
+        {label}
+      </button>
+    </>
   )
 
   // ── Rendu ─────────────────────────────────────
@@ -715,7 +747,14 @@ export default function CheckoutPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#FAF8F0', borderRadius: 10, padding: '0.6rem 0.875rem', marginBottom: '1rem' }}>
               <span style={{ fontSize: '0.85rem', flexShrink: 0 }}>💡</span>
               <span style={{ fontSize: '0.72rem', color: '#7A6D5A', lineHeight: 1.5 }}>
-                Besoin de conseil ? <a href="https://wa.me/33600000000" target="_blank" rel="noreferrer" style={{ color: '#25D366', fontWeight: 700, textDecoration: 'none' }}>Contactez-nous sur WhatsApp →</a>
+                Besoin de conseil ?{' '}
+                <a href="https://wa.me/33600000000" target="_blank" rel="noreferrer" style={{ color: '#25D366', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', verticalAlign: 'middle' }}>
+                  Contactez-nous
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#25D366" style={{ flexShrink: 0 }}>
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                    <path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.126 1.533 5.859L0 24l6.335-1.54C8.03 23.447 9.977 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.897 0-3.67-.515-5.188-1.408l-.372-.22-3.76.914.952-3.659-.242-.376C2.521 15.67 2 13.9 2 12 2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+                  </svg>
+                </a>
               </span>
             </div>
 

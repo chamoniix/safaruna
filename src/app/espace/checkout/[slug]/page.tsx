@@ -235,6 +235,7 @@ export default function CheckoutPage() {
   // Étape 3
   const [selectedPlaces, setSelectedPlaces] = useState<string[]>([])
   const [transportOption, setTransportOption] = useState<TransportOption>('NONE')
+  const [taxiDirection, setTaxiDirection] = useState<'MAKKAH' | 'MADINAH' | null>(null)
   const [localTransportMakkah, setLocalTransportMakkah] = useState<'NONE' | 'TAXI' | 'CAR'>('NONE')
   const [localTransportMadinah, setLocalTransportMadinah] = useState<'NONE' | 'TAXI' | 'CAR'>('NONE')
   const [visitSubStep, setVisitSubStep] = useState<'MAKKAH' | 'MADINAH' | 'TRANSPORT'>('MAKKAH')
@@ -275,6 +276,7 @@ export default function CheckoutPage() {
       if (s.langue) setLangue(s.langue)
       if (s.selectedPlaces) setSelectedPlaces(s.selectedPlaces)
       if (s.transportOption) setTransportOption(s.transportOption)
+      if (s.taxiDirection) setTaxiDirection(s.taxiDirection)
       if (s.localTransportMakkah) setLocalTransportMakkah(s.localTransportMakkah)
       if (s.localTransportMadinah) setLocalTransportMadinah(s.localTransportMadinah)
       if (s.visitSubStep) setVisitSubStep(s.visitSubStep)
@@ -291,12 +293,12 @@ export default function CheckoutPage() {
         _ts: Date.now(),
         step, cityChoice,
         range: range ? { from: range.from?.toISOString(), to: range.to?.toISOString() } : undefined,
-        nbPersonnes, gender, langue, selectedPlaces, transportOption,
+        nbPersonnes, gender, langue, selectedPlaces, transportOption, taxiDirection,
         localTransportMakkah, localTransportMadinah, visitSubStep,
         selectedGuideSlug, selectedGuideSlugMadinah,
       }))
     } catch { /* ignore */ }
-  }, [slug, step, cityChoice, range, nbPersonnes, gender, langue, selectedPlaces, transportOption, localTransportMakkah, localTransportMadinah, visitSubStep, selectedGuideSlug, selectedGuideSlugMadinah])
+  }, [slug, step, cityChoice, range, nbPersonnes, gender, langue, selectedPlaces, transportOption, taxiDirection, localTransportMakkah, localTransportMadinah, visitSubStep, selectedGuideSlug, selectedGuideSlugMadinah])
 
   // Initialise selectedGuideSlug depuis l'URL
   useEffect(() => {
@@ -361,7 +363,7 @@ export default function CheckoutPage() {
   const prixTransport = cityChoice === 'BOTH'
     ? transportOption === 'TRAIN' ? 80 * nbPersonnes
     : transportOption === 'TAXI_RT' ? 240
-    : transportOption === 'TAXI_ONE' ? 240
+    : transportOption === 'TAXI_ONE' ? 120
     : 0
     : 0
   const daysMakkah   = calcCarDays(selectedPlaces, 'MAKKAH')
@@ -408,6 +410,7 @@ export default function CheckoutPage() {
           langue,
           selectedPlaces,
           transportOption,
+          taxiDirection,
           localTransportMakkah,
           localTransportMadinah,
           totalPrice: total,
@@ -912,29 +915,107 @@ export default function CheckoutPage() {
                     Choisissez votre transport entre les villes et pour vos visites locales.
                   </p>
 
-                  {/* Transport intercité */}
-                  <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.75rem' }}>
-                    Transport Makkah ↔ Madinah
+                  {/* Header transport intercité */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.875rem' }}>
+                    <div style={{ width: 3, height: 28, borderRadius: 2, background: 'linear-gradient(180deg, #C9A84C, #8B6914)', flexShrink: 0 }} />
+                    <div>
+                      <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#8B6914' }}>Intercité</div>
+                      <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.15rem', fontWeight: 600, color: '#1A1209' }}>Transport La Mecque · Médine</div>
+                    </div>
                   </div>
+
+                  {/* Options principale */}
                   {([
                     { key: 'NONE' as TransportOption, title: 'Sans transport', desc: 'Je gère mes déplacements moi-même', price: 'Gratuit' },
                     { key: 'TRAIN' as TransportOption, title: '🚄 Train Haramayn', desc: 'Aller-retour Makkah ↔ Madinah · Rapide et confortable', price: `+${80 * nbPersonnes}€`, perPerson: '80€/pers' },
-                    { key: 'TAXI_RT' as TransportOption, title: '🚕 Taxi privé — Aller-retour', desc: 'Makkah ↔ Madinah · Véhicule privatisé pour votre groupe', price: '+240€', perPerson: 'forfait groupe' },
-                    { key: 'TAXI_ONE' as TransportOption, title: '🚕 Taxi privé — Aller simple', desc: 'Makkah → Madinah OU Madinah → Makkah', price: '+240€', perPerson: 'forfait groupe' },
-                  ] as { key: TransportOption; title: string; desc: string; price: string; perPerson?: string }[]).map(opt => (
-                    <div key={opt.key} onClick={() => setTransportOption(opt.key)} style={{ background: transportOption === opt.key ? 'rgba(201,168,76,0.06)' : 'white', border: transportOption === opt.key ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', borderRadius: 12, padding: '1rem 1.25rem', cursor: 'pointer', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      <div style={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid #C9A84C', flexShrink: 0, background: transportOption === opt.key ? '#C9A84C' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        {transportOption === opt.key && <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'white' }} />}
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1A1209' }}>{opt.title}</div>
-                        <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>
-                          {opt.desc}{opt.perPerson && <span style={{ color: '#C9A84C', fontWeight: 600 }}> · {opt.perPerson}</span>}
+                    { key: 'TAXI_RT' as TransportOption, title: '🚕 Taxi privé', desc: 'Véhicule privatisé pour votre groupe', price: '', perPerson: '' },
+                  ] as { key: TransportOption; title: string; desc: string; price: string; perPerson?: string }[]).map(opt => {
+                    const isTaxi = opt.key === 'TAXI_RT'
+                    const taxiActive = isTaxi && (transportOption === 'TAXI_RT' || transportOption === 'TAXI_ONE')
+                    const isActive = taxiActive || transportOption === opt.key
+                    return (
+                      <div key={opt.key}>
+                        <div
+                          onClick={() => {
+                            if (isTaxi) { setTransportOption('TAXI_RT'); setTaxiDirection(null) }
+                            else setTransportOption(opt.key)
+                          }}
+                          style={{ background: isActive ? 'rgba(201,168,76,0.06)' : 'white', border: isActive ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', borderRadius: taxiActive ? '12px 12px 0 0' : 12, padding: '1rem 1.25rem', cursor: 'pointer', marginBottom: taxiActive ? 0 : '0.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}
+                        >
+                          <div style={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid #C9A84C', flexShrink: 0, background: isActive ? '#C9A84C' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {isActive && <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'white' }} />}
+                          </div>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1A1209' }}>{opt.title}</div>
+                            <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>{opt.desc}</div>
+                          </div>
+                          {!isTaxi && (
+                            <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: opt.key === 'NONE' ? '#7A6D5A' : '#C9A84C' }}>{opt.price}</div>
+                          )}
                         </div>
+
+                        {/* Sous-flow taxi : aller-retour / aller simple */}
+                        {taxiActive && (
+                          <div style={{ border: '2px solid #C9A84C', borderTop: 'none', borderRadius: '0 0 12px 12px', background: 'rgba(201,168,76,0.03)', padding: '1rem 1.25rem', marginBottom: '0.5rem' }}>
+                            {/* Aller-retour */}
+                            <div
+                              onClick={() => { setTransportOption('TAXI_RT'); setTaxiDirection(null) }}
+                              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 0.75rem', borderRadius: 8, cursor: 'pointer', background: transportOption === 'TAXI_RT' ? 'rgba(201,168,76,0.08)' : 'transparent', marginBottom: '0.35rem' }}
+                            >
+                              <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid #C9A84C', flexShrink: 0, background: transportOption === 'TAXI_RT' ? '#C9A84C' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                {transportOption === 'TAXI_RT' && <div style={{ width: 5, height: 5, borderRadius: '50%', background: 'white' }} />}
+                              </div>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1A1209' }}>Aller-retour</div>
+                                <div style={{ fontSize: '0.68rem', color: '#7A6D5A' }}>Makkah ↔ Madinah · forfait groupe</div>
+                              </div>
+                              <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#C9A84C' }}>+240€</div>
+                            </div>
+
+                            {/* Aller simple */}
+                            <div
+                              onClick={() => setTransportOption('TAXI_ONE')}
+                              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 0.75rem', borderRadius: 8, cursor: 'pointer', background: transportOption === 'TAXI_ONE' ? 'rgba(201,168,76,0.08)' : 'transparent' }}
+                            >
+                              <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid #C9A84C', flexShrink: 0, background: transportOption === 'TAXI_ONE' ? '#C9A84C' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                {transportOption === 'TAXI_ONE' && <div style={{ width: 5, height: 5, borderRadius: '50%', background: 'white' }} />}
+                              </div>
+                              <div style={{ flex: 1 }}>
+                                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1A1209' }}>Aller simple</div>
+                                <div style={{ fontSize: '0.68rem', color: '#7A6D5A' }}>Vers une seule ville · forfait groupe</div>
+                              </div>
+                              <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#C9A84C' }}>+120€</div>
+                            </div>
+
+                            {/* Choix direction si aller simple */}
+                            {transportOption === 'TAXI_ONE' && (
+                              <div style={{ marginTop: '0.75rem', padding: '0.75rem 1rem', background: '#FAF8F0', borderRadius: 8, border: '1px solid #E8DFC8' }}>
+                                <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#8B6914', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.6rem' }}>Direction</div>
+                                {([
+                                  { dir: 'MAKKAH' as const, label: '🕋 Vers La Mecque', sub: 'Madinah → Makkah' },
+                                  { dir: 'MADINAH' as const, label: '🌿 Vers Médine', sub: 'Makkah → Madinah' },
+                                ]).map(({ dir, label, sub }) => (
+                                  <div
+                                    key={dir}
+                                    onClick={e => { e.stopPropagation(); setTaxiDirection(dir) }}
+                                    style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.5rem 0.6rem', borderRadius: 6, cursor: 'pointer', background: taxiDirection === dir ? 'rgba(201,168,76,0.1)' : 'transparent', marginBottom: '0.25rem' }}
+                                  >
+                                    <div style={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid #C9A84C', flexShrink: 0, background: taxiDirection === dir ? '#C9A84C' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                      {taxiDirection === dir && <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'white' }} />}
+                                    </div>
+                                    <div>
+                                      <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1A1209' }}>{label}</div>
+                                      <div style={{ fontSize: '0.65rem', color: '#7A6D5A' }}>{sub}</div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
-                      <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: opt.key === 'NONE' ? '#7A6D5A' : '#C9A84C' }}>{opt.price}</div>
-                    </div>
-                  ))}
+                    )
+                  })}
 
                   {/* Transport local — toggle Makkah / Madinah */}
                   <div style={{ marginTop: '2rem' }}>

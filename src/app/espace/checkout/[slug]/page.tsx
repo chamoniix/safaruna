@@ -1199,253 +1199,225 @@ export default function CheckoutPage() {
 
         {/* ── ÉTAPE 4 — VOTRE GUIDE ── */}
         {step === 4 && (() => {
-          const isMadinahSub = cityChoice === 'BOTH' && guideSubStep === 2
-          const currentSlug = isMadinahSub ? selectedGuideSlugMadinah : selectedGuideSlug
-          const setCurrentSlug = (s: string | null) => {
-            if (isMadinahSub) setSelectedGuideSlugMadinah(s)
-            else setSelectedGuideSlug(s)
-          }
-          const showPicker = !currentSlug || guidePickerMode
-
-          // Guide sélectionné — données pour la carte proéminente
-          const selectedGuideData = currentSlug
-            ? (availableGuides.find(g => g.slug === currentSlug) ?? (guide && guide.slug === currentSlug ? guide : null))
+          // Prochain slot à remplir (BOTH uniquement)
+          const nextSlot: 'MAKKAH' | 'MADINAH' | null = cityChoice !== 'BOTH' ? null
+            : !selectedGuideSlug ? 'MAKKAH'
+            : !selectedGuideSlugMadinah ? 'MADINAH'
             : null
 
-          // Guide drawer
-          const drawerGuide = guideDetailSlug ? availableGuides.find(g => g.slug === guideDetailSlug) : null
+          const handleChoose = (slug: string) => {
+            if (cityChoice !== 'BOTH') { setSelectedGuideSlug(slug); return }
+            if (!selectedGuideSlug) { setSelectedGuideSlug(slug); return }
+            if (!selectedGuideSlugMadinah) { setSelectedGuideSlugMadinah(slug); return }
+            // Les deux sont remplis — remplace Madinah par défaut
+            setSelectedGuideSlugMadinah(slug)
+          }
 
-          // Thème couleur selon la ville
-          const gTheme = isMadinahSub
-            ? {
-                accent: '#1D5C3A', accentLight: '#27AE60',
-                accentBg: 'rgba(29,92,58,0.07)',
-                avatarGrad: 'linear-gradient(135deg, #6FCF97, #1D5C3A)', avatarText: 'white',
-                cardBg: 'linear-gradient(135deg, #0F3320 0%, #1D5C3A 100%)',
-                cardBorder: 'rgba(39,174,96,0.45)',
-                labelColor: '#6FCF97',
-                btnGrad: 'linear-gradient(135deg, #27AE60 0%, #1D5C3A 100%)',
-                btnShadow: '0 4px 12px rgba(29,92,58,0.35)',
-                headerBg: 'linear-gradient(135deg, #0F3320, #1D5C3A)',
-                headerAccent: '#6FCF97',
-                emoji: '🌿', city: 'Médine',
-              }
-            : {
-                accent: '#C9A84C', accentLight: '#C9A84C',
-                accentBg: 'rgba(201,168,76,0.07)',
-                avatarGrad: 'linear-gradient(135deg, #F0D897, #C9A84C)', avatarText: '#1A1209',
-                cardBg: 'linear-gradient(135deg, #1A1209 0%, #2C1F10 100%)',
-                cardBorder: 'rgba(201,168,76,0.35)',
-                labelColor: '#C9A84C',
-                btnGrad: 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)',
-                btnShadow: '0 4px 12px rgba(201,168,76,0.35)',
-                headerBg: 'linear-gradient(135deg, #1A1209, #2C1F10)',
-                headerAccent: '#C9A84C',
-                emoji: '🕋', city: 'La Mecque',
-              }
+          const drawerGuide = guideDetailSlug ? availableGuides.find(g => g.slug === guideDetailSlug) : null
+          const bothDone = cityChoice === 'BOTH' && !!selectedGuideSlug && !!selectedGuideSlugMadinah
+          const canContinue = cityChoice === 'BOTH' ? bothDone : !!selectedGuideSlug
 
           return (
             <div>
-              {/* Drawer fiche guide */}
+              {/* ── Drawer fiche guide ── */}
               {drawerGuide && (
                 <>
-                  <div
-                    onClick={() => setGuideDetailSlug(null)}
-                    style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 50 }}
-                  />
-                  <div style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 480, background: 'white', borderRadius: '20px 20px 0 0', zIndex: 51, padding: '1.5rem 1.25rem 2.5rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-                      <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7A6D5A' }}>Fiche guide</div>
-                      <button onClick={() => setGuideDetailSlug(null)} style={{ background: 'none', border: 'none', fontSize: '1.1rem', cursor: 'pointer', color: '#7A6D5A', lineHeight: 1 }}>✕</button>
-                    </div>
-                    {/* Avatar + identité */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
-                      <div style={{ width: 60, height: 60, borderRadius: '50%', background: gTheme.avatarGrad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 700, color: gTheme.avatarText, flexShrink: 0 }}>
+                  <div onClick={() => setGuideDetailSlug(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 50 }} />
+                  <div style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: 480, background: 'white', borderRadius: '20px 20px 0 0', zIndex: 51, padding: '0 0 2.5rem' }}>
+                    {/* Visuel gradient haut */}
+                    <div style={{ height: 140, background: 'linear-gradient(135deg, #1A1209 0%, #2C1F10 60%, #C9A84C 100%)', borderRadius: '20px 20px 0 0', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', flexShrink: 0 }}>
+                      <div style={{ position: 'absolute', inset: 0, opacity: 0.06, backgroundImage: 'repeating-linear-gradient(45deg, white 0, white 1px, transparent 0, transparent 50%)', backgroundSize: '10px 10px', borderRadius: '20px 20px 0 0' }} />
+                      <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', fontWeight: 700, color: '#1A1209', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
                         {drawerGuide.name?.slice(0, 2).toUpperCase()}
                       </div>
-                      <div>
-                        <div style={{ fontSize: '1.15rem', fontWeight: 700, color: '#1A1209' }}>{drawerGuide.name}</div>
-                        <div style={{ fontSize: '0.78rem', color: '#7A6D5A', marginTop: 2 }}>
-                          Guide Safaruma · {formatGuideCity(drawerGuide.city)}
-                        </div>
-                        <div style={{ fontSize: '0.78rem', color: gTheme.accent, fontWeight: 600, marginTop: 2 }}>
-                          ★ {drawerGuide.rating}
-                          {drawerGuide.languages?.length > 0 && (
-                            <span style={{ color: '#7A6D5A', fontWeight: 400 }}> · {drawerGuide.languages.slice(0, 3).join(', ')}</span>
-                          )}
-                        </div>
-                      </div>
+                      <button onClick={() => setGuideDetailSlug(null)} style={{ position: 'absolute', top: 14, right: 14, width: 30, height: 30, borderRadius: '50%', background: 'rgba(0,0,0,0.3)', border: 'none', color: 'white', fontSize: '0.9rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
                     </div>
-                    {/* Actions */}
-                    <div style={{ display: 'flex', gap: '0.75rem' }}>
-                      <a
-                        href={`/guides/${drawerGuide.slug}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.75rem', borderRadius: 50, border: '1.5px solid #E8DFC8', background: 'white', color: '#4A3F30', fontSize: '0.82rem', fontWeight: 600, textDecoration: 'none' }}
-                      >
-                        Voir le profil →
-                      </a>
-                      <button
-                        onClick={() => { setCurrentSlug(drawerGuide.slug); setGuidePickerMode(false); setGuideDetailSlug(null) }}
-                        style={{ flex: 1, padding: '0.75rem', borderRadius: 50, border: 'none', background: gTheme.btnGrad, color: 'white', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', boxShadow: gTheme.btnShadow }}
-                      >
-                        Choisir ce guide
-                      </button>
+                    {/* Identité */}
+                    <div style={{ padding: '1.25rem 1.25rem 0' }}>
+                      <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#1A1209', marginBottom: 2 }}>{drawerGuide.name}</div>
+                      <div style={{ fontSize: '0.78rem', color: '#7A6D5A', marginBottom: 2 }}>
+                        Guide Safaruma · {formatGuideCity(drawerGuide.city)}
+                      </div>
+                      <div style={{ fontSize: '0.78rem', color: '#C9A84C', fontWeight: 600, marginBottom: '1.25rem' }}>
+                        ★ {drawerGuide.rating}
+                        {drawerGuide.languages?.length > 0 && (
+                          <span style={{ color: '#7A6D5A', fontWeight: 400 }}> · {drawerGuide.languages.slice(0, 3).join(', ')}</span>
+                        )}
+                      </div>
+                      {/* Actions */}
+                      <div style={{ display: 'flex', gap: '0.75rem' }}>
+                        <a
+                          href={`/guides/${drawerGuide.slug}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0.75rem', borderRadius: 50, border: '1.5px solid #E8DFC8', background: 'white', color: '#4A3F30', fontSize: '0.82rem', fontWeight: 600, textDecoration: 'none' }}
+                        >
+                          Voir le profil complet →
+                        </a>
+                        <button
+                          onClick={() => { handleChoose(drawerGuide.slug); setGuideDetailSlug(null) }}
+                          style={{ flex: 1, padding: '0.75rem', borderRadius: 50, border: 'none', background: 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)', color: 'white', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 12px rgba(201,168,76,0.35)' }}
+                        >
+                          Choisir ce guide
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </>
               )}
 
-              {guideSubStep === 2
-                ? (
-                  <button
-                    onClick={() => { setGuideSubStep(1); setGuidePickerMode(false) }}
-                    style={{ background: 'none', border: 'none', color: '#7A6D5A', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600, marginBottom: '1.25rem', padding: 0, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-                  >
-                    ← Retour
-                  </button>
-                )
-                : backBtn(3)
-              }
+              {backBtn(3)}
 
-              {/* Bandeau ville — identité visuelle forte */}
+              {/* Titre */}
+              <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', fontWeight: 400, color: '#1A1209', marginBottom: '0.4rem' }}>
+                Votre guide
+              </h2>
+              <p style={{ color: '#7A6D5A', fontSize: '0.85rem', marginBottom: '1.25rem', lineHeight: 1.6 }}>
+                {cityChoice === 'BOTH'
+                  ? 'Choisissez un guide pour chaque ville.'
+                  : 'Choisissez votre guide pour ce séjour.'}
+              </p>
+
+              {/* Résumé des choix (BOTH) */}
               {cityChoice === 'BOTH' && (
-                <div style={{ background: gTheme.headerBg, borderRadius: 14, padding: '1rem 1.25rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.875rem', border: `1px solid ${gTheme.cardBorder}` }}>
-                  <div style={{ fontSize: '1.6rem', lineHeight: 1 }}>{gTheme.emoji}</div>
-                  <div>
-                    <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: gTheme.headerAccent, marginBottom: 2 }}>
-                      Étape {guideSubStep} / 2
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem' }}>
+                  {/* Slot Makkah */}
+                  <div style={{ flex: 1, borderRadius: 10, padding: '0.625rem 0.75rem', background: selectedGuideSlug ? 'rgba(201,168,76,0.08)' : '#FAF8F0', border: selectedGuideSlug ? '1.5px solid #C9A84C' : '1.5px dashed #D4C5A5', display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 0 }}>
+                    <span style={{ fontSize: '1rem', flexShrink: 0 }}>🕋</span>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#8B6914', letterSpacing: '0.1em', textTransform: 'uppercase' }}>La Mecque</div>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#1A1209', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {selectedGuideSlug
+                          ? (availableGuides.find(g => g.slug === selectedGuideSlug)?.name ?? selectedGuideSlug)
+                          : <span style={{ color: '#A89880', fontWeight: 400 }}>À choisir</span>
+                        }
+                      </div>
                     </div>
-                    <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.35rem', fontWeight: 600, color: 'white', lineHeight: 1.1 }}>
-                      Votre guide · {gTheme.city}
-                    </div>
+                    {selectedGuideSlug && (
+                      <button onClick={() => setSelectedGuideSlug(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#A89880', cursor: 'pointer', fontSize: '0.75rem', flexShrink: 0, padding: 0 }}>✕</button>
+                    )}
                   </div>
-                  {/* Indicateur 1/2 */}
-                  <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: guideSubStep >= 1 ? '#C9A84C' : 'rgba(255,255,255,0.2)' }} />
-                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: guideSubStep >= 2 ? '#27AE60' : 'rgba(255,255,255,0.2)' }} />
+                  {/* Slot Madinah */}
+                  <div style={{ flex: 1, borderRadius: 10, padding: '0.625rem 0.75rem', background: selectedGuideSlugMadinah ? 'rgba(29,92,58,0.07)' : '#FAF8F0', border: selectedGuideSlugMadinah ? '1.5px solid #1D5C3A' : '1.5px dashed #D4C5A5', display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 0 }}>
+                    <span style={{ fontSize: '1rem', flexShrink: 0 }}>🌿</span>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#1D5C3A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Médine</div>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#1A1209', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {selectedGuideSlugMadinah
+                          ? (availableGuides.find(g => g.slug === selectedGuideSlugMadinah)?.name ?? selectedGuideSlugMadinah)
+                          : <span style={{ color: '#A89880', fontWeight: 400 }}>À choisir</span>
+                        }
+                      </div>
+                    </div>
+                    {selectedGuideSlugMadinah && (
+                      <button onClick={() => setSelectedGuideSlugMadinah(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#A89880', cursor: 'pointer', fontSize: '0.75rem', flexShrink: 0, padding: 0 }}>✕</button>
+                    )}
                   </div>
                 </div>
               )}
 
-              {cityChoice !== 'BOTH' && (
-                <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', fontWeight: 400, color: '#1A1209', marginBottom: '1.25rem' }}>
-                  Choisissez votre guide
-                </h2>
+              {/* Instruction contextuelle */}
+              {cityChoice === 'BOTH' && selectedGuideSlug && !selectedGuideSlugMadinah && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(29,92,58,0.07)', border: '1px solid rgba(29,92,58,0.25)', borderRadius: 8, padding: '0.6rem 0.875rem', marginBottom: '1rem', fontSize: '0.78rem', color: '#1D5C3A', fontWeight: 600 }}>
+                  🌿 Choisissez maintenant votre guide pour Médine
+                </div>
               )}
 
+              {/* Liste des guides */}
               {loadingGuides ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   {[1, 2, 3].map(i => (
-                    <div key={i} style={{ background: '#E8DFC8', borderRadius: 12, padding: '1.25rem', height: 88, opacity: 0.5, animation: 'pulse 1.5s ease-in-out infinite' }} />
+                    <div key={i} style={{ background: '#E8DFC8', borderRadius: 12, height: 90, opacity: 0.5, animation: 'pulse 1.5s ease-in-out infinite' }} />
                   ))}
                   <style>{`@keyframes pulse { 0%,100%{opacity:0.5} 50%{opacity:0.8} }`}</style>
                 </div>
               ) : availableGuides.length === 0 ? (
                 <div style={{ background: '#FAF8F0', border: '1px solid #E8DFC8', borderRadius: 16, padding: '2rem 1.5rem', textAlign: 'center' }}>
                   <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>🕌</div>
-                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209', marginBottom: '0.5rem' }}>
-                    Votre guide sera confirmé
-                  </div>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209', marginBottom: '0.5rem' }}>Votre guide sera confirmé</div>
                   <div style={{ fontSize: '0.82rem', color: '#7A6D5A', lineHeight: 1.7, marginBottom: '1.25rem' }}>
-                    Aucun guide disponible pour vos critères. Notre équipe sélectionnera le plus adapté à votre profil sous 24h.
+                    Aucun guide disponible pour vos critères. Notre équipe sélectionnera le plus adapté sous 24h.
                   </div>
-                  <a
-                    href="https://wa.me/33600000000"
-                    target="_blank"
-                    rel="noreferrer"
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#25D366', color: 'white', fontSize: '0.78rem', fontWeight: 700, padding: '0.6rem 1.25rem', borderRadius: 50, textDecoration: 'none' }}
-                  >
+                  <a href="https://wa.me/33600000000" target="_blank" rel="noreferrer"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#25D366', color: 'white', fontSize: '0.78rem', fontWeight: 700, padding: '0.6rem 1.25rem', borderRadius: 50, textDecoration: 'none' }}>
                     📱 Être conseillé sur WhatsApp
                   </a>
                 </div>
-              ) : showPicker ? (
-                /* ── MODE LISTE : choisir parmi les guides ── */
+              ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                   {availableGuides.map(g => {
-                    const isSelected = currentSlug === g.slug
+                    const isMakkah = selectedGuideSlug === g.slug
+                    const isMadinah = selectedGuideSlugMadinah === g.slug
+                    const hasBadge = isMakkah || isMadinah
+
                     return (
-                      <div
-                        key={g.slug}
-                        style={{ background: isSelected ? gTheme.accentBg : 'white', border: isSelected ? `2px solid ${gTheme.accent}` : '1.5px solid #E8DFC8', borderRadius: 12, padding: '0.875rem 1rem', display: 'flex', alignItems: 'center', gap: '0.875rem' }}
-                      >
-                        <div style={{ width: 44, height: 44, borderRadius: '50%', background: gTheme.avatarGrad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: gTheme.avatarText, flexShrink: 0 }}>
-                          {g.name?.slice(0, 2).toUpperCase()}
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1A1209' }}>{g.name}</div>
-                          <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 1 }}>
-                            Guide Safaruma · {formatGuideCity(g.city)}
+                      <div key={g.slug} style={{
+                        background: hasBadge ? (isMakkah && isMadinah ? 'rgba(201,168,76,0.06)' : isMakkah ? 'rgba(201,168,76,0.06)' : 'rgba(29,92,58,0.06)') : 'white',
+                        border: hasBadge ? `2px solid ${isMakkah && isMadinah ? '#C9A84C' : isMakkah ? '#C9A84C' : '#1D5C3A'}` : '1.5px solid #E8DFC8',
+                        borderRadius: 12, padding: '0.875rem 1rem',
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
+                          {/* Avatar */}
+                          <div style={{ width: 46, height: 46, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.05rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
+                            {g.name?.slice(0, 2).toUpperCase()}
                           </div>
-                          <div style={{ fontSize: '0.72rem', color: gTheme.accent, fontWeight: 600, marginTop: 1 }}>
-                            ★ {g.rating}
-                            {g.languages?.length > 0 && (
-                              <span style={{ color: '#7A6D5A', fontWeight: 400 }}> · {g.languages.slice(0, 2).join(', ')}</span>
+                          {/* Infos */}
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1A1209' }}>{g.name}</div>
+                            <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 1 }}>Guide Safaruma · {formatGuideCity(g.city)}</div>
+                            <div style={{ fontSize: '0.72rem', color: '#C9A84C', fontWeight: 600, marginTop: 1 }}>
+                              ★ {g.rating}
+                              {g.languages?.length > 0 && <span style={{ color: '#7A6D5A', fontWeight: 400 }}> · {g.languages.slice(0, 2).join(', ')}</span>}
+                            </div>
+                          </div>
+                          {/* Boutons */}
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', alignItems: 'flex-end', flexShrink: 0 }}>
+                            <button
+                              onClick={() => handleChoose(g.slug)}
+                              style={{
+                                padding: '0.45rem 0.9rem', borderRadius: 50, border: 'none', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
+                                background: nextSlot === null && !hasBadge ? '#E8DFC8'
+                                  : nextSlot === 'MAKKAH' ? 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)'
+                                  : nextSlot === 'MADINAH' ? 'linear-gradient(135deg, #27AE60 0%, #1D5C3A 100%)'
+                                  : '#E8DFC8',
+                                color: nextSlot === null && !hasBadge ? '#4A3F30' : nextSlot ? 'white' : '#4A3F30',
+                              }}
+                            >
+                              {nextSlot === 'MAKKAH' ? 'Choisir · 🕋' : nextSlot === 'MADINAH' ? 'Choisir · 🌿' : 'Choisir'}
+                            </button>
+                            <button
+                              onClick={() => setGuideDetailSlug(g.slug)}
+                              style={{ background: 'none', border: 'none', color: '#C9A84C', fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer', padding: 0, textDecoration: 'underline' }}
+                            >
+                              Voir le profil
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Badges ville(s) choisie(s) */}
+                        {hasBadge && (
+                          <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.625rem', paddingTop: '0.625rem', borderTop: '1px solid #E8DFC8', flexWrap: 'wrap' }}>
+                            {isMakkah && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: 'rgba(201,168,76,0.12)', border: '1px solid rgba(201,168,76,0.4)', borderRadius: 50, padding: '0.25rem 0.6rem' }}>
+                                <span style={{ fontSize: '0.7rem' }}>🕋</span>
+                                <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#8B6914' }}>La Mecque</span>
+                              </div>
+                            )}
+                            {isMadinah && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', background: 'rgba(29,92,58,0.1)', border: '1px solid rgba(29,92,58,0.3)', borderRadius: 50, padding: '0.25rem 0.6rem' }}>
+                                <span style={{ fontSize: '0.7rem' }}>🌿</span>
+                                <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#1D5C3A' }}>Médine</span>
+                              </div>
                             )}
                           </div>
-                        </div>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', alignItems: 'flex-end', flexShrink: 0 }}>
-                          <button
-                            onClick={() => { setCurrentSlug(g.slug); setGuidePickerMode(false) }}
-                            style={{ padding: '0.45rem 1rem', borderRadius: 50, border: 'none', background: isSelected ? gTheme.btnGrad : '#E8DFC8', color: isSelected ? 'white' : '#4A3F30', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}
-                          >
-                            {isSelected ? 'Sélectionné ✓' : 'Choisir'}
-                          </button>
-                          <button
-                            onClick={() => setGuideDetailSlug(g.slug)}
-                            style={{ background: 'none', border: 'none', color: gTheme.accent, fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer', padding: 0, textDecoration: 'underline' }}
-                          >
-                            Voir détails
-                          </button>
-                        </div>
+                        )}
                       </div>
                     )
                   })}
                 </div>
-              ) : (
-                /* ── MODE SÉLECTIONNÉ : carte proéminente ── */
-                selectedGuideData && (
-                  <div>
-                    {/* Carte guide sélectionné */}
-                    <div style={{ background: gTheme.cardBg, borderRadius: 16, padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', border: `1px solid ${gTheme.cardBorder}`, marginBottom: '0.75rem' }}>
-                      <div style={{ width: 52, height: 52, borderRadius: '50%', background: gTheme.avatarGrad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.15rem', fontWeight: 700, color: gTheme.avatarText, flexShrink: 0 }}>
-                        {selectedGuideData.name?.slice(0, 2).toUpperCase()}
-                      </div>
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '0.68rem', color: gTheme.labelColor, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 3 }}>
-                          Guide sélectionné ✓
-                        </div>
-                        <div style={{ fontSize: '1rem', fontWeight: 700, color: 'white' }}>{selectedGuideData.name}</div>
-                        <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.55)', marginTop: 2 }}>
-                          ★ {selectedGuideData.rating}
-                          {selectedGuideData.languages?.length > 0 && (
-                            <span> · {selectedGuideData.languages.slice(0, 2).join(', ')}</span>
-                          )}
-                        </div>
-                      </div>
-                      <button
-                        onClick={() => setGuideDetailSlug(selectedGuideData.slug)}
-                        style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 50, padding: '0.45rem 0.9rem', color: 'white', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer', flexShrink: 0 }}
-                      >
-                        Détails
-                      </button>
-                    </div>
-                    {/* Changer de guide */}
-                    <button
-                      onClick={() => { setCurrentSlug(null); setGuidePickerMode(true) }}
-                      style={{ background: 'none', border: `1.5px solid ${gTheme.accent}`, borderRadius: 50, color: gTheme.accent, fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', padding: '0.55rem 1.25rem', width: '100%', fontFamily: 'inherit' }}
-                    >
-                      Changer de guide →
-                    </button>
-                  </div>
-                )
               )}
 
-              {cityChoice === 'BOTH' && guideSubStep === 1
-                ? nextBtn('Continuer → Guide Médine', () => { setSelectedGuideSlugMadinah(selectedGuideSlug); setGuideSubStep(2); setGuidePickerMode(false) }, !selectedGuideSlug)
-                : nextBtn('Voir le récapitulatif', () => setStep(5), !currentSlug)
-              }
+              {nextBtn('Voir le récapitulatif', () => setStep(5), !canContinue)}
             </div>
           )
         })()}

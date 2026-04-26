@@ -575,7 +575,7 @@ export default function CheckoutPage() {
         {step === 1 && (
           <div>
             <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2rem', fontWeight: 400, color: '#1A1209', marginBottom: '0.5rem' }}>
-              Où souhaitez-vous vous rendre ?
+              Planifier votre voyage
             </h1>
             <p style={{ color: '#7A6D5A', fontSize: '0.9rem', marginBottom: '2rem', lineHeight: 1.7 }}>
               Choisissez une ou deux villes pour votre voyage spirituel.
@@ -1310,19 +1310,22 @@ export default function CheckoutPage() {
                     )}
                   </div>
                   {/* Slot Madinah */}
-                  <div style={{ flex: 1, borderRadius: 10, padding: '0.625rem 0.75rem', background: selectedGuideSlugMadinah ? 'rgba(29,92,58,0.07)' : '#FAF8F0', border: selectedGuideSlugMadinah ? '1.5px solid #1D5C3A' : '1.5px dashed #D4C5A5', display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 0 }}>
+                  <div
+                    onClick={() => { if (!selectedGuideSlugMadinah) router.push(`/guides?city=MADINAH&returnSlug=${slug}`) }}
+                    style={{ flex: 1, borderRadius: 10, padding: '0.625rem 0.75rem', background: selectedGuideSlugMadinah ? 'rgba(29,92,58,0.07)' : '#FAF8F0', border: selectedGuideSlugMadinah ? '1.5px solid #1D5C3A' : '1.5px dashed #D4C5A5', display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 0, cursor: selectedGuideSlugMadinah ? 'default' : 'pointer', transition: 'border-color 0.15s' }}
+                  >
                     <span style={{ fontSize: '1rem', flexShrink: 0 }}>🌿</span>
                     <div style={{ minWidth: 0 }}>
                       <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#1D5C3A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Médine</div>
                       <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#1A1209', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {selectedGuideSlugMadinah
                           ? (availableGuides.find(g => g.slug === selectedGuideSlugMadinah)?.name ?? selectedGuideSlugMadinah)
-                          : <span style={{ color: '#A89880', fontWeight: 400 }}>À choisir</span>
+                          : <span style={{ color: '#1D5C3A', fontWeight: 600 }}>Choisir →</span>
                         }
                       </div>
                     </div>
                     {selectedGuideSlugMadinah && (
-                      <button onClick={() => setSelectedGuideSlugMadinah(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#A89880', cursor: 'pointer', fontSize: '0.75rem', flexShrink: 0, padding: 0 }}>✕</button>
+                      <button onClick={e => { e.stopPropagation(); setSelectedGuideSlugMadinah(null) }} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#A89880', cursor: 'pointer', fontSize: '0.75rem', flexShrink: 0, padding: 0 }}>✕</button>
                     )}
                   </div>
                 </div>

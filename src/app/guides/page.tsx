@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -239,6 +240,9 @@ function CalendarPicker({ dateArrivee, setDateArrivee, dateDepart, setDateDepart
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function GuideSearchPage() {
+  const searchParams = useSearchParams();
+  const returnSlug = searchParams.get('returnSlug');
+
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedLangue, setSelectedLangue] = useState('');
   const [selectedGender, setSelectedGender] = useState('');
@@ -259,6 +263,14 @@ export default function GuideSearchPage() {
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
   }, []);
+
+  // Pre-filter city from URL param (e.g. ?city=MADINAH coming from checkout)
+  useEffect(() => {
+    const city = searchParams.get('city');
+    if (city === 'MAKKAH' || city === 'MADINAH' || city === 'BOTH') {
+      setSelectedCity(city);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [selectedNote, setSelectedNote] = useState('');
   const [selectedSpecialites, setSelectedSpecialites] = useState<string[]>([]);
@@ -831,6 +843,20 @@ export default function GuideSearchPage() {
         {/* Results */}
         <div style={{ flex: 1, minWidth: 0 }}>
 
+          {/* Context banner when coming from checkout */}
+          {returnSlug && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(29,92,58,0.08)', border: '1.5px solid rgba(29,92,58,0.3)', borderRadius: 12, padding: '0.75rem 1rem', marginBottom: '1.25rem' }}>
+              <span style={{ fontSize: '1.1rem' }}>🌿</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1D5C3A' }}>Choisir un guide pour Médine</div>
+                <div style={{ fontSize: '0.72rem', color: '#4A7A5A', marginTop: '0.1rem' }}>Cliquez sur &ldquo;Choisir pour Médine&rdquo; pour compléter votre duo.</div>
+              </div>
+              <Link href={`/espace/checkout/${returnSlug}`} style={{ fontSize: '0.72rem', color: '#1D5C3A', fontWeight: 700, textDecoration: 'underline', whiteSpace: 'nowrap' }}>
+                ← Retour
+              </Link>
+            </div>
+          )}
+
           {/* Results bar */}
           {hasSearched ? (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
@@ -874,7 +900,7 @@ export default function GuideSearchPage() {
           {filteredOfficial.map(g => (
             <div key={g.slug} className="guide-official-wrap">
               <div className="guide-official-label">★ RESPONSABLE OFFICIEL SAFARUMA</div>
-              <GuideCard guide={g} official onProfile={() => openDrawer(g)} isLoading={loadingSlug === g.slug} />
+              <GuideCard guide={g} official onProfile={() => openDrawer(g)} isLoading={loadingSlug === g.slug} returnSlug={returnSlug} />
             </div>
           ))}
 
@@ -894,7 +920,7 @@ export default function GuideSearchPage() {
           )}
 
           <div className="guides-grid">
-            {filteredNonOfficial.map(g => <GuideCard key={g.slug} guide={g} onProfile={() => openDrawer(g)} isLoading={loadingSlug === g.slug} />)}
+            {filteredNonOfficial.map(g => <GuideCard key={g.slug} guide={g} onProfile={() => openDrawer(g)} isLoading={loadingSlug === g.slug} returnSlug={returnSlug} />)}
           </div>
 
           {/* ── Section Prochainement ── */}
@@ -957,7 +983,7 @@ export default function GuideSearchPage() {
 
       {/* ── GUIDE DRAWER ── */}
       {drawerGuide && (
-        <GuideDrawer guide={drawerGuide} visible={drawerVisible} onClose={closeDrawer} />
+        <GuideDrawer guide={drawerGuide} visible={drawerVisible} onClose={closeDrawer} returnSlug={returnSlug} />
       )}
 
       {/* ── CSS ── */}
@@ -1203,7 +1229,7 @@ function FilterCard({ title, children }: { title: string; children: React.ReactN
 }
 
 // ─── Guide Drawer ─────────────────────────────────────────────────────────────
-function GuideDrawer({ guide: g, visible, onClose }: { guide: GuideData; visible: boolean; onClose: () => void }) {
+function GuideDrawer({ guide: g, visible, onClose, returnSlug }: { guide: GuideData; visible: boolean; onClose: () => void; returnSlug?: string | null }) {
   return (
     <>
       {/* Overlay */}
@@ -1287,11 +1313,11 @@ function GuideDrawer({ guide: g, visible, onClose }: { guide: GuideData; visible
         {/* CTAs */}
         <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <Link
-            href={`/espace/checkout/${g.slug}`}
+            href={returnSlug ? `/espace/checkout/${returnSlug}?pair=${g.slug}` : `/espace/checkout/${g.slug}`}
             style={{ display: 'block', textDecoration: 'none', background: '#1A1209', color: '#F0D897', textAlign: 'center', padding: '0.9rem', borderRadius: 50, fontSize: '0.9rem', fontWeight: 800, letterSpacing: '0.04em' }}
             onClick={onClose}
           >
-            Réserver ce guide →
+            {returnSlug ? 'Choisir pour Médine →' : 'Réserver ce guide →'}
           </Link>
           <Link
             href={`/guides/${g.slug}`}
@@ -1306,7 +1332,7 @@ function GuideDrawer({ guide: g, visible, onClose }: { guide: GuideData; visible
   );
 }
 
-function GuideCard({ guide: g, official, onProfile, isLoading }: { guide: GuideData; official?: boolean; onProfile?: () => void; isLoading?: boolean }) {
+function GuideCard({ guide: g, official, onProfile, isLoading, returnSlug }: { guide: GuideData; official?: boolean; onProfile?: () => void; isLoading?: boolean; returnSlug?: string | null }) {
   return (
     <div
       className={official ? 'guide-official-card' : ''}
@@ -1404,10 +1430,10 @@ function GuideCard({ guide: g, official, onProfile, isLoading }: { guide: GuideD
               ) : 'Voir le profil'}
             </button>
             <Link
-              href={`/espace/checkout/${g.slug}`}
+              href={returnSlug ? `/espace/checkout/${returnSlug}?pair=${g.slug}` : `/espace/checkout/${g.slug}`}
               style={{ flex: 1, display: 'block', textDecoration: 'none', background: '#1A1209', color: '#F0D897', textAlign: 'center', padding: '0.65rem', borderRadius: 50, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.04em' }}
             >
-              Choisir ce guide
+              {returnSlug ? 'Choisir pour Médine' : 'Choisir ce guide'}
             </Link>
           </div>
         </div>

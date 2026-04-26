@@ -64,7 +64,7 @@ function PlaceSelector({
               <div style={{ fontSize: '1.3rem', flexShrink: 0 }}>{place.emoji}</div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1A1209' }}>{place.nameFr}</div>
-                <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>{place.desc}</div>
+                <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>{place.tagline}</div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem', flexShrink: 0 }}>
                 <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#C9A84C' }}>

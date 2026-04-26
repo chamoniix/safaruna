@@ -264,13 +264,13 @@ export default function LieuxSaintsPage() {
 
         <div style={{ position: 'relative', zIndex: 1, maxWidth: 700, margin: '0 auto' }}>
           <div style={{ display: 'inline-block', background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)', color: '#F0D897', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', padding: '0.3rem 1rem', borderRadius: 50, marginBottom: '1.5rem' }}>
-            Encyclopédie · 17 lieux saints
+            Encyclopédie · 26 lieux saints
           </div>
           <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(2.5rem, 7vw, 4.5rem)', fontWeight: 600, color: 'white', lineHeight: 1.1, marginBottom: '1.25rem' }}>
             Les Lieux Saints de l'Islam
           </h1>
           <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '1rem', lineHeight: 1.75, maxWidth: 520, margin: '0 auto 2.5rem' }}>
-            Histoire, signification spirituelle et du'a pour chacun des 17 lieux les plus sacrés de Makkah et Madinah.
+            Histoire, signification spirituelle et du'a pour chacun des 26 lieux les plus sacrés de Makkah et Madinah.
           </p>
 
           {/* City toggle */}

@@ -242,13 +242,18 @@ export default function CheckoutPage() {
     }
   }, [status, slug, router])
 
-  // Restaurer l'état depuis sessionStorage
+  // Restaurer l'état depuis localStorage (survit aux rafraîchissements Safari)
   useEffect(() => {
     if (!slug) return
     try {
-      const saved = sessionStorage.getItem(`checkout-${slug}`)
-      if (!saved) return
-      const s = JSON.parse(saved)
+      const raw = localStorage.getItem(`safaruna_checkout_${slug}`)
+      if (!raw) return
+      const s = JSON.parse(raw)
+      // Expiration : 2h
+      if (!s._ts || Date.now() - s._ts > 2 * 60 * 60 * 1000) {
+        localStorage.removeItem(`safaruna_checkout_${slug}`)
+        return
+      }
       if (s.step) setStep(s.step)
       if (s.cityChoice) setCityChoice(s.cityChoice)
       if (s.range) setRange({
@@ -268,11 +273,12 @@ export default function CheckoutPage() {
     } catch { /* ignore */ }
   }, [slug]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Sauvegarder l'état dans sessionStorage
+  // Sauvegarder l'état dans localStorage (survit aux rafraîchissements Safari)
   useEffect(() => {
     if (!slug) return
     try {
-      sessionStorage.setItem(`checkout-${slug}`, JSON.stringify({
+      localStorage.setItem(`safaruna_checkout_${slug}`, JSON.stringify({
+        _ts: Date.now(),
         step, cityChoice,
         range: range ? { from: range.from?.toISOString(), to: range.to?.toISOString() } : undefined,
         nbPersonnes, gender, langue, selectedPlaces, transportOption,
@@ -402,7 +408,7 @@ export default function CheckoutPage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Erreur')
-      try { sessionStorage.removeItem(`checkout-${slug}`) } catch { /* ignore */ }
+      try { localStorage.removeItem(`safaruna_checkout_${slug}`) } catch { /* ignore */ }
       window.location.href = data.sessionUrl
     } catch (e: any) {
       setError(e.message)

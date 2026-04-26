@@ -852,7 +852,7 @@ export default function CheckoutPage() {
               {/* ── 3a : Visites Makkah ── */}
               {(visitSubStep === 'MAKKAH') && (
                 <div>
-                  <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', fontWeight: 400, color: '#1A1209', marginBottom: '0.5rem' }}>
+                  <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.9rem', fontWeight: 600, color: '#8B6914', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     🕋 Visites à Makkah
                   </h2>
                   <p style={{ color: '#7A6D5A', fontSize: '0.85rem', marginBottom: '1.5rem', lineHeight: 1.7 }}>
@@ -860,7 +860,7 @@ export default function CheckoutPage() {
                   </p>
 
                   {/* Inclus */}
-                  <div style={{ background: '#FAF8F0', border: '1px solid #E8DFC8', borderRadius: 12, padding: '1rem 1.25rem', marginBottom: '1.5rem' }}>
+                  <div style={{ background: 'linear-gradient(135deg, rgba(255,251,235,0.95), rgba(255,248,220,0.9))', border: '1.5px solid rgba(201,168,76,0.35)', borderRadius: 14, padding: '1rem 1.25rem', marginBottom: '1.5rem', boxShadow: '0 2px 12px rgba(201,168,76,0.1)' }}>
                     <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#8B6914', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>✓ Inclus dans votre package</div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                       {basePackage?.includedPlaces.filter(pk => PLACES.find(p => p.key === pk && p.category === 'MAKKAH')).map(pk => {
@@ -894,7 +894,7 @@ export default function CheckoutPage() {
               {/* ── 3b : Visites Madinah ── */}
               {(visitSubStep === 'MADINAH') && (
                 <div>
-                  <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', fontWeight: 400, color: '#1A1209', marginBottom: '0.5rem' }}>
+                  <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.9rem', fontWeight: 600, color: '#1D5C3A', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     🌿 Visites à Madinah
                   </h2>
                   <p style={{ color: '#7A6D5A', fontSize: '0.85rem', marginBottom: '1.5rem', lineHeight: 1.7 }}>
@@ -903,12 +903,12 @@ export default function CheckoutPage() {
 
                   {/* Inclus (si MADINAH ou BOTH) */}
                   {basePackage?.includedPlaces.some(pk => PLACES.find(p => p.key === pk && p.category === 'MADINAH')) && (
-                    <div style={{ background: '#FAF8F0', border: '1px solid #E8DFC8', borderRadius: 12, padding: '1rem 1.25rem', marginBottom: '1.5rem' }}>
-                      <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#8B6914', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>✓ Inclus dans votre package</div>
+                    <div style={{ background: 'linear-gradient(135deg, rgba(236,253,245,0.95), rgba(220,252,231,0.9))', border: '1.5px solid rgba(29,92,58,0.25)', borderRadius: 14, padding: '1rem 1.25rem', marginBottom: '1.5rem', boxShadow: '0 2px 12px rgba(29,92,58,0.08)' }}>
+                      <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#1D5C3A', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>✓ Inclus dans votre package</div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
                         {basePackage.includedPlaces.filter(pk => PLACES.find(p => p.key === pk && p.category === 'MADINAH')).map(pk => {
                           const place = PLACES.find(p => p.key === pk)
-                          return place ? <span key={pk} style={{ background: 'rgba(201,168,76,0.12)', color: '#8B6914', fontSize: '0.75rem', fontWeight: 600, padding: '0.3rem 0.75rem', borderRadius: 50, border: '1px solid rgba(201,168,76,0.25)' }}>{place.emoji} {place.nameFr}</span> : null
+                          return place ? <span key={pk} style={{ background: 'rgba(29,92,58,0.1)', color: '#1D5C3A', fontSize: '0.75rem', fontWeight: 600, padding: '0.3rem 0.75rem', borderRadius: 50, border: '1px solid rgba(29,92,58,0.2)' }}>{place.emoji} {place.nameFr}</span> : null
                         })}
                       </div>
                     </div>

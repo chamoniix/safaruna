@@ -995,6 +995,14 @@ export default function GuideSearchPage() {
         @keyframes spin {
           to { transform: rotate(360deg); }
         }
+        a[data-medine]:hover {
+          background: linear-gradient(135deg, #1D9950 0%, #155C30 100%) !important;
+          box-shadow: 0 4px 20px rgba(29,92,58,0.45) !important;
+        }
+        a[data-medine]:active {
+          background: linear-gradient(135deg, #0F6633 0%, #0A3D1F 100%) !important;
+          transform: scale(0.97);
+        }
 
         /* Hero */
         .guides-hero {
@@ -1314,10 +1322,11 @@ function GuideDrawer({ guide: g, visible, onClose, returnSlug }: { guide: GuideD
         <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <Link
             href={returnSlug ? `/espace/checkout/${returnSlug}?pair=${g.slug}` : `/espace/checkout/${g.slug}`}
-            style={{ display: 'block', textDecoration: 'none', background: '#1A1209', color: '#F0D897', textAlign: 'center', padding: '0.9rem', borderRadius: 50, fontSize: '0.9rem', fontWeight: 800, letterSpacing: '0.04em' }}
+            {...(returnSlug ? { 'data-medine': '' } : {})}
+            style={{ display: 'block', textDecoration: 'none', background: returnSlug ? 'linear-gradient(135deg, #27AE60 0%, #1D5C3A 100%)' : '#1A1209', color: returnSlug ? 'white' : '#F0D897', textAlign: 'center', padding: '0.9rem', borderRadius: 50, fontSize: '0.9rem', fontWeight: 800, letterSpacing: '0.04em', boxShadow: returnSlug ? '0 4px 16px rgba(29,92,58,0.35)' : 'none', transition: 'background 0.15s, transform 0.1s' }}
             onClick={onClose}
           >
-            {returnSlug ? 'Choisir pour Médine →' : 'Réserver ce guide →'}
+            {returnSlug ? 'Choisir pour Médine 🌿' : 'Réserver ce guide →'}
           </Link>
           <Link
             href={`/guides/${g.slug}`}
@@ -1431,9 +1440,10 @@ function GuideCard({ guide: g, official, onProfile, isLoading, returnSlug }: { g
             </button>
             <Link
               href={returnSlug ? `/espace/checkout/${returnSlug}?pair=${g.slug}` : `/espace/checkout/${g.slug}`}
-              style={{ flex: 1, display: 'block', textDecoration: 'none', background: '#1A1209', color: '#F0D897', textAlign: 'center', padding: '0.65rem', borderRadius: 50, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.04em' }}
+              {...(returnSlug ? { 'data-medine': '' } : {})}
+              style={{ flex: 1, display: 'block', textDecoration: 'none', background: returnSlug ? 'linear-gradient(135deg, #27AE60 0%, #1D5C3A 100%)' : '#1A1209', color: returnSlug ? 'white' : '#F0D897', textAlign: 'center', padding: '0.65rem', borderRadius: 50, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.04em', boxShadow: returnSlug ? '0 2px 12px rgba(29,92,58,0.3)' : 'none', transition: 'background 0.15s, transform 0.1s' }}
             >
-              {returnSlug ? 'Choisir pour Médine' : 'Choisir ce guide'}
+              {returnSlug ? 'Choisir pour Médine 🌿' : 'Choisir ce guide'}
             </Link>
           </div>
         </div>

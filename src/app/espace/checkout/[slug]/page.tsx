@@ -30,12 +30,14 @@ function PlaceSelector({
   if (places.length === 0) return null
   return (
     <div style={{ marginBottom: '1.5rem' }}>
-      <div style={{
-        fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.1em',
-        textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.75rem',
-      }}>
-        {title}
-      </div>
+      {title && (
+        <div style={{
+          fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.1em',
+          textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.75rem',
+        }}>
+          {title}
+        </div>
+      )}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
         {places.map(place => {
           const isSelected = selected.includes(place.key)
@@ -827,8 +829,18 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
+                  {/* Header section Visites supplémentaires Makkah */}
+                  {getAvailablePlacesByCity('MAKKAH').length > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.875rem' }}>
+                      <div style={{ width: 3, height: 28, borderRadius: 2, background: 'linear-gradient(180deg, #C9A84C, #8B6914)', flexShrink: 0 }} />
+                      <div>
+                        <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#8B6914' }}>À la carte</div>
+                        <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.15rem', fontWeight: 600, color: '#1A1209' }}>Visites supplémentaires · La Mecque</div>
+                      </div>
+                    </div>
+                  )}
                   <PlaceSelector
-                    title="Visites supplémentaires"
+                    title=""
                     places={getAvailablePlacesByCity('MAKKAH')}
                     selected={selectedPlaces}
                     onToggle={togglePlace}
@@ -861,8 +873,18 @@ export default function CheckoutPage() {
                     </div>
                   )}
 
+                  {/* Header section Visites supplémentaires Médine */}
+                  {getAvailablePlacesByCity('MADINAH').length > 0 && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.875rem' }}>
+                      <div style={{ width: 3, height: 28, borderRadius: 2, background: 'linear-gradient(180deg, #27AE60, #1D5C3A)', flexShrink: 0 }} />
+                      <div>
+                        <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#1D5C3A' }}>À la carte</div>
+                        <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.15rem', fontWeight: 600, color: '#1A1209' }}>Visites supplémentaires · Médine</div>
+                      </div>
+                    </div>
+                  )}
                   <PlaceSelector
-                    title="Visites supplémentaires"
+                    title=""
                     places={getAvailablePlacesByCity('MADINAH')}
                     selected={selectedPlaces}
                     onToggle={togglePlace}
@@ -948,17 +970,68 @@ export default function CheckoutPage() {
               {/* Drawer détail lieu */}
               {detailPlace && (() => {
                 const place = PLACES.find(p => p.key === detailPlace)
+                const isSelected = selectedPlaces.includes(detailPlace)
+                const prix = place ? (placePrices[place.key] ?? 50) : 0
+                // Couleur de fond illustrative selon catégorie
+                const bgGradient = place?.category === 'MAKKAH' || place?.key === 'hunayn'
+                  ? 'linear-gradient(135deg, #2C1A06 0%, #8B4513 40%, #C9A84C 100%)'
+                  : place?.category === 'MADINAH' || ['badr','khandaq','bir-aris','masjid-ghamamah'].includes(place?.key ?? '')
+                  ? 'linear-gradient(135deg, #0A2A1A 0%, #1D5C3A 40%, #6FCF97 100%)'
+                  : 'linear-gradient(135deg, #1A1209 0%, #4A3F30 100%)'
                 return place ? (
-                  <div style={{ position: 'fixed', top: 0, right: 0, width: 320, height: '100vh', background: 'white', boxShadow: '-4px 0 24px rgba(0,0,0,0.12)', zIndex: 100, padding: '2rem 1.5rem', overflowY: 'auto' }}>
-                    <button onClick={() => setDetailPlace(null)} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', marginBottom: '1rem', color: '#7A6D5A' }}>✕</button>
-                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>{place.emoji}</div>
-                    <div style={{ fontFamily: 'serif', fontSize: '1rem', color: '#7A6D5A', direction: 'rtl', marginBottom: '0.5rem' }}>{place.nameAr}</div>
-                    <h3 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.5rem', color: '#1A1209', marginBottom: '0.75rem' }}>{place.nameFr}</h3>
-                    <p style={{ fontSize: '0.88rem', color: '#4A3F30', lineHeight: 1.8 }}>{place.desc}</p>
-                    <div style={{ marginTop: '1.5rem', padding: '0.75rem 1rem', background: '#FAF3E0', borderRadius: 8, fontSize: '0.85rem', fontWeight: 700, color: '#8B6914' }}>
-                      Tarif : {placePrices[place.key] ?? 50}€ / personne
+                  <>
+                    {/* Overlay semi-transparent */}
+                    <div
+                      onClick={() => setDetailPlace(null)}
+                      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 99 }}
+                    />
+                    {/* Drawer */}
+                    <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, maxHeight: '92vh', background: 'white', borderRadius: '20px 20px 0 0', boxShadow: '0 -8px 40px rgba(0,0,0,0.18)', zIndex: 100, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+                      {/* Visuel illustratif */}
+                      <div style={{ position: 'relative', height: 200, background: bgGradient, flexShrink: 0, borderRadius: '20px 20px 0 0', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {/* Motif décoratif */}
+                        <div style={{ position: 'absolute', inset: 0, opacity: 0.08, backgroundImage: 'repeating-linear-gradient(45deg, white 0, white 1px, transparent 0, transparent 50%)', backgroundSize: '12px 12px' }} />
+                        <div style={{ fontSize: '5.5rem', filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.4))' }}>{place.emoji}</div>
+                        {/* Bouton fermer */}
+                        <button
+                          onClick={() => setDetailPlace(null)}
+                          style={{ position: 'absolute', top: 16, right: 16, width: 32, height: 32, borderRadius: '50%', background: 'rgba(0,0,0,0.35)', border: 'none', color: 'white', fontSize: '1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(4px)' }}
+                        >✕</button>
+                        {/* Nom arabe en bas de l'image */}
+                        <div style={{ position: 'absolute', bottom: 12, left: 0, right: 0, textAlign: 'center', fontFamily: 'serif', fontSize: '1.1rem', color: 'rgba(255,255,255,0.65)', direction: 'rtl' }}>{place.nameAr}</div>
+                      </div>
+
+                      {/* Contenu */}
+                      <div style={{ padding: '1.5rem 1.5rem 2rem' }}>
+                        <h3 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.7rem', fontWeight: 400, color: '#1A1209', marginBottom: '0.75rem', lineHeight: 1.2 }}>{place.nameFr}</h3>
+                        <p style={{ fontSize: '0.9rem', color: '#4A3F30', lineHeight: 1.8, marginBottom: '1.5rem' }}>{place.desc}</p>
+
+                        {/* Prix + toggle */}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#FAF8F0', border: '1px solid #E8DFC8', borderRadius: 12, padding: '0.875rem 1.25rem', marginBottom: '1rem' }}>
+                          <div>
+                            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#8B6914', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Tarif</div>
+                            <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.5rem', fontWeight: 700, color: '#C9A84C' }}>+{prix}€ <span style={{ fontSize: '0.75rem', color: '#7A6D5A', fontFamily: 'inherit', fontWeight: 400 }}>/ personne</span></div>
+                          </div>
+                          <button
+                            onClick={() => { togglePlace(place.key); setDetailPlace(null) }}
+                            style={{ padding: '0.6rem 1.4rem', borderRadius: 50, border: 'none', background: isSelected ? '#DC2626' : 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)', color: 'white', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', boxShadow: isSelected ? 'none' : '0 4px 12px rgba(201,168,76,0.4)' }}
+                          >
+                            {isSelected ? '✕ Retirer' : '+ Ajouter'}
+                          </button>
+                        </div>
+
+                        {/* En savoir plus */}
+                        <a
+                          href={`/lieux-saints/${place.key}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', width: '100%', padding: '0.75rem', borderRadius: 50, border: '1.5px solid #E8DFC8', background: 'white', color: '#4A3F30', fontSize: '0.82rem', fontWeight: 600, textDecoration: 'none' }}
+                        >
+                          En savoir plus →
+                        </a>
+                      </div>
                     </div>
-                  </div>
+                  </>
                 ) : null
               })()}
 

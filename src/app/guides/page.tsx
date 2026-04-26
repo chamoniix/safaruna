@@ -78,6 +78,7 @@ const GUIDES_DATA = [
     available: true,
     isOfficial: true,
     specialisteEnfants: false,
+    shortBio: 'Naïm accompagne les pèlerins depuis 8 ans entre Makkah et Madinah. Responsable terrain SAFARUMA, formateur certifié, il maîtrise les rituels de l\'Omra, l\'histoire islamique des lieux saints, et assure une prise en charge PMR et gestion de crise. Plus de 500 familles l\'ont choisi pour la qualité humaine de son accompagnement.',
   },
   {
     slug: 'bientot-disponible',
@@ -103,6 +104,8 @@ const GUIDES_DATA = [
     specialisteEnfants: false,
   },
 ];
+
+type GuideData = typeof GUIDES_DATA[0];
 
 // ─── SVG Avatars ──────────────────────────────────────────────────────────────
 function GuideAvatarSVG({ slug, gradient, initials, isWoman }: { slug: string; gradient: string; initials: string; isWoman?: boolean }) {
@@ -262,6 +265,23 @@ export default function GuideSearchPage() {
   const [selectedLieux, setSelectedLieux] = useState<string[]>([]);
   const [lieuxDropOpen, setLieuxDropOpen] = useState(false);
   const [sortBy, setSortBy] = useState('recommande');
+
+  const [drawerGuide, setDrawerGuide] = useState<GuideData | null>(null);
+  const [drawerVisible, setDrawerVisible] = useState(false);
+  const [loadingSlug, setLoadingSlug] = useState<string | null>(null);
+
+  const openDrawer = (g: GuideData) => {
+    setLoadingSlug(g.slug);
+    setTimeout(() => {
+      setDrawerGuide(g);
+      setDrawerVisible(true);
+      setLoadingSlug(null);
+    }, 120);
+  };
+  const closeDrawer = () => {
+    setDrawerVisible(false);
+    setTimeout(() => setDrawerGuide(null), 300);
+  };
 
   const barRef = useRef<HTMLDivElement>(null);
 
@@ -854,7 +874,7 @@ export default function GuideSearchPage() {
           {filteredOfficial.map(g => (
             <div key={g.slug} className="guide-official-wrap">
               <div className="guide-official-label">★ RESPONSABLE OFFICIEL SAFARUMA</div>
-              <GuideCard guide={g} official />
+              <GuideCard guide={g} official onProfile={() => openDrawer(g)} isLoading={loadingSlug === g.slug} />
             </div>
           ))}
 
@@ -874,7 +894,7 @@ export default function GuideSearchPage() {
           )}
 
           <div className="guides-grid">
-            {filteredNonOfficial.map(g => <GuideCard key={g.slug} guide={g} />)}
+            {filteredNonOfficial.map(g => <GuideCard key={g.slug} guide={g} onProfile={() => openDrawer(g)} isLoading={loadingSlug === g.slug} />)}
           </div>
 
           {/* ── Section Prochainement ── */}
@@ -935,11 +955,19 @@ export default function GuideSearchPage() {
         </>
       )}
 
+      {/* ── GUIDE DRAWER ── */}
+      {drawerGuide && (
+        <GuideDrawer guide={drawerGuide} visible={drawerVisible} onClose={closeDrawer} />
+      )}
+
       {/* ── CSS ── */}
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes slideUp {
           from { transform: translateY(100%); }
           to   { transform: translateY(0); }
+        }
+        @keyframes spin {
+          to { transform: rotate(360deg); }
         }
 
         /* Hero */
@@ -1174,9 +1202,111 @@ function FilterCard({ title, children }: { title: string; children: React.ReactN
   );
 }
 
-type GuideData = typeof GUIDES_DATA[0];
+// ─── Guide Drawer ─────────────────────────────────────────────────────────────
+function GuideDrawer({ guide: g, visible, onClose }: { guide: GuideData; visible: boolean; onClose: () => void }) {
+  return (
+    <>
+      {/* Overlay */}
+      <div
+        onClick={onClose}
+        style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+          zIndex: 300, backdropFilter: 'blur(2px)',
+          opacity: visible ? 1 : 0,
+          transition: 'opacity 0.25s ease',
+          pointerEvents: visible ? 'auto' : 'none',
+        }}
+      />
+      {/* Slide-up panel */}
+      <div style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0,
+        zIndex: 301,
+        background: 'white',
+        borderRadius: '24px 24px 0 0',
+        maxHeight: '90vh',
+        overflowY: 'auto',
+        boxShadow: '0 -8px 40px rgba(0,0,0,0.25)',
+        transform: visible ? 'translateY(0)' : 'translateY(100%)',
+        transition: 'transform 0.3s cubic-bezier(0.32, 0.72, 0, 1)',
+      }}>
+        {/* Handle */}
+        <div style={{ textAlign: 'center', padding: '0.875rem 0 0.5rem' }}>
+          <div style={{ width: 40, height: 4, borderRadius: 2, background: '#E8DFC8', margin: '0 auto' }} />
+        </div>
 
-function GuideCard({ guide: g, official }: { guide: GuideData; official?: boolean }) {
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 1.5rem 1rem' }}>
+          <span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 700, color: '#1A1209' }}>Fiche guide</span>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7A6D5A', fontSize: '1.3rem', lineHeight: 1 }}>✕</button>
+        </div>
+
+        {/* Guide hero band */}
+        <div style={{ background: g.gradient, padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <div style={{ width: 72, height: 72, borderRadius: '50%', border: '3px solid #C9A84C', overflow: 'hidden', flexShrink: 0, boxShadow: '0 0 0 3px #1A1209' }}>
+            <GuideAvatarSVG slug={g.slug} gradient={g.gradient} initials={g.initials} isWoman={g.slug === 'fatima-al-omari' || g.slug === 'samira-al-rashidi'} />
+          </div>
+          <div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#F0D897', lineHeight: 1.2 }}>{g.name}</div>
+            <div style={{ fontSize: '0.72rem', color: 'rgba(240,216,151,0.75)', fontStyle: 'italic', marginTop: '0.2rem' }}>{g.title}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.5rem' }}>
+              <span style={{ fontSize: '0.62rem', color: '#C9A84C', fontWeight: 800 }}>★</span>
+              <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>{g.rating} · {g.experience} ans d&apos;expérience</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Bio */}
+        {'shortBio' in g && g.shortBio && (
+          <div style={{ padding: '1.25rem 1.5rem 0' }}>
+            <p style={{ fontSize: '0.85rem', lineHeight: 1.65, color: '#4A4A4A', margin: 0 }}>{g.shortBio as string}</p>
+          </div>
+        )}
+
+        {/* Languages */}
+        <div style={{ padding: '1rem 1.5rem 0' }}>
+          <div style={{ fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.5rem' }}>Langues parlées</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
+            {g.languages.map((l, i) => (
+              <span key={l} style={{ fontSize: '0.72rem', fontWeight: 600, padding: '0.2rem 0.65rem', borderRadius: 50, background: i === 0 ? '#FAF3E0' : '#E8DFC8', border: `1px solid ${i === 0 ? 'rgba(201,168,76,0.4)' : 'transparent'}`, color: i === 0 ? '#8B6914' : '#7A6D5A' }}>{l}</span>
+            ))}
+          </div>
+        </div>
+
+        {/* Services */}
+        {g.services.length > 0 && (
+          <div style={{ padding: '1rem 1.5rem 0' }}>
+            <div style={{ fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.5rem' }}>Spécialités</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
+              {g.services.map(s => (
+                <span key={s} style={{ fontSize: '0.72rem', color: '#7A6D5A', background: '#E8DFC8', padding: '0.2rem 0.6rem', borderRadius: 6 }}>{s}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* CTAs */}
+        <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <Link
+            href={`/espace/checkout/${g.slug}`}
+            style={{ display: 'block', textDecoration: 'none', background: '#1A1209', color: '#F0D897', textAlign: 'center', padding: '0.9rem', borderRadius: 50, fontSize: '0.9rem', fontWeight: 800, letterSpacing: '0.04em' }}
+            onClick={onClose}
+          >
+            Réserver ce guide →
+          </Link>
+          <Link
+            href={`/guides/${g.slug}`}
+            style={{ display: 'block', textDecoration: 'none', background: 'white', border: '1.5px solid #E8DFC8', color: '#1A1209', textAlign: 'center', padding: '0.75rem', borderRadius: 50, fontSize: '0.82rem', fontWeight: 700, letterSpacing: '0.04em' }}
+            onClick={onClose}
+          >
+            Voir le profil complet
+          </Link>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function GuideCard({ guide: g, official, onProfile, isLoading }: { guide: GuideData; official?: boolean; onProfile?: () => void; isLoading?: boolean }) {
   return (
     <div
       className={official ? 'guide-official-card' : ''}
@@ -1264,12 +1394,15 @@ function GuideCard({ guide: g, official }: { guide: GuideData; official?: boolea
           </div>
 
           <div style={{ marginTop: '0.875rem', display: 'flex', gap: '0.5rem' }}>
-            <Link
-              href={`/guides/${g.slug}`}
-              style={{ flex: 1, display: 'block', textDecoration: 'none', background: 'white', border: '1.5px solid #E8DFC8', color: '#1A1209', textAlign: 'center', padding: '0.65rem', borderRadius: 50, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.04em' }}
+            <button
+              onClick={onProfile}
+              disabled={isLoading}
+              style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', background: 'white', border: '1.5px solid #E8DFC8', color: '#1A1209', textAlign: 'center', padding: '0.65rem', borderRadius: 50, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.04em', cursor: isLoading ? 'default' : 'pointer', fontFamily: 'inherit', transition: 'background 0.15s, transform 0.1s', transform: isLoading ? 'scale(0.96)' : 'scale(1)' }}
             >
-              Voir le profil
-            </Link>
+              {isLoading ? (
+                <span style={{ width: 14, height: 14, border: '2px solid #C9A84C', borderTopColor: 'transparent', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite' }} />
+              ) : 'Voir le profil'}
+            </button>
             <Link
               href={`/espace/checkout/${g.slug}`}
               style={{ flex: 1, display: 'block', textDecoration: 'none', background: '#1A1209', color: '#F0D897', textAlign: 'center', padding: '0.65rem', borderRadius: 50, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.04em' }}

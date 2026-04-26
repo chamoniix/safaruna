@@ -198,6 +198,79 @@ export default function GuideProfileClient({
       <div className="profile-main-grid">
         {/* LEFT SIDE */}
         <div>
+
+          {/* ── SECTION COMPAGNON (toutes tailles d'écran) ── */}
+          {companions.length > 0 && companionCityLabel && (
+            <div style={{
+              background: 'white',
+              border: '1.5px solid #E8DFC8',
+              borderRadius: 16,
+              padding: '1.25rem 1.5rem',
+              marginBottom: '1.5rem',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                <div style={{ fontSize: '1.5rem' }}>🕋🌿</div>
+                <div>
+                  <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#8B6914', marginBottom: '0.15rem' }}>
+                    Pèlerinage complet
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 600, color: '#1A1209', lineHeight: 1.2 }}>
+                    Ajoutez un guide pour <strong>{companionCityLabel}</strong>
+                  </div>
+                </div>
+              </div>
+              <p style={{ fontSize: '0.8rem', color: '#6B5F50', lineHeight: 1.6, marginBottom: '1rem' }}>
+                Réservez votre duo Makkah + Madinah en une seule fois et bénéficiez d&apos;un accompagnement complet pour votre pèlerinage.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {companions.map(c => {
+                  const isSelected = companionSlug === c.slug;
+                  return (
+                    <button
+                      key={c.slug}
+                      onClick={() => setCompanionSlug(isSelected ? null : c.slug)}
+                      style={{
+                        display: 'flex', alignItems: 'center', gap: '0.875rem',
+                        padding: '0.75rem 1rem', borderRadius: 12, cursor: 'pointer',
+                        border: isSelected ? '2px solid #10B981' : '1.5px solid #E8DFC8',
+                        background: isSelected ? 'rgba(16,185,129,0.06)' : '#FAF7F0',
+                        textAlign: 'left', width: '100%', transition: 'all 0.15s',
+                        fontFamily: 'var(--font-manrope, sans-serif)',
+                      }}
+                    >
+                      <div style={{
+                        width: 42, height: 42, borderRadius: '50%', flexShrink: 0,
+                        background: isSelected ? 'linear-gradient(135deg,#10B981,#1D5C3A)' : 'linear-gradient(135deg,#E8DFC8,#C9A84C)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '0.75rem', fontWeight: 700, color: isSelected ? 'white' : '#1A1209',
+                      }}>
+                        {c.initials}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1A1209' }}>{c.name}</div>
+                        <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: '0.1rem' }}>{c.specialty}</div>
+                      </div>
+                      <div style={{
+                        width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
+                        border: isSelected ? '2px solid #10B981' : '2px solid #E8DFC8',
+                        background: isSelected ? '#10B981' : 'transparent',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '0.7rem', color: 'white', fontWeight: 700,
+                      }}>
+                        {isSelected && '✓'}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+              {companionSlug && (
+                <div style={{ marginTop: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.25)', borderRadius: 8, padding: '0.5rem 0.875rem', fontSize: '0.78rem', color: '#1D5C3A', fontWeight: 600 }}>
+                  ✓ Duo sélectionné — le bouton de réservation est mis à jour ci-dessous
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Tab Navigation */}
           <div className="profile-tabs-bar">
             {TAB_LABELS.map((label, i) => (
@@ -466,74 +539,6 @@ export default function GuideProfileClient({
             <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 600, color: '#1A1209', marginBottom: '1.25rem', lineHeight: 1.4 }}>
               Réserver avec<br/>{guideName}
             </div>
-
-            {/* Companion guide section */}
-            {companions.length > 0 && companionCityLabel && (
-              <div style={{ marginBottom: '1.25rem', textAlign: 'left' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.6rem' }}>
-                  <div style={{ flex: 1, height: 1, background: '#E8DFC8' }} />
-                  <span style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#9CA3AF', whiteSpace: 'nowrap' }}>
-                    Pèlerinage complet
-                  </span>
-                  <div style={{ flex: 1, height: 1, background: '#E8DFC8' }} />
-                </div>
-                <div style={{ fontSize: '0.75rem', color: '#6B5F50', marginBottom: '0.75rem', lineHeight: 1.5 }}>
-                  Ajoutez un guide pour <strong>{companionCityLabel}</strong> et réservez votre duo en une fois.
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  {companions.map(c => {
-                    const isSelected = companionSlug === c.slug;
-                    return (
-                      <button
-                        key={c.slug}
-                        onClick={() => setCompanionSlug(isSelected ? null : c.slug)}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '0.75rem',
-                          padding: '0.65rem 0.8rem',
-                          borderRadius: 12,
-                          border: isSelected ? '1.5px solid #10B981' : '1.5px solid #E8DFC8',
-                          background: isSelected ? 'rgba(16,185,129,0.06)' : 'var(--cream, #FAF7F0)',
-                          cursor: 'pointer',
-                          textAlign: 'left',
-                          width: '100%',
-                          transition: 'all 0.15s',
-                          fontFamily: 'var(--font-manrope, sans-serif)',
-                        }}
-                      >
-                        <div style={{
-                          width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
-                          background: isSelected ? 'linear-gradient(135deg,#10B981,#1D5C3A)' : 'linear-gradient(135deg,#E8DFC8,#C9A84C)',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: '0.7rem', fontWeight: 700, color: isSelected ? 'white' : '#1A1209',
-                        }}>
-                          {c.initials}
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.2 }}>{c.name}</div>
-                          <div style={{ fontSize: '0.68rem', color: '#9CA3AF', lineHeight: 1.3, marginTop: '0.1rem' }}>{c.specialty}</div>
-                        </div>
-                        <div style={{
-                          width: 20, height: 20, borderRadius: '50%', flexShrink: 0,
-                          border: isSelected ? '2px solid #10B981' : '2px solid #E8DFC8',
-                          background: isSelected ? '#10B981' : 'transparent',
-                          display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontSize: '0.65rem', color: 'white',
-                        }}>
-                          {isSelected && '✓'}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-                {companionSlug && (
-                  <div style={{ marginTop: '0.5rem', fontSize: '0.7rem', color: '#10B981', fontWeight: 600, textAlign: 'center' }}>
-                    ✓ Duo sélectionné · Réservez les deux en une fois
-                  </div>
-                )}
-              </div>
-            )}
 
             <a
               href={checkoutHref}

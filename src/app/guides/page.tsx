@@ -1178,12 +1178,11 @@ type GuideData = typeof GUIDES_DATA[0];
 
 function GuideCard({ guide: g, official }: { guide: GuideData; official?: boolean }) {
   return (
-    <Link href={`/guides/${g.slug}`} style={{ textDecoration: 'none', display: 'block' }}>
-      <div
-        className={official ? 'guide-official-card' : ''}
-        style={{ background: 'white', border: '1px solid #E8DFC8', borderRadius: 18, overflow: 'hidden', transition: 'transform 0.2s, box-shadow 0.2s, border-color 0.2s', cursor: 'pointer' }}
-        onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = 'translateY(-3px)'; el.style.boxShadow = '0 16px 48px rgba(26,18,9,0.1)'; el.style.borderColor = 'rgba(201,168,76,0.7)'; }}
-        onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = ''; el.style.boxShadow = official ? '0 8px 40px rgba(201,168,76,0.18)' : ''; el.style.borderColor = official ? '#C9A84C' : '#E8DFC8'; }}
+    <div
+      className={official ? 'guide-official-card' : ''}
+      style={{ background: 'white', border: '1px solid #E8DFC8', borderRadius: 18, overflow: 'hidden', transition: 'transform 0.2s, box-shadow 0.2s, border-color 0.2s' }}
+      onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.transform = 'translateY(-3px)'; el.style.boxShadow = '0 16px 48px rgba(26,18,9,0.1)'; el.style.borderColor = 'rgba(201,168,76,0.7)'; }}
+      onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.transform = ''; el.style.boxShadow = official ? '0 8px 40px rgba(201,168,76,0.18)' : ''; el.style.borderColor = official ? '#C9A84C' : '#E8DFC8'; }}
       >
         {/* Banner */}
         <div className="guide-card-banner" style={{ background: g.gradient, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
@@ -1264,11 +1263,21 @@ function GuideCard({ guide: g, official }: { guide: GuideData; official?: boolea
             </div>
           </div>
 
-          <div style={{ marginTop: '0.875rem', background: '#1A1209', color: '#F0D897', textAlign: 'center', padding: '0.7rem', borderRadius: 50, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.04em' }}>
-            Voir le profil
+          <div style={{ marginTop: '0.875rem', display: 'flex', gap: '0.5rem' }}>
+            <Link
+              href={`/guides/${g.slug}`}
+              style={{ flex: 1, display: 'block', textDecoration: 'none', background: 'white', border: '1.5px solid #E8DFC8', color: '#1A1209', textAlign: 'center', padding: '0.65rem', borderRadius: 50, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.04em' }}
+            >
+              Voir le profil
+            </Link>
+            <Link
+              href={`/espace/checkout/${g.slug}`}
+              style={{ flex: 1, display: 'block', textDecoration: 'none', background: '#1A1209', color: '#F0D897', textAlign: 'center', padding: '0.65rem', borderRadius: 50, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.04em' }}
+            >
+              Choisir ce guide
+            </Link>
           </div>
         </div>
-      </div>
-    </Link>
+    </div>
   );
 }

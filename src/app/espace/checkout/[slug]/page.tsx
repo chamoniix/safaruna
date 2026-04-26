@@ -241,6 +241,7 @@ export default function CheckoutPage() {
   const [gender, setGender] = useState<Gender>('MIXTE')
   const [langue, setLangue] = useState('fr')
   const [showAllLangues, setShowAllLangues] = useState(false)
+  const [showCalendar, setShowCalendar] = useState(false)
 
   // Étape 3
   const [selectedPlaces, setSelectedPlaces] = useState<string[]>([])
@@ -772,86 +773,91 @@ export default function CheckoutPage() {
         {((step === 2 && cityChoice !== 'BOTH') || (step === 3 && cityChoice === 'BOTH')) && (
           <div>
             {backBtn(step - 1)}
-            <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', fontWeight: 400, color: '#1A1209', marginBottom: '2rem' }}>
+            <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.6rem', fontWeight: 400, color: '#1A1209', marginBottom: '1rem' }}>
               Votre voyage
             </h2>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
               {/* Range picker dates */}
               <div>
-                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.75rem' }}>
+                <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.5rem' }}>
                   Dates du séjour *
                 </label>
 
-                {/* Affichage de la sélection */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
-                  <div style={{ background: '#FAF7F0', border: range?.from ? '1.5px solid #C9A84C' : '1px solid #E8DFC8', borderRadius: 10, padding: '10px 14px' }}>
-                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: 3 }}>Arrivée</div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: range?.from ? '#1A1209' : '#7A6D5A' }}>
+                {/* Affichage de la sélection — clic pour ouvrir/fermer le calendrier */}
+                <div
+                  onClick={() => setShowCalendar(c => !c)}
+                  style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: showCalendar ? 10 : 0, cursor: 'pointer' }}
+                >
+                  <div style={{ background: '#FAF7F0', border: range?.from ? '1.5px solid #C9A84C' : '1px solid #E8DFC8', borderRadius: 10, padding: '8px 12px' }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: 2 }}>Arrivée</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: range?.from ? '#1A1209' : '#C9A84C' }}>
                       {range?.from ? format(range.from, 'd MMM yyyy', { locale: frLocale }) : 'Choisir'}
                     </div>
                   </div>
-                  <div style={{ background: '#FAF7F0', border: range?.to ? '1.5px solid #C9A84C' : '1px solid #E8DFC8', borderRadius: 10, padding: '10px 14px' }}>
-                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: 3 }}>Départ</div>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: range?.to ? '#1A1209' : '#7A6D5A' }}>
+                  <div style={{ background: '#FAF7F0', border: range?.to ? '1.5px solid #C9A84C' : '1px solid #E8DFC8', borderRadius: 10, padding: '8px 12px' }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: 2 }}>Départ</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: range?.to ? '#1A1209' : '#C9A84C' }}>
                       {range?.to ? format(range.to, 'd MMM yyyy', { locale: frLocale }) : 'Choisir'}
                     </div>
                   </div>
                 </div>
 
                 {/* Durée calculée */}
-                {range?.from && range?.to && (
-                  <div style={{ textAlign: 'center', fontSize: 11, color: '#8B6914', background: 'rgba(201,168,76,.1)', borderRadius: 50, padding: '4px 12px', display: 'inline-block', marginBottom: 12 }}>
-                    {differenceInDays(range.to, range.from)} nuits
+                {range?.from && range?.to && !showCalendar && (
+                  <div style={{ fontSize: 11, color: '#8B6914', background: 'rgba(201,168,76,.1)', borderRadius: 50, padding: '3px 10px', display: 'inline-block', marginTop: 6 }}>
+                    {differenceInDays(range.to, range.from)} nuits · <span style={{ color: '#7A6D5A' }}>Modifier</span>
                   </div>
                 )}
 
-                {/* Calendrier range picker */}
-                <div style={{ border: '1px solid #E8DFC8', borderRadius: 12, overflow: 'hidden', marginBottom: 8 }}>
-                  <DayPicker
-                    mode="range"
-                    selected={range}
-                    onSelect={setRange}
-                    locale={frLocale}
-                    disabled={{ before: new Date() }}
-                    numberOfMonths={1}
-                    showOutsideDays={false}
-                    modifiersStyles={{
-                      selected: { backgroundColor: '#C9A84C', color: '#1A1209', fontWeight: 700 },
-                      range_middle: { backgroundColor: 'rgba(201,168,76,.15)', color: '#1A1209' },
-                      range_start: { backgroundColor: '#C9A84C', borderRadius: '50%', color: '#1A1209' },
-                      range_end: { backgroundColor: '#C9A84C', borderRadius: '50%', color: '#1A1209' },
-                    }}
-                    styles={{
-                      root: { width: '100%', fontFamily: 'inherit' },
-                      month: { width: '100%' },
-                      table: { width: '100%' },
-                      head_cell: { fontSize: 11, color: '#7A6D5A', fontWeight: 600 },
-                      day: { fontSize: 13, width: 36, height: 36, borderRadius: '50%' },
-                      caption_label: { fontSize: 14, fontWeight: 700, color: '#1A1209' },
-                      nav_button: { color: '#C9A84C', border: '1px solid #E8DFC8', borderRadius: 8 },
-                    }}
-                  />
-                </div>
+                {/* Calendrier — affiché uniquement si showCalendar */}
+                {showCalendar && (
+                  <div style={{ border: '1px solid #E8DFC8', borderRadius: 12, overflow: 'hidden' }}>
+                    <DayPicker
+                      mode="range"
+                      selected={range}
+                      onSelect={(r) => { setRange(r); if (r?.from && r?.to) setShowCalendar(false) }}
+                      locale={frLocale}
+                      disabled={{ before: new Date() }}
+                      numberOfMonths={1}
+                      showOutsideDays={false}
+                      modifiersStyles={{
+                        selected: { backgroundColor: '#C9A84C', color: '#1A1209', fontWeight: 700 },
+                        range_middle: { backgroundColor: 'rgba(201,168,76,.15)', color: '#1A1209' },
+                        range_start: { backgroundColor: '#C9A84C', borderRadius: '50%', color: '#1A1209' },
+                        range_end: { backgroundColor: '#C9A84C', borderRadius: '50%', color: '#1A1209' },
+                      }}
+                      styles={{
+                        root: { width: '100%', fontFamily: 'inherit' },
+                        month: { width: '100%' },
+                        table: { width: '100%' },
+                        head_cell: { fontSize: 11, color: '#7A6D5A', fontWeight: 600 },
+                        day: { fontSize: 13, width: 36, height: 36, borderRadius: '50%' },
+                        caption_label: { fontSize: 14, fontWeight: 700, color: '#1A1209' },
+                        nav_button: { color: '#C9A84C', border: '1px solid #E8DFC8', borderRadius: 8 },
+                      }}
+                    />
+                  </div>
+                )}
               </div>
 
               {/* Nb personnes */}
               <div>
-                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.5rem' }}>
+                <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.4rem' }}>
                   Nombre de personnes *
                 </label>
                 <div style={{ display: 'flex', alignItems: 'center', border: '1.5px solid #E8DFC8', borderRadius: 10, overflow: 'hidden', background: 'white' }}>
-                  <button onClick={() => setNbPersonnes(n => Math.max(1, n - 1))} style={{ width: 48, height: 48, border: 'none', background: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#1A1209', fontFamily: 'inherit' }}>−</button>
-                  <div style={{ flex: 1, textAlign: 'center', fontWeight: 700, fontSize: '1rem', color: '#1A1209', borderLeft: '1px solid #E8DFC8', borderRight: '1px solid #E8DFC8', padding: '0.75rem 0' }}>
+                  <button onClick={() => setNbPersonnes(n => Math.max(1, n - 1))} style={{ width: 44, height: 44, border: 'none', background: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#1A1209', fontFamily: 'inherit' }}>−</button>
+                  <div style={{ flex: 1, textAlign: 'center', fontWeight: 700, fontSize: '0.95rem', color: '#1A1209', borderLeft: '1px solid #E8DFC8', borderRight: '1px solid #E8DFC8', padding: '0.6rem 0' }}>
                     {nbPersonnes} {nbPersonnes === 1 ? 'personne' : 'personnes'}
                   </div>
-                  <button onClick={() => setNbPersonnes(n => Math.min(20, n + 1))} style={{ width: 48, height: 48, border: 'none', background: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#1A1209', fontFamily: 'inherit' }}>+</button>
+                  <button onClick={() => setNbPersonnes(n => Math.min(20, n + 1))} style={{ width: 44, height: 44, border: 'none', background: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#1A1209', fontFamily: 'inherit' }}>+</button>
                 </div>
               </div>
 
               {/* Genre */}
               <div>
-                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.5rem' }}>
+                <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.4rem' }}>
                   Profil du groupe
                 </label>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -859,7 +865,7 @@ export default function CheckoutPage() {
                     <button
                       key={g}
                       onClick={() => setGender(g)}
-                      style={{ flex: 1, padding: '0.75rem 0.5rem', border: gender === g ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', borderRadius: 10, background: gender === g ? 'rgba(201,168,76,0.08)' : 'white', color: gender === g ? '#8B6914' : '#7A6D5A', fontWeight: gender === g ? 700 : 500, fontSize: '0.82rem', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
+                      style={{ flex: 1, padding: '0.6rem 0.5rem', border: gender === g ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', borderRadius: 10, background: gender === g ? 'rgba(201,168,76,0.08)' : 'white', color: gender === g ? '#8B6914' : '#7A6D5A', fontWeight: gender === g ? 700 : 500, fontSize: '0.82rem', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }}
                     >
                       <GenderIcon type={g} />
                       {g === 'HOMME' ? 'Homme' : g === 'FEMME' ? 'Femme' : 'Mixte'}
@@ -870,34 +876,30 @@ export default function CheckoutPage() {
 
               {/* Langue */}
               <div>
-                <label style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.5rem' }}>
+                <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.4rem' }}>
                   Langue préférée
                 </label>
-                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                  {LANGUES.slice(0, 4).map(l => (
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  {LANGUES.slice(0, 2).map(l => (
                     <button
                       key={l.code}
                       onClick={() => setLangue(l.code)}
-                      style={{ padding: '0.5rem 1rem', border: langue === l.code ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', borderRadius: 50, background: langue === l.code ? 'rgba(201,168,76,0.08)' : 'white', color: langue === l.code ? '#8B6914' : '#7A6D5A', fontWeight: langue === l.code ? 700 : 500, fontSize: '0.82rem', cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
+                      style={{ padding: '0.45rem 0.875rem', border: langue === l.code ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', borderRadius: 50, background: langue === l.code ? 'rgba(201,168,76,0.08)' : 'white', color: langue === l.code ? '#8B6914' : '#7A6D5A', fontWeight: langue === l.code ? 700 : 500, fontSize: '0.82rem', cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
                     >
                       <FlagIcon code={l.code} />
                       {l.label}
                     </button>
                   ))}
+                  <button
+                    type="button"
+                    onClick={() => setShowAllLangues(true)}
+                    style={{ padding: '0.45rem 0.875rem', border: !['fr', 'ar'].includes(langue) ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', borderRadius: 50, background: !['fr', 'ar'].includes(langue) ? 'rgba(201,168,76,0.08)' : 'white', color: !['fr', 'ar'].includes(langue) ? '#8B6914' : '#7A6D5A', fontWeight: !['fr', 'ar'].includes(langue) ? 700 : 500, fontSize: '0.82rem', cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+                  >
+                    {!['fr', 'ar'].includes(langue)
+                      ? `✓ ${LANGUES.find(l => l.code === langue)?.label ?? langue}`
+                      : 'Langues ▾'}
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setShowAllLangues(true)}
-                  style={{ background: 'white', border: '1px solid #E8DFC8', borderRadius: 50, padding: '6px 14px', fontSize: 11, color: '#7A6D5A', cursor: 'pointer', fontFamily: 'inherit', marginTop: 8, display: 'flex', alignItems: 'center', gap: 6 }}
-                >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/>
-                  </svg>
-                  {langue && !['fr', 'ar', 'en', 'wo'].includes(langue)
-                    ? `✓ ${LANGUES.find(l => l.code === langue)?.label}`
-                    : 'Voir toutes les langues'}
-                </button>
               </div>
             </div>
 
@@ -1426,41 +1428,50 @@ export default function CheckoutPage() {
 
               {/* Résumé des choix (BOTH) */}
               {cityChoice === 'BOTH' && (
-                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem' }}>
+                <div style={{ display: 'flex', gap: '0.625rem', marginBottom: '1.25rem' }}>
                   {/* Slot Makkah */}
-                  <div style={{ flex: 1, borderRadius: 10, padding: '0.625rem 0.75rem', background: selectedGuideSlug ? 'rgba(201,168,76,0.08)' : '#FAF8F0', border: selectedGuideSlug ? '1.5px solid #C9A84C' : '1.5px dashed #D4C5A5', display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 0 }}>
-                    <span style={{ fontSize: '1rem', flexShrink: 0 }}>🕋</span>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#8B6914', letterSpacing: '0.1em', textTransform: 'uppercase' }}>La Mecque</div>
-                      <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#1A1209', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {selectedGuideSlug
-                          ? (availableGuides.find(g => g.slug === selectedGuideSlug)?.name ?? selectedGuideSlug)
-                          : <span style={{ color: '#A89880', fontWeight: 400 }}>À choisir</span>
-                        }
+                  <div
+                    onClick={() => { if (!selectedGuideSlug) router.push(`/guides?city=MAKKAH&returnSlug=${slug}`) }}
+                    style={{ flex: 1, borderRadius: 12, overflow: 'hidden', border: selectedGuideSlug ? '1.5px solid #C9A84C' : '1.5px dashed #C9A84C', background: selectedGuideSlug ? 'rgba(201,168,76,0.07)' : 'linear-gradient(135deg, #FFFBEB, #FEF3C7)', cursor: selectedGuideSlug ? 'default' : 'pointer', transition: 'all 0.15s' }}
+                  >
+                    <div style={{ height: 3, background: 'linear-gradient(90deg, #C9A84C, #8B6914)' }} />
+                    <div style={{ padding: '0.55rem 0.7rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <span style={{ fontSize: '1rem', flexShrink: 0 }}>🕋</span>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ fontSize: '0.58rem', fontWeight: 700, color: '#8B6914', letterSpacing: '0.1em', textTransform: 'uppercase' }}>La Mecque</div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#1A1209', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {selectedGuideSlug
+                            ? (availableGuides.find(g => g.slug === selectedGuideSlug)?.name ?? selectedGuideSlug)
+                            : <span style={{ color: '#C9A84C', fontWeight: 700 }}>Choisir →</span>
+                          }
+                        </div>
                       </div>
+                      {selectedGuideSlug && (
+                        <button onClick={e => { e.stopPropagation(); setSelectedGuideSlug(null) }} style={{ background: 'rgba(201,168,76,0.15)', border: 'none', color: '#8B6914', cursor: 'pointer', fontSize: '0.6rem', borderRadius: '50%', width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, padding: 0 }}>✕</button>
+                      )}
                     </div>
-                    {selectedGuideSlug && (
-                      <button onClick={() => setSelectedGuideSlug(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#A89880', cursor: 'pointer', fontSize: '0.75rem', flexShrink: 0, padding: 0 }}>✕</button>
-                    )}
                   </div>
                   {/* Slot Madinah */}
                   <div
                     onClick={() => { if (!selectedGuideSlugMadinah) router.push(`/guides?city=MADINAH&returnSlug=${slug}`) }}
-                    style={{ flex: 1, borderRadius: 10, padding: '0.625rem 0.75rem', background: selectedGuideSlugMadinah ? 'rgba(29,92,58,0.07)' : '#FAF8F0', border: selectedGuideSlugMadinah ? '1.5px solid #1D5C3A' : '1.5px dashed #D4C5A5', display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 0, cursor: selectedGuideSlugMadinah ? 'default' : 'pointer', transition: 'border-color 0.15s' }}
+                    style={{ flex: 1, borderRadius: 12, overflow: 'hidden', border: selectedGuideSlugMadinah ? '1.5px solid #1D5C3A' : '1.5px dashed #27AE60', background: selectedGuideSlugMadinah ? 'rgba(29,92,58,0.07)' : 'linear-gradient(135deg, #F0FDF4, #DCFCE7)', cursor: selectedGuideSlugMadinah ? 'default' : 'pointer', transition: 'all 0.15s' }}
                   >
-                    <span style={{ fontSize: '1rem', flexShrink: 0 }}>🌿</span>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: '0.6rem', fontWeight: 700, color: '#1D5C3A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Médine</div>
-                      <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#1A1209', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {selectedGuideSlugMadinah
-                          ? (availableGuides.find(g => g.slug === selectedGuideSlugMadinah)?.name ?? selectedGuideSlugMadinah)
-                          : <span style={{ color: '#1D5C3A', fontWeight: 600 }}>Choisir →</span>
-                        }
+                    <div style={{ height: 3, background: 'linear-gradient(90deg, #27AE60, #1D5C3A)' }} />
+                    <div style={{ padding: '0.55rem 0.7rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <span style={{ fontSize: '1rem', flexShrink: 0 }}>🌿</span>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ fontSize: '0.58rem', fontWeight: 700, color: '#1D5C3A', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Médine</div>
+                        <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#1A1209', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {selectedGuideSlugMadinah
+                            ? (availableGuides.find(g => g.slug === selectedGuideSlugMadinah)?.name ?? selectedGuideSlugMadinah)
+                            : <span style={{ color: '#27AE60', fontWeight: 700 }}>Choisir →</span>
+                          }
+                        </div>
                       </div>
+                      {selectedGuideSlugMadinah && (
+                        <button onClick={e => { e.stopPropagation(); setSelectedGuideSlugMadinah(null) }} style={{ background: 'rgba(29,92,58,0.15)', border: 'none', color: '#1D5C3A', cursor: 'pointer', fontSize: '0.6rem', borderRadius: '50%', width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, padding: 0 }}>✕</button>
+                      )}
                     </div>
-                    {selectedGuideSlugMadinah && (
-                      <button onClick={e => { e.stopPropagation(); setSelectedGuideSlugMadinah(null) }} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#A89880', cursor: 'pointer', fontSize: '0.75rem', flexShrink: 0, padding: 0 }}>✕</button>
-                    )}
                   </div>
                 </div>
               )}

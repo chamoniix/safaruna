@@ -14,7 +14,8 @@ import { BASE_PACKAGES, getPackageForCity, type CityChoice } from '@/lib/package
 type Gender = 'HOMME' | 'FEMME' | 'MIXTE'
 type TransportOption = 'NONE' | 'TRAIN' | 'TAXI_RT' | 'TAXI_ONE'
 
-const STEPS = ['Destination', 'Dates & Profil', 'Visites', 'Votre guide', 'Récap']
+const STEPS_SINGLE = ['Destination', 'Dates & Profil', 'Visites', 'Votre guide', 'Récap']
+const STEPS_BOTH   = ['Destination', 'Vos guides', 'Dates & Profil', 'Visites', 'Récap']
 
 // ── Composant PlaceSelector ───────────────────────
 function PlaceSelector({
@@ -356,10 +357,11 @@ export default function CheckoutPage() {
       .then(data => setGuideDataMadinah(data.guide ?? null))
   }, [selectedGuideSlugMadinah])
 
-  // Fetch guides disponibles à l'entrée de l'étape 4
+  // Fetch guides disponibles à l'entrée de l'étape guide (2 pour BOTH, 4 pour single)
   useEffect(() => {
+    const guideStep = cityChoice === 'BOTH' ? 2 : 4
     const fetchKey = [step, cityChoice, langue, gender].join('-')
-    if (step !== 4 || fetchKey === guideFetchKey.current) return
+    if (step !== guideStep || fetchKey === guideFetchKey.current) return
     guideFetchKey.current = fetchKey
     setLoadingGuides(true)
     fetch('/api/guides/available?' + new URLSearchParams({
@@ -457,6 +459,7 @@ export default function CheckoutPage() {
   }
 
   // ── Barre de progression ──────────────────────
+  const STEPS = cityChoice === 'BOTH' ? STEPS_BOTH : STEPS_SINGLE
   const ProgressBar = () => {
     const items: React.ReactNode[] = []
     STEPS.forEach((s, i) => {
@@ -631,10 +634,10 @@ export default function CheckoutPage() {
           </div>
         )}
 
-        {/* ── ÉTAPE 2 — DATES & PROFIL ── */}
-        {step === 2 && (
+        {/* ── ÉTAPE 2 (single) / 3 (BOTH) — DATES & PROFIL ── */}
+        {((step === 2 && cityChoice !== 'BOTH') || (step === 3 && cityChoice === 'BOTH')) && (
           <div>
-            {backBtn(1)}
+            {backBtn(step - 1)}
             <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', fontWeight: 400, color: '#1A1209', marginBottom: '2rem' }}>
               Votre voyage
             </h2>
@@ -764,24 +767,24 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {nextBtn('Continuer', () => setStep(3), !range?.from || !range?.to)}
+            {nextBtn('Continuer', () => setStep(step + 1), !range?.from || !range?.to)}
           </div>
         )}
 
-        {/* ── ÉTAPE 3 — LIEUX DE VISITE ── */}
-        {step === 3 && (() => {
+        {/* ── ÉTAPE 3 (single) / 4 (BOTH) — LIEUX DE VISITE ── */}
+        {((step === 3 && cityChoice !== 'BOTH') || (step === 4 && cityChoice === 'BOTH')) && (() => {
           // Sous-étape Makkah ou Madinah : back logic
           const handleBack3 = () => {
-            if (visitSubStep === 'MAKKAH') return setStep(2)
-            if (visitSubStep === 'MADINAH') return cityChoice === 'BOTH' ? setVisitSubStep('MAKKAH') : setStep(2)
+            if (visitSubStep === 'MAKKAH') return setStep(step - 1)
+            if (visitSubStep === 'MADINAH') return cityChoice === 'BOTH' ? setVisitSubStep('MAKKAH') : setStep(step - 1)
             if (visitSubStep === 'TRANSPORT') return setVisitSubStep('MADINAH')
           }
           const handleNext3 = () => {
             if (visitSubStep === 'MAKKAH' && cityChoice === 'BOTH') return setVisitSubStep('MADINAH')
-            if (visitSubStep === 'MAKKAH') return setStep(4)
+            if (visitSubStep === 'MAKKAH') return setStep(step + 1)
             if (visitSubStep === 'MADINAH' && cityChoice === 'BOTH') return setVisitSubStep('TRANSPORT')
-            if (visitSubStep === 'MADINAH') return setStep(4)
-            if (visitSubStep === 'TRANSPORT') return setStep(4)
+            if (visitSubStep === 'MADINAH') return setStep(step + 1)
+            if (visitSubStep === 'TRANSPORT') return setStep(step + 1)
           }
 
           // Sous-étape progress pills (BOTH uniquement)
@@ -1206,8 +1209,8 @@ export default function CheckoutPage() {
           )
         })()}
 
-        {/* ── ÉTAPE 4 — VOTRE GUIDE ── */}
-        {step === 4 && (() => {
+        {/* ── ÉTAPE 2 (BOTH) / 4 (single) — VOTRE / VOS GUIDES ── */}
+        {((step === 2 && cityChoice === 'BOTH') || (step === 4 && cityChoice !== 'BOTH')) && (() => {
           // Prochain slot à remplir (BOTH uniquement)
           const nextSlot: 'MAKKAH' | 'MADINAH' | null = cityChoice !== 'BOTH' ? null
             : !selectedGuideSlug ? 'MAKKAH'
@@ -1275,11 +1278,11 @@ export default function CheckoutPage() {
                 </>
               )}
 
-              {backBtn(3)}
+              {backBtn(step - 1)}
 
               {/* Titre */}
               <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', fontWeight: 400, color: '#1A1209', marginBottom: '0.4rem' }}>
-                Votre guide
+                {cityChoice === 'BOTH' ? 'Vos guides' : 'Votre guide'}
               </h2>
               <p style={{ color: '#7A6D5A', fontSize: '0.85rem', marginBottom: '1.25rem', lineHeight: 1.6 }}>
                 {cityChoice === 'BOTH'
@@ -1426,7 +1429,11 @@ export default function CheckoutPage() {
                 </div>
               )}
 
-              {nextBtn('Voir le récapitulatif', () => setStep(5), !canContinue)}
+              {nextBtn(
+                cityChoice === 'BOTH' ? 'Continuer' : 'Voir le récapitulatif',
+                () => setStep(step + 1),
+                !canContinue
+              )}
             </div>
           )
         })()}

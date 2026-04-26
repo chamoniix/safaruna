@@ -149,6 +149,14 @@ const LANGUES = [
   { code: 'sw', label: 'Swahili' },
 ]
 
+// ── Correspondance places.ts key → slug page lieux-saints ──
+const PLACE_PAGE_SLUG: Record<string, string> = {
+  'jabal-nour':  'jabal-al-nour',
+  'baqi':        'al-baqi',
+  'qiblatayn':   'masjid-al-qiblatayn',
+  'ohoud':       'jabal-uhud',
+}
+
 // ── Lieux historiques → assignés à une ville ──────
 const MAKKAH_HISTORIQUE = ['hunayn']
 const MADINAH_HISTORIQUE = ['badr', 'khandaq', 'bir-aris', 'masjid-ghamamah']
@@ -1022,7 +1030,7 @@ export default function CheckoutPage() {
 
                         {/* En savoir plus */}
                         <a
-                          href={`/lieux-saints/${place.key}`}
+                          href={`/lieux-saints/${PLACE_PAGE_SLUG[place.key] ?? place.key}`}
                           target="_blank"
                           rel="noreferrer"
                           style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', width: '100%', padding: '0.75rem', borderRadius: 50, border: '1.5px solid #E8DFC8', background: 'white', color: '#4A3F30', fontSize: '0.82rem', fontWeight: 600, textDecoration: 'none' }}

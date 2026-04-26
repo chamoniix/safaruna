@@ -248,6 +248,7 @@ export default function CheckoutPage() {
   const [localTransportMadinah, setLocalTransportMadinah] = useState<'NONE' | 'TAXI' | 'CAR'>('NONE')
   const [visitSubStep, setVisitSubStep] = useState<'MAKKAH' | 'MADINAH' | 'TRANSPORT'>('MAKKAH')
   const [localTransportTab, setLocalTransportTab] = useState<'MAKKAH' | 'MADINAH'>('MAKKAH')
+  const [localTransportMadinahSeen, setLocalTransportMadinahSeen] = useState(false)
   const [detailPlace, setDetailPlace] = useState<string | null>(null)
 
   // Étape 4
@@ -287,6 +288,7 @@ export default function CheckoutPage() {
       if (s.taxiDirection) setTaxiDirection(s.taxiDirection)
       if (s.localTransportMakkah) setLocalTransportMakkah(s.localTransportMakkah)
       if (s.localTransportMadinah) setLocalTransportMadinah(s.localTransportMadinah)
+      if (s.localTransportMadinahSeen) setLocalTransportMadinahSeen(true)
       if (s.visitSubStep) setVisitSubStep(s.visitSubStep)
       if (s.selectedGuideSlug) setSelectedGuideSlug(s.selectedGuideSlug)
       if (s.selectedGuideSlugMadinah) setSelectedGuideSlugMadinah(s.selectedGuideSlugMadinah)
@@ -302,11 +304,11 @@ export default function CheckoutPage() {
         step, cityChoice,
         range: range ? { from: range.from?.toISOString(), to: range.to?.toISOString() } : undefined,
         nbPersonnes, gender, langue, selectedPlaces, transportOption, taxiDirection,
-        localTransportMakkah, localTransportMadinah, visitSubStep,
+        localTransportMakkah, localTransportMadinah, localTransportMadinahSeen, visitSubStep,
         selectedGuideSlug, selectedGuideSlugMadinah,
       }))
     } catch { /* ignore */ }
-  }, [slug, step, cityChoice, range, nbPersonnes, gender, langue, selectedPlaces, transportOption, taxiDirection, localTransportMakkah, localTransportMadinah, visitSubStep, selectedGuideSlug, selectedGuideSlugMadinah])
+  }, [slug, step, cityChoice, range, nbPersonnes, gender, langue, selectedPlaces, transportOption, taxiDirection, localTransportMakkah, localTransportMadinah, localTransportMadinahSeen, visitSubStep, selectedGuideSlug, selectedGuideSlugMadinah])
 
   // Initialise selectedGuideSlug depuis l'URL
   useEffect(() => {
@@ -360,6 +362,14 @@ export default function CheckoutPage() {
       .then(d => setAvailableGuides(d.guides || []))
       .finally(() => setLoadingGuides(false))
   }, [step, cityChoice, langue, gender])
+
+  // Auto-switch vers onglet Madinah dès que Makkah local transport est choisi
+  useEffect(() => {
+    if (localTransportMakkah !== 'NONE' && cityChoice === 'BOTH') {
+      setLocalTransportTab('MADINAH')
+      setLocalTransportMadinahSeen(true)
+    }
+  }, [localTransportMakkah, cityChoice])
 
   // Package de base
   const basePackage = cityChoice ? getPackageForCity(cityChoice) : null
@@ -1027,27 +1037,74 @@ export default function CheckoutPage() {
 
                   {/* Transport local — toggle Makkah / Madinah */}
                   <div style={{ marginTop: '2rem' }}>
-                    <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.875rem' }}>
-                      Transport pour les visites locales
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                      <div style={{ width: 3, height: 24, borderRadius: 2, background: 'linear-gradient(180deg, #C9A84C, #8B6914)', flexShrink: 0 }} />
+                      <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#8B6914' }}>
+                        Transport pour les visites locales
+                      </div>
                     </div>
-                    {/* Toggle */}
-                    <div style={{ display: 'inline-flex', background: '#F5F2EC', borderRadius: 50, padding: '0.25rem', gap: '0.25rem', marginBottom: '1rem' }}>
-                      {(['MAKKAH', 'MADINAH'] as const).map(city => (
+
+                    {/* Toggle avec indicateurs visuels */}
+                    {cityChoice === 'BOTH' ? (
+                      <div style={{ display: 'flex', gap: '0.625rem', marginBottom: '1.25rem' }}>
+                        {/* Tab Makkah */}
                         <button
-                          key={city}
-                          onClick={() => setLocalTransportTab(city)}
-                          style={{ padding: '0.45rem 1.25rem', borderRadius: 50, border: 'none', background: localTransportTab === city ? '#1A1209' : 'transparent', color: localTransportTab === city ? '#F0D897' : '#7A6D5A', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.15s' }}
+                          onClick={() => setLocalTransportTab('MAKKAH')}
+                          style={{
+                            flex: 1, padding: '0.65rem 0.75rem', borderRadius: 10, border: localTransportTab === 'MAKKAH' ? '2px solid #C9A84C' : '1.5px solid #E8DFC8',
+                            background: localTransportTab === 'MAKKAH' ? 'rgba(201,168,76,0.07)' : 'white',
+                            cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem',
+                          }}
                         >
-                          {city === 'MAKKAH' ? '🕋 Makkah' : '🌿 Madinah'}
+                          <span style={{ fontSize: '0.82rem', fontWeight: 700, color: localTransportTab === 'MAKKAH' ? '#1A1209' : '#7A6D5A' }}>🕋 La Mecque</span>
+                          {localTransportMakkah !== 'NONE'
+                            ? <span style={{ width: 18, height: 18, borderRadius: '50%', background: '#1D5C3A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', color: 'white', fontWeight: 900, flexShrink: 0 }}>✓</span>
+                            : <span style={{ width: 18, height: 18, borderRadius: '50%', border: '1.5px solid #E8DFC8', flexShrink: 0 }} />
+                          }
                         </button>
-                      ))}
-                    </div>
+
+                        {/* Tab Madinah — grisé jusqu'à Makkah choisi */}
+                        <button
+                          onClick={() => {
+                            if (localTransportMakkah === 'NONE') return
+                            setLocalTransportTab('MADINAH')
+                            setLocalTransportMadinahSeen(true)
+                          }}
+                          disabled={localTransportMakkah === 'NONE'}
+                          style={{
+                            flex: 1, padding: '0.65rem 0.75rem', borderRadius: 10, border: localTransportTab === 'MADINAH' ? '2px solid #1D5C3A' : '1.5px solid #E8DFC8',
+                            background: localTransportTab === 'MADINAH' ? 'rgba(29,92,58,0.07)' : 'white',
+                            cursor: localTransportMakkah === 'NONE' ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
+                            opacity: localTransportMakkah === 'NONE' ? 0.4 : 1,
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem',
+                          }}
+                        >
+                          <span style={{ fontSize: '0.82rem', fontWeight: 700, color: localTransportTab === 'MADINAH' ? '#1A1209' : '#7A6D5A' }}>🌿 Médine</span>
+                          {localTransportMadinah !== 'NONE'
+                            ? <span style={{ width: 18, height: 18, borderRadius: '50%', background: '#1D5C3A', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', color: 'white', fontWeight: 900, flexShrink: 0 }}>✓</span>
+                            : <span style={{ width: 18, height: 18, borderRadius: '50%', border: '1.5px dashed #C9A84C', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <span style={{ fontSize: '0.55rem', color: '#C9A84C', fontWeight: 700 }}>!</span>
+                              </span>
+                          }
+                        </button>
+                      </div>
+                    ) : (
+                      /* Ville unique — pas de toggle */
+                      <div style={{ marginBottom: '1rem' }} />
+                    )}
 
                     {/* Choix voiture selon ville active */}
                     {localTransportTab === 'MAKKAH'
                       ? <CarSelector city="MAKKAH" value={localTransportMakkah} onChange={setLocalTransportMakkah} />
-                      : <CarSelector city="MADINAH" value={localTransportMadinah} onChange={setLocalTransportMadinah} />
+                      : <CarSelector city="MADINAH" value={localTransportMadinah} onChange={(v) => { setLocalTransportMadinah(v); setLocalTransportMadinahSeen(true) }} />
                     }
+
+                    {/* Hint si Madinah non encore vu */}
+                    {cityChoice === 'BOTH' && localTransportMakkah !== 'NONE' && !localTransportMadinahSeen && (
+                      <div style={{ marginTop: '0.75rem', padding: '0.6rem 0.875rem', background: 'rgba(201,168,76,0.08)', border: '1px solid #C9A84C', borderRadius: 8, fontSize: '0.75rem', color: '#8B6914', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        ↑ Choisissez aussi le transport pour vos visites à Médine
+                      </div>
+                    )}
 
                     {/* Récap sélections */}
                     {(localTransportMakkah !== 'NONE' || localTransportMadinah !== 'NONE') && (
@@ -1133,7 +1190,8 @@ export default function CheckoutPage() {
               })()}
 
               {nextBtn('Continuer', handleNext3,
-                visitSubStep === 'TRANSPORT' && transportOption === 'TAXI_ONE' && !taxiDirection
+                (visitSubStep === 'TRANSPORT' && transportOption === 'TAXI_ONE' && !taxiDirection) ||
+                (visitSubStep === 'TRANSPORT' && cityChoice === 'BOTH' && !localTransportMadinahSeen)
               )}
             </div>
           )

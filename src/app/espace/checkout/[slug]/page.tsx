@@ -1157,6 +1157,35 @@ export default function CheckoutPage() {
           // Guide drawer
           const drawerGuide = guideDetailSlug ? availableGuides.find(g => g.slug === guideDetailSlug) : null
 
+          // Thème couleur selon la ville
+          const gTheme = isMadinahSub
+            ? {
+                accent: '#1D5C3A', accentLight: '#27AE60',
+                accentBg: 'rgba(29,92,58,0.07)',
+                avatarGrad: 'linear-gradient(135deg, #6FCF97, #1D5C3A)', avatarText: 'white',
+                cardBg: 'linear-gradient(135deg, #0F3320 0%, #1D5C3A 100%)',
+                cardBorder: 'rgba(39,174,96,0.45)',
+                labelColor: '#6FCF97',
+                btnGrad: 'linear-gradient(135deg, #27AE60 0%, #1D5C3A 100%)',
+                btnShadow: '0 4px 12px rgba(29,92,58,0.35)',
+                headerBg: 'linear-gradient(135deg, #0F3320, #1D5C3A)',
+                headerAccent: '#6FCF97',
+                emoji: '🌿', city: 'Médine',
+              }
+            : {
+                accent: '#C9A84C', accentLight: '#C9A84C',
+                accentBg: 'rgba(201,168,76,0.07)',
+                avatarGrad: 'linear-gradient(135deg, #F0D897, #C9A84C)', avatarText: '#1A1209',
+                cardBg: 'linear-gradient(135deg, #1A1209 0%, #2C1F10 100%)',
+                cardBorder: 'rgba(201,168,76,0.35)',
+                labelColor: '#C9A84C',
+                btnGrad: 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)',
+                btnShadow: '0 4px 12px rgba(201,168,76,0.35)',
+                headerBg: 'linear-gradient(135deg, #1A1209, #2C1F10)',
+                headerAccent: '#C9A84C',
+                emoji: '🕋', city: 'La Mecque',
+              }
+
           return (
             <div>
               {/* Drawer fiche guide */}
@@ -1173,7 +1202,7 @@ export default function CheckoutPage() {
                     </div>
                     {/* Avatar + identité */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
-                      <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
+                      <div style={{ width: 60, height: 60, borderRadius: '50%', background: gTheme.avatarGrad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 700, color: gTheme.avatarText, flexShrink: 0 }}>
                         {drawerGuide.name?.slice(0, 2).toUpperCase()}
                       </div>
                       <div>
@@ -1181,7 +1210,7 @@ export default function CheckoutPage() {
                         <div style={{ fontSize: '0.78rem', color: '#7A6D5A', marginTop: 2 }}>
                           Guide Safaruma · {formatGuideCity(drawerGuide.city)}
                         </div>
-                        <div style={{ fontSize: '0.78rem', color: '#C9A84C', fontWeight: 600, marginTop: 2 }}>
+                        <div style={{ fontSize: '0.78rem', color: gTheme.accent, fontWeight: 600, marginTop: 2 }}>
                           ★ {drawerGuide.rating}
                           {drawerGuide.languages?.length > 0 && (
                             <span style={{ color: '#7A6D5A', fontWeight: 400 }}> · {drawerGuide.languages.slice(0, 3).join(', ')}</span>
@@ -1201,7 +1230,7 @@ export default function CheckoutPage() {
                       </a>
                       <button
                         onClick={() => { setCurrentSlug(drawerGuide.slug); setGuidePickerMode(false); setGuideDetailSlug(null) }}
-                        style={{ flex: 1, padding: '0.75rem', borderRadius: 50, border: 'none', background: 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)', color: 'white', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 12px rgba(201,168,76,0.35)' }}
+                        style={{ flex: 1, padding: '0.75rem', borderRadius: 50, border: 'none', background: gTheme.btnGrad, color: 'white', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', boxShadow: gTheme.btnShadow }}
                       >
                         Choisir ce guide
                       </button>
@@ -1214,7 +1243,7 @@ export default function CheckoutPage() {
                 ? (
                   <button
                     onClick={() => { setGuideSubStep(1); setGuidePickerMode(false) }}
-                    style={{ background: 'none', border: 'none', color: '#7A6D5A', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600, marginBottom: '1.5rem', padding: 0, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+                    style={{ background: 'none', border: 'none', color: '#7A6D5A', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600, marginBottom: '1.25rem', padding: 0, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
                   >
                     ← Retour
                   </button>
@@ -1222,14 +1251,31 @@ export default function CheckoutPage() {
                 : backBtn(3)
               }
 
-              <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', fontWeight: 400, color: '#1A1209', marginBottom: '0.5rem' }}>
-                {cityChoice === 'BOTH'
-                  ? guideSubStep === 1 ? 'Votre guide à La Mecque' : 'Votre guide à Médine'
-                  : 'Choisissez votre guide'}
-              </h2>
-              <p style={{ color: '#7A6D5A', fontSize: '0.85rem', marginBottom: '1.5rem', lineHeight: 1.7 }}>
-                {isMadinahSub ? 'Même guide ou guide différent — votre choix.' : ''}
-              </p>
+              {/* Bandeau ville — identité visuelle forte */}
+              {cityChoice === 'BOTH' && (
+                <div style={{ background: gTheme.headerBg, borderRadius: 14, padding: '1rem 1.25rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.875rem', border: `1px solid ${gTheme.cardBorder}` }}>
+                  <div style={{ fontSize: '1.6rem', lineHeight: 1 }}>{gTheme.emoji}</div>
+                  <div>
+                    <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: gTheme.headerAccent, marginBottom: 2 }}>
+                      Étape {guideSubStep} / 2
+                    </div>
+                    <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.35rem', fontWeight: 600, color: 'white', lineHeight: 1.1 }}>
+                      Votre guide · {gTheme.city}
+                    </div>
+                  </div>
+                  {/* Indicateur 1/2 */}
+                  <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: guideSubStep >= 1 ? '#C9A84C' : 'rgba(255,255,255,0.2)' }} />
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: guideSubStep >= 2 ? '#27AE60' : 'rgba(255,255,255,0.2)' }} />
+                  </div>
+                </div>
+              )}
+
+              {cityChoice !== 'BOTH' && (
+                <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', fontWeight: 400, color: '#1A1209', marginBottom: '1.25rem' }}>
+                  Choisissez votre guide
+                </h2>
+              )}
 
               {loadingGuides ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -1264,9 +1310,9 @@ export default function CheckoutPage() {
                     return (
                       <div
                         key={g.slug}
-                        style={{ background: isSelected ? 'rgba(201,168,76,0.06)' : 'white', border: isSelected ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', borderRadius: 12, padding: '0.875rem 1rem', display: 'flex', alignItems: 'center', gap: '0.875rem' }}
+                        style={{ background: isSelected ? gTheme.accentBg : 'white', border: isSelected ? `2px solid ${gTheme.accent}` : '1.5px solid #E8DFC8', borderRadius: 12, padding: '0.875rem 1rem', display: 'flex', alignItems: 'center', gap: '0.875rem' }}
                       >
-                        <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
+                        <div style={{ width: 44, height: 44, borderRadius: '50%', background: gTheme.avatarGrad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: gTheme.avatarText, flexShrink: 0 }}>
                           {g.name?.slice(0, 2).toUpperCase()}
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
@@ -1274,7 +1320,7 @@ export default function CheckoutPage() {
                           <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 1 }}>
                             Guide Safaruma · {formatGuideCity(g.city)}
                           </div>
-                          <div style={{ fontSize: '0.72rem', color: '#C9A84C', fontWeight: 600, marginTop: 1 }}>
+                          <div style={{ fontSize: '0.72rem', color: gTheme.accent, fontWeight: 600, marginTop: 1 }}>
                             ★ {g.rating}
                             {g.languages?.length > 0 && (
                               <span style={{ color: '#7A6D5A', fontWeight: 400 }}> · {g.languages.slice(0, 2).join(', ')}</span>
@@ -1284,13 +1330,13 @@ export default function CheckoutPage() {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', alignItems: 'flex-end', flexShrink: 0 }}>
                           <button
                             onClick={() => { setCurrentSlug(g.slug); setGuidePickerMode(false) }}
-                            style={{ padding: '0.45rem 1rem', borderRadius: 50, border: 'none', background: isSelected ? '#1D5C3A' : '#E8DFC8', color: isSelected ? 'white' : '#4A3F30', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                            style={{ padding: '0.45rem 1rem', borderRadius: 50, border: 'none', background: isSelected ? gTheme.btnGrad : '#E8DFC8', color: isSelected ? 'white' : '#4A3F30', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}
                           >
                             {isSelected ? 'Sélectionné ✓' : 'Choisir'}
                           </button>
                           <button
                             onClick={() => setGuideDetailSlug(g.slug)}
-                            style={{ background: 'none', border: 'none', color: '#C9A84C', fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer', padding: 0, textDecoration: 'underline' }}
+                            style={{ background: 'none', border: 'none', color: gTheme.accent, fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer', padding: 0, textDecoration: 'underline' }}
                           >
                             Voir détails
                           </button>
@@ -1304,13 +1350,13 @@ export default function CheckoutPage() {
                 selectedGuideData && (
                   <div>
                     {/* Carte guide sélectionné */}
-                    <div style={{ background: 'linear-gradient(135deg, #1A1209 0%, #2C1F10 100%)', borderRadius: 16, padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', border: '1px solid rgba(201,168,76,0.3)', marginBottom: '0.75rem' }}>
-                      <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.15rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
+                    <div style={{ background: gTheme.cardBg, borderRadius: 16, padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', border: `1px solid ${gTheme.cardBorder}`, marginBottom: '0.75rem' }}>
+                      <div style={{ width: 52, height: 52, borderRadius: '50%', background: gTheme.avatarGrad, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.15rem', fontWeight: 700, color: gTheme.avatarText, flexShrink: 0 }}>
                         {selectedGuideData.name?.slice(0, 2).toUpperCase()}
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: '0.68rem', color: '#C9A84C', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 3 }}>
-                          {isMadinahSub ? '🌿 Guide Médine' : '🕋 Guide La Mecque'}
+                        <div style={{ fontSize: '0.68rem', color: gTheme.labelColor, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 3 }}>
+                          Guide sélectionné ✓
                         </div>
                         <div style={{ fontSize: '1rem', fontWeight: 700, color: 'white' }}>{selectedGuideData.name}</div>
                         <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.55)', marginTop: 2 }}>
@@ -1320,19 +1366,17 @@ export default function CheckoutPage() {
                           )}
                         </div>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
-                        <button
-                          onClick={() => setGuideDetailSlug(selectedGuideData.slug)}
-                          style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 50, padding: '0.45rem 0.9rem', color: 'white', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer' }}
-                        >
-                          Détails
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => setGuideDetailSlug(selectedGuideData.slug)}
+                        style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 50, padding: '0.45rem 0.9rem', color: 'white', fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer', flexShrink: 0 }}
+                      >
+                        Détails
+                      </button>
                     </div>
                     {/* Changer de guide */}
                     <button
                       onClick={() => { setCurrentSlug(null); setGuidePickerMode(true) }}
-                      style={{ background: 'none', border: '1.5px solid #E8DFC8', borderRadius: 50, color: '#7A6D5A', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', padding: '0.55rem 1.25rem', width: '100%', fontFamily: 'inherit' }}
+                      style={{ background: 'none', border: `1.5px solid ${gTheme.accent}`, borderRadius: 50, color: gTheme.accent, fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', padding: '0.55rem 1.25rem', width: '100%', fontFamily: 'inherit' }}
                     >
                       Changer de guide →
                     </button>
@@ -1341,7 +1385,7 @@ export default function CheckoutPage() {
               )}
 
               {cityChoice === 'BOTH' && guideSubStep === 1
-                ? nextBtn('Continuer', () => { setSelectedGuideSlugMadinah(selectedGuideSlug); setGuideSubStep(2); setGuidePickerMode(false) }, !selectedGuideSlug)
+                ? nextBtn('Continuer → Guide Médine', () => { setSelectedGuideSlugMadinah(selectedGuideSlug); setGuideSubStep(2); setGuidePickerMode(false) }, !selectedGuideSlug)
                 : nextBtn('Voir le récapitulatif', () => setStep(5), !currentSlug)
               }
             </div>

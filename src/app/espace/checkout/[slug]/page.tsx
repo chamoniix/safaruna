@@ -574,60 +574,157 @@ export default function CheckoutPage() {
         {/* ── ÉTAPE 1 — DESTINATION ── */}
         {step === 1 && (
           <div>
-            <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2rem', fontWeight: 400, color: '#1A1209', marginBottom: '0.5rem' }}>
-              Planifier votre voyage
-            </h1>
-            <p style={{ color: '#7A6D5A', fontSize: '0.9rem', marginBottom: '2rem', lineHeight: 1.7 }}>
-              Choisissez une ou deux villes pour votre voyage spirituel.
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '2rem' }}>
-              {BASE_PACKAGES.map(pkg => (
-                <div
-                  key={pkg.id}
-                  onClick={() => setCityChoice(pkg.cities)}
-                  style={{
-                    background: cityChoice === pkg.cities ? 'rgba(201,168,76,0.06)' : 'white',
-                    border: cityChoice === pkg.cities ? '2px solid #C9A84C' : '1.5px solid #E8DFC8',
-                    borderRadius: 16, padding: '1.5rem', cursor: 'pointer',
-                    position: 'relative', transition: 'all 0.15s',
-                  }}
-                >
-                  {pkg.recommended && (
-                    <div style={{ position: 'absolute', top: 12, right: 12, background: '#C9A84C', color: '#1A1209', fontSize: '0.6rem', fontWeight: 800, letterSpacing: '0.1em', padding: '0.2rem 0.6rem', borderRadius: 50 }}>
-                      RECOMMANDÉ
-                    </div>
-                  )}
-                  <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>{pkg.emoji}</div>
-                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.3rem', fontWeight: 700, color: '#1A1209', marginBottom: '0.4rem' }}>
-                    {pkg.name}
-                  </div>
-                  <p style={{ fontSize: '0.83rem', color: '#7A6D5A', lineHeight: 1.7, marginBottom: '0.75rem' }}>
-                    {pkg.description}
-                  </p>
-                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.5rem', fontWeight: 700, color: '#C9A84C' }}>
-                    À partir de {pkg.basePrice}€
-                    <span style={{ fontSize: '0.75rem', color: '#7A6D5A', fontFamily: 'inherit', fontWeight: 400, marginLeft: 4 }}>/ groupe (1-7 pers.)</span>
-                  </div>
-                </div>
-              ))}
+            {/* Header compact */}
+            <div style={{ marginBottom: '1.25rem' }}>
+              <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.75rem', fontWeight: 600, color: '#1A1209', marginBottom: '0.25rem', lineHeight: 1.2 }}>
+                Planifier votre voyage
+              </h1>
+              <p style={{ color: '#9A8A7A', fontSize: '0.82rem', margin: 0 }}>
+                Sélectionnez votre destination spirituelle
+              </p>
             </div>
 
-            <div style={{ background: '#FAF8F0', border: '1px solid #E8DFC8', borderRadius: 12, padding: '1rem 1.25rem', marginBottom: '2rem' }}>
-              <div style={{ fontSize: '0.82rem', color: '#8B6914', fontWeight: 600, marginBottom: '0.3rem' }}>
-                💡 Vous ne savez pas quoi choisir ?
-              </div>
-              <div style={{ fontSize: '0.78rem', color: '#4A3F30', lineHeight: 1.7 }}>
-                La Omra se fait uniquement à Makkah. Madinah est une visite spirituelle séparée — non obligatoire mais très recommandée. Contactez-nous gratuitement pour être conseillé.
-              </div>
-              <a
-                href="https://wa.me/33600000000"
-                target="_blank"
-                rel="noreferrer"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.75rem', background: '#25D366', color: 'white', fontSize: '0.78rem', fontWeight: 700, padding: '0.5rem 1rem', borderRadius: 50, textDecoration: 'none' }}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem', marginBottom: '1rem' }}>
+
+              {/* ── CARTE MAKKAH ── */}
+              <div
+                onClick={() => setCityChoice('MAKKAH')}
+                style={{
+                  background: cityChoice === 'MAKKAH'
+                    ? 'linear-gradient(135deg, #FFF8E7 0%, #FEF3C7 100%)'
+                    : 'white',
+                  border: cityChoice === 'MAKKAH' ? '2px solid #C9A84C' : '1.5px solid #E8DFC8',
+                  borderRadius: 14, padding: '0.875rem 1rem', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: '0.875rem',
+                  transition: 'all 0.15s',
+                  boxShadow: cityChoice === 'MAKKAH' ? '0 4px 16px rgba(201,168,76,0.2)' : '0 1px 4px rgba(0,0,0,0.04)',
+                }}
               >
-                📱 Nous contacter sur WhatsApp
-              </a>
+                {/* Accent bar */}
+                <div style={{ width: 4, height: 44, borderRadius: 2, background: 'linear-gradient(180deg, #C9A84C, #8B6914)', flexShrink: 0 }} />
+                {/* Emoji */}
+                <div style={{ fontSize: '1.75rem', flexShrink: 0, lineHeight: 1 }}>🕋</div>
+                {/* Text */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.15rem', fontWeight: 700, color: '#8B6914', lineHeight: 1.2 }}>
+                    Omra — Makkah
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: '0.15rem', lineHeight: 1.4 }}>
+                    Ihram · Tawaf · Sa&apos;i · Lieux saints
+                  </div>
+                </div>
+                {/* Price + radio */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.35rem', flexShrink: 0 }}>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#C9A84C' }}>99€</div>
+                  <div style={{ width: 18, height: 18, borderRadius: '50%', border: `2px solid ${cityChoice === 'MAKKAH' ? '#C9A84C' : '#D4C5A5'}`, background: cityChoice === 'MAKKAH' ? '#C9A84C' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {cityChoice === 'MAKKAH' && <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'white' }} />}
+                  </div>
+                </div>
+              </div>
+
+              {/* ── CARTE MADINAH ── */}
+              <div
+                onClick={() => setCityChoice('MADINAH')}
+                style={{
+                  background: cityChoice === 'MADINAH'
+                    ? 'linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%)'
+                    : 'white',
+                  border: cityChoice === 'MADINAH' ? '2px solid #27AE60' : '1.5px solid #E8DFC8',
+                  borderRadius: 14, padding: '0.875rem 1rem', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: '0.875rem',
+                  transition: 'all 0.15s',
+                  boxShadow: cityChoice === 'MADINAH' ? '0 4px 16px rgba(29,92,58,0.18)' : '0 1px 4px rgba(0,0,0,0.04)',
+                }}
+              >
+                <div style={{ width: 4, height: 44, borderRadius: 2, background: 'linear-gradient(180deg, #27AE60, #1D5C3A)', flexShrink: 0 }} />
+                <div style={{ fontSize: '1.75rem', flexShrink: 0, lineHeight: 1 }}>🌿</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.15rem', fontWeight: 700, color: '#1D5C3A', lineHeight: 1.2 }}>
+                    Découverte — Madinah
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: '0.15rem', lineHeight: 1.4 }}>
+                    Masjid An-Nabawi · Rawdah · Ziyarat
+                  </div>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.35rem', flexShrink: 0 }}>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#27AE60' }}>99€</div>
+                  <div style={{ width: 18, height: 18, borderRadius: '50%', border: `2px solid ${cityChoice === 'MADINAH' ? '#27AE60' : '#D4C5A5'}`, background: cityChoice === 'MADINAH' ? '#27AE60' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {cityChoice === 'MADINAH' && <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'white' }} />}
+                  </div>
+                </div>
+              </div>
+
+              {/* ── CARTE BOTH — PREMIUM ── */}
+              <div
+                onClick={() => setCityChoice('BOTH')}
+                style={{
+                  background: cityChoice === 'BOTH'
+                    ? 'linear-gradient(135deg, #1A1209 0%, #0F2A1A 100%)'
+                    : 'linear-gradient(135deg, #1C140A 0%, #102016 100%)',
+                  border: cityChoice === 'BOTH' ? '2px solid #C9A84C' : '2px solid transparent',
+                  borderRadius: 16, padding: '1rem 1.125rem', cursor: 'pointer',
+                  position: 'relative', overflow: 'hidden',
+                  transition: 'all 0.2s',
+                  boxShadow: cityChoice === 'BOTH'
+                    ? '0 8px 32px rgba(201,168,76,0.35), 0 2px 8px rgba(0,0,0,0.3)'
+                    : '0 4px 20px rgba(0,0,0,0.25)',
+                }}
+              >
+                {/* Ambient glows */}
+                <div style={{ position: 'absolute', top: 0, left: 0, width: '45%', height: '100%', background: 'radial-gradient(ellipse at 20% 50%, rgba(201,168,76,0.18) 0%, transparent 70%)', pointerEvents: 'none' }} />
+                <div style={{ position: 'absolute', top: 0, right: 0, width: '45%', height: '100%', background: 'radial-gradient(ellipse at 80% 50%, rgba(39,174,96,0.15) 0%, transparent 70%)', pointerEvents: 'none' }} />
+                {/* Arabic watermark */}
+                <div style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontFamily: 'serif', fontSize: '3.5rem', color: 'rgba(255,255,255,0.04)', pointerEvents: 'none', lineHeight: 1, userSelect: 'none' }}>رحلة</div>
+
+                {/* RECOMMANDÉ badge */}
+                <div style={{ position: 'absolute', top: 10, right: 10, background: 'linear-gradient(135deg, #C9A84C, #8B6914)', color: 'white', fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.12em', padding: '0.2rem 0.65rem', borderRadius: 50, textTransform: 'uppercase' }}>
+                  ★ RECOMMANDÉ
+                </div>
+
+                <div style={{ position: 'relative', zIndex: 1 }}>
+                  {/* Dual city row */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', marginBottom: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                      <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>🕋</span>
+                      <div style={{ width: 24, height: 1.5, background: 'linear-gradient(90deg, rgba(201,168,76,0.8), rgba(39,174,96,0.8))' }} />
+                      <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>🌿</span>
+                    </div>
+                    <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#F0D897', lineHeight: 1.2 }}>
+                      Voyage Complet
+                    </div>
+                  </div>
+
+                  {/* City pills */}
+                  <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '0.625rem' }}>
+                    <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '0.2rem 0.6rem', borderRadius: 50, background: 'rgba(201,168,76,0.18)', color: '#F0D897', border: '1px solid rgba(201,168,76,0.35)' }}>
+                      Makkah Al-Mukarramah
+                    </span>
+                    <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '0.2rem 0.6rem', borderRadius: 50, background: 'rgba(39,174,96,0.15)', color: '#6EE7B7', border: '1px solid rgba(39,174,96,0.3)' }}>
+                      Al-Madinah Al-Munawwarah
+                    </span>
+                  </div>
+
+                  {/* Bottom row: desc + price */}
+                  <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '0.5rem' }}>
+                    <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.45, flex: 1 }}>
+                      Omra complète · Ziyarat · Train Haramayn en option
+                    </div>
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 700, color: '#F0D897', lineHeight: 1 }}>199€</div>
+                      <div style={{ fontSize: '0.58rem', color: 'rgba(255,255,255,0.35)', marginTop: '0.1rem' }}>/ groupe</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Compact tip */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#FAF8F0', borderRadius: 10, padding: '0.6rem 0.875rem', marginBottom: '1rem' }}>
+              <span style={{ fontSize: '0.85rem', flexShrink: 0 }}>💡</span>
+              <span style={{ fontSize: '0.72rem', color: '#7A6D5A', lineHeight: 1.5 }}>
+                Besoin de conseil ? <a href="https://wa.me/33600000000" target="_blank" rel="noreferrer" style={{ color: '#25D366', fontWeight: 700, textDecoration: 'none' }}>Contactez-nous sur WhatsApp →</a>
+              </span>
             </div>
 
             {nextBtn('Continuer', () => setStep(2), !cityChoice)}

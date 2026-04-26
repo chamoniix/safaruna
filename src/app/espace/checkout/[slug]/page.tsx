@@ -606,6 +606,12 @@ export default function CheckoutPage() {
         {/* ── ÉTAPE 1 — DESTINATION ── */}
         {step === 1 && (
           <div>
+            <button
+              onClick={() => router.back()}
+              style={{ background: 'none', border: 'none', color: '#7A6D5A', cursor: 'pointer', fontSize: '0.82rem', fontWeight: 600, marginBottom: '1.25rem', padding: 0, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+            >
+              ← Retour
+            </button>
             {/* Header compact */}
             <div style={{ marginBottom: '1.25rem' }}>
               <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.75rem', fontWeight: 600, color: '#1A1209', marginBottom: '0.25rem', lineHeight: 1.2 }}>

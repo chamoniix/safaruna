@@ -37,7 +37,7 @@ export default function OffrirOmraParentsPage() {
         .op-hero { padding: 4rem 1.25rem 2.5rem; max-width: 700px; margin: 0 auto; text-align: center; }
         .op-section { padding: 2.5rem 1.25rem; max-width: 860px; margin: 0 auto; }
         .op-section-sm { padding: 2rem 1.25rem; max-width: 640px; margin: 0 auto; }
-        .op-cta { padding: 2.5rem 1.25rem; background: var(--deep); text-align: center; }
+        .op-cta { padding: 2.5rem 1.25rem; background: #FAF8F0; border-top: 3px solid var(--gold); text-align: center; }
         .op-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
         .op-versus { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
         .op-faq { display: flex; flex-direction: column; gap: 0.75rem; }
@@ -47,7 +47,6 @@ export default function OffrirOmraParentsPage() {
           .op-section-sm { padding: 1.5rem 1.25rem; }
           .op-cta { padding: 2rem 1.25rem; }
           .op-cards { grid-template-columns: 1fr; gap: 0.75rem; }
-          .op-versus { grid-template-columns: 1fr; }
         }
       `}} />
       <main style={{ paddingTop: '4rem', background: 'var(--cream)' }}>
@@ -75,28 +74,47 @@ export default function OffrirOmraParentsPage() {
           <div className="op-cards">
             {[
               {
-                icon: '🤲',
+                icon: (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  </svg>
+                ),
                 title: 'Il les accompagne pas à pas',
                 text: 'De l\'arrivée jusqu\'au dernier rite, votre guide est présent à chaque moment. Aucune étape laissée seule, aucune question sans réponse.',
               },
               {
-                icon: '📖',
+                icon: (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                  </svg>
+                ),
                 title: 'Il leur raconte ce qu\'ils n\'ont jamais appris',
                 text: 'Ibrahim, Hajar, le Prophète ﷺ — l\'histoire de ces lieux saints racontée sur les lieux mêmes. Vos parents repartiront en ayant compris ce qu\'aucune école ne leur a enseigné.',
               },
               {
-                icon: '⏱️',
+                icon: (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <polyline points="12 6 12 12 16 14"/>
+                  </svg>
+                ),
                 title: 'Il adapte le rythme',
                 text: 'Pas de course, pas de pression. Le guide ajuste le rythme à leur âge, leur condition, leur énergie. Leur voyage est unique — il est traité comme tel.',
               },
               {
-                icon: '📱',
+                icon: (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                  </svg>
+                ),
                 title: 'Il vous tient informé',
                 text: 'Où que vous soyez dans le monde, votre guide vous tient au courant. Chaque étape franchie, chaque rituel accompli — vous êtes là, même à distance.',
               },
             ].map((item, i) => (
               <div key={i} style={{ background: 'white', border: '1px solid #EDE8DC', borderRadius: 14, padding: '1.25rem' }}>
-                <div style={{ fontSize: '1.5rem', marginBottom: '0.6rem' }}>{item.icon}</div>
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: '#FAF3E0', border: '1px solid rgba(201,168,76,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '0.6rem' }}>{item.icon}</div>
                 <h3 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 600, color: 'var(--deep)', marginBottom: '0.4rem' }}>{item.title}</h3>
                 <p style={{ fontSize: '0.82rem', color: 'var(--muted)', lineHeight: 1.65, margin: 0 }}>{item.text}</p>
               </div>
@@ -171,13 +189,13 @@ export default function OffrirOmraParentsPage() {
 
         {/* CTA final */}
         <section className="op-cta">
-          <p style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(1.3rem, 3vw, 1.9rem)', fontStyle: 'italic', color: 'var(--gold-light)', marginBottom: '0.5rem' }}>
+          <p style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(1.3rem, 3vw, 1.9rem)', fontStyle: 'italic', color: 'var(--deep)', marginBottom: '0.5rem' }}>
             &quot;SVP prenez soin de mes parents.&quot;
           </p>
-          <p style={{ fontSize: '0.87rem', color: 'rgba(240,216,151,0.6)', marginBottom: '1.75rem' }}>
+          <p style={{ fontSize: '0.87rem', color: 'var(--muted)', marginBottom: '1.75rem' }}>
             Nos guides l&apos;ont entendu des centaines de fois. Ils savent ce que ça veut dire.
           </p>
-          <Link href="/guides" style={{ display: 'inline-block', background: 'var(--gold)', color: 'var(--deep)', padding: '0.85rem 2rem', borderRadius: 50, fontWeight: 700, fontSize: '0.88rem', textDecoration: 'none', letterSpacing: '0.04em' }}>
+          <Link href="/guides" style={{ display: 'inline-block', background: 'var(--deep)', color: 'var(--gold-light)', padding: '0.85rem 2rem', borderRadius: 50, fontWeight: 700, fontSize: '0.88rem', textDecoration: 'none', letterSpacing: '0.04em' }}>
             Trouver un guide pour mes parents
           </Link>
         </section>

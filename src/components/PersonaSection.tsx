@@ -91,9 +91,9 @@ export default function PersonaSection() {
         @media (max-width: 480px) { .persona-grid { grid-template-columns: 1fr; } }
         .persona-card { background: white; border: 1px solid #EDE8DC; border-radius: 14px; padding: 1.25rem; cursor: pointer; transition: border-color 0.15s, transform 0.15s; text-align: left; }
         .persona-card:hover { border-color: #C9A84C; transform: translateY(-2px); }
-        .persona-card.active { border: 1.5px solid #C9A84C; background: #FAF8F0; }
+        .persona-card.active { border: 1.5px solid #C9A84C; background: #FAF8F0; transform: none; }
         .persona-icon-wrap { width: 40px; height: 40px; border-radius: 10px; background: #FAF3E0; border: 1px solid rgba(201,168,76,0.2); display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem; }
-        .persona-response { border: 1px solid rgba(201,168,76,0.4); border-left: 3px solid #C9A84C; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; background: #FAF8F0; animation: fadeIn 0.2s ease; }
+        .persona-inline-response { border-top: 1px solid rgba(201,168,76,0.3); margin-top: 0.85rem; padding-top: 0.85rem; animation: fadeIn 0.2s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
       `}} />
 
@@ -107,18 +107,17 @@ export default function PersonaSection() {
             <div className="persona-icon-wrap">{p.icon}</div>
             <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1A1209', marginBottom: '0.35rem' }}>{p.title}</div>
             <div style={{ fontSize: '0.78rem', color: '#7A6D5A', lineHeight: 1.55, fontStyle: 'italic' }}>{p.desc}</div>
+            {active === i && (
+              <div className="persona-inline-response">
+                <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#8B6914', marginBottom: '0.45rem' }}>Pour vous</div>
+                <p style={{ fontSize: '0.84rem', color: '#1A1209', lineHeight: 1.7, margin: 0, fontFamily: 'var(--font-cormorant, serif)', fontStyle: 'italic' }}>
+                  {p.response}
+                </p>
+              </div>
+            )}
           </div>
         ))}
       </div>
-
-      {active !== null && (
-        <div className="persona-response">
-          <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#8B6914', marginBottom: '0.5rem' }}>Pour vous</div>
-          <p style={{ fontSize: '0.92rem', color: '#1A1209', lineHeight: 1.75, margin: 0, fontFamily: 'var(--font-cormorant, serif)', fontStyle: 'italic' }}>
-            {PERSONAS[active].response}
-          </p>
-        </div>
-      )}
 
       <div style={{ textAlign: 'center' }}>
         <Link href="/guide-omra" style={{ display: 'inline-block', background: '#1A1209', color: '#F0D897', padding: '0.8rem 2rem', borderRadius: 50, fontSize: '0.875rem', fontWeight: 700, textDecoration: 'none', letterSpacing: '0.04em' }}>

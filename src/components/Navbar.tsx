@@ -9,7 +9,7 @@ const HIDE_BANNER_PATHS = ['/connexion', '/inscription', '/guide/connexion', '/g
 
 const NAV_LINKS: { href: string; label: string }[] = [
   { href: '/guides', label: 'Nos guides' },
-  { href: '/guides', label: 'Forfaits' },
+  { href: '/accompagnements', label: 'Accompagnements' },
   { href: '/services', label: 'Services' },
   { href: '/guide-omra', label: 'Ebook Omra' },
   { href: '/certification', label: 'Certification' },

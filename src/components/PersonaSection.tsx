@@ -20,6 +20,36 @@ const PERSONAS = [
   {
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4h-1"/>
+        <circle cx="14" cy="7" r="3"/>
+        <path d="M9 21v-1a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v1"/>
+        <circle cx="6" cy="9" r="2.5"/>
+        <path d="M11 13l1 8"/>
+        <path d="M11 13h3"/>
+      </svg>
+    ),
+    title: 'Pour mes parents',
+    desc: '"SVP prenez soin de mes parents." — Ces mots que vous direz à leur guide.',
+    response: "Votre père ou votre mère n'a peut-être jamais eu l'occasion d'apprendre l'histoire de ces lieux saints. Le guide qui prend soin de vos parents leur raconte La Mecque et Médine comme ils ne les ont jamais entendus — à leur rythme, avec patience et bienveillance. Ils repartiront en ayant compris et vécu quelque chose que vous leur aurez offert pour toujours.",
+  },
+  {
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="4" r="1.5"/>
+        <path d="M9 8h4l1 5h3"/>
+        <path d="M10 13v4l2 2"/>
+        <circle cx="8" cy="20" r="2"/>
+        <circle cx="16" cy="20" r="2"/>
+        <path d="M8 13H6l-1-5"/>
+      </svg>
+    ),
+    title: 'Mobilité réduite',
+    desc: '"Je pensais que ce voyage n\'était pas possible pour moi."',
+    response: "Beaucoup pensent que leur mobilité réduite les empêche de faire la Omra. Votre guide connaît les accès adaptés, les parcours aménagés, et ajuste chaque étape à votre situation — du tawaf au sa'i. Ce voyage est le vôtre aussi, sans compromis et sans vous sentir un fardeau.",
+  },
+  {
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z"/>
         <circle cx="12" cy="9" r="2.5"/>
       </svg>
@@ -52,19 +82,6 @@ const PERSONAS = [
     title: 'Mes origines spirituelles',
     desc: '"L\'histoire de ces lieux sacrés m\'intrigue. Je veux comprendre d\'où vient tout ça."',
     response: "Ces lieux portent des millénaires d'histoire spirituelle. Ibrahim, Hajar, le Prophète ﷺ — nos guides vous racontent ces récits sur les lieux mêmes où ils se sont passés. Une expérience que nulle lecture ne peut remplacer.",
-  },
-  {
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A84C" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <polyline points="17 1 21 5 17 9"/>
-        <path d="M3 11V9a4 4 0 0 1 4-4h14"/>
-        <polyline points="7 23 3 19 7 15"/>
-        <path d="M21 13v2a4 4 0 0 1-4 4H3"/>
-      </svg>
-    ),
-    title: 'Déjà fait la Omra',
-    desc: '"J\'ai fait la Omra mais je veux mieux comprendre les rituels cette fois."',
-    response: "La deuxième Omra est souvent la plus profonde. Avec un guide qui connaît les textes, les récits, les détails cachés — vous vivrez chaque rituel avec une compréhension totalement nouvelle.",
   },
   {
     icon: (

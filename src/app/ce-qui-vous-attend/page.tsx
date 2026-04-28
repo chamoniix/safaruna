@@ -64,6 +64,15 @@ const IconPlane = ({ color }: { color: string }) => (
   </svg>
 )
 
+const IconKaaba = ({ color }: { color: string }) => (
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="4" y="9" width="16" height="13" rx="1"/>
+    <polyline points="4,9 12,5 20,9"/>
+    <line x1="4" y1="14" x2="20" y2="14"/>
+    <rect x="9.5" y="16" width="5" height="6"/>
+  </svg>
+)
+
 const IconPlaneLand = ({ color }: { color: string }) => (
   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     <path d="M2 22h20M6.3 15.7l-1.1-3.8L2 10l2-2 3 3 4-1 4-5h2l1 2-8 7-3 1.7z"/>
@@ -141,7 +150,7 @@ export default function CeQuiVousAttend() {
         <div style={{
           background: '#1A1209',
           padding: '100px 20px 28px',
-          borderRadius: '0 0 24px 24px',
+          borderRadius: 0,
           textAlign: 'center',
         }}>
           <div style={{
@@ -155,7 +164,7 @@ export default function CeQuiVousAttend() {
             Ce qui vous <em style={{ color: '#C9A84C' }}>attend</em>
           </h1>
           <p style={{
-            fontSize: 12, color: 'rgba(255,255,255,.45)', lineHeight: 1.7,
+            fontSize: 12, color: 'rgba(255,255,255,.82)', lineHeight: 1.7,
             maxWidth: 340, margin: '0 auto 24px',
           }}>
             Vous avez votre billet d&apos;avion et votre hôtel.
@@ -215,7 +224,7 @@ export default function CeQuiVousAttend() {
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
                     {c.id === 'makkah'
-                      ? <IconMountain color={active ? MAKKAH.accent : '#7A6D5A'} />
+                      ? <span style={{ fontSize: 16 }}>🕋</span>
                       : <IconShield color={active ? MADINAH.accent : '#7A6D5A'} />
                     }
                   </div>
@@ -324,7 +333,7 @@ function StepCard({
           }}>{icon}</div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 13, fontWeight: 500, color: '#1A1209' }}>{title}</div>
-            <div style={{ fontSize: 11, color: `${theme.accent}cc`, fontStyle: 'italic', marginTop: 1 }}>{emotion}</div>
+            <div style={{ fontSize: 11, color: theme.accent, fontStyle: 'italic', marginTop: 1 }}>{emotion}</div>
           </div>
           <span style={{
             fontSize: 10, color: 'rgba(26,18,9,.3)',
@@ -432,7 +441,7 @@ function SplitRasage({ openSplit, togSplit, theme }: { openSplit: string | null;
         }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 12, fontWeight: 500, color: '#1A1209' }}>Couper quelques mèches</div>
+              <div style={{ fontSize: 12, fontWeight: 500, color: '#1A1209' }}>Couper une mèche</div>
               <div style={{ fontSize: 10, color: `${theme.accent}bb`, fontStyle: 'italic', marginTop: 1 }}>Sortie d&apos;ihram</div>
             </div>
             <span style={{ fontSize: 10, color: 'rgba(26,18,9,.3)', transform: openSplit === 'femme' ? 'rotate(180deg)' : 'none', transition: 'transform .2s', display: 'inline-block' }}>▼</span>
@@ -531,7 +540,7 @@ function FlowMakkah({ openStep, togStep, openSplit, togSplit, theme }: {
 
       <ConnectorLine theme={theme} />
 
-      <StepCard num={6} icon={<IconMountain color={theme.accent} />}
+      <StepCard num={6} icon={<IconKaaba color={theme.accent} />}
         title="Visites à Makkah"
         emotion="Selon les lieux choisis à la réservation"
         open={openStep === 'm6'} onToggle={() => togStep('m6')} theme={theme}
@@ -656,7 +665,7 @@ function FlowMadinah({ openStep, togStep, openSplit, togSplit, theme }: {
 
       <ConnectorLine theme={theme} />
 
-      <StepCard num={8} icon={<IconMountain color={theme.accent} />}
+      <StepCard num={8} icon={<IconKaaba color={theme.accent} />}
         title="Visites à Makkah"
         emotion="Selon les lieux choisis à la réservation"
         open={openStep === 'd8'} onToggle={() => togStep('d8')} theme={theme}

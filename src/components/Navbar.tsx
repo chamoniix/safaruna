@@ -9,7 +9,6 @@ const HIDE_BANNER_PATHS = ['/connexion', '/inscription', '/guide/connexion', '/g
 
 const NAV_LINKS: { href: string; label: string }[] = [
   { href: '/guides', label: 'Nos guides' },
-  { href: '/accompagnements', label: 'Accompagnements' },
   { href: '/ce-qui-vous-attend', label: 'Ce qui vous attend' },
   { href: '/services', label: 'Services' },
   { href: '/guide-omra', label: 'Ebook Omra' },
@@ -111,11 +110,13 @@ export default function Navbar() {
         .nb-mobile-menu.open { display: flex; }
         .nb-mobile-link {
           font-size: 0.9rem; font-weight: 500; color: #7A6D5A; text-decoration: none;
-          padding: 0.65rem 0; border-bottom: 1px solid rgba(201,168,76,0.1);
-          text-transform: uppercase; letter-spacing: 0.05em; transition: color 0.15s;
+          padding: 0.65rem 0.75rem; border-bottom: 1px solid rgba(201,168,76,0.1);
+          text-transform: uppercase; letter-spacing: 0.05em; transition: color 0.15s, background 0.15s;
+          border-radius: 8px; margin: 0 -0.25rem;
         }
         .nb-mobile-link:last-of-type { border-bottom: none; }
-        .nb-mobile-link:hover { color: #1A1209; }
+        .nb-mobile-link:hover { color: #1A1209; background: rgba(26,18,9,.04); }
+        .nb-mobile-link-active { color: #1A1209 !important; background: rgba(201,168,76,.1) !important; font-weight: 700; }
         .nb-mobile-auth { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
         .nb-mobile-dash {
           background: #1A1209; color: #F0D897; padding: 0.75rem; border-radius: 50px;
@@ -194,7 +195,7 @@ export default function Navbar() {
 
         <div className={`nb-mobile-menu${menuOpen ? ' open' : ''}`}>
           {NAV_LINKS.map(l => (
-            <Link key={l.href} href={l.href} className="nb-mobile-link" onClick={() => setMenuOpen(false)}>
+            <Link key={l.href} href={l.href} className={`nb-mobile-link${pathname === l.href ? ' nb-mobile-link-active' : ''}`} onClick={() => setMenuOpen(false)}>
               {l.label}
             </Link>
           ))}

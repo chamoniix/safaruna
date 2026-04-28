@@ -1009,7 +1009,7 @@ export default function GuideSearchPage() {
           padding: 8rem 1.5rem 3rem;
         }
         @media (max-width: 768px) {
-          .guides-hero { padding: 5rem 1rem 2rem !important; }
+          .guides-hero { padding: 7rem 1rem 2rem !important; }
         }
 
         /* Search pill */

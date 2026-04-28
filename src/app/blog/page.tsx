@@ -85,12 +85,26 @@ export default function BlogPage() {
     <>
       <Navbar />
       <ScrollReveal />
+      <style dangerouslySetInnerHTML={{ __html: `
+        .blog-hero-section { padding: 8rem 4rem 5rem; }
+        .blog-featured-section { padding: 4rem 4rem 2rem; }
+        .blog-grid-section { padding: 2rem 4rem 5rem; }
+        .blog-newsletter-section { padding: 4rem; }
+        .blog-featured-card { display: grid; grid-template-columns: 1fr 1fr; }
+        .blog-featured-left { padding: 4rem; min-height: 320px; }
+        @media (max-width: 768px) {
+          .blog-hero-section { padding: 6rem 1.25rem 3rem; }
+          .blog-featured-section { padding: 2rem 1.25rem 1rem; }
+          .blog-grid-section { padding: 1.5rem 1.25rem 3rem; }
+          .blog-newsletter-section { padding: 3rem 1.25rem; }
+          .blog-featured-card { grid-template-columns: 1fr; }
+          .blog-featured-left { padding: 2rem; min-height: 180px; }
+        }
+      `}} />
 
       {/* HERO */}
-      <section style={{
-        background: 'var(--deep)', paddingTop: '8rem', paddingBottom: '5rem',
-        paddingLeft: '4rem', paddingRight: '4rem',
-        position: 'relative', overflow: 'hidden',
+      <section className="blog-hero-section" style={{
+        background: 'var(--deep)', position: 'relative', overflow: 'hidden',
       }}>
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 60% 70% at 50% 0%, rgba(201,168,76,0.11) 0%, transparent 60%)', pointerEvents: 'none' }} />
         {/* Arabic watermark */}
@@ -112,23 +126,21 @@ export default function BlogPage() {
       </section>
 
       {/* FEATURED ARTICLE */}
-      <section style={{ padding: '4rem 4rem 2rem', background: 'var(--cream)' }}>
+      <section className="blog-featured-section" style={{ background: 'var(--cream)' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <div className="section-label reveal">À la une</div>
           <Link href={`/blog/${featured.slug}`} style={{ textDecoration: 'none' }}>
-            <div className="reveal reveal-d1" style={{
+            <div className="reveal reveal-d1 blog-featured-card" style={{
               background: 'white', borderRadius: 24, overflow: 'hidden',
-              border: '1px solid var(--sand)', display: 'grid',
-              gridTemplateColumns: '1fr 1fr', gap: 0,
+              border: '1px solid var(--sand)', gap: 0,
               boxShadow: '0 8px 40px rgba(26,18,9,0.06)',
               transition: 'transform 0.2s, box-shadow 0.2s',
             }}>
               {/* Left: visual */}
-              <div style={{
+              <div className="blog-featured-left" style={{
                 background: 'linear-gradient(135deg, var(--deep) 0%, #2D1F08 100%)',
-                padding: '4rem', position: 'relative', overflow: 'hidden',
+                position: 'relative', overflow: 'hidden',
                 display: 'flex', flexDirection: 'column', justifyContent: 'flex-end',
-                minHeight: 320,
               }}>
                 <div style={{ position: 'absolute', top: '1rem', right: '1.5rem', fontFamily: 'var(--font-cormorant, serif)', fontSize: '8rem', color: 'rgba(201,168,76,0.1)', lineHeight: 1, direction: 'rtl', userSelect: 'none' }}>
                   مرشد
@@ -166,7 +178,7 @@ export default function BlogPage() {
       </section>
 
       {/* ARTICLES GRID */}
-      <section style={{ padding: '2rem 4rem 5rem', background: 'var(--cream)' }}>
+      <section className="blog-grid-section" style={{ background: 'var(--cream)' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <div className="section-label reveal">Tous les articles</div>
           <h2 className="reveal reveal-d1" style={{ marginBottom: '2.5rem' }}>
@@ -218,7 +230,7 @@ export default function BlogPage() {
       </section>
 
       {/* CTA Newsletter */}
-      <section style={{ background: 'var(--sand)', padding: '4rem', textAlign: 'center' }}>
+      <section className="blog-newsletter-section" style={{ background: 'var(--sand)', textAlign: 'center' }}>
         <div style={{ maxWidth: 540, margin: '0 auto' }}>
           <h2 className="reveal" style={{ marginBottom: '0.75rem' }}>
             Recevez nos articles <em>chaque semaine</em>

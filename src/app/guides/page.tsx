@@ -794,40 +794,51 @@ export default function GuideSearchPage() {
       </div>
 
       {/* ── TRUST BAR ── */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', padding: '0.75rem 1.5rem', background: '#E8DFC8', borderBottom: '1px solid #E8DFC8', flexWrap: 'wrap' }}>
-        {[
-          {
-            label: 'Guides certifiés',
-            icon: (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                <polyline points="9,12 11,14 15,10"/>
-              </svg>
-            ),
-          },
-          {
-            label: 'Paiement sécurisé',
-            icon: (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-                <line x1="1" y1="10" x2="23" y2="10"/>
-              </svg>
-            ),
-          },
-          {
-            label: '4.9 · 12 890 avis',
-            icon: (
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="#C9A84C" stroke="#C9A84C" strokeWidth="1">
-                <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
-              </svg>
-            ),
-          },
-        ].map(b => (
-          <span key={b.label} style={{ display: 'flex', alignItems: 'center', gap: '.4rem', fontSize: '.75rem', fontWeight: 600, color: '#7A6D5A' }}>
-            <span style={{ color: '#C9A84C', display: 'flex', alignItems: 'center' }}>{b.icon}</span>
-            {b.label}
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '2rem', padding: '0.8rem 1.5rem', background: '#E8DFC8', borderBottom: '1px solid #D4C9A8', flexWrap: 'nowrap', overflow: 'hidden' }}>
+        {/* Guides certifiés */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexShrink: 0 }}>
+          <span style={{ color: '#C9A84C', display: 'flex' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <polyline points="9,12 11,14 15,10"/>
+            </svg>
           </span>
-        ))}
+          <div>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.15 }}>Guides</div>
+            <div style={{ fontSize: '0.65rem', color: '#7A6D5A', lineHeight: 1.15 }}>Certifiés</div>
+          </div>
+        </div>
+
+        <div style={{ width: 1, height: 28, background: 'rgba(26,18,9,.12)', flexShrink: 0 }} />
+
+        {/* Paiement sécurisé */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexShrink: 0 }}>
+          <span style={{ color: '#C9A84C', display: 'flex' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+              <line x1="1" y1="10" x2="23" y2="10"/>
+            </svg>
+          </span>
+          <div>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.15 }}>Paiement</div>
+            <div style={{ fontSize: '0.65rem', color: '#7A6D5A', lineHeight: 1.15 }}>Sécurisé</div>
+          </div>
+        </div>
+
+        <div style={{ width: 1, height: 28, background: 'rgba(26,18,9,.12)', flexShrink: 0 }} />
+
+        {/* Avis */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexShrink: 0 }}>
+          <span style={{ color: '#C9A84C', display: 'flex' }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#C9A84C" stroke="#C9A84C" strokeWidth="1">
+              <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+            </svg>
+          </span>
+          <div>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.15 }}>★★★★★ 4.9</div>
+            <div style={{ fontSize: '0.65rem', color: '#7A6D5A', lineHeight: 1.15 }}>12 890 avis</div>
+          </div>
+        </div>
       </div>
 
       {/* ── MAIN ── */}
@@ -1006,10 +1017,10 @@ export default function GuideSearchPage() {
 
         /* Hero */
         .guides-hero {
-          padding: 8rem 1.5rem 3rem;
+          padding: 9.5rem 1.5rem 3rem;
         }
         @media (max-width: 768px) {
-          .guides-hero { padding: 7rem 1rem 2rem !important; }
+          .guides-hero { padding: 8.5rem 1rem 2rem !important; }
         }
 
         /* Search pill */

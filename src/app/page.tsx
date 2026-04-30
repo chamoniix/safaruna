@@ -116,8 +116,6 @@ export default function Home() {
           HERO FULLSCREEN — cinématique
           ═══════════════════════════════════════════════════════ */}
       <section className="hero-full">
-        {/* Arabic watermark */}
-        <div className="hero-full-arabic" aria-hidden="true">بسم الله</div>
 
         {/* Ambient glow rings */}
         <div style={{ position: 'absolute', width: '70vw', height: '70vw', maxWidth: 800, maxHeight: 800, borderRadius: '50%', background: 'radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 65%)', top: '50%', left: '50%', transform: 'translate(-50%, -55%)', pointerEvents: 'none' }} />
@@ -144,55 +142,30 @@ export default function Home() {
           </div>
 
           {/* Arabic subtitle */}
-          <div style={{
-            fontFamily: 'var(--font-cormorant, serif)',
-            fontSize: '1rem', letterSpacing: '0.15em',
-            color: 'rgba(201,168,76,0.85)',
-            marginBottom: '1rem',
-            animation: 'fadeIn 0.8s 1.0s ease both', opacity: 0,
-          }}>
+          <div className="hero-subtitle-ar">
             سافر • SAFARUMA • Voyage
           </div>
 
           {/* Main tagline */}
-          <h1 style={{
-            fontFamily: 'var(--font-cormorant, serif)',
-            fontSize: 'clamp(2.4rem, 5.5vw, 3.8rem)',
-            fontWeight: 300, color: 'white', lineHeight: 1.15,
-            marginBottom: '1.5rem',
-            animation: 'fadeInUp 0.9s 1.2s ease both', opacity: 0,
-          }}>
+          <h1 className="hero-tagline">
             Vis ta Omra dans ta langue,
             <br />
             <em style={{ color: 'var(--gold)', fontStyle: 'italic' }}>guidé comme tu le mérites.</em>
           </h1>
 
-          <p style={{
-            color: 'rgba(255,255,255,0.7)',
-            fontSize: '1rem', lineHeight: 1.8,
-            maxWidth: 520, margin: '0 auto 2.5rem',
-            animation: 'fadeInUp 0.9s 1.4s ease both', opacity: 0,
-          }}>
+          <p className="hero-desc">
             Un guide privé certifié, qui parle ta langue, t&apos;explique chaque rituel de la Omra et fait de ce voyage le plus important de ta vie.
           </p>
 
           {/* CTAs */}
-          <div style={{
-            display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap',
-            marginBottom: '1.5rem',
-            animation: 'fadeInUp 0.9s 1.6s ease both', opacity: 0,
-          }}>
+          <div className="hero-cta-row">
             <Link href="/guides" className="btn-hero-cta">
               Trouver mon guide
             </Link>
           </div>
 
           {/* Live trust mini-row */}
-          <div style={{
-            display: 'flex', gap: '2rem', justifyContent: 'center', flexWrap: 'wrap',
-            marginBottom: '1.75rem',
-            animation: 'fadeIn 0.9s 1.8s ease both', opacity: 0,
-          }}>
+          <div className="hero-trust-row">
             <div className="live-badge">
               <span className="live-dot" />
               <span>147 pèlerins ont réservé cette semaine</span>

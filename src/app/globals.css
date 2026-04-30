@@ -193,6 +193,11 @@ footer { background: var(--warm); padding: 3rem 4rem 2rem; color: rgba(255,255,2
 .btn-hero-cta:hover { background: var(--gold); color: var(--deep); border-color: var(--gold); }
 .btn-hero-cta-secondary { display: inline-block; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.75); border: 1px solid rgba(255,255,255,0.12); padding: 0.9rem 2.5rem; border-radius: 50px; font-size: 0.88rem; font-weight: 500; letter-spacing: 0.05em; text-decoration: none; transition: all 0.25s; cursor: pointer; }
 .btn-hero-cta-secondary:hover { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.85); }
+.hero-subtitle-ar { font-family: var(--font-cormorant), serif; font-size: 1rem; letter-spacing: 0.15em; color: rgba(201,168,76,0.85); margin-bottom: 1rem; animation: fadeIn 0.8s 1.0s ease both; opacity: 0; }
+.hero-tagline { font-family: var(--font-cormorant), serif; font-size: clamp(2.4rem, 5.5vw, 3.8rem); font-weight: 300; color: white; line-height: 1.15; margin-bottom: 1.5rem; animation: fadeInUp 0.9s 1.2s ease both; opacity: 0; }
+.hero-desc { color: rgba(255,255,255,0.7); font-size: 1rem; line-height: 1.8; max-width: 520px; margin: 0 auto 2.5rem; animation: fadeInUp 0.9s 1.4s ease both; opacity: 0; }
+.hero-cta-row { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.5rem; animation: fadeInUp 0.9s 1.6s ease both; opacity: 0; }
+.hero-trust-row { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.75rem; animation: fadeIn 0.9s 1.8s ease both; opacity: 0; }
 
 /* ── STATS SECTION ─────────────────────────────────────────────────────────── */
 .stats-section { background: var(--cream); padding: 5rem 4rem; border-top: 1px solid var(--sand); border-bottom: 1px solid var(--sand); }
@@ -298,6 +303,14 @@ footer { background: var(--warm); padding: 3rem 4rem 2rem; color: rgba(255,255,2
   .cta-section { padding: 2.5rem 1.25rem; }
   .trust { padding: 1.25rem 1rem; gap: 1rem; }
   .guide-card { padding: 1.25rem; }
+  .hero-full { justify-content: flex-start; min-height: 100svh; padding: calc(64px + 1.25rem) 1.25rem 1rem; }
+  .golden-line-wrap { margin: 0.6rem 0; }
+  .hero-logo-letter { font-size: 2.8rem; }
+  .hero-subtitle-ar { display: none; }
+  .hero-tagline { margin-bottom: 0.75rem; }
+  .hero-desc { margin: 0 auto 1rem; font-size: 0.9rem; }
+  .hero-cta-row { margin-bottom: 0.75rem; }
+  .hero-trust-row { margin-bottom: 0.75rem; gap: 1rem; }
 }
 /* 768px — tablet */
 @media (max-width: 768px) {

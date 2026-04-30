@@ -52,11 +52,13 @@ model User {
   createdAt     DateTime  @default(now())
   lastLogin     DateTime?
 
+  newsletterOptIn Boolean @default(false)
+
   // Relations
   accounts       Account[]
   sessions       Session[]
   guideProfile   GuideProfile?
-  
+
   // As a Pelerin
   reservations   Reservation[] @relation("PelerinReservations")
   conversationsAsPelerin Conversation[] @relation("PelerinConversations")
@@ -357,6 +359,14 @@ model Notification {
   message   String
   readAt    DateTime?
   createdAt DateTime @default(now())
+}
+
+model NewsletterSubscription {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  createdAt   DateTime @default(now())
+  source      String   @default("blog")
+  brevoSynced Boolean  @default(false)
 }
 
 model PasswordResetToken {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const card: React.CSSProperties = { background: 'white', border: '1px solid #E8DFC8', borderRadius: 16, padding: '1.75rem 2rem', marginBottom: '1.25rem' };
 const cardTitle: React.CSSProperties = { fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.3rem', fontWeight: 700, color: '#1A1209', marginBottom: '1.25rem', paddingBottom: '0.85rem', borderBottom: '1px solid #F0EBD8' };
@@ -35,7 +35,29 @@ export default function ParametresPage() {
   const [deleteConfirm, setDeleteConfirm] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const toggleN = (k: keyof typeof notifs) => setNotifs(p => ({ ...p, [k]: !p[k] }));
+  // Load newsletter preference from server
+  useEffect(() => {
+    fetch('/api/newsletter/preference')
+      .then(r => r.ok ? r.json() : null)
+      .then((data: { newsletterOptIn?: boolean } | null) => {
+        if (data && typeof data.newsletterOptIn === 'boolean') {
+          setNotifs(p => ({ ...p, newsletter: data.newsletterOptIn as boolean }));
+        }
+      })
+      .catch(() => {/* ignore */});
+  }, []);
+
+  const toggleN = (k: keyof typeof notifs) => {
+    const newValue = !notifs[k];
+    setNotifs(p => ({ ...p, [k]: newValue }));
+    if (k === 'newsletter') {
+      fetch('/api/newsletter/preference', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newsletterOptIn: newValue }),
+      }).catch(() => {/* ignore */});
+    }
+  };
   const toggleA = (k: keyof typeof access) => setAccess(p => ({ ...p, [k]: !p[k] }));
   const handleSave = () => { setSaved(true); setTimeout(() => setSaved(false), 2000); };
 

@@ -2,6 +2,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
+import NewsletterForm from "@/components/NewsletterForm";
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -238,15 +239,8 @@ export default function BlogPage() {
           <p className="reveal reveal-d1" style={{ color: 'var(--muted)', lineHeight: 1.75, marginBottom: '2rem', fontSize: '0.9rem' }}>
             Conseils spirituels, guides pratiques et actualités des Lieux Saints — directement dans votre boîte mail.
           </p>
-          <div className="reveal reveal-d2" style={{ display: 'flex', gap: '0.75rem', maxWidth: 420, margin: '0 auto', flexWrap: 'wrap', justifyContent: 'center' }}>
-            <input
-              type="email"
-              placeholder="votre@email.com"
-              style={{ flex: 1, minWidth: 200, padding: '0.75rem 1rem', borderRadius: 50, border: '1px solid var(--sand-dark)', background: 'white', fontSize: '0.875rem', outline: 'none', color: 'var(--deep)' }}
-            />
-            <button style={{ background: 'var(--deep)', color: 'var(--gold-light)', padding: '0.75rem 1.5rem', borderRadius: 50, fontWeight: 700, fontSize: '0.82rem', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap' }}>
-              S&apos;abonner →
-            </button>
+          <div className="reveal reveal-d2">
+            <NewsletterForm />
           </div>
         </div>
       </section>

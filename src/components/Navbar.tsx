@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const HIDE_BANNER_PATHS = ['/connexion', '/inscription', '/guide/connexion', '/guide/inscription', '/admin'];
 
@@ -18,10 +18,21 @@ const NAV_LINKS: { href: string; label: string }[] = [
   { href: '/a-propos', label: 'À propos' },
 ];
 
-export default function Navbar() {
+export default function Navbar({ transparentOnHero = false }: { transparentOnHero?: boolean }) {
   const { data: session } = useSession();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    if (!transparentOnHero) return;
+    const onScroll = () => setScrolled(window.scrollY > 80);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [transparentOnHero]);
+
+  const isTransparent = transparentOnHero && !scrolled;
 
   const hideBanner = pathname ? HIDE_BANNER_PATHS.some(p => pathname.startsWith(p)) : false;
   const role = (session?.user as any)?.role;
@@ -39,18 +50,22 @@ export default function Navbar() {
           font-family: var(--font-manrope, sans-serif);
         }
         .nb-banner {
-          background: #1A1209; color: #F0D897;
-          display: flex; align-items: center; justify-content: center; gap: 0.5rem;
-          padding: 0.55rem 1rem; font-size: 0.78rem; font-weight: 500; text-align: center;
+          background: #251913; color: #F0D897;
+          display: flex; align-items: center; justify-content: space-between; gap: 10px;
+          padding: 9px 12px; border-bottom: 0.5px solid rgba(201,168,76,0.22);
         }
-        .nb-banner a { color: #C9A84C; font-weight: 700; text-decoration: underline; }
-        .nb-banner-dot { width: 6px; height: 6px; border-radius: 50%; background: #C9A84C; flex-shrink: 0; animation: nbpulse 2s infinite; }
-        @keyframes nbpulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+        .nb-banner-pdf-btn {
+          display: inline-flex; align-items: center; gap: 4px;
+          padding: 5px 11px; border: 0.5px solid #C9A84C; border-radius: 999px;
+          font-size: 9px; color: #C9A84C; letter-spacing: 0.08em; font-weight: 500;
+          flex-shrink: 0; text-decoration: none;
+        }
         .nb-bar {
           background: rgba(250,247,240,0.95); backdrop-filter: blur(12px);
           border-bottom: 1px solid rgba(201,168,76,0.2);
           padding: 0.9rem 2rem;
           display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+          transition: background 0.35s ease, border-color 0.35s ease, backdrop-filter 0.35s ease;
         }
         .nb-logo {
           font-family: var(--font-cormorant, serif); font-size: 1.75rem; font-weight: 700;
@@ -146,28 +161,37 @@ export default function Navbar() {
       `}} />
 
       <div className="nb-root">
-        {!hideBanner && (
+        {!hideBanner && !isTransparent && (
           <div className="nb-banner">
-            <span className="nb-banner-dot" />
-            <span>
-              La Omra n&apos;attend pas que vous soyez prêt —{' '}
-              <Link href="/guide-omra">Découvrir</Link>
-            </span>
+            <Link href="/guide-omra" style={{ display: 'flex', alignItems: 'center', gap: '9px', minWidth: 0, flex: 1, textDecoration: 'none' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', flexShrink: 0 }}>
+                <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
+                  <path d="M3 2h7l3 3v9H3V2z" stroke="#C9A84C" strokeWidth="1" strokeLinejoin="round" fill="rgba(201,168,76,0.08)"/>
+                  <path d="M10 2v3h3" stroke="#C9A84C" strokeWidth="1" strokeLinejoin="round"/>
+                  <path d="M5 8h6M5 10h6M5 12h4" stroke="#C9A84C" strokeWidth="0.7" strokeLinecap="round"/>
+                </svg>
+              </span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', minWidth: 0 }}>
+                <div style={{ fontSize: '11.5px', fontWeight: 500, color: '#F0D897', letterSpacing: '0.03em', lineHeight: 1.25 }}>Guide PDF gratuit</div>
+                <div style={{ fontSize: '9.5px', color: 'rgba(240,216,151,0.65)', lineHeight: 1.25 }}>La Omra étape par étape</div>
+              </div>
+            </Link>
+            <Link href="/guide-omra" className="nb-banner-pdf-btn">RECEVOIR →</Link>
           </div>
         )}
 
-        <div className="nb-bar">
-          <Link href="/" className="nb-logo">
+        <div className="nb-bar" style={isTransparent ? { background: 'transparent', backdropFilter: 'none', WebkitBackdropFilter: 'none', borderBottom: 'none' } : {}}>
+          <Link href="/" className="nb-logo" style={{ transition: 'opacity 0.35s ease', ...(isTransparent ? { opacity: 0, pointerEvents: 'none' } : {}) }}>
             SAFAR<span>U</span>MA
           </Link>
 
-          <div className="nb-links">
+          <div className="nb-links" style={isTransparent ? { display: 'none' } : {}}>
             {NAV_LINKS.map(l => (
               <Link key={l.href} href={l.href}>{l.label}</Link>
             ))}
           </div>
 
-          <div className="nb-actions">
+          <div className="nb-actions" style={isTransparent ? { display: 'none' } : {}}>
             {session ? (
               <>
                 <span className="nb-user-name">{session.user?.name || session.user?.email}</span>
@@ -188,8 +212,11 @@ export default function Navbar() {
             className={`nb-hamburger${menuOpen ? ' open' : ''}`}
             onClick={() => setMenuOpen(o => !o)}
             aria-label="Menu"
+            style={isTransparent ? { display: 'flex', background: 'rgba(250,247,240,0.05)', borderColor: 'rgba(201,168,76,0.4)', borderWidth: '0.5px' } : {}}
           >
-            <span /><span /><span />
+            <span style={isTransparent ? { background: 'rgba(240,216,151,0.9)' } : {}} />
+            <span style={isTransparent ? { background: 'rgba(240,216,151,0.9)' } : {}} />
+            <span style={isTransparent ? { background: 'rgba(240,216,151,0.9)' } : {}} />
           </button>
         </div>
 

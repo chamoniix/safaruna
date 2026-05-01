@@ -109,7 +109,7 @@ const nbDisponibles = 8;
 export default function Home() {
   return (
     <>
-      <Navbar />
+      <Navbar transparentOnHero />
       <ScrollReveal />
 
       {/* ═══════════════════════════════════════════════════════
@@ -141,53 +141,63 @@ export default function Home() {
             <div className="golden-line-anim" />
           </div>
 
-          {/* Arabic subtitle */}
-          <div className="hero-subtitle-ar">
-            سافر • SAFARUMA • Voyage
-          </div>
-
-          {/* Main tagline */}
-          <h1 className="hero-tagline">
-            Vis ta Omra dans ta langue,
-            <br />
-            <em style={{ color: 'var(--gold)', fontStyle: 'italic' }}>guidé comme tu le mérites.</em>
-          </h1>
-
-          <p className="hero-desc">
-            Un guide privé certifié, qui parle ta langue, t&apos;explique chaque rituel de la Omra et fait de ce voyage le plus important de ta vie.
-          </p>
-
-          {/* CTAs */}
-          <div className="hero-cta-row">
-            <Link href="/guides" className="btn-hero-cta">
-              Trouver mon guide
-            </Link>
-          </div>
-
-          {/* Live trust mini-row */}
-          <div className="hero-trust-row">
-            <div className="live-badge">
-              <span className="live-dot" />
-              <span>147 pèlerins ont réservé cette semaine</span>
-            </div>
-            <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.65)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              <span style={{ color: 'var(--gold)' }}>★★★★★</span> 4.96 · 709 avis vérifiés
+          {/* Eyebrow */}
+          <div style={{ marginBottom: '14px' }}>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: '5px',
+              fontSize: '0.59rem', color: 'rgba(201,168,76,0.95)', letterSpacing: '0.1em',
+              padding: '4px 12px', border: '0.5px solid rgba(201,168,76,0.4)',
+              borderRadius: '999px', background: 'rgba(201,168,76,0.06)',
+            }}>
+              <span style={{ color: '#C9A84C' }}>★</span> Guides privés certifiés · 30+ langues
             </span>
           </div>
 
-          {/* Citation */}
-          <p style={{
-            fontFamily: 'var(--font-cormorant, serif)',
-            fontStyle: 'italic',
-            fontSize: '0.95rem',
-            color: 'rgba(240,216,151,0.85)',
-            maxWidth: 480,
-            margin: '0 auto',
-            lineHeight: 1.7,
-            animation: 'fadeIn 0.9s 2.0s ease both', opacity: 0,
-          }}>
-            &ldquo;Voyage — car dans chaque pas vers les lieux saints,<br />ton âme retrouve ce qu&apos;elle cherchait.&rdquo;
+          {/* H1 */}
+          <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(1.6rem, 4vw, 2.2rem)', lineHeight: 1.18, color: '#FAF7F0', marginTop: 0, marginBottom: 0 }}>
+            Une Omra, un guide privé
+          </h1>
+          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(1.6rem, 4vw, 2.2rem)', fontStyle: 'italic', lineHeight: 1.18, color: '#C9A84C', marginTop: '2px', marginBottom: '14px' }}>
+            dans ta langue.
+          </div>
+
+          {/* Subtitle */}
+          <p style={{ fontSize: '0.72rem', lineHeight: 1.6, color: 'rgba(250,247,240,0.78)', maxWidth: '34ch', margin: '0 auto 20px' }}>
+            Guide certifié à <span style={{ color: '#F0D897', fontWeight: 500 }}>La Mecque</span> et <span style={{ color: '#F0D897', fontWeight: 500 }}>Médine</span>. Visites sur les lieux saints et lieux que peu de pèlerins connaissent.
           </p>
+
+          {/* CTA with halo */}
+          <div style={{ marginBottom: '22px' }}>
+            <span className="cta-halo-wrap">
+              <Link href="/guides" style={{
+                display: 'inline-block', border: '1.5px solid #C9A84C',
+                color: '#F0D897', padding: '12px 36px', borderRadius: '999px',
+                fontSize: '0.81rem', fontWeight: 500, letterSpacing: '0.04em',
+                background: 'rgba(201,168,76,0.04)', textDecoration: 'none',
+              }}>
+                Trouver mon guide
+              </Link>
+            </span>
+          </div>
+
+          {/* Social proof stack */}
+          <div style={{ marginBottom: '11px' }}>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: '7px',
+              padding: '5px 13px', border: '0.5px solid rgba(122,217,150,0.5)',
+              borderRadius: '999px', fontSize: '0.66rem', color: '#7AD996',
+            }}>
+              <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#7AD996', flexShrink: 0 }} />
+              147 pèlerins ont réservé cette semaine
+            </span>
+          </div>
+          <div style={{ marginBottom: '14px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+            <span style={{ fontSize: '0.625rem', color: '#C9A84C', letterSpacing: '1px' }}>★★★★★</span>
+            <span style={{ fontSize: '0.625rem', color: 'rgba(250,247,240,0.8)' }}>4.96 · 709 avis vérifiés</span>
+          </div>
+          <div style={{ fontSize: '0.69rem', color: 'rgba(240,216,151,0.92)', letterSpacing: '0.02em', lineHeight: 1.45 }}>
+            <span style={{ color: '#C9A84C', fontSize: '0.56rem' }}>◆</span> Partenaire de <span style={{ color: '#F0D897', fontWeight: 500 }}>200+ mosquées</span> et <span style={{ color: '#F0D897', fontWeight: 500 }}>agences Omra</span>
+          </div>
         </div>
 
         {/* Scroll indicator */}
@@ -200,6 +210,17 @@ export default function Home() {
           STATS — animated counters
           ═══════════════════════════════════════════════════════ */}
       <StatsSection />
+
+      {/* Citation */}
+      <section style={{ background: '#1A1209', padding: 'clamp(3rem, 6vw, 5rem) 2rem', textAlign: 'center' }}>
+        <p style={{
+          fontFamily: 'var(--font-cormorant, serif)', fontStyle: 'italic',
+          fontSize: 'clamp(1.1rem, 2.5vw, 1.5rem)', color: 'rgba(240,216,151,0.85)',
+          maxWidth: 600, margin: '0 auto', lineHeight: 1.75,
+        }}>
+          &ldquo;Voyage, car dans chaque pas vers les lieux saints,<br />ton âme retrouve ce qu&apos;elle cherchait.&rdquo;
+        </p>
+      </section>
 
       {/* ═══════════════════════════════════════════════════════
           QUESTIONNEMENT — Personas / Ce voyage est pour vous

@@ -50,15 +50,15 @@ export default function Navbar({ transparentOnHero = false }: { transparentOnHer
           font-family: var(--font-manrope, sans-serif);
         }
         .nb-banner {
-          background: #251913; color: #F0D897;
-          display: flex; align-items: center; justify-content: space-between; gap: 10px;
-          padding: 9px 12px; border-bottom: 0.5px solid rgba(201,168,76,0.22);
+          background: #251913; color: #FFFFFF;
+          display: flex; align-items: center; justify-content: flex-start; gap: 14px;
+          padding: 12px 16px; border-bottom: 0.5px solid rgba(201,168,76,0.22);
         }
         .nb-banner-pdf-btn {
-          display: inline-flex; align-items: center; gap: 4px;
-          padding: 5px 11px; border: 0.5px solid #C9A84C; border-radius: 999px;
-          font-size: 9px; color: #C9A84C; letter-spacing: 0.08em; font-weight: 500;
-          flex-shrink: 0; text-decoration: none;
+          display: inline-flex; align-items: center; gap: 5px;
+          padding: 7px 14px; border: 0.5px solid #C9A84C; border-radius: 999px;
+          font-size: 11px; color: #C9A84C; letter-spacing: 0.08em; font-weight: 600;
+          flex-shrink: 0; text-decoration: none; margin-left: auto;
         }
         .nb-bar {
           background: rgba(250,247,240,0.95); backdrop-filter: blur(12px);
@@ -172,8 +172,8 @@ export default function Navbar({ transparentOnHero = false }: { transparentOnHer
                 </svg>
               </span>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', minWidth: 0 }}>
-                <div style={{ fontSize: '11.5px', fontWeight: 500, color: '#F0D897', letterSpacing: '0.03em', lineHeight: 1.25 }}>Guide PDF gratuit</div>
-                <div style={{ fontSize: '9.5px', color: 'rgba(240,216,151,0.65)', lineHeight: 1.25 }}>La Omra étape par étape</div>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: '#FFFFFF', letterSpacing: '0.02em', lineHeight: 1.25 }}>Guide PDF gratuit</div>
+                <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.65)', lineHeight: 1.25 }}>La Omra étape par étape</div>
               </div>
             </Link>
             <Link href="/guide-omra" className="nb-banner-pdf-btn">RECEVOIR →</Link>

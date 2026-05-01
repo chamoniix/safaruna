@@ -113,18 +113,18 @@ export default function Home() {
       <ScrollReveal />
       <style dangerouslySetInnerHTML={{ __html: `
         @media (max-width: 768px) {
-          .hc-eyebrow { font-size: 0.7rem !important; }
-          .hc-title   { font-size: 1.65rem !important; }
-          .hc-title-em { font-size: 1.65rem !important; }
-          .hc-sub     { font-size: 0.85rem !important; max-width: min(540px, 90vw) !important; }
-          .hc-cta     { font-size: 0.95rem !important; padding: 14px 40px !important; }
-          .hc-pill    { font-size: 0.78rem !important; }
-          .hc-stars   { font-size: 0.75rem !important; }
-          .hc-partner { font-size: 0.82rem !important; }
+          .hc-eyebrow  { font-size: 0.75rem !important; }
+          .hc-title    { font-size: 2.1rem !important; }
+          .hc-title-em { font-size: 2.1rem !important; }
+          .hc-sub      { font-size: 0.9rem !important; max-width: min(540px, 90vw) !important; }
+          .hc-cta      { font-size: 1rem !important; padding: 15px 44px !important; }
+          .hc-pill     { font-size: 0.82rem !important; }
+          .hc-stars    { font-size: 0.8rem !important; }
+          .hc-partner  { font-size: 0.85rem !important; }
         }
         @media (min-width: 769px) {
-          .hc-title   { font-size: 2.4rem !important; }
-          .hc-title-em { font-size: 2.4rem !important; }
+          .hc-title    { font-size: 2.8rem !important; }
+          .hc-title-em { font-size: 2.8rem !important; }
         }
       `}} />
 
@@ -158,7 +158,7 @@ export default function Home() {
           </div>
 
           {/* Eyebrow */}
-          <div style={{ marginBottom: '14px' }}>
+          <div style={{ marginBottom: '28px' }}>
             <span className="hc-eyebrow" style={{
               display: 'inline-flex', alignItems: 'center', gap: '5px',
               fontSize: '0.59rem', color: 'rgba(201,168,76,0.95)', letterSpacing: '0.1em',
@@ -170,20 +170,20 @@ export default function Home() {
           </div>
 
           {/* H1 */}
-          <h1 className="hc-title" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(1.6rem, 4vw, 2.2rem)', lineHeight: 1.18, color: '#FAF7F0', marginTop: 0, marginBottom: 0 }}>
+          <h1 className="hc-title" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(2rem, 5vw, 2.8rem)', lineHeight: 1.15, color: '#FAF7F0', marginTop: 0, marginBottom: 0 }}>
             Une Omra, un guide privé
           </h1>
-          <div className="hc-title-em" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(1.6rem, 4vw, 2.2rem)', fontStyle: 'italic', lineHeight: 1.18, color: '#C9A84C', marginTop: '2px', marginBottom: '14px' }}>
+          <div className="hc-title-em" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(2rem, 5vw, 2.8rem)', fontStyle: 'italic', lineHeight: 1.15, color: '#C9A84C', marginTop: '4px', marginBottom: '28px' }}>
             dans ta langue.
           </div>
 
           {/* Subtitle */}
-          <p className="hc-sub" style={{ fontSize: '0.72rem', lineHeight: 1.6, color: 'rgba(250,247,240,0.78)', maxWidth: 'min(540px, 90vw)', margin: '0 auto 20px' }}>
+          <p className="hc-sub" style={{ fontSize: '0.72rem', lineHeight: 1.65, color: 'rgba(250,247,240,0.78)', maxWidth: 'min(540px, 90vw)', margin: '0 auto 32px' }}>
             Guide certifié à <span style={{ color: '#F0D897', fontWeight: 500 }}>La Mecque</span> et <span style={{ color: '#F0D897', fontWeight: 500 }}>Médine</span>. Visites sur les lieux saints et lieux que peu de pèlerins connaissent.
           </p>
 
           {/* CTA with halo */}
-          <div style={{ marginBottom: '22px' }}>
+          <div style={{ marginBottom: '36px' }}>
             <span className="cta-halo-wrap">
               <Link href="/guides" className="hc-cta" style={{
                 display: 'inline-block', border: '1.5px solid #C9A84C',
@@ -197,7 +197,7 @@ export default function Home() {
           </div>
 
           {/* Social proof stack */}
-          <div style={{ marginBottom: '11px' }}>
+          <div style={{ marginBottom: '16px' }}>
             <span className="hc-pill" style={{
               display: 'inline-flex', alignItems: 'center', gap: '7px',
               padding: '5px 13px', border: '0.5px solid rgba(122,217,150,0.5)',
@@ -207,7 +207,7 @@ export default function Home() {
               147 pèlerins ont réservé cette semaine
             </span>
           </div>
-          <div className="hc-stars" style={{ marginBottom: '14px', display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.625rem' }}>
+          <div className="hc-stars" style={{ marginBottom: '18px', display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '0.625rem' }}>
             <span style={{ color: '#C9A84C', letterSpacing: '1px' }}>★★★★★</span>
             <span style={{ color: 'rgba(250,247,240,0.8)' }}>4.96 · 709 avis vérifiés</span>
           </div>

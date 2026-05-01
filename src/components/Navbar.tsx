@@ -50,14 +50,14 @@ export default function Navbar({ transparentOnHero = false }: { transparentOnHer
           font-family: var(--font-manrope, sans-serif);
         }
         .nb-banner {
-          background: #4A2E10; color: #FFFFFF;
+          background: #251913; color: #FFFFFF;
           display: flex; align-items: center; justify-content: center; gap: 20px;
           padding: 12px 16px; border-bottom: 1px solid rgba(201,168,76,0.3);
         }
         .nb-banner-pdf-btn {
           display: inline-flex; align-items: center; gap: 5px;
-          padding: 8px 18px; background: #16A34A; border: none; border-radius: 999px;
-          font-size: 11px; color: #FFFFFF; letter-spacing: 0.08em; font-weight: 600;
+          padding: 8px 18px; border: 0.5px solid #C9A84C; border-radius: 999px;
+          font-size: 11px; color: #22C55E; letter-spacing: 0.08em; font-weight: 600;
           flex-shrink: 0; text-decoration: none;
         }
         .nb-bar {

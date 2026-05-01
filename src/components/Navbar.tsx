@@ -156,12 +156,12 @@ export default function Navbar({ transparentOnHero = false }: { transparentOnHer
           .nb-links { display: none; }
           .nb-actions { display: none; }
           .nb-hamburger { display: flex !important; }
-          .nb-bar { background: rgba(250,247,240,1) !important; padding: 0.9rem 1.25rem !important; }
+          .nb-bar { background: rgba(250,247,240,1); padding: 0.9rem 1.25rem !important; }
         }
       `}} />
 
       <div className="nb-root">
-        {!hideBanner && !isTransparent && (
+        {!hideBanner && (
           <div className="nb-banner">
             <Link href="/guide-omra" style={{ display: 'flex', alignItems: 'center', gap: '9px', minWidth: 0, flex: 1, textDecoration: 'none' }}>
               <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', flexShrink: 0 }}>

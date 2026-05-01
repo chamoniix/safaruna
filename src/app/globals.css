@@ -305,7 +305,7 @@ footer { background: var(--warm); padding: 3rem 4rem 2rem; color: rgba(255,255,2
   .guide-card { padding: 1.25rem; }
   .hero-full { justify-content: flex-start; min-height: 100svh; padding: 6rem 1.25rem 1rem; }
   .golden-line-wrap { margin: 0.6rem 0; }
-  .hero-logo-letter { font-size: 2.8rem; }
+  .hero-logo-letter { font-size: 3.4rem; }
   .hero-subtitle-ar { display: none; }
   .hero-tagline { margin-bottom: 0.75rem; }
   .hero-desc { margin: 0 auto 1rem; font-size: 0.9rem; }

@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import GuideOmraClient from "./GuideOmraClient";
 
 export const metadata: Metadata = {
-  title: "Guide complet de la Omra 2025 — Rituels, Du'as & Conseils | SAFARUMA",
+  title: "La Omra étape par étape — Rituels, Du'as & Conseils | SAFARUMA",
   description:
-    "Guide spirituel complet de la Omra : Ihram, Tawaf, Sa'i, Tahallul — chaque rituel expliqué étape par étape avec les du'as, conseils pratiques et checklist de préparation.",
+    "Guide spirituel complet de la Omra : Ihram, Tawaf, Sa'i, Tahallul. Chaque rituel expliqué simplement avec ses du'as et ses conseils pratiques.",
   keywords: [
     "guide omra",
     "comment faire la omra",
@@ -16,9 +16,8 @@ export const metadata: Metadata = {
     "safaruma",
   ],
   openGraph: {
-    title: "Guide complet de la Omra — SAFARUMA",
-    description:
-      "Tout ce qu'il faut savoir pour accomplir la Omra dans les meilleures conditions spirituelles : rituels, du'as, conseils et checklist.",
+    title: "La Omra étape par étape — SAFARUMA",
+    description: "De l'Ihram au Tahallul, chaque rituel expliqué simplement.",
     url: "https://safaruma.com/guide-omra",
     siteName: "SAFARUMA",
     locale: "fr_FR",

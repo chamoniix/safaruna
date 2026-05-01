@@ -18,7 +18,7 @@ const NAV_LINKS: { href: string; label: string }[] = [
   { href: '/a-propos', label: 'À propos' },
 ];
 
-export default function Navbar({ transparentOnHero = false }: { transparentOnHero?: boolean }) {
+export default function Navbar({ transparentOnHero = false, scrollThreshold = 80 }: { transparentOnHero?: boolean; scrollThreshold?: number }) {
   const { data: session } = useSession();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -26,7 +26,7 @@ export default function Navbar({ transparentOnHero = false }: { transparentOnHer
 
   useEffect(() => {
     if (!transparentOnHero) return;
-    const onScroll = () => setScrolled(window.scrollY > 80);
+    const onScroll = () => setScrolled(window.scrollY > scrollThreshold);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);

@@ -50,15 +50,15 @@ export default function Navbar({ transparentOnHero = false }: { transparentOnHer
           font-family: var(--font-manrope, sans-serif);
         }
         .nb-banner {
-          background: #251913; color: #FFFFFF;
-          display: flex; align-items: center; justify-content: flex-start; gap: 14px;
-          padding: 12px 16px; border-bottom: 0.5px solid rgba(201,168,76,0.22);
+          background: #4A2E10; color: #FFFFFF;
+          display: flex; align-items: center; justify-content: center; gap: 20px;
+          padding: 12px 16px; border-bottom: 1px solid rgba(201,168,76,0.3);
         }
         .nb-banner-pdf-btn {
           display: inline-flex; align-items: center; gap: 5px;
-          padding: 7px 14px; border: 0.5px solid #C9A84C; border-radius: 999px;
-          font-size: 11px; color: #C9A84C; letter-spacing: 0.08em; font-weight: 600;
-          flex-shrink: 0; text-decoration: none; margin-left: auto;
+          padding: 8px 18px; background: #16A34A; border: none; border-radius: 999px;
+          font-size: 11px; color: #FFFFFF; letter-spacing: 0.08em; font-weight: 600;
+          flex-shrink: 0; text-decoration: none;
         }
         .nb-bar {
           background: rgba(250,247,240,0.95); backdrop-filter: blur(12px);
@@ -163,7 +163,7 @@ export default function Navbar({ transparentOnHero = false }: { transparentOnHer
       <div className="nb-root">
         {!hideBanner && (
           <div className="nb-banner">
-            <Link href="/guide-omra" style={{ display: 'flex', alignItems: 'center', gap: '9px', minWidth: 0, flex: 1, textDecoration: 'none' }}>
+            <Link href="/guide-omra" style={{ display: 'flex', alignItems: 'center', gap: '9px', textDecoration: 'none' }}>
               <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', flexShrink: 0 }}>
                 <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
                   <path d="M3 2h7l3 3v9H3V2z" stroke="#C9A84C" strokeWidth="1" strokeLinejoin="round" fill="rgba(201,168,76,0.08)"/>

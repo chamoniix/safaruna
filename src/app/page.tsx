@@ -158,7 +158,7 @@ export default function Home() {
           </div>
 
           {/* Eyebrow */}
-          <div style={{ marginBottom: '28px' }}>
+          <div style={{ marginTop: '20px', marginBottom: '28px' }}>
             <span className="hc-eyebrow" style={{
               display: 'inline-flex', alignItems: 'center', gap: '5px',
               fontSize: '0.59rem', color: 'rgba(201,168,76,0.95)', letterSpacing: '0.1em',
@@ -179,7 +179,7 @@ export default function Home() {
 
           {/* Subtitle */}
           <p className="hc-sub" style={{ fontSize: '0.72rem', lineHeight: 1.65, color: 'rgba(250,247,240,0.78)', maxWidth: 'min(540px, 90vw)', margin: '0 auto 32px' }}>
-            Guide certifié à <span style={{ color: '#F0D897', fontWeight: 500 }}>La Mecque</span> et <span style={{ color: '#F0D897', fontWeight: 500 }}>Médine</span>. Visites sur les lieux saints et lieux que peu de pèlerins connaissent.
+            Guide certifié à <span style={{ color: '#F0D897', fontWeight: 500 }}>La Mecque</span> et <span style={{ color: '#F0D897', fontWeight: 500 }}>Médine</span>. Visite des lieux saints, sites historiques et endroits que les agences Omra ne montrent pas.
           </p>
 
           {/* CTA with halo */}

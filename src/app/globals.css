@@ -622,13 +622,14 @@ footer div::-webkit-scrollbar { display: none; }
 .step-active  { background: #1A1209; color: #C9A84C; }
 .step-inactive { background: rgba(26,18,9,0.05); color: rgba(26,18,9,0.5); border: 0.5px solid rgba(26,18,9,0.1); }
 .guide-content {
-  padding: 24px clamp(16px, 3vw, 24px) 48px;
+  padding: 20px clamp(16px, 3vw, 24px) 32px;
   max-width: 720px; margin: 0 auto; background: #FAF7F0;
 }
+.guide-content section { padding: 0; }
 .guide-content h2 {
   font-family: var(--font-cormorant, serif);
   font-size: clamp(20px, 3.6vw, 28px);
-  color: #1A1209; margin: 22px 0 10px; line-height: 1.2;
+  color: #1A1209; margin: 14px 0 10px; line-height: 1.2;
 }
 .guide-content > section > p,
 .guide-content > p {
@@ -638,7 +639,7 @@ footer div::-webkit-scrollbar { display: none; }
 .label-overline {
   font-size: 10px; font-weight: 600; letter-spacing: 0.15em; color: #C9A84C;
   padding: 4px 10px; border: 0.5px solid rgba(201,168,76,0.4); border-radius: 999px;
-  display: inline-block; margin-top: 24px;
+  display: inline-block; margin-top: 20px;
 }
 .quote-block {
   background: #FFFFFF; border-left: 2px solid #C9A84C;
@@ -675,7 +676,7 @@ footer div::-webkit-scrollbar { display: none; }
 .arabic-dua .dua-fr { font-size: 12px; color: #1A1209; margin-top: 2px; }
 .upgrade-card {
   background: linear-gradient(135deg, #1A1209 0%, #2a1f12 100%);
-  border-radius: 16px; padding: 24px 20px; margin: 28px 0;
+  border-radius: 16px; padding: 24px 20px; margin: 20px 0;
   color: #FAF7F0; text-align: center;
   border: 0.5px solid rgba(201,168,76,0.25);
   box-shadow: 0 4px 20px rgba(0,0,0,0.15);

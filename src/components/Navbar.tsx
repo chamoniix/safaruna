@@ -123,6 +123,12 @@ export default function Navbar({ transparentOnHero = false, scrollThreshold = 80
           gap: 0.25rem;
         }
         .nb-mobile-menu.open { display: flex; }
+        .nb-mobile-safaruma {
+          font-family: var(--font-cormorant, serif); font-size: 1.6rem; font-weight: 700;
+          color: #1A1209; text-decoration: none; letter-spacing: 0.05em;
+          padding: 0.25rem 0.75rem 0.75rem; display: block;
+          border-bottom: 1px solid rgba(201,168,76,0.2); margin-bottom: 0.25rem;
+        }
         .nb-mobile-link {
           font-size: 0.9rem; font-weight: 500; color: #7A6D5A; text-decoration: none;
           padding: 0.65rem 0.75rem; border-bottom: 1px solid rgba(201,168,76,0.1);
@@ -221,6 +227,9 @@ export default function Navbar({ transparentOnHero = false, scrollThreshold = 80
         </div>
 
         <div className={`nb-mobile-menu${menuOpen ? ' open' : ''}`}>
+          <Link href="/" className="nb-mobile-safaruma" onClick={() => setMenuOpen(false)}>
+            SAFAR<span style={{ color: '#C9A84C' }}>U</span>MA
+          </Link>
           {NAV_LINKS.map(l => (
             <Link key={l.href} href={l.href} className={`nb-mobile-link${pathname === l.href ? ' nb-mobile-link-active' : ''}`} onClick={() => setMenuOpen(false)}>
               {l.label}

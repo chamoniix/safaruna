@@ -143,7 +143,7 @@ export default function CeQuiVousAttend() {
 
   return (
     <>
-      <Navbar />
+      <Navbar transparentOnHero scrollThreshold={300} />
       <div style={{ background: '#FAF7F0', minHeight: '100vh', paddingTop: 0, paddingBottom: 0 }}>
 
         {/* HERO — flush sous la navbar (paddingTop interne absorbe la hauteur navbar) */}

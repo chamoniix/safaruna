@@ -167,8 +167,9 @@ export default function BlogPage() {
                       <div style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--deep)' }}>{featured.author}</div>
                       <div style={{ fontSize: '0.72rem', color: 'var(--muted)' }}>{featured.date} · {featured.readTime} de lecture</div>
                     </div>
-                    <div style={{ marginLeft: 'auto', background: 'var(--deep)', color: 'var(--gold-light)', padding: '0.5rem 1.25rem', borderRadius: 50, fontSize: '0.78rem', fontWeight: 700 }}>
-                      Lire →
+                    <div style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '6px', border: '1.5px solid var(--gold)', color: 'var(--gold-dark)', padding: '0.5rem 1.25rem', borderRadius: 50, fontSize: '0.78rem', fontWeight: 700, background: 'rgba(201,168,76,0.04)', flexShrink: 0 }}>
+                      Lire
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M7 3l3 3-3 3" stroke="#8B6914" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </div>
                   </div>
                 </div>
@@ -221,6 +222,12 @@ export default function BlogPage() {
                         <div style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--deep)' }}>{article.author}</div>
                         <div style={{ fontSize: '0.65rem', color: 'var(--muted)' }}>{article.date} · {article.readTime}</div>
                       </div>
+                    </div>
+                    <div style={{ marginTop: '0.75rem' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', border: '1.5px solid var(--gold)', color: 'var(--gold-dark)', padding: '0.4rem 0.9rem', borderRadius: 50, fontSize: '0.73rem', fontWeight: 700, background: 'rgba(201,168,76,0.04)' }}>
+                        Lire l&apos;article
+                        <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M7 3l3 3-3 3" stroke="#8B6914" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      </span>
                     </div>
                   </div>
                 </div>

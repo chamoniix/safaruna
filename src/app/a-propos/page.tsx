@@ -1,4 +1,6 @@
 import React from 'react';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
 import { IconMosque, IconGraduationCap, IconHandshake, IconGlobe, IconSparkles, IconMoon } from '@/components/Icons';
 
@@ -95,6 +97,7 @@ const COMPARISON = [
 export default function AProposPage() {
   return (
     <>
+      <Navbar transparentOnHero scrollThreshold={400} />
       <ScrollReveal />
 
       {/* HERO */}
@@ -627,6 +630,7 @@ export default function AProposPage() {
           </div>
         </div>
       </section>
+      <Footer />
     </>
   );
 }

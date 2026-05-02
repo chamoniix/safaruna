@@ -123,7 +123,7 @@ export default function FaqPage() {
 
   return (
     <>
-      <Navbar />
+      <Navbar transparentOnHero scrollThreshold={250} />
 
       {/* Hero */}
       <section style={{ background: '#1A1209', padding: '6rem 1.5rem 4rem', textAlign: 'center' }}>

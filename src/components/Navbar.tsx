@@ -83,6 +83,13 @@ export default function Navbar({ transparentOnHero = false, scrollThreshold = 80
         .nb-links a:hover { color: #8B6914; }
         .nb-links-dark a { color: rgba(240,216,151,0.75) !important; }
         .nb-links-dark a:hover { color: #C9A84C !important; }
+        .nb-bar-dark {
+          background: #1A1209 !important;
+          backdrop-filter: none !important;
+          -webkit-backdrop-filter: none !important;
+          border-bottom: 1px solid rgba(201,168,76,0.15) !important;
+        }
+        .nb-logo-light { color: #FAF7F0 !important; transition: color 0.35s ease; }
         .nb-actions { display: flex; align-items: center; gap: 1rem; flex-shrink: 0; }
         .nb-user-name { font-size: 0.82rem; font-weight: 600; color: #1A1209; white-space: nowrap; }
         .nb-btn-dash {
@@ -189,12 +196,10 @@ export default function Navbar({ transparentOnHero = false, scrollThreshold = 80
           </div>
         )}
 
-        <div className="nb-bar" style={
-          isTransparent ? { background: 'transparent', backdropFilter: 'none', WebkitBackdropFilter: 'none', borderBottom: 'none' } :
-          isDarkHero ? { background: '#1A1209', backdropFilter: 'none', WebkitBackdropFilter: 'none', borderBottom: '1px solid rgba(201,168,76,0.15)' } :
-          {}
+        <div className={`nb-bar${isDarkHero ? ' nb-bar-dark' : ''}`} style={
+          isTransparent ? { background: 'transparent', backdropFilter: 'none', WebkitBackdropFilter: 'none', borderBottom: 'none' } : {}
         }>
-          <Link href="/" className="nb-logo" style={{ transition: 'opacity 0.35s ease, color 0.35s ease', ...(isTransparent ? { opacity: 0, pointerEvents: 'none' } : isDarkHero ? { color: '#FAF7F0' } : {}) }}>
+          <Link href="/" className={`nb-logo${isDarkHero ? ' nb-logo-light' : ''}`} style={{ transition: 'opacity 0.35s ease', ...(isTransparent ? { opacity: 0, pointerEvents: 'none' } : {}) }}>
             SAFAR<span>U</span>MA
           </Link>
 

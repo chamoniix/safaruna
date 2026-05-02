@@ -18,21 +18,22 @@ const NAV_LINKS: { href: string; label: string }[] = [
   { href: '/a-propos', label: 'À propos' },
 ];
 
-export default function Navbar({ transparentOnHero = false, scrollThreshold = 80 }: { transparentOnHero?: boolean; scrollThreshold?: number }) {
+export default function Navbar({ transparentOnHero = false, scrollThreshold = 80, darkHeroMode = false }: { transparentOnHero?: boolean; scrollThreshold?: number; darkHeroMode?: boolean }) {
   const { data: session } = useSession();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    if (!transparentOnHero) return;
+    if (!transparentOnHero && !darkHeroMode) return;
     const onScroll = () => setScrolled(window.scrollY > scrollThreshold);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, [transparentOnHero]);
+  }, [transparentOnHero, darkHeroMode, scrollThreshold]);
 
   const isTransparent = transparentOnHero && !scrolled;
+  const isDarkHero = darkHeroMode && !scrolled;
 
   const hideBanner = pathname ? HIDE_BANNER_PATHS.some(p => pathname.startsWith(p)) : false;
   const role = (session?.user as any)?.role;
@@ -80,6 +81,8 @@ export default function Navbar({ transparentOnHero = false, scrollThreshold = 80
           letter-spacing: 0.05em; text-transform: uppercase; transition: color 0.2s; white-space: nowrap;
         }
         .nb-links a:hover { color: #8B6914; }
+        .nb-links-dark a { color: rgba(240,216,151,0.75) !important; }
+        .nb-links-dark a:hover { color: #C9A84C !important; }
         .nb-actions { display: flex; align-items: center; gap: 1rem; flex-shrink: 0; }
         .nb-user-name { font-size: 0.82rem; font-weight: 600; color: #1A1209; white-space: nowrap; }
         .nb-btn-dash {
@@ -186,12 +189,16 @@ export default function Navbar({ transparentOnHero = false, scrollThreshold = 80
           </div>
         )}
 
-        <div className="nb-bar" style={isTransparent ? { background: 'transparent', backdropFilter: 'none', WebkitBackdropFilter: 'none', borderBottom: 'none' } : {}}>
-          <Link href="/" className="nb-logo" style={{ transition: 'opacity 0.35s ease', ...(isTransparent ? { opacity: 0, pointerEvents: 'none' } : {}) }}>
+        <div className="nb-bar" style={
+          isTransparent ? { background: 'transparent', backdropFilter: 'none', WebkitBackdropFilter: 'none', borderBottom: 'none' } :
+          isDarkHero ? { background: '#1A1209', backdropFilter: 'none', WebkitBackdropFilter: 'none', borderBottom: '1px solid rgba(201,168,76,0.15)' } :
+          {}
+        }>
+          <Link href="/" className="nb-logo" style={{ transition: 'opacity 0.35s ease, color 0.35s ease', ...(isTransparent ? { opacity: 0, pointerEvents: 'none' } : isDarkHero ? { color: '#FAF7F0' } : {}) }}>
             SAFAR<span>U</span>MA
           </Link>
 
-          <div className="nb-links" style={isTransparent ? { display: 'none' } : {}}>
+          <div className={`nb-links${isDarkHero ? ' nb-links-dark' : ''}`} style={isTransparent ? { display: 'none' } : {}}>
             {NAV_LINKS.map(l => (
               <Link key={l.href} href={l.href}>{l.label}</Link>
             ))}
@@ -218,11 +225,15 @@ export default function Navbar({ transparentOnHero = false, scrollThreshold = 80
             className={`nb-hamburger${menuOpen ? ' open' : ''}`}
             onClick={() => setMenuOpen(o => !o)}
             aria-label="Menu"
-            style={isTransparent ? { display: 'flex', background: 'rgba(250,247,240,0.05)', borderColor: 'rgba(201,168,76,0.4)', borderWidth: '0.5px' } : {}}
+            style={
+              isTransparent ? { display: 'flex', background: 'rgba(250,247,240,0.05)', borderColor: 'rgba(201,168,76,0.4)', borderWidth: '0.5px' } :
+              isDarkHero ? { borderColor: 'rgba(201,168,76,0.35)' } :
+              {}
+            }
           >
-            <span style={isTransparent ? { background: 'rgba(240,216,151,0.9)' } : {}} />
-            <span style={isTransparent ? { background: 'rgba(240,216,151,0.9)' } : {}} />
-            <span style={isTransparent ? { background: 'rgba(240,216,151,0.9)' } : {}} />
+            <span style={(isTransparent || isDarkHero) ? { background: 'rgba(240,216,151,0.9)' } : {}} />
+            <span style={(isTransparent || isDarkHero) ? { background: 'rgba(240,216,151,0.9)' } : {}} />
+            <span style={(isTransparent || isDarkHero) ? { background: 'rgba(240,216,151,0.9)' } : {}} />
           </button>
         </div>
 

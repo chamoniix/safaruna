@@ -540,7 +540,7 @@ export default function GuideSearchPage() {
 
   return (
     <div style={{ fontFamily: 'var(--font-manrope, Manrope, sans-serif)', background: '#FAF7F0', color: '#1A1209', minHeight: '100vh' }}>
-      <Navbar transparentOnHero scrollThreshold={280} />
+      <Navbar darkHeroMode scrollThreshold={280} />
 
       {/* ── HERO ── */}
       <div className="guides-hero" style={{ background: '#1A1209', position: 'relative', overflow: 'visible' }}>

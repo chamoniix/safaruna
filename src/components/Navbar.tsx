@@ -51,9 +51,9 @@ export default function Navbar({ transparentOnHero = false, scrollThreshold = 80
           font-family: var(--font-manrope, sans-serif);
         }
         .nb-banner {
-          background: rgba(250,247,240,0.97); color: #1A1209;
+          background: #251913; color: #FFFFFF;
           display: flex; align-items: center; justify-content: center; gap: 20px;
-          padding: 12px 16px; border-bottom: 1px solid rgba(201,168,76,0.2);
+          padding: 12px 16px; border-bottom: 1px solid rgba(201,168,76,0.3);
         }
         .nb-banner-pdf-btn {
           display: inline-flex; align-items: center; gap: 5px;
@@ -188,8 +188,8 @@ export default function Navbar({ transparentOnHero = false, scrollThreshold = 80
                 </svg>
               </span>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', minWidth: 0 }}>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: '#1A1209', letterSpacing: '0.02em', lineHeight: 1.25 }}>Guide PDF gratuit</div>
-                <div style={{ fontSize: '11px', color: 'rgba(26,18,9,0.5)', lineHeight: 1.25 }}>La Omra étape par étape</div>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: '#FFFFFF', letterSpacing: '0.02em', lineHeight: 1.25 }}>Guide PDF gratuit</div>
+                <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.65)', lineHeight: 1.25 }}>La Omra étape par étape</div>
               </div>
             </Link>
             <Link href="/guide-omra" className="nb-banner-pdf-btn">RECEVOIR →</Link>

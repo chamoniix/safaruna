@@ -251,7 +251,7 @@ export default function CertificationClient() {
         .cert-submit-btn:hover { opacity: 0.88; }
       `}} />
 
-      <Navbar />
+      <Navbar transparentOnHero scrollThreshold={350} />
 
       {/* ── HERO ── */}
       <section className="cert-hero">

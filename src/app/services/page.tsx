@@ -94,7 +94,7 @@ const SERVICES: Service[] = [
 export default function ServicesPage() {
   return (
     <>
-      <Navbar />
+      <Navbar transparentOnHero scrollThreshold={280} />
 
       {/* Hero */}
       <section style={{ background: '#1A1209', padding: '6rem 1.5rem 5rem', textAlign: 'center' }}>

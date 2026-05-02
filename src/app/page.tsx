@@ -6,6 +6,9 @@ import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
 import StatsSection from "@/components/StatsSection";
 import PersonaSection from "@/components/PersonaSection";
+import type { Viewport } from 'next';
+
+export const viewport: Viewport = { themeColor: '#FAF7F0' };
 import {
   IconMegaphone, IconEye, IconChat, IconGraduationCap, IconShield, IconUserGroup,
   IconMosque, IconMountain, IconBuilding, IconMap, IconAccessibility,

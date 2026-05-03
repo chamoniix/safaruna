@@ -9,57 +9,57 @@ import NotificationBell from '@/components/NotificationBell';
 
 /* ── HEROICONS SVG (stroke, 18×18) ── */
 const IcoHome = ({ c }: { c: string }) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
   </svg>
 );
 const IcoCalendar = ({ c }: { c: string }) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <rect width="18" height="18" x="3" y="4" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
   </svg>
 );
 const IcoChat = ({ c }: { c: string }) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
   </svg>
 );
 const IcoCap = ({ c }: { c: string }) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/>
   </svg>
 );
 const IcoBook = ({ c }: { c: string }) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
   </svg>
 );
 const IcoCheckCircle = ({ c }: { c: string }) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
   </svg>
 );
 const IcoHeart = ({ c }: { c: string }) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
   </svg>
 );
 const IcoUser = ({ c }: { c: string }) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
   </svg>
 );
 const IcoGift = ({ c }: { c: string }) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="20 12 20 22 4 22 4 12"/><rect width="20" height="5" x="2" y="7"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
   </svg>
 );
 const IcoCog = ({ c }: { c: string }) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
   </svg>
 );
 const IcoLogout = ({ c }: { c: string }) => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
   </svg>
 );
@@ -85,13 +85,7 @@ const NAV: { section: string; items: NavItem[] }[] = [
   ]},
 ];
 
-const BOTTOM_NAV: NavItem[] = [
-  { href: '/espace/tableau-de-bord', Icon: IcoHome,     label: 'Accueil' },
-  { href: '/espace/reservations',   Icon: IcoCalendar, label: 'Voyages' },
-  { href: '/espace/messages',       Icon: IcoChat,     label: 'Messages' },
-  { href: '/espace/guide-omra',     Icon: IcoBook,     label: 'Omra' },
-  { href: '/espace/profil',         Icon: IcoUser,     label: 'Profil' },
-];
+const EXTRA: NavItem[] = [];
 
 export default function PelerinLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -120,12 +114,10 @@ export default function PelerinLayout({ children }: { children: React.ReactNode 
     <>
       <style dangerouslySetInnerHTML={{ __html: `
         body { margin: 0; padding: 0; }
-
-        /* ── Sidebar ── */
         .pelerin-sidebar {
           position: fixed !important; left: 0 !important; top: 0 !important;
           width: 260px !important; height: 100vh !important;
-          z-index: 60 !important; overflow: hidden;
+          z-index: 50 !important; overflow: hidden;
           background: #FFFFFF; border-right: 1px solid #EDE8DC;
           display: flex; flex-direction: column;
           transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
@@ -135,8 +127,6 @@ export default function PelerinLayout({ children }: { children: React.ReactNode 
           .pelerin-sidebar { transform: translateX(-260px); }
           .pelerin-sidebar.is-open { transform: translateX(0); }
         }
-
-        /* ── Main area ── */
         .pelerin-main {
           margin-left: 260px !important; width: calc(100% - 260px) !important;
           min-height: 100vh; display: flex; flex-direction: column;
@@ -144,30 +134,16 @@ export default function PelerinLayout({ children }: { children: React.ReactNode 
         @media (max-width: 1023px) {
           .pelerin-main { margin-left: 0 !important; width: 100% !important; }
         }
-
-        /* ── Hamburger ── */
         .pelerin-hamburger { display: none !important; }
         @media (max-width: 1023px) { .pelerin-hamburger { display: flex !important; } }
-
-        /* ── Overlay ── */
-        .pelerin-overlay {
-          display: none; position: fixed; inset: 0;
-          background: rgba(0,0,0,0.5); z-index: 55;
-          backdrop-filter: blur(3px);
-        }
+        .pelerin-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 49; backdrop-filter: blur(2px); }
         @media (max-width: 1023px) { .pelerin-overlay.is-open { display: block; } }
-
-        /* ── Nav link states ── */
         .sb-nav-link { transition: background 0.15s, color 0.15s; }
         .sb-nav-link:hover { background: #FAF7F0 !important; }
-        .sb-logout-btn { transition: opacity 0.15s; }
+        .sb-logout-btn { transition: color 0.15s; }
         .sb-logout-btn:hover { opacity: 0.8; }
-
-        /* ── Close btn (mobile sidebar) ── */
         .sb-close-btn { display: none !important; }
         @media (max-width: 1023px) { .sb-close-btn { display: flex !important; } }
-
-        /* ── Sidebar nav reset ── */
         .pelerin-sidebar nav {
           position: static !important; background: transparent !important;
           border: none !important; backdrop-filter: none !important;
@@ -177,72 +153,11 @@ export default function PelerinLayout({ children }: { children: React.ReactNode 
         }
         @media (max-width: 1023px) {
           .pelerin-sidebar {
-            height: 100dvh !important; max-height: 100dvh !important;
+            height: 100dvh !important;
+            max-height: 100dvh !important;
           }
-          .pelerin-sidebar nav { -webkit-overflow-scrolling: touch !important; }
-        }
-
-        /* ── Bottom nav (mobile only) ── */
-        .pelerin-bottom-nav {
-          display: none;
-          position: fixed; bottom: 0; left: 0; right: 0;
-          z-index: 50;
-          background: rgba(255,255,255,0.97);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          border-top: 1px solid #EDE8DC;
-          grid-template-columns: repeat(5, 1fr);
-          padding-bottom: env(safe-area-inset-bottom, 4px);
-          box-shadow: 0 -4px 24px rgba(26,18,9,0.07);
-        }
-        @media (max-width: 1023px) {
-          .pelerin-bottom-nav { display: grid; }
-        }
-        .pb-nav-item {
-          display: flex; flex-direction: column; align-items: center; justify-content: center;
-          gap: 4px; padding: 10px 4px 8px;
-          text-decoration: none;
-          color: #B5A898;
-          font-size: 0.56rem; font-weight: 700;
-          letter-spacing: 0.05em; text-transform: uppercase;
-          transition: color 0.15s;
-          font-family: var(--font-manrope, sans-serif);
-        }
-        .pb-nav-item:active { opacity: 0.7; }
-        .pbn-active { color: #C9A84C !important; }
-
-        /* ── Mobile header adaptations ── */
-        .pelerin-header-title { display: block; }
-        .pelerin-header-logo  { display: none !important; }
-        .pelerin-new-guide-btn { display: inline-flex !important; }
-        .pelerin-header-avatar { display: none !important; }
-        @media (max-width: 1023px) {
-          .pelerin-header-title  { display: none !important; }
-          .pelerin-header-logo   { display: flex !important; }
-          .pelerin-new-guide-btn { display: none !important; }
-          .pelerin-header-avatar { display: flex !important; }
-        }
-
-        /* ── Main content padding ── */
-        .pelerin-main-content {
-          flex: 1;
-          padding: 2rem 1.75rem;
-          max-width: 1200px;
-          width: 100%;
-          margin: 0 auto;
-          box-sizing: border-box;
-        }
-        @media (max-width: 1023px) {
-          .pelerin-main-content {
-            padding: 1.25rem 1rem calc(1.25rem + 72px) !important;
-          }
-        }
-        @media (max-width: 640px) {
-          .pelerin-main-content {
-            padding: 1rem 0.875rem calc(1rem + 72px) !important;
-          }
-          .pelerin-header-inner {
-            padding: 0.625rem 0.875rem !important;
+          .pelerin-sidebar nav {
+            -webkit-overflow-scrolling: touch !important;
           }
         }
       `}} />
@@ -255,7 +170,7 @@ export default function PelerinLayout({ children }: { children: React.ReactNode 
             <Link href="/" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.5rem', fontWeight: 700, color: '#1A1209', textDecoration: 'none', letterSpacing: '0.04em' }}>
               SAFAR<span style={{ color: '#C9A84C' }}>U</span>MA
             </Link>
-            <button className="sb-close-btn" onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7A6D5A', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, fontSize: '1rem' }}>✕</button>
+            <button className="sb-close-btn" onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7A6D5A', fontSize: '1.1rem', width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
           </div>
 
           <div style={{ padding: '1.25rem 1.5rem 1rem', borderBottom: '1px solid #EDE8DC', display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
@@ -286,66 +201,25 @@ export default function PelerinLayout({ children }: { children: React.ReactNode 
 
         {/* ── MAIN ── */}
         <div className="pelerin-main">
-          <header className="pelerin-header-inner" style={{ position: 'sticky', top: 0, zIndex: 40, background: 'rgba(245,242,236,0.95)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', borderBottom: '1px solid #EDE8DC', padding: '0.85rem 1.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
-              <button
-                className="pelerin-hamburger"
-                onClick={() => setOpen(true)}
-                style={{ width: 42, height: 42, borderRadius: 12, border: '1px solid #EDE8DC', background: 'white', cursor: 'pointer', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5, flexShrink: 0, boxShadow: '0 1px 4px rgba(26,18,9,0.06)' }}
-              >
+          <header style={{ position: 'sticky', top: 0, zIndex: 40, background: 'rgba(245,242,236,0.94)', backdropFilter: 'blur(16px)', borderBottom: '1px solid #EDE8DC', padding: '0.9rem 1.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <button className="pelerin-hamburger" onClick={() => setOpen(true)} style={{ width: 44, height: 44, borderRadius: 10, border: '1px solid #EDE8DC', background: 'white', cursor: 'pointer', gap: 4, flexShrink: 0, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 <span style={{ display: 'block', width: 16, height: 1.5, background: '#1A1209', borderRadius: 2 }} />
-                <span style={{ display: 'block', width: 11, height: 1.5, background: '#1A1209', borderRadius: 2 }} />
+                <span style={{ display: 'block', width: 12, height: 1.5, background: '#1A1209', borderRadius: 2 }} />
                 <span style={{ display: 'block', width: 16, height: 1.5, background: '#1A1209', borderRadius: 2 }} />
               </button>
-
-              {/* Desktop title */}
-              <span className="pelerin-header-title" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.25rem', fontWeight: 700, color: '#1A1209', letterSpacing: '0.01em' }}>
-                Espace Pèlerin
-              </span>
-
-              {/* Mobile: SAFARUMA logo */}
-              <Link href="/" className="pelerin-header-logo" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.35rem', fontWeight: 700, color: '#1A1209', textDecoration: 'none', letterSpacing: '0.04em', alignItems: 'center' }}>
-                SAFAR<span style={{ color: '#C9A84C' }}>U</span>MA
-              </Link>
+              <span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 600, color: '#1A1209' }}>Espace Pèlerin</span>
             </div>
-
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <NotificationBell />
-
-              {/* Mobile avatar */}
-              <div className="pelerin-header-avatar" style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '0.9rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
-                {initials}
-              </div>
-
-              {/* Desktop CTA */}
-              <Link href="/guides" className="pelerin-new-guide-btn" style={{ padding: '0.5rem 1.25rem', borderRadius: 50, fontSize: '0.75rem', fontWeight: 700, background: '#1A1209', color: '#F0D897', textDecoration: 'none', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>
-                + Nouveau guide
-              </Link>
+              <Link href="/guides" style={{ padding: '0.5rem 1.25rem', borderRadius: 50, fontSize: '0.75rem', fontWeight: 700, background: '#1A1209', color: '#F0D897', textDecoration: 'none', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>+ Nouveau guide</Link>
             </div>
           </header>
 
-          <main className="pelerin-main-content">
+          <main style={{ flex: 1, padding: '2rem 1.75rem', maxWidth: 1200, width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
             {children}
           </main>
         </div>
-
-        {/* ── BOTTOM NAV (mobile only) ── */}
-        <nav className="pelerin-bottom-nav">
-          {BOTTOM_NAV.map(item => {
-            const active = isActive(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`pb-nav-item${active ? ' pbn-active' : ''}`}
-              >
-                <item.Icon c={active ? '#C9A84C' : '#B5A898'} />
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-
       </div>
     </>
   );

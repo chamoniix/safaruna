@@ -2,10 +2,10 @@ import React from 'react';
 import type { Viewport } from 'next';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-
-export const viewport: Viewport = { themeColor: '#FAF7F0' };
 import ScrollReveal from '@/components/ScrollReveal';
 import { IconMosque, IconGraduationCap, IconHandshake, IconGlobe, IconSparkles, IconMoon } from '@/components/Icons';
+
+export const viewport: Viewport = { themeColor: '#FAF7F0' };
 
 const TEAM = [
   {
@@ -101,6 +101,43 @@ export default function AProposPage() {
   return (
     <>
       <Navbar transparentOnHero scrollThreshold={400} />
+      <style dangerouslySetInnerHTML={{ __html: `
+        .ap-comp-grid { display: flex; flex-direction: column; border-radius: 16px; overflow: hidden; border: 1px solid #E8DFC8; }
+        .ap-comp-header { display: grid; grid-template-columns: 1.2fr 1.5fr 1fr 1fr; background: #FAF7F0; padding: 0.75rem 1.25rem; border-bottom: 2px solid #E8DFC8; }
+        .ap-comp-header > div { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(26,18,9,0.45); }
+        .ap-comp-header > div.ap-col-sf { color: #C9A84C; }
+        .ap-comp-row { display: grid; grid-template-columns: 1.2fr 1.5fr 1fr 1fr; padding: 0.9rem 1.25rem; border-bottom: 1px solid #E8DFC8; background: white; align-items: center; gap: 0.5rem; }
+        .ap-comp-row:last-child { border-bottom: none; }
+        .ap-comp-row:nth-child(odd) { background: rgba(232,223,200,0.15); }
+        .ap-col-critere { font-size: 0.85rem; font-weight: 600; color: #1A1209; }
+        .ap-col-sf { font-size: 0.82rem; color: #1A1209; font-weight: 500; }
+        .ap-col-sf::before { content: '✓ '; color: #2D7A3B; font-weight: 700; }
+        .ap-col-other { font-size: 0.8rem; color: rgba(26,18,9,0.5); }
+
+        @media (max-width: 700px) {
+          .ap-comp-header { display: none; }
+          .ap-comp-grid { border-radius: 12px; }
+          .ap-comp-row {
+            grid-template-columns: 1fr;
+            padding: 1rem 1.1rem;
+            gap: 0.35rem;
+          }
+          .ap-comp-row:nth-child(odd) { background: white; }
+          .ap-comp-row:nth-child(even) { background: rgba(232,223,200,0.18); }
+          .ap-col-critere { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #C9A84C; margin-bottom: 0.15rem; }
+          .ap-col-sf { font-size: 0.88rem; color: #1A1209; font-weight: 600; }
+          .ap-col-other { font-size: 0.8rem; color: rgba(26,18,9,0.5); }
+          .ap-col-other::before { content: attr(data-label) ' — '; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.6; }
+        }
+
+        @media (max-width: 640px) {
+          .ap-timeline-item { flex-direction: column !important; }
+          .ap-timeline-item > div:first-child { display: block !important; text-align: left !important; }
+          .ap-timeline-item > div:last-child { display: block !important; text-align: left !important; }
+          .ap-timeline-dot { align-self: flex-start; margin-top: 4px; }
+          .ap-timeline-center { display: none; }
+        }
+      ` }} />
       <ScrollReveal />
 
       {/* HERO */}
@@ -232,7 +269,7 @@ export default function AProposPage() {
           </div>
 
           <div style={{ position: 'relative' }}>
-            <div style={{
+            <div className="ap-timeline-center" style={{
               position: 'absolute',
               left: '50%',
               top: 0,
@@ -243,7 +280,7 @@ export default function AProposPage() {
             }} />
 
             {TIMELINE.map((item, i) => (
-              <div key={item.year} className="reveal" style={{
+              <div key={item.year} className="reveal ap-timeline-item" style={{
                 display: 'flex',
                 gap: '2rem',
                 marginBottom: '3rem',
@@ -274,7 +311,7 @@ export default function AProposPage() {
                   )}
                 </div>
 
-                <div style={{
+                <div className="ap-timeline-dot" style={{
                   width: '12px',
                   height: '12px',
                   borderRadius: '50%',
@@ -462,91 +499,23 @@ export default function AProposPage() {
             </p>
           </div>
 
-          <div className="reveal" style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr>
-                  <th style={{
-                    padding: '1rem 1.5rem',
-                    textAlign: 'left',
-                    fontSize: '0.7rem',
-                    letterSpacing: '0.15em',
-                    textTransform: 'uppercase',
-                    color: 'rgba(26,18,9,0.5)',
-                    borderBottom: '2px solid var(--sand)',
-                  }}>Critère</th>
-                  <th style={{
-                    padding: '1rem 1.5rem',
-                    textAlign: 'center',
-                    fontSize: '0.7rem',
-                    letterSpacing: '0.15em',
-                    textTransform: 'uppercase',
-                    color: 'var(--gold)',
-                    background: 'rgba(201,168,76,0.06)',
-                    borderBottom: '2px solid var(--gold)',
-                  }}>✦ SAFARUMA</th>
-                  <th style={{
-                    padding: '1rem 1.5rem',
-                    textAlign: 'center',
-                    fontSize: '0.7rem',
-                    letterSpacing: '0.15em',
-                    textTransform: 'uppercase',
-                    color: 'rgba(26,18,9,0.5)',
-                    borderBottom: '2px solid var(--sand)',
-                  }}>Autres apps</th>
-                  <th style={{
-                    padding: '1rem 1.5rem',
-                    textAlign: 'center',
-                    fontSize: '0.7rem',
-                    letterSpacing: '0.15em',
-                    textTransform: 'uppercase',
-                    color: 'rgba(26,18,9,0.5)',
-                    borderBottom: '2px solid var(--sand)',
-                  }}>Agence traditionnelle</th>
-                </tr>
-              </thead>
-              <tbody>
-                {COMPARISON.map((row, i) => (
-                  <tr key={row.critere} style={{
-                    background: i % 2 === 0 ? 'transparent' : 'rgba(232,223,200,0.3)',
-                  }}>
-                    <td style={{
-                      padding: '1rem 1.5rem',
-                      fontSize: '0.9rem',
-                      fontWeight: 500,
-                      color: 'var(--deep)',
-                      borderBottom: '1px solid rgba(232,223,200,0.5)',
-                    }}>{row.critere}</td>
-                    <td style={{
-                      padding: '1rem 1.5rem',
-                      textAlign: 'center',
-                      fontSize: '0.85rem',
-                      color: 'var(--deep)',
-                      background: 'rgba(201,168,76,0.06)',
-                      borderBottom: '1px solid rgba(201,168,76,0.15)',
-                      fontWeight: 500,
-                    }}>
-                      <span style={{ marginRight: '0.4rem', color: '#2D7A3B' }}>✓</span>
-                      {row.safaruma}
-                    </td>
-                    <td style={{
-                      padding: '1rem 1.5rem',
-                      textAlign: 'center',
-                      fontSize: '0.85rem',
-                      color: 'rgba(26,18,9,0.55)',
-                      borderBottom: '1px solid rgba(232,223,200,0.5)',
-                    }}>{row.autres}</td>
-                    <td style={{
-                      padding: '1rem 1.5rem',
-                      textAlign: 'center',
-                      fontSize: '0.85rem',
-                      color: 'rgba(26,18,9,0.55)',
-                      borderBottom: '1px solid rgba(232,223,200,0.5)',
-                    }}>{row.agence}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="reveal">
+            <div className="ap-comp-grid">
+              <div className="ap-comp-header">
+                <div>Critère</div>
+                <div className="ap-col-sf">SAFARUMA</div>
+                <div>Autres apps</div>
+                <div>Agence trad.</div>
+              </div>
+              {COMPARISON.map((row) => (
+                <div key={row.critere} className="ap-comp-row">
+                  <div className="ap-col-critere">{row.critere}</div>
+                  <div className="ap-col-sf">{row.safaruma}</div>
+                  <div className="ap-col-other" data-label="Autres apps">{row.autres}</div>
+                  <div className="ap-col-other" data-label="Agence">{row.agence}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>

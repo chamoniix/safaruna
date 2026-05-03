@@ -164,39 +164,6 @@ export default function GuideOmraClient() {
           </div>
         </section>
 
-        {/* ── CTA ESPACE PÈLERIN ── */}
-        <div className="upgrade-card">
-          <div className="upgrade-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M12 3v18M3 12h18" stroke="#C9A84C" strokeWidth="1.5" strokeLinecap="round"/>
-              <circle cx="12" cy="12" r="9" stroke="#C9A84C" strokeWidth="1.2"/>
-            </svg>
-          </div>
-          <h3>Va plus loin avec ton <span className="upgrade-gold">espace pèlerin</span></h3>
-          <p className="upgrade-sub">Outils interactifs et contenus enrichis, gratuits.</p>
-          <div className="upgrade-grid">
-            {[
-              'Checklist cochable',
-              "Audio des du'as",
-              'Marque-pages',
-              'Suivi de progression',
-            ].map((feat) => (
-              <div key={feat} className="upgrade-feat">
-                <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                  <path d="M3 6l2 2 4-4" stroke="#C9A84C" strokeWidth="1.3" strokeLinecap="round"/>
-                </svg>
-                {feat}
-              </div>
-            ))}
-          </div>
-          <Link href="/inscription" className="upgrade-cta">
-            Créer mon espace gratuit
-            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-              <path d="M3 7h8M7 3l4 4-4 4" stroke="#1A1209" strokeWidth="1.6" strokeLinecap="round"/>
-            </svg>
-          </Link>
-        </div>
-
         {/* ── RITUELS ── */}
         <section id="rituels">
           <span className="label-overline">LE TAWAF</span>
@@ -273,6 +240,39 @@ export default function GuideOmraClient() {
             </div>
           </div>
         </section>
+
+        {/* ── Bandeau fin de guide ── */}
+        <div style={{
+          background: '#FFFFFF', border: '1px solid #EDE8DC', borderRadius: 12,
+          padding: '16px 18px', marginTop: '28px',
+          display: 'flex', alignItems: 'center', gap: '14px',
+          borderLeft: '3px solid #C9A84C',
+        }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ flexShrink: 0 }}>
+            <path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="#C9A84C" strokeWidth="1.4" strokeLinecap="round"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="#C9A84C" strokeWidth="1.4" strokeLinejoin="round"/>
+            <path d="M9 7h6M9 11h4" stroke="#C9A84C" strokeWidth="1" strokeLinecap="round"/>
+          </svg>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: '13px', fontWeight: 700, color: '#1A1209', marginBottom: '3px' }}>
+              La suite du guide dans votre espace pèlerin
+            </div>
+            <div style={{ fontSize: '12px', color: '#5A4E3A', lineHeight: 1.55 }}>
+              Version complète avec checklist cochable, audio des du&apos;as, marque-pages et suivi — gratuit.
+            </div>
+          </div>
+          <Link href="/inscription" style={{
+            display: 'inline-flex', alignItems: 'center', gap: '5px', flexShrink: 0,
+            padding: '8px 14px', borderRadius: 999, background: '#1A1209',
+            color: '#F0D897', fontSize: '12px', fontWeight: 600, textDecoration: 'none',
+            letterSpacing: '0.02em',
+          }}>
+            Accéder
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M2 6h8M7 3l3 3-3 3" stroke="#F0D897" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+          </Link>
+        </div>
 
       </article>
 

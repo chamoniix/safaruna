@@ -1,5 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import GuideOmraClient from "./GuideOmraClient";
+
+export const viewport: Viewport = { themeColor: '#FAF7F0' };
 
 export const metadata: Metadata = {
   title: "La Omra étape par étape — Rituels, Du'as & Conseils | SAFARUMA",

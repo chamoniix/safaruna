@@ -1,6 +1,9 @@
 import React from 'react';
+import type { Viewport } from 'next';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+
+export const viewport: Viewport = { themeColor: '#FAF7F0' };
 import ScrollReveal from '@/components/ScrollReveal';
 import { IconMosque, IconGraduationCap, IconHandshake, IconGlobe, IconSparkles, IconMoon } from '@/components/Icons';
 

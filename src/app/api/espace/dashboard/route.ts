@@ -70,7 +70,7 @@ export async function GET() {
     });
   }
 
-  const [totalReservations, upcomingReservations, completedReservations, spentResult, nextReservation, rawUnread, lastNotif, notificationsCount] = await Promise.all([
+  const [totalReservations, upcomingReservations, completedReservations, spentResult] = await Promise.all([
     prisma.reservation.count({ where: { pelerinId: user.id } }),
     prisma.reservation.count({
       where: { pelerinId: user.id, status: 'CONFIRMED', startDate: { gt: now } }
@@ -80,39 +80,6 @@ export async function GET() {
       where: { pelerinId: user.id, status: 'COMPLETED' },
       _sum: { totalPrice: true },
     }),
-    // Prochaine réservation à venir
-    prisma.reservation.findFirst({
-      where: {
-        pelerinId: user.id,
-        status: { in: ['PENDING', 'CONFIRMED'] },
-        startDate: { gt: now },
-      },
-      orderBy: { startDate: 'asc' },
-      include: {
-        guideProfile: {
-          select: {
-            slug: true,
-            user: { select: { name: true, firstName: true, lastName: true } },
-          },
-        },
-      },
-    }),
-    // Messages non lus (guide ou admin → pèlerin)
-    prisma.message.count({
-      where: {
-        conversation: { pelerinId: user.id },
-        senderId: { not: user.id },
-        readAt: null,
-      },
-    }),
-    // Dernière notification non lue
-    prisma.notification.findFirst({
-      where: { userId: user.id, readAt: null },
-      orderBy: { createdAt: 'desc' },
-      select: { title: true, message: true, createdAt: true },
-    }),
-    // Nombre total de notifs non lues
-    prisma.notification.count({ where: { userId: user.id, readAt: null } }),
   ]);
 
   const displayName = user.name
@@ -158,28 +125,5 @@ export async function GET() {
       type: n.type,
       createdAt: new Date(n.createdAt).toLocaleDateString('fr-FR'),
     })),
-    nextReservation: nextReservation ? {
-      id: nextReservation.id,
-      refNumber: nextReservation.refNumber,
-      status: nextReservation.status,
-      startDate: nextReservation.startDate.toISOString(),
-      endDate: nextReservation.endDate.toISOString(),
-      selectedCities: nextReservation.selectedCities ?? 'MAKKAH',
-      selectedPlaces: (nextReservation.selectedPlaces as string[]) ?? [],
-      guide: {
-        slug: nextReservation.guideProfile.slug ?? null,
-        firstName:
-          nextReservation.guideProfile.user.firstName ??
-          nextReservation.guideProfile.user.name?.split(' ')[0] ?? '—',
-        fullName:
-          nextReservation.guideProfile.user.name ??
-          (`${nextReservation.guideProfile.user.firstName ?? ''} ${nextReservation.guideProfile.user.lastName ?? ''}`.trim() || '—'),
-      },
-    } : null,
-    unreadMessages: rawUnread > 0 ? 1 : 0,
-    notificationsCount,
-    lastNotification: lastNotif
-      ? { title: lastNotif.title, message: lastNotif.message, createdAt: lastNotif.createdAt.toISOString() }
-      : null,
   });
 }

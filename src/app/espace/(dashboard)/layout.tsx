@@ -201,17 +201,19 @@ export default function PelerinLayout({ children }: { children: React.ReactNode 
 
         {/* ── MAIN ── */}
         <div className="pelerin-main">
-          <header style={{ background: '#FAF7F0', padding: '14px 16px 12px', display: 'flex', alignItems: 'center', gap: '10px', borderBottom: '0.5px solid rgba(26,18,9,0.06)', position: 'sticky', top: 0, zIndex: 40 }}>
-            <button className="pelerin-hamburger" onClick={() => setOpen(true)} style={{ width: 36, height: 36, borderRadius: 10, border: '0.5px solid rgba(26,18,9,0.08)', background: '#FFFFFF', cursor: 'pointer', gap: 4, flexShrink: 0, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ display: 'block', width: 14, height: 1.4, background: '#1A1209', borderRadius: 1 }} />
-              <span style={{ display: 'block', width: 14, height: 1.4, background: '#1A1209', borderRadius: 1 }} />
-              <span style={{ display: 'block', width: 14, height: 1.4, background: '#1A1209', borderRadius: 1 }} />
-            </button>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <span style={{ display: 'block', fontSize: '9px', color: 'rgba(26,18,9,0.45)', letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 500 }}>Espace</span>
-              <span style={{ display: 'block', fontFamily: 'var(--font-cormorant, serif)', fontSize: '18px', color: '#1A1209', lineHeight: 1.1, marginTop: '1px' }}>Pèlerin</span>
+          <header style={{ position: 'sticky', top: 0, zIndex: 40, background: 'rgba(245,242,236,0.94)', backdropFilter: 'blur(16px)', borderBottom: '1px solid #EDE8DC', padding: '0.9rem 1.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <button className="pelerin-hamburger" onClick={() => setOpen(true)} style={{ width: 44, height: 44, borderRadius: 10, border: '1px solid #EDE8DC', background: 'white', cursor: 'pointer', gap: 4, flexShrink: 0, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ display: 'block', width: 16, height: 1.5, background: '#1A1209', borderRadius: 2 }} />
+                <span style={{ display: 'block', width: 12, height: 1.5, background: '#1A1209', borderRadius: 2 }} />
+                <span style={{ display: 'block', width: 16, height: 1.5, background: '#1A1209', borderRadius: 2 }} />
+              </button>
+              <span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 600, color: '#1A1209' }}>Espace Pèlerin</span>
             </div>
-            <NotificationBell />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <NotificationBell />
+              <Link href="/guides" style={{ padding: '0.5rem 1.25rem', borderRadius: 50, fontSize: '0.75rem', fontWeight: 700, background: '#1A1209', color: '#F0D897', textDecoration: 'none', letterSpacing: '0.04em', whiteSpace: 'nowrap' }}>+ Nouveau guide</Link>
+            </div>
           </header>
 
           <main style={{ flex: 1, padding: '2rem 1.75rem', maxWidth: 1200, width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>

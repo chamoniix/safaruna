@@ -4,28 +4,20 @@ import { useState } from 'react';
 import Link from 'next/link';
 
 const INITIAL_TASKS = [
-  // Administratif
-  { id: 1,  category: 'Administratif', title: 'Passeport — validité +6 mois',           desc: 'Vérifiez la date d\'expiration. Minimum 6 mois après la date de retour.', done: false },
-  { id: 2,  category: 'Administratif', title: 'Visa d\'entrée — app Nusuk',              desc: 'Obtenez votre e-visa sur l\'application Nusuk (Arabie Saoudite).', done: false },
-  { id: 3,  category: 'Administratif', title: 'Billet d\'avion',                         desc: 'Confirmez votre vol aller-retour.', done: false },
-  { id: 4,  category: 'Administratif', title: 'Hôtel réservé',                           desc: 'Vérifiez vos confirmations d\'hôtel à Makkah et/ou Madinah.', done: false },
-  { id: 5,  category: 'Administratif', title: 'Carte bancaire / cash',                   desc: 'Prévoyez du cash pour les souvenirs. Les cartes sont acceptées dans les grands hôtels.', done: false },
-  // Bagages
-  { id: 6,  category: 'Bagages',       title: 'Ihram (Hommes)',                          desc: '2 serviettes blanches non cousues, sans couture ni motif.', done: false },
-  { id: 7,  category: 'Bagages',       title: 'Ceinture sécurisée pour l\'Ihram',        desc: 'Pour garder téléphone et argent sous l\'Ihram.', done: false },
-  { id: 8,  category: 'Bagages',       title: 'Petite sacoche pour la Omra',             desc: 'Légère, port ventral recommandé pendant les rites.', done: false },
-  { id: 9,  category: 'Bagages',       title: 'Sandalettes plastique confortables',      desc: 'Doivent laisser le dessus du pied découvert (Ihram). Privilégiez une semelle épaisse.', done: false },
-  { id: 10, category: 'Bagages',       title: 'Vaseline',                                desc: 'Éviter l\'irritation des cuisses lors des longues marches.', done: false },
-  { id: 11, category: 'Bagages',       title: 'Lunettes de soleil',                      desc: 'Le reflet du marbre blanc peut blesser les yeux sensibles.', done: false },
-  // Spirituel
-  { id: 12, category: 'Spirituel',     title: 'Tawbah — Repentir sincère',               desc: 'Demander pardon à Allah et, si possible, aux personnes concernées.', done: false },
-  { id: 13, category: 'Spirituel',     title: 'Régler ses dettes',                       desc: 'S\'acquitter de ses dettes ou obtenir un accord de report.', done: false },
-  { id: 14, category: 'Spirituel',     title: 'Apprendre les rites (Fiqh)',              desc: 'Terminer le module Omra de la SAFARUMA Academy avant le départ.', done: false },
+  { id: 1, category: 'Administratif', title: 'Passeport valide (+6 mois)', desc: 'Vérifiez la date d\'expiration de votre passeport.', done: false },
+  { id: 2, category: 'Administratif', title: 'Visa de Omra / eVisa Touristique', desc: 'Imprimez votre eVisa KSA ou Visa de Omra.', done: false },
+  { id: 3, category: 'Administratif', title: 'Vaccin Méningite (ACYW)', desc: 'Carnet de vaccination jaune international requis.', done: false },
+  { id: 4, category: 'Spirituel', title: 'Repentir sincère (Tawbah)', desc: 'Demander pardon à Allah et aux personnes lésées.', done: false },
+  { id: 5, category: 'Spirituel', title: 'Régler ses dettes', desc: 'S\'acquitter de ses dettes ou demander un délai.', done: false },
+  { id: 6, category: 'Spirituel', title: 'Apprendre les rites (Fiqh)', desc: 'Terminer le module 2 de la SAFARUMA Academy.', done: false },
+  { id: 7, category: 'Bagages', title: 'Acheter l\'Ihram (Hommes)', desc: '2 serviettes blanches non cousues.', done: false },
+  { id: 8, category: 'Bagages', title: 'Ceinture / Sacoche sécurisée', desc: 'Pour garder téléphone et argent sous l\'Ihram.', done: false },
+  { id: 9, category: 'Bagages', title: 'Sandales confortables', desc: 'Doivent laisser le talon et le dessus du pied découverts (hommes en Ihram).', done: false },
 ];
 
 const CATEGORY_CONFIG: Record<string, { color: string; bg: string; border: string; icon: string }> = {
-  'Administratif': { color: '#8B6914', bg: '#FAF3E0', border: 'rgba(201,168,76,0.3)',  icon: '📋' },
-  'Spirituel':     { color: '#1D5C3A', bg: '#E8F5EE', border: 'rgba(29,92,58,0.2)',   icon: '🤲' },
+  'Administratif': { color: '#1A4A8A', bg: '#EAF1FB', border: 'rgba(26,74,138,0.2)', icon: '📋' },
+  'Spirituel':     { color: '#1D5C3A', bg: '#E8F5EE', border: 'rgba(29,92,58,0.2)',  icon: '🤲' },
   'Bagages':       { color: '#8B6914', bg: '#FAF3E0', border: 'rgba(201,168,76,0.3)', icon: '🧳' },
 };
 
@@ -64,27 +56,6 @@ export default function PreparationChecklist() {
           .cl-grid { grid-template-columns: 1fr !important; }
         }
       `}} />
-
-      {/* Conseil 48h */}
-      <div style={{
-        background: 'linear-gradient(90deg, rgba(201,168,76,0.12), rgba(201,168,76,0.04))',
-        border: '0.5px solid rgba(201,168,76,0.3)',
-        borderRadius: 12, padding: '10px 14px',
-        display: 'flex', alignItems: 'center', gap: 10,
-        marginBottom: '1.5rem',
-      }}>
-        <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#C9A84C', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-            <path d="M7 1v6M7 10v1" stroke="#1A1209" strokeWidth="1.8" strokeLinecap="round"/>
-          </svg>
-        </div>
-        <div>
-          <div style={{ fontSize: '10px', fontWeight: 700, color: '#8B6914', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Conseil</div>
-          <div style={{ fontSize: '12px', color: '#1A1209', fontWeight: 500, marginTop: 1 }}>
-            <strong>48h avant le départ</strong>, ta checklist doit être complète. Valide chaque point dès maintenant !
-          </div>
-        </div>
-      </div>
 
       {/* Header */}
       <div className="cl-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1.25rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
@@ -212,7 +183,7 @@ export default function PreparationChecklist() {
       <div style={{ marginTop: '2rem', background: 'linear-gradient(135deg, #1A1209, #2D1F08)', borderRadius: 16, padding: '1.75rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem', flexWrap: 'wrap', border: '1px solid rgba(201,168,76,0.2)' }}>
         <div>
           <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: '0.4rem' }}>Conseil spirituel</div>
-          <h3 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', color: 'white', marginBottom: '0.4rem', fontWeight: 600 }}>L&apos;intention de la Omra (Niyyah)</h3>
+          <h3 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', color: 'white', marginBottom: '0.4rem', fontWeight: 600 }}>L'intention de la Omra (Niyyah)</h3>
           <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.65, maxWidth: 480 }}>
             La préparation du cœur est plus importante que celle des valises. Purifiez votre intention avant le départ.
           </p>

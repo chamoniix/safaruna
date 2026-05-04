@@ -89,6 +89,16 @@ export async function PATCH(req: NextRequest) {
       }).catch(e => console.error('[reservations PATCH] pelerin email error', e));
     }
 
+    // In-app notification au pèlerin
+    prisma.notification.create({
+      data: {
+        userId: reservation.pelerinId,
+        type: 'RESERVATION_CONFIRMED',
+        title: 'Réservation confirmée !',
+        message: `Ta réservation ${reservation.refNumber} avec ${guideName} est confirmée. Prépare-toi pour ta Omra !`,
+      },
+    }).catch(e => console.error('[admin] notification create error', e));
+
     // Email au guide
     if (gu.email) {
       sendEmail({

@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Nos guides certifiés — SAFARUMA',
-  description: 'Découvrez nos guides privés certifiés pour la Omra. Français, Arabe, Wolof, Darija — trouvez le guide qui parle votre langue et connaît les lieux saints.',
+  title: 'Guides privés Omra certifiés — La Mecque & Médine | SAFARUMA',
+  description: 'Trouvez votre guide privé certifié pour la Omra à La Mecque et Médine. 15+ guides vérifiés, 17 langues : français, arabe, wolof, darija, turc et plus. Accompagnement sur mesure.',
   alternates: { canonical: 'https://safaruma.com/guides' },
   openGraph: {
-    title: 'Nos guides certifiés — SAFARUMA',
-    description: 'Guides privés certifiés pour la Omra. 35 langues couvertes.',
+    title: 'Guides privés Omra certifiés | SAFARUMA',
+    description: 'Trouvez votre guide privé pour la Omra. 15+ guides certifiés, 17 langues.',
     url: 'https://safaruma.com/guides',
   },
 };

@@ -4,8 +4,9 @@ import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
 
 export const metadata = {
-  title: "Hôtels & Hébergements Omra — SAFARUMA",
-  description: "Sélection d'hôtels certifiés SAFARUMA à Makkah et Madinah. Proches du Haram, adaptés PMR, avec accueil de qualité pour votre Omra.",
+  title: "Hôtels Omra à La Mecque & Médine — Sélection certifiée | SAFARUMA",
+  description: "Hôtels certifiés SAFARUMA proches du Masjid Al-Haram à Makkah et du Masjid An-Nabawi à Madinah. Accessibles PMR, réservables avec votre guide privé.",
+  alternates: { canonical: 'https://safaruma.com/services/hotels' },
 };
 
 const HOTELS_MAKKAH = [

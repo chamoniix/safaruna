@@ -4,8 +4,9 @@ import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
 
 export const metadata = {
-  title: "Transferts & Transport — SAFARUMA",
-  description: "Voiture privée, van 9 places, Train Haramayn Makkah↔Madinah. Vos transferts Omra organisés par votre guide SAFARUMA.",
+  title: "Transferts Omra : voiture privée, van & Train Haramayn | SAFARUMA",
+  description: "Transport Omra clé en main : voiture privée 4 places, van 7-9 places, Train Haramayn Makkah-Madinah. Organisé directement par votre guide privé certifié SAFARUMA.",
+  alternates: { canonical: 'https://safaruma.com/services/transfert' },
 };
 
 const OPTIONS = [

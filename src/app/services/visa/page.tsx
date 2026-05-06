@@ -4,8 +4,9 @@ import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
 
 export const metadata = {
-  title: "Visa Omra — Assistance SAFARUMA",
-  description: "Assistance complète pour votre visa Omra individuel ou de groupe. Démarches simplifiées, délais réduits, accompagnement par des guides basés en Arabie Saoudite.",
+  title: "Visa Omra 2026 : démarches complètes & assistance | SAFARUMA",
+  description: "Tout savoir sur le visa Omra 2026 : e-visa Arabie Saoudite via Nusuk, documents requis, délais, coûts. Assistance complète pour votre demande individuelle ou en groupe.",
+  alternates: { canonical: 'https://safaruma.com/services/visa' },
 };
 
 const STEPS = [

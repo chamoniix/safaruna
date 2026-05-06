@@ -1,11 +1,16 @@
 import React from 'react';
-import type { Viewport } from 'next';
+import type { Metadata, Viewport } from 'next';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
 import { IconMosque, IconGraduationCap, IconHandshake, IconGlobe, IconSparkles, IconMoon } from '@/components/Icons';
 
 export const viewport: Viewport = { themeColor: '#FAF7F0' };
+export const metadata: Metadata = {
+  title: 'À propos de SAFARUMA — Plateforme de guides privés Omra',
+  description: 'SAFARUMA est la première plateforme francophone de guides privés certifiés pour la Omra. Notre mission : un pèlerinage authentique, personnalisé et accessible à tous, dans votre langue.',
+  alternates: { canonical: 'https://safaruma.com/a-propos' },
+};
 
 const TEAM = [
   {

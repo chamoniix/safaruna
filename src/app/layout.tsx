@@ -19,9 +19,9 @@ const manrope = Manrope({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://safaruma.com'),
-  title: "SAFARUMA — Le voyage vers tes origines commence ici.",
-  description: "SAFARUMA connecte les voyageurs avec des guides privés certifiés pour vivre la Omra, découvrir l'histoire de l'Islam et retrouver ses origines spirituelles. 320 guides certifiés, 12 langues.",
-  keywords: ["omra", "guide omra", "umrah", "guide privé", "arabie saoudite", "makkah", "madinah", "pèlerinage", "guide islamique"],
+  title: "Guide privé Omra certifié à La Mecque & Médine | SAFARUMA",
+  description: "SAFARUMA connecte les pèlerins avec des guides privés certifiés pour la Omra à La Mecque et Médine. 15+ guides vérifiés, 17 langues, accompagnement personnalisé PMR.",
+  keywords: ["guide omra", "guide privé omra", "guide francophone La Mecque", "omra avec guide", "guide omra certifié", "omra privée", "guide Médine", "omra famille", "omra PMR", "umrah guide"],
 
   openGraph: {
     title: 'SAFARUMA — Le voyage vers tes origines commence ici',

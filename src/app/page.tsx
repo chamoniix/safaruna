@@ -168,7 +168,7 @@ export default function Home() {
               padding: '4px 12px', border: '0.5px solid rgba(201,168,76,0.4)',
               borderRadius: '999px', background: 'rgba(201,168,76,0.06)',
             }}>
-              <span style={{ color: '#C9A84C' }}>★</span> Guides privés certifiés · 30+ langues
+              <span style={{ color: '#C9A84C' }}>★</span> Guides privés certifiés · 17 langues
             </span>
           </div>
 

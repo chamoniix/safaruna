@@ -835,8 +835,8 @@ export default function GuideSearchPage() {
             </svg>
           </span>
           <div>
-            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.15 }}>★★★★★ 4.9</div>
-            <div style={{ fontSize: '0.65rem', color: '#7A6D5A', lineHeight: 1.15 }}>12 890 avis</div>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.15 }}>★★★★★ 4.96</div>
+            <div style={{ fontSize: '0.65rem', color: '#7A6D5A', lineHeight: 1.15 }}>709 avis vérifiés</div>
           </div>
         </div>
       </div>

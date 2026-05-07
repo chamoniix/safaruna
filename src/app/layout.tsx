@@ -40,6 +40,15 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://safaruma.com',
   },
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/icon-logo.png', type: 'image/png' },
+    ],
+    apple: { url: '/icon-logo.png', type: 'image/png' },
+    shortcut: '/favicon.ico',
+  },
+  manifest: '/manifest.webmanifest',
 };
 
 export default async function RootLayout({

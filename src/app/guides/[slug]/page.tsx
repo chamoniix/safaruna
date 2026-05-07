@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         || 'Guide';
       const desc = guideData.bio || `Profil guide — ${name}`;
       return {
-        title: `${name} — Guide | SAFARUMA`,
+        title: `${name} — Guide privé Omra certifié | SAFARUMA`,
         description: desc,
         alternates: { canonical: `https://safaruma.com/guides/${slug}` },
         openGraph: {
@@ -42,11 +42,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const g = GUIDE_META[slug];
   if (!g) return { title: 'Guide — SAFARUMA' };
   return {
-    title: `${g.name} — ${g.title} | SAFARUMA`,
+    title: `${g.name} — Guide privé Omra certifié | SAFARUMA`,
     description: g.desc,
     alternates: { canonical: `https://safaruma.com/guides/${slug}` },
     openGraph: {
-      title: `${g.name} — SAFARUMA`,
+      title: `${g.name} — Guide privé Omra | SAFARUMA`,
       description: g.desc,
       url: `https://safaruma.com/guides/${slug}`,
     },
@@ -451,8 +451,57 @@ export default async function GuideProfilePage({
     locUp.includes('MADINAH') ? 'MADINAH' :
     null;
 
+  const guideSchema = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Person",
+        "@id": `https://safaruma.com/guides/${slug}#person`,
+        "name": guide.name,
+        "jobTitle": "Guide privé Omra certifié",
+        "description": guide.shortBio || `Guide privé certifié Omra à La Mecque et Médine — ${guide.name}`,
+        "worksFor": { "@id": "https://safaruma.com/#organization" },
+        ...(guide.languages.length > 0 && {
+          "knowsLanguage": guide.languages.map(l =>
+            l.replace(/[\u{1F1E0}-\u{1F1FF}]{2}\s*/gu, '').trim()
+          ),
+        }),
+        ...(guide.experience > 0 && {
+          "description": `${guide.shortBio || ''} ${guide.experience} ans d'expérience.`.trim(),
+        }),
+      },
+      {
+        "@type": "Service",
+        "@id": `https://safaruma.com/guides/${slug}#service`,
+        "name": `Guide privé Omra — ${guide.name}`,
+        "provider": { "@id": `https://safaruma.com/guides/${slug}#person` },
+        "serviceType": "Guide touristique et religieux",
+        "areaServed": { "@type": "Place", "name": "La Mecque & Médine, Arabie Saoudite" },
+        "url": `https://safaruma.com/guides/${slug}`,
+        ...(guide.reviewCount > 0 && {
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": String(guide.rating),
+            "reviewCount": String(guide.reviewCount),
+            "bestRating": "5",
+            "worstRating": "1",
+          },
+        }),
+        ...(packages.length > 0 && {
+          "offers": packages.map(p => ({
+            "@type": "Offer",
+            "name": p.name,
+            "price": String(p.price),
+            "priceCurrency": "EUR",
+          })),
+        }),
+      },
+    ],
+  };
+
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(guideSchema) }} />
       <Navbar />
 
       {/* HERO */}

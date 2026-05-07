@@ -120,7 +120,7 @@ function GuideAvatarSVG({ slug, gradient, initials, isWoman }: { slug: string; g
       }}>
         <Image
           src="/guide-avatar.png"
-          alt="Naïm LAAMARI"
+          alt="Naïm LAAMARI — Guide officiel SAFARUMA, guide privé Omra certifié à La Mecque"
           fill
           style={{
             objectFit: 'cover',

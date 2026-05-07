@@ -57,7 +57,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export async function generateStaticParams() {
   try {
     const guides = await prisma.guideProfile.findMany({
-      where: { slug: { not: null } },
+      where: { slug: { not: null }, status: 'ACTIVE' },
       select: { slug: true },
     });
     const dbSlugs = guides.filter(g => g.slug).map(g => ({ slug: g.slug! }));
@@ -389,6 +389,8 @@ export default async function GuideProfilePage({
 
   const hardcoded = GUIDES[slug] ?? null;
   if (!guideData && !hardcoded) notFound();
+  // Masquer les fiches non actives qui n'ont pas de fallback hardcodé
+  if (guideData && (guideData as any).status !== 'ACTIVE' && !hardcoded) notFound();
 
   // ── Build packages ────────────────────────────────────────────────────────
   type PackageShape = { name: string; label: string; price: number; days: number; description: string; features: string[] };

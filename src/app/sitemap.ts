@@ -79,15 +79,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: 'https://safaruma.com/devenir-guide',                lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
 
     // ── Auth ──
-    { url: 'https://safaruma.com/inscription',                  lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
-    { url: 'https://safaruma.com/connexion',                    lastModified: new Date(), changeFrequency: 'monthly', priority: 0.3 },
     { url: 'https://safaruma.com/rejoindre',                    lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
 
     // ── Légal ──
-    { url: 'https://safaruma.com/mentions-legales',             lastModified: new Date(), changeFrequency: 'yearly',  priority: 0.2 },
-    { url: 'https://safaruma.com/politique-confidentialite',    lastModified: new Date(), changeFrequency: 'yearly',  priority: 0.2 },
-    { url: 'https://safaruma.com/cgu',                          lastModified: new Date(), changeFrequency: 'yearly',  priority: 0.2 },
-    { url: 'https://safaruma.com/conditions-clients',           lastModified: new Date(), changeFrequency: 'yearly',  priority: 0.2 },
     { url: 'https://safaruma.com/charte-islamique',             lastModified: new Date(), changeFrequency: 'yearly',  priority: 0.2 },
   ]
 }

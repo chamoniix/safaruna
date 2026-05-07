@@ -40,6 +40,7 @@ interface GuideProfileClientProps {
   certifications: string[];
   services: string[];
   bioFull: string[];
+  languages: string[];
   activePlaceKeys?: string[];
   guideCity?: 'MAKKAH' | 'MADINAH';
 }
@@ -68,6 +69,7 @@ export default function GuideProfileClient({
   certifications,
   services,
   bioFull,
+  languages,
   activePlaceKeys,
   guideCity,
 }: GuideProfileClientProps) {
@@ -213,13 +215,23 @@ export default function GuideProfileClient({
             <div style={{ minHeight: '50vh' }}>
               {/* ── RESPONSABLE TERRAIN CARD (officiel uniquement) ── */}
               {isOfficial && (
-                <div style={{
-                  background: '#1A1209',
-                  borderLeft: '4px solid #C9A84C',
-                  borderRadius: '12px',
-                  padding: '24px',
-                  marginBottom: '2rem',
-                }}>
+                <>
+                  <h2 style={{
+                    fontFamily: 'var(--font-cormorant), serif',
+                    fontSize: '1.4rem',
+                    fontWeight: 600,
+                    color: '#1A1209',
+                    marginBottom: '1rem',
+                  }}>
+                    Responsable Terrain SAFARUMA
+                  </h2>
+                  <div style={{
+                    background: '#1A1209',
+                    borderLeft: '4px solid #C9A84C',
+                    borderRadius: '12px',
+                    padding: '24px',
+                    marginBottom: '2rem',
+                  }}>
                   <div style={{
                     fontSize: '1rem',
                     fontWeight: 800,
@@ -229,7 +241,11 @@ export default function GuideProfileClient({
                     alignItems: 'center',
                     gap: '0.5rem',
                   }}>
-                    🛡️ Responsable Terrain SAFARUMA
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true" style={{ flexShrink: 0 }}>
+                      <path d="M12 2L3 7v6c0 5.1 3.9 9.5 9 11 5.1-1.5 9-5.9 9-11V7L12 2z" stroke="#C9A84C" strokeWidth="1.5" strokeLinejoin="round"/>
+                      <path d="M9 12l2 2 4-4" stroke="#C9A84C" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Responsable Terrain SAFARUMA
                   </div>
                   <p style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.75)', lineHeight: 1.8, marginBottom: '1.25rem' }}>
                     Naïm LAAMARI est le garant de la qualité SAFARUMA sur le terrain à Makkah. En cas d&apos;imprévu, de remplacement de guide ou de situation d&apos;urgence, Naïm intervient en moins de 2h. Sa présence permanente à Makkah est votre assurance d&apos;une expérience réussie.
@@ -255,8 +271,18 @@ export default function GuideProfileClient({
                     ))}
                   </div>
                 </div>
+                </>
               )}
 
+              <h2 style={{
+                fontFamily: 'var(--font-cormorant), serif',
+                fontSize: '1.4rem',
+                fontWeight: 600,
+                color: '#1A1209',
+                margin: '0 0 1rem',
+              }}>
+                À propos
+              </h2>
               <div style={{ marginBottom: '2.5rem' }}>
                 {bioFull.map((para, i) => (
                   <p key={i} style={{
@@ -271,15 +297,15 @@ export default function GuideProfileClient({
               </div>
 
               <div style={{ marginBottom: '2.5rem' }}>
-                <h3 style={{
+                <h2 style={{
                   fontFamily: 'var(--font-cormorant), serif',
                   fontSize: '1.4rem',
                   fontWeight: 600,
                   color: '#1A1209',
                   marginBottom: '1rem',
                 }}>
-                  Certifications &amp; Diplômes
-                </h3>
+                  Parcours et certifications
+                </h2>
                 <ul style={{ listStyle: 'none', padding: 0 }}>
                   {certifications.map((cert, i) => (
                     <li key={i} style={{
@@ -299,7 +325,7 @@ export default function GuideProfileClient({
               </div>
 
               <div>
-                <h3 style={{
+                <h2 style={{
                   fontFamily: 'var(--font-cormorant), serif',
                   fontSize: '1.4rem',
                   fontWeight: 600,
@@ -307,7 +333,7 @@ export default function GuideProfileClient({
                   marginBottom: '1rem',
                 }}>
                   Services inclus
-                </h3>
+                </h2>
                 <div className="profile-services-grid">
                   {services.map((svc, i) => (
                     <div key={i} style={{
@@ -327,6 +353,35 @@ export default function GuideProfileClient({
                   ))}
                 </div>
               </div>
+
+              {languages.length > 0 && (
+                <div style={{ marginTop: '2rem' }}>
+                  <h2 style={{
+                    fontFamily: 'var(--font-cormorant), serif',
+                    fontSize: '1.4rem',
+                    fontWeight: 600,
+                    color: '#1A1209',
+                    marginBottom: '1rem',
+                  }}>
+                    Langues parlées
+                  </h2>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    {languages.map((lang, i) => (
+                      <span key={i} style={{
+                        padding: '0.35rem 0.9rem',
+                        borderRadius: '50px',
+                        background: i === 0 ? '#FEF3C7' : '#F5F0E8',
+                        color: i === 0 ? '#78350F' : '#4A3F30',
+                        fontSize: '0.82rem',
+                        fontWeight: 600,
+                        border: '1px solid #E8DFC8',
+                      }}>
+                        {lang}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

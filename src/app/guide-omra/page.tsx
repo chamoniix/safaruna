@@ -4,7 +4,7 @@ import GuideOmraClient from "./GuideOmraClient";
 export const viewport: Viewport = { themeColor: '#FAF7F0' };
 
 export const metadata: Metadata = {
-  title: "La Omra étape par étape — Rituels, Du'as & Conseils | SAFARUMA",
+  title: "La Omra étape par étape 2026 — Rituels, Du'as & Conseils | SAFARUMA",
   description:
     "Guide spirituel complet de la Omra : Ihram, Tawaf, Sa'i, Tahallul. Chaque rituel expliqué simplement avec ses du'as et ses conseils pratiques.",
   keywords: [

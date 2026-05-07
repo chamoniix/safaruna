@@ -7,8 +7,11 @@ import Footer from '@/components/Footer';
 
 const SECTIONS = [
   { id: 'introduction', label: 'Introduction' },
+  { id: 'omra-hajj',    label: 'Omra vs Hajj' },
   { id: 'preparation',  label: 'Préparation' },
   { id: 'rituels',      label: 'Rituels' },
+  { id: 'faq',          label: 'FAQ Pratique' },
+  { id: 'apres',        label: 'Après la Omra' },
 ];
 
 export default function GuideOmraClient() {
@@ -44,7 +47,7 @@ export default function GuideOmraClient() {
         <div className="guide-hero-inner">
           <h1>
             La Omra étape par étape
-            <span className="hero-subtitle">Rituels, Du&apos;as &amp; Conseils</span>
+            <span className="hero-subtitle">Rituels, Du&apos;as &amp; Conseils 2026</span>
           </h1>
           <p className="hero-lead">
             De l&apos;Ihram au Tahallul, chaque rituel expliqué simplement, avec ses du&apos;as
@@ -82,7 +85,8 @@ export default function GuideOmraClient() {
           <h2>Comprendre la Omra</h2>
           <p>
             La Omra est un <strong>voyage de l&apos;âme</strong> bien plus qu&apos;un simple pèlerinage.
-            C&apos;est l&apos;effacement des péchés d&apos;une vie entière.
+            C&apos;est l&apos;effacement des péchés d&apos;une vie entière, un retour vers Allah ﷻ
+            dans les lieux les plus sacrés de l&apos;Islam.
           </p>
           <div className="quote-block">
             <span className="quote-icon">
@@ -95,6 +99,91 @@ export default function GuideOmraClient() {
               Le Prophète a dit : <em>« La Omra jusqu&apos;à la Omra suivante est une expiation
               pour ce qui s&apos;est passé entre elles. »</em> (Bukhari &amp; Muslim).
             </p>
+          </div>
+          <p>
+            Contrairement au Hajj, la Omra peut être accomplie à n&apos;importe quel moment de
+            l&apos;année. Elle est considérée comme une sunna mu&apos;akkadah — une pratique fortement
+            recommandée par le Prophète ﷺ. Elle comprend quatre rituels fondamentaux : l&apos;entrée
+            en état d&apos;Ihram, le Tawaf, le Sa&apos;i, et le Tahallul. Ce guide vous accompagne
+            à travers chacun d&apos;eux, avec les du&apos;as correspondants et les conseils pratiques
+            des guides certifiés SAFARUMA.
+          </p>
+        </section>
+
+        {/* ── OMRA VS HAJJ ── */}
+        <section id="omra-hajj">
+          <span className="label-overline">DIFFÉRENCES ESSENTIELLES</span>
+          <h2>Omra vs Hajj</h2>
+          <p>
+            La Omra et le Hajj sont deux pèlerinages distincts en Islam. Comprendre leurs différences
+            est essentiel pour préparer son voyage en toute connaissance de cause et choisir la formule
+            adaptée à sa situation.
+          </p>
+
+          <div className="info-card">
+            <div className="info-icon">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M7 1l1.5 3.5L12 5l-2.5 2.5.6 3.5L7 9.5 3.9 11l.6-3.5L2 5l3.5-.5L7 1z" stroke="#C9A84C" strokeWidth="1" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <div className="info-content">
+              <h3>La Omra — Pèlerinage mineur</h3>
+              <p>
+                La Omra peut être accomplie à n&apos;importe quel moment de l&apos;année. Elle n&apos;est
+                pas obligatoire (fard) mais fortement recommandée (sunna mu&apos;akkadah). Elle
+                comprend quatre rituels : Ihram, Tawaf (7 tours), Sa&apos;i (7 allers-retours),
+                Tahallul. Durée minimale des rituels seuls : 3 à 4 heures. Le séjour complet
+                pour visiter les lieux saints dure généralement plusieurs jours.
+              </p>
+            </div>
+          </div>
+
+          <div className="info-card">
+            <div className="info-icon">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M7 2L2 5v4l5 3 5-3V5L7 2z" stroke="#C9A84C" strokeWidth="1" strokeLinejoin="round"/>
+                <path d="M7 5v5M4.5 6.5L7 5l2.5 1.5" stroke="#C9A84C" strokeWidth="0.8" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <div className="info-content">
+              <h3>Le Hajj — Pèlerinage majeur</h3>
+              <p>
+                Le Hajj est le 5e pilier de l&apos;Islam, obligatoire une fois dans la vie pour
+                tout musulman adulte, sain et financièrement capable. Il s&apos;effectue
+                uniquement en Dhul Hijja (du 8 au 13). Ses rituels supplémentaires incluent
+                le séjour à Arafat (pilier central du Hajj), la nuit à Muzdalifah, le séjour
+                à Mina et la lapidation des Djamarat. Durée : 5 à 6 jours minimum.
+              </p>
+            </div>
+          </div>
+
+          <div className="faq-card">
+            <div className="faq-num">?</div>
+            <div className="faq-content">
+              <h3>Quelle est la meilleure période pour la Omra en 2026 ?</h3>
+              <p>
+                La Omra peut s&apos;accomplir toute l&apos;année. Les mois les moins chargés sont
+                Muharram, Safar et Rabi&apos;al-Awwal. Le Ramadan 2026 se déroulera fin
+                février–mars — la foule y sera importante mais la récompense spirituelle
+                incomparable (le Prophète ﷺ a dit qu&apos;une Omra en Ramadan équivaut en
+                récompense à un Hajj — Bukhari). Pour un premier voyage serein, mars–avril ou
+                octobre offrent un bon équilibre entre affluence modérée et température
+                agréable.
+              </p>
+            </div>
+          </div>
+
+          <div className="faq-card">
+            <div className="faq-num">?</div>
+            <div className="faq-content">
+              <h3>Peut-on effectuer plusieurs Omra dans sa vie ?</h3>
+              <p>
+                Oui, absolument. Le Prophète ﷺ a encouragé à répéter la Omra aussi souvent
+                que possible. Chaque Omra acceptée est une expiation des péchés commis depuis
+                la précédente. Certains pèlerins effectuent plusieurs Omra par an — chaque
+                retour aux Lieux Saints est une opportunité de rapprochement spirituel unique.
+              </p>
+            </div>
           </div>
         </section>
 
@@ -162,6 +251,24 @@ export default function GuideOmraClient() {
               <p>Suivi du Talbiyah que vous répéterez jusqu&apos;au début du Tawaf.</p>
             </div>
           </div>
+
+          <div className="faq-card">
+            <div className="faq-num">4</div>
+            <div className="faq-content">
+              <h3>La valise de la Omra — Que prendre ?</h3>
+              <p>
+                <strong>Pour les hommes :</strong> 2 pièces d&apos;Ihram blanches (une de rechange),
+                sandales ouvertes pour l&apos;Ihram, chaussures fermées pour les visites.
+                <strong>Pour les femmes :</strong> abaya ample sans coutures ni ornements
+                excessifs + hijab, vêtements couvrants pour les sorties.
+                <strong>Pour tous :</strong> livret de du&apos;as, médicaments habituels
+                (anti-douleur, antidiarrhéiques), crème solaire halal, gourde/thermos
+                pour l&apos;eau de Zamzam, copies du passeport et visa, argent liquide en SAR,
+                chargeur universel, couverture légère pour les nuits climatisées,
+                masque et lingettes pour les moments de forte affluence.
+              </p>
+            </div>
+          </div>
         </section>
 
         {/* ── RITUELS ── */}
@@ -192,12 +299,36 @@ export default function GuideOmraClient() {
             </div>
           </div>
 
+          <div className="quote-block">
+            <span className="quote-icon">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M3 5h2v4H3V5zm6 0h2v4H9V5z" fill="#C9A84C"/>
+              </svg>
+              Du&apos;a du Tawaf
+            </span>
+            <p>
+              Entre la Pierre Noire (Yéménite) et le Coin Yéménite, récitez :<br/>
+              <strong>رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ</strong><br/>
+              <em>Rabbana atina fi&apos;d-dunya hasanatan wa fi&apos;l-akhirati hasanatan wa qina
+              &apos;adhaba&apos;n-nar</em><br/>
+              « Notre Seigneur, accorde-nous le meilleur en ce monde et le meilleur dans
+              l&apos;au-delà, et protège-nous du châtiment du feu. » (Bukhari)
+            </p>
+          </div>
+
+          <p>
+            Au début de chaque tour, en face de la Pierre Noire, levez la main droite et
+            dites : <em>« Bismillah, Allahu Akbar »</em>. Si vous ne pouvez pas la toucher ou
+            l&apos;embrasser en raison de la foule, pointer vers elle suffit — ne mettez jamais
+            en danger votre sécurité ou celle des autres pèlerins pour la toucher.
+          </p>
+
           <span className="label-overline">LE SA&apos;I</span>
           <h2>Entre Safa et Marwa</h2>
           <p>
             Après le Tawaf, vous accomplissez le Sa&apos;i : 7 allers-retours entre les deux
-            collines de Safa et Marwa, en mémoire de Hajar cherchant de l&apos;eau pour son fils
-            Ismaïl. C&apos;est un rituel de patience, de confiance et de mémoire.
+            collines de Safa et Marwa. Ce rituel commémore le geste de Hajar, la mère d&apos;Ismaïl
+            ﷺ, cherchant de l&apos;eau dans la vallée désertique de Bakka.
           </p>
 
           <div className="info-card">
@@ -210,10 +341,28 @@ export default function GuideOmraClient() {
               <h3>7 trajets de Safa à Marwa</h3>
               <p>
                 Safa → Marwa = 1 trajet. Marwa → Safa = 2e trajet. Au total, 7 trajets se
-                terminant à Marwa. Une légère course est recommandée entre les deux marqueurs
-                verts pour les hommes.
+                terminant à Marwa. Le Mas&apos;a (couloir) mesure environ 394 mètres — le pèlerin
+                parcourt au total environ 2 758 mètres (3,5 km). Une légère course est
+                recommandée entre les deux marqueurs verts pour les hommes.
               </p>
             </div>
+          </div>
+
+          <div className="quote-block">
+            <span className="quote-icon">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M3 5h2v4H3V5zm6 0h2v4H9V5z" fill="#C9A84C"/>
+              </svg>
+              Histoire de Hajar
+            </span>
+            <p>
+              Ibrahim ﷺ avait laissé Hajar et son nourrisson Ismaïl ﷺ dans la vallée
+              désertique de Bakka, future Makkah, sur ordre d&apos;Allah ﷻ. Manquant d&apos;eau,
+              Hajar courut sept fois entre les collines de Safa et Marwa, cherchant de l&apos;aide
+              du regard. C&apos;est alors que la source de Zamzam jaillit sous les pieds d&apos;Ismaïl.
+              En accomplissant le Sa&apos;i, chaque pèlerin rejoue ce geste de foi absolue, de
+              persévérance et de confiance totale en la Providence d&apos;Allah ﷻ.
+            </p>
           </div>
 
           <span className="label-overline">LE TAHALLUL</span>
@@ -238,6 +387,176 @@ export default function GuideOmraClient() {
                 Tahallul accompli, les interdits de l&apos;Ihram sont levés.
               </p>
             </div>
+          </div>
+        </section>
+
+        {/* ── FAQ PRATIQUE ── */}
+        <section id="faq">
+          <span className="label-overline">QUESTIONS FRÉQUENTES</span>
+          <h2>FAQ Pratique de la Omra</h2>
+          <p>
+            Les questions les plus posées par les pèlerins avant et pendant leur Omra,
+            avec des réponses claires et précises.
+          </p>
+
+          <div className="faq-card">
+            <div className="faq-num">5</div>
+            <div className="faq-content">
+              <h3>Puis-je effectuer la Omra si je suis en état de menstruation ?</h3>
+              <p>
+                Non. Les femmes en état de menstruation (haid) ou de lochies (nifas) ne peuvent
+                pas accomplir la Omra, car le Tawaf autour de la Kaaba nécessite d&apos;être en
+                état de pureté rituelle (tahara). Si cela survient pendant le voyage, il faut
+                patienter jusqu&apos;à la fin de la période, accomplir le ghusl (grande purification),
+                puis entrer en Ihram pour effectuer la Omra.
+              </p>
+            </div>
+          </div>
+
+          <div className="faq-card">
+            <div className="faq-num">6</div>
+            <div className="faq-content">
+              <h3>Puis-je porter des sandales pendant le Tawaf ?</h3>
+              <p>
+                Oui. Il n&apos;est pas obligatoire d&apos;être pieds nus pour le Tawaf. Des sandales
+                propres sont autorisées et recommandées — le sol du Masjid Al-Haram peut être très
+                chaud en été (50°C au sol) ou froid en hiver. Privilégiez des sandales légères à
+                semelle épaisse et antidérapante.
+              </p>
+            </div>
+          </div>
+
+          <div className="faq-card">
+            <div className="faq-num">7</div>
+            <div className="faq-content">
+              <h3>Doit-on jeûner pendant la Omra ?</h3>
+              <p>
+                Non, il n&apos;y a pas de jeûne obligatoire lié à la Omra. En revanche, si votre
+                Omra tombe pendant le Ramadan, vous continuez à jeûner selon les règles habituelles
+                — sauf si vous avez droit à l&apos;exemption du voyageur selon votre situation
+                (consulter votre imam ou un savant de confiance pour votre cas particulier).
+              </p>
+            </div>
+          </div>
+
+          <div className="faq-card">
+            <div className="faq-num">8</div>
+            <div className="faq-content">
+              <h3>Puis-je faire du Tawaf volontaire après la Omra ?</h3>
+              <p>
+                Oui, et c&apos;est fortement recommandé. Chaque tour autour de la Kaaba est une
+                ibadah à part entière. Profitez de votre présence à Makkah pour accomplir autant
+                de Tawaf volontaires (Tawaf an-nafl) que possible, particulièrement la nuit où
+                la foule est moins dense et l&apos;atmosphère spirituelle incomparable.
+              </p>
+            </div>
+          </div>
+
+          <div className="faq-card">
+            <div className="faq-num">9</div>
+            <div className="faq-content">
+              <h3>Le Tawaf est-il accessible aux personnes à mobilité réduite ?</h3>
+              <p>
+                Oui. Le Masjid Al-Haram dispose de fauteuils roulants disponibles gratuitement
+                (sous réserve de disponibilité) et d&apos;un étage dédié avec une vue directe sur
+                la Kaaba. Le Sa&apos;i (Mas&apos;a) est entièrement climatisé et accessible en
+                fauteuil roulant ou en fauteuil poussé. Un guide SAFARUMA formé à l&apos;accompagnement
+                PMR connaît tous les itinéraires et accès prioritaires.
+              </p>
+            </div>
+          </div>
+
+          <div className="faq-card">
+            <div className="faq-num">10</div>
+            <div className="faq-content">
+              <h3>Faut-il un guide pour accomplir la Omra ?</h3>
+              <p>
+                La Omra est techniquement réalisable seul si l&apos;on connaît les rituels. Mais
+                un guide certifié change profondément l&apos;expérience : il sécurise les rituels
+                (aucun pilier manqué, aucune erreur), explique la signification spirituelle de
+                chaque lieu, gère la logistique et permet au pèlerin de se concentrer pleinement
+                sur son dialogue avec Allah ﷻ. C&apos;est particulièrement précieux pour les
+                premiers voyages, les familles avec enfants, et les personnes âgées.
+              </p>
+            </div>
+          </div>
+
+          <div className="faq-card">
+            <div className="faq-num">11</div>
+            <div className="faq-content">
+              <h3>Combien coûte la Omra avec un guide privé SAFARUMA ?</h3>
+              <p>
+                Les tarifs des guides SAFARUMA débutent à <strong>150 € pour une visite guidée</strong>
+                de 4h des lieux essentiels, à <strong>350 € pour l&apos;accompagnement complet
+                de la Omra</strong> (rituels + lieux saints), et jusqu&apos;à <strong>600–780 €
+                pour les forfaits VIP</strong> incluant transport, hôtel et accès prioritaires.
+                Chaque guide fixe librement ses tarifs. SAFARUMA prélève une commission de 12%
+                seulement en cas de mission réalisée.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* ── APRÈS LA OMRA ── */}
+        <section id="apres">
+          <span className="label-overline">LE RETOUR</span>
+          <h2>Après la Omra — Préserver la baraka</h2>
+          <p>
+            La Omra ne s&apos;arrête pas au Tahallul. Le véritable pèlerin revient transformé —
+            et cette transformation doit se maintenir dans la durée. Voici ce que la Sunnah
+            enseigne sur les jours qui suivent l&apos;accomplissement de ce voyage béni.
+          </p>
+
+          <div className="info-card">
+            <div className="info-icon">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M7 2v5l3 2" stroke="#C9A84C" strokeWidth="1" strokeLinecap="round"/>
+                <circle cx="7" cy="7" r="5" stroke="#C9A84C" strokeWidth="1"/>
+              </svg>
+            </div>
+            <div className="info-content">
+              <h3>Ce que la Sunnah recommande après la Omra</h3>
+              <p>
+                Après l&apos;accomplissement de la Omra, il est recommandé de prier 2 rak&apos;ats
+                de shukr (remerciement) à Allah ﷻ. Profitez de votre présence à Makkah pour
+                accomplir des Tawaf volontaires supplémentaires — chaque tour compte.
+                Buvez de l&apos;eau de Zamzam en abondance en faisant du du&apos;a. Avant de
+                quitter Makkah, accomplissez le <strong>Tawaf de Wada&apos;</strong> (Tawaf
+                d&apos;adieu), obligatoire selon la majorité des savants.
+              </p>
+            </div>
+          </div>
+
+          <div className="info-card">
+            <div className="info-icon">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M3 7l3 3 5-5" stroke="#C9A84C" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <div className="info-content">
+              <h3>Maintenir la baraka à votre retour</h3>
+              <p>
+                La Omra acceptée laisse une empreinte durable. Revenez avec la résolution
+                ferme de changer : renforcer votre prière, réparer vos relations, réduire
+                ce qui éloigne d&apos;Allah ﷻ. Partagez votre expérience pour inspirer d&apos;autres
+                à faire le voyage. Le Prophète ﷺ a dit : <em>« Pour le pèlerin accepté,
+                il n&apos;y a pas de récompense autre que le Paradis. »</em> (Bukhari &amp; Muslim)
+              </p>
+            </div>
+          </div>
+
+          <div className="quote-block">
+            <span className="quote-icon">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M3 5h2v4H3V5zm6 0h2v4H9V5z" fill="#C9A84C"/>
+              </svg>
+              Un conseil de guide
+            </span>
+            <p>
+              Nos guides SAFARUMA vous préparent non seulement aux rituels, mais aussi à la
+              dimension spirituelle du retour. Une Omra bien accompagnée se ressent encore
+              des années après le voyage.
+            </p>
           </div>
         </section>
 

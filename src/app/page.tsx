@@ -109,9 +109,28 @@ const TEMOIGNAGES = [
 
 const nbDisponibles = 8;
 
+const HOME_SCHEMA = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "Guide privé certifié pour la Omra",
+  "provider": { "@id": "https://safaruma.com/#organization" },
+  "serviceType": "Guide touristique et religieux",
+  "areaServed": { "@type": "Place", "name": "La Mecque & Médine, Arabie Saoudite" },
+  "description": "Accompagnement personnalisé pour la Omra avec un guide privé certifié francophone à La Mecque (Makkah) et Médine (Madinah).",
+  "offers": { "@type": "AggregateOffer", "priceCurrency": "EUR", "lowPrice": "150", "highPrice": "400", "offerCount": "15" },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.96",
+    "reviewCount": "709",
+    "bestRating": "5",
+    "worstRating": "1"
+  }
+};
+
 export default function Home() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(HOME_SCHEMA) }} />
       <Navbar transparentOnHero />
       <ScrollReveal />
       <style dangerouslySetInnerHTML={{ __html: `

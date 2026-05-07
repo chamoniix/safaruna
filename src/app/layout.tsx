@@ -55,6 +55,35 @@ export default async function RootLayout({
     <html lang="fr" className={`${cormorant.variable} ${manrope.variable}`}>
       <head>
         <link href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@graph": [
+              {
+                "@type": "Organization",
+                "@id": "https://safaruma.com/#organization",
+                "name": "SAFARUMA",
+                "url": "https://safaruma.com",
+                "logo": { "@type": "ImageObject", "url": "https://safaruma.com/icon-logo.png", "width": 512, "height": 512 },
+                "description": "Plateforme francophone de guides privés certifiés pour la Omra à La Mecque et Médine.",
+                "sameAs": [
+                  "https://www.instagram.com/safaruma.officiel",
+                  "https://www.tiktok.com/@safaruma",
+                  "https://www.youtube.com/@safaruma"
+                ]
+              },
+              {
+                "@type": "WebSite",
+                "@id": "https://safaruma.com/#website",
+                "url": "https://safaruma.com",
+                "name": "SAFARUMA",
+                "inLanguage": "fr-FR",
+                "publisher": { "@id": "https://safaruma.com/#organization" }
+              }
+            ]
+          }) }}
+        />
       </head>
       <body className="antialiased font-sans bg-[var(--cream)] text-[var(--deep)]">
         <a href="#main-content" className="skip-link">Passer au contenu principal</a>

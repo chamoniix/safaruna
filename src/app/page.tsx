@@ -244,6 +244,23 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── TRUST STRIP — preuves sociales au-dessus de la ligne de flottaison ── */}
+      <div style={{ background: 'white', borderBottom: '1px solid var(--sand)', padding: '0.75rem 2rem' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '0 2.5rem', rowGap: '0.4rem' }}>
+          {([
+            { icon: '🔒', label: 'Paiement sécurisé Stripe' },
+            { icon: '✓', label: 'Accréditation officielle Mutawwif' },
+            { icon: '🛡️', label: 'Garantie remplacement 2h' },
+            { icon: '★', label: '4.96 / 5 · 709 avis vérifiés' },
+          ] as { icon: string; label: string }[]).map(({ icon, label }) => (
+            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.72rem', color: 'var(--muted)', fontWeight: 500, letterSpacing: '0.01em' }}>
+              <span style={{ color: 'var(--gold-dark)' }}>{icon}</span>
+              {label}
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* ═══════════════════════════════════════════════════════
           STATS — animated counters
           ═══════════════════════════════════════════════════════ */}
@@ -553,9 +570,12 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="reveal" style={{ textAlign: 'center', marginTop: '3rem' }}>
+          <div className="reveal" style={{ textAlign: 'center', marginTop: '3rem', display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/guides" className="btn-primary" style={{ fontSize: '0.88rem' }}>
               Voir tous les guides
+            </Link>
+            <Link href="/accompagnements" className="btn-secondary" style={{ fontSize: '0.88rem' }}>
+              Comparer les formules
             </Link>
           </div>
         </div>

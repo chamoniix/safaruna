@@ -3,6 +3,7 @@ import LegalLayout, { h2, p, ul, li } from '@/components/LegalLayout';
 export const metadata = {
   title: 'Conditions Clients — SAFARUMA',
   description: 'Contrat Clients SAFARUMA : réservations, remboursements, protection contre les fraudes, litiges.',
+  robots: { index: false },
 };
 
 export default function ConditionsClients() {

@@ -3,6 +3,7 @@ import LegalLayout, { h2, p, ul, li } from '@/components/LegalLayout';
 export const metadata = {
   title: 'Conditions Guides — SAFARUMA',
   description: 'Contrat Guides SAFARUMA : obligations, rémunération, politique d\'annulation, fraudes, protection.',
+  robots: { index: false },
 };
 
 export default function ConditionsGuides() {

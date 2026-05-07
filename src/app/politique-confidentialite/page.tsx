@@ -3,6 +3,7 @@ import LegalLayout, { h2, p, ul, li } from '@/components/LegalLayout';
 export const metadata = {
   title: 'Politique de confidentialité — SAFARUMA',
   description: 'Comment SAFARUMA collecte, utilise et protège vos données personnelles. Vos droits RGPD.',
+  robots: { index: false },
 };
 
 export default function PolitiqueConfidentialite() {

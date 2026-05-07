@@ -3,6 +3,7 @@ import LegalLayout, { h2, p, ul, li } from '@/components/LegalLayout';
 export const metadata = {
   title: 'Conditions Générales d\'Utilisation — SAFARUMA',
   description: 'CGU de la plateforme SAFARUMA : rôle d\'intermédiaire, paiements, commission, avis, responsabilité.',
+  robots: { index: false },
 };
 
 export default function CGU() {

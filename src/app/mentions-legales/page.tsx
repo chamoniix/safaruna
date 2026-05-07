@@ -3,6 +3,7 @@ import LegalLayout, { h2, p } from '@/components/LegalLayout';
 export const metadata = {
   title: 'Mentions légales — SAFARUMA',
   description: 'Mentions légales de la plateforme SAFARUMA : éditeur, hébergeur, propriété intellectuelle.',
+  robots: { index: false },
 };
 
 export default function MentionsLegales() {

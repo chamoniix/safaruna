@@ -244,22 +244,49 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── TRUST STRIP — preuves sociales au-dessus de la ligne de flottaison ── */}
-      <div style={{ background: 'white', borderBottom: '1px solid var(--sand)', padding: '0.75rem 2rem' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', gap: '0 2.5rem', rowGap: '0.4rem' }}>
-          {([
-            { icon: '🔒', label: 'Paiement sécurisé Stripe' },
-            { icon: '✓', label: 'Accréditation officielle Mutawwif' },
-            { icon: '🛡️', label: 'Garantie remplacement 2h' },
-            { icon: '★', label: '4.96 / 5 · 709 avis vérifiés' },
-          ] as { icon: string; label: string }[]).map(({ icon, label }) => (
-            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.72rem', color: 'var(--muted)', fontWeight: 500, letterSpacing: '0.01em' }}>
-              <span style={{ color: 'var(--gold-dark)' }}>{icon}</span>
-              {label}
+      {/* ── TRUST BAR — preuves sociales ── */}
+      <section className="home-trust-bar">
+        <div className="home-trust-row">
+
+          <div className="home-trust-item">
+            <div className="home-trust-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <rect x="5" y="11" width="14" height="10" rx="1.5" stroke="#C9A84C" strokeWidth="1.4"/>
+                <path d="M8 11V7a4 4 0 018 0v4" stroke="#C9A84C" strokeWidth="1.4"/>
+                <circle cx="12" cy="16" r="1.2" fill="#C9A84C"/>
+              </svg>
             </div>
-          ))}
+            <span className="home-trust-text">Paiement sécurisé</span>
+          </div>
+
+          <div className="home-trust-item">
+            <div className="home-trust-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 2L4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5l-8-3z" stroke="#C9A84C" strokeWidth="1.4" strokeLinejoin="round"/>
+                <path d="M9 12l2 2 4-4" stroke="#C9A84C" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <span className="home-trust-text">Garantie remplacement 2h</span>
+          </div>
+
         </div>
-      </div>
+
+        <div className="home-trust-rating">
+          <div className="home-trust-rating-stars">
+            {[0,1,2,3,4].map(i => (
+              <svg key={i} width="14" height="14" viewBox="0 0 14 14" fill="#C9A84C" aria-hidden="true">
+                <path d="M7 1l1.8 4 4.2.5-3 3 .8 4.2L7 10.5 3.2 12.7 4 8.5 1 5.5l4.2-.5L7 1z"/>
+              </svg>
+            ))}
+          </div>
+          <div className="home-trust-rating-score">
+            <span className="home-trust-rating-num">4.9</span>
+            <span className="home-trust-rating-max">/ 5</span>
+          </div>
+          <div className="home-trust-rating-count">3 200+ avis vérifiés</div>
+        </div>
+
+      </section>
 
       {/* ═══════════════════════════════════════════════════════
           STATS — animated counters

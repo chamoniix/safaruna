@@ -1,4 +1,6 @@
-import LegalLayout, { h2, p, ul, li } from '@/components/LegalLayout';
+import LegalLayout, { h2 as h2Base, p, ul, li } from '@/components/LegalLayout';
+
+const h2 = { ...h2Base, marginTop: '1.5rem', paddingTop: '1.5rem' };
 
 export const metadata = {
   title: 'Conditions Clients — SAFARUMA',
@@ -103,7 +105,7 @@ export default function ConditionsClients() {
         </div>
       </section>
 
-      <section id="droit">
+      <section id="droit" style={{ marginBottom: '-1.5rem' }}>
         <h2 style={h2}>6. Droit applicable et juridiction</h2>
         <p style={p}>Les présentes conditions sont régies par le <strong>droit français</strong>. En cas de désaccord persistant non résolu par l'arbitrage SAFARUMA, compétence exclusive est attribuée aux <strong>tribunaux de Paris</strong>.</p>
         <p style={p}>Pour tout litige de consommation, vous pouvez également recourir à un médiateur de la consommation agréé, conformément aux articles L.611-1 et suivants du Code de la consommation.</p>

@@ -32,6 +32,7 @@ export default function LegalLayout({ title, subtitle, toc, updated = '2 avril 2
         .legal-toc-inner nav a:hover { color: #1A1209; background: #F0EBE0; }
         .legal-toc-inner nav a.active { color: #1A1209; background: #F0EBE0; font-weight: 700; }
         .legal-content section:first-child h2 { margin-top: 0 !important; padding-top: 0 !important; border-top: none !important; }
+        .legal-content section { scroll-margin-top: 110px; }
         .legal-box-gold {
           background: #FEF9EC; border-left: 3px solid #C9A84C;
           border-radius: 0 8px 8px 0; padding: 1.25rem 1.5rem; margin: 1.5rem 0;
@@ -51,7 +52,7 @@ export default function LegalLayout({ title, subtitle, toc, updated = '2 avril 2
       <Navbar />
 
       {/* Hero */}
-      <div style={{ background: '#1A1209', padding: '8rem 2rem 5rem', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ background: '#1A1209', padding: '11rem 2rem 5rem', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 60% 60% at 50% 100%, rgba(201,168,76,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: 760, margin: '0 auto', position: 'relative' }}>
           <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.24em', textTransform: 'uppercase', color: '#C9A84C', opacity: 0.7, marginBottom: '1.25rem' }}>

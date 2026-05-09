@@ -5,10 +5,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let guides: { slug: string | null }[] = []
   try {
     guides = await prisma.guideProfile.findMany({
-      where: {
-        status: 'ACTIVE',
-        slug: { not: 'moi-guide-guide' },
-      },
+      where: { status: 'ACTIVE' },
       select: { slug: true },
     })
   } catch { /* DB non disponible au build — sitemap sans guides dynamiques */ }

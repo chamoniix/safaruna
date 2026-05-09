@@ -2,14 +2,14 @@
 import { useEffect, useRef, useState } from 'react';
 
 const STATS = [
-  { end: 15,  prefix: '', suffix: '+', label: 'Guides certifiés & vérifiés', duration: 1200 },
-  { end: 850, prefix: '', suffix: '+', label: 'Pèlerins accompagnés',         duration: 1800 },
-  { end: 97,  prefix: '', suffix: '%', label: 'Taux de recommandation',       duration: 1600 },
-  { end: 17,  prefix: '', suffix: '',  label: 'Langues couvertes',             duration: 1400 },
+  { end: 1000, prefix: '+', suffix: '',  label: 'Pèlerins accompagnés',       duration: 1800 },
+  { end: 8,    prefix: '',  suffix: '',  label: "Ans d'expérience Mutawwif",  duration: 1000 },
+  { end: 12,   prefix: '',  suffix: '+', label: 'Langues parlées',            duration: 1200 },
+  { end: 100,  prefix: '',  suffix: '%', label: 'Guides certifiés Mutawwif',  duration: 1500 },
 ];
 
 function useCounting(end: number, duration: number) {
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState(end);
   const ref = useRef<HTMLDivElement>(null);
   const started = useRef(false);
 

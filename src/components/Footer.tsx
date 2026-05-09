@@ -1,6 +1,6 @@
 import Link from "next/link";
 import React from "react";
-import { IconShield, IconStar, IconAccessibility, IconCheck } from "@/components/Icons";
+import { IconShield, IconAccessibility, IconCheck } from "@/components/Icons";
 
 export default function Footer() {
   return (
@@ -8,7 +8,7 @@ export default function Footer() {
       {/* Trust badges strip */}
       <div className="footer-trust" style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
+        gridTemplateColumns: 'repeat(3, 1fr)',
         gap: '0.75rem',
         padding: '1rem 1.5rem',
         borderBottom: '1px solid rgba(255,255,255,0.08)',
@@ -20,7 +20,6 @@ export default function Footer() {
         {([
           { icon: <IconCheck size={14} stroke="rgba(201,168,76,0.8)" />, label: 'Guides certifiés SAFARUMA' },
           { icon: <IconShield size={14} stroke="rgba(201,168,76,0.8)" />, label: 'Paiement sécurisé' },
-          { icon: <IconStar size={14} stroke="rgba(201,168,76,0.8)" />, label: '4.9 · 12 890 avis' },
           { icon: <IconAccessibility size={14} stroke="rgba(201,168,76,0.8)" />, label: 'Accessibilité PMR' },
         ] as { icon: React.ReactNode; label: string }[]).map(b => (
           <div key={b.label} style={{

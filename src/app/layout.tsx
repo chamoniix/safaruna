@@ -73,13 +73,22 @@ export default async function RootLayout({
                 "@type": "Organization",
                 "@id": "https://safaruma.com/#organization",
                 "name": "SAFARUMA",
+                "legalName": "HOLDINGAI LTD",
                 "url": "https://safaruma.com",
                 "logo": { "@type": "ImageObject", "url": "https://safaruma.com/icon-logo.png", "width": 512, "height": 512 },
                 "description": "Plateforme francophone de guides privés certifiés pour la Omra à La Mecque et Médine.",
+                "slogan": "La première plateforme dédiée aux guides privés pour la Omra",
+                "address": { "@type": "PostalAddress", "addressCountry": "GB" },
+                "areaServed": ["FR","BE","CH","MC","LU","MA","DZ","TN","SN","CI","ML","BF","GN","NE","TG","BJ","CM","GA","CA"],
+                "knowsAbout": ["Omra","Pèlerinage islamique","La Mecque","Médine","Mutawwif","Tawaf","Sa'i","Ihram","Lieux saints"],
                 "sameAs": [
-                  "https://www.instagram.com/safaruma.officiel",
+                  "https://www.instagram.com/safaruma_",
                   "https://www.tiktok.com/@safaruma",
-                  "https://www.youtube.com/@safaruma"
+                  "https://x.com/safaruma",
+                  "https://www.snapchat.com/add/safaruma",
+                  "https://youtube.com/@safaruma",
+                  "https://pin.it/2AfX27PBM",
+                  "https://www.linkedin.com/company/safaruma"
                 ]
               },
               {

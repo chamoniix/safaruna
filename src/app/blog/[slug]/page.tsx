@@ -3,10 +3,50 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ScrollReveal from '@/components/ScrollReveal';
-import { ARTICLES } from '../page';
+import type { Metadata } from 'next';
+import { BLOG_ARTICLES, BLOG_ARTICLES_LIST } from '../data';
 
-export async function generateStaticParams() {
-  return ARTICLES.map((a) => ({ slug: a.slug }));
+export function generateStaticParams() {
+  return Object.keys(BLOG_ARTICLES).map(slug => ({ slug }));
+}
+
+export async function generateMetadata({ params }: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const article = BLOG_ARTICLES[slug];
+
+  if (!article) return { title: 'Article introuvable | SAFARUMA' };
+
+  const url = `https://safaruma.com/blog/${slug}`;
+  const ogImage = article.image || 'https://safaruma.com/icon-logo.png';
+
+  return {
+    title: `${article.title} | SAFARUMA`,
+    description: article.description,
+    keywords: article.keywords.join(','),
+    alternates: { canonical: url },
+    openGraph: {
+      title: article.title,
+      description: article.description,
+      url,
+      type: 'article',
+      siteName: 'SAFARUMA',
+      locale: 'fr_FR',
+      publishedTime: article.publishedAt,
+      modifiedTime: article.updatedAt || article.publishedAt,
+      authors: [article.author],
+      section: article.category,
+      tags: article.keywords,
+      images: [{ url: ogImage, width: 1200, height: 630, alt: article.title }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: article.title,
+      description: article.description,
+      images: [ogImage],
+    },
+  };
 }
 
 // ─── Article content ──────────────────────────────────────────────────────────
@@ -90,15 +130,53 @@ const CONTENT: Record<string, { sections: { heading?: string; body: string }[] }
 
 export default async function BlogArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const article = ARTICLES.find((a) => a.slug === slug);
+  const article = BLOG_ARTICLES[slug];
   const content = CONTENT[slug];
 
   if (!article || !content) notFound();
 
-  const relatedArticles = ARTICLES.filter((a) => a.slug !== slug).slice(0, 3);
+  const url = `https://safaruma.com/blog/${slug}`;
+  const ogImage = article.image || 'https://safaruma.com/icon-logo.png';
+
+  const blogPostingSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    '@id': `${url}#article`,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': url },
+    headline: article.title,
+    description: article.description,
+    image: [ogImage],
+    datePublished: article.publishedAt,
+    dateModified: article.updatedAt || article.publishedAt,
+    author: {
+      '@type': 'Person',
+      name: article.author,
+      jobTitle: article.authorRole,
+    },
+    publisher: { '@id': 'https://safaruma.com/#organization' },
+    articleSection: article.category,
+    keywords: article.keywords.join(', '),
+    inLanguage: 'fr-FR',
+    url,
+  };
+
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Accueil', item: 'https://safaruma.com' },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://safaruma.com/blog' },
+      { '@type': 'ListItem', position: 3, name: article.title, item: url },
+    ],
+  };
+
+  const relatedArticles = BLOG_ARTICLES_LIST.filter((a) => a.slug !== slug).slice(0, 3);
 
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+
       <Navbar />
       <ScrollReveal />
 
@@ -122,7 +200,7 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
           </h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', animation: 'fadeInUp 0.8s 0.3s ease both', opacity: 0 }}>
             <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontWeight: 700, color: 'var(--deep)', fontSize: '1rem', flexShrink: 0 }}>
-              {article.author.split(' ').map(w => w[0]).join('').slice(0, 2)}
+              {article.author.split(' ').map((w: string) => w[0]).join('').slice(0, 2)}
             </div>
             <div>
               <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'white' }}>{article.author}</div>
@@ -155,7 +233,7 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
             alignItems: 'flex-start', marginTop: '3rem',
           }}>
             <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontWeight: 700, color: 'var(--deep)', fontSize: '1.2rem', flexShrink: 0 }}>
-              {article.author.split(' ').map(w => w[0]).join('').slice(0, 2)}
+              {article.author.split(' ').map((w: string) => w[0]).join('').slice(0, 2)}
             </div>
             <div>
               <div style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--deep)', marginBottom: '0.15rem' }}>Écrit par {article.author}</div>

@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
 import NewsletterForm from "@/components/NewsletterForm";
 import type { Metadata } from 'next';
+import { BLOG_ARTICLES_LIST as ARTICLES } from './data';
 
 export const metadata: Metadata = {
   title: 'Blog — Hajj, Omra & lieux saints — SAFARUMA',
@@ -11,73 +12,6 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://safaruma.com/blog' },
 };
 
-export const ARTICLES = [
-  {
-    slug: 'comment-preparer-omra-10-etapes',
-    category: 'Préparation',
-    categoryColor: '#1D5C3A',
-    categoryBg: 'rgba(29,92,58,0.1)',
-    title: 'Comment préparer son Omra en 10 étapes',
-    excerpt: "De l'intention à l'atterrissage : le guide complet pour que rien ne soit laissé au hasard. Visa, ihram, rituels, santé, spiritualité — 10 étapes pour une Omra sereine.",
-    readTime: '10 min',
-    date: '28 mars 2026',
-    author: 'Fatima Al-Omari',
-    authorRole: 'Guide certifiée · Makkah',
-    featured: true,
-  },
-  {
-    slug: 'les-7-tours-du-tawaf',
-    category: 'Spiritualité',
-    categoryColor: '#5A2D82',
-    categoryBg: 'rgba(90,45,130,0.1)',
-    title: 'Les 7 tours du Tawaf : sens et spiritualité',
-    excerpt: "Pourquoi 7 tours ? Quel est le sens de chaque passage devant la Pierre Noire ? Ce que les savants disent de ce rite millénaire et comment le vivre de l'intérieur.",
-    readTime: '8 min',
-    date: '20 mars 2026',
-    author: 'Abdullah Ben Yusuf',
-    authorRole: 'Docteur en Sciences Islamiques · Madinah',
-    featured: false,
-  },
-  {
-    slug: 'jabal-uhud-bataille-islam',
-    category: 'Histoire',
-    categoryColor: '#8B2A1A',
-    categoryBg: 'rgba(139,42,26,0.1)',
-    title: 'Jabal Uhud : la bataille qui a forgé l\'Islam',
-    excerpt: "Le mont Uhud n'est pas qu'une montagne. C'est le lieu où le Prophète ﷺ a pleuré ses compagnons tombés. L'histoire, la géographie, la visite — tout ce qu'il faut savoir.",
-    readTime: '9 min',
-    date: '12 mars 2026',
-    author: 'Rachid Al-Madani',
-    authorRole: 'Guide certifié · Makkah & Madinah',
-    featured: false,
-  },
-  {
-    slug: 'guide-visa-omra-2025',
-    category: 'Visa & Pratique',
-    categoryColor: '#1A4A8A',
-    categoryBg: 'rgba(26,74,138,0.1)',
-    title: 'Guide pratique du visa Omra 2025',
-    excerpt: "Nouveau système Nusuk, délais, documents exigés, erreurs à éviter : tout ce qui a changé pour les ressortissants francophones qui souhaitent obtenir leur visa Omra.",
-    readTime: '7 min',
-    date: '5 mars 2026',
-    author: 'Youssouf Konaté',
-    authorRole: 'Guide certifié · Madinah',
-    featured: false,
-  },
-  {
-    slug: 'difference-omra-hajj',
-    category: 'Éducation',
-    categoryColor: '#8B6914',
-    categoryBg: 'rgba(201,168,76,0.1)',
-    title: 'Quelle est la différence entre Omra et Hajj ?',
-    excerpt: "Obligatoire ou facultatif ? Quels rituels sont partagés, lesquels sont propres au Hajj ? Une explication claire, fondée sur les textes, pour mieux comprendre les deux grands pèlerinages.",
-    readTime: '6 min',
-    date: '25 février 2026',
-    author: 'Samira Al-Rashidi',
-    authorRole: 'Guide certifiée · Makkah',
-    featured: false,
-  },
-];
 
 export default function BlogPage() {
   const [featured, ...rest] = ARTICLES;

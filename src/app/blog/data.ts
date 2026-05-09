@@ -12,6 +12,7 @@ export type BlogArticle = {
   updatedAt?: string;
   author: string;
   authorRole: string;
+  authorUrl?: string;
   featured: boolean;
   keywords: string[];
   image?: string;
@@ -28,9 +29,10 @@ export const BLOG_ARTICLES_LIST: BlogArticle[] = [
     description: "Visa, ihram, rituels, santé, spiritualité — 10 étapes pour préparer son Omra sereinement. Le guide complet pour pèlerins francophones, par une guide certifiée SAFARUMA.",
     readTime: '10 min',
     date: '28 mars 2026',
-    publishedAt: '2026-03-28',
+    publishedAt: '2026-03-28T08:00:00+03:00',
     author: 'Fatima Al-Omari',
     authorRole: 'Guide certifiée · Makkah',
+    authorUrl: 'https://safaruma.com/guides/fatima-al-omari',
     featured: true,
     keywords: ['préparer omra', 'checklist omra', 'omra étapes', 'première omra', 'visa omra nusuk', 'ihram omra', 'rituels omra'],
   },
@@ -44,9 +46,10 @@ export const BLOG_ARTICLES_LIST: BlogArticle[] = [
     description: "Sens du Tawaf : pourquoi 7 tours autour de la Kaaba, Pierre Noire, Maqam Ibrahim, du'as. Ce que les savants islamiques disent de ce rite millénaire de la Omra.",
     readTime: '8 min',
     date: '20 mars 2026',
-    publishedAt: '2026-03-20',
+    publishedAt: '2026-03-20T09:00:00+03:00',
     author: 'Abdullah Ben Yusuf',
     authorRole: 'Docteur en Sciences Islamiques · Madinah',
+    authorUrl: 'https://safaruma.com/guides/abdullah-ben-yusuf',
     featured: false,
     keywords: ['tawaf', '7 tours kaaba', 'rituel omra', 'pierre noire', 'hajar al-aswad', 'maqam ibrahim', 'tawaf sens spirituel'],
   },
@@ -60,9 +63,10 @@ export const BLOG_ARTICLES_LIST: BlogArticle[] = [
     description: "Bataille d'Uhud, 625 ap. J.-C. : contexte, martyrs, blessure du Prophète ﷺ et leçon spirituelle. Guide de visite de Jabal Uhud à Madinah avec un guide certifié.",
     readTime: '9 min',
     date: '12 mars 2026',
-    publishedAt: '2026-03-12',
+    publishedAt: '2026-03-12T08:30:00+03:00',
     author: 'Rachid Al-Madani',
     authorRole: 'Guide certifié · Makkah & Madinah',
+    authorUrl: 'https://safaruma.com/guides/rachid-al-madani',
     featured: false,
     keywords: ['jabal uhud', 'bataille uhud', 'histoire islam', 'hamza ibn abd al-muttalib', 'martyrs uhud', 'visite médine', 'sahaba'],
   },
@@ -76,9 +80,10 @@ export const BLOG_ARTICLES_LIST: BlogArticle[] = [
     description: "Obtenir son visa Omra via Nusuk : documents requis, délais 3-10 jours, coûts, erreurs fréquentes. Guide pratique 2026 pour pèlerins francophones.",
     readTime: '7 min',
     date: '5 mars 2026',
-    publishedAt: '2026-03-05',
+    publishedAt: '2026-03-05T10:00:00+03:00',
     author: 'Youssouf Konaté',
     authorRole: 'Guide certifié · Madinah',
+    authorUrl: 'https://safaruma.com/guides/youssouf-konate',
     featured: false,
     keywords: ['visa omra', 'nusuk visa', 'visa pèlerinage mecque', 'omra 2026', 'documents omra', 'visa arabie saoudite', 'omra visa francais'],
   },
@@ -92,9 +97,10 @@ export const BLOG_ARTICLES_LIST: BlogArticle[] = [
     description: "Omra vs Hajj : rituels communs, rites propres au Hajj (Arafat, Mina, Djamarat), statut obligatoire ou facultatif. Explication fondée sur les textes islamiques.",
     readTime: '6 min',
     date: '25 février 2026',
-    publishedAt: '2026-02-25',
+    publishedAt: '2026-02-25T09:00:00+03:00',
     author: 'Samira Al-Rashidi',
     authorRole: 'Guide certifiée · Makkah',
+    authorUrl: 'https://safaruma.com/guides/samira-al-rashidi',
     featured: false,
     keywords: ['omra vs hajj', 'différence omra hajj', 'pèlerinage islam', 'hajj obligatoire', 'omra facultatif', 'rituels hajj', 'wuquf arafat'],
   },

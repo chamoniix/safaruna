@@ -152,6 +152,7 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
       '@type': 'Person',
       name: article.author,
       jobTitle: article.authorRole,
+      ...(article.authorUrl ? { url: article.authorUrl } : {}),
     },
     publisher: { '@id': 'https://safaruma.com/#organization' },
     articleSection: article.category,

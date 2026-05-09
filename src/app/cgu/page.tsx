@@ -28,7 +28,7 @@ export default function CGU() {
         <h2 style={h2}>1. Objet et champ d'application</h2>
         <p style={p}>Les présentes Conditions Générales d'Utilisation (CGU) régissent l'accès et l'utilisation de la plateforme HOLDINGAI LTD (exploitant la marque SAFARUMA), accessible à l'adresse <strong>safaruma.com</strong>.</p>
         <p style={p}>En créant un compte ou en utilisant les services de HOLDINGAI LTD (exploitant la marque SAFARUMA), vous acceptez sans réserve les présentes CGU. Si vous n'acceptez pas ces conditions, vous ne devez pas utiliser la plateforme.</p>
-        <p style={p}>Ces CGU s'appliquent à tous les utilisateurs : pèlerins, guides (Mutawwifin) et visiteurs. Des conditions spécifiques s'appliquent aux <a href="/conditions-guides" style={{ color: '#C9A84C' }}>Guides</a> et aux <a href="/conditions-clients" style={{ color: '#C9A84C' }}>Clients</a>.</p>
+        <p style={p}>Ces CGU s'appliquent à tous les utilisateurs : pèlerins, guides et visiteurs. Des conditions spécifiques s'appliquent aux <a href="/conditions-guides" style={{ color: '#C9A84C' }}>Guides</a> et aux <a href="/conditions-clients" style={{ color: '#C9A84C' }}>Clients</a>.</p>
       </section>
 
       <section id="intermediaire">

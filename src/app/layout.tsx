@@ -80,7 +80,7 @@ export default async function RootLayout({
                 "slogan": "La première plateforme dédiée aux guides privés pour la Omra",
                 "address": { "@type": "PostalAddress", "addressCountry": "GB" },
                 "areaServed": ["FR","BE","CH","MC","LU","MA","DZ","TN","SN","CI","ML","BF","GN","NE","TG","BJ","CM","GA","CA"],
-                "knowsAbout": ["Omra","Pèlerinage islamique","La Mecque","Médine","Mutawwif","Tawaf","Sa'i","Ihram","Lieux saints"],
+                "knowsAbout": ["Omra","Pèlerinage islamique","La Mecque","Médine","Tawaf","Sa'i","Ihram","Lieux saints"],
                 "sameAs": [
                   "https://www.instagram.com/safaruma_",
                   "https://www.tiktok.com/@safaruma",

@@ -2,11 +2,11 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Nos guides privés certifiés pour la Omra | SAFARUMA',
-  description: 'Trouvez votre guide privé Omra certifié Mutawwif. Accompagnement personnalisé en français, arabe et autres langues. Spécialités histoire islamique, PMR, familles.',
+  description: 'Trouvez votre guide privé Omra certifié SAFARUMA. Accompagnement personnalisé en français, arabe et autres langues. Spécialités histoire islamique, PMR, familles.',
   alternates: { canonical: 'https://safaruma.com/guides' },
   openGraph: {
-    title: 'Guides privés Omra certifiés Mutawwif | SAFARUMA',
-    description: 'Trouvez votre guide privé Omra certifié Mutawwif. Accompagnement personnalisé en français, arabe et autres langues.',
+    title: 'Guides privés Omra certifiés | SAFARUMA',
+    description: 'Trouvez votre guide privé Omra certifié SAFARUMA. Accompagnement personnalisé en français, arabe et autres langues.',
     url: 'https://safaruma.com/guides',
   },
 };

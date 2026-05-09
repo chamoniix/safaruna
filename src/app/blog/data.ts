@@ -12,7 +12,6 @@ export type BlogArticle = {
   updatedAt?: string;
   author: string;
   authorRole: string;
-  authorUrl?: string;
   featured: boolean;
   keywords: string[];
   image?: string;
@@ -32,7 +31,6 @@ export const BLOG_ARTICLES_LIST: BlogArticle[] = [
     publishedAt: '2026-03-28T08:00:00+03:00',
     author: 'Fatima Al-Omari',
     authorRole: 'Guide certifiée · Makkah',
-    authorUrl: 'https://safaruma.com/guides/fatima-al-omari',
     featured: true,
     keywords: ['préparer omra', 'checklist omra', 'omra étapes', 'première omra', 'visa omra nusuk', 'ihram omra', 'rituels omra'],
   },
@@ -49,7 +47,6 @@ export const BLOG_ARTICLES_LIST: BlogArticle[] = [
     publishedAt: '2026-03-20T09:00:00+03:00',
     author: 'Abdullah Ben Yusuf',
     authorRole: 'Docteur en Sciences Islamiques · Madinah',
-    authorUrl: 'https://safaruma.com/guides/abdullah-ben-yusuf',
     featured: false,
     keywords: ['tawaf', '7 tours kaaba', 'rituel omra', 'pierre noire', 'hajar al-aswad', 'maqam ibrahim', 'tawaf sens spirituel'],
   },
@@ -66,7 +63,6 @@ export const BLOG_ARTICLES_LIST: BlogArticle[] = [
     publishedAt: '2026-03-12T08:30:00+03:00',
     author: 'Rachid Al-Madani',
     authorRole: 'Guide certifié · Makkah & Madinah',
-    authorUrl: 'https://safaruma.com/guides/rachid-al-madani',
     featured: false,
     keywords: ['jabal uhud', 'bataille uhud', 'histoire islam', 'hamza ibn abd al-muttalib', 'martyrs uhud', 'visite médine', 'sahaba'],
   },
@@ -83,7 +79,6 @@ export const BLOG_ARTICLES_LIST: BlogArticle[] = [
     publishedAt: '2026-03-05T10:00:00+03:00',
     author: 'Youssouf Konaté',
     authorRole: 'Guide certifié · Madinah',
-    authorUrl: 'https://safaruma.com/guides/youssouf-konate',
     featured: false,
     keywords: ['visa omra', 'nusuk visa', 'visa pèlerinage mecque', 'omra 2026', 'documents omra', 'visa arabie saoudite', 'omra visa francais'],
   },
@@ -100,7 +95,6 @@ export const BLOG_ARTICLES_LIST: BlogArticle[] = [
     publishedAt: '2026-02-25T09:00:00+03:00',
     author: 'Samira Al-Rashidi',
     authorRole: 'Guide certifiée · Makkah',
-    authorUrl: 'https://safaruma.com/guides/samira-al-rashidi',
     featured: false,
     keywords: ['omra vs hajj', 'différence omra hajj', 'pèlerinage islam', 'hajj obligatoire', 'omra facultatif', 'rituels hajj', 'wuquf arafat'],
   },

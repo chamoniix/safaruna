@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: 'Comment ça marche — Réserver un guide privé Omra | SAFARUMA',
   description: 'Comment réserver votre guide privé certifié pour la Omra en 3 étapes : choisissez votre guide, personnalisez votre programme, vivez votre pèlerinage. Simple, transparent, certifié.',
   alternates: { canonical: 'https://safaruma.com/comment-ca-marche' },
+  robots: { index: false, follow: true },
 };
 
 export default function Page() {

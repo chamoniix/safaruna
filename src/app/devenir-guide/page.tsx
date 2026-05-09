@@ -1,5 +1,11 @@
+import type { Metadata } from 'next';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+
+export const metadata: Metadata = {
+  title: 'Devenir guide Omra certifié — SAFARUMA',
+  robots: { index: false, follow: true },
+};
 
 export default function Page() {
   return (

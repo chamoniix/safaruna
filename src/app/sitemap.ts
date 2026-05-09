@@ -5,7 +5,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let guides: { slug: string | null }[] = []
   try {
     guides = await prisma.guideProfile.findMany({
-      where: { status: 'ACTIVE' },
+      where: {
+        status: 'ACTIVE',
+        slug: { not: 'moi-guide-guide' },
+      },
       select: { slug: true },
     })
   } catch { /* DB non disponible au build — sitemap sans guides dynamiques */ }
@@ -45,7 +48,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: 'https://safaruma.com/accompagnements',              lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.9 },
     { url: 'https://safaruma.com/omra-mobilite-reduite',        lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
     { url: 'https://safaruma.com/offrir-omra-parents',          lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: 'https://safaruma.com/comment-ca-marche',            lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
     { url: 'https://safaruma.com/certification',                lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
 
     // ── Lieux saints (pages individuelles) ──
@@ -76,12 +78,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: 'https://safaruma.com/a-propos',                     lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     { url: 'https://safaruma.com/contact',                      lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     { url: 'https://safaruma.com/faq',                          lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
-    { url: 'https://safaruma.com/devenir-guide',                lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
+    { url: 'https://safaruma.com/charte-islamique',             lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
 
     // ── Auth ──
     { url: 'https://safaruma.com/rejoindre',                    lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
-
-    // ── Légal ──
-    { url: 'https://safaruma.com/charte-islamique',             lastModified: new Date(), changeFrequency: 'yearly',  priority: 0.2 },
   ]
 }

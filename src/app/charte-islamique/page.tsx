@@ -3,7 +3,8 @@ import LegalLayout, { h2, p, ul, li } from '@/components/LegalLayout';
 export const metadata = {
   title: 'Charte Islamique — SAFARUMA',
   description: 'La Charte de Confiance SAFARUMA — Engagement éthique et spirituel des guides Mutawwifin.',
-  robots: { index: false },
+  robots: { index: true, follow: true },
+  alternates: { canonical: 'https://safaruma.com/charte-islamique' },
 };
 
 export default function CharteIslamique() {

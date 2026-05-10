@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import "./globals.css";
 import ConditionalWhatsApp from "@/components/ConditionalWhatsApp";
 import Providers from "@/components/Providers";
+import { GoogleTagManager } from '@next/third-parties/google';
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -111,6 +112,9 @@ export default async function RootLayout({
           </main>
         </Providers>
         <ConditionalWhatsApp />
+        {process.env.NEXT_PUBLIC_GTM_ID && (
+          <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
+        )}
       </body>
     </html>
   );

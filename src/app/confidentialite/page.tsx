@@ -1,4 +1,10 @@
-import LegalLayout, { h2, p, ul, li } from '@/components/LegalLayout';
+import LegalLayout, { h2 as h2Base, p, ul, li } from '@/components/LegalLayout';
+
+const h2: React.CSSProperties = {
+  ...h2Base,
+  marginTop: '1.5rem',
+  paddingTop: '1.5rem',
+};
 
 export const metadata = {
   title: 'Politique de confidentialité | SAFARUMA',

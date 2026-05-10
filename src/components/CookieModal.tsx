@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { Shield, BarChart3, Target, Sparkles } from 'lucide-react';
 import { getConsent, setConsent, rejectAll } from '@/lib/consent';
 
 type Props = {
@@ -35,31 +36,33 @@ function Toggle({ value, onChange, disabled }: { value: boolean; onChange: (v: b
   );
 }
 
+const ICON_PROPS = { size: 20, strokeWidth: 1.5, style: { flexShrink: 0 } } as const;
+
 const CATEGORIES = [
   {
     key: 'essential' as const,
-    icon: '🛡️',
+    icon: <Shield {...ICON_PROPS} color="#1A1209" />,
     title: 'Cookies essentiels',
     desc: 'Nécessaires au fonctionnement du site (session, paiement, sécurité). Ils ne peuvent pas être désactivés.',
     disabled: true,
   },
   {
     key: 'analytics' as const,
-    icon: '📊',
+    icon: <BarChart3 {...ICON_PROPS} color="#1A1209" />,
     title: "Cookies de mesure d'audience",
     desc: "Nous aident à comprendre comment vous utilisez notre site (Google Analytics 4). Données agrégées et anonymes.",
     disabled: false,
   },
   {
     key: 'marketing' as const,
-    icon: '🎯',
+    icon: <Target {...ICON_PROPS} color="#1A1209" />,
     title: 'Cookies marketing',
     desc: "Permettent de mesurer l'efficacité de nos campagnes publicitaires sur Meta, TikTok et Google. Aucun cookie marketing n'est actif aujourd'hui.",
     disabled: false,
   },
   {
     key: 'confort' as const,
-    icon: '✨',
+    icon: <Sparkles {...ICON_PROPS} color="#1A1209" />,
     title: 'Cookies de confort',
     desc: "Améliorent votre expérience en analysant votre navigation pour identifier les points de friction (Hotjar). Aucun cookie de confort n'est actif aujourd'hui.",
     disabled: false,
@@ -158,7 +161,7 @@ export default function CookieModal({ open, onClose, onSaved }: Props) {
                 border: '1px solid #F3F4F6',
               }}
             >
-              <span style={{ fontSize: '1.3rem', flexShrink: 0, marginTop: 2 }}>{cat.icon}</span>
+              <div style={{ flexShrink: 0, marginTop: 2 }}>{cat.icon}</div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#1A1209', marginBottom: '0.25rem' }}>
                   {cat.title}

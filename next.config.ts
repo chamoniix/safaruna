@@ -5,6 +5,15 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
+  async redirects() {
+    return [
+      {
+        source: '/blog/guide-visa-omra-2025',
+        destination: '/blog/guide-visa-omra',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

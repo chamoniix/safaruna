@@ -1,6 +1,7 @@
 import Link from "next/link";
 import React from "react";
 import { IconShield, IconAccessibility, IconCheck } from "@/components/Icons";
+import CookiePrefsButton from "@/components/CookiePrefsButton";
 
 export default function Footer() {
   return (
@@ -82,10 +83,12 @@ export default function Footer() {
           <h4>Légal</h4>
           <ul>
             <li><Link href="/mentions-legales">Mentions légales</Link></li>
-            <li><Link href="/politique-confidentialite">Confidentialité</Link></li>
+            <li><Link href="/confidentialite">Confidentialité</Link></li>
+            <li><Link href="/cookies">Politique de cookies</Link></li>
             <li><Link href="/cgu">CGU</Link></li>
             <li><Link href="/conditions-clients">Conditions Clients</Link></li>
             <li><Link href="/charte-islamique">Charte Islamique</Link></li>
+            <li><CookiePrefsButton /></li>
           </ul>
         </div>
       </div>

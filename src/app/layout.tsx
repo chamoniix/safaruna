@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import { headers } from "next/headers";
+import Script from "next/script";
 import "./globals.css";
 import ConditionalWhatsApp from "@/components/ConditionalWhatsApp";
 import Providers from "@/components/Providers";
 import { GoogleTagManager } from '@next/third-parties/google';
+import CookieBanner from "@/components/CookieBanner";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -64,6 +66,20 @@ export default async function RootLayout({
   return (
     <html lang="fr" className={`${cormorant.variable} ${manrope.variable}`}>
       <head>
+        <Script id="consent-mode-default" strategy="beforeInteractive">{`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('consent', 'default', {
+            'ad_storage': 'denied',
+            'ad_user_data': 'denied',
+            'ad_personalization': 'denied',
+            'analytics_storage': 'denied',
+            'functionality_storage': 'denied',
+            'personalization_storage': 'denied',
+            'security_storage': 'granted',
+            'wait_for_update': 500
+          });
+        `}</Script>
         <link href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet" />
         <script
           type="application/ld+json"
@@ -112,6 +128,7 @@ export default async function RootLayout({
           </main>
         </Providers>
         <ConditionalWhatsApp />
+        <CookieBanner />
         {process.env.NEXT_PUBLIC_GTM_ID && (
           <GoogleTagManager gtmId={process.env.NEXT_PUBLIC_GTM_ID} />
         )}

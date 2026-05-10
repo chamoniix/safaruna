@@ -434,14 +434,14 @@ export default async function Page({ params }: Props) {
   return (
     <>
       <Navbar />
-      <main style={{ backgroundColor: '#FDFBF7' }}>
+      <main style={{ backgroundColor: '#FDFBF7', paddingTop: '8rem' }}>
         {/* Breadcrumb */}
         <nav
           aria-label="Fil d'Ariane"
           style={{
             maxWidth: 720,
             margin: '0 auto',
-            padding: '1.25rem 1.5rem 0',
+            padding: '0 1.5rem 1.25rem',
             fontSize: '0.8rem',
             color: '#6B5A3A',
             display: 'flex',

@@ -374,7 +374,7 @@ export default function LieuxSaintsPage() {
       <Navbar />
 
       {/* HERO */}
-      <section style={{ background: '#0D0A06', paddingTop: '8rem', paddingBottom: '5rem', paddingLeft: '2rem', paddingRight: '2rem', position: 'relative', overflow: 'hidden', textAlign: 'center' }}>
+      <section style={{ background: '#0D0A06', paddingTop: '11rem', paddingBottom: '5rem', paddingLeft: '2rem', paddingRight: '2rem', position: 'relative', overflow: 'hidden', textAlign: 'center' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 70% 60% at 50% 0%, rgba(201,168,76,0.12) 0%, transparent 60%)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', bottom: 0, left: '50%', transform: 'translateX(-50%)', fontFamily: 'serif', fontSize: 'clamp(6rem, 20vw, 14rem)', color: 'rgba(201,168,76,0.04)', lineHeight: 1, pointerEvents: 'none', userSelect: 'none', whiteSpace: 'nowrap' }}>الأماكن المقدسة</div>
 

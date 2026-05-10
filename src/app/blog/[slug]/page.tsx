@@ -235,7 +235,7 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
 
       {/* HERO */}
       <section style={{
-        background: 'var(--deep)', paddingTop: '8rem', paddingBottom: '5rem',
+        background: 'var(--deep)', paddingTop: '11rem', paddingBottom: '5rem',
         paddingLeft: '4rem', paddingRight: '4rem',
         position: 'relative', overflow: 'hidden',
       }}>

@@ -1,10 +1,13 @@
-import LegalLayout, { h2 as h2Base, p, ul, li } from '@/components/LegalLayout';
+import LegalLayout, { h2 as h2Base, p as pBase, ul as ulBase, li } from '@/components/LegalLayout';
 
 const h2: React.CSSProperties = {
   ...h2Base,
-  marginTop: '1.5rem',
-  paddingTop: '1.5rem',
+  marginTop: '2rem',
+  marginBottom: '0.5rem',
+  paddingTop: '0.4rem',
 };
+const p: React.CSSProperties = { ...pBase, marginTop: 0, marginBottom: '0.6rem', lineHeight: 1.7 };
+const ul: React.CSSProperties = { ...ulBase, marginTop: 0, marginBottom: '0.6rem', lineHeight: 1.7 };
 
 export const metadata = {
   title: 'Politique de cookies | SAFARUMA',

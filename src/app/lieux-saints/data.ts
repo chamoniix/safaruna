@@ -2120,4 +2120,706 @@ export const lieuxSaints: Record<string, LieuSaint> = {
       { question: "Quels sont les bienfaits santé des dattes ?", answer: "Les dattes sont riches en fibres, potassium, magnésium, fer et vitamines B. Elles fournissent une énergie rapide et soutenue. Leur indice glycémique, bien que présent, est modéré grâce à leur teneur en fibres. La science moderne confirme leurs propriétés antioxydantes et anti-inflammatoires, sans que cela constitue une garantie médicale au sens clinique." },
     ],
   },
+
+  'badr': {
+    slug: 'badr',
+    title: "Badr : la première grande victoire de l'Islam",
+    location: "À 130 km au sud-ouest de Médine",
+    locationKicker: 'LIEU SAINT · MÉDINE',
+    excerpt: "Lieu de la bataille fondatrice de Badr (an 2 H.), où 313 Musulmans ont vaincu une armée qurayshite trois fois plus nombreuse, événement célébré dans le Coran sous le nom de «Yawm al-Furqan».",
+    readingTime: 7,
+    publishedAt: '2026-05-11T14:00:00+03:00',
+    sections: [
+      {
+        id: 'origine',
+        title: 'La bataille fondatrice',
+        content: [
+          {
+            type: 'paragraph',
+            content: "Le 17 Ramadan de l'an 2 de l'Hégire (17 mars 624), une armée de 313 Musulmans affronta une force qurayshite de près de 1 000 guerriers dans la plaine de Badr, à environ 130 kilomètres au sud-ouest de Médine. L'affrontement dura une matinée. À son terme, 70 Quraysh avaient été tués et 70 autres faits prisonniers, contre 14 martyrs côté musulman.",
+          },
+          {
+            type: 'callout',
+            text: "Allah vous a secourus à Badr, alors que vous étiez dans la faiblesse. Craignez Allah, peut-être serez-vous reconnaissants.",
+            reference: 'Sourate Aal-Imran, verset 123, rappelant le secours divin accordé à Badr',
+          },
+          {
+            type: 'paragraph',
+            content: "La bataille éclata autour d'une caravane commerciale qurayshite que le Prophète ﷺ cherchait à intercepter pour compenser les biens confisqués aux Musulmans lors de leur expulsion de La Mecque. Abu Sufyan, à la tête de la caravane, put l'esquiver, mais les notables mecquois décidèrent tout de même d'affronter les Musulmans pour leur donner une leçon. Ce calcul se révéla fatal pour la puissance qurayshite.",
+          },
+          {
+            type: 'paragraph',
+            content: "Parmi les Quraysh tombés figuraient certains des ennemis les plus acharnés de l'Islam : Abu Jahl, Utba ibn Rabi'a, Shaybah ibn Rabi'a. Ces pertes furent un choc considérable pour la société mecquoise. Le Coran consacra à cet événement une sourate entière : Al-Anfal (le Butin), révélée peu après la bataille.",
+          },
+        ],
+      },
+      {
+        id: 'geographie',
+        title: 'Description géographique',
+        content: [
+          {
+            type: 'stats',
+            items: [
+              { label: 'Année', value: 'An 2 H.' },
+              { label: 'Soldats musulmans', value: '313' },
+              { label: 'Soldats Quraysh', value: '~1 000' },
+              { label: 'Distance Médine', value: '130 km' },
+            ],
+          },
+          {
+            type: 'paragraph',
+            content: "La plaine de Badr est une vaste étendue sablonneuse encadrée de petites collines, sur l'ancienne route caravanière reliant La Mecque à la Syrie. C'est un point d'eau stratégique que les deux armées cherchaient à contrôler. Aujourd'hui, la ville moderne de Badr Hunayn s'est développée sur et autour du site historique.",
+          },
+          {
+            type: 'paragraph',
+            content: "Le Cimetière des Martyrs de Badr (Maqbarat Shuhada Badr) est le site le plus visité. Il abrite les tombes des 14 Compagnons tombés lors de la bataille. Parmi eux figurent Ubaydah ibn al-Harith (ra), cousin du Prophète ﷺ, et Umair ibn Abi Waqqas (ra), frère cadet de Sad ibn Abi Waqqas, qui aurait à peine seize ans lors de la bataille.",
+          },
+        ],
+        seeAlso: [{ href: '/lieux-saints/khandaq', label: 'Le Khandaq : la bataille de la tranchée à Médine' }],
+      },
+      {
+        id: 'spiritualite',
+        title: 'Importance spirituelle',
+        content: [
+          {
+            type: 'paragraph',
+            content: "Badr est appelé «Yawm al-Furqan», le Jour du Discernement, c'est-à-dire le jour où la vérité et le mensonge furent clairement séparés. Le Coran y voit la première manifestation tangible du soutien divin aux croyants sincères face aux puissants : 313 hommes mal armés, pour la plupart des jeunes gens, face à l'élite militaire et commerciale de La Mecque.",
+          },
+          {
+            type: 'callout',
+            text: "Ce n'est pas vous qui les avez tués, mais c'est Allah qui les a tués. Et tu n'as pas lancé quand tu as lancé, mais c'est Allah qui a lancé.",
+            reference: "Sourate Al-Anfal, verset 17, attribuant la victoire à Allah plutôt qu'aux hommes",
+          },
+          {
+            type: 'paragraph',
+            content: "Les versets 9 à 13 de la Sourate Aal-Imran décrivent l'envoi de 1 000 puis 3 000 anges au soutien des Musulmans à Badr. Cette aide angélique, que les Compagnons perçurent comme une forme de sérénité et d'assurance qui les envahit soudainement, explique leur résolution face à une infériorité numérique écrasante.",
+          },
+          {
+            type: 'paragraph',
+            content: "La leçon centrale de Badr est celle du tawakkul radical : la confiance totale en Allah, indépendante des rapports de force matériels. Cette leçon, répétée à Hunayn dans le sens inverse (le grand nombre ne garantit rien), constitue l'un des enseignements spirituels les plus récurrents de la Sîra.",
+          },
+        ],
+      },
+      {
+        id: 'visite',
+        title: 'Visite et recueillement',
+        content: [
+          {
+            type: 'paragraph',
+            content: "La visite de Badr s'articule principalement autour du Cimetière des Martyrs. Il est recommandé d'y réciter les salutations islamiques aux morts : «Al-salam alaykum ya ahl al-qubur» (Que la paix soit sur vous, habitants des tombeaux). Faire des invocations pour les martyrs et pour les proches décédés est une Sunnah établie.",
+          },
+          {
+            type: 'paragraph',
+            content: "Il est important de souligner que les invocations se font pour les martyrs, non aux martyrs. Demander aux morts d'intercéder est une pratique catégoriquement rejetée par l'Islam. La prière du pèlerin s'adresse à Allah, en demandant Sa miséricorde pour les martyrs et pour soi-même.",
+          },
+          {
+            type: 'expert-tip',
+            title: 'Conseil expert SAFARUMA',
+            text: "La visite de Badr est une excursion à la journée depuis Médine (environ 2h30 de route aller). Préparez-vous physiquement et logistiquement. L'essentiel de la visite se concentre au Cimetière des Martyrs. Votre guide SAFARUMA retrace le déroulement de la bataille sur le terrain, ce qui rend la visite infiniment plus vivante que la simple lecture. Prévoir 1h30 à 2h sur le site.",
+          },
+        ],
+      },
+      {
+        id: 'conseils',
+        title: 'Conseils pratiques',
+        content: [
+          {
+            type: 'paragraph',
+            content: "La visite de Badr se fait généralement en excursion à la journée depuis Médine. Aucun transport public régulier ne dessert Badr depuis Médine : il faut louer un taxi privé ou passer par une agence. Le trajet prend environ 2h à 2h30 selon la circulation. Les routes sont bonnes mais longues.",
+          },
+          {
+            type: 'list',
+            items: [
+              "Distance Médine : 130 km, environ 2h à 2h30 de route",
+              "Transport : taxi privé ou agence (pas de bus public)",
+              "Durée sur site : 1h30 à 2h (cimetière + panorama de la plaine)",
+              "Emportez eau, protection solaire et encas pour la journée",
+              "Le cimetière est ouvert mais les horaires peuvent varier",
+              "Tenue modeste obligatoire, comme pour tout site islamique",
+            ],
+          },
+        ],
+        seeAlso: [{ href: '/lieux-saints/jabal-uhud', label: "Jabal Uhud : la montagne des martyrs de Médine" }],
+      },
+      {
+        id: 'erreurs',
+        title: 'Erreurs à éviter',
+        content: [
+          {
+            type: 'list',
+            items: [
+              "Invoquer les martyrs directement (leur demander d'intercéder, faire des demandes à leurs tombes) : c'est une forme de shirk catégoriquement rejetée en Islam. On prie pour eux, non par eux.",
+              "Confondre Badr et Uhud : ce sont deux batailles distinctes. Badr (an 2 H.) fut une victoire totale ; Uhud (an 3 H.) fut une défaite partielle due à la désobéissance de certains archers.",
+              "Confondre Badr et Hunayn : Badr opposait 313 Musulmans à 1 000 Quraysh ; Hunayn opposait 12 000 Musulmans aux Hawazin.",
+              "Partir de Médine sans eau ni nourriture suffisante : la journée est longue et les services en route sont limités.",
+              "Photographier les tombes en gros plan ou adopter un comportement irrespectueux au cimetière.",
+            ],
+          },
+        ],
+      },
+    ],
+    faq: [
+      { question: "Combien de Musulmans participaient à la bataille de Badr ?", answer: "313 Compagnons du Prophète ﷺ participèrent à la bataille. Ce chiffre est unanimement attesté dans les sources islamiques authentiques. Parmi eux, des compagnons de tous âges et de toutes origines sociales, dont certains très jeunes comme Umair ibn Abi Waqqas (ra)." },
+      { question: "Où se trouve exactement le site de Badr aujourd'hui ?", answer: "Le site historique correspond à l'actuelle ville de Badr Hunayn, à environ 130 km au sud-ouest de Médine. Le Cimetière des Martyrs (Maqbarat Shuhada Badr) est le site principal identifiable. La plaine environnante correspond approximativement au champ de bataille." },
+      { question: "Pourquoi cette bataille est-elle si importante en Islam ?", answer: "Badr est la première grande victoire militaire de l'Islam, contre toute probabilité. Elle confirma aux yeux des Compagnons et des adversaires que le Prophète ﷺ bénéficiait d'un soutien divin réel. Le Coran y consacra une sourate entière (Al-Anfal) et la qualifia de «Yawm al-Furqan» (Jour du Discernement)." },
+      { question: "Qui sont les 14 martyrs de Badr ?", answer: "Les 14 martyrs musulmans de Badr incluent notamment Ubaydah ibn al-Harith (ra), cousin du Prophète ﷺ, Sa'd ibn Khaythama (ra), Umair ibn Abi Waqqas (ra, environ 16 ans), et Rafi' ibn al-Mu'alla (ra). Leurs noms sont consignés dans les livres de Sîra, notamment chez Ibn Hisham et Ibn Kathir." },
+      { question: "Faut-il visiter Badr pendant la Omra ?", answer: "Non, c'est une excursion historique et spirituelle facultative. Les rites de la Omra se déroulent exclusivement à La Mecque. Badr est une visite recommandée pour les pèlerins séjournant à Médine et souhaitant approfondir leur connaissance de la Sîra prophétique." },
+      { question: "Comment s'y rendre depuis Médine ?", answer: "En taxi privé ou avec un guide, car il n'existe pas de transport public régulier. Négociez le prix aller-retour avec plusieurs chauffeurs. Certaines agences proposent des excursions organisées vers Badr. Le trajet dure environ 2h à 2h30 selon les conditions de circulation." },
+      { question: "Combien de temps prévoir pour l'excursion ?", answer: "Comptez une journée complète : 2h30 de trajet aller, 1h30 à 2h sur le site (cimetière et panorama), puis 2h30 de retour. Partez tôt le matin pour éviter la chaleur de la mi-journée sur le site." },
+      { question: "Y a-t-il des restrictions d'accès ?", answer: "Le Cimetière des Martyrs est généralement accessible mais les horaires et les conditions d'accès peuvent varier selon les périodes et les décisions des autorités saoudiennes. Votre guide SAFARUMA vérifie l'accessibilité avant de programmer la visite." },
+    ],
+  },
+
+  'khandaq': {
+    slug: 'khandaq',
+    title: "Le Khandaq : la bataille de la tranchée à Médine",
+    location: 'Nord de Médine',
+    locationKicker: 'LIEU SAINT · MÉDINE',
+    excerpt: "Site historique de la bataille du Khandaq (an 5 H.), où les Musulmans de Médine repoussèrent un siège de 10 000 coalisés grâce à une tranchée stratégique et à la prière du Prophète ﷺ.",
+    readingTime: 7,
+    publishedAt: '2026-05-11T14:15:00+03:00',
+    sections: [
+      {
+        id: 'origine',
+        title: 'La bataille des Coalisés',
+        content: [
+          {
+            type: 'paragraph',
+            content: "En l'an 5 de l'Hégire (627 de l'ère chrétienne), une coalition sans précédent se forma contre la communauté musulmane de Médine. Les Quraysh de La Mecque, les tribus arabes de Ghatafan et de Sulaym, ainsi que les Banu Nadir expulsés de Médine, assemblèrent une force d'environ 10 000 guerriers. Face à eux, le Prophète ﷺ ne disposait que de 3 000 combattants.",
+          },
+          {
+            type: 'callout',
+            text: "Ô vous qui avez cru, rappelez-vous le bienfait d'Allah sur vous, quand des armées vous sont venues et que Nous avons envoyé sur elles un vent violent et des armées que vous n'avez pas vues.",
+            reference: 'Sourate Al-Ahzab, verset 9, rappelant le secours divin lors du Khandaq',
+          },
+          {
+            type: 'paragraph',
+            content: "C'est Salman al-Farisi (ra), ancien Perse converti à l'Islam, qui proposa la stratégie décisive : creuser une tranchée profonde le long de la frontière nord de Médine, le seul flanc non protégé par des obstacles naturels. Cette technique défensive, inconnue des Arabes, était courante dans les guerres perses et byzantines.",
+          },
+          {
+            type: 'paragraph',
+            content: "En six jours de travail intense, les Compagnons creusèrent une tranchée d'environ cinq kilomètres de long, trois à cinq mètres de profondeur et cinq mètres de large. Le Prophète ﷺ participa lui-même aux travaux, portant des pierres et creusant. Un hadith de Bukhari (n° 4101) rapporte que, affamé, il avait noué des pierres sur son ventre pour tromper la faim.",
+          },
+        ],
+      },
+      {
+        id: 'deroulement',
+        title: 'Déroulement et victoire',
+        content: [
+          {
+            type: 'stats',
+            items: [
+              { label: 'Année', value: 'An 5 H.' },
+              { label: 'Coalisés', value: '~10 000' },
+              { label: 'Défenseurs', value: '~3 000' },
+              { label: 'Durée siège', value: '24 jours' },
+            ],
+          },
+          {
+            type: 'paragraph',
+            content: "La coalition arriva devant Médine et fut stoppée par la tranchée, qu'elle ne parvint pas à franchir. Pendant vingt-quatre jours, les coalisés tentèrent de trouver des passages, sans succès. La situation devenait critique : les Banu Qurayza, tribu juive de Médine restée neutre, rompirent leur traité d'alliance, menaçant les Musulmans d'un front intérieur.",
+          },
+          {
+            type: 'paragraph',
+            content: "Durant ces semaines d'épreuve, le Prophète ﷺ monta sur le mont Sal' pour prier. Selon les récits historiques, il pria pendant trois jours d'affilée pour la victoire. Puis Allah envoya un vent violent (décrit dans le Coran comme des «armées invisibles») qui disloqua le camp des coalisés. La discorde s'installa entre les chefs de la coalition. Abu Sufyan ordonna le repli. La bataille du Khandaq s'acheva sans combat frontal majeur.",
+          },
+        ],
+        seeAlso: [{ href: '/lieux-saints/masjid-fateh', label: "Masjid al-Fateh : la mosquée de la victoire de Khandaq" }],
+      },
+      {
+        id: 'spiritualite',
+        title: 'Importance spirituelle',
+        content: [
+          {
+            type: 'paragraph',
+            content: "Le Khandaq enseigne plusieurs leçons spirituelles fondamentales. La première est celle de la créativité au service de la foi : Salman al-Farisi apporta une connaissance étrangère (la tranchée persane) qui servit la communauté musulmane. L'Islam valorise l'intelligence stratégique et le recours à toutes les ressources disponibles.",
+          },
+          {
+            type: 'paragraph',
+            content: "La deuxième leçon est celle de la patience dans l'épreuve prolongée. Vingt-quatre jours de siège, de faim et d'incertitude auraient pu briser la cohésion communautaire. La fermeté du Prophète ﷺ, ses prières constantes et sa communication régulière avec les Compagnons maintinrent l'unité.",
+          },
+          {
+            type: 'paragraph',
+            content: "La troisième leçon est que la victoire finale ne vint pas par les armes mais par le vent divin et la discorde entre ennemis. Aucun Compagnon ne tua 10 000 adversaires : Allah dispersa l'armée adverse. La confiance en Allah comme ultime protecteur reste la leçon centrale du Khandaq.",
+          },
+        ],
+      },
+      {
+        id: 'visite',
+        title: 'Visite et recueillement',
+        content: [
+          {
+            type: 'paragraph',
+            content: "Le site historique du Khandaq est aujourd'hui largement urbanisé. La tranchée elle-même n'est plus visible : elle a été comblée et recouverte par les constructions de Médine moderne. Quelques panneaux indiquent l'emplacement approximatif de la ligne défensive, mais sans infrastructure touristique développée.",
+          },
+          {
+            type: 'paragraph',
+            content: "La façon la plus significative de «vivre» le Khandaq est de se rendre à Masjid al-Fateh, qui surplombe la zone. C'est de ce point élevé que le Prophète ﷺ pria pendant les trois jours décisifs du siège. Depuis la mosquée, votre guide peut vous montrer l'emplacement approximatif de la tranchée et reconstituer le dispositif défensif.",
+          },
+          {
+            type: 'expert-tip',
+            title: 'Conseil expert SAFARUMA',
+            text: "Le site historique du Khandaq est une zone urbanisée sans infrastructure touristique. Pour ressentir pleinement la bataille, rendez-vous d'abord à Masjid al-Fateh qui domine la zone : c'est de là que le Prophète ﷺ pria pendant les 24 jours du siège. Votre guide SAFARUMA vous montre l'emplacement approximatif de la tranchée et retrace les événements jour par jour, transformant une visite ordinaire en immersion historique.",
+          },
+        ],
+      },
+      {
+        id: 'conseils',
+        title: 'Conseils pratiques',
+        content: [
+          {
+            type: 'paragraph',
+            content: "La visite du Khandaq est le plus souvent intégrée dans un circuit des sites historiques de Médine en demi-journée ou journée complète, combinée avec Masjid al-Fateh, le site des Sept Mosquées et parfois Masjid Quba. Un taxi privé ou un guide avec véhicule est nécessaire.",
+          },
+          {
+            type: 'list',
+            items: [
+              "Distance depuis Masjid an-Nabawi : environ 3 à 4 km, 10 à 15 minutes",
+              "Visite courte sur site : 20 à 30 minutes (zone urbanisée, peu à voir)",
+              "Combiner avec Masjid al-Fateh pour une visite significative",
+              "Pas de restaurants ni de commerces à proximité immédiate",
+              "Tenue modeste, eau recommandée",
+            ],
+          },
+        ],
+        seeAlso: [{ href: '/lieux-saints/badr', label: "Badr : la première grande victoire de l'Islam" }],
+      },
+      {
+        id: 'erreurs',
+        title: 'Erreurs à éviter',
+        content: [
+          {
+            type: 'list',
+            items: [
+              "S'attendre à voir la tranchée ou des vestiges visibles : le site est urbanisé, la tranchée comblée. L'expérience est essentiellement narrative et spirituelle.",
+              "Confondre Khandaq et Badr : le Khandaq est une victoire défensive sans combat frontal majeur. Badr est une victoire offensive au corps-à-corps. Deux batailles entièrement différentes.",
+              "Confondre Masjid al-Fateh et le site du Khandaq : la mosquée est sur le site de la prière du Prophète ﷺ pendant le siège, pas à l'emplacement de la tranchée elle-même.",
+              "Visiter les Sept Mosquées de façon systématique en croyant accomplir une Sunna établie : les savants divergent sur ce point (voir section sur Masjid al-Fateh).",
+            ],
+          },
+        ],
+      },
+    ],
+    faq: [
+      { question: "Qui a proposé l'idée de la tranchée ?", answer: "Salman al-Farisi (ra), un Perse converti à l'Islam, proposa cette stratégie inspirée des pratiques militaires perses et byzantines, inconnues des Arabes de l'époque. Le Prophète ﷺ adopta immédiatement la suggestion. Cet épisode est souvent cité comme exemple de l'ouverture de l'Islam aux bonnes pratiques extérieures." },
+      { question: "Combien de temps a duré le siège ?", answer: "Environ vingt-quatre jours selon les sources islamiques les plus répandues (certaines mentionnent vingt-sept jours). La coalition leva le siège sans avoir franchi la tranchée ni conquis Médine, dispersée par un vent violent et des dissensions internes." },
+      { question: "Combien de Musulmans participaient à la défense ?", answer: "Environ 3 000 Compagnons défendirent Médine face à une coalition d'environ 10 000 guerriers. Malgré cette infériorité numérique écrasante (1 contre 3), la tranchée rendit l'infériorité militaire sans effet." },
+      { question: "Quelles tribus formaient la coalition ?", answer: "La coalition comprenait les Quraysh de La Mecque (sous Abu Sufyan), les Banu Ghatafan, les Banu Sulaym, les Banu Asad, les Banu Murra, les Fazara et les Banu Nadir (tribu juive expulsée de Médine). C'est la plus grande coalition jamais assemblée contre Médine." },
+      { question: "Pourquoi la coalition s'est-elle retirée ?", answer: "Selon le Coran (Al-Ahzab 9) et les sources historiques, Allah envoya un vent violent qui désorganisa le camp des coalisés. Simultanément, Nu'aym ibn Mas'ud (ra), converti secrètement, sema la méfiance entre les chefs de la coalition. Abu Sufyan ordonna finalement le repli, fatigué du siège sans résultat." },
+      { question: "Y a-t-il encore des vestiges visibles ?", answer: "Non, la tranchée historique a été comblée et la zone est entièrement urbanisée. Quelques panneaux indicatifs existent mais l'infrastructure touristique est quasi inexistante. La visite de Masjid al-Fateh (qui surplombe la zone) est le moyen le plus significatif d'approcher le site." },
+      { question: "Quelle leçon spirituelle retenir du Khandaq ?", answer: "Trois leçons principales : l'intelligence stratégique au service de la foi (la tranchée de Salman), la patience dans l'épreuve prolongée (24 jours de siège), et la confiance en Allah comme ultime protecteur (le vent divin qui dispersa les ennemis sans combat frontal)." },
+      { question: "Cette bataille est-elle mentionnée dans le Coran ?", answer: "Oui, abondamment. La Sourate Al-Ahzab (Les Coalisés) y consacre les versets 9 à 27, décrivant l'arrivée des coalisés, l'épreuve des croyants, le comportement des hypocrites, et la victoire accordée par Allah. C'est l'une des batailles les plus longuement décrites dans le Coran." },
+    ],
+  },
+
+  'bir-aris': {
+    slug: 'bir-aris',
+    title: "Bir Aris : le puits où tomba le sceau prophétique",
+    location: 'Quartier Quba, Médine',
+    locationKicker: 'LIEU SAINT · MÉDINE',
+    excerpt: "Ancien puits de Médine, célèbre pour avoir été le lieu où la bague-sceau du Prophète Muhammad ﷺ, portée par le calife Othman, tomba accidentellement et ne fut jamais retrouvée.",
+    readingTime: 5,
+    publishedAt: '2026-05-11T14:30:00+03:00',
+    sections: [
+      {
+        id: 'origine',
+        title: 'Histoire du puits et du sceau perdu',
+        content: [
+          {
+            type: 'paragraph',
+            content: "Bir Aris est un ancien puits situé dans le quartier de Quba, à quelques centaines de mètres de Masjid Quba. Il est également connu sous le nom de «Bir al-Khatim», le Puits du Sceau, en référence à l'événement qui lui valut sa célébrité.",
+          },
+          {
+            type: 'paragraph',
+            content: "Le Prophète Muhammad ﷺ avait l'habitude de visiter ce jardin, de s'y asseoir au bord du puits et d'y faire ses ablutions. Anas ibn Malik (ra), serviteur du Prophète ﷺ, rapporte dans le Sahih al-Bukhari (n° 3105) que le Prophète ﷺ s'assit un jour au bord de Bir Aris, les pieds pendants dans le puits.",
+          },
+          {
+            type: 'callout',
+            text: "Le Prophète ﷺ portait une bague en argent gravée de «Muhammad, Messager d'Allah». Il dit : «Ne faites pas graver cette inscription.» Après lui, Abu Bakr, puis Umar, puis Othman la portèrent.",
+            reference: "Sahih al-Bukhari, n° 5873, rapporté par Anas ibn Malik (ra), sur la bague-sceau du Prophète ﷺ",
+          },
+          {
+            type: 'paragraph',
+            content: "Sous le califat d'Othman ibn Affan (ra), alors qu'il était assis au bord du puits, la bague-sceau lui glissa du doigt et tomba dans le puits. Othman (ra) fit entreprendre des recherches pendant trois jours consécutifs. L'eau fut épuisée, des hommes descendirent dans le puits, mais le sceau ne fut jamais retrouvé. Selon Ibn Kathir et d'autres historiens, cette perte fut vécue comme un mauvais présage. Les années qui suivirent furent effectivement marquées par les premières grandes fitnas (troubles politiques) de l'histoire islamique.",
+          },
+        ],
+        seeAlso: [{ href: '/lieux-saints/masjid-quba', label: 'Masjid Quba : la première mosquée de l\'Islam' }],
+      },
+      {
+        id: 'description',
+        title: 'Description physique',
+        content: [
+          {
+            type: 'stats',
+            items: [
+              { label: 'Profondeur', value: '~10 m' },
+              { label: 'Diamètre', value: '~3 m' },
+              { label: 'Distance Quba', value: '~500 m' },
+              { label: 'Accès', value: 'Restreint' },
+            ],
+          },
+          {
+            type: 'paragraph',
+            content: "Le puits est creusé dans la roche locale. Son diamètre est d'environ trois mètres, sa profondeur d'environ dix mètres. Il est aujourd'hui partiellement recouvert et son accès direct est restreint. Le jardin environnant a été en grande partie urbanisé, mais le puits lui-même est identifiable et préservé.",
+          },
+          {
+            type: 'paragraph',
+            content: "La zone de Quba dans laquelle se trouve Bir Aris correspond au quartier historique où le Prophète ﷺ séjourna à son arrivée à Médine lors de l'Hégire, avant de rejoindre la ville. C'est dans ce même quartier que se trouve Masjid Quba, la première mosquée de l'Islam.",
+          },
+        ],
+      },
+      {
+        id: 'spiritualite',
+        title: 'Importance historique',
+        content: [
+          {
+            type: 'paragraph',
+            content: "La valeur de Bir Aris est principalement historique et anecdotique plutôt que liturgique. Ce puits est un témoin matériel de la vie quotidienne du Prophète ﷺ et de ses Compagnons à Médine. Il rappelle que les plus grands personnages de l'Islam étaient des êtres humains ordinaires dans leur quotidien, qui se reposaient au bord des puits, qui perdaient des bijoux.",
+          },
+          {
+            type: 'paragraph',
+            content: "L'histoire du sceau perdu a également une dimension historique significative : la bague portait l'inscription «Muhammad Rasul Allah» et servait à sceller les lettres envoyées aux rois et gouverneurs de l'époque, les invitant à embrasser l'Islam. Sa perte symbolique sous Othman marque, selon certains historiens et commentateurs islamiques, un tournant dans la cohésion de la communauté.",
+          },
+          {
+            type: 'paragraph',
+            content: "Bir Aris est un exemple de ces lieux «secondaires» de l'histoire islamique qui, précisément parce qu'ils sont peu fréquentés et peu médiatisés, offrent une intimité rare avec la Sîra prophétique. Leur visite relève de la curiosité historique sincère plutôt que d'une démarche liturgique.",
+          },
+        ],
+      },
+      {
+        id: 'visite',
+        title: 'Visite et recueillement',
+        content: [
+          {
+            type: 'paragraph',
+            content: "La visite de Bir Aris s'effectue le plus souvent lors d'une excursion vers Masjid Quba, à laquelle elle est naturellement associée en raison de la proximité géographique. Elle ne requiert pas de rituel particulier. Une méditation courte sur l'histoire du sceau perdu et sur les transitions historiques après le Prophète ﷺ constitue le recueillement approprié.",
+          },
+          {
+            type: 'expert-tip',
+            title: 'Conseil expert SAFARUMA',
+            text: "Bir Aris est un site historique secondaire qui mérite une visite courte si vous êtes déjà dans le quartier de Quba. Méditez sur le sceau perdu d'Othman : un objet minuscule, chargé d'histoire, qui ne fut jamais retrouvé malgré trois jours de recherche. Votre guide SAFARUMA vous explique le contexte politique du califat d'Othman et la symbolique de cette perte pour la communauté islamique des premières générations.",
+          },
+        ],
+      },
+      {
+        id: 'conseils',
+        title: 'Conseils pratiques',
+        content: [
+          {
+            type: 'paragraph',
+            content: "Bir Aris est situé à environ 500 mètres de Masjid Quba. La visite est courte (quinze à trente minutes) et peut être facilement intégrée dans un circuit Quba lors d'une demi-journée consacrée aux sites historiques du sud de Médine. L'accès au puits lui-même peut être restreint selon les périodes.",
+          },
+          {
+            type: 'list',
+            items: [
+              "Distance depuis Masjid an-Nabawi : environ 4 km, 15 minutes en taxi",
+              "Distance depuis Masjid Quba : environ 500 mètres à pied",
+              "Durée de visite : 15 à 30 minutes",
+              "Accès restreint possible : vérifier auprès de votre guide",
+              "Pas d'infrastructure touristique sur place",
+            ],
+          },
+        ],
+        seeAlso: [{ href: '/lieux-saints/masjid-an-nabawi', label: 'Masjid an-Nabawi : la mosquée du Prophète ﷺ' }],
+      },
+      {
+        id: 'erreurs',
+        title: 'Erreurs à éviter',
+        content: [
+          {
+            type: 'list',
+            items: [
+              "Attribuer au puits lui-même des vertus spirituelles particulières : Bir Aris est un site historique, pas un lieu d'adoration.",
+              "Tenter de puiser de l'eau du puits : l'accès est restreint et l'eau n'est pas potable.",
+              "Confondre Bir Aris avec Bir Zamzam : Zamzam est le puits sacré du Masjid Al-Haram à La Mecque. Bir Aris est un puits historique ordinaire de Médine.",
+              "Prévoir une demi-journée entière pour ce seul site : la visite est courte et doit être combinée avec d'autres lieux du quartier de Quba.",
+            ],
+          },
+        ],
+      },
+    ],
+    faq: [
+      { question: "Qu'est-ce que la bague-sceau du Prophète ﷺ ?", answer: "C'était une bague en argent portant l'inscription «Muhammad Rasul Allah» (Muhammad, Messager d'Allah) gravée en trois lignes. Elle servait de sceau officiel pour authentifier les lettres du Prophète ﷺ envoyées aux rois et gouverneurs de l'époque. Après sa mort, Abu Bakr, puis Umar, puis Othman la portèrent successivement." },
+      { question: "Comment est-elle tombée dans le puits ?", answer: "Selon le Sahih al-Bukhari (n° 3105), elle glissa du doigt d'Othman ibn Affan (ra) alors qu'il était assis au bord du puits. Certaines narrations mentionnent qu'il la tenait en la faisant tourner entre ses doigts lorsqu'elle lui échappa." },
+      { question: "A-t-on jamais retrouvé le sceau ?", answer: "Non. Trois jours de recherches intensives, incluant le vidage partiel du puits et la descente d'hommes dans ses profondeurs, ne permirent pas de retrouver la bague. Elle n'a jamais été retrouvée depuis. Son absence rendit la falsification des documents officiels plus facile et contribua aux troubles politiques de l'époque." },
+      { question: "Pourquoi visiter ce puits ?", answer: "Pour les passionnés de Sîra, Bir Aris est un lien concret avec la vie quotidienne du Prophète ﷺ et de ses Compagnons. C'est l'un de ces lieux modestes qui, précisément parce qu'ils sont hors des circuits touristiques habituels, offrent une intimité particulière avec l'histoire islamique." },
+      { question: "Comment s'y rendre ?", answer: "Bir Aris est situé dans le quartier de Quba, à environ 4 km de Masjid an-Nabawi. Depuis Masjid Quba, il est accessible à pied (environ 500 mètres). En taxi depuis Masjid an-Nabawi, comptez 15 minutes." },
+      { question: "Y a-t-il d'autres puits historiques à Médine ?", answer: "Plusieurs puits ont une histoire prophétique à Médine, dont Bir Ruuma (dont Othman racheta l'accès pour le mettre à disposition de tous les Musulmans) et les puits associés aux jardins du Prophète ﷺ. Ces sites sont généralement moins identifiables et moins accessibles que Bir Aris." },
+    ],
+  },
+
+  'masjid-ghamamah': {
+    slug: 'masjid-ghamamah',
+    title: "Masjid al-Ghamamah : la mosquée du nuage miraculeux",
+    location: 'À 200 m à l\'ouest de Masjid an-Nabawi, Médine',
+    locationKicker: 'LIEU SAINT · MÉDINE',
+    excerpt: "Mosquée historique de Médine commémorant la prière de demande de pluie (Salat al-Istisqa) accomplie par le Prophète Muhammad ﷺ, lors de laquelle un nuage descendit miraculeusement.",
+    readingTime: 5,
+    publishedAt: '2026-05-11T14:45:00+03:00',
+    sections: [
+      {
+        id: 'origine',
+        title: 'Le miracle du nuage',
+        content: [
+          {
+            type: 'paragraph',
+            content: "Masjid al-Ghamamah, «la mosquée du nuage», est construite sur l'emplacement où le Prophète Muhammad ﷺ accomplit la Salat al-Istisqa, la prière islamique de demande de pluie. Lors d'une période de sécheresse sévère frappant Médine, il sortit avec ses Compagnons vers cet espace ouvert, en dehors de la mosquée, pour supplier Allah.",
+          },
+          {
+            type: 'paragraph',
+            content: "Anas ibn Malik (ra) rapporte dans le Sahih al-Bukhari (n° 1013) que lors de cette prière, un homme entra dans la mosquée un vendredi et dit au Prophète ﷺ que les récoltes et les troupeaux périssaient. Le Prophète ﷺ leva les mains en supplication, et des nuages se formèrent «comme des montagnes». La pluie tomba abondamment pendant sept jours, à tel point que le vendredi suivant, un homme vint demander au Prophète ﷺ de prier pour que la pluie s'arrête.",
+          },
+          {
+            type: 'callout',
+            text: "Le Prophète ﷺ leva les deux mains jusqu'à ce que l'on voie le blanc de ses aisselles, suppliant pour la pluie.",
+            reference: "Sahih al-Bukhari, n° 1013, rapporté par Anas ibn Malik (ra), décrivant la Salat al-Istisqa du Prophète ﷺ",
+          },
+          {
+            type: 'paragraph',
+            content: "La mosquée tient son nom du mot arabe «ghamamah» (nuage). Elle commémore également, selon certaines sources historiques, l'endroit où le Prophète ﷺ accomplit les prières des deux Aïds (Al-Fitr et Al-Adha) à ciel ouvert, conformément à la Sunnah.",
+          },
+        ],
+      },
+      {
+        id: 'architecture',
+        title: 'Description architecturale',
+        content: [
+          {
+            type: 'stats',
+            items: [
+              { label: 'Capacité', value: '~600 fidèles' },
+              { label: 'Distance Nabawi', value: '~200 m' },
+              { label: 'Dômes', value: '6 dômes' },
+              { label: 'Style', value: 'Ottoman' },
+            ],
+          },
+          {
+            type: 'paragraph',
+            content: "Masjid al-Ghamamah est l'une des mosquées historiques les mieux préservées de Médine. Contrairement à beaucoup d'autres sites islamiques de la ville qui ont été démolis ou entièrement reconstruits, elle a conservé des éléments de son architecture ottomane caractéristique. Ses six dômes blancs, dont un principal imposant et plusieurs annexes plus petits, lui confèrent une silhouette reconnaissable depuis les rues environnantes.",
+          },
+          {
+            type: 'paragraph',
+            content: "La salle de prière est spacieuse et fraîche, illuminée par des fenêtres hautes. L'intérieur est orné de calligraphies coraniques simples. La cour extérieure est ombragée par des arcades. Située à seulement deux cents mètres à l'ouest de Masjid an-Nabawi, cette mosquée est accessible à pied depuis le grand sanctuaire en quelques minutes.",
+          },
+        ],
+      },
+      {
+        id: 'spiritualite',
+        title: 'Importance spirituelle',
+        content: [
+          {
+            type: 'paragraph',
+            content: "Masjid al-Ghamamah rappelle l'une des formes de prière les plus belles et les plus humbles de l'Islam : la Salat al-Istisqa. Cette prière collective, accomplie en cas de sécheresse, est une démonstration communautaire de dépendance totale à Allah pour les besoins les plus fondamentaux de la vie. Elle est toujours pratiquée dans les pays musulmans en période de sécheresse.",
+          },
+          {
+            type: 'paragraph',
+            content: "Le rite de la Salat al-Istisqa tel qu'enseigné par le Prophète ﷺ comprend une prière de deux rak'ahs en plein air, un sermon (khotba), l'inversion du manteau (les savants diffèrent sur sa signification exacte) et des supplications intenses les mains levées. La communauté se rend vers l'espace de prière dans un esprit de contrition et de repentir collectif.",
+          },
+          {
+            type: 'paragraph',
+            content: "La mosquée est également associée aux prières des Aïds, cette tradition prophétique de sortir en plein air pour célébrer collectivement les grandes fêtes islamiques. Prier dans cet espace permet de se relier à cette double tradition de recueillement communautaire, dans la joie comme dans l'épreuve.",
+          },
+        ],
+      },
+      {
+        id: 'visite',
+        title: 'Visite et recueillement',
+        content: [
+          {
+            type: 'paragraph',
+            content: "La visite de Masjid al-Ghamamah est l'une des plus accessibles parmi les mosquées historiques de Médine : elle se trouve à deux minutes à pied de Masjid an-Nabawi. Aucun rituel spécifique n'est prescrit. Accomplir deux rak'ahs de prière (tahiyat al-masjid) à l'arrivée, prendre un moment de méditation sur la Salat al-Istisqa et ses conditions d'exaucement constituent le recueillement approprié.",
+          },
+          {
+            type: 'expert-tip',
+            title: 'Conseil expert SAFARUMA',
+            text: "Masjid al-Ghamamah est une perle architecturale méconnue de Médine, à deux minutes à pied de Masjid an-Nabawi. Son nom rappelle le miracle du nuage qui ombragea le Prophète ﷺ lors de sa supplication pour la pluie. Prenez un moment pour prier deux rak'ahs et méditer sur la Salat al-Istisqa, cette prière de demande de pluie toujours pratiquée par les communautés musulmanes en période de sécheresse. Votre guide SAFARUMA vous en explique le rite et l'histoire.",
+          },
+        ],
+      },
+      {
+        id: 'conseils',
+        title: 'Conseils pratiques',
+        content: [
+          {
+            type: 'paragraph',
+            content: "La mosquée est ouverte pour les cinq prières quotidiennes. L'affluence y est généralement faible comparée à Masjid an-Nabawi, ce qui en fait un refuge de tranquillité. La visite est courte (quinze à vingt minutes) et peut être facilement intégrée dans une promenade entre les deux prières quotidiennes.",
+          },
+          {
+            type: 'list',
+            items: [
+              "Distance depuis Masjid an-Nabawi : environ 200 mètres à pied vers l'ouest",
+              "Durée de visite : 15 à 20 minutes",
+              "Ouverte pour les cinq prières, affluence faible",
+              "Espace séparé pour les femmes",
+              "Photographies autorisées à l'extérieur",
+            ],
+          },
+        ],
+        seeAlso: [{ href: '/lieux-saints/masjid-an-nabawi', label: 'Masjid an-Nabawi : la mosquée du Prophète ﷺ' }],
+      },
+      {
+        id: 'erreurs',
+        title: 'Erreurs à éviter',
+        content: [
+          {
+            type: 'list',
+            items: [
+              "Confondre Masjid al-Ghamamah avec Masjid al-Jumua ou Masjid al-Qiblatayn : trois petites mosquées historiques distinctes autour de Masjid an-Nabawi.",
+              "Croire que prier dans cette mosquée multiplie la valeur de la prière : aucun hadith authentique n'attribue une valeur multipliée à cette mosquée.",
+              "Manquer cette mosquée par méconnaissance : elle est à 200 mètres de Masjid an-Nabawi et offre une expérience historique et architecturale rare à Médine.",
+            ],
+          },
+        ],
+      },
+    ],
+    faq: [
+      { question: "Que signifie le mot Ghamamah ?", answer: "«Ghamamah» signifie «nuage» en arabe. Le nom de la mosquée rappelle le miracle du nuage qui descendit lors de la Salat al-Istisqa du Prophète ﷺ, ombragé les fidèles et annonçant la pluie abondante qui suivit." },
+      { question: "Qu'est-ce que la Salat al-Istisqa ?", answer: "C'est la prière islamique de demande de pluie, accomplie collectivement en plein air lors de sécheresses. Elle comprend deux rak'ahs, un sermon, des supplications les mains levées et, selon la Sunnah prophétique, l'inversion du manteau. Cette prière est toujours pratiquée dans les pays musulmans." },
+      { question: "Le Prophète ﷺ a-t-il prié les Aïds à Ghamamah ?", answer: "Selon plusieurs sources historiques et certains commentateurs, le Prophète ﷺ accomplit les prières des deux Aïds (Al-Fitr et Al-Adha) dans cet espace ouvert, conformément à la Sunnah de prier les Aïds en plein air avec toute la communauté. Cette attribution est confirmée par des récits historiques mais n'est pas unanime." },
+      { question: "Comment s'y rendre depuis Masjid an-Nabawi ?", answer: "La mosquée est à environ 200 mètres à l'ouest de Masjid an-Nabawi. Depuis la grande mosquée, marchez vers l'ouest pendant deux à trois minutes. Elle est facilement reconnaissable à ses dômes ottomans blancs." },
+      { question: "Est-elle ouverte toute la journée ?", answer: "Elle est ouverte pour les cinq prières quotidiennes. En dehors des heures de prière, l'accès peut être limité. Il est conseillé de la visiter juste avant ou après l'une des prières pour être sûr d'y entrer." },
+      { question: "Y a-t-il un espace pour les femmes ?", answer: "Oui, comme dans toutes les mosquées d'Arabie Saoudite, un espace de prière séparé est réservé aux femmes, avec une entrée distincte." },
+    ],
+  },
+
+  'masjid-al-jinn': {
+    slug: 'masjid-al-jinn',
+    title: "Masjid al-Jinn : la mosquée du pacte des djinns",
+    location: "Quartier Al-Ma'la, La Mecque",
+    locationKicker: 'LIEU SAINT · LA MECQUE',
+    excerpt: "Mosquée historique de La Mecque marquant le lieu où le Prophète Muhammad ﷺ récita le Coran à un groupe de djinns, qui acceptèrent l'Islam, événement relaté dans la Sourate Al-Jinn.",
+    readingTime: 6,
+    publishedAt: '2026-05-11T15:00:00+03:00',
+    sections: [
+      {
+        id: 'origine',
+        title: 'La rencontre avec les djinns',
+        content: [
+          {
+            type: 'paragraph',
+            content: "Masjid al-Jinn est située dans le quartier Al-Ma'la, à environ 1,5 kilomètre au nord du Masjid Al-Haram, non loin du cimetière de Jannat al-Mu'alla. La tradition islamique situe à cet endroit la rencontre entre le Prophète Muhammad ﷺ et un groupe de djinns qui l'écoutèrent réciter le Coran et embrassèrent l'Islam.",
+          },
+          {
+            type: 'callout',
+            text: "Dis : Il m'a été révélé qu'un groupe de djinns a écouté. Ils ont dit : Nous avons entendu un Coran admirable, qui guide vers la droiture. Nous croyons en lui et nous n'associerons rien à notre Seigneur.",
+            reference: 'Sourate Al-Jinn, versets 1 et 2, récit de la conversion des djinns à l\'Islam',
+          },
+          {
+            type: 'paragraph',
+            content: "Les sources islamiques situent cet événement lors d'un retour du Prophète ﷺ de Ta'if, où il avait prêché l'Islam sans succès et été rejeté avec violence. Sur le chemin du retour vers La Mecque, il s'arrêta pour prier. C'est à cet endroit qu'un groupe de djinns l'entendit réciter le Coran pendant la prière de Fajr. Ils retournèrent ensuite auprès de leur peuple pour l'inviter à l'Islam.",
+          },
+          {
+            type: 'paragraph',
+            content: "Un hadith rapporté par al-Bukhari (n° 3860) et Muslim précise que le Prophète ﷺ n'avait pas vu les djinns mais en fut informé par révélation divine. Abdullah ibn Mas'ud (ra) rapporte une version différente où il accompagnait le Prophète ﷺ et celui-ci traça un cercle autour de lui pour le protéger pendant qu'il allait rencontrer les djinns. Les deux récits sont authentiques et se complètent.",
+          },
+        ],
+      },
+      {
+        id: 'architecture',
+        title: 'Description architecturale',
+        content: [
+          {
+            type: 'stats',
+            items: [
+              { label: 'Capacité', value: '~600 fidèles' },
+              { label: 'Distance Haram', value: '1,5 km' },
+              { label: 'Quartier', value: "Al-Ma'la" },
+              { label: 'Style', value: 'Moderne' },
+            ],
+          },
+          {
+            type: 'paragraph',
+            content: "La mosquée actuelle est une structure moderne après rénovation saoudienne. Elle est de taille modeste (environ 600 fidèles), avec un dôme principal blanc et un minaret unique. L'intérieur est simple et fonctionnel. Des espaces séparés pour les hommes et les femmes sont disponibles.",
+          },
+          {
+            type: 'paragraph',
+            content: "La mosquée est dans un quartier résidentiel et commerçant animé. À proximité immédiate se trouve le cimetière de Jannat al-Mu'alla, l'un des cimetières les plus sacrés de l'Islam, où reposent notamment Khadija (ra), première épouse du Prophète ﷺ, et Abd al-Muttalib, son grand-père.",
+          },
+        ],
+      },
+      {
+        id: 'spiritualite',
+        title: 'Signification théologique',
+        content: [
+          {
+            type: 'paragraph',
+            content: "Masjid al-Jinn rappelle un point de théologie islamique fondamental : l'Islam s'adresse à l'ensemble des êtres doués de raison (mukallafin), c'est-à-dire les humains et les djinns. La Sourate Al-Jinn (72e sourate) est entièrement consacrée à la rencontre entre le Prophète ﷺ et ces êtres invisibles, et à leur adhésion à l'Islam.",
+          },
+          {
+            type: 'paragraph',
+            content: "Les djinns en Islam sont des créatures créées par Allah, comme les humains, mais à partir du feu (Sourate Al-Hijr, verset 27). Ils sont invisibles aux humains dans leur état naturel, dotés d'une liberté de choix (ils peuvent croire ou non), et soumis aux mêmes obligations religieuses que les humains. Ils peuvent être musulmans ou non-musulmans, croyants ou incrédules.",
+          },
+          {
+            type: 'paragraph',
+            content: "La Sourate Al-Jinn illustre l'universalité du message coranique : même les créatures invisibles, inconnues de la plupart des humains, furent touchées par la récitation du Coran. Cette universalité est l'une des preuves avancées par les théologiens de la valeur prophétique de Muhammad ﷺ.",
+          },
+        ],
+      },
+      {
+        id: 'visite',
+        title: 'Visite et recueillement',
+        content: [
+          {
+            type: 'paragraph',
+            content: "La visite de Masjid al-Jinn s'accompagne naturellement de la lecture ou de la récitation de la Sourate Al-Jinn (72e sourate, 28 versets courts). C'est l'une des sourates les plus accessibles du Coran par sa longueur et l'une des plus riches théologiquement. Accomplir deux rak'ahs de prière (tahiyat al-masjid) à l'arrivée est recommandé pour toute mosquée.",
+          },
+          {
+            type: 'paragraph',
+            content: "La visite peut très naturellement être combinée avec celle du cimetière de Jannat al-Mu'alla, à quelques mètres de la mosquée. Jannat al-Mu'alla est le cimetière où repose Khadija bint Khuwaylid (ra), première épouse et première croyante du Prophète ﷺ, ainsi que plusieurs membres de sa famille et des premiers Compagnons de l'Islam.",
+          },
+          {
+            type: 'expert-tip',
+            title: 'Conseil expert SAFARUMA',
+            text: "Masjid al-Jinn rappelle un point théologique important : l'Islam s'adresse à tous les êtres doués de raison, y compris aux djinns que nous ne voyons pas. Avant votre visite, lisez la Sourate Al-Jinn (courte et magnifique). À quelques mètres, le cimetière de Jannat al-Mu'alla mérite absolument une visite : c'est là que repose Khadija (ra), la première croyante de l'Islam, dont le rôle dans la vie du Prophète ﷺ fut central. Votre guide SAFARUMA organise les deux visites ensemble.",
+          },
+        ],
+        seeAlso: [{ href: '/lieux-saints/masjid-al-haram', label: 'Masjid Al-Haram et la Kaaba' }],
+      },
+      {
+        id: 'conseils',
+        title: 'Conseils pratiques',
+        content: [
+          {
+            type: 'paragraph',
+            content: "La mosquée est accessible en taxi depuis le Masjid Al-Haram (environ cinq minutes, 1,5 km). Elle peut aussi être atteinte à pied depuis le Haram en vingt à vingt-cinq minutes, en remontant vers le quartier Al-Ma'la. La visite est courte (vingt à trente minutes pour la mosquée et la prière).",
+          },
+          {
+            type: 'list',
+            items: [
+              "Distance depuis Masjid Al-Haram : 1,5 km, 5 minutes en taxi",
+              "Durée de visite mosquée : 20 à 30 minutes",
+              "Combiner avec Jannat al-Mu'alla : ajouter 20 à 30 minutes",
+              "Mosquée ouverte pour les cinq prières",
+              "Quartier animé, commerces et restaurants à proximité",
+            ],
+          },
+        ],
+      },
+      {
+        id: 'erreurs',
+        title: 'Erreurs à éviter',
+        content: [
+          {
+            type: 'list',
+            items: [
+              "Croire qu'on peut «voir» ou «communiquer» avec des djinns dans cette mosquée : les djinns sont invisibles aux humains dans leur état naturel, et chercher à les contacter est formellement interdit en Islam (cela relève de la sorcellerie).",
+              "Associer cette mosquée à des pratiques superstitieuses ou ésotériques : la valeur du lieu est uniquement historique et mémorielle.",
+              "Confondre les djinns islamiques avec la représentation des génies dans la culture populaire ou les contes des Mille et Une Nuits : les djinns en Islam sont des créatures rationnelles soumises aux mêmes obligations que les humains.",
+              "Négliger la visite de Jannat al-Mu'alla à proximité : le cimetière abrite la tombe de Khadija (ra) et mérite autant d'attention que la mosquée.",
+            ],
+          },
+        ],
+      },
+    ],
+    faq: [
+      { question: "Qu'est-ce que les djinns en Islam ?", answer: "Les djinns sont des créatures créées par Allah à partir du feu (Sourate Al-Hijr, verset 27), dotées d'une liberté de choix et d'obligations religieuses similaires à celles des humains. Ils sont invisibles dans leur état naturel. Ils peuvent être croyants ou non-croyants. La Sourate Al-Jinn (72) leur est entièrement consacrée." },
+      { question: "Le Prophète ﷺ a-t-il vu les djinns à cet endroit ?", answer: "Selon le hadith de Bukhari (n° 3860), le Prophète ﷺ fut informé par révélation de la présence des djinns mais ne les vit pas directement. Un récit d'Ibn Mas'ud (ra) mentionne cependant une rencontre plus directe. Les deux récits sont authentiques et les savants les conciliement en distinguant deux événements distincts." },
+      { question: "Que dit la Sourate Al-Jinn ?", answer: "La Sourate Al-Jinn (72e sourate, 28 versets) rapporte la conversion de djinns à l'Islam après avoir entendu la récitation du Coran. Elle décrit leur émerveillement devant le Coran, leur engagement à ne rien associer à Allah, leur adhésion à l'Islam et leur retour vers leur peuple pour l'inviter. Elle aborde aussi la question de la connaissance de l'Invisible." },
+      { question: "Y a-t-il un quelconque danger à visiter cette mosquée ?", answer: "Absolument aucun. Masjid al-Jinn est une mosquée ordinaire, un lieu de prière. La croyance en l'existence des djinns fait partie de la foi islamique, mais chercher à les contacter ou à les voir est une pratique interdite. La visite est une démarche historique et mémorielle, sans aucun danger." },
+      { question: "Comment s'y rendre depuis Masjid al-Haram ?", answer: "En taxi depuis Masjid al-Haram, comptez environ cinq minutes (1,5 km). La montée vers le quartier Al-Ma'la peut aussi se faire à pied en vingt à vingt-cinq minutes. Demandez au chauffeur «Masjid al-Jinn» ou «Masjid al-Bai'ah», deux noms parfois utilisés localement." },
+      { question: "Quelle est la durée de visite recommandée ?", answer: "Vingt à trente minutes pour la mosquée (prière et méditation). En ajoutant la visite du cimetière de Jannat al-Mu'alla voisin, prévoyez une heure à une heure trente au total." },
+      { question: "Peut-on combiner cette visite avec Jannat al-Mu'alla ?", answer: "Oui, et c'est fortement recommandé. Le cimetière de Jannat al-Mu'alla est à quelques mètres de la mosquée. Il abrite la tombe de Khadija bint Khuwaylid (ra), première épouse du Prophète ﷺ et première croyante de l'Islam. Sa visite est une expérience très émouvante pour beaucoup de pèlerins." },
+      { question: "Cette mosquée est-elle ouverte 24h/24 ?", answer: "Non, elle est ouverte pour les cinq prières quotidiennes. En dehors des horaires de prière, l'accès peut être limité. Planifiez votre visite autour de l'une des prières pour être sûr d'y entrer." },
+    ],
+  },
 };

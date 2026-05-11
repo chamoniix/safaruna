@@ -136,7 +136,7 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
                 { href: '/conditions-guides',  icon: '📋', label: 'Conditions Guides' },
                 { href: '/charte',             icon: '🔒', label: 'Charte SAFARUMA' },
                 { href: '/devenir-guide',      icon: '◈', label: 'Revenus & Écosystème' },
-                { href: '/certification',      icon: '✦', label: 'Certification SAFARUMA' },
+                { href: '/nos-guides-certifies', icon: '✦', label: 'Certification SAFARUMA' },
               ]},
             ].map((group) => (
               <div key={group.section}>

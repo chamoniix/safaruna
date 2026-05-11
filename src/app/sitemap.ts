@@ -29,7 +29,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const BLOG_SLUGS = [
     'comment-preparer-omra-10-etapes','les-7-tours-du-tawaf',
-    'jabal-uhud-bataille-islam','guide-visa-omra-2025','difference-omra-hajj',
+    'jabal-uhud-bataille-islam','guide-visa-omra','difference-omra-hajj',
   ];
 
   return [
@@ -45,7 +45,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: 'https://safaruma.com/accompagnements',              lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.9 },
     { url: 'https://safaruma.com/omra-mobilite-reduite',        lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
     { url: 'https://safaruma.com/offrir-omra-parents',          lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: 'https://safaruma.com/certification',                lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
+    { url: 'https://safaruma.com/vivre-la-omra',                 lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
+    { url: 'https://safaruma.com/nos-guides-certifies',          lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
 
     // ── Lieux saints (pages individuelles) ──
     { url: 'https://safaruma.com/lieux-saints',                 lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },

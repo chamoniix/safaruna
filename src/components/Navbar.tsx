@@ -3,28 +3,88 @@
 import Link from 'next/link';
 import { useSession, signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 const HIDE_BANNER_PATHS = ['/connexion', '/inscription', '/guide/connexion', '/guide/inscription', '/admin'];
 
-const NAV_LINKS: { href: string; label: string }[] = [
-  { href: '/guides', label: 'Nos guides' },
-  { href: '/ce-qui-vous-attend', label: 'Ce qui vous attend' },
-  { href: '/services', label: 'Services' },
-  { href: '/guide-omra', label: 'Guide Omra étape par étape' },
-  { href: '/certification', label: 'Certification' },
-  { href: '/blog', label: 'Blog' },
-  { href: '/lieux-saints', label: 'Lieux saints' },
-  { href: '/faq', label: 'FAQ' },
-  { href: '/a-propos', label: 'À propos' },
-];
+// ─── Menu structure ─────────────────────────────────────────────────────────
 
-export default function Navbar({ transparentOnHero = false, scrollThreshold = 80, darkHeroMode = false }: { transparentOnHero?: boolean; scrollThreshold?: number; darkHeroMode?: boolean }) {
+const MENUS = [
+  {
+    id: 'decouvrir',
+    label: 'Découvrir',
+    items: [
+      { href: '/guides',             label: 'Nos guides',            desc: 'Trouvez votre guide certifié' },
+      { href: '/lieux-saints',       label: 'Lieux saints',          desc: '26 fiches encyclopédiques' },
+      { href: '/nos-guides-certifies', label: 'Guides certifiés',    desc: 'Notre processus de vérification' },
+    ],
+  },
+  {
+    id: 'services',
+    label: 'Nos services',
+    items: [
+      { href: '/vivre-la-omra',      label: 'Vivre la Omra',         desc: 'Accompagnement spirituel' },
+      { href: '/comment-ca-marche',  label: 'Comment ça marche',     desc: 'Le parcours en 3 étapes' },
+      { href: '/guide-omra',         label: 'Guide Omra PDF',         desc: 'Guide étape par étape' },
+    ],
+  },
+  {
+    id: 'ressources',
+    label: 'Ressources',
+    items: [
+      { href: '/blog',               label: 'Blog',                  desc: 'Articles & conseils' },
+      { href: '/faq',                label: 'FAQ',                   desc: 'Questions fréquentes' },
+    ],
+  },
+] as const;
+
+// ─── Chevron SVG ─────────────────────────────────────────────────────────────
+
+function ChevronDown({ open }: { open: boolean }) {
+  return (
+    <svg
+      width="12" height="12" viewBox="0 0 12 12" fill="none"
+      style={{ transition: 'transform 0.2s ease', transform: open ? 'rotate(180deg)' : 'rotate(0deg)', flexShrink: 0 }}
+      aria-hidden="true"
+    >
+      <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+// ─── User icon SVG ───────────────────────────────────────────────────────────
+
+function UserIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+    </svg>
+  );
+}
+
+// ─── Component ───────────────────────────────────────────────────────────────
+
+export default function Navbar({
+  transparentOnHero = false,
+  scrollThreshold = 80,
+  darkHeroMode = false,
+}: {
+  transparentOnHero?: boolean;
+  scrollThreshold?: number;
+  darkHeroMode?: boolean;
+}) {
   const { data: session } = useSession();
   const pathname = usePathname();
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [openMobileSection, setOpenMobileSection] = useState<string | null>(null);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const navRef = useRef<HTMLDivElement>(null);
 
+  // Scroll detection
   useEffect(() => {
     if (!transparentOnHero && !darkHeroMode) return;
     const onScroll = () => setScrolled(window.scrollY > scrollThreshold);
@@ -33,16 +93,58 @@ export default function Navbar({ transparentOnHero = false, scrollThreshold = 80
     return () => window.removeEventListener('scroll', onScroll);
   }, [transparentOnHero, darkHeroMode, scrollThreshold]);
 
+  // Close on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (navRef.current && !navRef.current.contains(e.target as Node)) {
+        setOpenMenu(null);
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  // Close on Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setOpenMenu(null); setUserMenuOpen(false); setMobileOpen(false); }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, []);
+
+  // Lock body scroll when mobile menu open
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
+
   const isTransparent = transparentOnHero && !scrolled;
   const isDarkHero = darkHeroMode && !scrolled;
-
   const hideBanner = pathname ? HIDE_BANNER_PATHS.some(p => pathname.startsWith(p)) : false;
-  const role = (session?.user as any)?.role;
+  const role = (session?.user as { role?: string })?.role;
 
   const dashboardHref =
     role === 'GUIDE' ? '/guide/tableau-de-bord' :
     role === 'ADMIN' ? '/admin/tableau-de-bord' :
     '/espace/tableau-de-bord';
+
+  // Hover handlers with delay to prevent accidental close
+  const handleMenuEnter = useCallback((id: string) => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setOpenMenu(id);
+  }, []);
+
+  const handleMenuLeave = useCallback(() => {
+    closeTimer.current = setTimeout(() => setOpenMenu(null), 120);
+  }, []);
+
+  const handleMenuItemClick = useCallback(() => {
+    setOpenMenu(null);
+    setUserMenuOpen(false);
+    setMobileOpen(false);
+  }, []);
 
   return (
     <>
@@ -51,6 +153,7 @@ export default function Navbar({ transparentOnHero = false, scrollThreshold = 80
           position: fixed; top: 0; left: 0; right: 0; z-index: 200;
           font-family: var(--font-manrope, sans-serif);
         }
+        /* ── Banner ── */
         .nb-banner {
           background: #251913; color: #FFFFFF;
           display: flex; align-items: center; justify-content: center; gap: 20px;
@@ -62,60 +165,126 @@ export default function Navbar({ transparentOnHero = false, scrollThreshold = 80
           font-size: 11px; color: #22C55E; letter-spacing: 0.08em; font-weight: 600;
           flex-shrink: 0; text-decoration: none;
         }
+        /* ── Bar ── */
         .nb-bar {
-          background: rgba(250,247,240,0.95); backdrop-filter: blur(12px);
+          background: rgba(250,247,240,0.96); backdrop-filter: blur(12px);
           border-bottom: 1px solid rgba(201,168,76,0.2);
-          padding: 0.9rem 2rem;
-          display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
-          transition: background 0.35s ease, border-color 0.35s ease, backdrop-filter 0.35s ease;
+          padding: 0 2rem;
+          height: 60px;
+          display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+          transition: background 0.35s ease, border-color 0.35s ease;
         }
-        .nb-logo {
-          font-family: var(--font-cormorant, serif); font-size: 1.75rem; font-weight: 700;
-          color: #1A1209; text-decoration: none; letter-spacing: 0.05em; white-space: nowrap;
-        }
-        .nb-logo span { color: #C9A84C; }
-        .nb-links {
-          display: flex; align-items: center; gap: 1.75rem; flex-wrap: nowrap;
-        }
-        .nb-links a {
-          font-size: 0.8rem; font-weight: 500; color: #7A6D5A; text-decoration: none;
-          letter-spacing: 0.05em; text-transform: uppercase; transition: color 0.2s; white-space: nowrap;
-        }
-        .nb-links a:hover { color: #8B6914; }
-        .nb-links-dark a { color: rgba(240,216,151,0.75) !important; }
-        .nb-links-dark a:hover { color: #C9A84C !important; }
         .nb-bar-dark {
           background: #1A1209 !important;
           backdrop-filter: none !important;
-          -webkit-backdrop-filter: none !important;
           border-bottom: 1px solid rgba(201,168,76,0.15) !important;
         }
-        .nb-logo-light { color: #FAF7F0 !important; transition: color 0.35s ease; }
-        .nb-actions { display: flex; align-items: center; gap: 1rem; flex-shrink: 0; }
-        .nb-user-name { font-size: 0.82rem; font-weight: 600; color: #1A1209; white-space: nowrap; }
-        .nb-btn-dash {
-          background: #1A1209; color: #F0D897; padding: 0.5rem 1.1rem; border-radius: 50px;
-          font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
-          text-decoration: none; transition: background 0.2s; white-space: nowrap;
+        /* ── Logo ── */
+        .nb-logo {
+          font-family: var(--font-cormorant, serif); font-size: 1.75rem; font-weight: 700;
+          color: #1A1209; text-decoration: none; letter-spacing: 0.05em; white-space: nowrap; flex-shrink: 0;
         }
-        .nb-btn-dash:hover { background: #2D1F08; }
-        .nb-btn-out {
-          background: none; border: 1px solid #E8DFC8; color: #7A6D5A; padding: 0.45rem 1rem;
-          border-radius: 50px; font-size: 0.78rem; font-weight: 600; cursor: pointer;
-          font-family: var(--font-manrope, sans-serif); transition: border-color 0.2s, color 0.2s;
-          white-space: nowrap;
+        .nb-logo span { color: #C9A84C; }
+        .nb-logo-light { color: #FAF7F0 !important; }
+        /* ── Desktop nav ── */
+        .nb-nav {
+          display: flex; align-items: center; gap: 0.25rem; flex: 1; justify-content: center;
         }
-        .nb-btn-out:hover { border-color: #C9A84C; color: #1A1209; }
+        .nb-menu-btn {
+          display: inline-flex; align-items: center; gap: 0.35rem;
+          font-size: 0.8rem; font-weight: 500; color: #7A6D5A;
+          letter-spacing: 0.05em; text-transform: uppercase;
+          background: none; border: none; cursor: pointer;
+          padding: 0.5rem 0.75rem; border-radius: 8px;
+          transition: color 0.15s, background 0.15s;
+          font-family: var(--font-manrope, sans-serif); white-space: nowrap;
+        }
+        .nb-menu-btn:hover, .nb-menu-btn[aria-expanded="true"] { color: #1A1209; background: rgba(201,168,76,0.08); }
+        .nb-nav-link {
+          font-size: 0.8rem; font-weight: 500; color: #7A6D5A;
+          letter-spacing: 0.05em; text-transform: uppercase;
+          text-decoration: none; padding: 0.5rem 0.75rem; border-radius: 8px;
+          transition: color 0.15s, background 0.15s; white-space: nowrap;
+        }
+        .nb-nav-link:hover { color: #1A1209; background: rgba(201,168,76,0.08); }
+        .nb-nav-dark .nb-menu-btn { color: rgba(240,216,151,0.75); }
+        .nb-nav-dark .nb-menu-btn:hover, .nb-nav-dark .nb-menu-btn[aria-expanded="true"] { color: #C9A84C; background: rgba(201,168,76,0.12); }
+        .nb-nav-dark .nb-nav-link { color: rgba(240,216,151,0.75); }
+        .nb-nav-dark .nb-nav-link:hover { color: #C9A84C; background: rgba(201,168,76,0.12); }
+        /* ── Dropdown ── */
+        .nb-dropdown {
+          position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+          background: #FFFFFF; border-radius: 12px;
+          box-shadow: 0 12px 32px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.06);
+          padding: 0.5rem; min-width: 240px;
+          animation: nb-fadein 0.18s ease forwards;
+          z-index: 300;
+        }
+        @keyframes nb-fadein {
+          from { opacity: 0; transform: translateX(-50%) translateY(-6px); }
+          to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        .nb-dropdown-item {
+          display: flex; flex-direction: column; gap: 2px;
+          padding: 0.6rem 0.875rem; border-radius: 8px;
+          text-decoration: none; transition: background 0.12s;
+          border-bottom: 0.5px solid #F0EBE0;
+        }
+        .nb-dropdown-item:last-child { border-bottom: none; }
+        .nb-dropdown-item:hover { background: #FAF7F0; }
+        .nb-dropdown-label { font-size: 0.875rem; font-weight: 600; color: #1A1209; }
+        .nb-dropdown-desc { font-size: 0.75rem; color: #9A8D7A; }
+        /* ── Dropdown wrapper (relative) ── */
+        .nb-menu-wrap { position: relative; }
+        /* ── Actions ── */
+        .nb-actions { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; }
         .nb-btn-login {
-          font-size: 0.82rem; font-weight: 600; color: #1A1209; text-decoration: none; white-space: nowrap;
+          font-size: 0.8rem; font-weight: 600; color: #1A1209; text-decoration: none; white-space: nowrap;
         }
         .nb-btn-login:hover { color: #8B6914; }
+        .nb-btn-login-dark { color: rgba(240,216,151,0.85) !important; }
+        .nb-btn-login-dark:hover { color: #C9A84C !important; }
         .nb-btn-register {
-          background: #1A1209; color: #F0D897; padding: 0.55rem 1.3rem; border-radius: 50px;
-          font-size: 0.8rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+          background: #1A1209; color: #F0D897; padding: 0.5rem 1.2rem; border-radius: 50px;
+          font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
           text-decoration: none; transition: background 0.2s; white-space: nowrap;
         }
         .nb-btn-register:hover { background: #2D1F08; }
+        /* ── User menu ── */
+        .nb-user-btn {
+          display: inline-flex; align-items: center; gap: 0.4rem;
+          background: none; border: 1px solid #E8DFC8; border-radius: 50px;
+          padding: 0.35rem 0.75rem 0.35rem 0.5rem; cursor: pointer;
+          font-family: var(--font-manrope, sans-serif); transition: border-color 0.15s;
+          color: #1A1209;
+        }
+        .nb-user-btn:hover { border-color: #C9A84C; }
+        .nb-user-name { font-size: 0.78rem; font-weight: 600; color: #1A1209; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .nb-user-dropdown {
+          position: absolute; top: calc(100% + 8px); right: 0;
+          background: #FFFFFF; border-radius: 12px;
+          box-shadow: 0 12px 32px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.06);
+          padding: 0.5rem; min-width: 180px;
+          animation: nb-fadein-right 0.18s ease forwards;
+          z-index: 300;
+        }
+        @keyframes nb-fadein-right {
+          from { opacity: 0; transform: translateY(-6px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        .nb-user-item {
+          display: block; padding: 0.6rem 0.875rem; border-radius: 8px;
+          font-size: 0.85rem; font-weight: 500; color: #1A1209; text-decoration: none;
+          transition: background 0.12s; border-bottom: 0.5px solid #F0EBE0;
+        }
+        .nb-user-item:last-child { border-bottom: none; }
+        .nb-user-item:hover { background: #FAF7F0; }
+        .nb-user-item-danger { color: #9A3B2A !important; }
+        .nb-user-item-btn {
+          width: 100%; text-align: left; background: none; border: none; cursor: pointer;
+          font-family: var(--font-manrope, sans-serif);
+        }
+        /* ── Hamburger ── */
         .nb-hamburger {
           display: none; flex-direction: column; justify-content: center; gap: 5px;
           background: none; border: 1.5px solid #E8DFC8; border-radius: 8px;
@@ -128,56 +297,94 @@ export default function Navbar({ transparentOnHero = false, scrollThreshold = 80
         .nb-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
         .nb-hamburger.open span:nth-child(2) { opacity: 0; }
         .nb-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-        .nb-mobile-menu {
-          display: none; flex-direction: column; background: rgba(250,247,240,0.98);
-          border-top: 1px solid rgba(201,168,76,0.15); padding: 1.25rem 1.5rem 1.5rem;
-          gap: 0.25rem;
+        /* ── Mobile overlay ── */
+        .nb-mobile-overlay {
+          display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+          z-index: 198; animation: nb-overlay-in 0.2s ease;
         }
-        .nb-mobile-menu.open { display: flex; }
-        .nb-mobile-safaruma {
-          font-family: var(--font-cormorant, serif); font-size: 1.6rem; font-weight: 700;
-          color: #1A1209; text-decoration: none; letter-spacing: 0.05em;
-          padding: 0.25rem 0.75rem 0.75rem; display: block;
-          border-bottom: 1px solid rgba(201,168,76,0.2); margin-bottom: 0.25rem;
+        @keyframes nb-overlay-in { from { opacity: 0; } to { opacity: 1; } }
+        .nb-mobile-overlay.open { display: block; }
+        /* ── Mobile drawer ── */
+        .nb-mobile-drawer {
+          position: fixed; top: 0; right: 0; bottom: 0; width: min(340px, 92vw);
+          background: #FAF7F0; z-index: 199; overflow-y: auto;
+          display: flex; flex-direction: column;
+          transform: translateX(100%); transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+          box-shadow: -8px 0 32px rgba(0,0,0,0.12);
         }
-        .nb-mobile-link {
-          font-size: 0.9rem; font-weight: 500; color: #7A6D5A; text-decoration: none;
-          padding: 0.65rem 0.75rem; border-bottom: 1px solid rgba(201,168,76,0.1);
-          text-transform: uppercase; letter-spacing: 0.05em; transition: color 0.15s, background 0.15s;
-          border-radius: 8px; margin: 0 -0.25rem;
+        .nb-mobile-drawer.open { transform: translateX(0); }
+        .nb-drawer-header {
+          display: flex; align-items: center; justify-content: space-between;
+          padding: 1rem 1.25rem; border-bottom: 1px solid rgba(201,168,76,0.2);
+          flex-shrink: 0;
         }
-        .nb-mobile-link:last-of-type { border-bottom: none; }
-        .nb-mobile-link:hover { color: #1A1209; background: rgba(26,18,9,.04); }
-        .nb-mobile-link-active { color: #1A1209 !important; background: rgba(201,168,76,.1) !important; font-weight: 700; }
-        .nb-mobile-auth { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
-        .nb-mobile-dash {
-          background: #1A1209; color: #F0D897; padding: 0.75rem; border-radius: 50px;
+        .nb-drawer-close {
+          background: none; border: none; cursor: pointer; padding: 6px;
+          color: #7A6D5A; border-radius: 6px; display: flex; align-items: center;
+        }
+        .nb-drawer-close:hover { color: #1A1209; background: rgba(201,168,76,0.1); }
+        .nb-drawer-body { flex: 1; padding: 0.75rem 0; }
+        .nb-drawer-section { border-bottom: 1px solid rgba(201,168,76,0.15); }
+        .nb-drawer-section-btn {
+          width: 100%; display: flex; align-items: center; justify-content: space-between;
+          padding: 0.875rem 1.25rem; background: none; border: none; cursor: pointer;
+          font-family: var(--font-manrope, sans-serif); font-size: 0.82rem; font-weight: 700;
+          color: #1A1209; letter-spacing: 0.08em; text-transform: uppercase;
+        }
+        .nb-drawer-section-btn:hover { background: rgba(201,168,76,0.06); }
+        .nb-drawer-items { overflow: hidden; }
+        .nb-drawer-link {
+          display: flex; flex-direction: column; gap: 2px;
+          padding: 0.65rem 1.5rem; text-decoration: none;
+          border-bottom: 0.5px solid rgba(201,168,76,0.1);
+          transition: background 0.12s;
+        }
+        .nb-drawer-link:last-child { border-bottom: none; }
+        .nb-drawer-link:hover { background: rgba(201,168,76,0.06); }
+        .nb-drawer-link-label { font-size: 0.875rem; font-weight: 600; color: #1A1209; }
+        .nb-drawer-link-desc { font-size: 0.75rem; color: #9A8D7A; }
+        .nb-drawer-direct {
+          display: block; padding: 0.875rem 1.25rem; text-decoration: none;
+          font-size: 0.82rem; font-weight: 700; color: #1A1209;
+          letter-spacing: 0.08em; text-transform: uppercase;
+          border-bottom: 1px solid rgba(201,168,76,0.15);
+          transition: background 0.12s;
+        }
+        .nb-drawer-direct:hover { background: rgba(201,168,76,0.06); }
+        .nb-drawer-footer {
+          padding: 1.25rem; border-top: 1px solid rgba(201,168,76,0.2);
+          display: flex; flex-direction: column; gap: 0.75rem; flex-shrink: 0;
+        }
+        .nb-drawer-register {
+          background: #1A1209; color: #F0D897; padding: 0.8rem; border-radius: 50px;
           font-size: 0.85rem; font-weight: 600; text-align: center; text-decoration: none;
-          letter-spacing: 0.05em;
+          display: block; letter-spacing: 0.05em;
         }
-        .nb-mobile-out {
-          background: none; border: 1px solid #E8DFC8; color: #7A6D5A; padding: 0.7rem;
+        .nb-drawer-login {
+          font-size: 0.85rem; font-weight: 600; color: #1A1209; text-decoration: none;
+          text-align: center; padding: 0.4rem 0;
+        }
+        .nb-drawer-dash {
+          background: #1A1209; color: #F0D897; padding: 0.8rem; border-radius: 50px;
+          font-size: 0.85rem; font-weight: 600; text-align: center; text-decoration: none; display: block;
+        }
+        .nb-drawer-out {
+          background: none; border: 1px solid #E8DFC8; color: #7A6D5A; padding: 0.75rem;
           border-radius: 50px; font-size: 0.85rem; font-weight: 600; cursor: pointer;
           font-family: var(--font-manrope, sans-serif); width: 100%;
         }
-        .nb-mobile-register {
-          background: #1A1209; color: #F0D897; padding: 0.75rem; border-radius: 50px;
-          font-size: 0.85rem; font-weight: 600; text-align: center; text-decoration: none;
-          display: block;
-        }
-        .nb-mobile-login {
-          font-size: 0.85rem; font-weight: 600; color: #1A1209; text-decoration: none;
-          text-align: center; padding: 0.5rem 0;
-        }
+        /* ── Responsive ── */
         @media (max-width: 1023px) {
-          .nb-links { display: none; }
+          .nb-nav { display: none; }
           .nb-actions { display: none; }
           .nb-hamburger { display: flex !important; }
-          .nb-bar { background: rgba(250,247,240,1); padding: 0.9rem 1.25rem !important; }
+          .nb-bar { padding: 0 1.25rem !important; }
         }
       `}} />
 
-      <div className="nb-root">
+      <div className="nb-root" ref={navRef}>
+
+        {/* ── Banner ── */}
         {!hideBanner && (
           <div className="nb-banner">
             <Link href="/guide-omra" style={{ display: 'flex', alignItems: 'center', gap: '9px', textDecoration: 'none' }}>
@@ -197,78 +404,189 @@ export default function Navbar({ transparentOnHero = false, scrollThreshold = 80
           </div>
         )}
 
-        <div className={`nb-bar${isDarkHero ? ' nb-bar-dark' : ''}`} style={
-          isTransparent ? { background: 'transparent', backdropFilter: 'none', WebkitBackdropFilter: 'none', borderBottom: 'none' } : {}
-        }>
-          <Link href="/" className={`nb-logo${isDarkHero ? ' nb-logo-light' : ''}`} style={{ transition: 'opacity 0.35s ease', ...(isTransparent ? { opacity: 0, pointerEvents: 'none' } : {}) }}>
+        {/* ── Bar desktop ── */}
+        <div className={`nb-bar${isDarkHero ? ' nb-bar-dark' : ''}`}
+          style={isTransparent ? { background: 'transparent', backdropFilter: 'none', WebkitBackdropFilter: 'none', borderBottom: 'none' } : {}}>
+
+          {/* Logo */}
+          <Link href="/" className={`nb-logo${isDarkHero ? ' nb-logo-light' : ''}`}
+            style={isTransparent ? { opacity: 0, pointerEvents: 'none' } : {}}>
             SAFAR<span>U</span>MA
           </Link>
 
-          <div className={`nb-links${isDarkHero ? ' nb-links-dark' : ''}`} style={isTransparent ? { display: 'none' } : {}}>
-            {NAV_LINKS.map(l => (
-              <Link key={l.href} href={l.href}>{l.label}</Link>
-            ))}
-          </div>
+          {/* Desktop nav */}
+          {!isTransparent && (
+            <nav className={`nb-nav${isDarkHero ? ' nb-nav-dark' : ''}`} aria-label="Navigation principale">
+              {MENUS.map(menu => (
+                <div
+                  key={menu.id}
+                  className="nb-menu-wrap"
+                  onMouseEnter={() => handleMenuEnter(menu.id)}
+                  onMouseLeave={handleMenuLeave}
+                >
+                  <button
+                    className="nb-menu-btn"
+                    aria-expanded={openMenu === menu.id}
+                    aria-haspopup="menu"
+                    onClick={() => setOpenMenu(openMenu === menu.id ? null : menu.id)}
+                  >
+                    {menu.label}
+                    <ChevronDown open={openMenu === menu.id} />
+                  </button>
+                  {openMenu === menu.id && (
+                    <div className="nb-dropdown" role="menu">
+                      {menu.items.map(item => (
+                        <Link
+                          key={item.href}
+                          href={item.href}
+                          className="nb-dropdown-item"
+                          role="menuitem"
+                          onClick={handleMenuItemClick}
+                        >
+                          <span className="nb-dropdown-label">{item.label}</span>
+                          <span className="nb-dropdown-desc">{item.desc}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+              <Link href="/a-propos" className="nb-nav-link" onClick={handleMenuItemClick}>
+                À propos
+              </Link>
+            </nav>
+          )}
 
-          <div className="nb-actions" style={isTransparent ? { display: 'none' } : {}}>
-            {session ? (
-              <>
-                <span className="nb-user-name">{session.user?.name || session.user?.email}</span>
-                <Link href={dashboardHref} className="nb-btn-dash">Mon espace</Link>
-                <button className="nb-btn-out" onClick={() => signOut({ callbackUrl: '/' })}>
-                  Déconnexion
-                </button>
-              </>
-            ) : (
-              <>
-                <Link href="/connexion" className="nb-btn-login">Connexion</Link>
-                <Link href="/inscription" className="nb-btn-register">S&apos;inscrire</Link>
-              </>
-            )}
-          </div>
+          {/* Desktop actions */}
+          {!isTransparent && (
+            <div className="nb-actions">
+              {session ? (
+                <div className="nb-menu-wrap" style={{ position: 'relative' }}>
+                  <button
+                    className="nb-user-btn"
+                    aria-expanded={userMenuOpen}
+                    aria-haspopup="menu"
+                    onClick={() => setUserMenuOpen(o => !o)}
+                    aria-label="Mon compte"
+                  >
+                    <UserIcon />
+                    <span className="nb-user-name">{session.user?.name?.split(' ')[0] || 'Mon compte'}</span>
+                    <ChevronDown open={userMenuOpen} />
+                  </button>
+                  {userMenuOpen && (
+                    <div className="nb-user-dropdown" role="menu">
+                      <Link href={dashboardHref} className="nb-user-item" role="menuitem" onClick={handleMenuItemClick}>
+                        Mon espace
+                      </Link>
+                      <button
+                        className="nb-user-item nb-user-item-danger nb-user-item-btn"
+                        role="menuitem"
+                        onClick={() => { handleMenuItemClick(); signOut({ callbackUrl: '/' }); }}
+                      >
+                        Déconnexion
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <Link href="/connexion" className={`nb-btn-login${isDarkHero ? ' nb-btn-login-dark' : ''}`}>
+                    Connexion
+                  </Link>
+                  <Link href="/inscription" className="nb-btn-register">
+                    S&apos;inscrire
+                  </Link>
+                </>
+              )}
+            </div>
+          )}
 
+          {/* Hamburger */}
           <button
-            className={`nb-hamburger${menuOpen ? ' open' : ''}`}
-            onClick={() => setMenuOpen(o => !o)}
-            aria-label="Menu"
-            style={
-              isTransparent ? { display: 'flex', background: 'rgba(250,247,240,0.05)', borderColor: 'rgba(201,168,76,0.4)', borderWidth: '0.5px' } :
-              isDarkHero ? { borderColor: 'rgba(201,168,76,0.35)' } :
-              {}
-            }
+            className={`nb-hamburger${mobileOpen ? ' open' : ''}`}
+            onClick={() => setMobileOpen(o => !o)}
+            aria-label={mobileOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
+            aria-expanded={mobileOpen}
+            style={isDarkHero || isTransparent ? { borderColor: 'rgba(201,168,76,0.4)' } : {}}
           >
-            <span style={(isTransparent || isDarkHero) ? { background: 'rgba(240,216,151,0.9)' } : {}} />
-            <span style={(isTransparent || isDarkHero) ? { background: 'rgba(240,216,151,0.9)' } : {}} />
-            <span style={(isTransparent || isDarkHero) ? { background: 'rgba(240,216,151,0.9)' } : {}} />
+            <span style={isDarkHero || isTransparent ? { background: 'rgba(240,216,151,0.9)' } : {}} />
+            <span style={isDarkHero || isTransparent ? { background: 'rgba(240,216,151,0.9)' } : {}} />
+            <span style={isDarkHero || isTransparent ? { background: 'rgba(240,216,151,0.9)' } : {}} />
           </button>
         </div>
 
-        <div className={`nb-mobile-menu${menuOpen ? ' open' : ''}`}>
-          <Link href="/" className="nb-mobile-safaruma" onClick={() => setMenuOpen(false)}>
-            SAFAR<span style={{ color: '#C9A84C' }}>U</span>MA
-          </Link>
-          {NAV_LINKS.map(l => (
-            <Link key={l.href} href={l.href} className={`nb-mobile-link${pathname === l.href ? ' nb-mobile-link-active' : ''}`} onClick={() => setMenuOpen(false)}>
-              {l.label}
-            </Link>
-          ))}
+        {/* ── Mobile overlay ── */}
+        <div
+          className={`nb-mobile-overlay${mobileOpen ? ' open' : ''}`}
+          onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+        />
 
-          <div className="nb-mobile-auth">
+        {/* ── Mobile drawer ── */}
+        <div className={`nb-mobile-drawer${mobileOpen ? ' open' : ''}`} role="dialog" aria-label="Menu navigation" aria-modal="true">
+          <div className="nb-drawer-header">
+            <Link href="/" className="nb-logo" onClick={() => setMobileOpen(false)} style={{ fontSize: '1.5rem' }}>
+              SAFAR<span>U</span>MA
+            </Link>
+            <button className="nb-drawer-close" onClick={() => setMobileOpen(false)} aria-label="Fermer le menu">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="nb-drawer-body">
+            {MENUS.map(menu => (
+              <div key={menu.id} className="nb-drawer-section">
+                <button
+                  className="nb-drawer-section-btn"
+                  onClick={() => setOpenMobileSection(openMobileSection === menu.id ? null : menu.id)}
+                  aria-expanded={openMobileSection === menu.id}
+                >
+                  {menu.label}
+                  <ChevronDown open={openMobileSection === menu.id} />
+                </button>
+                {openMobileSection === menu.id && (
+                  <div className="nb-drawer-items">
+                    {menu.items.map(item => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        className="nb-drawer-link"
+                        onClick={() => setMobileOpen(false)}
+                      >
+                        <span className="nb-drawer-link-label">{item.label}</span>
+                        <span className="nb-drawer-link-desc">{item.desc}</span>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+            <Link href="/a-propos" className="nb-drawer-direct" onClick={() => setMobileOpen(false)}>
+              À propos
+            </Link>
+          </div>
+
+          <div className="nb-drawer-footer">
             {session ? (
               <>
-                <Link href={dashboardHref} className="nb-mobile-dash" onClick={() => setMenuOpen(false)}>
+                <Link href={dashboardHref} className="nb-drawer-dash" onClick={() => setMobileOpen(false)}>
                   Mon espace
                 </Link>
-                <button className="nb-mobile-out" onClick={() => { setMenuOpen(false); signOut({ callbackUrl: '/' }); }}>
+                <button
+                  className="nb-drawer-out"
+                  onClick={() => { setMobileOpen(false); signOut({ callbackUrl: '/' }); }}
+                >
                   Déconnexion
                 </button>
               </>
             ) : (
               <>
-                <Link href="/inscription" className="nb-mobile-register" onClick={() => setMenuOpen(false)}>
+                <Link href="/inscription" className="nb-drawer-register" onClick={() => setMobileOpen(false)}>
                   S&apos;inscrire gratuitement
                 </Link>
-                <Link href="/connexion" className="nb-mobile-login" onClick={() => setMenuOpen(false)}>
+                <Link href="/connexion" className="nb-drawer-login" onClick={() => setMobileOpen(false)}>
                   Déjà un compte ? Se connecter
                 </Link>
               </>

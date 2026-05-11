@@ -378,7 +378,7 @@ export default function Home() {
             <p style={{ color: 'var(--muted)', lineHeight: 1.75, fontSize: '0.9rem', margin: '0 0 0.75rem' }}>
               Moins d&apos;1 guide sur 10 est accepté. Chaque candidat passe un entretien exigeant avant d&apos;obtenir la Certification SAFARUMA.
             </p>
-            <Link href="/certification" style={{
+            <Link href="/nos-guides-certifies" style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
               fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.06em',
               color: 'var(--gold-dark)', textDecoration: 'none',

@@ -12,6 +12,16 @@ const nextConfig: NextConfig = {
         destination: '/blog/guide-visa-omra',
         permanent: true,
       },
+      {
+        source: '/ce-qui-vous-attend',
+        destination: '/vivre-la-omra',
+        permanent: true,
+      },
+      {
+        source: '/certification',
+        destination: '/nos-guides-certifies',
+        permanent: true,
+      },
     ];
   },
   async headers() {

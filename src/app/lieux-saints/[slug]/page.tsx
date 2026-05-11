@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { RefreshCw, Droplets, Heart } from 'lucide-react';
+import { RefreshCw, Droplets, Heart, Sun, Moon, Scissors, Target } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { lieuxSaints, type LieuSaint, type SectionBlock } from '../data';
@@ -348,6 +348,10 @@ const ritualIcons = {
   'rotate-cw': RefreshCw,
   'droplets': Droplets,
   'heart': Heart,
+  'sun': Sun,
+  'moon': Moon,
+  'scissors': Scissors,
+  'target': Target,
 } as const;
 
 function renderBlock(block: SectionBlock, idx: number) {
@@ -647,15 +651,13 @@ function RichLieuPage({ lieu }: { lieu: LieuSaint }) {
                 </h2>
                 {section.content.map((block, bi) => renderBlock(block, bi))}
 
-                {/* Internal links after specific sections */}
-                {section.id === 'rituels' && (
-                  <p style={{ fontSize: '0.82rem', color: '#888', marginTop: '0.5rem', marginBottom: 0 }}>
-                    Lecture recommandée : <Link href="/blog/les-7-tours-du-tawaf" style={{ color: '#C9A84C' }}>Les 7 tours du Tawaf — sens et spiritualité →</Link>
-                  </p>
-                )}
-                {section.id === 'conseils' && (
-                  <p style={{ fontSize: '0.82rem', color: '#888', marginTop: '0.5rem', marginBottom: 0 }}>
-                    Voir aussi : <Link href="/blog/comment-preparer-omra-10-etapes" style={{ color: '#C9A84C' }}>Comment préparer son Omra en 10 étapes →</Link>
+                {section.seeAlso && section.seeAlso.length > 0 && (
+                  <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '0.5rem', marginBottom: 0 }}>
+                    {section.seeAlso.map((link, li) => (
+                      <span key={link.href}>{li > 0 ? ' · ' : 'Voir aussi : '}
+                        <Link href={link.href} style={{ color: '#C9A84C' }}>{link.label} →</Link>
+                      </span>
+                    ))}
                   </p>
                 )}
               </section>

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { RefreshCw, Droplets, Heart, Sun, Moon, Scissors, Target } from 'lucide-react';
+import { RefreshCw, Droplets, Heart, Sun, Moon, Scissors, Target, List } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { lieuxSaints, type LieuSaint, type SectionBlock } from '../data';
@@ -557,7 +557,6 @@ function RichLieuPage({ lieu }: { lieu: LieuSaint }) {
         @supports not (text-wrap: pretty) { .lieu-section-h2 { text-wrap: balance; } }
         .lieu-section-h2:first-child { border-top: none; margin-top: 0; padding-top: 0; }
         details.lieu-mobile-details summary { cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #1A1209; padding: 0.75rem 0; list-style: none; display: flex; align-items: center; gap: 0.5rem; text-wrap: pretty; }
-        details.lieu-mobile-details summary::before { content: '§'; font-family: var(--font-cormorant, serif); color: #C9A84C; font-size: 1.1rem; }
         details.lieu-mobile-details nav a { display: block; padding: 0.4rem 0.5rem; font-size: 0.82rem; color: #7A6D5A; text-decoration: none; }
         .faq-item { border-bottom: 1px solid #E8E2D0; margin-bottom: 0.25rem; }
         .faq-item summary { padding: 0.875rem 0; cursor: pointer; font-size: 0.9rem; font-weight: 600; color: #1A1209; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 1rem; text-wrap: pretty; }
@@ -565,7 +564,7 @@ function RichLieuPage({ lieu }: { lieu: LieuSaint }) {
         .faq-item summary::after { content: '+'; color: #C9A84C; font-size: 1.1rem; font-weight: 400; line-height: 1; flex-shrink: 0; transition: transform 0.2s ease; }
         .faq-item[open] summary::after { transform: rotate(45deg); }
         .faq-item p { padding: 0 0 0.875rem; color: #555; line-height: 1.75; font-size: 0.875rem; margin: 0; }
-        .see-also { margin-top: 1rem; margin-bottom: 0; padding: 0.6rem 0.9rem; border-left: 2px solid #C9A84C; background: #FAF7F0; border-radius: 0 6px 6px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.6rem; }
+        .see-also { margin-top: 1rem; margin-bottom: 2.5rem; padding: 0.6rem 0.9rem; border-left: 2px solid #C9A84C; background: #FAF7F0; border-radius: 0 6px 6px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.6rem; }
         .see-also-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #C9A84C; white-space: nowrap; }
         .see-also a { font-size: 0.82rem; color: #5A4A2A; text-decoration: none; font-weight: 500; transition: color 0.15s; }
         .see-also a:hover { color: #C9A84C; }
@@ -622,7 +621,7 @@ function RichLieuPage({ lieu }: { lieu: LieuSaint }) {
         {/* Mobile TOC */}
         <div className="lieu-mobile-toc">
           <details className="lieu-mobile-details" style={{ borderBottom: '1px solid #E8E2D0', paddingBottom: '0.75rem' }}>
-            <summary>Table des matières — {lieu.sections.length + 1} sections</summary>
+            <summary><List size={18} color="#C9A84C" strokeWidth={1.75} style={{ flexShrink: 0 }} />Table des matières — {lieu.sections.length + 1} sections</summary>
             <nav style={{ paddingBottom: '0.5rem' }}>
               {lieu.sections.map(s => <a key={s.id} href={`#${s.id}`} style={{ display: 'block', padding: '0.3rem 0.5rem', fontSize: '0.82rem', color: '#7A6D5A', textDecoration: 'none' }}>{s.title}</a>)}
               <a href="#faq" style={{ display: 'block', padding: '0.3rem 0.5rem', fontSize: '0.82rem', color: '#7A6D5A', textDecoration: 'none' }}>Foire aux questions</a>

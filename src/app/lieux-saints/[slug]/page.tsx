@@ -553,11 +553,23 @@ function RichLieuPage({ lieu }: { lieu: LieuSaint }) {
         }
         .lieu-toc-link { display: block; padding: 0.35rem 0.75rem; border-radius: 6px; font-size: 0.78rem; color: #7A6D5A; text-decoration: none; font-weight: 500; font-family: var(--font-manrope, sans-serif); transition: color 0.15s, background 0.15s; }
         .lieu-toc-link:hover { color: #1A1209; background: #F0EBE0; }
-        .lieu-section-h2 { font-family: var(--font-cormorant, serif); font-size: clamp(1.3rem, 2.5vw, 1.7rem); font-weight: 600; color: #1A1209; margin: 2rem 0 0.75rem; padding-top: 0.5rem; scroll-margin-top: 140px; border-top: 1px solid #E8E2D0; }
+        .lieu-section-h2 { font-family: var(--font-cormorant, serif); font-size: clamp(1.3rem, 2.5vw, 1.7rem); font-weight: 600; color: #1A1209; margin: 2rem 0 0.75rem; padding-top: 0.5rem; scroll-margin-top: 140px; border-top: 1px solid #E8E2D0; text-wrap: pretty; }
+        @supports not (text-wrap: pretty) { .lieu-section-h2 { text-wrap: balance; } }
         .lieu-section-h2:first-child { border-top: none; margin-top: 0; padding-top: 0; }
-        details.lieu-mobile-details summary { cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #1A1209; padding: 0.75rem 0; list-style: none; display: flex; align-items: center; gap: 0.5rem; }
+        details.lieu-mobile-details summary { cursor: pointer; font-size: 0.85rem; font-weight: 600; color: #1A1209; padding: 0.75rem 0; list-style: none; display: flex; align-items: center; gap: 0.5rem; text-wrap: pretty; }
         details.lieu-mobile-details summary::before { content: '§'; font-family: var(--font-cormorant, serif); color: #C9A84C; font-size: 1.1rem; }
         details.lieu-mobile-details nav a { display: block; padding: 0.4rem 0.5rem; font-size: 0.82rem; color: #7A6D5A; text-decoration: none; }
+        .faq-item { border-bottom: 1px solid #E8E2D0; margin-bottom: 0.25rem; }
+        .faq-item summary { padding: 0.875rem 0; cursor: pointer; font-size: 0.9rem; font-weight: 600; color: #1A1209; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 1rem; text-wrap: pretty; }
+        .faq-item summary::-webkit-details-marker { display: none; }
+        .faq-item summary::after { content: '+'; color: #C9A84C; font-size: 1.1rem; font-weight: 400; line-height: 1; flex-shrink: 0; transition: transform 0.2s ease; }
+        .faq-item[open] summary::after { transform: rotate(45deg); }
+        .faq-item p { padding: 0 0 0.875rem; color: #555; line-height: 1.75; font-size: 0.875rem; margin: 0; }
+        .see-also { margin-top: 1rem; margin-bottom: 0; padding: 0.6rem 0.9rem; border-left: 2px solid #C9A84C; background: #FAF7F0; border-radius: 0 6px 6px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.6rem; }
+        .see-also-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #C9A84C; white-space: nowrap; }
+        .see-also a { font-size: 0.82rem; color: #5A4A2A; text-decoration: none; font-weight: 500; transition: color 0.15s; }
+        .see-also a:hover { color: #C9A84C; }
+        .see-also-sep { color: #C9A84C; font-size: 0.7rem; }
       `}</style>
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
@@ -586,7 +598,7 @@ function RichLieuPage({ lieu }: { lieu: LieuSaint }) {
           </div>
 
           {/* H1 */}
-          <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 400, color: 'white', lineHeight: 1.15, marginBottom: '1.25rem', margin: '0 0 1.25rem' }}>
+          <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 400, color: 'white', lineHeight: 1.15, marginBottom: '1.25rem', margin: '0 0 1.25rem', textWrap: 'pretty' } as React.CSSProperties}>
             {lieu.title}
           </h1>
 
@@ -652,13 +664,15 @@ function RichLieuPage({ lieu }: { lieu: LieuSaint }) {
                 {section.content.map((block, bi) => renderBlock(block, bi))}
 
                 {section.seeAlso && section.seeAlso.length > 0 && (
-                  <p style={{ fontSize: '0.8rem', color: '#888', marginTop: '0.5rem', marginBottom: 0 }}>
+                  <div className="see-also">
+                    <span className="see-also-label">Voir aussi</span>
                     {section.seeAlso.map((link, li) => (
-                      <span key={link.href}>{li > 0 ? ' · ' : 'Voir aussi : '}
-                        <Link href={link.href} style={{ color: '#C9A84C' }}>{link.label} →</Link>
+                      <span key={link.href} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                        {li > 0 && <span className="see-also-sep">·</span>}
+                        <Link href={link.href}>{link.label} →</Link>
                       </span>
                     ))}
-                  </p>
+                  </div>
                 )}
               </section>
             ))}
@@ -667,13 +681,9 @@ function RichLieuPage({ lieu }: { lieu: LieuSaint }) {
             <section id="faq">
               <h2 className="lieu-section-h2">Foire aux questions</h2>
               {lieu.faq.map((item, i) => (
-                <details key={i} style={{ borderBottom: '1px solid #E8E2D0', marginBottom: '0.25rem' }}>
-                  <summary style={{ padding: '0.875rem 0', cursor: 'pointer', fontSize: '0.9rem', fontWeight: 600, color: '#1A1209', listStyle: 'none' }}>
-                    {item.question}
-                  </summary>
-                  <p style={{ padding: '0 0 0.875rem', color: '#555', lineHeight: 1.75, fontSize: '0.875rem', margin: 0 }}>
-                    {item.answer}
-                  </p>
+                <details key={i} className="faq-item">
+                  <summary>{item.question}</summary>
+                  <p>{item.answer}</p>
                 </details>
               ))}
             </section>

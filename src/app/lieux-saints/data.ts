@@ -32,7 +32,7 @@ export const lieuxSaints: Record<string, LieuSaint> = {
     title: 'Masjid Al-Haram et la Kaaba',
     location: 'La Mecque, Hijaz',
     locationKicker: 'LIEU SAINT · LA MECQUE',
-    excerpt: "Le premier sanctuaire monothéiste de l'humanité — au cœur duquel la Kaaba est la Qibla vers laquelle se tournent 1,8 milliard de musulmans cinq fois par jour.",
+    excerpt: "Le premier sanctuaire monothéiste de l'humanité, au cœur duquel la Kaaba est la Qibla vers laquelle se tournent 1,8 milliard de musulmans cinq fois par jour.",
     readingTime: 10,
     publishedAt: '2026-05-11T09:00:00+03:00',
     modifiedAt: '2026-05-11T09:00:00+03:00',
@@ -43,7 +43,7 @@ export const lieuxSaints: Record<string, LieuSaint> = {
         content: [
           {
             type: 'paragraph',
-            content: "La Kaaba — du mot arabe «cube» — est le sanctuaire le plus sacré de l'Islam. Selon la tradition islamique, Allah ordonna à Ibrahim ﷺ et à son fils Ismaël ﷺ d'élever les fondations de cette Maison sur l'emplacement où Adam avait initialement bâti un premier lieu d'adoration.",
+            content: "La Kaaba (du mot arabe «cube») est le sanctuaire le plus sacré de l'Islam. Selon la tradition islamique, Allah ordonna à Ibrahim ﷺ et à son fils Ismaël ﷺ d'élever les fondations de cette Maison sur l'emplacement où Adam avait initialement bâti un premier lieu d'adoration.",
           },
           {
             type: 'callout',
@@ -79,11 +79,11 @@ export const lieuxSaints: Record<string, LieuSaint> = {
           },
           {
             type: 'paragraph',
-            content: "La Kiswa est le voile noir en soie, brodé de versets coraniques en fil d'or et d'argent, qui recouvre entièrement la Kaaba. Elle est renouvelée chaque année le 9 Dhul Hijja. Des artisans de la Manufacture de la Kiswa à La Mecque travaillent toute l'année à sa confection — un travail de près de 200 artisans spécialisés.",
+            content: "La Kiswa est le voile noir en soie, brodé de versets coraniques en fil d'or et d'argent, qui recouvre entièrement la Kaaba. Elle est renouvelée chaque année le 9 Dhul Hijja. Des artisans de la Manufacture de la Kiswa à La Mecque travaillent toute l'année à sa confection, un travail de près de 200 artisans spécialisés.",
           },
           {
             type: 'paragraph',
-            content: "La Hajar al-Aswad (Pierre noire), encastrée dans l'angle sud-est de la Kaaba, est l'élément le plus symbolique. D'après les textes islamiques, elle descend du Paradis et était d'une blancheur immaculée avant d'être ternie par les péchés des hommes. Les pèlerins tentent de la toucher ou de l'embrasser au début de chaque tour du Tawaf — si la foule ne le permet pas, un simple signe de la main suffit.",
+            content: "La Hajar al-Aswad (Pierre noire), encastrée dans l'angle sud-est de la Kaaba, est l'élément le plus symbolique. D'après les textes islamiques, elle descend du Paradis et était d'une blancheur immaculée avant d'être ternie par les péchés des hommes. Les pèlerins tentent de la toucher ou de l'embrasser au début de chaque tour du Tawaf ; si la foule ne le permet pas, un simple signe de la main suffit.",
           },
           {
             type: 'paragraph',
@@ -102,11 +102,11 @@ export const lieuxSaints: Record<string, LieuSaint> = {
           },
           {
             type: 'paragraph',
-            content: "La Kaaba est la Qibla de plus de 1,8 milliard de musulmans — la direction vers laquelle se tournent les croyants pour chacune de leurs cinq prières quotidiennes. En ce sens, elle est littéralement le centre spirituel de la Oumma islamique, un point d'unité unique au monde, indépendant de toute nationalité ou culture.",
+            content: "La Kaaba est la Qibla de plus de 1,8 milliard de musulmans, soit la direction vers laquelle se tournent les croyants pour chacune de leurs cinq prières quotidiennes. En ce sens, elle est littéralement le centre spirituel de la Oumma islamique, un point d'unité unique au monde, indépendant de toute nationalité ou culture.",
           },
           {
             type: 'paragraph',
-            content: "En effectuant le Tawaf, le pèlerin rejoint un mouvement de dévotion millénaire. Aux heures de pointe, jusqu'à 100 000 personnes circumambulent simultanément autour de la Kaaba. Cette image — des millions de croyants en vêtements blancs, tournant dans le même sens, invoquant le même Dieu — est l'une des plus puissantes de l'Islam. Une prière accomplie au Masjid Al-Haram vaut 100 000 prières dans toute autre mosquée.",
+            content: "En effectuant le Tawaf, le pèlerin rejoint un mouvement de dévotion millénaire. Aux heures de pointe, jusqu'à 100 000 personnes circumambulent simultanément autour de la Kaaba. Cette image, des millions de croyants en vêtements blancs tournant dans le même sens et invoquant le même Dieu, est l'une des plus puissantes de l'Islam. Une prière accomplie au Masjid Al-Haram vaut 100 000 prières dans toute autre mosquée.",
           },
         ],
       },
@@ -123,12 +123,12 @@ export const lieuxSaints: Record<string, LieuSaint> = {
             items: [
               {
                 icon: 'rotate-cw',
-                title: 'Le Tawaf — 7 circumambulations',
+                title: 'Le Tawaf : 7 circumambulations',
                 description: "Sept tours dans le sens anti-horaire, en commençant par la Hajar al-Aswad. Chaque passage marque un renouvellement de l'intention et une proximité avec Allah. Le premier tour peut être effectué à un rythme rapide (raml) pour les hommes.",
               },
               {
                 icon: 'droplets',
-                title: "Eau de Zamzam — l'eau bénie",
+                title: "Eau de Zamzam : l'eau bénie",
                 description: "Le puits de Zamzam, situé à quelques mètres de la Kaaba, fournit une eau disponible gratuitement dans tout le Masjid Al-Haram. Le Prophète ﷺ a dit : «L'eau de Zamzam convient à la finalité pour laquelle on la boit.»",
               },
               {
@@ -139,7 +139,7 @@ export const lieuxSaints: Record<string, LieuSaint> = {
             ],
           },
         ],
-        seeAlso: [{ href: '/blog/les-7-tours-du-tawaf', label: 'Les 7 tours du Tawaf — sens et spiritualité' }],
+        seeAlso: [{ href: '/blog/les-7-tours-du-tawaf', label: 'Les 7 tours du Tawaf : sens et spiritualité' }],
       },
       {
         id: 'conseils',
@@ -190,7 +190,7 @@ export const lieuxSaints: Record<string, LieuSaint> = {
     faq: [
       {
         question: 'Peut-on toucher la Kaaba pendant le Tawaf ?',
-        answer: "Oui, si l'on passe suffisamment près. Le Multazam — la partie de la Kaaba entre la porte et la Hajar al-Aswad — est particulièrement recommandé pour les invocations. Toucher la Kaaba n'est pas obligatoire. Si la foule l'empêche, continuez votre Tawaf normalement.",
+        answer: "Oui, si l'on passe suffisamment près. Le Multazam (la partie de la Kaaba entre la porte et la Hajar al-Aswad) est particulièrement recommandé pour les invocations. Toucher la Kaaba n'est pas obligatoire. Si la foule l'empêche, continuez votre Tawaf normalement.",
       },
       {
         question: 'Quel est le sens des 7 tours du Tawaf ?',
@@ -198,7 +198,7 @@ export const lieuxSaints: Record<string, LieuSaint> = {
       },
       {
         question: 'À quelles heures effectuer le Tawaf pour éviter la foule ?',
-        answer: "Les meilleures heures sont après Fajr (5h-7h) et après Isha (21h-23h). Évitez les après-midi en été — la chaleur y est extrême — et les vendredis mid-journée qui attirent une grande affluence locale.",
+        answer: "Les meilleures heures sont après Fajr (5h-7h) et après Isha (21h-23h). Évitez les après-midi en été (la chaleur y est extrême) et les vendredis mid-journée qui attirent une grande affluence locale.",
       },
       {
         question: 'Que faire si je perds mon groupe pendant le Tawaf ?',
@@ -229,7 +229,7 @@ export const lieuxSaints: Record<string, LieuSaint> = {
     title: "Safa et Marwa : la Sa'i, parcours de Hajar",
     location: 'La Mecque, Hijaz',
     locationKicker: 'LIEU SAINT · LA MECQUE',
-    excerpt: "Les deux collines sacrées entre lesquelles Hajar courut sept fois pour trouver de l'eau pour son fils Ismaël — commémorées par le rituel de la Sa'i, pilier de l'Omra.",
+    excerpt: "Les deux collines sacrées entre lesquelles Hajar courut sept fois pour trouver de l'eau pour son fils Ismaël, commémorées par le rituel de la Sa'i, pilier de l'Omra.",
     readingTime: 9,
     publishedAt: '2026-05-11T10:00:00+03:00',
     sections: [
@@ -241,7 +241,7 @@ export const lieuxSaints: Record<string, LieuSaint> = {
           { type: 'paragraph', content: "Il y a plus de quatre mille ans, Ibrahim ﷺ déposa son épouse Hajar et leur nourrisson Ismaël dans la vallée aride de La Mecque, sur l'ordre d'Allah. Sans végétation ni eau, les provisions s'épuisèrent rapidement. Hajar, voyant son fils mourir de soif, se précipita vers la colline de Safa pour chercher une caravane ou un signe de secours. N'en voyant aucun, elle redescendit et courut jusqu'à Marwa. Elle répéta ce trajet sept fois, courant entre les deux points surélevés d'où elle pouvait surveiller l'enfant dans la vallée." },
           { type: 'paragraph', content: "À l'issue de ce septième passage, l'ange Jibrîl frappa la terre de son talon et la source de Zamzam jaillit. Hajar se précipita pour retenir l'eau en disant «Zommi, Zommi» (retiens-toi, retiens-toi) — c'est l'étymologie traditionnelle du nom Zamzam. Cette course désespérée d'une mère pour son enfant, empreinte de foi absolue en Allah, est commémorée par tout pèlerin accomplissant l'Omra ou le Hajj jusqu'à la fin des temps." },
         ],
-        seeAlso: [{ href: '/lieux-saints/zamzam', label: 'Le puits de Zamzam — eau bénie de l\'Islam' }],
+        seeAlso: [{ href: '/lieux-saints/zamzam', label: 'Le puits de Zamzam, eau bénie de l\'Islam' }],
       },
       {
         id: 'description',
@@ -253,7 +253,7 @@ export const lieuxSaints: Record<string, LieuSaint> = {
             { label: 'Distance totale', value: '~3,15 km' },
             { label: 'Niveaux du couloir', value: '3 niveaux' },
           ]},
-          { type: 'paragraph', content: "Safa est une petite butte de granit côté sud de la Kaaba, à environ 100 mètres du sanctuaire. Marwa est sa colline homologue, située à environ 450 mètres. Toutes deux sont aujourd'hui intégrées dans l'immense enceinte du Masjid Al-Haram. Le corridor qui les relie, appelé Mas'a, mesure environ 450 mètres de long et 20 mètres de large. Il est climatisé, couvert, et dispose de trois niveaux — permettant de distribuer les flux de pèlerins." },
+          { type: 'paragraph', content: "Safa est une petite butte de granit côté sud de la Kaaba, à environ 100 mètres du sanctuaire. Marwa est sa colline homologue, située à environ 450 mètres. Toutes deux sont aujourd'hui intégrées dans l'immense enceinte du Masjid Al-Haram. Le corridor qui les relie, appelé Mas'a, mesure environ 450 mètres de long et 20 mètres de large. Il est climatisé, couvert, et dispose de trois niveaux, permettant de distribuer les flux de pèlerins." },
           { type: 'paragraph', content: "Deux colonnes vertes fluorescentes marquent une zone intermédiaire d'environ 50 mètres appelée le «raml». Les hommes sont encouragés à hâter le pas dans cette zone, en souvenir de Hajar qui courait pour voir son fils. Les femmes marchent à rythme normal tout au long du parcours. Des chaises roulantes motorisées et des accompagnateurs sont disponibles pour les personnes à mobilité réduite ou les personnes âgées." },
         ],
       },
@@ -261,14 +261,14 @@ export const lieuxSaints: Record<string, LieuSaint> = {
         id: 'spiritualite',
         title: 'Importance spirituelle',
         content: [
-          { type: 'paragraph', content: "La Sa'i est l'un des piliers (arkan) de l'Omra et du Hajj — ce qui signifie que son omission invalide le pèlerinage, et qu'aucune expiation ne peut la compenser. Elle est régie par la Sunna du Prophète ﷺ qui l'accomplit lors de ses pèlerinages et la prescrivit avec précision à ses Compagnons." },
-          { type: 'paragraph', content: "Sur le plan spirituel, la Sa'i est la commémoration d'une foi féminine exemplaire. Hajar ne fut pas une spectatrice passive de la volonté divine — elle agit avec tout ce qu'elle avait, dans une situation désespérée, sans jamais cesser de faire confiance à Allah. Les savants islamiques voient dans ce récit une leçon fondamentale : la tawakkul (confiance en Allah) ne dispense pas de l'effort humain, elle le précède et l'accompagne. En accomplissant la Sa'i, le pèlerin s'inscrit dans cette tradition de foi active." },
-          { type: 'paragraph', content: "Le Coran souligne que Safa et Marwa sont «des signes d'Allah» (sha'air Allah) — une notion qui va au-delà de la simple référence géographique. C'est un rappel permanent que les lieux et les événements peuvent devenir des symboles éternels d'obéissance et de miséricorde divine." },
+          { type: 'paragraph', content: "La Sa'i est l'un des piliers (arkan) de l'Omra et du Hajj, ce qui signifie que son omission invalide le pèlerinage, et qu'aucune expiation ne peut la compenser. Elle est régie par la Sunna du Prophète ﷺ qui l'accomplit lors de ses pèlerinages et la prescrivit avec précision à ses Compagnons." },
+          { type: 'paragraph', content: "Sur le plan spirituel, la Sa'i est la commémoration d'une foi féminine exemplaire. Hajar ne fut pas une spectatrice passive de la volonté divine. Elle agit avec tout ce qu'elle avait, dans une situation désespérée, sans jamais cesser de faire confiance à Allah. Les savants islamiques voient dans ce récit une leçon fondamentale : la tawakkul (confiance en Allah) ne dispense pas de l'effort humain, elle le précède et l'accompagne. En accomplissant la Sa'i, le pèlerin s'inscrit dans cette tradition de foi active." },
+          { type: 'paragraph', content: "Le Coran souligne que Safa et Marwa sont «des signes d'Allah» (sha'air Allah), une notion qui va au-delà de la simple référence géographique. C'est un rappel permanent que les lieux et les événements peuvent devenir des symboles éternels d'obéissance et de miséricorde divine." },
         ],
       },
       {
         id: 'rituel',
-        title: "Le Sa'i — le rituel en détail",
+        title: "Le Sa'i : le rituel en détail",
         content: [
           { type: 'paragraph', content: "La Sa'i débute à Safa et se termine à Marwa. Chaque trajet (aller ou retour) compte pour un. Le septième trajet se termine donc à Marwa. Avant de commencer à Safa, il est Sunna de monter sur la butte, de se tourner vers la Kaaba, et de réciter : «Nabdaou bi-mabada'a Allahu bihi» (Nous commençons par ce par quoi Allah a commencé), puis de lever les mains pour l'invocation et de réciter le verset 2:158." },
           { type: 'paragraph', content: "Les hommes hâtent le pas entre les deux colonnes vertes lors de chaque passage dans la zone de raml. En dehors de cette zone, tous marchent à un rythme normal. Il n'existe pas de du'a imposée pour la Sa'i — le pèlerin est libre d'invoquer Allah dans sa langue ou avec les du'a qu'il connaît. Il est Sunna de lever les mains en direction de la Kaaba en montant sur Safa et sur Marwa à chaque passage." },
@@ -290,12 +290,12 @@ export const lieuxSaints: Record<string, LieuSaint> = {
         title: 'Erreurs à éviter',
         content: [
           { type: 'list', items: [
-            "Commencer à Marwa au lieu de Safa — le Sa'i doit impérativement commencer à Safa et se terminer à Marwa.",
-            "Compter un aller-retour comme un seul trajet — chaque trajet (Safa→Marwa ou Marwa→Safa) est un tour distinct, soit 7 trajets au total.",
-            "Oublier de hâter le pas entre les colonnes vertes pour les hommes — ce raml est Sunna mu'akkada (fortement recommandé).",
-            "Ne pas monter sur Safa ou Marwa pour l'invocation — il faut monter sur chaque colline à chaque passage.",
-            "Faire la Sa'i sans avoir fait le Tawaf — la Sa'i doit être précédée d'un Tawaf valide.",
-            "Croire que les ablutions sont obligatoires — elles sont recommandées mais non requises pour valider la Sa'i.",
+            "Commencer à Marwa au lieu de Safa : le Sa'i doit impérativement commencer à Safa et se terminer à Marwa.",
+            "Compter un aller-retour comme un seul trajet : chaque trajet (Safa→Marwa ou Marwa→Safa) est un tour distinct, soit 7 trajets au total.",
+            "Oublier de hâter le pas entre les colonnes vertes pour les hommes : ce raml est Sunna mu'akkada (fortement recommandé).",
+            "Ne pas monter sur Safa ou Marwa pour l'invocation : il faut monter sur chaque colline à chaque passage.",
+            "Faire la Sa'i sans avoir fait le Tawaf : la Sa'i doit être précédée d'un Tawaf valide.",
+            "Croire que les ablutions sont obligatoires : elles sont recommandées mais non requises pour valider la Sa'i.",
           ]},
         ],
       },
@@ -318,7 +318,7 @@ export const lieuxSaints: Record<string, LieuSaint> = {
     title: "Le puits de Zamzam : eau bénie de l'Islam",
     location: 'La Mecque, Hijaz',
     locationKicker: 'LIEU SAINT · LA MECQUE',
-    excerpt: "Source miraculeuse jaillie sous le pied d'Ismaël, abreuvant sans interruption les pèlerins depuis plus de quatre mille ans — l'eau la plus sacrée de l'Islam.",
+    excerpt: "Source miraculeuse jaillie sous le pied d'Ismaël, abreuvant sans interruption les pèlerins depuis plus de quatre mille ans : l'eau la plus sacrée de l'Islam.",
     readingTime: 8,
     publishedAt: '2026-05-11T10:30:00+03:00',
     sections: [
@@ -326,12 +326,12 @@ export const lieuxSaints: Record<string, LieuSaint> = {
         id: 'origine',
         title: 'Origine miraculeuse',
         content: [
-          { type: 'callout', text: "L'eau de Zamzam est pour ce pour quoi elle est bue.", reference: "Hadith rapporté par Ibn Mâjah (n° 3062) — validé par de nombreux savants" },
+          { type: 'callout', text: "L'eau de Zamzam est pour ce pour quoi elle est bue.", reference: "Hadith rapporté par Ibn Mâjah (n° 3062), validé par de nombreux savants" },
           { type: 'paragraph', content: "L'histoire de Zamzam est indissociable du récit de Hajar et Ismaël. Abandonnés dans la vallée aride de La Mecque sur l'ordre d'Allah, mère et fils épuisèrent rapidement leurs provisions. Hajar courut sept fois entre Safa et Marwa à la recherche d'eau. Au terme de cette course empreinte de foi, l'ange Jibrîl frappa la terre de son talon — et l'eau jaillit." },
           { type: 'paragraph', content: "Le Prophète Muhammad ﷺ rapporte le récit complet dans un long hadith (Bukhari n° 3364) : Hajar s'écria «Zammi, zammi» (retiens-toi, retiens-toi) pour contenir le flot. Certains linguistes relient ce nom au terme araméen «zam» signifiant «abondant» ou «retenu». Depuis ce jour il y a plus de quatre mille ans, la source n'a jamais tari — malgré des millions de pèlerins qui y puisent chaque année." },
         ],
         seeAlso: [
-          { href: '/lieux-saints/safa-marwa', label: "Safa et Marwa — la Sa'i, parcours de Hajar" },
+          { href: '/lieux-saints/safa-marwa', label: "Safa et Marwa : la Sa'i, parcours de Hajar" },
           { href: '/lieux-saints/masjid-al-haram', label: 'Masjid Al-Haram et la Kaaba' },
         ],
       },
@@ -365,16 +365,16 @@ export const lieuxSaints: Record<string, LieuSaint> = {
           { type: 'rituals', items: [
             { icon: 'target', title: 'Faire face à la Qibla', description: "Tournez-vous vers la Kaaba (Qibla) avant de boire. C'est la Sunna établie du Prophète ﷺ, qui se tournait vers la direction de la Kaaba pour boire l'eau de Zamzam." },
             { icon: 'droplets', title: 'Boire en 3 gorgées', description: "Récitez «Bismillah» avant chaque gorgée. Buvez en trois fois, en reprenant votre souffle entre chaque. Cette manière de boire est la Sunna du Prophète ﷺ pour l'eau de Zamzam spécifiquement." },
-            { icon: 'heart', title: "Faire une du'a intentionnelle", description: "Avant de boire, formulez mentalement une intention précise — guérison, succès, connaissance, hafidh du Coran, satisfaction d'un besoin. Le hadith garantit que Zamzam répond à l'intention de celui qui boit." },
+            { icon: 'heart', title: "Faire une du'a intentionnelle", description: "Avant de boire, formulez mentalement une intention précise : guérison, succès, connaissance, hafidh du Coran, satisfaction d'un besoin. Le hadith garantit que Zamzam répond à l'intention de celui qui boit." },
           ]},
-          { type: 'expert-tip', title: 'Conseil expert SAFARUMA', text: "Ne pas «rationner» l'eau de Zamzam est un conseil souvent donné par les guides expérimentés. Allah l'a fait jaillir en abondance — buvez-en autant que vous le souhaitez. Versez-en également sur votre tête et votre visage comme le faisait le Prophète ﷺ. Prévoyez un jerrican de 5L à ramener en soute (généralement autorisé par les compagnies aériennes avec validation préalable)." },
+          { type: 'expert-tip', title: 'Conseil expert SAFARUMA', text: "Ne pas «rationner» l'eau de Zamzam est un conseil souvent donné par les guides expérimentés. Allah l'a fait jaillir en abondance, buvez-en autant que vous le souhaitez. Versez-en également sur votre tête et votre visage comme le faisait le Prophète ﷺ. Prévoyez un jerrican de 5L à ramener en soute (généralement autorisé par les compagnies aériennes avec validation préalable)." },
         ],
       },
       {
         id: 'conseils',
         title: 'Conseils pratiques',
         content: [
-          { type: 'paragraph', content: "L'eau est disponible partout dans le Haram — ne vous inquiétez pas de manquer. Les fontaines réfrigérées (eau fraîche et eau à température ambiante selon les robinets) sont placées tous les 30-40 mètres. Pour le Tawaf et la Sa'i, buvez avant de commencer et utilisez les fontaines aux pauses." },
+          { type: 'paragraph', content: "L'eau est disponible partout dans le Haram. Ne vous inquiétez pas de manquer. Les fontaines réfrigérées (eau fraîche et eau à température ambiante selon les robinets) sont placées tous les 30-40 mètres. Pour le Tawaf et la Sa'i, buvez avant de commencer et utilisez les fontaines aux pauses." },
           { type: 'paragraph', content: "Pour en ramener en France : les autorités saoudiennes ont imposé en 2023 une réglementation sur l'exportation non officielle. L'eau de Zamzam en soute est autorisée dans des contenants scellés non dépassant 5 litres par personne. En cabine, les contenants liquides sont soumis à la règle habituelle des 100ml. Méfiez-vous des vendeurs en dehors du Haram qui proposent de la «vraie Zamzam» — seule l'eau directement disponible dans l'enceinte du Masjid Al-Haram est authentique." },
         ],
       },
@@ -383,11 +383,11 @@ export const lieuxSaints: Record<string, LieuSaint> = {
         title: 'Erreurs à éviter',
         content: [
           { type: 'list', items: [
-            "Acheter de l'eau de Zamzam hors du Masjid Al-Haram — seule l'eau disponible directement dans l'enceinte du Haram est authentique.",
-            "Croire qu'il faut «rationner» l'eau — l'eau est gratuite et abondante, buvez-en à satiété.",
-            "Boire sans faire d'intention (niyyah) — c'est une opportunité spirituelle unique, ne la gâchez pas.",
-            "Jeter ou gaspiller l'eau de Zamzam — c'est un acte irrespectueux vis-à-vis d'une eau bénie.",
-            "Croire que l'eau de Zamzam peut remplacer un traitement médical — elle est un complément spirituel, consultez un médecin pour tout problème de santé.",
+            "Acheter de l'eau de Zamzam hors du Masjid Al-Haram : seule l'eau disponible directement dans l'enceinte du Haram est authentique.",
+            "Croire qu'il faut «rationner» l'eau : l'eau est gratuite et abondante, buvez-en à satiété.",
+            "Boire sans faire d'intention (niyyah) : c'est une opportunité spirituelle unique, ne la gâchez pas.",
+            "Jeter ou gaspiller l'eau de Zamzam : c'est un acte irrespectueux vis-à-vis d'une eau bénie.",
+            "Croire que l'eau de Zamzam peut remplacer un traitement médical : elle est un complément spirituel, consultez un médecin pour tout problème de santé.",
           ]},
         ],
       },
@@ -397,7 +397,7 @@ export const lieuxSaints: Record<string, LieuSaint> = {
       { question: "Peut-on ramener de l'eau de Zamzam dans l'avion ?", answer: "En soute : oui, dans des contenants scellés de 5 litres maximum par personne (vérifiez les conditions de votre compagnie). En cabine : soumis à la règle habituelle des 100ml. Les compagnies saoudiennes autorisent généralement 5L supplémentaires." },
       { question: "L'eau de Zamzam a-t-elle des vertus curatives prouvées ?", answer: "Sur le plan islamique, les hadiths authentiques attestent de ses vertus selon l'intention du buveur. Sur le plan scientifique, sa composition minérale particulière est documentée. Elle n'est pas un substitut à un traitement médical, mais un complément spirituel pour de nombreux croyants." },
       { question: "Peut-on boire de l'eau de Zamzam réchauffée ou bouillie ?", answer: "Oui. Certains savants mentionnent qu'il est préférable de la boire à température ambiante ou fraîche, mais aucune interdiction n'existe sur la boire chaude. Des pèlerins la boivent parfois en infusion avec du miel." },
-      { question: "Faut-il absolument se tourner vers la Qibla pour boire ?", answer: "C'est la Sunna du Prophète ﷺ — fortement recommandée. Si l'orientation est difficile à determiner dans la foule, l'intention sincère suffit." },
+      { question: "Faut-il absolument se tourner vers la Qibla pour boire ?", answer: "C'est la Sunna du Prophète ﷺ, fortement recommandée. Si l'orientation est difficile à determiner dans la foule, l'intention sincère suffit." },
       { question: "Le puits est-il encore accessible directement ?", answer: "L'accès direct au puits est réservé aux hommes via un espace sous-terrain accessible depuis le Haram. Pour les femmes et les pèlerins en général, les fontaines distribuées dans tout le Haram permettent d'accéder à la même eau." },
       { question: "Peut-on prendre l'eau de Zamzam avant de faire l'Omra ?", answer: "Oui. L'eau de Zamzam peut être bue à tout moment lors de votre séjour à La Mecque, avant, pendant ou après les rituels. Il n'existe pas de restriction temporelle." },
     ],
@@ -419,10 +419,10 @@ export const lieuxSaints: Record<string, LieuSaint> = {
         content: [
           { type: 'callout', text: "Lorsqu'il [Ismaël] fut en âge de l'accompagner, il [Ibrahim] dit : «Ô mon fils, je me vois en songe en train de t'immoler. Que penses-tu ?» Il répondit : «Ô mon père, fais ce qui t'est ordonné. Tu me trouveras, si Allah le veut, du nombre des patients.»", reference: 'Sourate As-Saffat, verset 102' },
           { type: 'paragraph', content: "La vallée de Mina est indissociable du récit du grand sacrifice. Selon la tradition islamique, c'est dans cette vallée qu'Ibrahim ﷺ reçut le commandement divin d'immoler son fils Ismaël ﷺ — un test suprême de soumission absolue à Allah. Le Coran narre cet événement dans la Sourate As-Saffat (37:100-112) : quand Ibrahim et Ismaël se soumirent et qu'Ibrahim s'apprêtait à exécuter l'ordre, Allah intervint et lui dit d'arrêter, révélant qu'il avait réussi l'épreuve, et lui envoya un bélier du Paradis en remplacement." },
-          { type: 'paragraph', content: "Lors de ce même événement, Satan tenta trois fois d'interrompre Ibrahim dans son chemin vers le sacrifice. Ibrahim le repoussa chaque fois en lui lançant des pierres — un geste symbolique que chaque pèlerin du Hajj commémore en lapidant les trois Jamarat (piliers) de Mina. C'est également l'origine théologique de l'Aïd al-Adha, fête du sacrifice célébrée par les musulmans du monde entier chaque 10 Dhul Hijjah." },
+          { type: 'paragraph', content: "Lors de ce même événement, Satan tenta trois fois d'interrompre Ibrahim dans son chemin vers le sacrifice. Ibrahim le repoussa chaque fois en lui lançant des pierres, un geste symbolique que chaque pèlerin du Hajj commémore en lapidant les trois Jamarat (piliers) de Mina. C'est également l'origine théologique de l'Aïd al-Adha, fête du sacrifice célébrée par les musulmans du monde entier chaque 10 Dhul Hijjah." },
         ],
         seeAlso: [
-          { href: '/lieux-saints/arafat', label: 'Mont Arafat — le pilier du Hajj' },
+          { href: '/lieux-saints/arafat', label: 'Mont Arafat : le pilier du Hajj' },
           { href: '/blog/difference-omra-hajj', label: 'Différence entre Omra et Hajj' },
         ],
       },
@@ -436,7 +436,7 @@ export const lieuxSaints: Record<string, LieuSaint> = {
             { label: 'Capacité', value: '2,5 millions' },
             { label: 'Jamarat', value: '3 piliers' },
           ]},
-          { type: 'paragraph', content: "Mina est une vallée étroite encaissée entre des montagnes granitiques, à 5 km à l'est de La Mecque. La plupart de l'année, elle est déserte — quelques gardiens, des tentes pliées, un silence presque irréel. Pendant le Hajj, elle se transforme en la plus grande ville de tentes au monde : 160 000 tentes blanches climatisées, installées à demeure depuis 1997, couvrent la totalité de la plaine disponible." },
+          { type: 'paragraph', content: "Mina est une vallée étroite encaissée entre des montagnes granitiques, à 5 km à l'est de La Mecque. La plupart de l'année, elle est déserte, avec quelques gardiens, des tentes pliées, un silence presque irréel. Pendant le Hajj, elle se transforme en la plus grande ville de tentes au monde : 160 000 tentes blanches climatisées, installées à demeure depuis 1997, couvrent la totalité de la plaine disponible." },
           { type: 'paragraph', content: "Les trois Jamarat sont les piliers les plus importants de Mina. Ils représentent les endroits où Satan tenta Ibrahim. Depuis la tragédie de 2006 (bousculade qui fit 346 victimes), l'Arabie Saoudite a reconstruit entièrement le complexe : c'est aujourd'hui un pont piéton de 950 mètres de long sur 5 niveaux, permettant à des centaines de milliers de pèlerins de lapider en simultané de façon sûre et fluide." },
         ],
       },
@@ -459,14 +459,14 @@ export const lieuxSaints: Record<string, LieuSaint> = {
           ]},
           { type: 'expert-tip', title: 'Conseil expert SAFARUMA', text: "La lapidation des Jamarat est le moment le plus physiquement intense du Hajj. Votre guide SAFARUMA vous accompagnera aux heures les moins fréquentées (généralement après Maghrib ou très tôt le matin) et vous positionnera sur le niveau du pont le plus fluide. Préparez vos cailloux la veille à Muzdalifah et comptez-les par groupes de 7. Ne prenez que des pierres de la taille d'un pois chiche." },
         ],
-        seeAlso: [{ href: '/lieux-saints/muzdalifah', label: 'Muzdalifah — la halte sacrée du Hajj' }],
+        seeAlso: [{ href: '/lieux-saints/muzdalifah', label: 'Muzdalifah : la halte sacrée du Hajj' }],
       },
       {
         id: 'conseils',
         title: 'Conseils pratiques',
         content: [
           { type: 'paragraph', content: "Pour les pèlerins du Hajj, prenez le temps d'explorer vos environs immédiats dans le camp de tentes dès l'arrivée. Repérez les sorties, les points d'eau, les sanitaires et les tentes médicales. Notez le numéro de votre tente — toutes se ressemblent et il est facile de se perdre. Votre guide SAFARUMA vous donnera des points de repère spécifiques." },
-          { type: 'paragraph', content: "La chaleur à Mina peut être intense même avec la climatisation des tentes — portez des vêtements légers, hydratez-vous constamment. Les appareils mobiles sont souvent saturés pendant le Hajj — mettez votre guide en favori et convenez d'un plan de contingence si les communications sont coupées." },
+          { type: 'paragraph', content: "La chaleur à Mina peut être intense même avec la climatisation des tentes, portez des vêtements légers, hydratez-vous constamment. Les appareils mobiles sont souvent saturés pendant le Hajj — mettez votre guide en favori et convenez d'un plan de contingence si les communications sont coupées." },
           { type: 'paragraph', content: "Pour les visiteurs hors saison Hajj : Mina est accessible et constitue un lieu de méditation paisible. La vallée vide des tentes blanches repliées offre une vision saisissante de ce que sera ce site à l'échelle humaine lors du Hajj. Votre guide SAFARUMA vous en racontera l'histoire et les enjeux logistiques." },
         ],
       },
@@ -476,11 +476,11 @@ export const lieuxSaints: Record<string, LieuSaint> = {
         content: [
           { type: 'list', items: [
             "Quitter Mina avant les nuits obligatoires sans autorisation islamique (pour personnes valides).",
-            "Lapider avant le lever du soleil le 11 Dhul Hijjah — interdit, sauf pour les personnes faibles ou âgées.",
+            "Lapider avant le lever du soleil le 11 Dhul Hijjah : interdit, sauf pour les personnes faibles ou âgées.",
             "Utiliser des pierres trop grandes, des chaussures ou des objets non conformes.",
             "Ne pas respecter l'ordre des trois Jamarat lors des jours de Tachrik (Sughra → Wusta → Aqaba).",
-            "Croire que Mina fait partie des rites de l'Omra — Mina est exclusivement réservé aux rites du Hajj.",
-            "Se laisser emporter par la foule sans plan de sécurité — convenez toujours d'un point de rendez-vous précis avec votre groupe.",
+            "Croire que Mina fait partie des rites de l'Omra : Mina est exclusivement réservé aux rites du Hajj.",
+            "Se laisser emporter par la foule sans plan de sécurité : convenez toujours d'un point de rendez-vous précis avec votre groupe.",
           ]},
         ],
       },
@@ -488,11 +488,11 @@ export const lieuxSaints: Record<string, LieuSaint> = {
     faq: [
       { question: "Mina est-il inclus dans les rites de l'Omra ?", answer: "Non. Mina et les Jamarat sont des rites spécifiques au Hajj, accomplis les 10, 11, 12 et éventuellement 13 Dhul Hijjah. Un pèlerin venant pour l'Omra n'accomplit pas les rites de Mina." },
       { question: "Combien de nuits doit-on passer à Mina ?", answer: "Obligatoirement les nuits du 10 au 11 et du 11 au 12 Dhul Hijjah. La nuit du 12 au 13 (restant pour Nafr al-Ta'khir) est optionnelle selon les écoles juridiques. Partir après la nuit du 12 (Nafr al-Awwal) est permis par la majorité des savants." },
-      { question: "Peut-on partir de Mina après la nuit du 12 (Nafr al-Awwal) ?", answer: "Oui. La majorité des savants autorise le Nafr al-Awwal — quitter Mina après la lapidation du 12 Dhul Hijjah avant le coucher du soleil. Ceux qui souhaitent la récompense maximale restent la nuit du 12 et lapident le 13." },
+      { question: "Peut-on partir de Mina après la nuit du 12 (Nafr al-Awwal) ?", answer: "Oui. La majorité des savants autorise le Nafr al-Awwal, à savoir quitter Mina après la lapidation du 12 Dhul Hijjah avant le coucher du soleil. Ceux qui souhaitent la récompense maximale restent la nuit du 12 et lapident le 13." },
       { question: "Quelle est la taille des cailloux pour la lapidation ?", answer: "Environ la taille d'un pois chiche (7-8 mm). Ni trop petits (inefficaces), ni trop grands. Prenez 70 cailloux propres à Muzdalifah (7 × 10 jours de tachrik). Évitez les cailloux souillés." },
       { question: "Que faire si on ne peut pas effectuer la lapidation soi-même ?", answer: "Une personne faible, âgée ou malade peut déléguer la lapidation à quelqu'un de valide. Le délégué lance d'abord pour lui-même, puis pour la personne concernée, en formulant l'intention de chaque lancé." },
       { question: "Y a-t-il des commerces et restaurants à Mina ?", answer: "Pendant le Hajj, des points de restauration sont organisés dans les camps. Hors Hajj, la vallée est quasi-déserte avec très peu de commerces. Apportez vos provisions pour les nuits de Tachrik." },
-      { question: "Peut-on visiter Mina hors de la saison du Hajj ?", answer: "Oui. Mina est librement accessible hors saison — un site de recueillement paisible où l'histoire du sacrifice d'Ibrahim prend toute sa dimension dans le silence de la vallée vide. Un guide expert amplifie considérablement la valeur spirituelle de cette visite." },
+      { question: "Peut-on visiter Mina hors de la saison du Hajj ?", answer: "Oui. Mina est librement accessible hors saison : un site de recueillement paisible où l'histoire du sacrifice d'Ibrahim prend toute sa dimension dans le silence de la vallée vide. Un guide expert amplifie considérablement la valeur spirituelle de cette visite." },
     ],
   },
 
@@ -502,7 +502,7 @@ export const lieuxSaints: Record<string, LieuSaint> = {
     title: 'Mont Arafat : le pilier du Hajj',
     location: 'À 20 km de La Mecque, Hijaz',
     locationKicker: 'LIEU SAINT · LA MECQUE',
-    excerpt: "Le Wuquf à Arafat est le pilier central du Hajj — sans cette station, le pèlerinage est invalide. C'est ici que le Prophète ﷺ prononça son discours d'adieu en 632.",
+    excerpt: "Le Wuquf à Arafat est le pilier central du Hajj. Sans cette station, le pèlerinage est invalide. C'est ici que le Prophète ﷺ prononça son discours d'adieu en 632.",
     readingTime: 9,
     publishedAt: '2026-05-11T11:30:00+03:00',
     sections: [
@@ -510,12 +510,12 @@ export const lieuxSaints: Record<string, LieuSaint> = {
         id: 'origine',
         title: 'Origine et signification du nom',
         content: [
-          { type: 'callout', text: "Le Hajj, c'est Arafat.", reference: "Hadith authentique — Abu Dawud (n° 1949), Tirmidhi (n° 889), Ibn Mâjah (n° 3015)" },
-          { type: 'paragraph', content: "Le nom «Arafat» est riche d'étymologies possibles. La racine arabe «arafa» signifie «connaître» ou «reconnaître» — une allusion au fait que c'est en ce lieu qu'Adam et Ève se seraient retrouvés après leur descente du Paradis, se reconnaissant mutuellement après leur séparation. Une autre interprétation associe le nom à la transmission de la connaissance : c'est en ce lieu qu'Ibrahim ﷺ apprit à Ismaël les rites du pèlerinage, et que le Prophète ﷺ transmit son ultime message à l'humanité." },
+          { type: 'callout', text: "Le Hajj, c'est Arafat.", reference: "Hadith authentique : Abu Dawud (n° 1949), Tirmidhi (n° 889), Ibn Mâjah (n° 3015)" },
+          { type: 'paragraph', content: "Le nom «Arafat» est riche d'étymologies possibles. La racine arabe «arafa» signifie «connaître» ou «reconnaître», une allusion au fait que c'est en ce lieu qu'Adam et Ève se seraient retrouvés après leur descente du Paradis, se reconnaissant mutuellement après leur séparation. Une autre interprétation associe le nom à la transmission de la connaissance : c'est en ce lieu qu'Ibrahim ﷺ apprit à Ismaël les rites du pèlerinage, et que le Prophète ﷺ transmit son ultime message à l'humanité." },
           { type: 'paragraph', content: "Arafat est mentionné implicitement dans le Coran à travers le Wuquf (Al-Baqara 2:198 : «Quand vous déferlz d'Arafat, souvenez-vous d'Allah»). Le Prophète ﷺ y accomplit son unique Hajj en l'an 10 de l'Hégire (632 de l'ère chrétienne), y prononçant le discours qui synthétisa toute l'éthique islamique — l'égalité des êtres humains, l'inviolabilité de la vie et du bien d'autrui, la fin du paganisme et des pratiques injustes." },
         ],
         seeAlso: [
-          { href: '/lieux-saints/mina', label: 'Mina — la vallée du sacrifice et du Hajj' },
+          { href: '/lieux-saints/mina', label: 'Mina : la vallée du sacrifice et du Hajj' },
           { href: '/blog/difference-omra-hajj', label: 'Différence entre Omra et Hajj' },
         ],
       },
@@ -544,7 +544,7 @@ export const lieuxSaints: Record<string, LieuSaint> = {
       },
       {
         id: 'rituel',
-        title: 'Le Wuquf — la station debout',
+        title: 'Le Wuquf : la station debout',
         content: [
           { type: 'rituals', items: [
             { icon: 'sun', title: 'Timing du Wuquf (9 Dhul Hijjah)', description: "La station commence valablement dès le lever du soleil le 9 Dhul Hijjah. Elle s'étend jusqu'au coucher du soleil. Quitter Arafat avant le Maghrib est permis, mais la majorité des savants recommande d'attendre le coucher du soleil pour la récompense maximale." },
@@ -553,7 +553,7 @@ export const lieuxSaints: Record<string, LieuSaint> = {
           ]},
           { type: 'expert-tip', title: 'Conseil expert SAFARUMA', text: "Préparez une liste écrite de vos invocations et de celles de vos proches avant de partir pour Arafat. La foule et l'émotion peuvent perturber la concentration. Votre guide SAFARUMA vous donnera une liste de du'a recommandées par le Prophète ﷺ spécifiquement pour le jour d'Arafat. Protégez-vous du soleil intensément — la chaleur à Arafat peut dépasser 45°C en été." },
         ],
-        seeAlso: [{ href: '/lieux-saints/muzdalifah', label: 'Muzdalifah — la halte sacrée du Hajj' }],
+        seeAlso: [{ href: '/lieux-saints/muzdalifah', label: 'Muzdalifah : la halte sacrée du Hajj' }],
       },
       {
         id: 'conseils',
@@ -561,7 +561,7 @@ export const lieuxSaints: Record<string, LieuSaint> = {
         content: [
           { type: 'paragraph', content: "Arrivez à Arafat tôt dans la matinée, idéalement après la prière de Fajr. Cela vous permet de trouver un bon emplacement, de vous installer, et d'accomplir la prière de Dhuhr/Asr à la mosquée ou dans votre espace. L'emplacement dans la plaine n'a pas d'importance pour la validité du Wuquf — n'importe quel point d'Arafat convient." },
           { type: 'paragraph', content: "Hydratation : c'est ici plus que partout ailleurs que la déshydratation peut être dangereuse. Emportez au moins 2 litres d'eau par personne, et des pastilles de réhydratation orale si vous êtes sujet aux coups de chaleur. Portez un chapeau ou utilisez un parasol. Le soleil d'Arafat est impitoyable en été." },
-          { type: 'paragraph', content: "Pour les pèlerins souhaitant visiter hors Hajj : Arafat est accessible toute l'année. La plaine vide, le mont surplombant le désert, le silence — c'est une expérience de méditation profonde. Un guide SAFARUMA vous narrera le Khutbah al-Wada' sur place, point par point, depuis l'endroit exact où le Prophète ﷺ se tenait." },
+          { type: 'paragraph', content: "Pour les pèlerins souhaitant visiter hors Hajj : Arafat est accessible toute l'année. La plaine vide, le mont surplombant le désert, le silence : c'est une expérience de méditation profonde. Un guide SAFARUMA vous narrera le Khutbah al-Wada' sur place, point par point, depuis l'endroit exact où le Prophète ﷺ se tenait." },
         ],
       },
       {
@@ -569,11 +569,11 @@ export const lieuxSaints: Record<string, LieuSaint> = {
         title: 'Erreurs à éviter',
         content: [
           { type: 'list', items: [
-            "Croire qu'il faut absolument monter sur le Jabal ar-Rahmah — n'importe quel point de la plaine suffit pour la validité du Wuquf.",
-            "Quitter la plaine d'Arafat avant le coucher du soleil sans raison valable — cela peut compromettre la validité du Hajj.",
-            "Confondre «Mont Arafat» et «plaine d'Arafat» — seul le séjour dans la plaine est obligatoire.",
-            "Croire qu'Arafat est un rite de l'Omra — c'est exclusivement un rite du Hajj.",
-            "Négliger les du'a pour passer le temps à photographier — c'est un moment spirituel irremplaçable, pas une visite touristique.",
+            "Croire qu'il faut absolument monter sur le Jabal ar-Rahmah : n'importe quel point de la plaine suffit pour la validité du Wuquf.",
+            "Quitter la plaine d'Arafat avant le coucher du soleil sans raison valable : cela peut compromettre la validité du Hajj.",
+            "Confondre «Mont Arafat» et «plaine d'Arafat» : seul le séjour dans la plaine est obligatoire.",
+            "Croire qu'Arafat est un rite de l'Omra : c'est exclusivement un rite du Hajj.",
+            "Négliger les du'a pour passer le temps à photographier : c'est un moment spirituel irremplaçable, pas une visite touristique.",
           ]},
         ],
       },
@@ -581,11 +581,11 @@ export const lieuxSaints: Record<string, LieuSaint> = {
     faq: [
       { question: "Quelle est la différence entre «Mont Arafat» et la «plaine d'Arafat» ?", answer: "Le Mont Arafat (Jabal ar-Rahmah) est le monticule rocheux de 70 mètres surmonté d'une colonne blanche. La plaine d'Arafat est l'ensemble de la zone délimitée, y compris la plaine environnante. Pour le Wuquf, il suffit d'être n'importe où dans la plaine — monter sur le mont est une Sunna mais non obligatoire." },
       { question: "Faut-il absolument monter sur le Jabal ar-Rahmah ?", answer: "Non. Monter sur le mont est une Sunna (le Prophète ﷺ l'a fait) mais pas une obligation. Le Wuquf dans n'importe quel point de la plaine délimitée d'Arafat est valide." },
-      { question: "Que se passe-t-il si on quitte Arafat avant le coucher du soleil ?", answer: "Quitter avant le Maghrib est permis selon certains savants mais est fortement déconseillé — vous perdrez la récompense maximale. Si vous êtes parti avant le coucher et n'y êtes pas retourné, votre Hajj reste valide selon la majorité, mais vous devez expier (dam)." },
+      { question: "Que se passe-t-il si on quitte Arafat avant le coucher du soleil ?", answer: "Quitter avant le Maghrib est permis selon certains savants mais est fortement déconseillé, car vous perdrez la récompense maximale. Si vous êtes parti avant le coucher et n'y êtes pas retourné, votre Hajj reste valide selon la majorité, mais vous devez expier (dam)." },
       { question: "L'Omra inclut-elle une station à Arafat ?", answer: "Non. L'Omra comprend l'Ihram, le Tawaf, la Sa'i et le rasage/coupe des cheveux. Arafat est un rite spécifique au Hajj (le 9 Dhul Hijjah)." },
       { question: "Peut-on visiter Arafat hors de la saison du Hajj ?", answer: "Oui, la plaine est accessible toute l'année. C'est un lieu de méditation et de mémoire historique paisible hors saison. Votre guide SAFARUMA peut vous y emmener lors d'une journée d'excursion depuis La Mecque." },
       { question: "Qu'est-ce que la Khutbah al-Wada' ?", answer: "Le «Discours d'adieu» du Prophète ﷺ, prononcé à Arafat le 9 Dhul Hijjah de l'an 10H (632). Il résume l'éthique islamique : égalité des hommes indépendamment de leur race, inviolabilité du sang et des biens, droits de la femme, abolition de l'usure. Considéré comme l'une des premières déclarations universelles des droits de l'homme." },
-      { question: "Peut-on rester à Arafat la nuit du 9 au 10 Dhul Hijjah ?", answer: "Non. Rester à Arafat après Maghrib le 9 Dhul Hijjah n'est pas requis — au contraire, les pèlerins quittent Arafat à Maghrib pour se rendre à Muzdalifah où ils passent la nuit." },
+      { question: "Peut-on rester à Arafat la nuit du 9 au 10 Dhul Hijjah ?", answer: "Non. Rester à Arafat après Maghrib le 9 Dhul Hijjah n'est pas requis. Les pèlerins quittent Arafat à Maghrib pour se rendre à Muzdalifah où ils passent la nuit." },
     ],
   },
 
@@ -608,8 +608,8 @@ export const lieuxSaints: Record<string, LieuSaint> = {
           { type: 'paragraph', content: "La tradition islamique associe Muzdalifah à Ibrahim ﷺ qui s'y arrêta lors de son pèlerinage original. Le Prophète Muhammad ﷺ y séjourna lors de son Hajj d'adieu et enseigna à ses Compagnons les rites spécifiques à ce lieu : la prière combinée, la collecte des cailloux et le départ vers Mina après la prière de Fajr." },
         ],
         seeAlso: [
-          { href: '/lieux-saints/arafat', label: 'Mont Arafat — le pilier du Hajj' },
-          { href: '/lieux-saints/mina', label: 'Mina — la vallée du sacrifice et du Hajj' },
+          { href: '/lieux-saints/arafat', label: 'Mont Arafat : le pilier du Hajj' },
+          { href: '/lieux-saints/mina', label: 'Mina : la vallée du sacrifice et du Hajj' },
         ],
       },
       {
@@ -624,20 +624,20 @@ export const lieuxSaints: Record<string, LieuSaint> = {
         id: 'spiritualite',
         title: 'Importance spirituelle',
         content: [
-          { type: 'paragraph', content: "La nuit de Muzdalifah est souvent comparée par les savants à une préfiguration du Jour du Jugement. Des millions d'êtres humains — de toutes nations, de toutes conditions sociales, vêtus du même tissu blanc — allongés à même la terre sous les étoiles, attendant l'aube. La frontière entre le riche et le pauvre, le roi et le mendiant, s'efface complètement. C'est l'une des manifestations les plus saisissantes de l'égalité islamique." },
+          { type: 'paragraph', content: "La nuit de Muzdalifah est souvent comparée par les savants à une préfiguration du Jour du Jugement. Des millions d'êtres humains, de toutes nations, de toutes conditions sociales, vêtus du même tissu blanc, allongés à même la terre sous les étoiles, attendant l'aube. La frontière entre le riche et le pauvre, le roi et le mendiant, s'efface complètement. C'est l'une des manifestations les plus saisissantes de l'égalité islamique." },
           { type: 'paragraph', content: "Le dhikr et les invocations à Muzdalifah sont particulièrement recommandés. Le Prophète ﷺ y resta debout en invocations de l'arrivée jusqu'à l'aurore, en récitant la Talbiyah, le Tahlil et en faisant du Salat. Les savants recommandent de profiter de cette nuit rare — même si le sommeil est nécessaire — pour accomplir des prières surérogatoires, réciter le Coran et faire des du'a pour ses proches." },
         ],
       },
       {
         id: 'rituel',
-        title: 'La nuit de Muzdalifah — le rituel',
+        title: 'La nuit de Muzdalifah : le rituel',
         content: [
           { type: 'rituals', items: [
             { icon: 'moon', title: 'Prière Maghrib + Isha combinées', description: "En arrivant à Muzdalifah après le coucher du soleil, le pèlerin combine et raccourcit les prières de Maghrib et Isha (3+2 rak'ahs, prières Isha raccourcie et différée jusqu'à Muzdalifah). Pas de Sunnah entre les deux. C'est la Sunna du Prophète ﷺ à Muzdalifah." },
             { icon: 'target', title: 'Collecte des cailloux', description: "Collecter 49 ou 70 petits cailloux (taille d'un pois chiche, 7-8 mm) dans la plaine de Muzdalifah. 49 cailloux pour ceux qui font le Nafr al-Awwal (3 jours de lapidation), 70 pour ceux qui restent les 4 jours complets. Évitez les cailloux souillés ou trop grands." },
-            { icon: 'sun', title: 'Fajr et départ vers Mina', description: "Prière de Fajr à Muzdalifah — à ne pas manquer. Après Fajr, dhikr et invocations jusqu'à l'éclaircissement de l'aurore (ishraq), puis départ vers Mina pour la lapidation de Jamrat al-Aqaba. Les personnes âgées ou faibles peuvent partir après minuit." },
+            { icon: 'sun', title: 'Fajr et départ vers Mina', description: "Prière de Fajr à Muzdalifah, à ne pas manquer. Après Fajr, dhikr et invocations jusqu'à l'éclaircissement de l'aurore (ishraq), puis départ vers Mina pour la lapidation de Jamrat al-Aqaba. Les personnes âgées ou faibles peuvent partir après minuit." },
           ]},
-          { type: 'expert-tip', title: 'Conseil expert SAFARUMA', text: "Emportez une couverture légère et une bouteille d'eau — les nuits à Muzdalifah peuvent être fraîches même en été (altitude et air du désert). Mettez vos 49 ou 70 cailloux directement dans une petite pochette ou un sac zippé que vous accrocherez à votre ceinture. Votre guide SAFARUMA les aura comptés et disposés par groupes de 7 avant d'arriver à Muzdalifah." },
+          { type: 'expert-tip', title: 'Conseil expert SAFARUMA', text: "Emportez une couverture légère et une bouteille d'eau, car les nuits à Muzdalifah peuvent être fraîches même en été (altitude et air du désert). Mettez vos 49 ou 70 cailloux directement dans une petite pochette ou un sac zippé que vous accrocherez à votre ceinture. Votre guide SAFARUMA les aura comptés et disposés par groupes de 7 avant d'arriver à Muzdalifah." },
         ],
         seeAlso: [{ href: '/blog/difference-omra-hajj', label: 'Différence entre Omra et Hajj' }],
       },
@@ -646,7 +646,7 @@ export const lieuxSaints: Record<string, LieuSaint> = {
         title: 'Conseils pratiques',
         content: [
           { type: 'paragraph', content: "Préparez un sac ultra-léger pour Muzdalifah : documents d'identité, médicaments essentiels, eau, couverture légère et chaussures fermées. Évitez les gros bagages — vous marchez et vous dormez à même le sol. Chaussures fermées indispensables car le sol de Muzdalifah est recouvert de gravier et de cailloux." },
-          { type: 'paragraph', content: "Le réseau téléphonique est généralement saturé à Muzdalifah pendant le Hajj — prévenez votre famille de l'absence de communication prévue. Convenez d'un point de rendez-vous précis avec votre guide en cas de séparation. Note sur la prière : certains pèlerins oublient de prier Isha séparément — à Muzdalifah, elle est combinée et raccourcie avec Maghrib, sans attendre l'heure habituelle d'Isha." },
+          { type: 'paragraph', content: "Le réseau téléphonique est généralement saturé à Muzdalifah pendant le Hajj, prévenez votre famille de l'absence de communication prévue. Convenez d'un point de rendez-vous précis avec votre guide en cas de séparation. Note sur la prière : certains pèlerins oublient de prier Isha séparément — à Muzdalifah, elle est combinée et raccourcie avec Maghrib, sans attendre l'heure habituelle d'Isha." },
           { type: 'paragraph', content: "Pour les pèlerins faibles, âgés ou malades : il est permis de quitter Muzdalifah après minuit pour éviter la foule de l'après-Fajr. Cette dispense est authentifiée par le Hadith — le Prophète ﷺ l'accordait aux femmes, aux enfants et aux personnes faibles de sa famille lors du Hajj d'adieu." },
         ],
       },
@@ -655,22 +655,22 @@ export const lieuxSaints: Record<string, LieuSaint> = {
         title: 'Erreurs à éviter',
         content: [
           { type: 'list', items: [
-            "Collecter les cailloux à Mina ou ailleurs — les cailloux doivent être pris à Muzdalifah ou dans tout endroit d'Arafat/Muzdalifah.",
-            "Partir de Muzdalifah avant minuit sans dispense valide — les personnes valides doivent rester jusqu'après Fajr.",
-            "Prendre des cailloux trop gros — la taille maximale recommandée est celle d'un pois chiche.",
-            "Oublier de prier Fajr à Muzdalifah — c'est une prière obligatoire et elle a une valeur particulière en ce lieu.",
-            "Croire qu'il faut monter sur le Mash'ar al-Haram — n'importe quel endroit de la plaine de Muzdalifah est valide pour le séjour.",
+            "Collecter les cailloux à Mina ou ailleurs : les cailloux doivent être pris à Muzdalifah ou dans tout endroit d'Arafat/Muzdalifah.",
+            "Partir de Muzdalifah avant minuit sans dispense valide : les personnes valides doivent rester jusqu'après Fajr.",
+            "Prendre des cailloux trop gros : la taille maximale recommandée est celle d'un pois chiche.",
+            "Oublier de prier Fajr à Muzdalifah : c'est une prière obligatoire et elle a une valeur particulière en ce lieu.",
+            "Croire qu'il faut monter sur le Mash'ar al-Haram : n'importe quel endroit de la plaine de Muzdalifah est valide pour le séjour.",
           ]},
         ],
       },
     ],
     faq: [
-      { question: "Doit-on dormir à Muzdalifah ou peut-on rester debout ?", answer: "Le séjour à Muzdalifah (wuquf ou hayth) est la Sunna — le Prophète ﷺ y dormit. Il suffit d'être présent une partie de la nuit. Si vous dormez, c'est Sunna. Si vous priez et faites du dhikr toute la nuit, c'est encore mieux selon les savants." },
+      { question: "Doit-on dormir à Muzdalifah ou peut-on rester debout ?", answer: "Le séjour à Muzdalifah (wuquf ou hayth) est la Sunna : le Prophète ﷺ y dormit. Il suffit d'être présent une partie de la nuit. Si vous dormez, c'est Sunna. Si vous priez et faites du dhikr toute la nuit, c'est encore mieux selon les savants." },
       { question: "Combien de cailloux faut-il collecter exactement ?", answer: "49 cailloux si vous faites le Nafr al-Awwal (lapidation sur 3 jours), 70 si vous restez pour 4 jours de lapidation. Beaucoup prennent 70 par précaution. Vérifiez avec votre guide selon votre programme." },
       { question: "Peut-on prendre les cailloux à Mina plutôt qu'à Muzdalifah ?", answer: "Oui, selon la majorité des savants, les cailloux peuvent être pris n'importe où dans les environs — y compris à Mina. Mais la Sunna est de les collecter à Muzdalifah. Prendre les cailloux déjà lancés (utilisés) n'est pas recommandé." },
       { question: "Qu'est-ce que le Nafr al-Awwal (départ anticipé) ?", answer: "C'est la permission de quitter Mina après la lapidation du 12 Dhul Hijjah avant le coucher du soleil, plutôt que d'attendre le 13. Le Coran le permet explicitement (2:203). Cela réduit les rites de Tachrik à 2 jours complets au lieu de 3." },
-      { question: "Les personnes âgées et faibles doivent-elles passer la nuit à Muzdalifah ?", answer: "La dispense de partir après minuit est authentifiée par Hadith — le Prophète ﷺ l'accordait aux femmes, aux enfants et aux personnes faibles. Les médecins considèrent également que les personnes avec des conditions médicales peuvent partir tôt sur avis médical." },
-      { question: "Que faire s'il n'y a pas de tente à Muzdalifah ?", answer: "Il n'y a pas de tentes permanentes à Muzdalifah — c'est voulu. Les pèlerins dorment à la belle étoile ou sous des bâches légères. Prévoyez une couverture légère, un imperméable fin (rosée possible) et votre provision d'eau." },
+      { question: "Les personnes âgées et faibles doivent-elles passer la nuit à Muzdalifah ?", answer: "La dispense de partir après minuit est authentifiée par Hadith : le Prophète ﷺ l'accordait aux femmes, aux enfants et aux personnes faibles. Les médecins considèrent également que les personnes avec des conditions médicales peuvent partir tôt sur avis médical." },
+      { question: "Que faire s'il n'y a pas de tente à Muzdalifah ?", answer: "Il n'y a pas de tentes permanentes à Muzdalifah, c'est voulu. Les pèlerins dorment à la belle étoile ou sous des bâches légères. Prévoyez une couverture légère, un imperméable fin (rosée possible) et votre provision d'eau." },
       { question: "Comment combiner les prières Maghrib et Isha à Muzdalifah ?", answer: "On prie d'abord le Maghrib (3 rak'ahs) puis immédiatement l'Isha raccourcie (2 rak'ahs) avec un seul adhan et deux iqama, sans prière sunna entre les deux. Cette combinaison avec différé (Jam' Ta'khir) est la Sunna du Prophète ﷺ à Muzdalifah." },
     ],
   },

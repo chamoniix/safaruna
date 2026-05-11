@@ -14,6 +14,7 @@ const NAV_LINKS: { href: string; label: string }[] = [
   { href: '/guide-omra', label: 'Guide Omra étape par étape' },
   { href: '/certification', label: 'Certification' },
   { href: '/blog', label: 'Blog' },
+  { href: '/lieux-saints', label: 'Lieux saints' },
   { href: '/faq', label: 'FAQ' },
   { href: '/a-propos', label: 'À propos' },
 ];

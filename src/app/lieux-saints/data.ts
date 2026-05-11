@@ -1403,4 +1403,721 @@ export const lieuxSaints: Record<string, LieuSaint> = {
       { question: "Hunayn est-il mentionné dans le Coran ?", answer: "Oui, c'est l'un des rares batailles citées explicitement dans le Coran par son nom. Les versets 25 et 26 de la Sourate At-Tawba (le Repentir) évoquent directement la bataille, sa leçon d'humilité et l'intervention divine." },
     ],
   },
+
+  'masjid-al-miqat': {
+    slug: 'masjid-al-miqat',
+    title: "Masjid al-Miqat : le point d'entrée en ihram pour la Omra",
+    location: "Dhul-Hulayfah, à 9 km de Médine",
+    locationKicker: 'LIEU SAINT · MÉDINE',
+    excerpt: "Aussi appelée Abyar Ali, c'est la mosquée du miqat pour tous les pèlerins venant de Médine vers La Mecque, le plus grand et le plus éloigné des cinq miqats islamiques.",
+    readingTime: 7,
+    publishedAt: '2026-05-11T12:00:00+03:00',
+    sections: [
+      {
+        id: 'origine',
+        title: 'Origine et importance historique',
+        content: [
+          {
+            type: 'paragraph',
+            content: "Masjid al-Miqat, également connue sous le nom d'Abyar Ali (les puits d'Ali), est située à Dhul-Hulayfah, à environ neuf kilomètres au sud-ouest de Médine sur la route menant à La Mecque. C'est en ce lieu que le Prophète Muhammad ﷺ a fixé le miqat des habitants et des visiteurs de Médine pour les pèlerinages.",
+          },
+          {
+            type: 'callout',
+            text: "Le Prophète ﷺ a fixé Dhul-Hulayfah comme miqat pour les habitants de Médine, Al-Juhfa pour les habitants de Syrie, Qarn al-Manazil pour les habitants de Najd, et Yalamlam pour les habitants du Yémen.",
+            reference: 'Sahih al-Bukhari, n° 1526, et Sahih Muslim, n° 1181, rapporté par Ibn Abbas (ra)',
+          },
+          {
+            type: 'paragraph',
+            content: "Le Prophète ﷺ lui-même entra en ihram depuis Dhul-Hulayfah lors de son Hajj d'adieu en l'an 10 de l'Hégire (632). C'est le miqat le plus éloigné de La Mecque parmi les cinq miqats, à environ 420 kilomètres, ce qui laisse au pèlerin un long chemin de recueillement dans l'état sacré avant d'arriver au Masjid Al-Haram.",
+          },
+          {
+            type: 'paragraph',
+            content: "Le nom «Abyar Ali» (les puits d'Ali) est d'origine populaire et fait référence à un puits associé à Ali ibn Abi Talib (ra) dans les traditions locales. Ce nom est couramment utilisé par les populations locales et les chauffeurs de bus, mais le nom islamiquement correct est Masjid Dhul-Hulayfah ou Masjid al-Miqat.",
+          },
+        ],
+      },
+      {
+        id: 'architecture',
+        title: 'Description architecturale',
+        content: [
+          {
+            type: 'stats',
+            items: [
+              { label: 'Capacité', value: '5 000' },
+              { label: 'Distance Médine', value: '9 km' },
+              { label: 'Distance La Mecque', value: '~420 km' },
+              { label: 'Reconstruction', value: '1985' },
+            ],
+          },
+          {
+            type: 'paragraph',
+            content: "La mosquée actuelle est une structure moderne dotée de vastes espaces pour accueillir les flux de pèlerins venant de Médine. Elle dispose de salles d'ablutions séparées pour les hommes et les femmes, de vestiaires permettant de revêtir les vêtements d'ihram, ainsi que d'un grand parking pouvant accueillir de nombreux bus de pèlerins.",
+          },
+          {
+            type: 'paragraph',
+            content: "Plusieurs fontaines d'eau potable sont disponibles dans l'enceinte. La mosquée fonctionne en continu et est particulièrement animée lors des saisons de Hajj et d'Omra, où des milliers de pèlerins y transitent chaque heure. L'organisation saoudienne y maintient un personnel permanent pour orienter et assister les pèlerins.",
+          },
+        ],
+      },
+      {
+        id: 'liturgique',
+        title: 'Importance liturgique',
+        content: [
+          {
+            type: 'paragraph',
+            content: "Masjid al-Miqat est obligatoirement le point de passage pour tout pèlerin qui se trouve à Médine ou qui emprunte la route de Médine pour rejoindre La Mecque. Franchir le miqat sans être en état d'ihram est une faute liturgique grave (elle nécessite une compensation : un dam, c'est-à-dire un sacrifice expiatoire) selon le consensus des quatre madhabs.",
+          },
+          {
+            type: 'paragraph',
+            content: "Les cinq miqats sont chacun désignés selon la direction géographique d'où vient le pèlerin. Pour un pèlerin volant directement vers Djeddah ou prenant un avion survolant le miqat, l'ihram doit être pris avant l'embarquement ou dès que l'avion atteint la hauteur correspondant au miqat géographique survolé.",
+          },
+          {
+            type: 'callout',
+            text: "Accomplissez le Hajj et la Omra en l'honneur d'Allah.",
+            reference: 'Sourate Al-Baqara, verset 196, fondement coranique de l\'obligation de respecter les miqats dans leur intégralité',
+          },
+        ],
+        seeAlso: [{ href: '/lieux-saints/masjid-aisha', label: "Masjid Aïcha : le miqat des Mecquois pour la Omra" }],
+      },
+      {
+        id: 'rituels',
+        title: "Rituels du miqat",
+        content: [
+          {
+            type: 'paragraph',
+            content: "La séquence des actes à accomplir à Masjid al-Miqat est précisément définie par la Sunnah. Chaque étape prépare le pèlerin à entrer dans l'état sacré de l'ihram.",
+          },
+          {
+            type: 'rituals',
+            items: [
+              {
+                icon: 'droplets',
+                title: 'Ghusl et ablutions',
+                description: "Effectuer la grande purification (ghusl) est une Sunnah fortement recommandée. Elle peut être faite dans votre hôtel à Médine avant de partir. Sur place, des salles de bains complètes sont disponibles. Les ablutions mineures (wudu) sont au minimum nécessaires.",
+              },
+              {
+                icon: 'sun',
+                title: "Port de l'ihram",
+                description: "Les hommes revêtent deux pièces de tissu blanc non cousu : le rida (haut) et l'izar (bas), avec des sandales ouvertes. Les femmes portent une tenue pudique couvrant tout le corps sauf le visage et les mains. Aucun parfum ne doit être appliqué après l'ihram.",
+              },
+              {
+                icon: 'target',
+                title: 'Niyyah et Talbiyah',
+                description: "L'intention (niyyah) pour la Omra ou le Hajj est formulée en silence ou à voix basse. Puis la Talbiyah est prononcée à voix haute : «Labbayk Allahumma labbayk, labbayk la sharika laka labbayk, innal hamda wan-ni'mata laka wal-mulk, la sharika lak.» Elle est répétée jusqu'au début du Tawaf.",
+              },
+            ],
+          },
+        ],
+        seeAlso: [{ href: '/blog/comment-preparer-omra-10-etapes', label: 'Comment préparer son Omra en 10 étapes' }],
+      },
+      {
+        id: 'conseils',
+        title: 'Conseils pratiques',
+        content: [
+          {
+            type: 'paragraph',
+            content: "Pour optimiser votre passage au miqat, effectuez le ghusl dans votre chambre d'hôtel à Médine avant de partir. Revêtez votre ihram ou préparez-le dans votre bagage à main. Arrivez à la mosquée en état de pureté pour ne plus avoir qu'à formuler l'intention et prononcer la Talbiyah avant de reprendre le bus ou le taxi.",
+          },
+          {
+            type: 'paragraph',
+            content: "En saison de pointe, les salles d'ablutions et de change peuvent être saturées pendant une à deux heures. Préférez les matinées (entre 6h et 10h) ou les soirées (après 21h) pour trouver des conditions plus calmes. Les après-midis sont généralement les plus chargés.",
+          },
+          {
+            type: 'expert-tip',
+            title: 'Conseil expert SAFARUMA',
+            text: "Préparez votre ihram dans votre bagage à main avec un savon non parfumé, une serviette et votre eau de Zamzam. À Masjid al-Miqat, l'organisation est efficace mais l'affluence peut être importante. Plus vous arrivez préparé depuis Médine, plus le passage au miqat devient un moment de recueillement plutôt qu'une logistique stressante. Votre guide SAFARUMA coordonne le timing pour éviter les heures d'affluence maximale.",
+          },
+        ],
+      },
+      {
+        id: 'erreurs',
+        title: 'Erreurs à éviter',
+        content: [
+          {
+            type: 'list',
+            items: [
+              "Franchir le miqat en bus ou en voiture sans être en état d'ihram : c'est une faute grave nécessitant un dam (sacrifice expiatoire) selon tous les madhabs.",
+              "Appliquer du parfum après avoir revêtu l'ihram : le parfum est strictement interdit en état d'ihram. Appliquez-le avant, si souhaité.",
+              "Croire que le ghusl est obligatoire : il est fortement recommandé (Sunnah muakkadah) mais les ablutions mineures suffisent si le ghusl est impossible.",
+              "Oublier de formuler l'intention (niyyah) avant de franchir le miqat : sans intention explicite, l'ihram n'est pas validement entré.",
+              "Oublier d'apporter son ihram dans le bus : il est trop tard une fois le miqat franchi sans être en état sacré.",
+              "Confondre les règles hommes et femmes : les femmes ne portent pas le deux-pièces blanc et gardent le visage et les mains découverts.",
+            ],
+          },
+        ],
+      },
+    ],
+    faq: [
+      { question: "Pourquoi appelle-t-on cette mosquée Abyar Ali ?", answer: "Ce nom populaire signifie «les puits d'Ali» et fait référence à des puits associés à Ali ibn Abi Talib (ra) dans les traditions locales. Le nom islamiquement correct est Masjid Dhul-Hulayfah ou Masjid al-Miqat. Les deux noms désignent le même lieu." },
+      { question: "Faut-il obligatoirement faire le ghusl avant l'ihram ?", answer: "Non, le ghusl est une Sunnah fortement recommandée mais pas une obligation. Les ablutions mineures (wudu) sont suffisantes pour la validité de l'ihram. En cas d'impossibilité, l'ihram reste valide sans ghusl ni wudu selon certains savants, mais la pureté rituelle est fortement conseillée." },
+      { question: "Que se passe-t-il si on franchit le miqat sans ihram ?", answer: "C'est une faute grave (contraventions aux règles du Hajj ou de la Omra). La règle générale est qu'il faut retourner au miqat pour y entrer en ihram. Si ce retour est impossible, un dam (sacrifice d'un animal à La Mecque) est requis comme expiation, selon le consensus des savants islamiques." },
+      { question: "Combien de temps prévoir pour le rituel d'ihram ?", answer: "Comptez 30 à 45 minutes pour le ghusl, le changement et la prière. Si les salles d'ablutions sont bondées, prévoyez jusqu'à 1h30. En arrivant préparé depuis Médine (ghusl fait à l'hôtel), vous pouvez réduire le temps sur place à 15 à 20 minutes." },
+      { question: "Les femmes ont-elles un endroit séparé ?", answer: "Oui, Masjid al-Miqat dispose d'espaces entièrement séparés pour les femmes : salles d'ablutions, vestiaires et salle de prière. Le personnel féminin assiste les pèlerines." },
+      { question: "Quels vêtements ne sont pas autorisés en ihram ?", answer: "Pour les hommes : tout vêtement cousu, les chaussettes, les sous-vêtements et les chaussures couvrant le talon. Pour les femmes : le niqab et les gants (selon la majorité des savants). Pour les deux : tout vêtement parfumé. En revanche, les femmes peuvent porter leur tenue habituelle modeste couvrant tout le corps sauf le visage et les mains." },
+      { question: "Peut-on revenir à Médine après l'ihram ?", answer: "Oui, mais en restant en état d'ihram. Si vous revenez à Médine après avoir passé le miqat en ihram, vous devez maintenir toutes les restrictions de l'ihram (pas de parfum, pas de relations conjugales, pas de couture, etc.) jusqu'au début du Tawaf à La Mecque." },
+      { question: "Comment se rend-on à Masjid al-Miqat ?", answer: "Des bus réguliers partent des hôtels proches de Masjid an-Nabawi vers Masjid al-Miqat. Des taxis collectifs (hiace) fonctionnent également. Votre agence ou guide organise généralement le transport. Le trajet depuis le centre de Médine dure environ 15 à 20 minutes." },
+    ],
+  },
+
+  'masjid-al-jumua': {
+    slug: 'masjid-al-jumua',
+    title: "Masjid al-Jumua : la première prière du vendredi",
+    location: 'Quartier Banu Salim, sud-ouest de Médine',
+    locationKicker: 'LIEU SAINT · MÉDINE',
+    excerpt: "Mosquée où le Prophète Muhammad ﷺ accomplit la toute première Salat al-Jumua (prière du vendredi) de l'histoire de l'Islam, lors de son Hégire vers Médine en l'an 1 H.",
+    readingTime: 6,
+    publishedAt: '2026-05-11T12:15:00+03:00',
+    sections: [
+      {
+        id: 'origine',
+        title: 'La première prière du vendredi de l\'Islam',
+        content: [
+          {
+            type: 'paragraph',
+            content: "En l'an 1 de l'Hégire (622 de l'ère chrétienne), lors du voyage du Prophète Muhammad ﷺ de La Mecque vers Médine, il fit halte dans le quartier des Banu Salim ibn Awf, un vendredi matin, après avoir séjourné quatorze jours à Quba pour y fonder la première mosquée de l'Islam.",
+          },
+          {
+            type: 'paragraph',
+            content: "C'est à cet endroit précis, dans le quartier de Banu Salim, que le Prophète ﷺ accomplit la toute première Salat al-Jumua de l'histoire islamique. Il prononça également le premier khotba (sermon du vendredi) de l'Islam. Cet événement fonda l'institution de la prière hebdomadaire du vendredi, pilier de la vie communautaire musulmane.",
+          },
+          {
+            type: 'callout',
+            text: "Ô vous qui avez cru, quand on appelle à la prière du jour du vendredi, accourez à l'invocation d'Allah et laissez tout négoce. C'est mieux pour vous, si vous saviez.",
+            reference: 'Sourate Al-Jumua, verset 9, révélée à Médine, instituant l\'obligation de la prière du vendredi',
+          },
+          {
+            type: 'paragraph',
+            content: "La mosquée actuelle fut construite ultérieurement à l'emplacement exact de cette première prière. Elle a été rénovée à plusieurs reprises par les autorités saoudiennes. Ibn Kathir et d'autres historiens de la Sîra confirment cet emplacement dans leurs ouvrages, en s'appuyant sur les récits de Ibn Ishaq et Ibn Hisham.",
+          },
+        ],
+        seeAlso: [{ href: '/lieux-saints/masjid-quba', label: 'Masjid Quba : la première mosquée de l\'Islam' }],
+      },
+      {
+        id: 'architecture',
+        title: 'Description architecturale',
+        content: [
+          {
+            type: 'stats',
+            items: [
+              { label: 'Capacité', value: '650 fidèles' },
+              { label: 'Distance Nabawi', value: '4 km' },
+              { label: 'Année événement', value: '622 H.' },
+              { label: 'Dômes', value: '4 dômes' },
+            ],
+          },
+          {
+            type: 'paragraph',
+            content: "La mosquée actuelle est une structure relativement modeste comparée aux grands sanctuaires de Médine. Sa capacité est d'environ 650 fidèles. Elle présente une architecture simple et fonctionnelle : quatre dômes blancs surmontent la salle de prière, un minaret unique domine la cour extérieure. L'intérieur est sobre, orné uniquement de calligraphies coraniques.",
+          },
+          {
+            type: 'paragraph',
+            content: "Quatre mihrabs rappellent les différentes orientations de prière utilisées au fil de l'histoire de la mosquée. La cour est ouverte et ombragée par quelques palmiers. La mosquée est entourée d'un quartier résidentiel calme, à l'écart de l'agitation des grands axes touristiques de Médine.",
+          },
+        ],
+      },
+      {
+        id: 'spiritualite',
+        title: 'Importance spirituelle',
+        content: [
+          {
+            type: 'paragraph',
+            content: "Masjid al-Jumua est le berceau d'un des rites communautaires les plus pratiqués dans l'Islam : la prière du vendredi. Cette prière, qui rassemble chaque semaine plus d'un milliard de musulmans dans le monde entier, trouve son origine dans cette petite cour de Médine où le Prophète ﷺ se retrouva un vendredi matin avec ses compagnons.",
+          },
+          {
+            type: 'paragraph',
+            content: "Accomplir la Salat al-Jumua dans cette mosquée, là où la première fut accomplie, est une expérience que de nombreux pèlerins décrivent comme particulièrement émouvante. La continuité du rite à travers quatorze siècles, depuis ce premier vendredi de 622 jusqu'à aujourd'hui, devient palpable en ce lieu discret.",
+          },
+          {
+            type: 'paragraph',
+            content: "La mosquée n'est pas un lieu de rituel prescrit dans le cadre de l'Omra ou du Hajj. La visite est une démarche spirituelle et historique volontaire. Prier la Jumua ici ne remplace pas l'obligation hebdomadaire, mais la confirme dans un contexte unique.",
+          },
+        ],
+      },
+      {
+        id: 'visite',
+        title: 'Visite et recueillement',
+        content: [
+          {
+            type: 'paragraph',
+            content: "La visite se prête à un recueillement calme dans un cadre intimiste. La coutume islamique recommande d'accomplir deux rak'ahs de prière dite «tahiyat al-masjid» (salutation de la mosquée) à l'arrivée dans tout lieu de prière. Une méditation sur le premier sermon du Prophète ﷺ et sur l'institution de la Jumua enrichit la visite.",
+          },
+          {
+            type: 'paragraph',
+            content: "Si votre séjour à Médine inclut un vendredi, assister à la Salat al-Jumua à cette mosquée est une expérience à envisager. Arrivez au moins une heure avant l'appel à la prière pour trouver une place confortable. En dehors du vendredi, la mosquée reçoit peu de visiteurs et offre un cadre de recueillement tranquille.",
+          },
+          {
+            type: 'expert-tip',
+            title: 'Conseil expert SAFARUMA',
+            text: "Si votre séjour à Médine couvre un vendredi, accomplir la Salat al-Jumua à Masjid al-Jumua est une expérience unique : c'est prier là où le Prophète ﷺ a accompli la toute première Salat al-Jumua de l'Islam. Votre guide SAFARUMA vous y conduit en avance et vous explique l'histoire du lieu avant la prière, pour que vous puissiez vivre ce moment avec toute la profondeur qu'il mérite.",
+          },
+        ],
+      },
+      {
+        id: 'conseils',
+        title: 'Conseils pratiques',
+        content: [
+          {
+            type: 'paragraph',
+            content: "La mosquée est ouverte tous les jours pour les cinq prières quotidiennes. L'affluence est faible en semaine. Le vendredi, en revanche, la mosquée peut être pleine bien avant l'appel à la prière du Jumua. Arrivez une heure à l'avance pour être bien placé. La salle des femmes est séparée.",
+          },
+          {
+            type: 'list',
+            items: [
+              "Distance depuis Masjid an-Nabawi : environ 4 km, 10 à 15 minutes en taxi",
+              "Pas de transport public direct depuis le centre de Médine",
+              "Horaires d'ouverture : pour les cinq prières quotidiennes",
+              "Tenue propre recommandée, voire parfumée le vendredi (Sunnah)",
+              "Photographies permises à l'extérieur, modération recommandée à l'intérieur",
+            ],
+          },
+        ],
+        seeAlso: [{ href: '/lieux-saints/masjid-an-nabawi', label: 'Masjid an-Nabawi : la mosquée du Prophète ﷺ' }],
+      },
+      {
+        id: 'erreurs',
+        title: 'Erreurs à éviter',
+        content: [
+          {
+            type: 'list',
+            items: [
+              "Croire que prier à Masjid al-Jumua confère une vertu supérieure à la prière du vendredi ordinaire : aucun hadith authentique n'attribue une valeur multipliée à cette mosquée spécifiquement.",
+              "Confondre Masjid al-Jumua et Masjid Quba : les deux sont sur l'itinéraire de l'Hijra mais à des étapes différentes. Quba fut la première mosquée fondée, al-Jumua le lieu de la première prière du vendredi.",
+              "Arriver le vendredi sans prévoir suffisamment de temps avant l'iqama : la salle est petite (650 personnes) et se remplit tôt.",
+              "Négliger la visite en pensant qu'elle est sans intérêt : pour tout pèlerin attaché à la Sîra, ce lieu discret est l'un des plus chargés de sens à Médine.",
+            ],
+          },
+        ],
+      },
+    ],
+    faq: [
+      { question: "Pourquoi cette mosquée s'appelle-t-elle al-Jumua ?", answer: "Parce que c'est l'endroit où le Prophète ﷺ accomplit la toute première Salat al-Jumua (prière du vendredi) de l'histoire islamique, lors de son Hégire de La Mecque à Médine en l'an 622. Le mot arabe «Jumua» signifie «vendredi» ou «rassemblement»." },
+      { question: "Le Prophète ﷺ a-t-il vraiment prié à cet endroit précis ?", answer: "Oui, selon les récits de la Sîra rapportés par Ibn Ishaq et Ibn Hisham, confirmés par des historiens comme Ibn Kathir. Le Prophète ﷺ s'arrêta dans le quartier des Banu Salim ibn Awf un vendredi matin et y accomplit la première Salat al-Jumua avant de continuer vers Médine." },
+      { question: "Combien de personnes peuvent y prier ?", answer: "Environ 650 fidèles dans la salle principale. La mosquée est petite comparée aux grands sanctuaires de Médine. Il existe également un espace extérieur pouvant accueillir quelques fidèles supplémentaires." },
+      { question: "Comment s'y rendre depuis Masjid an-Nabawi ?", answer: "En taxi, le trajet dure environ 10 à 15 minutes depuis Masjid an-Nabawi (environ 4 km). Il n'existe pas de ligne de bus directe. Votre guide peut organiser le transport ou vous indiquer où trouver un taxi au tarif local." },
+      { question: "Est-elle ouverte tous les jours ?", answer: "Oui, pour les cinq prières quotidiennes. L'affluence est faible en semaine. Le vendredi, elle reçoit plus de visiteurs souhaitant accomplir la Jumua en ce lieu historique." },
+      { question: "Y a-t-il des espaces séparés hommes/femmes ?", answer: "Oui, comme dans toutes les mosquées saoudiennes, les espaces de prière sont entièrement séparés. Les femmes disposent d'une entrée et d'une salle de prière distinctes." },
+      { question: "Cette mosquée est-elle mentionnée dans le Coran ?", answer: "Non, la mosquée n'est pas mentionnée directement. En revanche, la Sourate Al-Jumua (verset 9) institue l'obligation de la prière du vendredi, et cet endroit est le lieu où cette institution fut mise en pratique pour la première fois." },
+      { question: "Combien de temps prévoir pour la visite ?", answer: "30 à 45 minutes suffisent pour une visite calme avec prière de salutation. Si vous y assistez à la Salat al-Jumua, prévoyez 2h30 à 3h au total (arrivée en avance, prière, retour)." },
+    ],
+  },
+
+  'wadi-al-aqiq': {
+    slug: 'wadi-al-aqiq',
+    title: "Wadi al-Aqiq : la vallée bénie de Médine",
+    location: "À l'ouest de Médine",
+    locationKicker: 'LIEU SAINT · MÉDINE',
+    excerpt: "Vallée naturelle traversant l'ouest de Médine, qualifiée de «vallée bénie» par le Prophète Muhammad ﷺ et associée au lieu de la talbiyah pour la Omra.",
+    readingTime: 5,
+    publishedAt: '2026-05-11T12:30:00+03:00',
+    sections: [
+      {
+        id: 'origine',
+        title: 'Origine et signification prophétique',
+        content: [
+          {
+            type: 'paragraph',
+            content: "Wadi al-Aqiq est une vallée naturelle traversant l'ouest de Médine sur une longueur d'environ trente kilomètres. Son nom, «l'Aqiq», désigne en arabe l'agate rouge, une pierre semi-précieuse, probablement en référence à la couleur de ses sols lors des crues.",
+          },
+          {
+            type: 'callout',
+            text: "Un envoyé est venu cette nuit de la part de mon Seigneur en m'ordonnant de prier dans cette vallée bénie et de dire : Omra et Hajj ensemble.",
+            reference: "Sahih al-Bukhari, n° 1534, rapporté par Umar ibn al-Khattab (ra), le Prophète ﷺ évoquant la vision reçue à Wadi al-Aqiq",
+          },
+          {
+            type: 'paragraph',
+            content: "Ce hadith de Bukhari établit la bénédiction divine de la vallée par révélation directe. La formule «vallée bénie» (wadi mubarak) n'est pas une qualification humaine mais une désignation prophétique. C'est dans cette vallée que le Prophète ﷺ commençait sa talbiyah lors de ses déplacements vers La Mecque pour la Omra ou le Hajj.",
+          },
+          {
+            type: 'paragraph',
+            content: "La vallée est également mentionnée dans un hadith de Muslim (n° 1186) relatant que le Prophète ﷺ s'y arrêtait pour prier et y formulait l'intention de l'Omra. Ces deux témoignages concordants des plus grands compilateurs de hadiths confirment l'importance du lieu.",
+          },
+        ],
+        seeAlso: [{ href: '/lieux-saints/masjid-al-miqat', label: "Masjid al-Miqat : le point d'entrée en ihram" }],
+      },
+      {
+        id: 'geographie',
+        title: 'Description géographique',
+        content: [
+          {
+            type: 'stats',
+            items: [
+              { label: 'Longueur', value: '~30 km' },
+              { label: 'Distance Nabawi', value: '~8 km' },
+              { label: 'Hadith de référence', value: 'Bukhari 1534' },
+              { label: 'Hadith de référence', value: 'Muslim 1186' },
+            ],
+          },
+          {
+            type: 'paragraph',
+            content: "Wadi al-Aqiq s'étend du nord-est au sud-ouest de Médine, traversant l'ensemble de la partie occidentale de l'oasis. Sa largeur varie de quelques centaines de mètres à plus d'un kilomètre selon les sections. Le fond de la vallée était historiquement cultivé en palmiers dattiers, en jardins et en champs irrigués par les eaux de crues saisonnières.",
+          },
+          {
+            type: 'paragraph',
+            content: "Aujourd'hui, la vallée est en grande partie urbanisée et intégrée dans le tissu de Médine moderne. Certaines sections, notamment près de Masjid al-Miqat (Dhul-Hulayfah), préservent encore un caractère naturel. La mosquée du miqat est précisément située dans la portion de la vallée la plus chargée de signification prophétique.",
+          },
+        ],
+      },
+      {
+        id: 'spiritualite',
+        title: 'Importance spirituelle',
+        content: [
+          {
+            type: 'paragraph',
+            content: "La désignation de Wadi al-Aqiq comme «vallée bénie» par le Prophète ﷺ en fait l'un des rares lieux géographiques à avoir reçu une qualification divine explicite dans les hadiths authentiques. Cette bénédiction s'étend à ceux qui y accomplissent des actes d'adoration sincères.",
+          },
+          {
+            type: 'paragraph',
+            content: "La recommandation prophétique de prier dans cette vallée avant de se rendre à La Mecque trouve sa réalisation pratique à Masjid al-Miqat : les pèlerins y accomplissent deux rak'ahs avant d'entrer en ihram, perpétuant ainsi la Sunnah du Prophète ﷺ dans ce lieu béni.",
+          },
+          {
+            type: 'paragraph',
+            content: "Les savants islamiques s'accordent à dire que la bénédiction de la vallée est réelle mais ne justifie pas de déplacement spécifique en dehors du passage au miqat, qui en est l'expression naturelle. Visiter la vallée comme site touristique distinct n'est ni recommandé ni déconseillé, mais doit être fait avec conscience de sa signification.",
+          },
+        ],
+      },
+      {
+        id: 'visite',
+        title: 'Visite et recueillement',
+        content: [
+          {
+            type: 'paragraph',
+            content: "En pratique, visiter Wadi al-Aqiq ne constitue pas une démarche distincte de la visite de Masjid al-Miqat. La mosquée du miqat est au cœur de la zone la plus significative de la vallée. Lorsque vous accomplirez votre ihram à Masjid al-Miqat, vous serez déjà dans la vallée bénie du Prophète ﷺ.",
+          },
+          {
+            type: 'paragraph',
+            content: "Il est possible de demander à votre guide de vous montrer les contours naturels de la vallée depuis un point élevé lors du trajet vers La Mecque. La conscience d'être dans ce lieu béni, même en transit, contribue au recueillement spirituel du départ vers le pèlerinage.",
+          },
+          {
+            type: 'expert-tip',
+            title: 'Conseil expert SAFARUMA',
+            text: "Wadi al-Aqiq n'est pas un site à visiter séparément : la vallée traverse toute la zone du miqat et est aujourd'hui urbanisée. Quand vous accomplissez votre ihram à Masjid al-Miqat, vous êtes au cœur de la vallée bénie. Votre guide SAFARUMA mentionnera ce contexte avant votre entrée en ihram pour enrichir spirituellement ce moment fondateur de votre Omra.",
+          },
+        ],
+      },
+      {
+        id: 'conseils',
+        title: 'Conseils pratiques',
+        content: [
+          {
+            type: 'paragraph',
+            content: "Aucun déplacement spécifique vers Wadi al-Aqiq n'est nécessaire. Le passage naturel au miqat lors du départ pour La Mecque vous place automatiquement dans la vallée bénie. La conscience de ce contexte géographique enrichit la spiritualité du moment sans requérir de visite supplémentaire.",
+          },
+          {
+            type: 'list',
+            items: [
+              "La visite de Wadi al-Aqiq est incluse naturellement dans le passage au miqat",
+              "Aucune infrastructure touristique spécifique à la vallée",
+              "La zone naturelle préservée se trouve principalement autour de Masjid al-Miqat",
+              "Mentionner la vallée à votre guide : il pourra vous en montrer les contours",
+            ],
+          },
+        ],
+      },
+      {
+        id: 'erreurs',
+        title: 'Erreurs à éviter',
+        content: [
+          {
+            type: 'list',
+            items: [
+              "Organiser une visite séparée et longue de «Wadi al-Aqiq» en tant que site touristique : la vallée est urbanisée et n'offre pas de vue ni d'infrastructure particulières.",
+              "Confondre la vallée et la mosquée : Wadi al-Aqiq est une vallée géographique de 30 km, Masjid al-Miqat est la mosquée construite en son sein au point le plus significatif.",
+              "Croire que marcher dans la vallée confère automatiquement une bénédiction sans acte d'adoration sincère : c'est la prière et le dhikr accomplis dans ce lieu béni qui ont une valeur, pas le simple passage.",
+            ],
+          },
+        ],
+      },
+    ],
+    faq: [
+      { question: "Quelle est la différence entre Wadi al-Aqiq et Masjid al-Miqat ?", answer: "Wadi al-Aqiq est une vallée naturelle de 30 km traversant l'ouest de Médine. Masjid al-Miqat (Dhul-Hulayfah) est la mosquée construite dans la portion la plus significative de cette vallée, là où le Prophète ﷺ s'arrêtait pour prier et entrer en ihram. La mosquée est au sein de la vallée." },
+      { question: "Pourquoi le Prophète ﷺ a-t-il qualifié cette vallée de bénie ?", answer: "Selon le hadith rapporté par Bukhari (n° 1534), le Prophète ﷺ reçut une instruction divine lors d'une vision nocturne lui ordonnant de prier dans «cette vallée bénie». La désignation est donc d'origine divine, transmise par le Prophète ﷺ à ses compagnons." },
+      { question: "Faut-il prier spécifiquement dans la vallée ?", answer: "La Sunnah est de prier à Masjid al-Miqat qui est dans la vallée, avant d'entrer en ihram. C'est la réalisation pratique la plus simple de la recommandation prophétique. Une prière dans n'importe quel point de la vallée est valide mais pas nécessairement plus méritoire." },
+      { question: "Peut-on y aller sans passer par la mosquée du miqat ?", answer: "Techniquement oui, mais sans intérêt pratique. La partie de la vallée préservant un caractère naturel est précisément autour du miqat. Ailleurs, la vallée est urbanisée et intégrée dans Médine moderne." },
+      { question: "Quelle est la longueur exacte de la vallée ?", answer: "Wadi al-Aqiq s'étend sur environ 30 km, du nord-est au sud-ouest de Médine. C'est l'une des plus importantes vallées de la région du Hijaz." },
+      { question: "Y a-t-il d'autres lieux saints dans la vallée ?", answer: "Masjid al-Miqat est le lieu saint principal situé dans la vallée. Historiquement, plusieurs jardins et domaines du Prophète ﷺ et des compagnons étaient également dans cette zone, mais ils ne sont plus identifiables aujourd'hui." },
+    ],
+  },
+
+  'masjid-fateh': {
+    slug: 'masjid-fateh',
+    title: "Masjid al-Fateh : la mosquée de la victoire de Khandaq",
+    location: "Mont Sal', ouest de Médine",
+    locationKicker: 'LIEU SAINT · MÉDINE',
+    excerpt: "Mosquée bâtie sur le site où le Prophète Muhammad ﷺ pria trois jours pour la victoire lors du siège de Médine (bataille du Khandaq, an 5 H.).",
+    readingTime: 6,
+    publishedAt: '2026-05-11T12:45:00+03:00',
+    sections: [
+      {
+        id: 'origine',
+        title: 'Le contexte historique : la bataille du Khandaq',
+        content: [
+          {
+            type: 'paragraph',
+            content: "En l'an 5 de l'Hégire (627 de l'ère chrétienne), une coalition de 10 000 guerriers qurayshites, juifs de Khaybar et tribus alliées assiégea Médine. Face à cette menace sans précédent, Salman al-Farisi (ra) proposa une stratégie inédite dans la péninsule arabique : creuser une tranchée (khandaq) pour protéger les frontières nord de Médine.",
+          },
+          {
+            type: 'callout',
+            text: "Ô vous qui avez cru, rappelez-vous le bienfait d'Allah sur vous, quand des armées vinrent contre vous et que Nous envoyâmes sur elles un vent violent et des troupes que vous n'avez pas vues.",
+            reference: 'Sourate Al-Ahzab, verset 9, relatant la bataille du Khandaq',
+          },
+          {
+            type: 'paragraph',
+            content: "Le siège dura vingt-sept jours. Les Musulmans, moins de 3 000 combattants, tinrent la tranchée face à une armée dix fois supérieure. Le Prophète ﷺ posta ses lieutenants le long de la ligne de défense et monta lui-même au flanc du mont Sal' pour observer et diriger. C'est à cet endroit précis qu'il pria pendant trois jours et trois nuits consécutives, suppliant Allah de secourir les croyants.",
+          },
+          {
+            type: 'paragraph',
+            content: "Selon les récits du Sahih al-Bukhari, le mercredi à l'heure de Dhuhr, la réponse divine arriva : un vent violent s'abattit sur le camp des coalisés, semant la confusion. Puis la discorde éclata entre les alliés de la coalition. La tribu de Ghatafan demanda sa part du butin avant de combattre, les Qurayshites refusèrent. La coalition se disloqua et leva le siège.",
+          },
+        ],
+      },
+      {
+        id: 'architecture',
+        title: 'Description architecturale',
+        content: [
+          {
+            type: 'stats',
+            items: [
+              { label: 'Superficie', value: '~70 m²' },
+              { label: 'Année événement', value: 'An 5 H.' },
+              { label: 'Ensemble', value: '7 mosquées' },
+              { label: 'Accès public', value: 'Variable' },
+            ],
+          },
+          {
+            type: 'paragraph',
+            content: "Masjid al-Fateh est une petite mosquée modeste, d'environ 70 mètres carrés, construite à flanc du mont Sal'. Son architecture est simple : une salle de prière blanche avec un minaret unique et une cour minimaliste. Elle fait partie d'un ensemble de petites mosquées historiques connues sous le nom des «Sept Mosquées» (Sab'a Masajid), bâties en souvenir des sites liés à la bataille du Khandaq.",
+          },
+          {
+            type: 'paragraph',
+            content: "Les Sept Mosquées comprennent notamment Masjid al-Fateh, Masjid Salman al-Farisi, Masjid Abu Bakr, Masjid Umar, Masjid Ali et Masjid al-Qiblatayn (cette dernière ayant une signification distincte). L'ensemble est situé dans le quartier ouest de Médine, non loin du site de la tranchée historique.",
+          },
+        ],
+      },
+      {
+        id: 'spiritualite',
+        title: 'Importance spirituelle',
+        content: [
+          {
+            type: 'paragraph',
+            content: "Masjid al-Fateh symbolise la puissance de la prière sincère dans l'épreuve. Pendant trois jours de siège, alors que Médine était au bord de la capitulation, le Prophète ﷺ ne cessa pas de prier. Sa conviction que la victoire viendrait d'Allah, et non du nombre ou des armes, est l'une des expressions les plus saisissantes du tawakkul dans toute la Sîra.",
+          },
+          {
+            type: 'paragraph',
+            content: "Le nom «al-Fateh» signifie «la victoire» ou «l'ouverture», en référence directe à la victoire accordée par Allah après ces trois jours de prière. Cette mosquée rappelle que la prière en temps d'épreuve n'est pas une passivité mais un acte de résistance spirituelle active.",
+          },
+          {
+            type: 'paragraph',
+            content: "La position théologique sur la visite des Sept Mosquées mérite d'être mentionnée avec transparence : plusieurs savants contemporains, dont certains membres du Conseil du Grand Mouftiat saoudien, considèrent que les visiter spécifiquement toutes ensemble, dans l'idée d'y accomplir une Sunna, relève de la bid'ah (innovation blâmable). La visite reste licite à titre de mémoire historique.",
+          },
+        ],
+      },
+      {
+        id: 'visite',
+        title: 'Visite et recueillement',
+        content: [
+          {
+            type: 'paragraph',
+            content: "Masjid al-Fateh est parfois fermée au public, notamment pendant les périodes de travaux dans la zone ou selon les décisions des autorités saoudiennes. Il est conseillé de se renseigner sur l'accessibilité auprès de votre guide avant de planifier une visite.",
+          },
+          {
+            type: 'paragraph',
+            content: "Si la mosquée est accessible, la visite s'articule autour d'une prière de salutation (tahiyat al-masjid), d'une méditation sur l'histoire du Khandaq et d'invocations personnelles. La récitation de la Sourate Al-Ahzab, qui relate la bataille, enrichit le recueillement. Une visite de quinze à trente minutes est largement suffisante.",
+          },
+          {
+            type: 'expert-tip',
+            title: 'Conseil expert SAFARUMA',
+            text: "La visite des «Sept Mosquées» fait débat parmi les savants. Nombreux sont ceux qui considèrent qu'y aller spécifiquement en y cherchant une vertu liturgique relève de la bid'ah. Masjid al-Fateh est cependant intéressante à titre historique. Votre guide SAFARUMA vous présente le site depuis l'extérieur avec le récit du Khandaq, ce qui suffit à rendre la visite spirituellement riche sans entrer dans les zones de débat théologique.",
+          },
+        ],
+      },
+      {
+        id: 'conseils',
+        title: 'Conseils pratiques',
+        content: [
+          {
+            type: 'paragraph',
+            content: "Le site est peu fréquenté comparé aux grands sanctuaires de Médine. Pas de transport public direct depuis Masjid an-Nabawi : un taxi ou un véhicule avec guide est nécessaire. La visite peut être combinée avec celle du site du Khandaq (la tranchée historique), situé à proximité.",
+          },
+          {
+            type: 'list',
+            items: [
+              "Vérifiez l'accessibilité avant de vous y rendre (souvent fermée au public)",
+              "Distance depuis Masjid an-Nabawi : environ 3 à 4 km, 10 à 15 minutes en taxi",
+              "Visite courte : 15 à 30 minutes sur place",
+              "Peut être combinée avec la visite du site du Khandaq dans le même trajet",
+              "Aucun service sur place (eau, sanitaires) : prévoyez votre eau",
+            ],
+          },
+        ],
+        seeAlso: [{ href: '/lieux-saints/masjid-an-nabawi', label: 'Masjid an-Nabawi : la mosquée du Prophète ﷺ' }],
+      },
+      {
+        id: 'erreurs',
+        title: 'Erreurs à éviter',
+        content: [
+          {
+            type: 'list',
+            items: [
+              "Visiter toutes les Sept Mosquées dans l'idée d'accomplir une Sunna particulière : certains savants qualifient cela de bid'ah. La visite à titre historique est licite.",
+              "Considérer que prier dans Masjid al-Fateh multiplie la valeur de la prière : aucun hadith authentique n'attribue de valeur multipliée à cette mosquée spécifiquement.",
+              "Se rendre sur place sans vérifier qu'elle est accessible : la mosquée est parfois fermée par les autorités saoudiennes.",
+              "Confondre Masjid al-Fateh et Masjid al-Qiblatayn : les deux sont dans l'ouest de Médine mais ont des histoires entièrement différentes.",
+            ],
+          },
+        ],
+      },
+    ],
+    faq: [
+      { question: "Qu'est-ce que la bataille du Khandaq ?", answer: "La bataille du Khandaq (la tranchée) eut lieu en l'an 5 de l'Hégire (627). Une coalition de 10 000 guerriers assiégea Médine pendant 27 jours. Sur la suggestion de Salman al-Farisi, les Musulmans creusèrent une tranchée de 5,5 km pour bloquer les assaillants. La coalition se disloqua sans combattre, après qu'un vent divin sema la confusion dans leur camp." },
+      { question: "Pourquoi cette mosquée est-elle parfois fermée ?", answer: "Les autorités saoudiennes ont parfois fermé Masjid al-Fateh et les autres mosquées de l'ensemble des Sept Mosquées, soit pour rénovation, soit en raison du débat théologique sur la bid'ah que représenterait leur visite collective systématique. L'accessibilité varie selon les périodes." },
+      { question: "Quelles sont les 7 mosquées de Médine ?", answer: "L'ensemble traditionnel des Sept Mosquées comprend Masjid al-Fateh, Masjid Salman al-Farisi, Masjid Abu Bakr, Masjid Umar, Masjid Ali et Masjid al-Qiblatayn, plus Masjid al-Fath al-A'la selon certaines listes. Elles sont toutes situées dans la zone ouest de Médine, liées au contexte de la bataille du Khandaq." },
+      { question: "Faut-il visiter Masjid al-Fateh pendant la visite à Médine ?", answer: "Non, ce n'est pas une obligation ni une Sunna établie. C'est une démarche historique facultative. Pour un pèlerin passionné par l'histoire islamique et la Sîra, la visite à titre mémoriel est enrichissante. Pour un pèlerin avec peu de temps, les lieux prioritaires à Médine sont Masjid an-Nabawi, Al-Baqi' et Masjid Quba." },
+      { question: "Quelle est la position des savants sur la visite des 7 mosquées ?", answer: "Les avis divergent. Certains savants (dont Cheikh Ibn Baz et d'autres du Conseil des Grands Oulémas saoudiens) ont considéré qu'y aller en pensant y trouver une vertu spéciale relève de la bid'ah. D'autres autorisent la visite à titre historique sans lui attribuer de vertu liturgique. La règle de prudence est de visiter à titre mémoriel sans intention de Sunna spécifique." },
+      { question: "Quelle est la durée historique du siège ?", answer: "Le siège dura vingt-sept jours, selon les sources historiques islamiques majoritaires. La coalition leva le camp sans avoir réussi à franchir la tranchée ni à prendre Médine. C'est l'une des défenses les plus remarquables de l'histoire militaire de l'Islam primitif." },
+    ],
+  },
+
+  'marche-dattes': {
+    slug: 'marche-dattes',
+    title: "Le marché aux dattes : tradition millénaire de Médine",
+    location: "Centre de Médine, près de Masjid an-Nabawi",
+    locationKicker: 'LIEU SAINT · MÉDINE',
+    excerpt: "Marché historique de Médine, célèbre dans le monde musulman pour ses dattes Ajwa, fruit béni mentionné dans les hadiths authentiques du Prophète Muhammad ﷺ.",
+    readingTime: 6,
+    publishedAt: '2026-05-11T13:00:00+03:00',
+    sections: [
+      {
+        id: 'origine',
+        title: 'Histoire et tradition des dattes à Médine',
+        content: [
+          {
+            type: 'paragraph',
+            content: "La datte est au cœur de la civilisation de Médine depuis des millénaires. L'oasis de Médine, avec ses sols fertiles et son microclimat favorable, produit depuis l'Antiquité certaines des meilleures variétés de dattes du monde arabe. Le Prophète Muhammad ﷺ lui-même évoqua Médine comme une ville aux deux volcans (harras) et à la palmeraie, dans plusieurs hadiths décrivant sa géographie bénie.",
+          },
+          {
+            type: 'callout',
+            text: "Celui qui mange chaque matin sept dattes Ajwa, ni poison ni magie ne lui feront de mal ce jour-là.",
+            reference: 'Sahih al-Bukhari, n° 5445, et Sahih Muslim, n° 2047, rapporté par Sad ibn Abi Waqqas (ra)',
+          },
+          {
+            type: 'paragraph',
+            content: "Ce hadith authentique, transmis par deux des compilateurs les plus rigoureux de l'histoire islamique, fait de la datte Ajwa la seule variété nommément mentionnée dans les hadiths du Prophète ﷺ avec une vertu spécifique. Cette distinction a contribué à faire de l'Ajwa de Médine l'une des dattes les plus recherchées et les plus exportées dans le monde musulman.",
+          },
+          {
+            type: 'paragraph',
+            content: "Le marché aux dattes de Médine, connu sous le nom de Souq al-Tamr, est situé à quelques centaines de mètres du Masjid an-Nabawi. Il existe sous diverses formes depuis des siècles, évoluant de simples étals en plein air à un marché structuré proposant aujourd'hui des dizaines de variétés en vrac ou en coffrets cadeaux.",
+          },
+        ],
+        seeAlso: [{ href: '/lieux-saints/masjid-an-nabawi', label: 'Masjid an-Nabawi : la mosquée du Prophète ﷺ' }],
+      },
+      {
+        id: 'description',
+        title: 'Description du marché',
+        content: [
+          {
+            type: 'stats',
+            items: [
+              { label: 'Variétés vendues', value: '50+' },
+              { label: 'Variété sacrée', value: 'Ajwa' },
+              { label: 'Saison récolte', value: 'Août-oct.' },
+              { label: 'Distance Nabawi', value: '~200 m' },
+            ],
+          },
+          {
+            type: 'paragraph',
+            content: "Le marché propose plus de cinquante variétés de dattes originaires de la région du Hijaz et d'autres zones d'Arabie Saoudite. Parmi les plus réputées : l'Ajwa (la variété prophétique, noire et moelleuse), la Medjool (grosse, charnue et sucrée), la Sukkari (jaune dorée et fondante), la Mabroum (longue et fibreuse), et la Khalas (petit format, très sucrée).",
+          },
+          {
+            type: 'paragraph',
+            content: "Les vendeurs proposent généralement à leurs clients de goûter les différentes variétés avant l'achat, une tradition commerciale que les pèlerins apprécient universellement. Au-delà des dattes, le marché offre du miel sauvage de la région (sidr et acacia), des épices, de l'huile d'olive, du kohl traditionnel et divers produits médicinaux naturels.",
+          },
+        ],
+      },
+      {
+        id: 'culture',
+        title: 'Importance culturelle et spirituelle',
+        content: [
+          {
+            type: 'paragraph',
+            content: "La datte occupe une place centrale dans la Sunnah du Prophète ﷺ. Il rompait le jeûne du Ramadan avec des dattes fraîches (ratab) ou sèches avant de prier, conformément au hadith d'Anas ibn Malik (ra) rapporté par Abu Dawud (n° 2356). Il les mangeait en nombre impair : une, trois ou cinq. Il recommandait de commencer le repas de l'Aïd al-Fitr avec des dattes.",
+          },
+          {
+            type: 'paragraph',
+            content: "Le Coran évoque les dattes dans un contexte de grâce divine : lors de la naissance de Jésus (Isa), Allah ordonna à Maryam de secouer le palmier pour en faire tomber des dattes fraîches (Sourate Maryam, versets 25-26). Cette mention coranique confirme la place de la datte dans le patrimoine spirituel des trois religions abrahamiques.",
+          },
+          {
+            type: 'paragraph',
+            content: "Ramener des dattes de Médine, et en particulier des Ajwa, constitue une tradition du pèlerinage profondément ancrée dans la culture musulmane. C'est l'un des cadeaux les plus appréciés et les plus symboliques qu'un pèlerin peut offrir à sa famille et à ses proches à son retour.",
+          },
+        ],
+      },
+      {
+        id: 'achats',
+        title: 'Que faire et quoi acheter',
+        content: [
+          {
+            type: 'paragraph',
+            content: "La visite du marché aux dattes est une expérience sensorielle complète : les arômes sucrés des dattes séchées, la couleur dorée ou noire selon les variétés, les échantillons offerts par les vendeurs. Prenez le temps de goûter plusieurs variétés avant de décider.",
+          },
+          {
+            type: 'list',
+            items: [
+              "Ajwa : variété prophétique, noire et moelleuse, la plus onéreuse. Budget : 80 à 150 SAR/kg (20 à 40 EUR) selon qualité",
+              "Sukkari : dorée, fondante, très accessible. Budget : 20 à 50 SAR/kg",
+              "Medjool : grosse, charnue, idéale pour les coffrets cadeaux. Budget : 40 à 80 SAR/kg",
+              "Coffrets cadeaux : 2 à 5 variétés en boîtes décorées, idéaux pour les cadeaux de pèlerinage",
+              "Miel sidr : miel d'une qualité exceptionnelle, récolté sur les jujubiers sauvages du Hijaz",
+              "Négocier est attendu et normal : proposer 70 à 80% du prix affiché est une pratique courante",
+            ],
+          },
+          {
+            type: 'expert-tip',
+            title: 'Conseil expert SAFARUMA',
+            text: "Les dattes Ajwa authentiques de Médine coûtent généralement entre 80 et 150 SAR/kg selon la qualité. Méfiez-vous des prix anormalement bas, qui peuvent indiquer des dattes cultivées hors de Médine et commercialisées sous le label Ajwa. Notre recommandation : achetez chez un vendeur référencé par votre guide SAFARUMA et ramenez 1 à 2 kg d'Ajwa pour votre famille comme cadeau de pèlerinage authentique.",
+          },
+        ],
+        seeAlso: [{ href: '/blog/comment-preparer-omra-10-etapes', label: 'Comment préparer son Omra en 10 étapes' }],
+      },
+      {
+        id: 'conseils',
+        title: 'Conseils pratiques',
+        content: [
+          {
+            type: 'paragraph',
+            content: "Le marché est accessible à pied depuis Masjid an-Nabawi (environ 200 mètres). Il est ouvert sept jours sur sept, de tôt le matin jusqu'à tard le soir. Les meilleures heures pour la visite sont la matinée (entre 10h et 12h) ou après la prière de Asr, quand l'affluence est modérée et les vendeurs disponibles pour discuter et faire goûter.",
+          },
+          {
+            type: 'paragraph',
+            content: "Pour les achats en grande quantité (au-delà de 5 kg), négociez directement avec le propriétaire du stand plutôt qu'avec les vendeurs. Demandez toujours d'où viennent les Ajwa (elles doivent provenir d'Al-Aliya, la zone de culture traditionnelle près de Médine). Vérifiez que les coffrets cadeaux sont bien fermés et étanches avant de les mettre dans vos bagages.",
+          },
+        ],
+      },
+      {
+        id: 'erreurs',
+        title: 'Erreurs à éviter',
+        content: [
+          {
+            type: 'list',
+            items: [
+              "Acheter des dattes Ajwa à un prix anormalement bas sans vérifier leur provenance : les Ajwa authentiques de Médine ont un coût de production élevé.",
+              "Transporter plus de dattes que votre quota de bagages ne le permet : les dattes sont lourdes et volumineuses. Prévoyez le poids dans votre allocation de bagages.",
+              "Oublier de vérifier les dates de péremption sur les coffrets fermés : certains lots ont une durée de conservation limitée, surtout pour les dattes fraîches.",
+              "Confondre les variétés : les vendeurs peu scrupuleux peuvent proposer de la Mabroum ou de la Sukkari sous l'appellation Ajwa. La vraie Ajwa est petite, noire, ridée et d'une douceur particulière.",
+              "Ne pas négocier : c'est une pratique attendue dans ce contexte commercial, et refuser de négocier peut être perçu comme un manque d'intérêt.",
+            ],
+          },
+        ],
+      },
+    ],
+    faq: [
+      { question: "Qu'est-ce qui rend les dattes Ajwa si spéciales ?", answer: "La datte Ajwa est la seule variété nommément citée dans les hadiths authentiques du Prophète ﷺ avec une vertu spécifique (Bukhari n° 5445, Muslim n° 2047). Elle est produite dans la zone d'Al-Aliya, près de Médine, dans un microclimat particulier. Sa texture moelleuse, sa saveur douce et légèrement caramélisée, et sa petite taille la distinguent des autres variétés." },
+      { question: "Comment reconnaître de vraies dattes Ajwa ?", answer: "La vraie Ajwa de Médine est petite (3 à 4 cm), noire ridée, moelleuse et non collante. Elle a une saveur douce et légèrement chocolatée. Une Ajwa de grande taille, brillante ou très sucrée est probablement une variété différente. Le prix (80 à 150 SAR/kg) et la provenance mentionnée (Al-Aliya, Médine) sont des indicateurs fiables." },
+      { question: "Combien de dattes manger par jour selon la Sunnah ?", answer: "Le hadith mentionne sept dattes Ajwa le matin. Plus généralement, le Prophète ﷺ mangeait les dattes en nombre impair. Aucune quantité précise n'est prescrite comme obligation religieuse : le hadith sur les sept dattes indique une vertu protectrice, pas une obligation." },
+      { question: "Quelles autres variétés acheter à Médine ?", answer: "La Sukkari (dorée, fondante, très accessible) est la préférée des locaux. La Medjool est idéale pour les coffrets cadeaux (grosse et impressionnante visuellement). La Mabroum est longue et fibreuse. La Khalas est très sucrée et petite. Acheter un assortiment de 3 à 4 variétés est une excellente option." },
+      { question: "Peut-on les ramener dans son bagage à l'avion ?", answer: "Oui, les dattes sont autorisées dans les bagages en soute sans restriction particulière. En cabine, les dattes emballées sont permises. Les pâtes de dattes ou produits dérivés liquides sont soumis aux restrictions habituelles des liquides en cabine." },
+      { question: "Doit-on négocier les prix ?", answer: "Oui, la négociation est attendue et normale dans les marchés traditionnels de Médine. Proposer 70 à 80% du prix affiché est une pratique courante. Pour les achats importants (plusieurs kilos), la marge de négociation est plus grande. Les boutiques modernes avec prix fixes existent aussi si vous préférez éviter la négociation." },
+      { question: "Combien coûtent les Ajwa au kilogramme ?", answer: "Les Ajwa authentiques de Médine coûtent entre 80 et 150 SAR/kg (environ 20 à 40 EUR) selon la qualité. Les Ajwa premium de première récolte peuvent atteindre 200 SAR/kg. Les prix inférieurs à 60 SAR/kg doivent alerter sur l'authenticité ou la provenance." },
+      { question: "Quels sont les bienfaits santé des dattes ?", answer: "Les dattes sont riches en fibres, potassium, magnésium, fer et vitamines B. Elles fournissent une énergie rapide et soutenue. Leur indice glycémique, bien que présent, est modéré grâce à leur teneur en fibres. La science moderne confirme leurs propriétés antioxydantes et anti-inflammatoires, sans que cela constitue une garantie médicale au sens clinique." },
+    ],
+  },
 };

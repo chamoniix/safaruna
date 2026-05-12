@@ -112,7 +112,7 @@ const nbDisponibles = 8;
 export default function Home() {
   return (
     <>
-      <Navbar transparentOnHero />
+      <Navbar />
       <ScrollReveal />
       <style dangerouslySetInnerHTML={{ __html: `
         @media (max-width: 768px) {

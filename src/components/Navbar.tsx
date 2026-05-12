@@ -169,10 +169,11 @@ export default function Navbar({
         .nb-bar {
           background: rgba(250,247,240,0.96); backdrop-filter: blur(12px);
           border-bottom: 1px solid rgba(201,168,76,0.2);
+          box-shadow: 0 2px 12px rgba(0,0,0,0.04);
           padding: 0 2rem;
           height: 60px;
           display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-          transition: background 0.35s ease, border-color 0.35s ease;
+          transition: background 0.3s ease-in-out, border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
         }
         .nb-bar-dark {
           background: #1A1209 !important;
@@ -211,6 +212,14 @@ export default function Navbar({
         .nb-nav-dark .nb-menu-btn:hover, .nb-nav-dark .nb-menu-btn[aria-expanded="true"] { color: #C9A84C; background: rgba(201,168,76,0.12); }
         .nb-nav-dark .nb-nav-link { color: rgba(240,216,151,0.75); }
         .nb-nav-dark .nb-nav-link:hover { color: #C9A84C; background: rgba(201,168,76,0.12); }
+        .nb-nav-transparent .nb-menu-btn { color: rgba(255,255,255,0.88); }
+        .nb-nav-transparent .nb-menu-btn:hover, .nb-nav-transparent .nb-menu-btn[aria-expanded="true"] { color: #FFFFFF; background: rgba(255,255,255,0.12); }
+        .nb-nav-transparent .nb-nav-link { color: rgba(255,255,255,0.88); }
+        .nb-nav-transparent .nb-nav-link:hover { color: #FFFFFF; background: rgba(255,255,255,0.12); }
+        .nb-btn-login-transparent { color: rgba(255,255,255,0.88) !important; }
+        .nb-btn-login-transparent:hover { color: #FFFFFF !important; }
+        .nb-btn-register-transparent { background: #C9A84C !important; color: #FFFFFF !important; }
+        .nb-btn-register-transparent:hover { background: #B8962E !important; }
         /* ── Dropdown ── */
         .nb-dropdown {
           position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%);
@@ -406,17 +415,17 @@ export default function Navbar({
 
         {/* ── Bar desktop ── */}
         <div className={`nb-bar${isDarkHero ? ' nb-bar-dark' : ''}`}
-          style={isTransparent ? { background: 'transparent', backdropFilter: 'none', WebkitBackdropFilter: 'none', borderBottom: 'none' } : {}}>
+          style={isTransparent ? { background: 'transparent', backdropFilter: 'none', WebkitBackdropFilter: 'none', borderBottom: 'none', boxShadow: 'none' } : {}}>
 
           {/* Logo */}
           <Link href="/" className={`nb-logo${isDarkHero ? ' nb-logo-light' : ''}`}
-            style={isTransparent ? { opacity: 0, pointerEvents: 'none' } : {}}>
+            style={{ opacity: isTransparent ? 0 : 1, pointerEvents: isTransparent ? 'none' : 'auto', transition: 'opacity 0.3s ease-in-out' }}>
             SAFAR<span>U</span>MA
           </Link>
 
-          {/* Desktop nav */}
-          {!isTransparent && (
-            <nav className={`nb-nav${isDarkHero ? ' nb-nav-dark' : ''}`} aria-label="Navigation principale">
+          {/* Desktop nav — toujours rendu, classe dynamique pour couleur */}
+          {true && (
+            <nav className={`nb-nav${isDarkHero ? ' nb-nav-dark' : isTransparent ? ' nb-nav-transparent' : ''}`} aria-label="Navigation principale">
               {MENUS.map(menu => (
                 <div
                   key={menu.id}
@@ -457,8 +466,8 @@ export default function Navbar({
             </nav>
           )}
 
-          {/* Desktop actions */}
-          {!isTransparent && (
+          {/* Desktop actions — toujours rendues, classes dynamiques */}
+          {true && (
             <div className="nb-actions">
               {session ? (
                 <div className="nb-menu-wrap" style={{ position: 'relative' }}>
@@ -468,9 +477,10 @@ export default function Navbar({
                     aria-haspopup="menu"
                     onClick={() => setUserMenuOpen(o => !o)}
                     aria-label="Mon compte"
+                    style={isTransparent ? { borderColor: 'rgba(255,255,255,0.3)', color: '#FFFFFF' } : {}}
                   >
                     <UserIcon />
-                    <span className="nb-user-name">{session.user?.name?.split(' ')[0] || 'Mon compte'}</span>
+                    <span className="nb-user-name" style={isTransparent ? { color: '#FFFFFF' } : {}}>{session.user?.name?.split(' ')[0] || 'Mon compte'}</span>
                     <ChevronDown open={userMenuOpen} />
                   </button>
                   {userMenuOpen && (
@@ -490,10 +500,10 @@ export default function Navbar({
                 </div>
               ) : (
                 <>
-                  <Link href="/connexion" className={`nb-btn-login${isDarkHero ? ' nb-btn-login-dark' : ''}`}>
+                  <Link href="/connexion" className={`nb-btn-login${isDarkHero ? ' nb-btn-login-dark' : isTransparent ? ' nb-btn-login-transparent' : ''}`}>
                     Connexion
                   </Link>
-                  <Link href="/inscription" className="nb-btn-register">
+                  <Link href="/inscription" className={`nb-btn-register${isTransparent ? ' nb-btn-register-transparent' : ''}`}>
                     S&apos;inscrire
                   </Link>
                 </>

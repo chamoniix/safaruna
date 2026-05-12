@@ -172,8 +172,7 @@ export default function Navbar({
           padding: 0 2rem;
           height: 60px;
           display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-          transition: background 0.3s ease-in-out, border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-          box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+          transition: background 0.35s ease, border-color 0.35s ease;
         }
         .nb-bar-dark {
           background: #1A1209 !important;
@@ -212,15 +211,6 @@ export default function Navbar({
         .nb-nav-dark .nb-menu-btn:hover, .nb-nav-dark .nb-menu-btn[aria-expanded="true"] { color: #C9A84C; background: rgba(201,168,76,0.12); }
         .nb-nav-dark .nb-nav-link { color: rgba(240,216,151,0.75); }
         .nb-nav-dark .nb-nav-link:hover { color: #C9A84C; background: rgba(201,168,76,0.12); }
-        /* ── Transparent state (home hero) ── */
-        .nb-nav-transparent .nb-menu-btn { color: rgba(255,255,255,0.9); }
-        .nb-nav-transparent .nb-menu-btn:hover, .nb-nav-transparent .nb-menu-btn[aria-expanded="true"] { color: #FFFFFF; background: rgba(255,255,255,0.12); }
-        .nb-nav-transparent .nb-nav-link { color: rgba(255,255,255,0.9); }
-        .nb-nav-transparent .nb-nav-link:hover { color: #FFFFFF; background: rgba(255,255,255,0.12); }
-        .nb-login-white { color: rgba(255,255,255,0.9) !important; }
-        .nb-login-white:hover { color: #FFFFFF !important; }
-        .nb-register-gold { background: #C9A84C !important; color: #FFFFFF !important; }
-        .nb-register-gold:hover { background: #b8962e !important; }
         /* ── Dropdown ── */
         .nb-dropdown {
           position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%);
@@ -416,16 +406,17 @@ export default function Navbar({
 
         {/* ── Bar desktop ── */}
         <div className={`nb-bar${isDarkHero ? ' nb-bar-dark' : ''}`}
-          style={isTransparent ? { background: 'transparent', backdropFilter: 'none', WebkitBackdropFilter: 'none', borderBottom: 'none', boxShadow: 'none' } : {}}>
+          style={isTransparent ? { background: 'transparent', backdropFilter: 'none', WebkitBackdropFilter: 'none', borderBottom: 'none' } : {}}>
 
           {/* Logo */}
           <Link href="/" className={`nb-logo${isDarkHero ? ' nb-logo-light' : ''}`}
-            style={{ opacity: isTransparent ? 0 : 1, pointerEvents: isTransparent ? 'none' : 'auto', transition: 'opacity 0.3s ease-in-out' }}>
+            style={isTransparent ? { opacity: 0, pointerEvents: 'none' } : {}}>
             SAFAR<span>U</span>MA
           </Link>
 
-          {/* Desktop nav — toujours visible, couleur selon état */}
-          <nav className={`nb-nav${isTransparent ? ' nb-nav-transparent' : isDarkHero ? ' nb-nav-dark' : ''}`} aria-label="Navigation principale">
+          {/* Desktop nav */}
+          {!isTransparent && (
+            <nav className={`nb-nav${isDarkHero ? ' nb-nav-dark' : ''}`} aria-label="Navigation principale">
               {MENUS.map(menu => (
                 <div
                   key={menu.id}
@@ -464,9 +455,11 @@ export default function Navbar({
                 À propos
               </Link>
             </nav>
+          )}
 
-          {/* Desktop actions — toujours visibles, style selon état */}
-          <div className="nb-actions">
+          {/* Desktop actions */}
+          {!isTransparent && (
+            <div className="nb-actions">
               {session ? (
                 <div className="nb-menu-wrap" style={{ position: 'relative' }}>
                   <button
@@ -497,15 +490,16 @@ export default function Navbar({
                 </div>
               ) : (
                 <>
-                  <Link href="/connexion" className={`nb-btn-login${isTransparent ? ' nb-login-white' : isDarkHero ? ' nb-btn-login-dark' : ''}`}>
+                  <Link href="/connexion" className={`nb-btn-login${isDarkHero ? ' nb-btn-login-dark' : ''}`}>
                     Connexion
                   </Link>
-                  <Link href="/inscription" className={`nb-btn-register${isTransparent ? ' nb-register-gold' : ''}`}>
+                  <Link href="/inscription" className="nb-btn-register">
                     S&apos;inscrire
                   </Link>
                 </>
               )}
             </div>
+          )}
 
           {/* Hamburger */}
           <button

@@ -81,10 +81,11 @@ export default function Navbar({
   const [openMobileSection, setOpenMobileSection] = useState<string | null>(null);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [hasScrolled, setHasScrolled] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navRef = useRef<HTMLDivElement>(null);
 
-  // Scroll detection
+  // Scroll detection (ancien prop-based)
   useEffect(() => {
     if (!transparentOnHero && !darkHeroMode) return;
     const onScroll = () => setScrolled(window.scrollY > scrollThreshold);
@@ -92,6 +93,14 @@ export default function Navbar({
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, [transparentOnHero, darkHeroMode, scrollThreshold]);
+
+  // Scroll detection — background beige au-dessus du 1er bloc chiffres (~1 viewport de hauteur)
+  useEffect(() => {
+    const onScroll = () => setHasScrolled(window.scrollY > window.innerHeight - 110);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   // Close on outside click
   useEffect(() => {
@@ -405,7 +414,16 @@ export default function Navbar({
 
         {/* ── Bar desktop ── */}
         <div className={`nb-bar${isDarkHero ? ' nb-bar-dark' : ''}`}
-          style={isTransparent ? { background: 'transparent', backdropFilter: 'none', WebkitBackdropFilter: 'none', borderBottom: 'none' } : {}}>
+          style={hasScrolled ? {
+            background: 'rgba(250,247,240,0.97)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            borderBottom: '1px solid rgba(201,168,76,0.2)',
+            boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+            transition: 'background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease',
+          } : {
+            transition: 'background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease',
+          }}>
 
           {/* Logo */}
           <Link href="/" className={`nb-logo${isDarkHero ? ' nb-logo-light' : ''}`}

@@ -169,7 +169,7 @@ export default function Navbar({
         .nb-bar {
           background: rgba(250,247,240,0.96); backdrop-filter: blur(12px);
           border-bottom: 1px solid rgba(201,168,76,0.2);
-          padding: 0 2rem;
+          padding: 0 4rem;
           height: 60px;
           display: flex; align-items: center; justify-content: space-between; gap: 1rem;
           transition: background 0.35s ease, border-color 0.35s ease;

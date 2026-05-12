@@ -415,8 +415,7 @@ export default function Navbar({
           </Link>
 
           {/* Desktop nav */}
-          {!isTransparent && (
-            <nav className={`nb-nav${isDarkHero ? ' nb-nav-dark' : ''}`} aria-label="Navigation principale">
+          <nav className={`nb-nav${isDarkHero ? ' nb-nav-dark' : ''}`} aria-label="Navigation principale">
               {MENUS.map(menu => (
                 <div
                   key={menu.id}
@@ -455,11 +454,9 @@ export default function Navbar({
                 À propos
               </Link>
             </nav>
-          )}
 
           {/* Desktop actions */}
-          {!isTransparent && (
-            <div className="nb-actions">
+          <div className="nb-actions">
               {session ? (
                 <div className="nb-menu-wrap" style={{ position: 'relative' }}>
                   <button
@@ -499,7 +496,6 @@ export default function Navbar({
                 </>
               )}
             </div>
-          )}
 
           {/* Hamburger */}
           <button

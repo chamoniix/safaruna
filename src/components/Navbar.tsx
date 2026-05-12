@@ -167,12 +167,11 @@ export default function Navbar({
         }
         /* ── Bar ── */
         .nb-bar {
-          background: rgba(250,247,240,0.96); backdrop-filter: blur(12px);
-          border-bottom: 1px solid rgba(201,168,76,0.2);
+          background: transparent;
+          border-bottom: none;
           padding: 0 4rem;
           height: 60px;
           display: flex; align-items: center; justify-content: space-between; gap: 1rem;
-          transition: background 0.35s ease, border-color 0.35s ease;
         }
         .nb-bar-dark {
           background: #1A1209 !important;
@@ -182,7 +181,7 @@ export default function Navbar({
         /* ── Logo ── */
         .nb-logo {
           font-family: var(--font-cormorant, serif); font-size: 1.75rem; font-weight: 700;
-          color: #1A1209; text-decoration: none; letter-spacing: 0.05em; white-space: nowrap; flex-shrink: 0;
+          color: #FAF7F0; text-decoration: none; letter-spacing: 0.05em; white-space: nowrap; flex-shrink: 0;
         }
         .nb-logo span { color: #C9A84C; }
         .nb-logo-light { color: #FAF7F0 !important; }
@@ -192,21 +191,21 @@ export default function Navbar({
         }
         .nb-menu-btn {
           display: inline-flex; align-items: center; gap: 0.35rem;
-          font-size: 0.8rem; font-weight: 500; color: #7A6D5A;
+          font-size: 0.8rem; font-weight: 500; color: rgba(255,255,255,0.9);
           letter-spacing: 0.05em; text-transform: uppercase;
           background: none; border: none; cursor: pointer;
           padding: 0.5rem 0.75rem; border-radius: 8px;
           transition: color 0.15s, background 0.15s;
           font-family: var(--font-manrope, sans-serif); white-space: nowrap;
         }
-        .nb-menu-btn:hover, .nb-menu-btn[aria-expanded="true"] { color: #1A1209; background: rgba(201,168,76,0.08); }
+        .nb-menu-btn:hover, .nb-menu-btn[aria-expanded="true"] { color: #FFFFFF; background: rgba(255,255,255,0.1); }
         .nb-nav-link {
-          font-size: 0.8rem; font-weight: 500; color: #7A6D5A;
+          font-size: 0.8rem; font-weight: 500; color: rgba(255,255,255,0.9);
           letter-spacing: 0.05em; text-transform: uppercase;
           text-decoration: none; padding: 0.5rem 0.75rem; border-radius: 8px;
           transition: color 0.15s, background 0.15s; white-space: nowrap;
         }
-        .nb-nav-link:hover { color: #1A1209; background: rgba(201,168,76,0.08); }
+        .nb-nav-link:hover { color: #FFFFFF; background: rgba(255,255,255,0.1); }
         .nb-nav-dark .nb-menu-btn { color: rgba(240,216,151,0.75); }
         .nb-nav-dark .nb-menu-btn:hover, .nb-nav-dark .nb-menu-btn[aria-expanded="true"] { color: #C9A84C; background: rgba(201,168,76,0.12); }
         .nb-nav-dark .nb-nav-link { color: rgba(240,216,151,0.75); }
@@ -239,27 +238,27 @@ export default function Navbar({
         /* ── Actions ── */
         .nb-actions { display: flex; align-items: center; gap: 0.75rem; flex-shrink: 0; }
         .nb-btn-login {
-          font-size: 0.8rem; font-weight: 600; color: #1A1209; text-decoration: none; white-space: nowrap;
+          font-size: 0.8rem; font-weight: 600; color: rgba(255,255,255,0.9); text-decoration: none; white-space: nowrap;
         }
-        .nb-btn-login:hover { color: #8B6914; }
+        .nb-btn-login:hover { color: #FFFFFF; }
         .nb-btn-login-dark { color: rgba(240,216,151,0.85) !important; }
         .nb-btn-login-dark:hover { color: #C9A84C !important; }
         .nb-btn-register {
-          background: #1A1209; color: #F0D897; padding: 0.5rem 1.2rem; border-radius: 50px;
-          font-size: 0.78rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+          background: #C9A84C; color: #1A1209; padding: 0.5rem 1.2rem; border-radius: 50px;
+          font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
           text-decoration: none; transition: background 0.2s; white-space: nowrap;
         }
-        .nb-btn-register:hover { background: #2D1F08; }
+        .nb-btn-register:hover { background: #b8962e; }
         /* ── User menu ── */
         .nb-user-btn {
           display: inline-flex; align-items: center; gap: 0.4rem;
-          background: none; border: 1px solid #E8DFC8; border-radius: 50px;
+          background: none; border: 1px solid rgba(255,255,255,0.35); border-radius: 50px;
           padding: 0.35rem 0.75rem 0.35rem 0.5rem; cursor: pointer;
           font-family: var(--font-manrope, sans-serif); transition: border-color 0.15s;
-          color: #1A1209;
+          color: rgba(255,255,255,0.9);
         }
-        .nb-user-btn:hover { border-color: #C9A84C; }
-        .nb-user-name { font-size: 0.78rem; font-weight: 600; color: #1A1209; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .nb-user-btn:hover { border-color: #C9A84C; color: #FFFFFF; }
+        .nb-user-name { font-size: 0.78rem; font-weight: 600; color: rgba(255,255,255,0.9); max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .nb-user-dropdown {
           position: absolute; top: calc(100% + 8px); right: 0;
           background: #FFFFFF; border-radius: 12px;
@@ -287,11 +286,11 @@ export default function Navbar({
         /* ── Hamburger ── */
         .nb-hamburger {
           display: none; flex-direction: column; justify-content: center; gap: 5px;
-          background: none; border: 1.5px solid #E8DFC8; border-radius: 8px;
+          background: none; border: 1.5px solid rgba(255,255,255,0.35); border-radius: 8px;
           cursor: pointer; padding: 6px 8px; width: 40px; height: 36px;
         }
         .nb-hamburger span {
-          display: block; height: 2px; background: #1A1209; border-radius: 2px;
+          display: block; height: 2px; background: rgba(255,255,255,0.9); border-radius: 2px;
           transition: transform 0.2s, opacity 0.2s; width: 100%;
         }
         .nb-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
@@ -470,7 +469,7 @@ export default function Navbar({
                     aria-label="Mon compte"
                   >
                     <UserIcon />
-                    <span className="nb-user-name">{session.user?.name?.split(' ')[0] || 'Mon compte'}</span>
+                    <span className="nb-user-name">{session.user?.name?.split(' ')[0] || 'Bienvenu'}</span>
                     <ChevronDown open={userMenuOpen} />
                   </button>
                   {userMenuOpen && (

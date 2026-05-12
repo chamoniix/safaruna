@@ -416,7 +416,7 @@ export default function Navbar({
 
           {/* Desktop nav */}
           {!isTransparent && (
-            <nav className={`nb-nav${isDarkHero ? ' nb-nav-dark' : ''}`} aria-label="Navigation principale">
+            <div role="navigation" aria-label="Navigation principale" className={`nb-nav${isDarkHero ? ' nb-nav-dark' : ''}`}>
               {MENUS.map(menu => (
                 <div
                   key={menu.id}
@@ -454,7 +454,7 @@ export default function Navbar({
               <Link href="/a-propos" className="nb-nav-link" onClick={handleMenuItemClick}>
                 À propos
               </Link>
-            </nav>
+            </div>
           )}
 
           {/* Desktop actions */}

@@ -161,6 +161,20 @@ export default function Navbar({
           position: fixed; top: 0; left: 0; right: 0; z-index: 200;
           font-family: var(--font-manrope, sans-serif);
         }
+        /* ── Brand centré mobile ── */
+        .nb-mobile-brand { display: none; }
+        @media (max-width: 1023px) {
+          .nb-mobile-brand {
+            display: block;
+            position: absolute; left: 50%; transform: translateX(-50%);
+            font-family: var(--font-cormorant, Georgia, serif);
+            font-size: 1rem; font-weight: 700;
+            color: white; letter-spacing: 0.1em;
+            white-space: nowrap; pointer-events: none;
+            opacity: 1; transition: opacity 250ms ease;
+          }
+          .nb-bar.mobile-at-top .nb-mobile-brand { opacity: 0; }
+        }
         @media (max-width: 1023px) {
           .nb-banner { display: none; }
           .nb-bar.mobile-at-top {
@@ -213,6 +227,7 @@ export default function Navbar({
           gap: 1rem;
           height: 48px;
           display: flex; align-items: center; justify-content: space-between;
+          position: relative;
           transition:
             height      300ms cubic-bezier(0.4,0,0.2,1),
             margin      300ms cubic-bezier(0.4,0,0.2,1),
@@ -471,6 +486,11 @@ export default function Navbar({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="SAFARUMA" style={{ height: hasScrolled ? '28px' : '36px' }} />
           </Link>
+
+          {/* Brand centré — mobile uniquement, disparaît quand transparent */}
+          <span className="nb-mobile-brand" aria-hidden="true">
+            SAFAR<span style={{ color: '#C9A84C' }}>U</span>MA
+          </span>
 
           {/* Desktop nav */}
           {!isTransparent && (

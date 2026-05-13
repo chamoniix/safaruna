@@ -172,7 +172,7 @@ export default function Navbar({
             font-family: var(--font-cormorant, Georgia, serif);
             font-size: 1rem; font-weight: 700;
             color: white; letter-spacing: 0.1em;
-            white-space: nowrap; pointer-events: none;
+            white-space: nowrap; text-decoration: none;
             opacity: 1; transition: opacity 250ms ease;
           }
           .nb-bar.mobile-at-top .nb-mobile-brand { opacity: 0; }
@@ -490,9 +490,9 @@ export default function Navbar({
           </Link>
 
           {/* Brand centré — mobile uniquement, disparaît quand transparent */}
-          <span className="nb-mobile-brand" aria-hidden="true">
+          <Link href="/" className="nb-mobile-brand" onClick={handleMenuItemClick}>
             SAFAR<span style={{ color: '#C9A84C' }}>U</span>MA
-          </span>
+          </Link>
 
           {/* Desktop nav */}
           {!isTransparent && (

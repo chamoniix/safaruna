@@ -177,13 +177,13 @@ export default function Navbar({
         /* ── Bar ── */
         .nb-bar {
           border-radius: 20px;
-          margin: 12px 2rem 0;
+          padding: 0 2rem;
+          gap: 1rem;
           height: 56px;
           display: flex; align-items: center; justify-content: space-between;
           transition:
             height      300ms cubic-bezier(0.4,0,0.2,1),
-            padding     300ms cubic-bezier(0.4,0,0.2,1),
-            gap         300ms cubic-bezier(0.4,0,0.2,1),
+            margin      300ms cubic-bezier(0.4,0,0.2,1),
             background  250ms ease,
             backdrop-filter 250ms ease,
             box-shadow  250ms ease;
@@ -390,7 +390,7 @@ export default function Navbar({
           .nb-nav { display: none; }
           .nb-actions { display: none; }
           .nb-hamburger { display: flex !important; }
-          .nb-bar { margin: 8px 1rem 0 !important; padding: 0 1rem !important; gap: 0 !important; }
+          .nb-bar { margin: 8px 1rem 0 !important; padding: 0 1.25rem !important; }
         }
       `}} />
 
@@ -424,16 +424,14 @@ export default function Navbar({
             WebkitBackdropFilter: 'blur(16px) saturate(1.6)',
             boxShadow: '0 4px 24px rgba(0,0,0,0.35), 0 1px 4px rgba(201,168,76,0.15)',
             height: '44px',
-            padding: '0 1.25rem',
-            gap: '0.5rem',
+            margin: '8px 4rem 0',
           } : {
             background: 'rgba(26,18,9,0.45)',
             backdropFilter: 'blur(12px) saturate(1.4)',
             WebkitBackdropFilter: 'blur(12px) saturate(1.4)',
             boxShadow: '0 4px 24px rgba(0,0,0,0.35), 0 1px 4px rgba(201,168,76,0.15)',
             height: '56px',
-            padding: '0 2rem',
-            gap: '1rem',
+            margin: '12px 2rem 0',
           }}>
 
           {/* Logo */}

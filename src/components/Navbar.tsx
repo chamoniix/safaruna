@@ -430,7 +430,7 @@ export default function Navbar({
           {/* Logo */}
           <Link href="/" className="nb-logo">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.svg" alt="SAFARUMA" />
+            <img src="/logo.png" alt="SAFARUMA" />
           </Link>
 
           {/* Desktop nav */}

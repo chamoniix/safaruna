@@ -96,7 +96,7 @@ export default function Navbar({
 
   // Scroll detection — background beige au-dessus du 1er bloc chiffres (~1 viewport de hauteur)
   useEffect(() => {
-    const onScroll = () => setHasScrolled(window.scrollY > window.innerHeight - 110);
+    const onScroll = () => setHasScrolled(window.scrollY > 200);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);

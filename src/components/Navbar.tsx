@@ -74,7 +74,7 @@ export default function Navbar({
   scrollThreshold?: number;
   darkHeroMode?: boolean;
 }) {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
@@ -479,7 +479,7 @@ export default function Navbar({
           {/* Desktop actions */}
           {!isTransparent && (
             <div className="nb-actions">
-              {session ? (
+              {status === 'loading' ? null : session ? (
                 <div className="nb-menu-wrap" style={{ position: 'relative' }}>
                   <button
                     className="nb-user-btn"

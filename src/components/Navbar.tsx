@@ -82,25 +82,47 @@ export default function Navbar({
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
+  const [atTop, setAtTop] = useState(true);
+  const [mobileHidden, setMobileHidden] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navRef = useRef<HTMLDivElement>(null);
+  const lastScrollY = useRef(0);
 
-  // Scroll detection (ancien prop-based)
+  // Scroll detection — desktop compact + mobile auto-hide + transparent-at-top
   useEffect(() => {
-    if (!transparentOnHero && !darkHeroMode) return;
-    const onScroll = () => setScrolled(window.scrollY > scrollThreshold);
+    const onScroll = () => {
+      const y = window.scrollY;
+      const delta = y - lastScrollY.current;
+
+      setHasScrolled(y > 200);
+      setAtTop(y < 60);
+
+      if (!transparentOnHero && !darkHeroMode) {
+        // noop for old prop
+      } else {
+        setScrolled(y > scrollThreshold);
+      }
+
+      // Mobile auto-hide
+      if (y < 60) {
+        setMobileHidden(false);
+      } else if (delta > 4) {
+        setMobileHidden(true);
+      } else if (delta < -4) {
+        setMobileHidden(false);
+      }
+
+      lastScrollY.current = y;
+    };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, [transparentOnHero, darkHeroMode, scrollThreshold]);
 
-  // Scroll detection — background beige au-dessus du 1er bloc chiffres (~1 viewport de hauteur)
+  // Toujours montrer la navbar quand le menu mobile est ouvert
   useEffect(() => {
-    const onScroll = () => setHasScrolled(window.scrollY > 200);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+    if (mobileOpen) setMobileHidden(false);
+  }, [mobileOpen]);
 
   // Close on outside click
   useEffect(() => {
@@ -161,6 +183,39 @@ export default function Navbar({
         .nb-root {
           position: fixed; top: 0; left: 0; right: 0; z-index: 200;
           font-family: var(--font-manrope, sans-serif);
+        }
+        @media (max-width: 1023px) {
+          .nb-root { transition: transform 320ms cubic-bezier(0.4,0,0.2,1); }
+          .nb-root.mobile-hidden { transform: translateY(-110%); }
+          .nb-banner { display: none; }
+          .nb-bar.mobile-at-top {
+            background: transparent !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            box-shadow: none !important;
+          }
+        }
+        /* ── CTA flottant mobile (homepage uniquement) ── */
+        .nb-mobile-cta {
+          display: none;
+          position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+          z-index: 199;
+        }
+        @media (max-width: 1023px) {
+          .nb-mobile-cta { display: block; }
+          .nb-mobile-cta-btn {
+            display: block; white-space: nowrap;
+            background: #C9A84C; color: #1A1209;
+            padding: 14px 30px; border-radius: 50px;
+            font-size: 12px; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+            text-decoration: none;
+            box-shadow: 0 8px 28px rgba(201,168,76,0.5), 0 2px 8px rgba(0,0,0,0.2);
+            animation: nb-cta-rise 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
+          }
+          @keyframes nb-cta-rise {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+          }
         }
         /* ── Banner ── */
         .nb-banner {
@@ -394,7 +449,7 @@ export default function Navbar({
         }
       `}} />
 
-      <div className="nb-root" ref={navRef}>
+      <div className={`nb-root${mobileHidden ? ' mobile-hidden' : ''}`} ref={navRef}>
 
         {/* ── Banner ── */}
         {!hideBanner && (
@@ -417,7 +472,7 @@ export default function Navbar({
         )}
 
         {/* ── Bar desktop ── */}
-        <div className={`nb-bar${isDarkHero ? ' nb-bar-dark' : ''}`}
+        <div className={`nb-bar${isDarkHero ? ' nb-bar-dark' : ''}${atTop ? ' mobile-at-top' : ''}`}
           style={hasScrolled ? {
             background: 'rgba(48,30,10,0.96)',
             backdropFilter: 'blur(16px) saturate(1.6)',
@@ -540,6 +595,15 @@ export default function Navbar({
             <span style={isDarkHero || isTransparent ? { background: 'rgba(240,216,151,0.9)' } : {}} />
           </button>
         </div>
+
+        {/* ── CTA flottant mobile — homepage uniquement ── */}
+        {pathname === '/' && !atTop && (
+          <div className="nb-mobile-cta">
+            <Link href="/guides" className="nb-mobile-cta-btn">
+              Trouver mon guide →
+            </Link>
+          </div>
+        )}
 
         {/* ── Mobile overlay ── */}
         <div

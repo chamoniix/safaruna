@@ -179,7 +179,7 @@ export default function Navbar({
           border-radius: 20px;
           padding: 0 2rem;
           gap: 1rem;
-          height: 56px;
+          height: 48px;
           display: flex; align-items: center; justify-content: space-between;
           transition:
             height      300ms cubic-bezier(0.4,0,0.2,1),
@@ -419,19 +419,19 @@ export default function Navbar({
         {/* ── Bar desktop ── */}
         <div className={`nb-bar${isDarkHero ? ' nb-bar-dark' : ''}`}
           style={hasScrolled ? {
-            background: 'rgba(26,18,9,0.82)',
+            background: 'rgba(48,30,10,0.96)',
             backdropFilter: 'blur(16px) saturate(1.6)',
             WebkitBackdropFilter: 'blur(16px) saturate(1.6)',
-            boxShadow: '0 4px 24px rgba(0,0,0,0.35), 0 1px 4px rgba(201,168,76,0.15)',
-            height: '44px',
+            boxShadow: '0 6px 28px rgba(0,0,0,0.55), 0 1px 0 rgba(201,168,76,0.25)',
+            height: '38px',
             margin: '8px 12rem 0',
           } : {
-            background: 'rgba(26,18,9,0.45)',
-            backdropFilter: 'blur(12px) saturate(1.4)',
-            WebkitBackdropFilter: 'blur(12px) saturate(1.4)',
-            boxShadow: '0 4px 24px rgba(0,0,0,0.35), 0 1px 4px rgba(201,168,76,0.15)',
-            height: '56px',
-            margin: '12px 2rem 0',
+            background: 'rgba(48,30,10,0.88)',
+            backdropFilter: 'blur(14px) saturate(1.5)',
+            WebkitBackdropFilter: 'blur(14px) saturate(1.5)',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.4), 0 1px 0 rgba(201,168,76,0.2)',
+            height: '48px',
+            margin: '10px 3rem 0',
           }}>
 
           {/* Logo */}

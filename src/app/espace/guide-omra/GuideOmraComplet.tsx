@@ -183,7 +183,7 @@ export default function GuideOmraComplet() {
 
         /* Du'as */
         .go-dua-card { background: #0D0805; border: 1px solid rgba(201,168,76,0.25); border-radius: 12px; padding: 1.5rem 1.75rem; margin-bottom: 1rem; }
-        .go-dua-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #C9A84C; margin-bottom: 0.65rem; }
+        .go-dua-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.9); margin-bottom: 0.65rem; }
         .go-dua-arabic { font-family: 'Tajawal', serif; font-size: 1.5rem; color: #F0D897; direction: rtl; line-height: 1.8; margin-bottom: 0.75rem; text-align: right; }
         .go-dua-transliteration { font-size: 0.82rem; font-style: italic; color: rgba(255,255,255,0.65); margin-bottom: 0.4rem; }
         .go-dua-translation { font-size: 0.88rem; color: rgba(255,255,255,0.85); line-height: 1.65; }
@@ -364,7 +364,7 @@ export default function GuideOmraComplet() {
 
           {/* PRÉPARATION */}
           <section id="preparation" className="go-section">
-            <span className="go-section-tag go-reveal">Avant le départ</span>
+            <span className="go-section-tag">Avant le départ</span>
             <h2 className="go-reveal go-reveal-d1">La Préparation</h2>
             <p className="go-reveal go-reveal-d2">
               La Omra commence bien avant d'embarquer dans l'avion. Une préparation sérieuse — spirituelle, physique et logistique — fait toute la différence entre un voyage accompli mécaniquement et une expérience qui transforme.
@@ -391,7 +391,7 @@ export default function GuideOmraComplet() {
 
           {/* IHRAM */}
           <section id="ihram" className="go-section">
-            <span className="go-section-tag go-reveal">Rituel 1</span>
+            <span className="go-section-tag">Rituel 1</span>
             <h2 className="go-reveal go-reveal-d1">L'Ihram — الإحرام</h2>
             <p className="go-reveal go-reveal-d2">
               L'Ihram est l'état sacré dans lequel le pèlerin entre pour accomplir la Omra. Il commence au <strong>miqat</strong> — la frontière géographique sacrée autour de La Mecque — et se compose d'une intention (niyyah), d'une tenue et d'un ensemble d'interdictions.
@@ -443,7 +443,7 @@ export default function GuideOmraComplet() {
 
           {/* TAWAF */}
           <section id="tawaf" className="go-section">
-            <span className="go-section-tag go-reveal">Rituel 2</span>
+            <span className="go-section-tag">Rituel 2</span>
             <h2 className="go-reveal go-reveal-d1">Le Tawaf — الطواف</h2>
             <p className="go-reveal go-reveal-d2">
               Le Tawaf consiste à tourner <strong>sept fois</strong> autour de la Kaaba dans le sens antihoraire, en commençant et en finissant à la Hajar Al-Aswad (la Pierre Noire). C'est l'image de l'âme qui tourne autour de son centre — Dieu.
@@ -494,7 +494,7 @@ export default function GuideOmraComplet() {
 
           {/* SA'I */}
           <section id="sai" className="go-section">
-            <span className="go-section-tag go-reveal">Rituel 3</span>
+            <span className="go-section-tag">Rituel 3</span>
             <h2 className="go-reveal go-reveal-d1">La Sa'i — السعي</h2>
             <p className="go-reveal go-reveal-d2">
               La Sa'i commémore la course d'Hajar, femme d'Ibrahim ﷺ, entre les collines de Safa et Marwa à la recherche d'eau pour son fils Ismaïl. Dieu répondit à son effort et sa foi en faisant jaillir la source de Zamzam.
@@ -528,7 +528,7 @@ export default function GuideOmraComplet() {
 
           {/* TAHALLUL */}
           <section id="tahallul" className="go-section">
-            <span className="go-section-tag go-reveal">Rituel 4</span>
+            <span className="go-section-tag">Rituel 4</span>
             <h2 className="go-reveal go-reveal-d1">Le Tahallul — التحلل</h2>
             <p className="go-reveal go-reveal-d2">
               Le Tahallul — «sortir de l'état sacré» — marque la fin de la Omra. Pour les hommes, il consiste à se <strong>raser la tête</strong> (halq, recommandé) ou à couper les cheveux de façon égale (taqsir). Pour les femmes, couper une mèche de la longueur d'un bout de doigt suffit.

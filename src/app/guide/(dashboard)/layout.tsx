@@ -172,6 +172,9 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
               </button>
               <span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 600, color: '#1A1209' }}>Espace Guide</span>
             </div>
+            <span style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', fontFamily: 'var(--font-cormorant, Georgia, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209', letterSpacing: '0.08em', whiteSpace: 'nowrap', pointerEvents: 'none' }}>
+              SAFAR<span style={{ color: '#C9A84C' }}>U</span>MA
+            </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <button style={{ position: 'relative', width: 44, height: 44, borderRadius: '50%', border: '1px solid #EDE8DC', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '1rem', flexShrink: 0 }}>
                 🔔

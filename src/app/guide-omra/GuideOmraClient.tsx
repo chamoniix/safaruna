@@ -39,7 +39,7 @@ export default function GuideOmraClient() {
 
   return (
     <>
-      <Navbar transparentOnHero scrollThreshold={250} />
+      <Navbar />
 
       {/* Hero */}
       <section className="guide-hero">

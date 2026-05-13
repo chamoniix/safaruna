@@ -190,11 +190,9 @@ export default function Navbar({
         }
         /* ── Logo ── */
         .nb-logo {
-          font-family: var(--font-cormorant, serif); font-size: 1.75rem; font-weight: 700;
-          color: #FAF7F0; text-decoration: none; letter-spacing: 0.05em; white-space: nowrap; flex-shrink: 0;
+          display: flex; align-items: center; flex-shrink: 0; text-decoration: none;
         }
-        .nb-logo span { color: #C9A84C; }
-        .nb-logo-light { color: #FAF7F0 !important; }
+        .nb-logo img { height: 36px; width: auto; display: block; transition: height 300ms cubic-bezier(0.4,0,0.2,1); }
         /* ── Desktop nav ── */
         .nb-nav {
           display: flex; align-items: center; gap: 0.25rem; flex: 1; justify-content: center;
@@ -430,9 +428,9 @@ export default function Navbar({
           }}>
 
           {/* Logo */}
-          <Link href="/" className={`nb-logo${isDarkHero ? ' nb-logo-light' : ''}`}
-            style={isTransparent ? { opacity: 0, pointerEvents: 'none' } : {}}>
-            SAFAR<span>U</span>MA
+          <Link href="/" className="nb-logo">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.svg" alt="SAFARUMA" />
           </Link>
 
           {/* Desktop nav */}

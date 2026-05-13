@@ -131,6 +131,8 @@ export default function Navbar({
   const isTransparent = transparentOnHero && !scrolled;
   const isDarkHero = darkHeroMode && !scrolled;
   const hideBanner = pathname ? HIDE_BANNER_PATHS.some(p => pathname.startsWith(p)) : false;
+  // Sur les pages guide/admin/espace, pas de transparent : navbar toujours solide
+  const isAtTop = atTop && !pathname?.startsWith('/guide') && !pathname?.startsWith('/admin') && !pathname?.startsWith('/espace');
   const role = (session?.user as { role?: string })?.role;
 
   const dashboardHref =
@@ -464,7 +466,7 @@ export default function Navbar({
         )}
 
         {/* ── Bar desktop ── */}
-        <div className={`nb-bar${isDarkHero ? ' nb-bar-dark' : ''}${atTop ? ' mobile-at-top' : ''}`}
+        <div className={`nb-bar${isDarkHero ? ' nb-bar-dark' : ''}${isAtTop ? ' mobile-at-top' : ''}`}
           style={hasScrolled ? {
             background: 'rgba(48,30,10,0.96)',
             backdropFilter: 'blur(16px) saturate(1.6)',

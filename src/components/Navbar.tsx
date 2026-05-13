@@ -424,7 +424,7 @@ export default function Navbar({
             WebkitBackdropFilter: 'blur(16px) saturate(1.6)',
             boxShadow: '0 4px 24px rgba(0,0,0,0.35), 0 1px 4px rgba(201,168,76,0.15)',
             height: '44px',
-            margin: '8px 7rem 0',
+            margin: '8px 9rem 0',
           } : {
             background: 'rgba(26,18,9,0.45)',
             backdropFilter: 'blur(12px) saturate(1.4)',

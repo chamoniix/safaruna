@@ -176,11 +176,12 @@ export default function Navbar({
         }
         /* ── Bar ── */
         .nb-bar {
-          background: transparent;
-          border-bottom: none;
-          padding: 0 4rem;
-          height: 60px;
+          border-radius: 20px;
+          margin: 12px 2rem 0;
+          padding: 0 2rem;
+          height: 56px;
           display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+          transition: height 300ms cubic-bezier(0.4,0,0.2,1), background 250ms ease, backdrop-filter 250ms ease, box-shadow 250ms ease;
         }
         .nb-bar-dark {
           background: #1A1209 !important;
@@ -386,7 +387,7 @@ export default function Navbar({
           .nb-nav { display: none; }
           .nb-actions { display: none; }
           .nb-hamburger { display: flex !important; }
-          .nb-bar { padding: 0 1.25rem !important; }
+          .nb-bar { margin: 8px 1rem 0 !important; padding: 0 1.25rem !important; }
         }
       `}} />
 
@@ -415,14 +416,17 @@ export default function Navbar({
         {/* ── Bar desktop ── */}
         <div className={`nb-bar${isDarkHero ? ' nb-bar-dark' : ''}`}
           style={hasScrolled ? {
-            background: 'rgba(250,247,240,0.97)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-            borderBottom: '1px solid rgba(201,168,76,0.2)',
-            boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
-            transition: 'background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease',
+            background: 'rgba(26,18,9,0.82)',
+            backdropFilter: 'blur(16px) saturate(1.6)',
+            WebkitBackdropFilter: 'blur(16px) saturate(1.6)',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.35), 0 1px 4px rgba(201,168,76,0.15)',
+            height: '44px',
           } : {
-            transition: 'background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease',
+            background: 'rgba(26,18,9,0.45)',
+            backdropFilter: 'blur(12px) saturate(1.4)',
+            WebkitBackdropFilter: 'blur(12px) saturate(1.4)',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.35), 0 1px 4px rgba(201,168,76,0.15)',
+            height: '56px',
           }}>
 
           {/* Logo */}

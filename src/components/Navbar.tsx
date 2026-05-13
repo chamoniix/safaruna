@@ -83,46 +83,23 @@ export default function Navbar({
   const [scrolled, setScrolled] = useState(false);
   const [hasScrolled, setHasScrolled] = useState(false);
   const [atTop, setAtTop] = useState(true);
-  const [mobileHidden, setMobileHidden] = useState(false);
+  const [ctaVisible, setCtaVisible] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navRef = useRef<HTMLDivElement>(null);
-  const lastScrollY = useRef(0);
 
-  // Scroll detection — desktop compact + mobile auto-hide + transparent-at-top
+  // Scroll detection — desktop compact + mobile transparent-at-top + CTA
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY;
-      const delta = y - lastScrollY.current;
-
       setHasScrolled(y > 200);
-      setAtTop(y < 60);
-
-      if (!transparentOnHero && !darkHeroMode) {
-        // noop for old prop
-      } else {
-        setScrolled(y > scrollThreshold);
-      }
-
-      // Mobile auto-hide
-      if (y < 60) {
-        setMobileHidden(false);
-      } else if (delta > 4) {
-        setMobileHidden(true);
-      } else if (delta < -4) {
-        setMobileHidden(false);
-      }
-
-      lastScrollY.current = y;
+      setAtTop(y < 40);
+      setCtaVisible(y > 150);
+      if (transparentOnHero || darkHeroMode) setScrolled(y > scrollThreshold);
     };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, [transparentOnHero, darkHeroMode, scrollThreshold]);
-
-  // Toujours montrer la navbar quand le menu mobile est ouvert
-  useEffect(() => {
-    if (mobileOpen) setMobileHidden(false);
-  }, [mobileOpen]);
 
   // Close on outside click
   useEffect(() => {
@@ -185,8 +162,6 @@ export default function Navbar({
           font-family: var(--font-manrope, sans-serif);
         }
         @media (max-width: 1023px) {
-          .nb-root { transition: transform 320ms cubic-bezier(0.4,0,0.2,1); }
-          .nb-root.mobile-hidden { transform: translateY(-110%); }
           .nb-banner { display: none; }
           .nb-bar.mobile-at-top {
             background: transparent !important;
@@ -195,14 +170,16 @@ export default function Navbar({
             box-shadow: none !important;
           }
         }
-        /* ── CTA flottant mobile (homepage uniquement) ── */
+        /* ── CTA flottant mobile — élément indépendant hors navbar ── */
         .nb-mobile-cta {
           display: none;
-          position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
-          z-index: 199;
         }
         @media (max-width: 1023px) {
-          .nb-mobile-cta { display: block; }
+          .nb-mobile-cta {
+            display: block;
+            position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+            z-index: 199;
+          }
           .nb-mobile-cta-btn {
             display: block; white-space: nowrap;
             background: #C9A84C; color: #1A1209;
@@ -449,7 +426,7 @@ export default function Navbar({
         }
       `}} />
 
-      <div className={`nb-root${mobileHidden ? ' mobile-hidden' : ''}`} ref={navRef}>
+      <div className="nb-root" ref={navRef}>
 
         {/* ── Banner ── */}
         {!hideBanner && (
@@ -596,15 +573,6 @@ export default function Navbar({
           </button>
         </div>
 
-        {/* ── CTA flottant mobile — homepage uniquement ── */}
-        {pathname === '/' && !atTop && (
-          <div className="nb-mobile-cta">
-            <Link href="/guides" className="nb-mobile-cta-btn">
-              Trouver mon guide →
-            </Link>
-          </div>
-        )}
-
         {/* ── Mobile overlay ── */}
         <div
           className={`nb-mobile-overlay${mobileOpen ? ' open' : ''}`}
@@ -684,6 +652,15 @@ export default function Navbar({
           </div>
         </div>
       </div>
+
+      {/* ── CTA flottant mobile — hors nb-root pour éviter tout bug de transform ── */}
+      {pathname === '/' && ctaVisible && (
+        <div className="nb-mobile-cta">
+          <Link href="/guides" className="nb-mobile-cta-btn">
+            Trouver mon guide →
+          </Link>
+        </div>
+      )}
     </>
   );
 }

@@ -36,6 +36,26 @@ export const metadata: Metadata = {
   },
 };
 
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: "La Omra étape par étape 2026 — Rituels, Du'as & Conseils",
+  description: "Guide spirituel complet de la Omra : Ihram, Tawaf, Sa'i, Tahallul.",
+  url: 'https://safaruma.com/guide-omra',
+  publisher: { '@type': 'Organization', name: 'SAFARUMA', url: 'https://safaruma.com' },
+  isAccessibleForFree: false,
+  hasPart: {
+    '@type': 'WebPageElement',
+    isAccessibleForFree: false,
+    cssSelector: '.guide-gate-blur',
+  },
+};
+
 export default function GuideOmraPage() {
-  return <GuideOmraClient />;
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <GuideOmraClient />
+    </>
+  );
 }

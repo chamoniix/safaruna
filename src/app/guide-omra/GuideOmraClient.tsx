@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -15,9 +16,11 @@ const SECTIONS = [
 ];
 
 export default function GuideOmraClient() {
+  const { data: session, status } = useSession();
   const [activeSection, setActiveSection] = useState('introduction');
   const [openFaq, setOpenFaq] = useState<string | null>(null);
   const toggleFaq = (id: string) => setOpenFaq(prev => prev === id ? null : id);
+  const isGated = status === 'unauthenticated';
 
   useEffect(() => {
     const onScroll = () => {
@@ -193,6 +196,10 @@ export default function GuideOmraClient() {
           </div>
           </div>{/* end cards-grid-2 faq */}
         </section>
+
+        {/* ── CONTENT GATE ── */}
+        <div style={{ position: 'relative' }}>
+          <div className={isGated ? 'guide-gate-blur' : ''}>
 
         {/* ── PRÉPARATION ── */}
         <section id="preparation">
@@ -606,9 +613,59 @@ export default function GuideOmraClient() {
           </Link>
         </div>
 
+          </div>{/* end guide-gate-blur */}
+          {isGated && <GateOverlay />}
+        </div>{/* end gate wrapper */}
+
       </article>
 
       <Footer />
     </>
+  );
+}
+
+function GateOverlay() {
+  return (
+    <div style={{
+      position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+      display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+      paddingTop: '60px',
+      background: 'linear-gradient(to bottom, transparent 0%, rgba(250,247,240,0.97) 12%)',
+      zIndex: 10,
+    }}>
+      <div style={{
+        background: 'white', border: '1px solid #EDE8DC',
+        borderLeft: '3px solid #C9A84C',
+        borderRadius: 20, padding: '32px 28px',
+        maxWidth: 380, width: '90%', textAlign: 'center',
+        boxShadow: '0 12px 48px rgba(0,0,0,0.12)',
+      }}>
+        <div style={{ fontSize: '2rem', marginBottom: 12 }}>🕋</div>
+        <h3 style={{
+          fontFamily: 'var(--font-cormorant, Georgia, serif)',
+          fontSize: '1.5rem', fontWeight: 600, color: '#1A1209',
+          margin: '0 0 10px', lineHeight: 1.25,
+        }}>
+          La suite du guide<br />vous attend
+        </h3>
+        <p style={{ fontSize: '0.88rem', color: '#7A6D5A', lineHeight: 1.75, margin: '0 0 22px' }}>
+          Préparation, rituels complets, FAQ pratique et conseils après la Omra — créez votre compte gratuit en 5 secondes.
+        </p>
+        <Link href="/inscription" style={{
+          display: 'block', background: '#1A1209', color: '#F0D897',
+          padding: '13px 24px', borderRadius: 50,
+          fontWeight: 700, fontSize: '0.88rem',
+          textDecoration: 'none', letterSpacing: '0.04em',
+          marginBottom: 12,
+        }}>
+          Créer mon compte — 100% gratuit
+        </Link>
+        <Link href="/connexion" style={{
+          fontSize: '0.8rem', color: '#9A8D7A', textDecoration: 'none',
+        }}>
+          Déjà un compte ? Se connecter
+        </Link>
+      </div>
+    </div>
   );
 }

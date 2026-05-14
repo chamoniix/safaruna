@@ -624,53 +624,115 @@ export default function GuideOmraClient() {
   );
 }
 
+const GATE_FEATURES = [
+  "Rituels complets avec du'as",
+  'Checklist de préparation cochable',
+  '11 FAQ pratiques — réponses complètes',
+  'Après la Omra — préserver la baraka',
+];
+
 function GateOverlay() {
   return (
     <div style={{
-      position: 'relative',
-      marginTop: '-280px',
-      zIndex: 10,
+      position: 'relative', marginTop: '-280px', zIndex: 10,
       background: 'linear-gradient(to bottom, transparent 0%, rgba(250,247,240,0.92) 22%, rgba(250,247,240,1) 40%)',
-      paddingTop: '48px',
-      paddingBottom: '40px',
-      display: 'flex',
-      justifyContent: 'center',
+      paddingTop: '48px', paddingBottom: '40px',
+      display: 'flex', justifyContent: 'center',
     }}>
+      {/* Gold gradient border wrapper */}
       <div style={{
-        background: '#FAF7F0',
-        border: '1px solid rgba(201,168,76,0.25)',
-        borderRadius: 16,
-        padding: '28px 28px 24px',
-        maxWidth: 380, width: '90%', textAlign: 'center',
-        boxShadow: '0 24px 64px rgba(26,18,9,0.45), 0 4px 16px rgba(26,18,9,0.2)',
-        animation: 'gateCardIn 0.4s ease-out both',
+        position: 'relative', borderRadius: 20, padding: '1.5px',
+        background: 'linear-gradient(135deg, #C9A84C 0%, #F0D897 28%, #C9A84C 50%, #8B6B2A 72%, #C9A84C 100%)',
+        animation: 'gateGoldGlow 3s ease-in-out infinite, gateCardIn 0.45s ease-out both',
+        boxShadow: '0 0 40px rgba(201,168,76,0.22), 0 20px 60px rgba(0,0,0,0.55)',
+        maxWidth: 390, width: '90%',
       }}>
-        {/* Ligne or — signal premium */}
-        <div style={{ width: 32, height: 1, background: '#C9A84C', margin: '0 auto 16px' }} />
-        <h3 style={{
-          fontFamily: 'var(--font-cormorant, Georgia, serif)',
-          fontSize: '1.4rem', fontWeight: 700, color: '#1A1209',
-          margin: '0 0 6px', lineHeight: 1.25,
+        {/* Dark inner card */}
+        <div style={{
+          background: '#1A1209', borderRadius: '18.5px',
+          padding: '26px 24px 22px', textAlign: 'center',
+          position: 'relative', overflow: 'hidden',
         }}>
-          Créez votre compte <span style={{ color: '#C9A84C' }}>gratuit</span><br />en 5 secondes
-        </h3>
-        <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap', margin: '12px 0 20px' }}>
-          {['Rituels complets', 'Checklist', 'FAQ', 'Préparation'].map(f => (
-            <span key={f} style={{ fontSize: '0.72rem', color: '#7A6D5A', background: 'rgba(201,168,76,0.1)', padding: '3px 8px', borderRadius: 4 }}>{f}</span>
-          ))}
+          {/* Radial glow top */}
+          <div style={{
+            position: 'absolute', top: -50, left: '50%', transform: 'translateX(-50%)',
+            width: 240, height: 120, pointerEvents: 'none',
+            background: 'radial-gradient(ellipse, rgba(201,168,76,0.18) 0%, transparent 70%)',
+          }} />
+          {/* Shimmer sweep */}
+          <div style={{
+            position: 'absolute', top: 0, left: 0, width: '45%', height: '100%',
+            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.025), transparent)',
+            animation: 'gateShimmer 4.5s ease-in-out infinite',
+            pointerEvents: 'none',
+          }} />
+
+          {/* Icône PDF */}
+          <div style={{
+            width: 46, height: 46, borderRadius: '50%', margin: '0 auto 14px',
+            background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.28)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            position: 'relative', zIndex: 1,
+          }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="#C9A84C" strokeWidth="1.4" strokeLinecap="round"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="#C9A84C" strokeWidth="1.4" strokeLinejoin="round"/>
+              <path d="M9 7h6M9 11h4" stroke="#C9A84C" strokeWidth="1" strokeLinecap="round"/>
+            </svg>
+          </div>
+
+          <div style={{
+            fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.2em',
+            textTransform: 'uppercase', color: 'rgba(201,168,76,0.7)',
+            marginBottom: 10, position: 'relative', zIndex: 1,
+          }}>
+            Guide complet — Accès gratuit
+          </div>
+
+          <h3 style={{
+            fontFamily: 'var(--font-cormorant, Georgia, serif)',
+            fontSize: '1.3rem', fontWeight: 700, color: '#FAF7F0',
+            margin: '0 0 5px', lineHeight: 1.25, position: 'relative', zIndex: 1,
+          }}>
+            Créez votre compte <span style={{ color: '#F0D897' }}>gratuit</span><br />en 5 secondes
+          </h3>
+
+          <div style={{ fontSize: '0.68rem', color: 'rgba(250,247,240,0.38)', margin: '0 0 16px', position: 'relative', zIndex: 1 }}>
+            Accédez à la suite du guide Omra
+          </div>
+
+          <div style={{ width: 36, height: '0.5px', background: 'rgba(201,168,76,0.3)', margin: '0 auto 18px', position: 'relative', zIndex: 1 }} />
+
+          {/* Features list avec ✦ — padding latéral pour centrage */}
+          <div style={{
+            display: 'flex', flexDirection: 'column', gap: 9,
+            marginBottom: 22, textAlign: 'left',
+            padding: '0 12px', position: 'relative', zIndex: 1,
+          }}>
+            {GATE_FEATURES.map(f => (
+              <div key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 9, fontSize: '0.72rem', color: 'rgba(250,247,240,0.72)', lineHeight: 1.35 }}>
+                <span style={{ color: '#C9A84C', fontSize: '0.625rem', flexShrink: 0, marginTop: 2 }}>✦</span>
+                {f}
+              </div>
+            ))}
+          </div>
+
+          <Link href="/inscription" style={{
+            display: 'block', width: '100%',
+            background: 'linear-gradient(135deg, #C9A84C 0%, #F0D897 50%, #C9A84C 100%)',
+            color: '#1A1209', padding: '13px 0', borderRadius: 50,
+            fontSize: '0.84rem', fontWeight: 800, letterSpacing: '0.05em',
+            textDecoration: 'none', marginBottom: 11,
+            boxShadow: '0 4px 22px rgba(201,168,76,0.42)',
+            position: 'relative', zIndex: 1,
+          }}>
+            S&apos;inscrire gratuitement
+          </Link>
+
+          <Link href="/connexion" style={{ fontSize: '0.67rem', color: 'rgba(250,247,240,0.3)', textDecoration: 'none', position: 'relative', zIndex: 1 }}>
+            Déjà un compte ? <span style={{ color: 'rgba(201,168,76,0.6)' }}>Se connecter</span>
+          </Link>
         </div>
-        <Link href="/inscription" style={{
-          display: 'block', background: '#1A1209', color: '#F0D897',
-          padding: '13px 24px', borderRadius: 50,
-          fontWeight: 700, fontSize: '0.88rem',
-          textDecoration: 'none', letterSpacing: '0.04em',
-          marginBottom: 10,
-        }}>
-          Créer mon compte
-        </Link>
-        <Link href="/connexion" style={{ fontSize: '0.8rem', color: '#9A8D7A', textDecoration: 'none' }}>
-          J&apos;ai déjà un compte →
-        </Link>
       </div>
     </div>
   );

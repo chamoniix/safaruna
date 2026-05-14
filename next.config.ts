@@ -14,7 +14,17 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/ce-qui-vous-attend',
-        destination: '/vivre-la-omra',
+        destination: '/omra-avec-guide-prive',
+        permanent: true,
+      },
+      {
+        source: '/vivre-la-omra',
+        destination: '/omra-avec-guide-prive',
+        permanent: true,
+      },
+      {
+        source: '/comment-ca-marche',
+        destination: '/omra-avec-guide-prive',
         permanent: true,
       },
       {

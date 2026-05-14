@@ -45,7 +45,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: 'https://safaruma.com/accompagnements',              lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.9 },
     { url: 'https://safaruma.com/omra-mobilite-reduite',        lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
     { url: 'https://safaruma.com/offrir-omra-parents',          lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-    { url: 'https://safaruma.com/vivre-la-omra',                 lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
+    { url: 'https://safaruma.com/omra-avec-guide-prive',          lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
+    { url: 'https://safaruma.com/comment-se-passe-la-omra',      lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
     { url: 'https://safaruma.com/nos-guides-certifies',          lastModified: new Date(), changeFrequency: 'monthly', priority: 0.7 },
 
     // ── Lieux saints (pages individuelles) ──

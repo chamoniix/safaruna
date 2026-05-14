@@ -558,7 +558,7 @@ footer div::-webkit-scrollbar { display: none; }
 /* ── GUIDE OMRA PUBLIC PAGE ─────────────────────────────────────────────── */
 .guide-hero {
   background: #1A1209;
-  padding: clamp(90px, 16vw, 140px) 18px 40px;
+  padding: clamp(130px, 14vw, 160px) 18px 40px;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -574,7 +574,7 @@ footer div::-webkit-scrollbar { display: none; }
   user-select: none;
   line-height: 1;
 }
-.guide-hero-inner { position: relative; z-index: 2; max-width: 720px; margin: 0 auto; }
+.guide-hero-inner { position: relative; z-index: 2; max-width: 760px; margin: 0 auto; }
 .guide-hero h1 {
   font-family: var(--font-cormorant, serif);
   font-size: clamp(28px, 6vw, 48px);
@@ -611,7 +611,7 @@ footer div::-webkit-scrollbar { display: none; }
 .guide-stepper {
   display: flex; gap: 10px;
   padding: 22px clamp(16px, 3vw, 24px) 0;
-  max-width: 720px; margin: 0 auto; background: #FAF7F0;
+  max-width: 1200px; margin: 0 auto; background: #FAF7F0;
 }
 .step-btn {
   flex: 1; padding: 12px; border-radius: 12px;
@@ -623,7 +623,18 @@ footer div::-webkit-scrollbar { display: none; }
 .step-inactive { background: rgba(26,18,9,0.05); color: rgba(26,18,9,0.5); border: 0.5px solid rgba(26,18,9,0.1); }
 .guide-content {
   padding: 20px clamp(16px, 3vw, 24px) 32px;
-  max-width: 720px; margin: 0 auto; background: #FAF7F0;
+  max-width: 1200px; margin: 0 auto; background: #FAF7F0;
+}
+/* ── Grilles desktop ── */
+.cards-grid-2 { display: flex; flex-direction: column; gap: 0; }
+.cards-grid-2 .info-card, .cards-grid-2 .faq-card { margin: 7px 0; }
+@media (min-width: 1024px) {
+  .guide-hero { padding: 150px 64px 56px; }
+  .guide-hero-inner { max-width: 860px; }
+  .guide-stepper { padding: 24px 64px 0; }
+  .guide-content { padding: 32px 64px 64px; }
+  .cards-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .cards-grid-2 .info-card, .cards-grid-2 .faq-card { margin: 0; }
 }
 .guide-content section { padding: 0; }
 .guide-content h2 {

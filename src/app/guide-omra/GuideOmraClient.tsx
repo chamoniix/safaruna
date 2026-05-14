@@ -120,6 +120,7 @@ export default function GuideOmraClient() {
             adaptée à sa situation.
           </p>
 
+          <div className="cards-grid-2">
           <div className="info-card">
             <div className="info-icon">
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
@@ -156,7 +157,9 @@ export default function GuideOmraClient() {
               </p>
             </div>
           </div>
+          </div>{/* end cards-grid-2 info */}
 
+          <div className="cards-grid-2">
           <div className="faq-card">
             <div className="faq-num">?</div>
             <div className="faq-content">
@@ -185,6 +188,7 @@ export default function GuideOmraClient() {
               </p>
             </div>
           </div>
+          </div>{/* end cards-grid-2 faq */}
         </section>
 
         {/* ── PRÉPARATION ── */}
@@ -399,6 +403,7 @@ export default function GuideOmraClient() {
             avec des réponses claires et précises.
           </p>
 
+          <div className="cards-grid-2">
           <div className="faq-card">
             <div className="faq-num">5</div>
             <div className="faq-content">
@@ -495,6 +500,7 @@ export default function GuideOmraClient() {
               </p>
             </div>
           </div>
+          </div>{/* end cards-grid-2 faq */}
         </section>
 
         {/* ── APRÈS LA OMRA ── */}

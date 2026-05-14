@@ -558,7 +558,7 @@ footer div::-webkit-scrollbar { display: none; }
 /* ── GUIDE OMRA PUBLIC PAGE ─────────────────────────────────────────────── */
 .guide-hero {
   background: #1A1209;
-  padding: clamp(130px, 14vw, 160px) 18px 40px;
+  padding: clamp(155px, 16vw, 180px) 18px 40px;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -609,14 +609,17 @@ footer div::-webkit-scrollbar { display: none; }
   font-size: clamp(11px, 1.8vw, 13px); color: #C9A84C; white-space: nowrap; flex-shrink: 0;
 }
 .guide-stepper {
-  display: flex; gap: 10px;
+  display: flex; gap: 8px;
   padding: 22px clamp(16px, 3vw, 24px) 0;
   max-width: 1200px; margin: 0 auto; background: #FAF7F0;
+  overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none;
 }
+.guide-stepper::-webkit-scrollbar { display: none; }
 .step-btn {
-  flex: 1; padding: 12px; border-radius: 12px;
+  flex: none; flex-shrink: 0;
+  padding: 10px 14px; border-radius: 12px;
   font-size: 12px; font-weight: 600; letter-spacing: 0.04em;
-  text-align: center; border: none; cursor: pointer;
+  text-align: center; border: none; cursor: pointer; white-space: nowrap;
   font-family: var(--font-manrope, sans-serif);
 }
 .step-active  { background: #1A1209; color: #C9A84C; }
@@ -649,7 +652,8 @@ footer div::-webkit-scrollbar { display: none; }
   .cards-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .cards-grid-2 .info-card, .cards-grid-2 .faq-card { margin: 0; }
 }
-.guide-content section { padding: 0; }
+.guide-content section { padding: 0; margin-top: 28px; }
+.guide-content section:first-of-type { margin-top: 0; }
 .guide-content h2 {
   font-family: var(--font-cormorant, serif);
   font-size: clamp(20px, 3.6vw, 28px);
@@ -676,8 +680,9 @@ footer div::-webkit-scrollbar { display: none; }
 .quote-block p { font-size: 14px; line-height: 1.6; margin: 0; color: #4a3d2c; }
 .quote-block em { color: #1A1209; font-weight: 600; font-style: italic; }
 .info-card, .faq-card {
-  background: #FFFFFF; border-radius: 12px; padding: 16px; margin: 14px 0;
-  border-left: 2px solid #C9A84C;
+  background: #FDFCFA; border-radius: 12px; padding: 16px; margin: 14px 0;
+  border-left: 3px solid #C9A84C;
+  box-shadow: 0 1px 4px rgba(26,18,9,0.07), 0 4px 14px rgba(26,18,9,0.05);
 }
 .info-card { display: flex; gap: 14px; align-items: flex-start; }
 .faq-card { display: block; cursor: pointer; user-select: none; }

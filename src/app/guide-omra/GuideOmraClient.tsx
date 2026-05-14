@@ -16,6 +16,8 @@ const SECTIONS = [
 
 export default function GuideOmraClient() {
   const [activeSection, setActiveSection] = useState('introduction');
+  const [openFaq, setOpenFaq] = useState<string | null>(null);
+  const toggleFaq = (id: string) => setOpenFaq(prev => prev === id ? null : id);
 
   useEffect(() => {
     const onScroll = () => {
@@ -160,33 +162,34 @@ export default function GuideOmraClient() {
           </div>{/* end cards-grid-2 info */}
 
           <div className="cards-grid-2">
-          <div className="faq-card">
-            <div className="faq-num">?</div>
-            <div className="faq-content">
-              <h3>Quelle est la meilleure période pour la Omra en 2026 ?</h3>
-              <p>
+          <div className="faq-card" onClick={() => toggleFaq('h1')}>
+            <div className="faq-header">
+              <div className="faq-num">?</div>
+              <div className="faq-content"><h3>Quelle est la meilleure période pour la Omra en 2026 ?</h3></div>
+              <span className="faq-toggle">{openFaq === 'h1' ? '×' : '+'}</span>
+            </div>
+            {openFaq === 'h1' && <div className="faq-answer"><p>
                 La Omra peut s&apos;accomplir toute l&apos;année. Les mois les moins chargés sont
                 Muharram, Safar et Rabi&apos;al-Awwal. Le Ramadan 2026 se déroulera fin
-                février–mars — la foule y sera importante mais la récompense spirituelle
+                février–mars, la foule y sera importante mais la récompense spirituelle
                 incomparable (le Prophète ﷺ a dit qu&apos;une Omra en Ramadan équivaut en
-                récompense à un Hajj — Bukhari). Pour un premier voyage serein, mars–avril ou
-                octobre offrent un bon équilibre entre affluence modérée et température
-                agréable.
-              </p>
-            </div>
+                récompense à un Hajj, Bukhari). Pour un premier voyage serein, mars–avril ou
+                octobre offrent un bon équilibre entre affluence modérée et température agréable.
+            </p></div>}
           </div>
 
-          <div className="faq-card">
-            <div className="faq-num">?</div>
-            <div className="faq-content">
-              <h3>Peut-on effectuer plusieurs Omra dans sa vie ?</h3>
-              <p>
+          <div className="faq-card" onClick={() => toggleFaq('h2')}>
+            <div className="faq-header">
+              <div className="faq-num">?</div>
+              <div className="faq-content"><h3>Peut-on effectuer plusieurs Omra dans sa vie ?</h3></div>
+              <span className="faq-toggle">{openFaq === 'h2' ? '×' : '+'}</span>
+            </div>
+            {openFaq === 'h2' && <div className="faq-answer"><p>
                 Oui, absolument. Le Prophète ﷺ a encouragé à répéter la Omra aussi souvent
                 que possible. Chaque Omra acceptée est une expiation des péchés commis depuis
-                la précédente. Certains pèlerins effectuent plusieurs Omra par an — chaque
+                la précédente. Certains pèlerins effectuent plusieurs Omra par an, chaque
                 retour aux Lieux Saints est une opportunité de rapprochement spirituel unique.
-              </p>
-            </div>
+            </p></div>}
           </div>
           </div>{/* end cards-grid-2 faq */}
         </section>
@@ -217,35 +220,40 @@ export default function GuideOmraClient() {
             </div>
           </div>
 
-          <div className="faq-card">
-            <div className="faq-num">1</div>
-            <div className="faq-content">
-              <h3>Quand dois-je enfiler l&apos;Ihram ?</h3>
-              <p>
+          <div className="faq-card" onClick={() => toggleFaq('p1')}>
+            <div className="faq-header">
+              <div className="faq-num">1</div>
+              <div className="faq-content"><h3>Quand dois-je enfiler l&apos;Ihram ?</h3></div>
+              <span className="faq-toggle">{openFaq === 'p1' ? '×' : '+'}</span>
+            </div>
+            {openFaq === 'p1' && <div className="faq-answer"><p>
                 Selon votre itinéraire. En général <strong>environ 1h avant le passage du Miqat
                 dans l&apos;avion</strong>. L&apos;équipage annoncera le moment précis pour que vous
                 ne le franchissiez pas sans être en état de sacralisation.
-              </p>
-            </div>
+            </p></div>}
           </div>
 
-          <div className="faq-card">
-            <div className="faq-num">2</div>
-            <div className="faq-content">
-              <h3>Puis-je enlever l&apos;Ihram à l&apos;arrivée pour me reposer ?</h3>
-              <p>
+          <div className="faq-card" onClick={() => toggleFaq('p2')}>
+            <div className="faq-header">
+              <div className="faq-num">2</div>
+              <div className="faq-content"><h3>Puis-je enlever l&apos;Ihram à l&apos;arrivée pour me reposer ?</h3></div>
+              <span className="faq-toggle">{openFaq === 'p2' ? '×' : '+'}</span>
+            </div>
+            {openFaq === 'p2' && <div className="faq-answer"><p>
                 <strong>Non.</strong> Une fois l&apos;Ihram enfilé et la Niyyah prononcée au Miqat,
                 vous êtes en état de sacralisation. Vous ne pouvez plus l&apos;enlever avant
                 d&apos;avoir accompli la Omra complète. Vous pouvez vous reposer en Ihram, mais
                 l&apos;enlever avant la Omra entraîne une pénalité (<em>Fidya</em>).
-              </p>
-            </div>
+            </p></div>}
           </div>
 
-          <div className="faq-card">
-            <div className="faq-num">3</div>
-            <div className="faq-content">
-              <h3>Comment prononcer la Niyyah ?</h3>
+          <div className="faq-card" onClick={() => toggleFaq('p3')}>
+            <div className="faq-header">
+              <div className="faq-num">3</div>
+              <div className="faq-content"><h3>Comment prononcer la Niyyah ?</h3></div>
+              <span className="faq-toggle">{openFaq === 'p3' ? '×' : '+'}</span>
+            </div>
+            {openFaq === 'p3' && <div className="faq-answer">
               <p>La Niyyah se prononce au moment du passage du Miqat.</p>
               <div className="arabic-dua">
                 <div className="dua-ar">لَبَّيْكَ اللَّهُمَّ عُمْرَةً</div>
@@ -253,25 +261,25 @@ export default function GuideOmraClient() {
                 <div className="dua-fr">« Me voici, ô Allah, pour la Omra. »</div>
               </div>
               <p>Suivi du Talbiyah que vous répéterez jusqu&apos;au début du Tawaf.</p>
-            </div>
+            </div>}
           </div>
 
-          <div className="faq-card">
-            <div className="faq-num">4</div>
-            <div className="faq-content">
-              <h3>La valise de la Omra — Que prendre ?</h3>
-              <p>
+          <div className="faq-card" onClick={() => toggleFaq('p4')}>
+            <div className="faq-header">
+              <div className="faq-num">4</div>
+              <div className="faq-content"><h3>La valise de la Omra — Que prendre ?</h3></div>
+              <span className="faq-toggle">{openFaq === 'p4' ? '×' : '+'}</span>
+            </div>
+            {openFaq === 'p4' && <div className="faq-answer"><p>
                 <strong>Pour les hommes :</strong> 2 pièces d&apos;Ihram blanches (une de rechange),
                 sandales ouvertes pour l&apos;Ihram, chaussures fermées pour les visites.
-                <strong>Pour les femmes :</strong> abaya ample sans coutures ni ornements
+                <strong> Pour les femmes :</strong> abaya ample sans coutures ni ornements
                 excessifs + hijab, vêtements couvrants pour les sorties.
-                <strong>Pour tous :</strong> livret de du&apos;as, médicaments habituels
-                (anti-douleur, antidiarrhéiques), crème solaire halal, gourde/thermos
-                pour l&apos;eau de Zamzam, copies du passeport et visa, argent liquide en SAR,
-                chargeur universel, couverture légère pour les nuits climatisées,
-                masque et lingettes pour les moments de forte affluence.
-              </p>
-            </div>
+                <strong> Pour tous :</strong> livret de du&apos;as, médicaments habituels,
+                crème solaire halal, gourde pour l&apos;eau de Zamzam, copies du passeport et visa,
+                argent liquide en SAR, chargeur universel, couverture légère pour les nuits
+                climatisées, masque et lingettes pour les moments de forte affluence.
+            </p></div>}
           </div>
         </section>
 
@@ -404,101 +412,100 @@ export default function GuideOmraClient() {
           </p>
 
           <div className="cards-grid-2">
-          <div className="faq-card">
-            <div className="faq-num">5</div>
-            <div className="faq-content">
-              <h3>Puis-je effectuer la Omra si je suis en état de menstruation ?</h3>
-              <p>
+          <div className="faq-card" onClick={() => toggleFaq('f5')}>
+            <div className="faq-header">
+              <div className="faq-num">5</div>
+              <div className="faq-content"><h3>Puis-je effectuer la Omra si je suis en état de menstruation ?</h3></div>
+              <span className="faq-toggle">{openFaq === 'f5' ? '×' : '+'}</span>
+            </div>
+            {openFaq === 'f5' && <div className="faq-answer"><p>
                 Non. Les femmes en état de menstruation (haid) ou de lochies (nifas) ne peuvent
-                pas accomplir la Omra, car le Tawaf autour de la Kaaba nécessite d&apos;être en
-                état de pureté rituelle (tahara). Si cela survient pendant le voyage, il faut
-                patienter jusqu&apos;à la fin de la période, accomplir le ghusl (grande purification),
+                pas accomplir la Omra, car le Tawaf nécessite d&apos;être en état de pureté rituelle
+                (tahara). Si cela survient pendant le voyage, il faut patienter, accomplir le ghusl,
                 puis entrer en Ihram pour effectuer la Omra.
-              </p>
-            </div>
+            </p></div>}
           </div>
 
-          <div className="faq-card">
-            <div className="faq-num">6</div>
-            <div className="faq-content">
-              <h3>Puis-je porter des sandales pendant le Tawaf ?</h3>
-              <p>
-                Oui. Il n&apos;est pas obligatoire d&apos;être pieds nus pour le Tawaf. Des sandales
-                propres sont autorisées et recommandées — le sol du Masjid Al-Haram peut être très
-                chaud en été (50°C au sol) ou froid en hiver. Privilégiez des sandales légères à
-                semelle épaisse et antidérapante.
-              </p>
+          <div className="faq-card" onClick={() => toggleFaq('f6')}>
+            <div className="faq-header">
+              <div className="faq-num">6</div>
+              <div className="faq-content"><h3>Puis-je porter des sandales pendant le Tawaf ?</h3></div>
+              <span className="faq-toggle">{openFaq === 'f6' ? '×' : '+'}</span>
             </div>
+            {openFaq === 'f6' && <div className="faq-answer"><p>
+                Oui. Des sandales propres sont autorisées et recommandées. Le sol du Masjid Al-Haram
+                peut être très chaud en été (50°C) ou froid en hiver. Privilégiez des sandales légères
+                à semelle épaisse et antidérapante.
+            </p></div>}
           </div>
 
-          <div className="faq-card">
-            <div className="faq-num">7</div>
-            <div className="faq-content">
-              <h3>Doit-on jeûner pendant la Omra ?</h3>
-              <p>
-                Non, il n&apos;y a pas de jeûne obligatoire lié à la Omra. En revanche, si votre
-                Omra tombe pendant le Ramadan, vous continuez à jeûner selon les règles habituelles
-                — sauf si vous avez droit à l&apos;exemption du voyageur selon votre situation
-                (consulter votre imam ou un savant de confiance pour votre cas particulier).
-              </p>
+          <div className="faq-card" onClick={() => toggleFaq('f7')}>
+            <div className="faq-header">
+              <div className="faq-num">7</div>
+              <div className="faq-content"><h3>Doit-on jeûner pendant la Omra ?</h3></div>
+              <span className="faq-toggle">{openFaq === 'f7' ? '×' : '+'}</span>
             </div>
+            {openFaq === 'f7' && <div className="faq-answer"><p>
+                Non, il n&apos;y a pas de jeûne obligatoire lié à la Omra. Si votre Omra tombe
+                pendant le Ramadan, vous continuez à jeûner selon les règles habituelles, sauf si
+                vous avez droit à l&apos;exemption du voyageur (consulter votre imam).
+            </p></div>}
           </div>
 
-          <div className="faq-card">
-            <div className="faq-num">8</div>
-            <div className="faq-content">
-              <h3>Puis-je faire du Tawaf volontaire après la Omra ?</h3>
-              <p>
+          <div className="faq-card" onClick={() => toggleFaq('f8')}>
+            <div className="faq-header">
+              <div className="faq-num">8</div>
+              <div className="faq-content"><h3>Puis-je faire du Tawaf volontaire après la Omra ?</h3></div>
+              <span className="faq-toggle">{openFaq === 'f8' ? '×' : '+'}</span>
+            </div>
+            {openFaq === 'f8' && <div className="faq-answer"><p>
                 Oui, et c&apos;est fortement recommandé. Chaque tour autour de la Kaaba est une
                 ibadah à part entière. Profitez de votre présence à Makkah pour accomplir autant
-                de Tawaf volontaires (Tawaf an-nafl) que possible, particulièrement la nuit où
-                la foule est moins dense et l&apos;atmosphère spirituelle incomparable.
-              </p>
-            </div>
+                de Tawaf volontaires que possible, particulièrement la nuit où la foule est moins dense.
+            </p></div>}
           </div>
 
-          <div className="faq-card">
-            <div className="faq-num">9</div>
-            <div className="faq-content">
-              <h3>Le Tawaf est-il accessible aux personnes à mobilité réduite ?</h3>
-              <p>
-                Oui. Le Masjid Al-Haram dispose de fauteuils roulants disponibles gratuitement
-                (sous réserve de disponibilité) et d&apos;un étage dédié avec une vue directe sur
-                la Kaaba. Le Sa&apos;i (Mas&apos;a) est entièrement climatisé et accessible en
-                fauteuil roulant ou en fauteuil poussé. Un guide SAFARUMA formé à l&apos;accompagnement
-                PMR connaît tous les itinéraires et accès prioritaires.
-              </p>
+          <div className="faq-card" onClick={() => toggleFaq('f9')}>
+            <div className="faq-header">
+              <div className="faq-num">9</div>
+              <div className="faq-content"><h3>Le Tawaf est-il accessible aux personnes à mobilité réduite ?</h3></div>
+              <span className="faq-toggle">{openFaq === 'f9' ? '×' : '+'}</span>
             </div>
+            {openFaq === 'f9' && <div className="faq-answer"><p>
+                Oui. Le Masjid Al-Haram dispose de fauteuils roulants gratuits et d&apos;un étage
+                dédié avec vue directe sur la Kaaba. Le Sa&apos;i est entièrement climatisé et
+                accessible en fauteuil roulant. Un guide SAFARUMA formé à l&apos;accompagnement PMR
+                connaît tous les itinéraires et accès prioritaires.
+            </p></div>}
           </div>
 
-          <div className="faq-card">
-            <div className="faq-num">10</div>
-            <div className="faq-content">
-              <h3>Faut-il un guide pour accomplir la Omra ?</h3>
-              <p>
-                La Omra est techniquement réalisable seul si l&apos;on connaît les rituels. Mais
-                un guide certifié change profondément l&apos;expérience : il sécurise les rituels
-                (aucun pilier manqué, aucune erreur), explique la signification spirituelle de
-                chaque lieu, gère la logistique et permet au pèlerin de se concentrer pleinement
-                sur son dialogue avec Allah ﷻ. C&apos;est particulièrement précieux pour les
-                premiers voyages, les familles avec enfants, et les personnes âgées.
-              </p>
+          <div className="faq-card" onClick={() => toggleFaq('f10')}>
+            <div className="faq-header">
+              <div className="faq-num">10</div>
+              <div className="faq-content"><h3>Faut-il un guide pour accomplir la Omra ?</h3></div>
+              <span className="faq-toggle">{openFaq === 'f10' ? '×' : '+'}</span>
             </div>
+            {openFaq === 'f10' && <div className="faq-answer"><p>
+                La Omra est techniquement réalisable seul. Mais un guide certifié change
+                profondément l&apos;expérience : il sécurise les rituels, explique la signification
+                spirituelle de chaque lieu et gère la logistique. C&apos;est particulièrement précieux
+                pour les premiers voyages, les familles et les personnes âgées.
+            </p></div>}
           </div>
 
-          <div className="faq-card">
-            <div className="faq-num">11</div>
-            <div className="faq-content">
-              <h3>Combien coûte la Omra avec un guide privé SAFARUMA ?</h3>
-              <p>
-                Les tarifs des guides SAFARUMA débutent à <strong>150 € pour une visite guidée</strong>
-                de 4h des lieux essentiels, à <strong>350 € pour l&apos;accompagnement complet
-                de la Omra</strong> (rituels + lieux saints), et jusqu&apos;à <strong>600–780 €
-                pour les forfaits VIP</strong> incluant transport, hôtel et accès prioritaires.
-                Chaque guide fixe librement ses tarifs. SAFARUMA prélève une commission de 12%
-                seulement en cas de mission réalisée.
-              </p>
+          <div className="faq-card" onClick={() => toggleFaq('f11')}>
+            <div className="faq-header">
+              <div className="faq-num">11</div>
+              <div className="faq-content"><h3>Combien coûte la Omra avec un guide privé SAFARUMA ?</h3></div>
+              <span className="faq-toggle">{openFaq === 'f11' ? '×' : '+'}</span>
             </div>
+            {openFaq === 'f11' && <div className="faq-answer"><p>
+                Les tarifs débutent à <strong>150 € pour une visite guidée</strong> de 4h,
+                à <strong>350 € pour l&apos;accompagnement complet de la Omra</strong> (rituels
+                + lieux saints), et jusqu&apos;à <strong>600–780 € pour les forfaits VIP</strong>
+                incluant transport, hôtel et accès prioritaires. Chaque guide fixe librement ses
+                tarifs. SAFARUMA prélève une commission de 12% seulement en cas de mission réalisée.
+            </p></div>}
           </div>
           </div>{/* end cards-grid-2 faq */}
         </section>

@@ -664,7 +664,20 @@ footer div::-webkit-scrollbar { display: none; }
 .quote-block em { color: #1A1209; font-weight: 600; font-style: italic; }
 .info-card, .faq-card {
   background: #FFFFFF; border-radius: 12px; padding: 16px; margin: 14px 0;
-  border-left: 2px solid #C9A84C; display: flex; gap: 14px; align-items: flex-start;
+  border-left: 2px solid #C9A84C;
+}
+.info-card { display: flex; gap: 14px; align-items: flex-start; }
+.faq-card { display: block; cursor: pointer; user-select: none; }
+.faq-card:hover { border-left-color: #b8962e; }
+.faq-header { display: flex; align-items: flex-start; gap: 14px; }
+.faq-toggle {
+  margin-left: auto; flex-shrink: 0;
+  font-size: 1.25rem; font-weight: 300; color: #C9A84C; line-height: 1.2;
+  width: 22px; text-align: center;
+}
+.faq-answer {
+  margin-top: 10px; padding-top: 10px;
+  border-top: 1px solid rgba(201,168,76,0.15);
 }
 .info-icon, .faq-num {
   width: 32px; height: 32px; border-radius: 50%;

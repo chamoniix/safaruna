@@ -134,6 +134,7 @@ export default function Navbar({
   const hideBanner = pathname ? HIDE_BANNER_PATHS.some(p => pathname.startsWith(p)) : false;
   // Sur les pages guide/admin/espace, pas de transparent : navbar toujours solide
   const isAtTop = atTop && !pathname?.startsWith('/guide') && !pathname?.startsWith('/admin') && !pathname?.startsWith('/espace');
+  const showBrand = pathname !== '/';
   const role = (session?.user as { role?: string })?.role;
 
   const dashboardHref =
@@ -289,6 +290,13 @@ export default function Navbar({
           display: flex; align-items: center; flex-shrink: 0; text-decoration: none;
         }
         .nb-logo img { height: 36px; width: auto; display: block; transition: height 300ms cubic-bezier(0.4,0,0.2,1); }
+        .nb-logo-brand {
+          font-family: var(--font-cormorant, Georgia, serif);
+          font-weight: 700; letter-spacing: 0.1em;
+          color: #FAF7F0; white-space: nowrap;
+          transition: font-size 300ms cubic-bezier(0.4,0,0.2,1);
+        }
+        @media (max-width: 1023px) { .nb-logo-brand { display: none; } }
         /* ── Desktop nav ── */
         .nb-nav {
           display: flex; align-items: center; gap: 0.25rem; flex: 1; justify-content: center;
@@ -526,6 +534,11 @@ export default function Navbar({
           <Link href="/" className="nb-logo">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="SAFARUMA" style={{ height: hasScrolled ? '28px' : '36px' }} />
+            {showBrand && (
+              <span className="nb-logo-brand" style={{ fontSize: hasScrolled ? '0.85rem' : '1.05rem' }}>
+                SAFAR<span style={{ color: '#C9A84C' }}>U</span>MA
+              </span>
+            )}
           </Link>
 
           {/* Brand centré — mobile uniquement, disparaît quand transparent */}

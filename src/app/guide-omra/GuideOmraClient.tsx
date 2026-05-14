@@ -627,11 +627,14 @@ export default function GuideOmraClient() {
 function GateOverlay() {
   return (
     <div style={{
-      position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
-      display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-      paddingTop: '200px',
-      background: 'linear-gradient(to bottom, transparent 0%, rgba(250,247,240,0.6) 40%, rgba(250,247,240,1) 65%)',
+      position: 'relative',
+      marginTop: '-280px',
       zIndex: 10,
+      background: 'linear-gradient(to bottom, transparent 0%, rgba(250,247,240,0.92) 22%, rgba(250,247,240,1) 40%)',
+      paddingTop: '48px',
+      paddingBottom: '40px',
+      display: 'flex',
+      justifyContent: 'center',
     }}>
       <div style={{
         background: '#FAF7F0',
@@ -649,7 +652,7 @@ function GateOverlay() {
           fontSize: '1.4rem', fontWeight: 700, color: '#1A1209',
           margin: '0 0 6px', lineHeight: 1.25,
         }}>
-          Créez votre compte gratuit<br />en 5 secondes
+          Créez votre compte <span style={{ color: '#C9A84C' }}>gratuit</span><br />en 5 secondes
         </h3>
         <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap', margin: '12px 0 20px' }}>
           {['Rituels complets', 'Checklist', 'FAQ', 'Préparation'].map(f => (

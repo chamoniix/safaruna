@@ -631,8 +631,8 @@ footer div::-webkit-scrollbar { display: none; }
   user-select: none;
   max-height: 380px;
   overflow: hidden;
-  mask-image: linear-gradient(to bottom, black 0%, black 30%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 30%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 0%, black 45%, rgba(0,0,0,0.5) 75%, rgba(0,0,0,0.2) 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 45%, rgba(0,0,0,0.5) 75%, rgba(0,0,0,0.2) 100%);
 }
 @keyframes gateCardIn {
   from { opacity: 0; transform: translateY(12px) scale(0.98); }

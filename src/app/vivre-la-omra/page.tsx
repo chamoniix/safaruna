@@ -149,7 +149,7 @@ export default function CeQuiVousAttend() {
         {/* HERO — flush sous la navbar (paddingTop interne absorbe la hauteur navbar) */}
         <div style={{
           background: '#1A1209',
-          padding: '100px 20px 28px',
+          padding: '130px 20px 28px',
           borderRadius: 0,
           textAlign: 'center',
         }}>

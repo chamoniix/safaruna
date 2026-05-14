@@ -261,8 +261,8 @@ export default function Navbar({
         .nb-banner-count { color: #C9A84C; font-weight: 700; font-style: normal; }
         .nb-banner-badge {
           background: #C9A84C; color: #1A1209;
-          padding: 6px 16px; border-radius: 50px;
-          font-size: 10.5px; font-weight: 800; letter-spacing: 0.07em;
+          padding: 5px 12px; border-radius: 50px;
+          font-size: 10px; font-weight: 800; letter-spacing: 0.07em;
           text-transform: uppercase; white-space: nowrap; flex-shrink: 0;
         }
         /* ── Bar ── */
@@ -507,7 +507,7 @@ export default function Navbar({
                   <span className="nb-banner-review">4,9 · <em className="nb-banner-count">2 400+</em> télécharg.</span>
                 </div>
               </div>
-              <span className="nb-banner-badge">OBTENIR →</span>
+              <span className="nb-banner-badge">OBTENIR</span>
             </Link>
           </div>
         )}

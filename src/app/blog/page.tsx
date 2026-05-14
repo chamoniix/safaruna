@@ -18,7 +18,7 @@ export default function BlogPage() {
 
   return (
     <>
-      <Navbar transparentOnHero scrollThreshold={300} />
+      <Navbar />
       <ScrollReveal />
       <style dangerouslySetInnerHTML={{ __html: `
         .blog-hero-section { padding: 8rem 4rem 5rem; }

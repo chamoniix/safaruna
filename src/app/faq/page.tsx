@@ -77,7 +77,7 @@ export default function FaqPage() {
         }
       `}} />
 
-      <Navbar transparentOnHero scrollThreshold={250} />
+      <Navbar />
 
       {/* Hero */}
       <section style={{ background: '#1A1209', padding: '6rem 1.5rem 4rem', textAlign: 'center' }}>

@@ -105,7 +105,7 @@ const COMPARISON = [
 export default function AProposPage() {
   return (
     <>
-      <Navbar transparentOnHero scrollThreshold={400} />
+      <Navbar />
       <ScrollReveal />
       <style dangerouslySetInnerHTML={{ __html: `
         /* ── MOTION — reveal amélioré ───────────────────────────── */

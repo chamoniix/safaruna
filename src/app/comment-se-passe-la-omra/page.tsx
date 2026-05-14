@@ -76,7 +76,7 @@ export default function CommentSePasseLaOmra() {
       <main style={{ background: CREAM, minHeight: '100vh' }}>
 
         {/* ── HERO ── */}
-        <div style={{ background: DARK, padding: '130px 24px 48px', textAlign: 'center' }}>
+        <div style={{ background: DARK, padding: '170px 24px 48px', textAlign: 'center' }}>
           <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: '0.2em', color: `${C}99`, textTransform: 'uppercase', marginBottom: 12 }}>
             SAFARUMA · Récit authentique
           </div>
@@ -123,11 +123,11 @@ export default function CommentSePasseLaOmra() {
           {/* ── CHAPITRE 1 ── */}
           <Chapter num="01" titre="Trois semaines avant le départ" />
 
-          <Perspective auteur="Youssef" couleur="#1A4B6E">
+          <Perspective auteur="Youssef">
             "Je ne savais pas vraiment comment ça allait se passer. J'avais lu des guides, regardé des vidéos — mais ça restait abstrait. Ce qui a tout changé, c'est quand Ibrahim, notre guide SAFARUMA, nous a appelés trois semaines avant le départ."
           </Perspective>
 
-          <Perspective auteur="Fatima" couleur="#6E3A1A">
+          <Perspective auteur="Fatima">
             "Il nous a envoyé un document complet : comment mettre l'ihram dans l'avion, où se trouve le miqat, les du'as à apprendre. Pour la première fois, j'avais l'impression que quelqu'un s'occupait vraiment de nous. La Omra n'était plus une idée vague — elle avait un plan."
           </Perspective>
 
@@ -139,7 +139,7 @@ export default function CommentSePasseLaOmra() {
           {/* ── CHAPITRE 2 ── */}
           <Chapter num="02" titre="Dans l'avion — le miqat au-dessus des nuages" />
 
-          <Perspective auteur="Youssef" couleur="#1A4B6E">
+          <Perspective auteur="Youssef">
             "Le commandant a annoncé que nous survolions le miqat. J'avais déjà mis mon ihram aux toilettes, comme Ibrahim nous l'avait expliqué. J'ai regardé Fatima. On s'est mis à réciter la Talbiya. Autour de nous, d'autres passagers faisaient de même. Je n'avais jamais rien vécu de tel dans un avion."
           </Perspective>
 
@@ -152,18 +152,18 @@ export default function CommentSePasseLaOmra() {
             </div>
           </div>
 
-          <Perspective auteur="Fatima" couleur="#6E3A1A">
+          <Perspective auteur="Fatima">
             "Pour moi, c'est là que tout a basculé. Pas à l'atterrissage, pas à l'arrivée au Haram. Dans cet avion, en récitant la Talbiya avec Youssef, j'ai senti que nous étions vraiment en route. Ibrahim nous avait dit que c'est souvent là que les pèlerins pleurent pour la première fois. Il avait raison."
           </Perspective>
 
           {/* ── CHAPITRE 3 ── */}
           <Chapter num="03" titre="L'arrivée — un prénom sur une pancarte" />
 
-          <Perspective auteur="Youssef" couleur="#1A4B6E">
+          <Perspective auteur="Youssef">
             "En sortant de la douane, on était un peu perdus. Les gens partaient dans tous les sens. Et là, on a vu Ibrahim — grand, souriant, avec une pancarte : 'Famille Benhamou'. Ce détail m'a touché. Il nous attendait vraiment."
           </Perspective>
 
-          <Perspective auteur="Fatima" couleur="#6E3A1A">
+          <Perspective auteur="Fatima">
             "Il a pris nos valises, nous a conduits au véhicule climatisé qu'il avait réservé, et pendant le trajet vers l'hôtel, il nous a expliqué le programme. Rien d'angoissant — juste de la clarté. On savait exactement ce qui nous attendait."
           </Perspective>
 
@@ -172,11 +172,11 @@ export default function CommentSePasseLaOmra() {
           {/* ── CHAPITRE 4 ── */}
           <Chapter num="04" titre="La première vue de la Kaaba" />
 
-          <Perspective auteur="Youssef" couleur="#1A4B6E">
+          <Perspective auteur="Youssef">
             "Ibrahim nous a dit : 'Quand vous allez la voir pour la première fois, posez une du'a. C'est un moment particulier — Allah écoute les du'as à ce moment-là.' On est entrés dans le Masjid al-Haram par Bab Abdel Aziz. Et là..."
           </Perspective>
 
-          <Perspective auteur="Fatima" couleur="#6E3A1A">
+          <Perspective auteur="Fatima">
             "Je ne m'y attendais pas. J'avais vu des photos, des vidéos — mais rien ne prépare vraiment à ça. La Kaaba est là, devant toi, noire et imposante, entourée de pèlerins qui tournent en silence. Youssef pleurait. Moi aussi. Ibrahim, à côté de nous, a murmuré doucement : 'Prenez votre temps. Posez ce que vous portez dans votre cœur.'"
           </Perspective>
 
@@ -186,11 +186,11 @@ export default function CommentSePasseLaOmra() {
           {/* ── CHAPITRE 5 ── */}
           <Chapter num="05" titre="Le Tawaf — 7 tours qui changent tout" />
 
-          <Perspective auteur="Youssef" couleur="#1A4B6E">
+          <Perspective auteur="Youssef">
             "Ibrahim nous a guidés au premier rang possible. Il nous expliquait au fur et à mesure : l'histoire de chaque angle de la Kaaba, la signification du Hajar al-Aswad, les du'as à réciter. Ce n'était pas une visite touristique — c'était une immersion."
           </Perspective>
 
-          <Perspective auteur="Fatima" couleur="#6E3A1A">
+          <Perspective auteur="Fatima">
             "Ce qui m'a frappée, c'est qu'à aucun moment je ne me suis sentie perdue ou dépassée. Ibrahim était là, calme, toujours à portée. Quand j'ai eu du mal à avancer dans la foule, il a trouvé un passage. Quand j'ai voulu m'arrêter pour faire une du'a, il nous a guidés vers un espace plus tranquille."
           </Perspective>
 
@@ -204,11 +204,11 @@ export default function CommentSePasseLaOmra() {
           {/* ── CHAPITRE 6 ── */}
           <Chapter num="06" titre="La fin des rituels — et après ?" />
 
-          <Perspective auteur="Youssef" couleur="#1A4B6E">
+          <Perspective auteur="Youssef">
             "Après le Tahallul — rasage pour moi, Fatima a coupé une mèche — Ibrahim nous a regardés et dit simplement : 'C'est fait. Votre Omra est accomplie.' Ces mots... je ne sais pas comment les décrire."
           </Perspective>
 
-          <Perspective auteur="Fatima" couleur="#6E3A1A">
+          <Perspective auteur="Fatima">
             "On s'est assis dans un coin du Haram. Ibrahim nous a laissé notre espace — il comprenait que certains moments appartiennent qu'à Allah et à ses serviteurs. Puis il nous a proposé de l'eau de Zamzam et nous a demandé ce que nous voulions faire ensuite. C'est ça, un guide privé : vous avez le temps, vous avez la paix."
           </Perspective>
 
@@ -284,11 +284,24 @@ function Chapter({ num, titre }: { num: string; titre: string }) {
   )
 }
 
-function Perspective({ auteur, couleur, children }: { auteur: string; couleur: string; children: string }) {
+const PERSPECTIVES: Record<string, { bg: string; text: string; label: string; avatarBg: string; avatarText: string }> = {
+  Youssef: { bg: '#1C2E3D', text: '#FAF7F0', label: '#C9A84C', avatarBg: '#C9A84C', avatarText: '#1A1209' },
+  Fatima:  { bg: '#FDF4E7', text: '#3D3528', label: '#8B6B3D', avatarBg: '#E8D5B0', avatarText: '#1A1209' },
+}
+
+function Perspective({ auteur, children }: { auteur: string; children: string }) {
+  const s = PERSPECTIVES[auteur] ?? PERSPECTIVES.Youssef
   return (
-    <div style={{ margin: '0 0 20px', padding: '20px 24px', background: 'white', borderRadius: 16, border: '1px solid #EDE8DC', borderLeft: `3px solid ${couleur}` }}>
-      <div style={{ fontSize: '0.7rem', fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', color: couleur, marginBottom: 10 }}>{auteur}</div>
-      <p style={{ fontSize: '0.95rem', color: '#3D3528', lineHeight: 1.85, margin: 0, fontStyle: 'italic' }}>{children}</p>
+    <div style={{ margin: '0 0 20px', padding: '20px 24px', background: s.bg, borderRadius: 16, borderLeft: `3px solid #C9A84C` }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+        <div style={{
+          width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
+          background: s.avatarBg, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontFamily: 'var(--font-cormorant, Georgia, serif)', fontSize: '1rem', fontWeight: 700, color: s.avatarText,
+        }}>{auteur[0]}</div>
+        <div style={{ fontSize: '0.7rem', fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: s.label }}>{auteur}</div>
+      </div>
+      <p style={{ fontSize: '0.95rem', color: s.text, lineHeight: 1.85, margin: 0, fontStyle: 'italic' }}>{children}</p>
     </div>
   )
 }

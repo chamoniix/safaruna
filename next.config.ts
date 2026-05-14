@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        source: '/devenir-guide',
+        destination: '/guide/inscription',
+        permanent: true,
+      },
+      {
         source: '/ce-qui-vous-attend',
         destination: '/omra-avec-guide-prive',
         permanent: true,

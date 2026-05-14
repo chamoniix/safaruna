@@ -629,41 +629,44 @@ function GateOverlay() {
     <div style={{
       position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
       display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-      paddingTop: '60px',
-      background: 'linear-gradient(to bottom, transparent 0%, rgba(250,247,240,0.97) 12%)',
+      paddingTop: '200px',
+      background: 'linear-gradient(to bottom, transparent 0%, rgba(250,247,240,0.6) 40%, rgba(250,247,240,1) 65%)',
       zIndex: 10,
     }}>
       <div style={{
-        background: 'white', border: '1px solid #EDE8DC',
-        borderLeft: '3px solid #C9A84C',
-        borderRadius: 20, padding: '32px 28px',
+        background: '#FAF7F0',
+        border: '1px solid rgba(201,168,76,0.25)',
+        borderRadius: 16,
+        padding: '28px 28px 24px',
         maxWidth: 380, width: '90%', textAlign: 'center',
-        boxShadow: '0 12px 48px rgba(0,0,0,0.12)',
+        boxShadow: '0 24px 64px rgba(26,18,9,0.45), 0 4px 16px rgba(26,18,9,0.2)',
+        animation: 'gateCardIn 0.4s ease-out both',
       }}>
-        <div style={{ fontSize: '2rem', marginBottom: 12 }}>🕋</div>
+        {/* Ligne or — signal premium */}
+        <div style={{ width: 32, height: 1, background: '#C9A84C', margin: '0 auto 16px' }} />
         <h3 style={{
           fontFamily: 'var(--font-cormorant, Georgia, serif)',
-          fontSize: '1.5rem', fontWeight: 600, color: '#1A1209',
-          margin: '0 0 10px', lineHeight: 1.25,
+          fontSize: '1.4rem', fontWeight: 700, color: '#1A1209',
+          margin: '0 0 6px', lineHeight: 1.25,
         }}>
-          La suite du guide<br />vous attend
+          Créez votre compte gratuit<br />en 5 secondes
         </h3>
-        <p style={{ fontSize: '0.88rem', color: '#7A6D5A', lineHeight: 1.75, margin: '0 0 22px' }}>
-          Préparation, rituels complets, FAQ pratique et conseils après la Omra — créez votre compte gratuit en 5 secondes.
-        </p>
+        <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap', margin: '12px 0 20px' }}>
+          {['Rituels complets', 'Checklist', 'FAQ', 'Préparation'].map(f => (
+            <span key={f} style={{ fontSize: '0.72rem', color: '#7A6D5A', background: 'rgba(201,168,76,0.1)', padding: '3px 8px', borderRadius: 4 }}>{f}</span>
+          ))}
+        </div>
         <Link href="/inscription" style={{
           display: 'block', background: '#1A1209', color: '#F0D897',
           padding: '13px 24px', borderRadius: 50,
           fontWeight: 700, fontSize: '0.88rem',
           textDecoration: 'none', letterSpacing: '0.04em',
-          marginBottom: 12,
+          marginBottom: 10,
         }}>
-          Créer mon compte — 100% gratuit
+          Créer mon compte
         </Link>
-        <Link href="/connexion" style={{
-          fontSize: '0.8rem', color: '#9A8D7A', textDecoration: 'none',
-        }}>
-          Déjà un compte ? Se connecter
+        <Link href="/connexion" style={{ fontSize: '0.8rem', color: '#9A8D7A', textDecoration: 'none' }}>
+          J&apos;ai déjà un compte →
         </Link>
       </div>
     </div>

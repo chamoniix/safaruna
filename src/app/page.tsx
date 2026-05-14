@@ -554,8 +554,8 @@ export default function Home() {
                 <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, marginBottom: '1.5rem' }}>
                   Partagez votre connaissance des lieux saints. Rejoignez les guides certifiés SAFARUMA.
                 </p>
-                <Link href="/devenir-guide" style={{ display: 'inline-block', background: '#1D9E75', color: 'white', fontSize: '0.78rem', fontWeight: 700, padding: '0.6rem 1.5rem', borderRadius: 50, textDecoration: 'none', letterSpacing: '0.04em' }}>
-                  Postuler maintenant →
+                <Link href="/guide/inscription" style={{ display: 'inline-block', background: '#1D9E75', color: 'white', fontSize: '0.78rem', fontWeight: 700, padding: '0.6rem 1.5rem', borderRadius: 50, textDecoration: 'none', letterSpacing: '0.04em' }}>
+                  Devenir guide →
                 </Link>
               </div>
             </div>

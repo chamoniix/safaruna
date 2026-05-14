@@ -65,7 +65,7 @@ export default function Footer() {
         <div className="footer-col">
           <h4>Guides</h4>
           <ul>
-            <li><Link href="/guide/inscription">Créer mon profil Guide</Link></li>
+            <li><Link href="/guide/inscription">Devenir guide certifié SAFARUMA</Link></li>
             <li><Link href="/guide/connexion">Espace Guide</Link></li>
           </ul>
         </div>

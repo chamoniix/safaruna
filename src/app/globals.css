@@ -627,11 +627,16 @@ footer div::-webkit-scrollbar { display: none; }
 }
 /* ── Content gate ── */
 .guide-gate-blur {
-  filter: blur(5px);
   pointer-events: none;
   user-select: none;
-  max-height: 420px;
+  max-height: 380px;
   overflow: hidden;
+  mask-image: linear-gradient(to bottom, black 0%, black 30%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 30%, transparent 100%);
+}
+@keyframes gateCardIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 /* ── Grilles desktop ── */
 .cards-grid-2 { display: flex; flex-direction: column; gap: 0; }

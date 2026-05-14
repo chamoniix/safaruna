@@ -39,7 +39,7 @@ const jsonLd = {
       {
         '@type': 'Question',
         name: 'Comment se passe la Omra avec un guide privé ?',
-        acceptedAnswer: { '@type': 'Answer', text: 'Votre guide vous contacte avant le départ, vous attend à l\'aéroport, vous accompagne pour le Tawaf, le Sa\'i, et les visites. Il est disponible 24h/24 pendant tout le séjour.' },
+        acceptedAnswer: { '@type': 'Answer', text: 'Votre guide vous contacte avant le départ, vous attend à l\'aéroport, vous accompagne pour le Tawaf, le Sa\'i, et les visites. Il est toujours à l\'écoute et répond à toutes vos questions tout au long du séjour.' },
       },
       {
         '@type': 'Question',
@@ -124,11 +124,11 @@ export default function CommentSePasseLaOmra() {
           <Chapter num="01" titre="Trois semaines avant le départ" />
 
           <Perspective auteur="Youssef">
-            "Je ne savais pas vraiment comment ça allait se passer. J'avais lu des guides, regardé des vidéos — mais ça restait abstrait. Ce qui a tout changé, c'est quand Ibrahim, notre guide SAFARUMA, nous a appelés trois semaines avant le départ."
+            "Je ne savais pas vraiment comment ça allait se passer. J'avais lu des guides, regardé des vidéos, mais ça restait abstrait. Ce qui a tout changé, c'est quand Ibrahim, notre guide SAFARUMA, nous a appelés trois semaines avant le départ."
           </Perspective>
 
           <Perspective auteur="Fatima">
-            "Il nous a envoyé un document complet : comment mettre l'ihram dans l'avion, où se trouve le miqat, les du'as à apprendre. Pour la première fois, j'avais l'impression que quelqu'un s'occupait vraiment de nous. La Omra n'était plus une idée vague — elle avait un plan."
+            "Il nous a envoyé un document complet : comment mettre l'ihram dans l'avion, où se trouve le miqat, les du'as à apprendre. Pour la première fois, j'avais l'impression que quelqu'un s'occupait vraiment de nous. La Omra n'était plus une idée vague. Elle avait un plan."
           </Perspective>
 
           <InfoCard icon="📞" texte="Votre guide SAFARUMA vous contacte dans les 24h suivant votre réservation. Il prépare votre voyage avant même que vous fassiez vos valises." />
@@ -160,11 +160,11 @@ export default function CommentSePasseLaOmra() {
           <Chapter num="03" titre="L'arrivée — un prénom sur une pancarte" />
 
           <Perspective auteur="Youssef">
-            "En sortant de la douane, on était un peu perdus. Les gens partaient dans tous les sens. Et là, on a vu Ibrahim — grand, souriant, avec une pancarte : 'Famille Benhamou'. Ce détail m'a touché. Il nous attendait vraiment."
+            "En sortant de la douane, on était un peu perdus. Les gens partaient dans tous les sens. Et là, on a vu Ibrahim, grand et souriant, avec une pancarte : 'Famille Benhamou'. Ce détail m'a touché. Il nous attendait vraiment."
           </Perspective>
 
           <Perspective auteur="Fatima">
-            "Il a pris nos valises, nous a conduits au véhicule climatisé qu'il avait réservé, et pendant le trajet vers l'hôtel, il nous a expliqué le programme. Rien d'angoissant — juste de la clarté. On savait exactement ce qui nous attendait."
+            "Il a pris nos valises, nous a conduits au véhicule climatisé qu'il avait réservé, et pendant le trajet vers l'hôtel, il nous a expliqué le programme. Rien d'angoissant, juste de la clarté. On savait exactement ce qui nous attendait."
           </Perspective>
 
           <InfoCard icon="🚗" texte="Votre guide vous attend à la sortie bagages. Il s'occupe du transport, de l'hôtel, et vous prépare mentalement et spirituellement pour les rituels." />
@@ -173,11 +173,11 @@ export default function CommentSePasseLaOmra() {
           <Chapter num="04" titre="La première vue de la Kaaba" />
 
           <Perspective auteur="Youssef">
-            "Ibrahim nous a dit : 'Quand vous allez la voir pour la première fois, posez une du'a. C'est un moment particulier — Allah écoute les du'as à ce moment-là.' On est entrés dans le Masjid al-Haram par Bab Abdel Aziz. Et là..."
+            "Ibrahim nous a dit : 'Quand vous allez la voir pour la première fois, posez une du'a. C'est un moment particulier, Allah écoute les du'as à ce moment-là.' On est entrés dans le Masjid al-Haram par Bab Abdel Aziz. Et là..."
           </Perspective>
 
           <Perspective auteur="Fatima">
-            "Je ne m'y attendais pas. J'avais vu des photos, des vidéos — mais rien ne prépare vraiment à ça. La Kaaba est là, devant toi, noire et imposante, entourée de pèlerins qui tournent en silence. Youssef pleurait. Moi aussi. Ibrahim, à côté de nous, a murmuré doucement : 'Prenez votre temps. Posez ce que vous portez dans votre cœur.'"
+            "Je ne m'y attendais pas. J'avais vu des photos, des vidéos, mais rien ne prépare vraiment à ça. La Kaaba est là, devant toi, noire et imposante, entourée de pèlerins qui tournent en silence. Youssef pleurait. Moi aussi. Ibrahim, à côté de nous, a murmuré doucement : 'Prenez votre temps. Posez ce que vous portez dans votre cœur.'"
           </Perspective>
 
           {/* ── CTA 2 ── */}
@@ -187,7 +187,7 @@ export default function CommentSePasseLaOmra() {
           <Chapter num="05" titre="Le Tawaf — 7 tours qui changent tout" />
 
           <Perspective auteur="Youssef">
-            "Ibrahim nous a guidés au premier rang possible. Il nous expliquait au fur et à mesure : l'histoire de chaque angle de la Kaaba, la signification du Hajar al-Aswad, les du'as à réciter. Ce n'était pas une visite touristique — c'était une immersion."
+            "Ibrahim nous a guidés au premier rang possible. Il nous expliquait au fur et à mesure : l'histoire de chaque angle de la Kaaba, la signification du Hajar al-Aswad, les du'as à réciter. Ce n'était pas une visite touristique, c'était une immersion."
           </Perspective>
 
           <Perspective auteur="Fatima">
@@ -205,11 +205,11 @@ export default function CommentSePasseLaOmra() {
           <Chapter num="06" titre="La fin des rituels — et après ?" />
 
           <Perspective auteur="Youssef">
-            "Après le Tahallul — rasage pour moi, Fatima a coupé une mèche — Ibrahim nous a regardés et dit simplement : 'C'est fait. Votre Omra est accomplie.' Ces mots... je ne sais pas comment les décrire."
+            "Après le Tahallul, rasage pour moi, Fatima a coupé une mèche, Ibrahim nous a regardés et dit simplement : 'C'est fait. Votre Omra est accomplie.' Ces mots... je ne sais pas comment les décrire."
           </Perspective>
 
           <Perspective auteur="Fatima">
-            "On s'est assis dans un coin du Haram. Ibrahim nous a laissé notre espace — il comprenait que certains moments appartiennent qu'à Allah et à ses serviteurs. Puis il nous a proposé de l'eau de Zamzam et nous a demandé ce que nous voulions faire ensuite. C'est ça, un guide privé : vous avez le temps, vous avez la paix."
+            "On s'est assis dans un coin du Haram. Ibrahim nous a laissé notre espace, il comprenait que certains moments n'appartiennent qu'à Allah et à ses serviteurs. Puis il nous a proposé de l'eau de Zamzam et nous a demandé ce que nous voulions faire ensuite. C'est ça, un guide privé : vous avez le temps, vous avez la paix."
           </Perspective>
 
           <InfoCard icon="✦" texte="L'Omra accomplie avec un guide privé, c'est la différence entre faire les rituels et les vivre. Chaque geste a un sens. Chaque moment est guidé." />
@@ -284,24 +284,42 @@ function Chapter({ num, titre }: { num: string; titre: string }) {
   )
 }
 
-const PERSPECTIVES: Record<string, { bg: string; text: string; label: string; avatarBg: string; avatarText: string }> = {
-  Youssef: { bg: '#1C2E3D', text: '#FAF7F0', label: '#C9A84C', avatarBg: '#C9A84C', avatarText: '#1A1209' },
-  Fatima:  { bg: '#FDF4E7', text: '#3D3528', label: '#8B6B3D', avatarBg: '#E8D5B0', avatarText: '#1A1209' },
+const PERSPECTIVES: Record<string, { bg: string; text: string; label: string; labelBg: string; avatarBg: string; avatarText: string; role: string; indent: string; quoteOpacity: string }> = {
+  Youssef: { bg: '#1B4B82', text: '#FAF7F0', label: '#C9A84C', labelBg: 'rgba(201,168,76,0.18)', avatarBg: '#C9A84C', avatarText: '#1A1209', role: 'Pèlerin',   indent: '0px',  quoteOpacity: 'rgba(255,255,255,0.07)' },
+  Fatima:  { bg: '#FDF4E7', text: '#3D3528', label: '#8B6B3D', labelBg: 'rgba(139,107,61,0.12)', avatarBg: '#E8D5B0', avatarText: '#1A1209', role: 'Pèlerine', indent: '20px', quoteOpacity: 'rgba(26,18,9,0.05)'    },
 }
 
 function Perspective({ auteur, children }: { auteur: string; children: string }) {
   const s = PERSPECTIVES[auteur] ?? PERSPECTIVES.Youssef
   return (
-    <div style={{ margin: '0 0 20px', padding: '20px 24px', background: s.bg, borderRadius: 16, borderLeft: `3px solid #C9A84C` }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+    <div style={{
+      margin: '0 0 20px', marginLeft: s.indent,
+      padding: '24px', background: s.bg, borderRadius: 20,
+      position: 'relative', overflow: 'hidden',
+      boxShadow: '0 4px 24px rgba(0,0,0,0.10)',
+    }}>
+      {/* Guillemet décoratif watermark */}
+      <div style={{
+        position: 'absolute', top: -10, right: 18,
+        fontSize: '5.5rem', lineHeight: 1, color: s.quoteOpacity,
+        fontFamily: 'Georgia, serif', pointerEvents: 'none', userSelect: 'none',
+      }}>❝</div>
+
+      {/* Header auteur */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, position: 'relative', zIndex: 1 }}>
         <div style={{
-          width: 32, height: 32, borderRadius: '50%', flexShrink: 0,
+          width: 42, height: 42, borderRadius: '50%', flexShrink: 0,
           background: s.avatarBg, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: 'var(--font-cormorant, Georgia, serif)', fontSize: '1rem', fontWeight: 700, color: s.avatarText,
+          fontFamily: 'var(--font-cormorant, Georgia, serif)', fontSize: '1.25rem', fontWeight: 700, color: s.avatarText,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
         }}>{auteur[0]}</div>
-        <div style={{ fontSize: '0.7rem', fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: s.label }}>{auteur}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: '0.88rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: s.label }}>{auteur}</span>
+          <span style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: s.label, background: s.labelBg, padding: '2px 9px', borderRadius: 20 }}>{s.role}</span>
+        </div>
       </div>
-      <p style={{ fontSize: '0.95rem', color: s.text, lineHeight: 1.85, margin: 0, fontStyle: 'italic' }}>{children}</p>
+
+      <p style={{ fontSize: '0.95rem', color: s.text, lineHeight: 1.9, margin: 0, fontStyle: 'italic', position: 'relative', zIndex: 1 }}>{children}</p>
     </div>
   )
 }

@@ -257,10 +257,7 @@ export default function Navbar({
         .nb-banner-stars { display: flex; align-items: center; gap: 4px; }
         .nb-banner-stars-row { color: #C9A84C; font-size: 9px; letter-spacing: 1px; }
         .nb-banner-review { font-size: 9.5px; color: rgba(255,255,255,0.35); }
-        .nb-banner-sep { width: 1px; height: 26px; background: rgba(201,168,76,0.15); flex-shrink: 0; }
-        .nb-banner-dl { display: flex; flex-direction: column; gap: 1px; align-items: center; }
-        .nb-banner-dl-count { font-size: 13px; font-weight: 800; color: #F0D897; letter-spacing: -0.01em; }
-        .nb-banner-dl-label { font-size: 9px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.06em; }
+        .nb-banner-count { color: #C9A84C; font-weight: 700; font-style: normal; }
         .nb-banner-badge {
           background: #C9A84C; color: #1A1209;
           padding: 6px 16px; border-radius: 50px;
@@ -499,15 +496,10 @@ export default function Navbar({
                 <div className="nb-banner-title">Guide PDF gratuit · <span style={{ color: '#C9A84C' }}>La Omra étape par étape</span></div>
                 <div className="nb-banner-stars">
                   <span className="nb-banner-stars-row">★★★★★</span>
-                  <span className="nb-banner-review">4,9 · 380 avis</span>
+                  <span className="nb-banner-review">4,9 · <em className="nb-banner-count">2 400+</em> télécharg.</span>
                 </div>
               </div>
-              <div className="nb-banner-sep" />
-              <div className="nb-banner-dl">
-                <div className="nb-banner-dl-count">2 400+</div>
-                <div className="nb-banner-dl-label">téléchargements</div>
-              </div>
-              <span className="nb-banner-badge">RECEVOIR →</span>
+              <span className="nb-banner-badge">OBTENIR →</span>
             </Link>
           </div>
         )}

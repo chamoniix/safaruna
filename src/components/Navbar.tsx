@@ -211,17 +211,61 @@ export default function Navbar({
             to   { opacity: 1; transform: translateY(0); }
           }
         }
+        /* ── Banner animations ── */
+        @keyframes nb-shimmer-sweep {
+          0%   { transform: translateX(-100%); }
+          100% { transform: translateX(300%); }
+        }
+        @keyframes nb-pulse-dot {
+          0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(201,168,76,0.5); }
+          50%       { opacity: 0.5; box-shadow: 0 0 0 4px rgba(201,168,76,0); }
+        }
+        @keyframes nb-pill-glow {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,76,0), inset 0 0 0 0.5px rgba(201,168,76,0.22); }
+          50%       { box-shadow: 0 0 18px 0 rgba(201,168,76,0.08), inset 0 0 0 0.5px rgba(201,168,76,0.38); }
+        }
         /* ── Banner ── */
         .nb-banner {
-          background: #251913; color: #FFFFFF;
-          display: flex; align-items: center; justify-content: center; gap: 20px;
-          padding: 12px 16px; border-bottom: 1px solid rgba(201,168,76,0.3);
+          background: #0D0A07;
+          display: flex; align-items: center; justify-content: center;
+          padding: 10px 20px;
+          border-bottom: 1px solid rgba(255,255,255,0.04);
+          color: #FAF7F0;
         }
-        .nb-banner-pdf-btn {
-          display: inline-flex; align-items: center; gap: 5px;
-          padding: 8px 18px; border: 0.5px solid #C9A84C; border-radius: 999px;
-          font-size: 11px; color: #22C55E; letter-spacing: 0.08em; font-weight: 600;
-          flex-shrink: 0; text-decoration: none;
+        .nb-banner-pill {
+          position: relative; overflow: hidden;
+          display: inline-flex; align-items: center; gap: 14px;
+          background: rgba(201,168,76,0.055);
+          border-radius: 50px; padding: 7px 7px 7px 14px;
+          animation: nb-pill-glow 3s ease-in-out infinite;
+          text-decoration: none; cursor: pointer;
+        }
+        .nb-banner-pill::before {
+          content: '';
+          position: absolute; top: 0; left: 0;
+          width: 40%; height: 100%;
+          background: linear-gradient(90deg, transparent 0%, rgba(201,168,76,0.09) 40%, rgba(240,216,151,0.13) 50%, rgba(201,168,76,0.09) 60%, transparent 100%);
+          animation: nb-shimmer-sweep 2.8s ease-in-out infinite;
+          pointer-events: none;
+        }
+        .nb-banner-dot {
+          width: 7px; height: 7px; border-radius: 50%; background: #C9A84C; flex-shrink: 0;
+          animation: nb-pulse-dot 2.2s ease-in-out infinite;
+        }
+        .nb-banner-main { display: flex; flex-direction: column; gap: 2px; }
+        .nb-banner-title { font-size: 12.5px; font-weight: 700; color: #FAF7F0; white-space: nowrap; }
+        .nb-banner-stars { display: flex; align-items: center; gap: 4px; }
+        .nb-banner-stars-row { color: #C9A84C; font-size: 9px; letter-spacing: 1px; }
+        .nb-banner-review { font-size: 9.5px; color: rgba(255,255,255,0.35); }
+        .nb-banner-sep { width: 1px; height: 26px; background: rgba(201,168,76,0.15); flex-shrink: 0; }
+        .nb-banner-dl { display: flex; flex-direction: column; gap: 1px; align-items: center; }
+        .nb-banner-dl-count { font-size: 13px; font-weight: 800; color: #F0D897; letter-spacing: -0.01em; }
+        .nb-banner-dl-label { font-size: 9px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.06em; }
+        .nb-banner-badge {
+          background: #C9A84C; color: #1A1209;
+          padding: 6px 16px; border-radius: 50px;
+          font-size: 10.5px; font-weight: 800; letter-spacing: 0.07em;
+          text-transform: uppercase; white-space: nowrap; flex-shrink: 0;
         }
         /* ── Bar ── */
         .nb-bar {
@@ -449,20 +493,22 @@ export default function Navbar({
         {/* ── Banner ── */}
         {!hideBanner && (
           <div className="nb-banner">
-            <Link href="/guide-omra" style={{ display: 'flex', alignItems: 'center', gap: '9px', textDecoration: 'none' }}>
-              <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px', flexShrink: 0 }}>
-                <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
-                  <path d="M3 2h7l3 3v9H3V2z" stroke="#C9A84C" strokeWidth="1" strokeLinejoin="round" fill="rgba(201,168,76,0.08)"/>
-                  <path d="M10 2v3h3" stroke="#C9A84C" strokeWidth="1" strokeLinejoin="round"/>
-                  <path d="M5 8h6M5 10h6M5 12h4" stroke="#C9A84C" strokeWidth="0.7" strokeLinecap="round"/>
-                </svg>
-              </span>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', minWidth: 0 }}>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: '#FFFFFF', letterSpacing: '0.02em', lineHeight: 1.25 }}>Guide PDF gratuit</div>
-                <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.65)', lineHeight: 1.25 }}>La Omra étape par étape</div>
+            <Link href="/guide-omra" className="nb-banner-pill">
+              <div className="nb-banner-dot" />
+              <div className="nb-banner-main">
+                <div className="nb-banner-title">Guide PDF gratuit · <span style={{ color: '#C9A84C' }}>La Omra étape par étape</span></div>
+                <div className="nb-banner-stars">
+                  <span className="nb-banner-stars-row">★★★★★</span>
+                  <span className="nb-banner-review">4,9 · 380 avis</span>
+                </div>
               </div>
+              <div className="nb-banner-sep" />
+              <div className="nb-banner-dl">
+                <div className="nb-banner-dl-count">2 400+</div>
+                <div className="nb-banner-dl-label">téléchargements</div>
+              </div>
+              <span className="nb-banner-badge">RECEVOIR →</span>
             </Link>
-            <Link href="/guide-omra" className="nb-banner-pdf-btn">RECEVOIR →</Link>
           </div>
         )}
 

@@ -179,7 +179,7 @@ footer { background: var(--warm); padding: 3rem 4rem 2rem; color: rgba(255,255,2
 }
 
 /* ── HERO FULL ─────────────────────────────────────────────────────────────── */
-.hero-full { min-height: 100vh; background: #1A1209; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 6rem 2rem 4rem; text-align: center; }
+.hero-full { min-height: 100vh; background: #1A1209; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 8rem 2rem 4rem; text-align: center; }
 .hero-full-arabic { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: var(--font-cormorant), serif; font-size: 22vw; color: rgba(201,168,76,0.06); line-height: 1; pointer-events: none; user-select: none; direction: rtl; white-space: nowrap; animation: fadeIn 2s 0.3s ease both; opacity: 0; }
 .hero-logo-word { display: flex; gap: 0.02em; align-items: center; justify-content: center; }
 .hero-logo-letter { display: inline-block; animation: fadeInLetter 0.55s ease both; opacity: 0; font-family: var(--font-cormorant), 'Cormorant Garamond', serif; font-size: clamp(3.5rem, 8vw, 6rem); font-weight: 600; color: white; letter-spacing: 0.06em; }
@@ -303,7 +303,7 @@ footer { background: var(--warm); padding: 3rem 4rem 2rem; color: rgba(255,255,2
   .cta-section { padding: 2.5rem 1.25rem; }
   .trust { padding: 1.25rem 1rem; gap: 1rem; }
   .guide-card { padding: 1.25rem; }
-  .hero-full { justify-content: flex-start; min-height: 100svh; padding: 6rem 1.25rem 1rem; }
+  .hero-full { justify-content: flex-start; min-height: 100svh; padding: 8rem 1.25rem 1rem; }
   .golden-line-wrap { margin: 0.6rem 0; }
   .hero-logo-letter { font-size: 3.4rem; }
   .hero-subtitle-ar { display: none; }

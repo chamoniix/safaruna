@@ -21,14 +21,14 @@ export default function BlogPage() {
       <Navbar />
       <ScrollReveal />
       <style dangerouslySetInnerHTML={{ __html: `
-        .blog-hero-section { padding: 8rem 4rem 5rem; }
+        .blog-hero-section { padding: 9.5rem 4rem 5rem; }
         .blog-featured-section { padding: 4rem 4rem 2rem; }
         .blog-grid-section { padding: 2rem 4rem 5rem; }
         .blog-newsletter-section { padding: 4rem; }
         .blog-featured-card { display: grid; grid-template-columns: 1fr 1fr; }
         .blog-featured-left { padding: 4rem; min-height: 320px; }
         @media (max-width: 768px) {
-          .blog-hero-section { padding: 6rem 1.25rem 3rem; }
+          .blog-hero-section { padding: 8rem 1.25rem 3rem; }
           .blog-featured-section { padding: 2rem 1.25rem 1rem; }
           .blog-grid-section { padding: 1.5rem 1.25rem 3rem; }
           .blog-newsletter-section { padding: 3rem 1.25rem; }

@@ -160,7 +160,7 @@ export default function AProposPage() {
         justifyContent: 'center',
         position: 'relative',
         overflow: 'hidden',
-        padding: '8rem 2rem 6rem',
+        padding: '9.5rem 2rem 6rem',
         textAlign: 'center',
       }}>
         <div style={{

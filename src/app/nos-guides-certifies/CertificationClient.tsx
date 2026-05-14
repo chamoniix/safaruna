@@ -147,7 +147,7 @@ export default function CertificationClient() {
         .cert-reveal-d4 { transition-delay: 0.4s; }
 
         /* Hero */
-        .cert-hero { position: relative; background: var(--cp-deep); min-height: 72vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 9rem 2rem 6rem; overflow: hidden; }
+        .cert-hero { position: relative; background: var(--cp-deep); min-height: 72vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 10.5rem 2rem 6rem; overflow: hidden; }
         .cert-hero-arabic { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--font-cormorant, serif); font-size: clamp(8rem, 22vw, 18rem); color: rgba(201,168,76,0.04); pointer-events: none; direction: rtl; line-height: 1; user-select: none; }
         .cert-hero-lines { position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent, transparent 79px, rgba(201,168,76,0.03) 80px); pointer-events: none; }
         .cert-hero-inner { position: relative; max-width: 760px; }

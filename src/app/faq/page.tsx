@@ -80,7 +80,7 @@ export default function FaqPage() {
       <Navbar />
 
       {/* Hero */}
-      <section style={{ background: '#1A1209', padding: '8.5rem 1.5rem 4rem', textAlign: 'center' }}>
+      <section style={{ background: '#1A1209', padding: '11rem 1.5rem 4rem', textAlign: 'center' }}>
         <div style={{ maxWidth: 640, margin: '0 auto' }}>
           <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: '1rem' }}>Foire aux questions</div>
           <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(2.5rem, 5vw, 3.75rem)', fontWeight: 700, color: 'white', lineHeight: 1.1, margin: '0 0 1.25rem' }}>
@@ -88,7 +88,7 @@ export default function FaqPage() {
             <span style={{ color: '#C9A84C' }}>réponses ici</span>
           </h1>
           <p style={{ fontSize: '1rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.7, margin: 0 }}>
-            {totalQ} questions répondues — classées par thème.
+            {totalQ} questions répondues, classées par thème.
           </p>
         </div>
       </section>

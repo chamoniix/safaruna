@@ -50,7 +50,7 @@ export default function Footer() {
               SAFAR<span>U</span>MA
             </span>
           </Link>
-          <p>La première plateforme dédiée aux guides privés pour la Omra. Rituels, histoire, spiritualité. Vivez-les en profondeur.</p>
+          <p>Première plateforme de réservation de guide privé pour la Omra, en plusieurs langues.</p>
         </div>
         <div className="footer-col">
           <h4>Pèlerins</h4>

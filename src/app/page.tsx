@@ -182,7 +182,7 @@ export default function Home() {
 
           {/* Subtitle */}
           <p className="hc-sub" style={{ fontSize: '0.72rem', lineHeight: 1.65, color: 'rgba(250,247,240,0.78)', maxWidth: 'min(540px, 90vw)', margin: '0 auto 32px' }}>
-            Guide certifié à <span style={{ color: '#F0D897', fontWeight: 500 }}>La Mecque</span> et <span style={{ color: '#F0D897', fontWeight: 500 }}>Médine</span>. Visite des lieux saints, sites historiques et endroits que les agences Omra ne montrent pas.
+            <span style={{ color: '#F0D897', fontWeight: 500 }}>Réservez</span> un guide certifié à <span style={{ color: '#F0D897', fontWeight: 500 }}>La Mecque</span> et <span style={{ color: '#F0D897', fontWeight: 500 }}>Médine</span>. Accompagnement sur les lieux saints et sites historiques que les agences Omra ne montrent pas.
           </p>
 
           {/* CTA with halo */}

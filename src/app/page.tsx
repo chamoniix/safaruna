@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import CookiePrefsButton from '@/components/CookiePrefsButton';
 
 const EASE_LUXURY = [0.16, 1, 0.3, 1] as const;
 
@@ -17,6 +17,9 @@ type ModalContent = {
   cta: string;
   meta?: string;
   image?: string;
+  badges?: string[];
+  highlights?: string[];
+  price?: string;
 };
 
 type CarouselItem = {
@@ -28,6 +31,10 @@ type CarouselItem = {
   image?: string;
   meta?: string;
   cta?: string;
+  badges?: string[];
+  highlights?: string[];
+  price?: string;
+  kind?: 'guide' | 'feature';
 };
 
 const partners = [
@@ -40,12 +47,44 @@ const partners = [
 
 const whyCards: CarouselItem[] = [
   {
+    id: 'langue',
+    icon: '◆',
+    title: 'Guide dans ta langue',
+    text: 'Tu choisis ton guide selon sa langue maternelle. Français, Wolof, Darija, Turc — ton guide te parle comme un ami, pas comme un conférencier.',
+    href: '/guides',
+    cta: 'Trouver mon guide',
+  },
+  {
     id: 'guides-experts',
     icon: '۞',
     title: 'Guides experts',
     text: 'Guides certifiés, passionnés et habitués du terrain pour une Omra claire, authentique et apaisée.',
     href: '/guides-certifies',
     cta: 'En savoir plus',
+  },
+  {
+    id: 'famille',
+    icon: '1',
+    title: 'En famille',
+    text: "Je veux emmener mes proches mais j'ai peur de mal organiser.",
+    href: '/guides',
+    cta: 'Trouver un guide famille',
+  },
+  {
+    id: 'parents',
+    icon: '2',
+    title: 'Pour mes parents',
+    text: 'SVP prenez soin de mes parents. — Ces mots que vous direz à leur guide.',
+    href: '/guides',
+    cta: 'Trouver un guide rassurant',
+  },
+  {
+    id: 'premiere-omra',
+    icon: '3',
+    title: 'Ma 1ère Omra',
+    text: 'Je prie, je jeûne. Je veux enfin faire la Omra mais je ne sais pas par où commencer.',
+    href: '/guide-omra',
+    cta: 'Préparer ma Omra',
   },
   {
     id: 'pmr',
@@ -71,53 +110,149 @@ const whyCards: CarouselItem[] = [
     href: '/histoire-premiere-omra',
     cta: 'En savoir plus',
   },
+  {
+    id: 'assistance',
+    icon: '◌',
+    title: 'Assistance en temps réel',
+    text: 'On répond à toutes vos questions. Nos guides et nos équipes restent disponibles pour que votre voyage soit le plus agréable possible.',
+    href: '/contact',
+    cta: 'Nous contacter',
+  },
+  {
+    id: 'remplacement',
+    icon: '✓',
+    title: 'Garantie remplacement',
+    text: 'Si ton guide ne peut pas venir pour une urgence, on te trouve un guide équivalent certifié en moins de 2 heures.',
+    href: '/guides',
+    cta: 'Trouver mon guide',
+  },
 ];
 
 const guides: CarouselItem[] = [
   {
     id: 'naim-laamari',
-    title: 'Naïm',
-    text: 'Guide terrain SAFARUMA à Makkah, idéal pour une première Omra en français et arabe.',
+    title: 'Naïm LAAMARI',
+    text: 'Makkah · 8 ans · Responsable Terrain. Guide Officiel SAFARUMA, formateur certifié et guide vérifié pour les familles francophones.',
     href: '/guides/naim-laamari',
     image: '/images/landing/guide-naim-laamari.jpg',
-    meta: 'Français + Arabe',
+    meta: 'Français · Arabe · English · Darija',
     cta: 'Voir le profil complet',
+    badges: ['OFFICIEL SAFARUMA', 'GUIDE VÉRIFIÉ', 'RESPONSABLE TERRAIN', 'FORMATEUR CERTIFIÉ'],
+    highlights: ['5.0 · avis vérifiés', 'Makkah', '8 ans d’expérience terrain', 'Français, Arabe, English, Darija'],
+    price: 'À partir de 150€ / pers.',
+  },
+  {
+    id: 'profil-transparent',
+    kind: 'feature',
+    icon: '◎',
+    title: 'Profil guide transparent',
+    text: 'Biographie complète, certifications vérifiées, avis authentiques, lieux couverts et taux de retour. Tu sais exactement qui tu vas rencontrer.',
+    href: '/guides',
+    meta: 'Confiance',
+    cta: 'Voir les guides',
+    badges: ['Certifications', 'Avis', 'Lieux couverts'],
   },
   {
     id: 'youssef',
     title: 'Youssef',
     text: 'Accompagnement anglophone et arabe pour pèlerins internationaux, familles et petits groupes.',
-    href: '/guides/youssef',
+    href: '/guides',
     meta: 'Anglais + Arabe',
-    cta: 'Voir le profil complet',
+    cta: 'Voir les guides disponibles',
   },
   {
     id: 'ibrahim',
     title: 'Ibrahim',
     text: 'Profil turcophone et arabe, pensé pour les visiteurs qui veulent poser leurs questions sans barrière.',
-    href: '/guides/ibrahim',
+    href: '/guides',
     meta: 'Turc + Arabe',
-    cta: 'Voir le profil complet',
+    cta: 'Voir les guides disponibles',
   },
   {
     id: 'muhammad',
     title: 'Muhammad',
     text: 'Guide indonésien et arabe pour une Omra calme, structurée et adaptée aux familles.',
-    href: '/guides/muhammad',
+    href: '/guides',
     meta: 'Indonésien + Arabe',
-    cta: 'Voir le profil complet',
+    cta: 'Voir les guides disponibles',
   },
   {
     id: 'rachid',
     title: 'Rachid',
     text: 'Accompagnement espagnol et arabe pour découvrir les rites et les lieux avec plus de profondeur.',
-    href: '/guides/rachid',
+    href: '/guides',
     meta: 'Espagnol + Arabe',
-    cta: 'Voir le profil complet',
+    cta: 'Voir les guides disponibles',
   },
 ];
 
 const experiences: CarouselItem[] = [
+  {
+    id: 'masjid-haram',
+    icon: 'الكعبة',
+    title: 'Masjid Al-Haram & Kaaba',
+    text: 'Le cœur du pèlerinage. Ton guide t’aide à comprendre le Tawaf, les repères, les accès et le sens de chaque geste.',
+    href: '/lieux-saints',
+    image: '/images/landing/hero-kaaba-main.jpg',
+    cta: 'Explorer tous les lieux',
+  },
+  {
+    id: 'masjid-nabawi',
+    icon: 'ﷺ',
+    title: 'Masjid An-Nabawi',
+    text: 'La mosquée du Prophète ﷺ à Médine, avec ses repères, son histoire et l’adab à respecter.',
+    href: '/lieux-saints',
+    cta: 'Explorer tous les lieux',
+  },
+  {
+    id: 'rawdah',
+    icon: 'روضة',
+    title: 'Rawdah',
+    text: 'Un moment très demandé à Médine. Le guide explique le contexte, l’organisation et les bonnes attentes.',
+    href: '/lieux-saints',
+    cta: 'Explorer tous les lieux',
+  },
+  {
+    id: 'quba',
+    icon: 'قباء',
+    title: 'Masjid Quba',
+    text: 'La première mosquée bâtie dans l’histoire de l’Islam, un lieu essentiel pour comprendre Médine.',
+    href: '/lieux-saints',
+    cta: 'Explorer tous les lieux',
+  },
+  {
+    id: 'uhud',
+    icon: 'أحد',
+    title: 'Mont Uhud',
+    text: 'Un lieu fort de l’histoire islamique, souvent visité à Médine pour comprendre les compagnons et leurs sacrifices.',
+    href: '/lieux-saints',
+    cta: 'Explorer tous les lieux',
+  },
+  {
+    id: 'badr',
+    icon: 'بدر',
+    title: 'Badr',
+    text: 'Plus éloigné, mais spirituellement majeur. Certains itinéraires peuvent l’inclure selon timing, autorisations et organisation.',
+    href: '/lieux-saints',
+    cta: 'Explorer tous les lieux',
+  },
+  {
+    id: 'hira',
+    icon: 'حراء',
+    title: 'Grotte de Hira',
+    text: 'Là où la première révélation coranique fut révélée. Ton guide replace le lieu dans son contexte spirituel.',
+    href: '/lieux-saints',
+    image: '/images/landing/experience-historique.jpg',
+    cta: 'Explorer tous les lieux',
+  },
+  {
+    id: 'arafat',
+    icon: 'عرفات',
+    title: 'Arafat & Jabal Rahmah',
+    text: 'Un repère fondamental du Hajj, expliqué avec simplicité même pendant une Omra.',
+    href: '/lieux-saints',
+    cta: 'Explorer tous les lieux',
+  },
   {
     id: 'lieux-historiques',
     title: 'Lieux historiques préservés',
@@ -197,28 +332,58 @@ const steps: CarouselItem[] = [
 
 const reviews: CarouselItem[] = [
   {
+    id: 'karim-live',
+    title: 'Karim L.',
+    text: "Rachid nous a fait vivre l'histoire à chaque pas. La montée de Jabal Nour avec ses explications était le moment le plus fort de notre vie.",
+    href: '#avis',
+    meta: '★★★★★',
+    image: '/images/landing/experience-historique.jpg',
+    cta: 'Voir les avis',
+  },
+  {
+    id: 'safia-live',
+    title: 'Safia M.',
+    text: 'En tant que groupe de femmes, nous avions des appréhensions. Fatima a tout géré avec une douceur et une compétence incroyables.',
+    href: '#avis',
+    meta: '★★★★★',
+    image: '/images/landing/experience-rencontres.jpg',
+    cta: 'Voir les avis',
+  },
+  {
+    id: 'ibrahima-live',
+    title: 'Ibrahima D.',
+    text: "Youssouf parle Wolof, connaît les histoires que nos anciens nous ont transmises, et les relie aux lieux saints. Toute la famille est repartie transformée.",
+    href: '#avis',
+    meta: '★★★★★',
+    image: '/images/landing/experience-spirituel.jpg',
+    cta: 'Voir les avis',
+  },
+  {
     id: 'meryem',
     title: 'Meryem B.',
     text: 'Une expérience incroyable. Notre guide a pris le temps d’expliquer chaque étape, de répondre aux questions de mes parents et de rendre la Omra plus profonde.',
-    href: '/avis',
+    href: '#avis',
     meta: '★★★★★',
-    cta: 'Voir tous les avis',
+    image: '/images/landing/testi-bg.jpg',
+    cta: 'Voir les avis',
   },
   {
-    id: 'karim',
-    title: 'Karim L.',
-    text: 'Grâce à SAFARUMA, j’ai découvert des lieux magnifiques que les agences classiques ne montrent pas. On sent que le parcours a été pensé pour nous.',
-    href: '/avis',
+    id: 'converti',
+    title: 'Nadir C.',
+    text: "Tout juste converti, j'ai découvert la Omra sans me sentir perdu. Le guide expliquait chaque étape avec patience et respect.",
+    href: '#avis',
     meta: '★★★★★',
-    cta: 'Voir tous les avis',
+    image: '/images/landing/mosque-bg-beige.jpg',
+    cta: 'Voir les avis',
   },
   {
-    id: 'amina',
-    title: 'Amina S.',
-    text: 'Service impeccable du début à la fin. On se sent accompagné comme en famille, même à l’autre bout du monde.',
-    href: '/avis',
+    id: 'hesitation',
+    title: 'Samira H.',
+    text: "J'ai hésité longtemps, je pensais que ce n'était pas le bon moment. L'accompagnement m'a rassurée dès la préparation.",
+    href: '#avis',
     meta: '★★★★★',
-    cta: 'Voir tous les avis',
+    image: '/images/landing/cta-bg.jpg',
+    cta: 'Voir les avis',
   },
 ];
 
@@ -259,39 +424,38 @@ function Carousel({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
-  const [paused, setPaused] = useState(false);
-  const [coarsePointer, setCoarsePointer] = useState(false);
+  const items = React.Children.toArray(children);
 
   const scrollBy = (direction: number) => {
     ref.current?.scrollBy({ left: direction * 340, behavior: 'smooth' });
   };
 
   useEffect(() => {
-    const query = window.matchMedia('(pointer: coarse)');
-    const update = () => setCoarsePointer(query.matches);
-    update();
-    query.addEventListener('change', update);
-    return () => query.removeEventListener('change', update);
-  }, []);
+    if (!auto || reduce) return;
+    let raf = 0;
+    let last = performance.now();
 
-  useEffect(() => {
-    if (!auto || paused || reduce || coarsePointer) return;
-    const id = window.setInterval(() => {
+    const tick = (now: number) => {
       const el = ref.current;
-      if (!el) return;
-      const nearEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 24;
-      el.scrollTo({ left: nearEnd ? 0 : el.scrollLeft + Math.min(320, el.clientWidth * 0.72), behavior: 'smooth' });
-    }, 3600);
-    return () => window.clearInterval(id);
-  }, [auto, paused, reduce, coarsePointer]);
+      if (el) {
+        const delta = now - last;
+        const loopWidth = el.scrollWidth / 2;
+        el.scrollLeft += delta * 0.026;
+        if (loopWidth > 0 && el.scrollLeft >= loopWidth) {
+          el.scrollLeft -= loopWidth;
+        }
+      }
+      last = now;
+      raf = window.requestAnimationFrame(tick);
+    };
+
+    raf = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(raf);
+  }, [auto, reduce]);
 
   return (
     <div
       className={`sfr-carousel-shell ${className ?? ''}`}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onPointerDown={() => setPaused(true)}
-      onPointerUp={() => window.setTimeout(() => setPaused(false), 1200)}
     >
       <motion.button
         className="sfr-carousel-arrow sfr-carousel-arrow--left"
@@ -303,7 +467,10 @@ function Carousel({
         &lt;
       </motion.button>
       <div ref={ref} className="sfr-carousel-track" aria-label={label}>
-        {children}
+        {items}
+        {auto && items.map((child, index) => (
+          <React.Fragment key={`loop-${index}`}>{child}</React.Fragment>
+        ))}
       </div>
       <motion.button
         className="sfr-carousel-arrow sfr-carousel-arrow--right"
@@ -343,6 +510,81 @@ function SmartImage({
   return <Image src={src} alt={alt} fill sizes="(max-width: 768px) 78vw, 280px" className={className} />;
 }
 
+function TrustIcon({ type }: { type: 'check' | 'shield' | 'accessibility' }) {
+  if (type === 'shield') {
+    return (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
+      </svg>
+    );
+  }
+  if (type === 'accessibility') {
+    return (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M10.5 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z" />
+        <path d="M7.5 10.5c.621 0 1.125.504 1.125 1.125V15l-1.6 3.2a1.125 1.125 0 0 0 2.01 1.005L10.5 16.5h3l1.465 2.71a1.125 1.125 0 1 0 2.01-1.005l-1.6-3.2V11.13A1.125 1.125 0 0 0 14.25 10h-3.75a1.125 1.125 0 0 0-1.125 1.125v-.375A1.125 1.125 0 0 0 8.25 9.75H7.5a1.125 1.125 0 0 0-1.125 1.125v.375C6.375 11.91 6.879 12 7.5 12" />
+      </svg>
+    );
+  }
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="m4.5 12.75 6 6 9-13.5" />
+    </svg>
+  );
+}
+
+function SocialIcon({ type }: { type: 'instagram' | 'tiktok' | 'youtube' | 'x' | 'snapchat' | 'pinterest' | 'linkedin' }) {
+  if (type === 'instagram') {
+    return (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37Z" />
+        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+      </svg>
+    );
+  }
+  if (type === 'tiktok') {
+    return (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.97a8.27 8.27 0 0 0 4.84 1.54V7.08a4.85 4.85 0 0 1-1.07-.39Z" />
+      </svg>
+    );
+  }
+  if (type === 'youtube') {
+    return (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814ZM9.545 15.568V8.432L15.818 12l-6.273 3.568Z" />
+      </svg>
+    );
+  }
+  if (type === 'x') {
+    return (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.258 5.63 5.906-5.63Zm-1.161 17.52h1.833L7.084 4.126H5.117Z" />
+      </svg>
+    );
+  }
+  if (type === 'pinterest') {
+    return (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 0C5.373 0 0 5.373 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.632-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0Z" />
+      </svg>
+    );
+  }
+  if (type === 'snapchat') {
+    return (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 2C8.61 2 6 4.77 6 8.2v.8c-.56.07-1.08.33-1.44.73-.34.38-.5.86-.44 1.34.12.95.87 1.67 1.88 1.82-.5 1.03-1.35 1.87-2.4 2.29-.3.12-.47.43-.38.74.08.27.32.44.6.44.05 0 .1 0 .15-.02.17-.04.34-.09.51-.14.55-.16 1.12-.24 1.7-.24.32 0 .63.03.93.08-.2.66-.31 1.36-.31 2.08 0 .3.24.55.55.55H12h5.65c.3 0 .55-.25.55-.55 0-.72-.11-1.42-.31-2.08.3-.05.61-.08.93-.08.58 0 1.15.08 1.7.24.17.05.34.1.51.14.05.01.1.02.15.02.28 0 .52-.17.6-.44.09-.31-.08-.62-.38-.74-1.05-.42-1.9-1.26-2.4-2.29 1.01-.15 1.76-.87 1.88-1.82.06-.48-.1-.96-.44-1.34-.36-.4-.88-.66-1.44-.73v-.8C18 4.77 15.39 2 12 2Z" />
+      </svg>
+    );
+  }
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286ZM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065Zm1.782 13.019H3.555V9h3.564v11.452ZM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003Z" />
+    </svg>
+  );
+}
+
 function Modal({ content, onClose }: { content: ModalContent | null; onClose: () => void }) {
   useEffect(() => {
     if (!content) return;
@@ -380,6 +622,21 @@ function Modal({ content, onClose }: { content: ModalContent | null; onClose: ()
             <h2 id="sfr-modal-title">{content.title}</h2>
             {content.meta && <p className="sfr-modal-meta">{content.meta}</p>}
             <p>{content.text}</p>
+            {content.badges && (
+              <div className="sfr-modal-badges">
+                {content.badges.map((badge) => (
+                  <span key={badge}>{badge}</span>
+                ))}
+              </div>
+            )}
+            {content.highlights && (
+              <ul className="sfr-modal-highlights">
+                {content.highlights.map((highlight) => (
+                  <li key={highlight}>{highlight}</li>
+                ))}
+              </ul>
+            )}
+            {content.price && <p className="sfr-modal-price">{content.price}</p>}
             <Link href={content.href} className="sfr-btn sfr-btn-gold" onClick={onClose}>
               {content.cta} →
             </Link>
@@ -429,7 +686,7 @@ function HeroSection() {
             agences Omra ne montrent pas.
           </p>
           <div className="sfr-hero-actions">
-            <Link href="/reservation" className="sfr-btn sfr-btn-gold">
+            <Link href="/guides" className="sfr-btn sfr-btn-gold">
               Trouver mon guide →
             </Link>
             <button className="sfr-btn sfr-btn-glass" type="button">
@@ -457,7 +714,6 @@ function PartnersSection() {
   return (
     <section className="sfr-partners" aria-label="Partenaires">
       <Carousel label="Partenaires SAFARUMA" className="sfr-partners-carousel">
-        <div className="sfr-partner-label">En partenariat avec</div>
         {partners.map((partner) => (
           <motion.div key={partner.name} className="sfr-partner-card" whileHover={{ y: -3 }}>
             {'image' in partner && partner.image ? (
@@ -514,6 +770,9 @@ function WhySection({ openModal }: { openModal: (item: ModalContent) => void }) 
             <br />
             <em>une expérience unique.</em>
           </h2>
+          <Link href="/guides" className="sfr-btn sfr-btn-outline sfr-title-action">
+            Trouver mon guide →
+          </Link>
         </Reveal>
         <Carousel label="Pourquoi choisir SAFARUMA">
           {whyCards.map((card) => (
@@ -564,7 +823,7 @@ function GuidesSection({ openModal }: { openModal: (item: ModalContent) => void 
             <motion.button
               type="button"
               key={guide.id}
-              className="sfr-guide-card"
+              className={`sfr-guide-card${guide.kind === 'feature' ? ' sfr-guide-card-feature' : ''}`}
               whileHover={{ y: -6 }}
               onClick={() =>
                 openModal({
@@ -575,20 +834,34 @@ function GuidesSection({ openModal }: { openModal: (item: ModalContent) => void 
                   cta: guide.cta ?? 'Voir le profil complet',
                   meta: guide.meta,
                   image: guide.image,
+                  badges: guide.badges,
+                  highlights: guide.highlights,
+                  price: guide.price,
                 })
               }
             >
-              <div className="sfr-guide-photo">
-                <SmartImage src={guide.image} alt={`Guide ${guide.title}`} />
-                {!guide.image && <span className="sfr-guide-initial">{guide.title.slice(0, 1)}</span>}
-              </div>
-              <h3>{guide.title}</h3>
-              <p>
-                {guide.meta}{' '}
-                <span className="sfr-flags">
-                  {['🇫🇷 🇸🇦', '🇬🇧 🇸🇦', '🇹🇷 🇸🇦', '🇮🇩 🇸🇦', '🇪🇸 🇸🇦'][index]}
-                </span>
-              </p>
+              {guide.kind === 'feature' ? (
+                <div className="sfr-guide-feature">
+                  <span className="sfr-card-icon">{guide.icon}</span>
+                  <h3>{guide.title}</h3>
+                  <p>{guide.text}</p>
+                  <small>{guide.cta} →</small>
+                </div>
+              ) : (
+                <>
+                  <div className="sfr-guide-photo">
+                    <SmartImage src={guide.image} alt={`Guide ${guide.title}`} />
+                    {!guide.image && <span className="sfr-guide-initial">{guide.title.slice(0, 1)}</span>}
+                  </div>
+                  <h3>{guide.title}</h3>
+                  <p>
+                    {guide.meta}{' '}
+                    <span className="sfr-flags">
+                      {['🇫🇷 🇸🇦', '', '🇬🇧 🇸🇦', '🇹🇷 🇸🇦', '🇮🇩 🇸🇦', '🇪🇸 🇸🇦'][index]}
+                    </span>
+                  </p>
+                </>
+              )}
             </motion.button>
           ))}
         </Carousel>
@@ -610,6 +883,9 @@ function ExperiencesSection({ openModal }: { openModal: (item: ModalContent) => 
             <br />
             ne montrent pas.
           </h2>
+          <Link href="/lieux-saints" className="sfr-btn sfr-btn-outline sfr-title-action">
+            Explorer tous les lieux →
+          </Link>
         </Reveal>
         <Carousel label="Expériences exclusives">
           {experiences.map((experience) => (
@@ -629,7 +905,13 @@ function ExperiencesSection({ openModal }: { openModal: (item: ModalContent) => 
                 })
               }
             >
-              <SmartImage src={experience.image} alt={experience.title} />
+              {experience.image ? (
+                <SmartImage src={experience.image} alt={experience.title} />
+              ) : (
+                <div className="sfr-place-art" aria-hidden="true">
+                  <span>{experience.icon ?? '۞'}</span>
+                </div>
+              )}
               <span>{experience.title}</span>
             </motion.button>
           ))}
@@ -650,6 +932,9 @@ function StepsSection({ openModal }: { openModal: (item: ModalContent) => void }
             <br />
             <em>à chaque étape.</em>
           </h2>
+          <Link href="/inscription" className="sfr-btn sfr-btn-outline sfr-title-action sfr-title-action-light">
+            Créer ton espace gratuitement →
+          </Link>
         </Reveal>
         <Carousel label="Ton parcours Omra">
           {steps.map((step, index) => (
@@ -681,7 +966,7 @@ function StepsSection({ openModal }: { openModal: (item: ModalContent) => void }
 
 function ReviewsSection({ openModal }: { openModal: (item: ModalContent) => void }) {
   return (
-    <section className="sfr-section sfr-section-beige">
+    <section id="avis" className="sfr-section sfr-section-beige">
       <div className="sfr-section-layout">
         <Reveal className="sfr-section-title">
           <p className="sfr-eyebrow">Ils nous font confiance</p>
@@ -690,7 +975,7 @@ function ReviewsSection({ openModal }: { openModal: (item: ModalContent) => void
             <br />
             notre plus belle récompense.
           </h2>
-          <p className="sfr-rating-line">★★★★★ 4,96 sur 709 avis vérifiés</p>
+          <p className="sfr-rating-line">★★★★★ 4.9 · 709 avis vérifiés</p>
         </Reveal>
         <Carousel label="Avis clients">
           {reviews.map((review) => (
@@ -705,23 +990,29 @@ function ReviewsSection({ openModal }: { openModal: (item: ModalContent) => void
                   title: review.title,
                   text: review.text,
                   href: review.href,
-                  cta: review.cta ?? 'Voir tous les avis',
+                  cta: review.cta ?? 'Voir les avis',
                   meta: review.meta,
+                  image: review.image,
                 })
               }
             >
-              <div className="sfr-review-head">
-                <span className="sfr-review-avatar">{review.title.slice(0, 1)}</span>
-                <div>
-                  <h3>{review.title}</h3>
-                  <p>{review.meta}</p>
+              <div className="sfr-review-photo">
+                <SmartImage src={review.image} alt={`Avis de ${review.title}`} />
+              </div>
+              <div className="sfr-review-overlay">
+                <p>{review.text}</p>
+                <div className="sfr-review-head">
+                  <span className="sfr-review-avatar">{review.title.slice(0, 1)}</span>
+                  <div>
+                    <h3>{review.title}</h3>
+                    <p>{review.meta}</p>
+                  </div>
                 </div>
               </div>
-              <p>{review.text}</p>
             </motion.button>
           ))}
         </Carousel>
-        <Link href="/avis" className="sfr-btn sfr-btn-outline sfr-review-link">
+        <Link href="#avis" className="sfr-btn sfr-btn-outline sfr-review-link">
           Voir tous les avis →
         </Link>
       </div>
@@ -753,7 +1044,7 @@ function FinalCtaSection() {
           </p>
         </div>
         <div className="sfr-final-actions">
-          <Link href="/reservation" className="sfr-btn sfr-btn-gold">
+          <Link href="/guides" className="sfr-btn sfr-btn-gold">
             Trouver mon guide →
           </Link>
           <Link href="/guides" className="sfr-btn sfr-btn-glass">
@@ -762,6 +1053,94 @@ function FinalCtaSection() {
         </div>
       </Reveal>
     </section>
+  );
+}
+
+function HomeFooter() {
+  return (
+    <footer className="sfr-footer">
+      <div className="sfr-footer-trust" aria-label="Garanties SAFARUMA">
+        <div>
+          <TrustIcon type="check" />
+          Guides certifiés SAFARUMA
+        </div>
+        <div>
+          <TrustIcon type="shield" />
+          Paiement sécurisé
+        </div>
+        <div>
+          <TrustIcon type="accessibility" />
+          Accessibilité PMR
+        </div>
+      </div>
+      <div className="sfr-footer-inner">
+        <div className="sfr-footer-brand">
+          <Link href="/" className="sfr-footer-logo">
+            SAFAR<span>U</span>MA
+          </Link>
+          <p>
+            Guides privés certifiés à La Mecque et Médine. Visite des lieux saints et sites historiques en plusieurs
+            langues.
+          </p>
+        </div>
+
+        <div className="sfr-footer-col">
+          <h4>Navigation</h4>
+          <Link href="/guides">Guides privés</Link>
+          <Link href="/lieux-saints">Destinations</Link>
+          <Link href="/a-propos">À propos</Link>
+          <Link href="/blog">Ressources</Link>
+          <Link href="/contact">Contact</Link>
+        </div>
+
+        <div className="sfr-footer-col">
+          <h4>Ressources</h4>
+          <Link href="/guide-omra">Guide PDF gratuit</Link>
+          <Link href="/blog">Blog</Link>
+          <Link href="/faq">FAQ</Link>
+          <Link href="/cgu">Conditions générales</Link>
+          <Link href="/confidentialite">Politique de confidentialité</Link>
+          <CookiePrefsButton />
+        </div>
+
+        <div className="sfr-footer-col">
+          <h4>Légal</h4>
+          <Link href="/mentions-legales">Mentions légales</Link>
+          <Link href="/conditions-clients">Conditions Clients</Link>
+          <Link href="/charte-islamique">Charte Islamique</Link>
+          <Link href="/contact">Contact</Link>
+        </div>
+      </div>
+      <div className="sfr-footer-social-section">
+        <div>Suivez-nous</div>
+        <div className="sfr-footer-socials" aria-label="Réseaux sociaux">
+          <a href="https://www.instagram.com/safaruma_" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+            <SocialIcon type="instagram" />
+          </a>
+          <a href="https://www.tiktok.com/@safaruma" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+            <SocialIcon type="tiktok" />
+          </a>
+          <a href="https://x.com/safaruma" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)">
+            <SocialIcon type="x" />
+          </a>
+          <a href="https://www.snapchat.com/add/safaruma" target="_blank" rel="noopener noreferrer" aria-label="Snapchat">
+            <SocialIcon type="snapchat" />
+          </a>
+          <a href="https://youtube.com/@safaruma" target="_blank" rel="noopener noreferrer" aria-label="YouTube">
+            <SocialIcon type="youtube" />
+          </a>
+          <a href="https://pin.it/2AfX27PBM" target="_blank" rel="noopener noreferrer" aria-label="Pinterest">
+            <SocialIcon type="pinterest" />
+          </a>
+          <a href="https://www.linkedin.com/company/safaruma" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+            <SocialIcon type="linkedin" />
+          </a>
+        </div>
+      </div>
+      <div className="sfr-footer-bottom">
+        © 2026 HOLDINGAI LTD · SAFARUMA est une marque de HOLDINGAI LTD · Co. No. 16382871 · England &amp; Wales
+      </div>
+    </footer>
   );
 }
 
@@ -780,7 +1159,7 @@ export default function Home() {
       <StepsSection openModal={setModalContent} />
       <ReviewsSection openModal={setModalContent} />
       <FinalCtaSection />
-      <Footer />
+      <HomeFooter />
       <Modal content={modalContent} onClose={() => setModalContent(null)} />
     </div>
   );

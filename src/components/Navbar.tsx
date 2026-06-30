@@ -292,6 +292,7 @@ export default function Navbar({
           height: 42px;
           display: flex; align-items: center; justify-content: space-between;
           position: relative;
+          box-sizing: border-box;
           transition:
             height      300ms cubic-bezier(0.4,0,0.2,1),
             margin      300ms cubic-bezier(0.4,0,0.2,1),
@@ -526,6 +527,8 @@ export default function Navbar({
           .nb-bar {
             height: 52px !important;
             margin: 12px 1.25rem 0 !important;
+            width: calc(100% - 2.5rem) !important;
+            max-width: none !important;
             padding: 0 1rem !important;
             border-radius: 14px;
           }
@@ -566,21 +569,30 @@ export default function Navbar({
             WebkitBackdropFilter: 'blur(16px) saturate(1.6)',
             boxShadow: '0 6px 28px rgba(0,0,0,0.55), 0 1px 0 rgba(201,168,76,0.25)',
             height: '38px',
-            margin: '8px 12rem 0',
+            margin: '8px auto 0',
+            width: 'min(1180px, calc(100% - 3rem))',
+            maxWidth: '1180px',
+            boxSizing: 'border-box',
           } : (pathname === '/' ? {
             background: 'transparent',
             backdropFilter: 'none',
             WebkitBackdropFilter: 'none',
             boxShadow: 'none',
             height: '42px',
-            margin: '10px 3rem 0',
+            margin: '10px auto 0',
+            width: 'min(1180px, calc(100% - 3rem))',
+            maxWidth: '1180px',
+            boxSizing: 'border-box',
           } : {
             background: 'rgba(48,30,10,0.88)',
             backdropFilter: 'blur(14px) saturate(1.5)',
             WebkitBackdropFilter: 'blur(14px) saturate(1.5)',
             boxShadow: '0 4px 24px rgba(0,0,0,0.4), 0 1px 0 rgba(201,168,76,0.2)',
             height: '42px',
-            margin: '10px 3rem 0',
+            margin: '10px auto 0',
+            width: 'min(1180px, calc(100% - 3rem))',
+            maxWidth: '1180px',
+            boxSizing: 'border-box',
           })}>
 
           {/* Logo */}

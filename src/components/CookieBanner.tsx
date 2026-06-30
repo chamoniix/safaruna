@@ -9,14 +9,14 @@ export default function CookieBanner() {
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    setShow(!hasConsented());
-
+    const initialStateTimer = window.setTimeout(() => setShow(!hasConsented()), 0);
     const onConsentChanged = () => setShow(!hasConsented());
     const onOpenModal = () => setShowModal(true);
 
     window.addEventListener('consent-changed', onConsentChanged);
     window.addEventListener('open-cookie-modal', onOpenModal);
     return () => {
+      window.clearTimeout(initialStateTimer);
       window.removeEventListener('consent-changed', onConsentChanged);
       window.removeEventListener('open-cookie-modal', onOpenModal);
     };
@@ -33,25 +33,115 @@ export default function CookieBanner() {
           from { opacity: 0; transform: translateY(16px); }
           to   { opacity: 1; transform: translateY(0); }
         }
+        .cookie-banner {
+          position: fixed;
+          left: 24px;
+          bottom: 24px;
+          right: auto;
+          z-index: 9999;
+          width: 340px;
+          max-width: calc(100vw - 32px);
+          padding: 18px;
+          border: 1px solid rgba(26,18,9,0.08);
+          border-radius: 14px;
+          background: #fff;
+          box-shadow: 0 12px 42px rgba(0,0,0,0.16);
+          font-family: var(--font-manrope, sans-serif);
+          animation: cookieBannerIn 0.3s ease both;
+        }
+        .cookie-banner-copy {
+          display: flex;
+          align-items: flex-start;
+          gap: 9px;
+          margin-bottom: 12px;
+        }
+        .cookie-banner-copy span {
+          font-size: 18px;
+          line-height: 1;
+          flex-shrink: 0;
+        }
+        .cookie-banner-copy p {
+          margin: 0;
+          color: #1A1209;
+          font-size: 0.8rem;
+          line-height: 1.52;
+        }
+        .cookie-banner-actions {
+          display: flex;
+          gap: 8px;
+          margin-bottom: 8px;
+        }
+        .cookie-banner-actions button {
+          flex: 1;
+          border: none;
+          border-radius: 8px;
+          min-height: 38px;
+          padding: 9px 12px;
+          font-family: var(--font-manrope, sans-serif);
+          font-size: 0.8rem;
+          font-weight: 700;
+          cursor: pointer;
+        }
+        .cookie-banner-reject {
+          background: #1A1209;
+          color: #fff;
+        }
+        .cookie-banner-accept {
+          background: #C9A84C;
+          color: #1A1209;
+        }
+        .cookie-banner-customize {
+          background: none;
+          border: none;
+          cursor: pointer;
+          color: #6B7280;
+          font-family: var(--font-manrope, sans-serif);
+          font-size: 0.73rem;
+          text-decoration: underline;
+          padding: 0;
+        }
+        @media (min-width: 641px) {
+          .cookie-banner {
+            left: auto;
+            right: 96px;
+          }
+        }
+        @media (max-width: 640px) {
+          .cookie-banner {
+            left: 10px;
+            bottom: 72px;
+            width: min(328px, calc(100vw - 76px));
+            padding: 12px;
+            border-radius: 12px;
+          }
+          .cookie-banner-copy {
+            gap: 7px;
+            margin-bottom: 9px;
+          }
+          .cookie-banner-copy span {
+            font-size: 16px;
+          }
+          .cookie-banner-copy p {
+            font-size: 0.72rem;
+            line-height: 1.42;
+          }
+          .cookie-banner-actions button {
+            min-height: 34px;
+            padding: 7px 10px;
+            font-size: 0.74rem;
+          }
+        }
       `}</style>
 
       {show && !showModal && (
         <div
           role="dialog"
           aria-label="Gestion des cookies"
-          style={{
-            position: 'fixed', bottom: 24, left: 24, zIndex: 9999,
-            width: 380, maxWidth: 'calc(100vw - 32px)',
-            background: '#FFFFFF', borderRadius: 16,
-            boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
-            padding: 24,
-            fontFamily: 'var(--font-manrope, sans-serif)',
-            animation: 'cookieBannerIn 0.3s ease both',
-          }}
+          className="cookie-banner"
         >
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 16 }}>
-            <span style={{ fontSize: 22, lineHeight: 1, flexShrink: 0 }}>🍪</span>
-            <p style={{ margin: 0, fontSize: '0.85rem', color: '#1A1209', lineHeight: 1.65 }}>
+          <div className="cookie-banner-copy">
+            <span>🍪</span>
+            <p>
               SAFARUMA utilise des cookies pour mesurer l&apos;audience du site et améliorer votre expérience. Acceptez-vous ?{' '}
               <Link href="/cookies" style={{ color: '#C9A84C', textDecoration: 'underline', fontSize: 'inherit' }}>
                 En savoir plus.
@@ -59,26 +149,16 @@ export default function CookieBanner() {
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+          <div className="cookie-banner-actions">
             <button
               onClick={handleReject}
-              style={{
-                flex: 1, background: '#1A1209', color: '#FFFFFF',
-                border: 'none', borderRadius: 8, padding: '10px 12px',
-                fontSize: '0.82rem', fontWeight: 500, cursor: 'pointer',
-                fontFamily: 'var(--font-manrope, sans-serif)',
-              }}
+              className="cookie-banner-reject"
             >
               Refuser
             </button>
             <button
               onClick={handleAccept}
-              style={{
-                flex: 1, background: '#C9A84C', color: '#FFFFFF',
-                border: 'none', borderRadius: 8, padding: '10px 12px',
-                fontSize: '0.82rem', fontWeight: 600, cursor: 'pointer',
-                fontFamily: 'var(--font-manrope, sans-serif)',
-              }}
+              className="cookie-banner-accept"
             >
               Accepter
             </button>
@@ -87,12 +167,7 @@ export default function CookieBanner() {
           <div style={{ textAlign: 'center' }}>
             <button
               onClick={() => setShowModal(true)}
-              style={{
-                background: 'none', border: 'none', cursor: 'pointer',
-                fontSize: '0.78rem', color: '#6B7280',
-                fontFamily: 'var(--font-manrope, sans-serif)',
-                textDecoration: 'underline', padding: 0,
-              }}
+              className="cookie-banner-customize"
             >
               Personnaliser
             </button>

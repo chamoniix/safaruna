@@ -85,6 +85,7 @@ export default function Navbar({
   const [hasScrolled, setHasScrolled] = useState(false);
   const [atTop, setAtTop] = useState(true);
   const [ctaVisible, setCtaVisible] = useState(false);
+  const [isMobileViewport, setIsMobileViewport] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navRef = useRef<HTMLDivElement>(null);
 
@@ -92,15 +93,26 @@ export default function Navbar({
   useEffect(() => {
     const onScroll = () => {
       const y = window.scrollY;
-      setHasScrolled(y > 200);
-      setAtTop(y < 40);
+      const mobile = window.matchMedia('(max-width: 1023px)').matches;
+      const solidThreshold = mobile ? 4 : scrollThreshold;
+      setHasScrolled(y > solidThreshold);
+      setScrolled(y > solidThreshold);
+      setAtTop(mobile ? y <= 4 : y < 40);
       setCtaVisible(y > 150);
-      if (transparentOnHero || darkHeroMode) setScrolled(y > scrollThreshold);
     };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, [transparentOnHero, darkHeroMode, scrollThreshold]);
+
+  useEffect(() => {
+    const query = window.matchMedia('(max-width: 1023px)');
+    const onChange = () => setIsMobileViewport(query.matches);
+
+    onChange();
+    query.addEventListener('change', onChange);
+    return () => query.removeEventListener('change', onChange);
+  }, []);
 
   // Close on outside click
   useEffect(() => {
@@ -132,9 +144,10 @@ export default function Navbar({
   const isTransparent = transparentOnHero && !scrolled;
   const isDarkHero = darkHeroMode && !scrolled;
   const hideBanner = pathname ? HIDE_BANNER_PATHS.some(p => pathname.startsWith(p)) : false;
+  const showBanner = !hideBanner && !isMobileViewport;
   // Sur les pages guide/admin/espace, pas de transparent : navbar toujours solide
   const isAtTop = atTop && !pathname?.startsWith('/guide') && !pathname?.startsWith('/admin') && !pathname?.startsWith('/espace');
-  const showBrand = pathname !== '/';
+  const showBrand = true;
   const role = (session?.user as { role?: string })?.role;
 
   const dashboardHref =
@@ -160,7 +173,7 @@ export default function Navbar({
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style suppressHydrationWarning dangerouslySetInnerHTML={{ __html: `
         .nb-root {
           position: fixed; top: 0; left: 0; right: 0; z-index: 200;
           font-family: var(--font-manrope, sans-serif);
@@ -177,10 +190,10 @@ export default function Navbar({
             white-space: nowrap; text-decoration: none;
             opacity: 1; transition: opacity 250ms ease;
           }
-          .nb-bar.mobile-at-top .nb-mobile-brand { opacity: 0; }
+          .nb-bar.mobile-at-top .nb-mobile-brand { opacity: 1; }
         }
         @media (max-width: 1023px) {
-          .nb-banner { display: none; }
+          .nb-banner { display: none !important; }
           .nb-bar.mobile-at-top {
             background: transparent !important;
             backdrop-filter: none !important;
@@ -227,19 +240,25 @@ export default function Navbar({
         }
         /* ── Banner ── */
         .nb-banner {
-          background: #0D0A07;
+          background: transparent;
           display: flex; align-items: center; justify-content: center;
-          padding: 10px 20px;
-          border-bottom: 1px solid rgba(255,255,255,0.04);
+          padding: 6px 11rem 0 8rem;
+          border-bottom: none;
           color: #FAF7F0;
         }
         .nb-banner-pill {
           position: relative; overflow: hidden;
-          display: inline-flex; align-items: center; gap: 14px;
-          background: rgba(201,168,76,0.055);
-          border-radius: 50px; padding: 7px 7px 7px 14px;
+          display: flex; align-items: center; justify-content: space-between;
+          width: 100%; gap: 12px;
+          background: rgba(201,168,76,0.07);
+          border: 1px solid rgba(201,168,76,0.2);
+          border-radius: 10px; padding: 10px 12px 10px 20px;
+          box-shadow: 0 12px 48px rgba(0,0,0,0.92), 0 4px 16px rgba(0,0,0,0.75);
           animation: nb-pill-glow 3s ease-in-out infinite;
           text-decoration: none; cursor: pointer;
+        }
+        .nb-banner-left {
+          display: flex; align-items: center; gap: 16px; flex: 1;
         }
         .nb-banner-pill::before {
           content: '';
@@ -254,23 +273,23 @@ export default function Navbar({
           animation: nb-pulse-dot 2.2s ease-in-out infinite;
         }
         .nb-banner-main { display: flex; flex-direction: column; gap: 2px; }
-        .nb-banner-title { font-size: 12.5px; font-weight: 700; color: #FAF7F0; white-space: nowrap; }
+        .nb-banner-title { font-size: 16px; font-weight: 700; color: #FAF7F0; white-space: nowrap; }
         .nb-banner-stars { display: flex; align-items: center; gap: 4px; }
-        .nb-banner-stars-row { color: #C9A84C; font-size: 9px; letter-spacing: 1px; }
-        .nb-banner-review { font-size: 9.5px; color: rgba(255,255,255,0.35); }
+        .nb-banner-stars-row { color: #C9A84C; font-size: 13px; letter-spacing: 1px; }
+        .nb-banner-review { font-size: 13px; color: rgba(255,255,255,0.55); }
         .nb-banner-count { color: #C9A84C; font-weight: 700; font-style: normal; }
         .nb-banner-badge {
           background: #C9A84C; color: #1A1209;
-          padding: 5px 12px; border-radius: 50px;
-          font-size: 10px; font-weight: 800; letter-spacing: 0.07em;
+          padding: 7px 22px; border-radius: 6px;
+          font-size: 11px; font-weight: 800; letter-spacing: 0.07em;
           text-transform: uppercase; white-space: nowrap; flex-shrink: 0;
         }
         /* ── Bar ── */
         .nb-bar {
-          border-radius: 20px;
-          padding: 0 2rem;
-          gap: 1rem;
-          height: 48px;
+          border-radius: 16px;
+          padding: 0 1.5rem;
+          gap: 0.75rem;
+          height: 42px;
           display: flex; align-items: center; justify-content: space-between;
           position: relative;
           transition:
@@ -281,13 +300,13 @@ export default function Navbar({
             box-shadow  250ms ease;
         }
         .nb-bar-dark {
-          background: #1A1209 !important;
+          background: #1A1209;
           backdrop-filter: none !important;
           border-bottom: 1px solid rgba(201,168,76,0.15) !important;
         }
         /* ── Logo ── */
         .nb-logo {
-          display: flex; align-items: center; flex-shrink: 0; text-decoration: none;
+          display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0; text-decoration: none;
         }
         .nb-logo img { height: 36px; width: auto; display: block; transition: height 300ms cubic-bezier(0.4,0,0.2,1); }
         .nb-logo-brand {
@@ -299,52 +318,67 @@ export default function Navbar({
         @media (max-width: 1023px) { .nb-logo-brand { display: none; } }
         /* ── Desktop nav ── */
         .nb-nav {
-          display: flex; align-items: center; gap: 0.25rem; flex: 1; justify-content: center;
+          display: flex; align-items: center; gap: 0.25rem; flex: 1; justify-content: flex-end;
         }
         .nb-menu-btn {
           display: inline-flex; align-items: center; gap: 0.35rem;
-          font-size: 0.8rem; font-weight: 500; color: rgba(255,255,255,0.9);
+          font-size: 0.8rem; font-weight: 600; color: rgba(255,255,255,0.95);
           letter-spacing: 0.05em; text-transform: uppercase;
           background: none; border: none; cursor: pointer;
           padding: 0.5rem 0.75rem; border-radius: 8px;
-          transition: color 0.15s, background 0.15s;
+          transition: color 0.25s ease, background 0.25s ease, transform 0.2s ease;
           font-family: var(--font-manrope, sans-serif); white-space: nowrap;
         }
-        .nb-menu-btn:hover, .nb-menu-btn[aria-expanded="true"] { color: #FFFFFF; background: rgba(255,255,255,0.1); }
+        .nb-menu-btn:hover, .nb-menu-btn[aria-expanded="true"] {
+          color: #1A1209;
+          background: linear-gradient(135deg, #E2C97A 0%, #C9A84C 100%);
+          transform: translateY(-1px);
+        }
         .nb-nav-link {
-          font-size: 0.8rem; font-weight: 500; color: rgba(255,255,255,0.9);
+          font-size: 0.8rem; font-weight: 600; color: rgba(255,255,255,0.95);
           letter-spacing: 0.05em; text-transform: uppercase;
           text-decoration: none; padding: 0.5rem 0.75rem; border-radius: 8px;
-          transition: color 0.15s, background 0.15s; white-space: nowrap;
+          transition: color 0.25s ease, background 0.25s ease, transform 0.2s ease;
+          white-space: nowrap;
         }
-        .nb-nav-link:hover { color: #FFFFFF; background: rgba(255,255,255,0.1); }
-        .nb-nav-dark .nb-menu-btn { color: rgba(240,216,151,0.75); }
-        .nb-nav-dark .nb-menu-btn:hover, .nb-nav-dark .nb-menu-btn[aria-expanded="true"] { color: #C9A84C; background: rgba(201,168,76,0.12); }
-        .nb-nav-dark .nb-nav-link { color: rgba(240,216,151,0.75); }
-        .nb-nav-dark .nb-nav-link:hover { color: #C9A84C; background: rgba(201,168,76,0.12); }
+        .nb-nav-link:hover {
+          color: #1A1209;
+          background: linear-gradient(135deg, #E2C97A 0%, #C9A84C 100%);
+          transform: translateY(-1px);
+        }
+        .nb-nav-dark .nb-menu-btn { color: rgba(255,255,255,0.95); }
+        .nb-nav-dark .nb-menu-btn:hover, .nb-nav-dark .nb-menu-btn[aria-expanded="true"] {
+          color: #1A1209;
+          background: linear-gradient(135deg, #E2C97A 0%, #C9A84C 100%);
+        }
+        .nb-nav-dark .nb-nav-link { color: rgba(255,255,255,0.95); }
+        .nb-nav-dark .nb-nav-link:hover {
+          color: #1A1209;
+          background: linear-gradient(135deg, #E2C97A 0%, #C9A84C 100%);
+        }
         /* ── Dropdown ── */
         .nb-dropdown {
-          position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%);
-          background: #FFFFFF; border-radius: 12px;
-          box-shadow: 0 12px 32px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.06);
-          padding: 0.5rem; min-width: 240px;
-          animation: nb-fadein 0.18s ease forwards;
+          position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+          background: #FAF7F0; border-radius: 10px;
+          border: 1px solid rgba(201,168,76,0.15);
+          box-shadow: 0 8px 24px rgba(26,18,9,0.1);
+          padding: 0.3rem; min-width: 200px;
+          animation: nb-fadein 0.15s ease forwards;
           z-index: 300;
         }
         @keyframes nb-fadein {
-          from { opacity: 0; transform: translateX(-50%) translateY(-6px); }
+          from { opacity: 0; transform: translateX(-50%) translateY(-4px); }
           to   { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
         .nb-dropdown-item {
-          display: flex; flex-direction: column; gap: 2px;
-          padding: 0.6rem 0.875rem; border-radius: 8px;
+          display: flex; flex-direction: column; gap: 1px;
+          padding: 0.45rem 0.75rem; border-radius: 7px;
           text-decoration: none; transition: background 0.12s;
-          border-bottom: 0.5px solid #F0EBE0;
+          border-bottom: none;
         }
-        .nb-dropdown-item:last-child { border-bottom: none; }
-        .nb-dropdown-item:hover { background: #FAF7F0; }
-        .nb-dropdown-label { font-size: 0.875rem; font-weight: 600; color: #1A1209; }
-        .nb-dropdown-desc { font-size: 0.75rem; color: #9A8D7A; }
+        .nb-dropdown-item:hover { background: rgba(201,168,76,0.1); }
+        .nb-dropdown-label { font-size: 0.82rem; font-weight: 600; color: #1A1209; }
+        .nb-dropdown-desc { font-size: 0.7rem; color: #9A8D7A; }
         /* ── Dropdown wrapper (relative) ── */
         .nb-menu-wrap { position: relative; }
         /* ── Actions ── */
@@ -489,23 +523,35 @@ export default function Navbar({
           .nb-nav { display: none; }
           .nb-actions { display: none; }
           .nb-hamburger { display: flex !important; }
-          .nb-bar { margin: 8px 1rem 0 !important; padding: 0 1.25rem !important; }
+          .nb-bar {
+            height: 52px !important;
+            margin: 12px 1.25rem 0 !important;
+            padding: 0 1rem !important;
+            border-radius: 14px;
+          }
+          .nb-logo img { height: 34px !important; }
+          .nb-hamburger {
+            width: 46px;
+            height: 42px;
+            border-color: rgba(201,168,76,0.62);
+            background: rgba(12,12,10,0.28);
+          }
         }
       `}} />
 
       <div className="nb-root" ref={navRef}>
 
         {/* ── Banner ── */}
-        {!hideBanner && (
+        {showBanner && (
           <div className="nb-banner">
             <Link href="/guide-omra" className="nb-banner-pill">
               <div className="nb-banner-dot" />
-              <div className="nb-banner-main">
-                <div className="nb-banner-title">Guide PDF gratuit · <span style={{ color: '#C9A84C' }}>La Omra étape par étape</span></div>
-                <div className="nb-banner-stars">
-                  <span className="nb-banner-stars-row">★★★★★</span>
-                  <span className="nb-banner-review">4,9 · <em className="nb-banner-count">2 400+</em> télécharg.</span>
-                </div>
+              <div className="nb-banner-left">
+                <span className="nb-banner-title">
+                  Guide PDF gratuit · <span style={{ color: '#C9A84C' }}>La Omra étape par étape</span>
+                </span>
+                <span className="nb-banner-stars-row">★★★★★</span>
+                <span className="nb-banner-review">4,9 · <em className="nb-banner-count">2 400+</em> télécharg.</span>
               </div>
               <span className="nb-banner-badge">OBTENIR</span>
             </Link>
@@ -513,7 +559,7 @@ export default function Navbar({
         )}
 
         {/* ── Bar desktop ── */}
-        <div className={`nb-bar${isDarkHero ? ' nb-bar-dark' : ''}${isAtTop ? ' mobile-at-top' : ''}`}
+        <div className={`nb-bar${isDarkHero && (hasScrolled || pathname !== '/') ? ' nb-bar-dark' : ''}${isAtTop ? ' mobile-at-top' : ''}`}
           style={hasScrolled ? {
             background: 'rgba(48,30,10,0.96)',
             backdropFilter: 'blur(16px) saturate(1.6)',
@@ -521,21 +567,28 @@ export default function Navbar({
             boxShadow: '0 6px 28px rgba(0,0,0,0.55), 0 1px 0 rgba(201,168,76,0.25)',
             height: '38px',
             margin: '8px 12rem 0',
+          } : (pathname === '/' ? {
+            background: 'transparent',
+            backdropFilter: 'none',
+            WebkitBackdropFilter: 'none',
+            boxShadow: 'none',
+            height: '42px',
+            margin: '10px 3rem 0',
           } : {
             background: 'rgba(48,30,10,0.88)',
             backdropFilter: 'blur(14px) saturate(1.5)',
             WebkitBackdropFilter: 'blur(14px) saturate(1.5)',
             boxShadow: '0 4px 24px rgba(0,0,0,0.4), 0 1px 0 rgba(201,168,76,0.2)',
-            height: '48px',
+            height: '42px',
             margin: '10px 3rem 0',
-          }}>
+          })}>
 
           {/* Logo */}
           <Link href="/" className="nb-logo">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/logo.png" alt="SAFARUMA" style={{ height: hasScrolled ? '28px' : '36px' }} />
             {showBrand && (
-              <span className="nb-logo-brand" style={{ fontSize: hasScrolled ? '0.85rem' : '1.05rem' }}>
+              <span className="nb-logo-brand" style={{ fontSize: hasScrolled ? '1.1rem' : '1.8rem' }}>
                 SAFAR<span style={{ color: '#C9A84C' }}>U</span>MA
               </span>
             )}

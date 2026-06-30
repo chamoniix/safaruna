@@ -31,14 +31,14 @@ export const metadata: Metadata = {
     description: 'Guides privés certifiés pour la Omra, la découverte historique et le tourisme spirituel.',
     url: 'https://safaruma.com',
     siteName: 'SAFARUMA',
-    images: [{ url: '/icon-logo.png', width: 800, height: 800, alt: 'SAFARUMA' }],
+    images: [{ url: '/logo.png', width: 800, height: 800, alt: 'SAFARUMA' }],
     locale: 'fr_FR',
     type: 'website',
   },
   twitter: {
     card: 'summary',
     title: 'SAFARUMA',
-    images: ['/icon-logo.png'],
+    images: ['/logo.png'],
   },
   alternates: {
     canonical: 'https://safaruma.com',
@@ -46,13 +46,15 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
-      { url: '/icon-logo.png', type: 'image/png' },
+      { url: '/logo.png', type: 'image/png' },
     ],
-    apple: { url: '/icon-logo.png', type: 'image/png' },
+    apple: { url: '/logo.png', type: 'image/png' },
     shortcut: '/favicon.ico',
   },
   manifest: '/manifest.webmanifest',
 };
+
+export { viewport } from './viewport';
 
 export default async function RootLayout({
   children,
@@ -66,20 +68,6 @@ export default async function RootLayout({
   return (
     <html lang="fr" className={`${cormorant.variable} ${manrope.variable}`}>
       <head>
-        <Script id="consent-mode-default" strategy="beforeInteractive">{`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('consent', 'default', {
-            'ad_storage': 'denied',
-            'ad_user_data': 'denied',
-            'ad_personalization': 'denied',
-            'analytics_storage': 'denied',
-            'functionality_storage': 'denied',
-            'personalization_storage': 'denied',
-            'security_storage': 'granted',
-            'wait_for_update': 500
-          });
-        `}</Script>
         <link href="https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet" />
         <script
           type="application/ld+json"
@@ -92,7 +80,7 @@ export default async function RootLayout({
                 "name": "SAFARUMA",
                 "legalName": "HOLDINGAI LTD",
                 "url": "https://safaruma.com",
-                "logo": { "@type": "ImageObject", "url": "https://safaruma.com/icon-logo.png", "width": 512, "height": 512 },
+                "logo": { "@type": "ImageObject", "url": "https://safaruma.com/logo.png", "width": 512, "height": 512 },
                 "description": "Plateforme francophone de guides privés certifiés pour la Omra à La Mecque et Médine.",
                 "slogan": "La première plateforme dédiée aux guides privés pour la Omra",
                 "address": { "@type": "PostalAddress", "streetAddress": "Wareham Road", "addressLocality": "Freeland Park, Poole", "postalCode": "BH16 6FA", "addressCountry": "GB" },
@@ -121,6 +109,20 @@ export default async function RootLayout({
         />
       </head>
       <body className="antialiased font-sans bg-[var(--cream)] text-[var(--deep)]">
+        <Script id="consent-mode-default" strategy="beforeInteractive">{`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('consent', 'default', {
+            'ad_storage': 'denied',
+            'ad_user_data': 'denied',
+            'ad_personalization': 'denied',
+            'analytics_storage': 'denied',
+            'functionality_storage': 'denied',
+            'personalization_storage': 'denied',
+            'security_storage': 'granted',
+            'wait_for_update': 500
+          });
+        `}</Script>
         <a href="#main-content" className="skip-link">Passer au contenu principal</a>
         <Providers>
           <main id="main-content">

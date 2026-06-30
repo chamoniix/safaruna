@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: {
   if (!article) return { title: 'Article introuvable | SAFARUMA' };
 
   const url = `https://safaruma.com/blog/${slug}`;
-  const ogImage = article.image || 'https://safaruma.com/icon-logo.png';
+  const ogImage = article.image || 'https://safaruma.com/logo.png';
 
   return {
     title: `${article.title} | SAFARUMA`,
@@ -177,7 +177,7 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
   if (!article || !content) notFound();
 
   const url = `https://safaruma.com/blog/${slug}`;
-  const ogImage = article.image || 'https://safaruma.com/icon-logo.png';
+  const ogImage = article.image || 'https://safaruma.com/logo.png';
 
   const blogPostingSchema = {
     '@context': 'https://schema.org',

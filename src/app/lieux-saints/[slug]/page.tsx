@@ -505,7 +505,7 @@ function RichLieuPage({ lieu }: { lieu: LieuSaint }) {
     dateModified: lieu.modifiedAt || lieu.publishedAt,
     author: { '@type': 'Organization', '@id': 'https://safaruma.com/#organization', name: 'SAFARUMA' },
     publisher: { '@id': 'https://safaruma.com/#organization' },
-    image: 'https://safaruma.com/icon-logo.png',
+    image: 'https://safaruma.com/logo.png',
     inLanguage: 'fr-FR',
     url,
   };

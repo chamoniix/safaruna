@@ -1,29 +1,158 @@
 # SAFARUMA — Roadmap Stratégique et Technique
-# Horizon : 12 semaines | Démarrage : 20 avril 2026
+# Horizon : 12 semaines | Révision : 2 juin 2026
 
 ---
 
-## Contexte de départ (état réel au 19 avril 2026)
+## Contexte de départ (état réel au 2 juin 2026)
 
 Ce qui existe et fonctionne en production :
-- Architecture complète (auth, paiement Stripe, emails Brevo, messaging, dashboards)
-- Sprint sécurité terminé (18 vulnérabilités corrigées)
+- Architecture complète (auth, paiement Stripe LIVE, emails Brevo, messaging, 3 dashboards)
+- 40+ pages publiques + blog + sitemap
+- Stripe en mode LIVE (pk_live / sk_live) — toute réservation = vrai débit
+- Base Neon.tech (prod) + Supabase pooler (dev, inutilisé)
 - Admin dashboard opérationnel
-- Sitemap + robots.txt en place mais jamais soumis à Google
-- Blog structuré avec articles rédigés mais sans trafic
-- 6 fiches guides en dur dans le sitemap (données fictives)
-- Notifications en base de données (modèle Prisma) mais sans canal externe (Telegram/WhatsApp absent)
-- Sentry installé, aucun outil analytics côté usage
+- Rate limiting Upstash configuré
+- CSP nonce-based via middleware
 
-Ce qui bloque le revenu aujourd'hui :
-- Zéro guide réel inscrit et activé
-- Zéro pèlerin converti (flow jamais testé bout en bout)
-- Zéro visibilité Google
+Ce qui est cassé / manquant :
+- **BUG B1 (bloquant)** : Mismatch forfait checkout — `BASE_PACKAGES` vs DB packages → paiement Stripe impossible
+- **BUG B2** : Stripe webhook secret = placeholder (`whsec_REMPLACE_APRES_CONFIG_WEBHOOK`) → callback Stripe non fonctionnel
+- **BUG B3** : Naïm LAAMARI (seul guide réel) a `emailVerified: null` → ne peut pas se connecter
+- **4+ guides fictifs** (rachid-al-madani, etc.) retournent 200 mais n'existent pas en DB
+- **12 890 avis hardcodés** = pratique commerciale trompeuse, risque légal
+- **Sentry DSN vide** → 0 monitoring erreur
+- **0 guide réel complet** (Naïm : pas de photo, pas de langues, pas d'IBAN, 1 seule disponibilité)
+- **Aucune réservation payante** effectuée
+- **Sitemap jamais soumis à Google** — 0 indexation
+- **Google Analytics / Plausible** non installé (GTM configuré mais GA4 absent)
+
+Infrastructure :
+- **Domaine** : safaruma.com — ✅ LIVE (HTTP 200, Vercel)
+- **Vercel** : compte `chamoniix` (team `chamoniixs-projects`) — projet non linké en local
+- **DB** : Neon.tech (prod active), credentials en clair dans `.env*`
+- **Stripe** : LIVE (⚠️ aucun mode test disponible)
+- **Brevo** : emails fonctionnels (7 templates)
+- **Sentry** : installé mais DSN vide
+- **Upstash** : rate limiting OK
+- **Supabase** : package installé mais **0 usage** dans le code (reliquat)
+- **Git** : branche active `feat/homepage-scroll-reduction`, prod = `main`
+
+---
+
+## PHASE 0 — Sécurité et Corrections Bloquantes
+### Durée : 1 semaine (immédiat)
+
+**Objectif** : Éliminer les risques de sécurité (credentials en clair) et les bugs bloquants qui empêchent toute réservation.
+
+---
+
+### Tâche 0.1 — Nettoyage des credentials des fichiers .env
+**Agent** : `engineering-senior-developer`
+**Durée** : 1 jour
+
+Les fichiers `.env` et `.env.local` contiennent en clair :
+- Identifiants DB (Neon.tech + Supabase)
+- Stripe LIVE keys (`pk_live`, `sk_live`)
+- Google OAuth secrets
+- Brevo API keys
+- Admin JWT secret
+
+Actions :
+- Déplacer les vraies valeurs dans les Secrets Vercel (Environment Variables)
+- Créer un `.env.example` clean (déjà partiellement existant)
+- Ajouter `.env` et `.env.local` au `.gitignore` si absent
+- Ne garder en local que `.env.local` avec valeurs test/fallback
+
+**Critère de succès** : Aucune credential sensible dans les fichiers commités.
+
+---
+
+### Tâche 0.2 — Configurer Stripe webhook secret
+**Agent** : `engineering-backend-architect`
+**Durée** : 1 jour
+
+Le `STRIPE_WEBHOOK_SECRET` dans `.env.local` est un placeholder. Sans lui, les callbacks Stripe (confirmation de paiement, création de réservation, email de confirmation) ne fonctionnent pas.
+
+Actions :
+- Aller dans le dashboard Stripe → Webhooks → Ajouter endpoint
+- Endpoint : `https://safaruma.com/api/stripe/webhook`
+- Événements à écouter : `checkout.session.completed`, `checkout.session.expired`
+- Copier le `whsec_xxx` généré dans les env vars Vercel
+
+**Critère de succès** : Stripe webhook renvoie 200 et les callbacks sont loggés.
+
+---
+
+### Tâche 0.3 — Corriger le bug forfait checkout (B1)
+**Agent** : `engineering-backend-architect`, `engineering-frontend-developer`
+**Durée** : 2 jours
+
+Le checkout utilise `BASE_PACKAGES` (lib/packages.ts) pour calculer le prix côté client, mais l'API Stripe valide côté serveur avec les packages Prisma. Les noms ne correspondent jamais → `"Forfait introuvable"` → paiement impossible.
+
+Solution :
+- Le checkout doit utiliser les packages depuis l'API publique du guide (`/api/guide/public/[slug]`), pas les `BASE_PACKAGES` hardcodés
+- Ou aligner `BASE_PACKAGES` exactement sur les noms DB
+
+**Critère de succès** : Flow checkout → Stripe → confirmation fonctionne bout en bout.
+
+---
+
+### Tâche 0.4 — Configurer Sentry (DSN)
+**Agent** : `engineering-frontend-developer`
+**Durée** : 1 jour
+
+`NEXT_PUBLIC_SENTRY_DSN` est vide → aucune erreur remontée.
+
+Actions :
+- Aller sur `sentry.io` → Projet `safaruma/javascript-nextjs` → Copier le DSN
+- Ajouter dans les env vars Vercel
+- Vérifier qu'une erreur test apparaît dans le dashboard Sentry
+
+**Critère de succès** : Sentry reçoit et affiche les erreurs.
+
+---
+
+### Tâche 0.5 — Supprimer les guides fictifs et les faux avis
+**Agent** : `engineering-senior-developer`
+**Durée** : 1 jour
+
+Problèmes :
+- 4+ guides (rachid-al-madani, fatima-al-omari, etc.) retournent 200 sans exister en DB
+- "12 890 avis" avec "4.9" est hardcodé
+- `NAIM_REVIEWS` dans la page profil Naïm sont des témoignages fictifs
+
+Actions :
+- Masquer ou tagguer "Bientôt disponible" les fictifs
+- Remplacer les compteurs hardcodés par des compteurs réels (0)
+- Supprimer les faux témoignages
+
+**Critère de succès** : 0 guide fictif dans la liste, compteurs à 0.
+
+---
+
+### Tâche 0.6 — Vérifier email Naïm + compléter profil guide
+**Agent** : `engineering-senior-developer`, fondateur
+**Durée** : 1 jour
+
+Naïm LAAMARI (seul guide réel) a :
+- `emailVerified: null` → ne peut pas se connecter par credentials
+- `user.image = null` → pas de photo
+- `languages = []` → section langues absente
+- `ibanEncrypted = null` → pas de paiement guide
+- 1 seule disponibilité (22 avril, expirée)
+
+Actions :
+- Set `emailVerified` par requête SQL
+- Uploader photo Naïm
+- Ajouter ses langues en DB (FR, AR, EN, Darija)
+- Créer des disponibilités pour juin-juillet 2026
+
+**Critère de succès** : Naïm peut se connecter, son profil est complet.
 
 ---
 
 ## PHASE 1 — Validation Opérationnelle
-### Durée : 2 semaines (20 avril — 3 mai 2026)
+### Durée : 2 semaines (après Phase 0)
 
 **Objectif business** : Avoir au moins 1 guide réel actif sur la plateforme et avoir prouvé qu'un pèlerin peut réserver et payer sans friction, sans intervention manuelle de l'admin.
 
@@ -480,6 +609,7 @@ Décision à prendre : concentrer 70% des efforts du trimestre suivant sur le ca
 
 | Phase | Durée | Priorité | Revenu attendu | Risque |
 |-------|-------|----------|----------------|--------|
+| Phase 0 — Sécurité & Fix | 1 semaine | **CRITIQUE** | 0 (prérequis) | Credentials en clair, Stripe webhook |
 | Phase 1 — Opérationnel | 2 semaines | Critique | 0 (prérequis) | Bugs flow paiement |
 | Phase 2 — SEO | 3 semaines | Haute | Indirect (trafic) | Délai indexation Google |
 | Phase 3 — Automation | 4 semaines | Haute | Rétention + conversion | Approbation Meta WhatsApp |
@@ -491,6 +621,12 @@ Décision à prendre : concentrer 70% des efforts du trimestre suivant sur le ca
 
 | Tâche | Agent principal | Agent support |
 |-------|----------------|---------------|
+| 0.1 Nettoyage credentials | `engineering-senior-developer` | — |
+| 0.2 Stripe webhook | `engineering-backend-architect` | — |
+| 0.3 Bug forfait checkout | `engineering-backend-architect` | `engineering-frontend-developer` |
+| 0.4 Sentry DSN | `engineering-frontend-developer` | — |
+| 0.5 Guides fictifs + faux avis | `engineering-senior-developer` | — |
+| 0.6 Profil Naïm | `engineering-senior-developer` | Fondateur |
 | 1.1 Flow guide | `engineering-senior-developer` | — |
 | 1.2 Flow pèlerin | `engineering-senior-developer` | — |
 | 1.3 Corrections bugs | `engineering-backend-architect` | `engineering-frontend-developer` |
@@ -514,15 +650,12 @@ Décision à prendre : concentrer 70% des efforts du trimestre suivant sur le ca
 
 ---
 
-## Première action demain matin (20 avril 2026, 9h00)
+## Première action (2 juin 2026)
 
-**Fondateur** : Prendre 30 minutes pour identifier 3 guides potentiels à contacter (réseaux personnels, associations, LinkedIn islamique). Préparer leur contact pour la semaine.
-
-**Claude Code avec `engineering-senior-developer`** : Démarrer la Tâche 1.1 — lancer le flow guide complet sur l'environnement de production avec un compte test. Documenter chaque friction dans `BUGS_FLOW_GUIDE.md`.
-
-Ces deux actions sont parallèles et non-bloquantes entre elles. La journée du 20 avril doit se terminer avec un premier rapport de bugs du flow guide et au moins 1 guide potentiel identifié.
+**Démarrer la Phase 0** : Corriger le bug forfait checkout (Tâche 0.3) et nettoyer les credentials (Tâche 0.1) — ce sont les deux prérequis pour quiconque puisse réserver.
 
 ---
 
-*Roadmap produite le 19 avril 2026*
-*Révisée en fin de Phase 2 sur la base des données analytics réelles*
+*Roadmap initiale produite le 19 avril 2026*
+*Révisée le 2 juin 2026 — ajout Phase 0 sécurité + corrections bugs bloquants*
+*Prochaine révision : fin de Phase 2 sur la base des données analytics réelles*

@@ -1615,7 +1615,7 @@ footer div::-webkit-scrollbar { display: none; }
   min-height: 86svh;
   display: flex;
   align-items: center;
-  width: min(1180px, calc(100% - 3rem));
+  width: min(1320px, calc(100% - 2rem));
   margin: 0 auto;
   padding-top: 6.2rem;
   padding-bottom: 6.8rem;
@@ -1716,7 +1716,7 @@ footer div::-webkit-scrollbar { display: none; }
 
 .sfr-carousel-shell {
   position: relative;
-  width: min(1180px, calc(100% - 3rem));
+  width: min(1320px, calc(100% - 2rem));
   margin: 0 auto;
 }
 
@@ -1854,7 +1854,7 @@ footer div::-webkit-scrollbar { display: none; }
 }
 
 .sfr-problem-grid {
-  width: min(1180px, calc(100% - 3rem));
+  width: min(1320px, calc(100% - 2rem));
   margin: 0 auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 220px;
@@ -1957,7 +1957,7 @@ footer div::-webkit-scrollbar { display: none; }
 }
 
 .sfr-section-layout {
-  width: min(1180px, calc(100% - 3rem));
+  width: min(1320px, calc(100% - 2rem));
   margin: 0 auto;
   display: grid;
   grid-template-columns: 300px minmax(0, 1fr);
@@ -2359,7 +2359,7 @@ footer div::-webkit-scrollbar { display: none; }
 .sfr-final-cta-content {
   position: relative;
   z-index: 1;
-  width: min(1180px, calc(100% - 3rem));
+  width: min(1320px, calc(100% - 2rem));
   margin: 0 auto;
 }
 
@@ -2500,7 +2500,7 @@ footer div::-webkit-scrollbar { display: none; }
 }
 
 .sfr-footer-payment-logos {
-  width: min(600px, calc(100% - 3rem));
+  width: min(680px, calc(100% - 2rem));
   margin: 0 auto;
   padding: 1rem 0;
   display: flex;
@@ -2539,7 +2539,7 @@ footer div::-webkit-scrollbar { display: none; }
 }
 
 .sfr-footer-inner {
-  width: min(1180px, calc(100% - 3rem));
+  width: min(1320px, calc(100% - 2rem));
   margin: 1.7rem auto 0;
   display: grid;
   grid-template-columns: 1.45fr 0.9fr 1fr 1fr;
@@ -2639,7 +2639,7 @@ footer div::-webkit-scrollbar { display: none; }
 }
 
 .sfr-footer-social-section {
-  width: min(1180px, calc(100% - 3rem));
+  width: min(1320px, calc(100% - 2rem));
   margin: 1.25rem auto 0;
   padding-top: 1.15rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
@@ -2657,7 +2657,7 @@ footer div::-webkit-scrollbar { display: none; }
 }
 
 .sfr-footer-bottom {
-  width: min(1180px, calc(100% - 3rem));
+  width: min(1320px, calc(100% - 2rem));
   margin: 0.65rem auto 0;
   padding-top: 0.8rem;
   color: rgba(255, 255, 255, 0.34);

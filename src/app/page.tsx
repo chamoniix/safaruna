@@ -519,29 +519,6 @@ function SmartImage({
   return <Image src={src} alt={alt} fill sizes="(max-width: 768px) 78vw, 280px" className={className} />;
 }
 
-function TrustIcon({ type }: { type: 'check' | 'shield' | 'accessibility' }) {
-  if (type === 'shield') {
-    return (
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M9 12.75 11.25 15 15 9.75m-3-7.036A11.959 11.959 0 0 1 3.598 6 11.99 11.99 0 0 0 3 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285Z" />
-      </svg>
-    );
-  }
-  if (type === 'accessibility') {
-    return (
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M10.5 6a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z" />
-        <path d="M7.5 10.5c.621 0 1.125.504 1.125 1.125V15l-1.6 3.2a1.125 1.125 0 0 0 2.01 1.005L10.5 16.5h3l1.465 2.71a1.125 1.125 0 1 0 2.01-1.005l-1.6-3.2V11.13A1.125 1.125 0 0 0 14.25 10h-3.75a1.125 1.125 0 0 0-1.125 1.125v-.375A1.125 1.125 0 0 0 8.25 9.75H7.5a1.125 1.125 0 0 0-1.125 1.125v.375C6.375 11.91 6.879 12 7.5 12" />
-      </svg>
-    );
-  }
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="m4.5 12.75 6 6 9-13.5" />
-    </svg>
-  );
-}
-
 function SocialIcon({ type }: { type: 'instagram' | 'tiktok' | 'youtube' | 'x' | 'snapchat' | 'pinterest' | 'linkedin' }) {
   if (type === 'instagram') {
     return (
@@ -1102,20 +1079,6 @@ function FinalCtaSection() {
 function HomeFooter() {
   return (
     <footer className="sfr-footer">
-      <div className="sfr-footer-trust" aria-label="Garanties SAFARUMA">
-        <div>
-          <TrustIcon type="check" />
-          Guides certifiés SAFARUMA
-        </div>
-        <div>
-          <TrustIcon type="shield" />
-          Paiement sécurisé
-        </div>
-        <div>
-          <TrustIcon type="accessibility" />
-          Accessibilité PMR
-        </div>
-      </div>
       <div className="sfr-footer-payment-logos" aria-label="Moyens de paiement acceptés">
         <PaymentMark type="visa" />
         <PaymentMark type="mastercard" />

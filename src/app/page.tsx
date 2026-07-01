@@ -8,7 +8,14 @@ import Navbar from '@/components/Navbar';
 import CookiePrefsButton from '@/components/CookiePrefsButton';
 
 const EASE_LUXURY = [0.16, 1, 0.3, 1] as const;
-const heroLanguages = ['français', 'arabe', 'algérien', 'darija', 'anglais', 'ourdou'];
+const heroLanguages = [
+  { word: 'français', flag: '🇫🇷' },
+  { word: 'arabe', flag: '🇸🇦' },
+  { word: 'algérien', flag: '🇩🇿' },
+  { word: 'darija', flag: '🇲🇦' },
+  { word: 'anglais', flag: '🇬🇧' },
+  { word: 'ourdou', flag: '🇵🇰' },
+];
 
 type ModalContent = {
   eyebrow: string;
@@ -668,6 +675,53 @@ function Modal({ content, onClose }: { content: ModalContent | null; onClose: ()
   );
 }
 
+function LanguageFlipBoard() {
+  const reduce = useReducedMotion();
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    if (reduce) return;
+    const id = setInterval(() => {
+      setIndex((i) => (i + 1) % heroLanguages.length);
+    }, 2200);
+    return () => clearInterval(id);
+  }, [reduce]);
+
+  const current = heroLanguages[index];
+
+  return (
+    <span
+      className="sfr-flip-board"
+      role="img"
+      aria-label={`langue : ${heroLanguages.map((l) => l.word).join(', ')}`}
+    >
+      <span className="sfr-flip-flag" aria-hidden="true">{current.flag}</span>
+      <span className="sfr-flip-letters" aria-hidden="true">
+        {reduce ? (
+          <span className="sfr-flip-word">{current.word}</span>
+        ) : (
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.span key={current.word} className="sfr-flip-word" layout="position">
+              {current.word.split('').map((char, charIndex) => (
+                <motion.span
+                  key={charIndex}
+                  className="sfr-flip-letter"
+                  initial={{ y: '110%', opacity: 0 }}
+                  animate={{ y: '0%', opacity: 1 }}
+                  exit={{ y: '-110%', opacity: 0 }}
+                  transition={{ duration: 0.45, delay: charIndex * 0.025, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  {char === ' ' ? ' ' : char}
+                </motion.span>
+              ))}
+            </motion.span>
+          </AnimatePresence>
+        )}
+      </span>
+    </span>
+  );
+}
+
 function HeroSection() {
   const reduce = useReducedMotion();
   const ref = useRef<HTMLElement>(null);
@@ -701,13 +755,7 @@ function HeroSection() {
             <br />
             <span className="sfr-hero-language-line">
               qui parle{' '}
-              <span className="sfr-flip-board" aria-label="français, arabe, algérien, darija, anglais, ourdou">
-                <span className="sfr-flip-track">
-                  {heroLanguages.concat(heroLanguages[0]).map((language, index) => (
-                    <span key={`${language}-${index}`}>{language}</span>
-                  ))}
-                </span>
-              </span>
+              <LanguageFlipBoard />
             </span>
           </h1>
           <p className="sfr-pill">Guides privés certifiés · 17 langues</p>

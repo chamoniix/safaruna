@@ -1649,8 +1649,8 @@ footer div::-webkit-scrollbar { display: none; }
 
 .sfr-hero-language-line {
   display: inline-flex;
-  align-items: baseline;
-  gap: 0.18em;
+  align-items: center;
+  gap: 0.34em;
   color: var(--sfr-gold-soft);
   font-style: italic;
   font-weight: 400;
@@ -1658,48 +1658,49 @@ footer div::-webkit-scrollbar { display: none; }
 
 .sfr-flip-board {
   position: relative;
-  top: 0.04em;
-  display: inline-block;
-  width: 3.45em;
-  height: 0.94em;
+  display: inline-flex;
+  width: 6.4em;
+  height: 1.7em;
   overflow: hidden;
-  vertical-align: baseline;
-  color: #fff6dd;
+  vertical-align: middle;
+  background: #fffaf0;
+  border-radius: 0.16em;
+  box-shadow: 0 14px 30px rgba(3, 5, 6, 0.4), inset 0 0 0 1px rgba(213, 161, 74, 0.5);
+  font-family: var(--font-manrope), 'Manrope', sans-serif;
+  font-size: 0.32em;
   font-style: normal;
-  font-weight: 500;
-  text-align: left;
-  text-shadow: 0 0 24px rgba(213, 161, 74, 0.18);
-}
-
-.sfr-flip-board::before,
-.sfr-flip-board::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  z-index: 2;
-  height: 1px;
-  background: rgba(213, 161, 74, 0.42);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
 }
 
 .sfr-flip-board::before {
-  top: 0.08em;
-}
-
-.sfr-flip-board::after {
-  bottom: 0.08em;
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0.3em;
+  right: 0.3em;
+  z-index: 2;
+  height: 1px;
+  background: rgba(3, 5, 6, 0.14);
 }
 
 .sfr-flip-track {
   display: block;
-  animation: sfr-language-flip 14s steps(6, end) infinite;
+  width: 100%;
+  animation: sfr-language-flip 15s steps(6, end) infinite;
   will-change: transform;
 }
 
 .sfr-flip-track span {
-  display: block;
-  height: 0.94em;
-  line-height: 0.94;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.7em;
+  line-height: 1;
+  padding: 0 0.3em;
+  color: #17130c;
+  text-align: center;
 }
 
 @keyframes sfr-language-flip {

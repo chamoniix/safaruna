@@ -424,6 +424,7 @@ function Carousel({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
+  const [coarsePointer, setCoarsePointer] = useState(false);
   const items = React.Children.toArray(children);
 
   const scrollBy = (direction: number) => {
@@ -431,7 +432,15 @@ function Carousel({
   };
 
   useEffect(() => {
-    if (!auto || reduce) return;
+    const query = window.matchMedia('(pointer: coarse)');
+    const update = () => setCoarsePointer(query.matches);
+    update();
+    query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
+  }, []);
+
+  useEffect(() => {
+    if (!auto || reduce || coarsePointer) return;
     let raf = 0;
     let last = performance.now();
 
@@ -451,7 +460,7 @@ function Carousel({
 
     raf = window.requestAnimationFrame(tick);
     return () => window.cancelAnimationFrame(raf);
-  }, [auto, reduce]);
+  }, [auto, reduce, coarsePointer]);
 
   return (
     <div
@@ -468,7 +477,7 @@ function Carousel({
       </motion.button>
       <div ref={ref} className="sfr-carousel-track" aria-label={label}>
         {items}
-        {auto && items.map((child, index) => (
+        {auto && !coarsePointer && items.map((child, index) => (
           <React.Fragment key={`loop-${index}`}>{child}</React.Fragment>
         ))}
       </div>
@@ -581,6 +590,40 @@ function SocialIcon({ type }: { type: 'instagram' | 'tiktok' | 'youtube' | 'x' |
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286ZM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065Zm1.782 13.019H3.555V9h3.564v11.452ZM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003Z" />
+    </svg>
+  );
+}
+
+function PaymentMark({ type }: { type: 'visa' | 'mastercard' | 'apple' | 'paypal' | 'amex' | 'bancontact' }) {
+  if (type === 'mastercard') {
+    return (
+      <svg viewBox="0 0 42 20" aria-label="Mastercard" role="img">
+        <circle cx="17" cy="10" r="7" />
+        <circle cx="25" cy="10" r="7" />
+      </svg>
+    );
+  }
+  if (type === 'apple') {
+    return (
+      <svg viewBox="0 0 56 20" aria-label="Apple Pay" role="img">
+        <path d="M11.4 5.2c.7-.9 1.2-2 1.1-3.2-1 .1-2.1.7-2.8 1.5-.6.7-1.2 1.9-1 3 .9.1 2-.5 2.7-1.3Z" />
+        <path d="M12.5 6.7c-1.5-.1-2.7.8-3.4.8-.7 0-1.8-.8-3-.8-1.6 0-3 1-3.8 2.5-1.6 2.8-.4 7 1.1 9.2.8 1.1 1.7 2.3 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7 2-.1 2.8-1.2c.9-1.3 1.3-2.5 1.3-2.6 0 0-2.5-1-2.5-3.8 0-2.4 2-3.5 2.1-3.6-1.1-1.7-2.9-1.8-3.5-1.8Z" />
+        <text x="25" y="14">Pay</text>
+      </svg>
+    );
+  }
+  if (type === 'bancontact') {
+    return (
+      <svg viewBox="0 0 68 20" aria-label="Bancontact" role="img">
+        <path d="M4 12h22l7-7h31" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+        <path d="M4 16h22l7-7h31" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" opacity="0.55" />
+      </svg>
+    );
+  }
+  const label = type === 'visa' ? 'VISA' : type === 'paypal' ? 'PayPal' : 'AMEX';
+  return (
+    <svg viewBox="0 0 58 20" aria-label={label} role="img">
+      <text x="29" y="13" textAnchor="middle">{label}</text>
     </svg>
   );
 }
@@ -814,7 +857,7 @@ function GuidesSection({ openModal }: { openModal: (item: ModalContent) => void 
             <br />
             <em>dans ta langue.</em>
           </h2>
-          <Link href="/guides" className="sfr-btn sfr-btn-outline">
+          <Link href="/guides" className="sfr-btn sfr-btn-outline sfr-title-action sfr-title-action-light">
             Voir tous les guides
           </Link>
         </Reveal>
@@ -976,6 +1019,9 @@ function ReviewsSection({ openModal }: { openModal: (item: ModalContent) => void
             notre plus belle récompense.
           </h2>
           <p className="sfr-rating-line">★★★★★ 4.9 · 709 avis vérifiés</p>
+          <Link href="#avis" className="sfr-btn sfr-btn-outline sfr-title-action sfr-review-link">
+            Voir tous les avis →
+          </Link>
         </Reveal>
         <Carousel label="Avis clients">
           {reviews.map((review) => (
@@ -1012,9 +1058,6 @@ function ReviewsSection({ openModal }: { openModal: (item: ModalContent) => void
             </motion.button>
           ))}
         </Carousel>
-        <Link href="#avis" className="sfr-btn sfr-btn-outline sfr-review-link">
-          Voir tous les avis →
-        </Link>
       </div>
     </section>
   );
@@ -1072,6 +1115,14 @@ function HomeFooter() {
           <TrustIcon type="accessibility" />
           Accessibilité PMR
         </div>
+      </div>
+      <div className="sfr-footer-payment-logos" aria-label="Moyens de paiement acceptés">
+        <PaymentMark type="visa" />
+        <PaymentMark type="mastercard" />
+        <PaymentMark type="apple" />
+        <PaymentMark type="paypal" />
+        <PaymentMark type="amex" />
+        <PaymentMark type="bancontact" />
       </div>
       <div className="sfr-footer-inner">
         <div className="sfr-footer-brand">

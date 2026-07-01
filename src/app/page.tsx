@@ -8,6 +8,7 @@ import Navbar from '@/components/Navbar';
 import CookiePrefsButton from '@/components/CookiePrefsButton';
 
 const EASE_LUXURY = [0.16, 1, 0.3, 1] as const;
+const heroLanguages = ['français', 'arabe', 'algérien', 'darija', 'anglais', 'ourdou'];
 
 type ModalContent = {
   eyebrow: string;
@@ -693,14 +694,23 @@ function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease: EASE_LUXURY }}
         >
-          <p className="sfr-pill">Guides privés certifiés · 17 langues</p>
           <h1>
             Une Omra,
             <br />
             un guide privé
             <br />
-            <em>dans ta langue.</em>
+            <span className="sfr-hero-language-line">
+              qui parle{' '}
+              <span className="sfr-flip-board" aria-label="français, arabe, algérien, darija, anglais, ourdou">
+                <span className="sfr-flip-track">
+                  {heroLanguages.concat(heroLanguages[0]).map((language, index) => (
+                    <span key={`${language}-${index}`}>{language}</span>
+                  ))}
+                </span>
+              </span>
+            </span>
           </h1>
+          <p className="sfr-pill">Guides privés certifiés · 17 langues</p>
           <p className="sfr-hero-lead">
             Guide certifié à La Mecque et Médine. Visite des lieux saints, sites historiques et endroits que les
             agences Omra ne montrent pas.

@@ -1588,7 +1588,7 @@ footer div::-webkit-scrollbar { display: none; }
   border-radius: 6px;
   padding: 0.38rem 0.65rem;
   background: rgba(7, 8, 9, 0.42);
-  margin-bottom: 1rem;
+  margin: 1.05rem 0 0;
 }
 
 .sfr-hero {
@@ -1634,7 +1634,7 @@ footer div::-webkit-scrollbar { display: none; }
 }
 
 .sfr-hero-content > div {
-  max-width: 560px;
+  max-width: 660px;
 }
 
 .sfr-hero h1 {
@@ -1645,6 +1645,97 @@ footer div::-webkit-scrollbar { display: none; }
   line-height: 0.94;
   font-weight: 500;
   letter-spacing: 0;
+}
+
+.sfr-hero-language-line {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.18em;
+  color: var(--sfr-gold-soft);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.sfr-flip-board {
+  position: relative;
+  top: 0.04em;
+  display: inline-block;
+  width: 3.45em;
+  height: 0.94em;
+  overflow: hidden;
+  vertical-align: baseline;
+  color: #fff6dd;
+  font-style: normal;
+  font-weight: 500;
+  text-align: left;
+  text-shadow: 0 0 24px rgba(213, 161, 74, 0.18);
+}
+
+.sfr-flip-board::before,
+.sfr-flip-board::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  height: 1px;
+  background: rgba(213, 161, 74, 0.42);
+}
+
+.sfr-flip-board::before {
+  top: 0.08em;
+}
+
+.sfr-flip-board::after {
+  bottom: 0.08em;
+}
+
+.sfr-flip-track {
+  display: block;
+  animation: sfr-language-flip 14s steps(6, end) infinite;
+  will-change: transform;
+}
+
+.sfr-flip-track span {
+  display: block;
+  height: 0.94em;
+  line-height: 0.94;
+}
+
+@keyframes sfr-language-flip {
+  0%,
+  12% {
+    transform: translateY(0);
+  }
+  16%,
+  28% {
+    transform: translateY(-100%);
+  }
+  32%,
+  44% {
+    transform: translateY(-200%);
+  }
+  48%,
+  60% {
+    transform: translateY(-300%);
+  }
+  64%,
+  76% {
+    transform: translateY(-400%);
+  }
+  80%,
+  92% {
+    transform: translateY(-500%);
+  }
+  100% {
+    transform: translateY(-600%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sfr-flip-track {
+    animation: none;
+  }
 }
 
 .sfr-hero h1 em,

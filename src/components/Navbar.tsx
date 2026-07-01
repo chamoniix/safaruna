@@ -252,7 +252,7 @@ export default function Navbar({
           width: 100%; gap: 12px;
           background: rgba(201,168,76,0.07);
           border: 1px solid rgba(201,168,76,0.2);
-          border-radius: 10px; padding: 10px 12px 10px 20px;
+          border-radius: 8px; padding: 4px 8px 4px 16px;
           box-shadow: 0 12px 48px rgba(0,0,0,0.92), 0 4px 16px rgba(0,0,0,0.75);
           animation: nb-pill-glow 3s ease-in-out infinite;
           text-decoration: none; cursor: pointer;
@@ -273,15 +273,15 @@ export default function Navbar({
           animation: nb-pulse-dot 2.2s ease-in-out infinite;
         }
         .nb-banner-main { display: flex; flex-direction: column; gap: 2px; }
-        .nb-banner-title { font-size: 16px; font-weight: 700; color: #FAF7F0; white-space: nowrap; }
+        .nb-banner-title { font-size: 13px; font-weight: 700; color: #FAF7F0; white-space: nowrap; }
         .nb-banner-stars { display: flex; align-items: center; gap: 4px; }
-        .nb-banner-stars-row { color: #C9A84C; font-size: 13px; letter-spacing: 1px; }
-        .nb-banner-review { font-size: 13px; color: rgba(255,255,255,0.55); }
+        .nb-banner-stars-row { color: #C9A84C; font-size: 11px; letter-spacing: 1px; }
+        .nb-banner-review { font-size: 11px; color: rgba(255,255,255,0.55); }
         .nb-banner-count { color: #C9A84C; font-weight: 700; font-style: normal; }
         .nb-banner-badge {
           background: #C9A84C; color: #1A1209;
-          padding: 7px 22px; border-radius: 6px;
-          font-size: 11px; font-weight: 800; letter-spacing: 0.07em;
+          padding: 4px 16px; border-radius: 5px;
+          font-size: 10px; font-weight: 800; letter-spacing: 0.07em;
           text-transform: uppercase; white-space: nowrap; flex-shrink: 0;
         }
         /* ── Bar ── */

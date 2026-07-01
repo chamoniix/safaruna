@@ -1629,7 +1629,7 @@ footer div::-webkit-scrollbar { display: none; }
   align-items: center;
   width: min(1360px, calc(100% - 2rem));
   margin: 0 auto;
-  padding-top: 6.2rem;
+  padding-top: 8.6rem;
   padding-bottom: 6.8rem;
 }
 
@@ -1658,19 +1658,19 @@ footer div::-webkit-scrollbar { display: none; }
 
 .sfr-flip-board {
   position: relative;
-  top: 0.12em;
+  top: 0.1em;
   display: inline-flex;
   align-items: center;
-  gap: 0.32em;
-  height: 1.7em;
-  padding: 0 0.42em;
+  gap: 0.36em;
+  height: 1.55em;
+  padding: 0 0.5em;
   overflow: hidden;
   vertical-align: baseline;
-  background: var(--green);
-  border-radius: 0.16em;
-  box-shadow: 0 14px 30px rgba(3, 5, 6, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+  background: linear-gradient(135deg, #e9f3ea, #d3e5d6);
+  border-radius: 0.18em;
+  box-shadow: 0 14px 30px rgba(3, 5, 6, 0.35), inset 0 0 0 1px rgba(29, 92, 58, 0.22);
   font-family: var(--font-manrope), 'Manrope', sans-serif;
-  font-size: 0.32em;
+  font-size: 0.42em;
   font-style: normal;
   font-weight: 700;
   letter-spacing: 0.01em;
@@ -1679,7 +1679,7 @@ footer div::-webkit-scrollbar { display: none; }
 }
 
 .sfr-flip-flag {
-  font-size: 1.05em;
+  font-size: 1em;
   line-height: 1;
   flex-shrink: 0;
 }
@@ -1687,18 +1687,18 @@ footer div::-webkit-scrollbar { display: none; }
 .sfr-flip-letters {
   position: relative;
   display: inline-flex;
-  height: 1.7em;
+  height: 1.55em;
   align-items: center;
   overflow: hidden;
 }
 
 .sfr-flip-word {
   display: inline-flex;
+  color: #1d5c3a;
 }
 
 .sfr-flip-letter {
   display: inline-block;
-  color: #fdfaf0;
   will-change: transform, opacity;
 }
 
@@ -1708,6 +1708,12 @@ footer div::-webkit-scrollbar { display: none; }
   color: var(--sfr-gold-soft);
   font-style: italic;
   font-weight: 400;
+}
+
+/* Sur fond beige, le doré clair est illisible : on passe en doré foncé. */
+.sfr-section-beige .sfr-section-title h2 em,
+.sfr-section-profile .sfr-section-title h2 em {
+  color: #9b6b22;
 }
 
 .sfr-hero-lead {
@@ -2063,12 +2069,86 @@ footer div::-webkit-scrollbar { display: none; }
 .sfr-info-card,
 .sfr-step-card,
 .sfr-review-card {
-  width: 224px;
-  min-height: 198px;
+  width: 245px;
+  min-height: 342px;
   padding: 1.05rem;
   border: 1px solid rgba(21, 17, 12, 0.1);
   background: rgba(255, 255, 255, 0.58);
   color: var(--sfr-ink);
+}
+
+/* Cartes "Pourquoi SAFARUMA" : format photo identique aux cartes avis. */
+.sfr-info-card {
+  position: relative;
+  height: 342px;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid rgba(21, 17, 12, 0.1);
+  background: #15110c;
+  color: #fffaf0;
+}
+
+.sfr-photo-card-media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #15110c;
+}
+
+.sfr-photo-card-media img {
+  object-fit: cover;
+}
+
+.sfr-photo-card-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.22) 36%, rgba(0, 0, 0, 0.92) 100%);
+}
+
+.sfr-photo-card-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  display: grid;
+  gap: 0.3rem;
+  padding: 1rem;
+  text-align: left;
+  color: #fffaf0;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.75);
+}
+
+.sfr-photo-card-overlay .sfr-card-icon {
+  width: 30px;
+  height: 30px;
+  margin-bottom: 0.35rem;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.sfr-info-card .sfr-photo-card-overlay h3 {
+  margin: 0;
+  font-size: 1.02rem;
+  color: #fffaf0;
+}
+
+.sfr-info-card .sfr-photo-card-overlay p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.sfr-info-card .sfr-photo-card-overlay small {
+  margin-top: 0.45rem;
+  color: var(--sfr-gold-soft);
+  font-weight: 800;
 }
 
 .sfr-section-dark .sfr-step-card {
@@ -2119,8 +2199,8 @@ footer div::-webkit-scrollbar { display: none; }
 }
 
 .sfr-profile-card {
-  width: 238px;
-  min-height: 214px;
+  width: 245px;
+  min-height: 342px;
 }
 
 .sfr-profile-card p {
@@ -2131,7 +2211,8 @@ footer div::-webkit-scrollbar { display: none; }
 }
 
 .sfr-guide-card {
-  width: 160px;
+  width: 245px;
+  min-height: 342px;
   padding: 0;
   overflow: hidden;
   border: 1px solid rgba(213, 161, 74, 0.22);
@@ -2140,11 +2221,11 @@ footer div::-webkit-scrollbar { display: none; }
 }
 
 .sfr-guide-card-feature {
-  width: 230px;
+  width: 245px;
 }
 
 .sfr-guide-feature {
-  min-height: 258px;
+  min-height: 342px;
   padding: 1rem;
   display: flex;
   flex-direction: column;
@@ -2176,7 +2257,7 @@ footer div::-webkit-scrollbar { display: none; }
 }
 
 .sfr-guide-photo {
-  height: 178px;
+  height: 225px;
   background:
     radial-gradient(circle at 50% 26%, rgba(240, 216, 151, 0.35), transparent 19%),
     linear-gradient(180deg, rgba(213, 161, 74, 0.18), transparent 44%),
@@ -2244,8 +2325,8 @@ footer div::-webkit-scrollbar { display: none; }
 }
 
 .sfr-experience-card {
-  width: 210px;
-  height: 172px;
+  width: 245px;
+  height: 342px;
   border: 0;
   background: #15110c;
   color: #fffaf0;
@@ -2555,16 +2636,45 @@ footer div::-webkit-scrollbar { display: none; }
   padding: 0 0 1rem;
 }
 
-.sfr-footer-payment-logos {
-  width: min(700px, calc(100% - 2rem));
+.sfr-footer-trust {
+  width: min(600px, calc(100% - 2rem));
   margin: 0 auto;
   padding: 1rem 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sfr-footer-trust > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(201, 168, 76, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(240, 216, 151, 0.7);
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.sfr-footer-trust svg {
+  flex-shrink: 0;
+  color: rgba(201, 168, 76, 0.8);
+}
+
+.sfr-footer-payment-logos {
+  width: min(700px, calc(100% - 2rem));
+  margin: 1.4rem auto 0;
+  padding: 0 0 0.35rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.85rem;
   color: rgba(255, 255, 255, 0.72);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .sfr-footer-payment-logos svg {
@@ -2598,8 +2708,8 @@ footer div::-webkit-scrollbar { display: none; }
   width: min(1360px, calc(100% - 2rem));
   margin: 1.7rem auto 0;
   display: grid;
-  grid-template-columns: 1.45fr 0.9fr 1fr 1fr;
-  gap: 2rem;
+  grid-template-columns: 1.35fr 1fr 1fr 0.85fr 1fr;
+  gap: 1.8rem;
 }
 
 .sfr-footer-logo {
@@ -2661,6 +2771,8 @@ footer div::-webkit-scrollbar { display: none; }
   display: grid;
   align-content: start;
   gap: 0.42rem;
+  /* Fixe l'héritage pour CookiePrefsButton (font: inherit inline). */
+  font-size: 0.84rem;
 }
 
 .sfr-footer-col h4 {
@@ -2900,11 +3012,16 @@ footer div::-webkit-scrollbar { display: none; }
     padding: 0 0.25rem;
   }
   .sfr-info-card,
-  .sfr-step-card {
-    width: min(78vw, 280px);
-  }
-  .sfr-review-card {
+  .sfr-step-card,
+  .sfr-review-card,
+  .sfr-guide-card,
+  .sfr-experience-card,
+  .sfr-profile-card {
     width: min(84vw, 310px);
+  }
+  .sfr-info-card,
+  .sfr-review-card,
+  .sfr-experience-card {
     height: 360px;
   }
   .sfr-review-overlay {
@@ -2929,8 +3046,19 @@ footer div::-webkit-scrollbar { display: none; }
   .sfr-page .sfr-footer {
     padding: 0.75rem 0 0.65rem;
   }
+  .sfr-footer-trust {
+    width: calc(100% - 1rem);
+    grid-template-columns: 1fr;
+    gap: 0.45rem;
+    padding: 0.7rem 0;
+  }
+  .sfr-footer-trust > div {
+    font-size: 0.68rem;
+    padding: 0.42rem 0.6rem;
+  }
   .sfr-footer-payment-logos {
     width: calc(100% - 1rem);
+    margin-top: 0.9rem;
     padding: 0 0 0.75rem;
     gap: 0.6rem;
     flex-wrap: wrap;

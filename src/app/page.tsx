@@ -8,6 +8,7 @@ import Navbar from '@/components/Navbar';
 import CookiePrefsButton from '@/components/CookiePrefsButton';
 
 const EASE_LUXURY = [0.16, 1, 0.3, 1] as const;
+// Deux tours : noms français d'abord, puis écritures natives.
 const heroLanguages = [
   { word: 'français', flag: '🇫🇷' },
   { word: 'arabe', flag: '🇸🇦' },
@@ -15,7 +16,17 @@ const heroLanguages = [
   { word: 'darija', flag: '🇲🇦' },
   { word: 'anglais', flag: '🇬🇧' },
   { word: 'ourdou', flag: '🇵🇰' },
+  { word: 'wolof', flag: '🇸🇳' },
+  { word: 'turc', flag: '🇹🇷' },
+  { word: 'العربية', flag: '🇸🇦' },
+  { word: 'دزاير', flag: '🇩🇿' },
+  { word: 'الدارجة', flag: '🇲🇦' },
+  { word: 'English', flag: '🇬🇧' },
+  { word: 'اردو', flag: '🇵🇰' },
+  { word: 'Türkçe', flag: '🇹🇷' },
 ];
+
+const isRtlWord = (word: string) => /[؀-ۿ]/.test(word);
 
 type ModalContent = {
   eyebrow: string;
@@ -61,6 +72,7 @@ const whyCards: CarouselItem[] = [
     text: 'Tu choisis ton guide selon sa langue maternelle. Français, Wolof, Darija, Turc — ton guide te parle comme un ami, pas comme un conférencier.',
     href: '/guides',
     cta: 'Trouver mon guide',
+    image: '/images/landing/experience-rencontres.jpg',
   },
   {
     id: 'guides-experts',
@@ -69,6 +81,7 @@ const whyCards: CarouselItem[] = [
     text: 'Guides certifiés, passionnés et habitués du terrain pour une Omra claire, authentique et apaisée.',
     href: '/guides-certifies',
     cta: 'En savoir plus',
+    image: '/images/landing/guide-naim-laamari.jpg',
   },
   {
     id: 'famille',
@@ -77,6 +90,7 @@ const whyCards: CarouselItem[] = [
     text: "Je veux emmener mes proches mais j'ai peur de mal organiser.",
     href: '/guides',
     cta: 'Trouver un guide famille',
+    image: '/images/landing/experience-spirituel.jpg',
   },
   {
     id: 'parents',
@@ -85,6 +99,7 @@ const whyCards: CarouselItem[] = [
     text: 'SVP prenez soin de mes parents. — Ces mots que vous direz à leur guide.',
     href: '/guides',
     cta: 'Trouver un guide rassurant',
+    image: '/images/landing/experience-acces.jpg',
   },
   {
     id: 'premiere-omra',
@@ -93,6 +108,7 @@ const whyCards: CarouselItem[] = [
     text: 'Je prie, je jeûne. Je veux enfin faire la Omra mais je ne sais pas par où commencer.',
     href: '/guide-omra',
     cta: 'Préparer ma Omra',
+    image: '/images/landing/hero-kaaba-main.jpg',
   },
   {
     id: 'pmr',
@@ -101,6 +117,7 @@ const whyCards: CarouselItem[] = [
     text: 'Fauteuil roulant, enfants, personnes âgées, rythme adapté et logistique pensée avant le départ.',
     href: '/omra-pmr',
     cta: 'En savoir plus',
+    image: '/images/landing/experience-historique.jpg',
   },
   {
     id: 'unique',
@@ -109,6 +126,7 @@ const whyCards: CarouselItem[] = [
     text: 'Accédez à des lieux et moments que les grands groupes ne peuvent pas vivre sereinement.',
     href: '/omra-avec-guide-prive',
     cta: 'En savoir plus',
+    image: '/images/landing/experience-acces.jpg',
   },
   {
     id: 'personnalise',
@@ -117,6 +135,7 @@ const whyCards: CarouselItem[] = [
     text: 'Un parcours humain, intime et sur-mesure pour comprendre chaque geste au lieu de simplement suivre.',
     href: '/histoire-premiere-omra',
     cta: 'En savoir plus',
+    image: '/images/landing/experience-spirituel.jpg',
   },
   {
     id: 'assistance',
@@ -125,6 +144,7 @@ const whyCards: CarouselItem[] = [
     text: 'On répond à toutes vos questions. Nos guides et nos équipes restent disponibles pour que votre voyage soit le plus agréable possible.',
     href: '/contact',
     cta: 'Nous contacter',
+    image: '/images/landing/testi-bg.jpg',
   },
   {
     id: 'remplacement',
@@ -133,6 +153,7 @@ const whyCards: CarouselItem[] = [
     text: 'Si ton guide ne peut pas venir pour une urgence, on te trouve un guide équivalent certifié en moins de 2 heures.',
     href: '/guides',
     cta: 'Trouver mon guide',
+    image: '/images/landing/mosque-bg-beige.jpg',
   },
 ];
 
@@ -688,6 +709,9 @@ function LanguageFlipBoard() {
   }, [reduce]);
 
   const current = heroLanguages[index];
+  // Les écritures arabes sont cursives : on anime le mot entier pour ne pas
+  // casser les ligatures en isolant les lettres.
+  const chunks = isRtlWord(current.word) ? [current.word] : current.word.split('');
 
   return (
     <span
@@ -695,14 +719,18 @@ function LanguageFlipBoard() {
       role="img"
       aria-label={`langue : ${heroLanguages.map((l) => l.word).join(', ')}`}
     >
-      <span className="sfr-flip-flag" aria-hidden="true">{current.flag}</span>
       <span className="sfr-flip-letters" aria-hidden="true">
         {reduce ? (
           <span className="sfr-flip-word">{current.word}</span>
         ) : (
           <AnimatePresence mode="popLayout" initial={false}>
-            <motion.span key={current.word} className="sfr-flip-word" layout="position">
-              {current.word.split('').map((char, charIndex) => (
+            <motion.span
+              key={`${current.word}-${index}`}
+              className="sfr-flip-word"
+              layout="position"
+              dir={isRtlWord(current.word) ? 'rtl' : undefined}
+            >
+              {chunks.map((char, charIndex) => (
                 <motion.span
                   key={charIndex}
                   className="sfr-flip-letter"
@@ -718,6 +746,7 @@ function LanguageFlipBoard() {
           </AnimatePresence>
         )}
       </span>
+      <span className="sfr-flip-flag" aria-hidden="true">{current.flag}</span>
     </span>
   );
 }
@@ -865,10 +894,15 @@ function WhySection({ openModal }: { openModal: (item: ModalContent) => void }) 
                 })
               }
             >
-              <span className="sfr-card-icon">{card.icon}</span>
-              <h3>{card.title}</h3>
-              <p>{card.text}</p>
-              <small>En savoir plus →</small>
+              <div className="sfr-photo-card-media">
+                <SmartImage src={card.image} alt={card.title} />
+              </div>
+              <div className="sfr-photo-card-overlay">
+                <span className="sfr-card-icon">{card.icon}</span>
+                <h3>{card.title}</h3>
+                <p>{card.text}</p>
+                <small>En savoir plus →</small>
+              </div>
             </motion.button>
           ))}
         </Carousel>
@@ -1133,6 +1167,70 @@ function FinalCtaSection() {
 function HomeFooter() {
   return (
     <footer className="sfr-footer">
+      <div className="sfr-footer-trust" aria-label="Garanties SAFARUMA">
+        <div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M4.5 12.75l6 6 9-13.5" />
+          </svg>
+          Guides certifiés SAFARUMA
+        </div>
+        <div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+          </svg>
+          Paiement sécurisé
+        </div>
+        <div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="12" cy="5" r="1.6" />
+            <path d="M9 9.5h6l-1 5h-4l-1-5zM10 14.5l-1.6 4M14 14.5l1.6 4" />
+          </svg>
+          Accessibilité PMR
+        </div>
+      </div>
+      <div className="sfr-footer-inner">
+        <div className="sfr-footer-brand">
+          <Link href="/" className="sfr-footer-logo">
+            SAFAR<span>U</span>MA
+          </Link>
+          <p>Première plateforme de réservation de guide privé pour la Omra, en plusieurs langues.</p>
+        </div>
+
+        <div className="sfr-footer-col">
+          <h4>Pèlerins</h4>
+          <Link href="/guides">Trouver un guide</Link>
+          <Link href="/guides">Nos forfaits</Link>
+          <Link href="/guide-omra">Guide complet de la Omra</Link>
+          <Link href="/espace/tableau-de-bord">Tableau de bord</Link>
+          <Link href="/connexion">Connexion</Link>
+        </div>
+
+        <div className="sfr-footer-col">
+          <h4>Guides</h4>
+          <Link href="/guide/inscription">Devenir guide certifié SAFARUMA</Link>
+          <Link href="/guide/connexion">Espace Guide</Link>
+        </div>
+
+        <div className="sfr-footer-col">
+          <h4>SAFARUMA</h4>
+          <Link href="/a-propos">À propos</Link>
+          <Link href="/blog">Blog</Link>
+          <Link href="/contact">Contact</Link>
+          <Link href="/services">Services</Link>
+          <Link href="/faq">FAQ</Link>
+        </div>
+
+        <div className="sfr-footer-col">
+          <h4>Légal</h4>
+          <Link href="/mentions-legales">Mentions légales</Link>
+          <Link href="/confidentialite">Confidentialité</Link>
+          <Link href="/cookies">Politique de cookies</Link>
+          <Link href="/cgu">CGU</Link>
+          <Link href="/conditions-clients">Conditions Clients</Link>
+          <Link href="/charte-islamique">Charte Islamique</Link>
+          <CookiePrefsButton />
+        </div>
+      </div>
       <div className="sfr-footer-payment-logos" aria-label="Moyens de paiement acceptés">
         <PaymentMark type="visa" />
         <PaymentMark type="mastercard" />
@@ -1140,44 +1238,6 @@ function HomeFooter() {
         <PaymentMark type="paypal" />
         <PaymentMark type="amex" />
         <PaymentMark type="bancontact" />
-      </div>
-      <div className="sfr-footer-inner">
-        <div className="sfr-footer-brand">
-          <Link href="/" className="sfr-footer-logo">
-            SAFAR<span>U</span>MA
-          </Link>
-          <p>
-            Guides privés certifiés à La Mecque et Médine. Visite des lieux saints et sites historiques en plusieurs
-            langues.
-          </p>
-        </div>
-
-        <div className="sfr-footer-col">
-          <h4>Navigation</h4>
-          <Link href="/guides">Guides privés</Link>
-          <Link href="/lieux-saints">Destinations</Link>
-          <Link href="/a-propos">À propos</Link>
-          <Link href="/blog">Ressources</Link>
-          <Link href="/contact">Contact</Link>
-        </div>
-
-        <div className="sfr-footer-col">
-          <h4>Ressources</h4>
-          <Link href="/guide-omra">Guide PDF gratuit</Link>
-          <Link href="/blog">Blog</Link>
-          <Link href="/faq">FAQ</Link>
-          <Link href="/cgu">Conditions générales</Link>
-          <Link href="/confidentialite">Politique de confidentialité</Link>
-          <CookiePrefsButton />
-        </div>
-
-        <div className="sfr-footer-col">
-          <h4>Légal</h4>
-          <Link href="/mentions-legales">Mentions légales</Link>
-          <Link href="/conditions-clients">Conditions Clients</Link>
-          <Link href="/charte-islamique">Charte Islamique</Link>
-          <Link href="/contact">Contact</Link>
-        </div>
       </div>
       <div className="sfr-footer-social-section">
         <div>Suivez-nous</div>

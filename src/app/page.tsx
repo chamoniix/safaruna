@@ -756,7 +756,7 @@ function ProblemSection() {
     <section className="sfr-problem">
       <div className="sfr-problem-grid">
         <Reveal className="sfr-problem-image">
-          <Image src="/images/landing/testi-bg.jpg" alt="Groupe de pèlerins dans un bus" fill sizes="(max-width: 768px) 100vw, 45vw" />
+          <span className="sfr-sr-only">Groupe de pèlerins dans un bus</span>
         </Reveal>
         <Reveal className="sfr-problem-copy" delay={0.08}>
           <p className="sfr-eyebrow">Le Problème</p>
@@ -769,10 +769,6 @@ function ProblemSection() {
             Pas de réponses à tes questions. Pas de compréhension profonde. Tu rentres avec des photos, mais sans
             transformation. L’Omra mérite mieux que ça.
           </p>
-        </Reveal>
-        <Reveal className="sfr-problem-symbol" delay={0.16}>
-          <div>♡</div>
-          <p>Une expérience unique mérite un accompagnement unique.</p>
         </Reveal>
       </div>
     </section>

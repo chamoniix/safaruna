@@ -343,7 +343,7 @@ footer { background: var(--warm); padding: 3rem 4rem 2rem; color: rgba(255,255,2
 }
 /* 1440px — large */
 @media (min-width: 1440px) {
-  section:not(.landing-hero):not(.landing-testimonials):not(.landing-cta-final):not(.home-trust-bar):not(.landing-stats-bar):not(.landing-partners-bar):not(.landing-experience-unique):not(.landing-guides-row):not(.landing-exclusive):not(.landing-parcours) { padding: 8rem 8rem; max-width: 1440px; margin-left: auto; margin-right: auto; }
+  section:not(.sfr-hero):not(.sfr-partners):not(.sfr-problem):not(.sfr-section):not(.sfr-final-cta):not(.landing-hero):not(.landing-testimonials):not(.landing-cta-final):not(.home-trust-bar):not(.landing-stats-bar):not(.landing-partners-bar):not(.landing-experience-unique):not(.landing-guides-row):not(.landing-exclusive):not(.landing-parcours) { padding: 8rem 8rem; max-width: 1440px; margin-left: auto; margin-right: auto; }
   .hero { padding: 9rem 8rem 6rem; max-width: 1440px; margin: 0 auto; }
 }
 /* Tablet responsive for new sections */
@@ -458,7 +458,7 @@ footer div::-webkit-scrollbar { display: none; }
   .guide-omra-inner { flex-direction: column !important; gap: 1rem !important; }
   .guide-omra-tags { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; width: 100%; }
   .guide-omra-cta { display: block; width: 100%; text-align: center; margin-top: 0.5rem; }
-  footer {
+  footer:not(.sfr-footer) {
     padding: 32px 20px 24px !important;
   }
   .footer-top {
@@ -1580,7 +1580,7 @@ footer div::-webkit-scrollbar { display: none; }
 }
 
 .sfr-hero {
-  min-height: 92svh;
+  min-height: 86svh;
   position: relative;
   overflow: hidden;
   background: #050607;
@@ -1612,13 +1612,13 @@ footer div::-webkit-scrollbar { display: none; }
 .sfr-hero-content {
   position: relative;
   z-index: 2;
-  min-height: 92svh;
+  min-height: 86svh;
   display: flex;
   align-items: center;
   width: min(1180px, calc(100% - 3rem));
   margin: 0 auto;
-  padding-top: 7rem;
-  padding-bottom: 8rem;
+  padding-top: 6.2rem;
+  padding-bottom: 6.8rem;
 }
 
 .sfr-hero-content > div {
@@ -1710,8 +1710,8 @@ footer div::-webkit-scrollbar { display: none; }
 .sfr-partners {
   position: relative;
   z-index: 3;
-  margin-top: -7rem;
-  padding: 0 0 1rem;
+  margin-top: -5.8rem;
+  padding: 0 0 0.75rem;
 }
 
 .sfr-carousel-shell {
@@ -1936,7 +1936,7 @@ footer div::-webkit-scrollbar { display: none; }
 }
 
 .sfr-section {
-  padding: 2.9rem 0;
+  padding: 2.35rem 0;
 }
 
 .sfr-section-beige {
@@ -1961,7 +1961,7 @@ footer div::-webkit-scrollbar { display: none; }
   margin: 0 auto;
   display: grid;
   grid-template-columns: 300px minmax(0, 1fr);
-  gap: 1.55rem;
+  gap: 1.25rem;
   align-items: start;
 }
 
@@ -2337,7 +2337,8 @@ footer div::-webkit-scrollbar { display: none; }
 
 .sfr-final-cta {
   position: relative;
-  min-height: 390px;
+  min-height: 350px;
+  padding: 0;
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -2539,7 +2540,7 @@ footer div::-webkit-scrollbar { display: none; }
 
 .sfr-footer-inner {
   width: min(1180px, calc(100% - 3rem));
-  margin: 2.4rem auto 0;
+  margin: 1.7rem auto 0;
   display: grid;
   grid-template-columns: 1.45fr 0.9fr 1fr 1fr;
   gap: 2rem;
@@ -2639,8 +2640,8 @@ footer div::-webkit-scrollbar { display: none; }
 
 .sfr-footer-social-section {
   width: min(1180px, calc(100% - 3rem));
-  margin: 1.6rem auto 0;
-  padding-top: 1.5rem;
+  margin: 1.25rem auto 0;
+  padding-top: 1.15rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   text-align: center;
 }
@@ -2657,8 +2658,8 @@ footer div::-webkit-scrollbar { display: none; }
 
 .sfr-footer-bottom {
   width: min(1180px, calc(100% - 3rem));
-  margin: 0.9rem auto 0;
-  padding-top: 1rem;
+  margin: 0.65rem auto 0;
+  padding-top: 0.8rem;
   color: rgba(255, 255, 255, 0.34);
   text-align: center;
   font-size: 0.76rem;
@@ -2834,7 +2835,7 @@ footer div::-webkit-scrollbar { display: none; }
     font-size: 2.1rem;
   }
   .sfr-section {
-    padding: 2.15rem 0;
+    padding: 1.85rem 0;
   }
   .sfr-section-layout {
     gap: 1rem;
@@ -2866,10 +2867,11 @@ footer div::-webkit-scrollbar { display: none; }
     background: rgba(255, 255, 255, 0.72);
   }
   .sfr-final-cta {
-    min-height: 430px;
+    min-height: 390px;
+    padding: 0;
   }
-  .sfr-footer {
-    padding: 0.85rem 0 0.65rem;
+  .sfr-page .sfr-footer {
+    padding: 0.75rem 0 0.65rem;
   }
   .sfr-footer-payment-logos {
     width: calc(100% - 1rem);

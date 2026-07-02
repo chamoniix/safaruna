@@ -9,21 +9,23 @@ import CookiePrefsButton from '@/components/CookiePrefsButton';
 
 const EASE_LUXURY = [0.16, 1, 0.3, 1] as const;
 // Deux tours : noms français d'abord, puis écritures natives.
+// `color` : couleur dominante du drapeau, appliquée au mot (déclinée claire
+// pour rester lisible sur le fond sombre du hero).
 const heroLanguages = [
-  { word: 'français', flag: '🇫🇷' },
-  { word: 'arabe', flag: '🇸🇦' },
-  { word: 'algérien', flag: '🇩🇿' },
-  { word: 'darija', flag: '🇲🇦' },
-  { word: 'anglais', flag: '🇬🇧' },
-  { word: 'ourdou', flag: '🇵🇰' },
-  { word: 'wolof', flag: '🇸🇳' },
-  { word: 'turc', flag: '🇹🇷' },
-  { word: 'العربية', flag: '🇸🇦' },
-  { word: 'دزاير', flag: '🇩🇿' },
-  { word: 'الدارجة', flag: '🇲🇦' },
-  { word: 'English', flag: '🇬🇧' },
-  { word: 'اردو', flag: '🇵🇰' },
-  { word: 'Türkçe', flag: '🇹🇷' },
+  { word: 'français', flag: 'fr', color: '#8fa8f5' },
+  { word: 'arabe', flag: 'sa', color: '#5fc98e' },
+  { word: 'algérien', flag: 'dz', color: '#5fc98e' },
+  { word: 'darija', flag: 'ma', color: '#f08a8a' },
+  { word: 'anglais', flag: 'gb', color: '#8fa8f5' },
+  { word: 'ourdou', flag: 'pk', color: '#5fc98e' },
+  { word: 'wolof', flag: 'sn', color: '#f2cf6b' },
+  { word: 'turc', flag: 'tr', color: '#f08a8a' },
+  { word: 'العربية', flag: 'sa', color: '#5fc98e' },
+  { word: 'دزاير', flag: 'dz', color: '#5fc98e' },
+  { word: 'الدارجة', flag: 'ma', color: '#f08a8a' },
+  { word: 'English', flag: 'gb', color: '#8fa8f5' },
+  { word: 'اردو', flag: 'pk', color: '#5fc98e' },
+  { word: 'Türkçe', flag: 'tr', color: '#f08a8a' },
 ];
 
 const isRtlWord = (word: string) => /[؀-ۿ]/.test(word);
@@ -231,6 +233,7 @@ const experiences: CarouselItem[] = [
     title: 'Masjid An-Nabawi',
     text: 'La mosquée du Prophète ﷺ à Médine, avec ses repères, son histoire et l’adab à respecter.',
     href: '/lieux-saints',
+    image: '/images/landing/place-nabawi.jpg',
     cta: 'Explorer tous les lieux',
   },
   {
@@ -239,6 +242,7 @@ const experiences: CarouselItem[] = [
     title: 'Rawdah',
     text: 'Un moment très demandé à Médine. Le guide explique le contexte, l’organisation et les bonnes attentes.',
     href: '/lieux-saints',
+    image: '/images/landing/place-rawdah.jpg',
     cta: 'Explorer tous les lieux',
   },
   {
@@ -247,6 +251,7 @@ const experiences: CarouselItem[] = [
     title: 'Masjid Quba',
     text: 'La première mosquée bâtie dans l’histoire de l’Islam, un lieu essentiel pour comprendre Médine.',
     href: '/lieux-saints',
+    image: '/images/landing/place-quba.jpg',
     cta: 'Explorer tous les lieux',
   },
   {
@@ -255,6 +260,7 @@ const experiences: CarouselItem[] = [
     title: 'Mont Uhud',
     text: 'Un lieu fort de l’histoire islamique, souvent visité à Médine pour comprendre les compagnons et leurs sacrifices.',
     href: '/lieux-saints',
+    image: '/images/landing/place-uhud.jpg',
     cta: 'Explorer tous les lieux',
   },
   {
@@ -263,6 +269,7 @@ const experiences: CarouselItem[] = [
     title: 'Badr',
     text: 'Plus éloigné, mais spirituellement majeur. Certains itinéraires peuvent l’inclure selon timing, autorisations et organisation.',
     href: '/lieux-saints',
+    image: '/images/landing/place-badr.jpg',
     cta: 'Explorer tous les lieux',
   },
   {
@@ -280,6 +287,7 @@ const experiences: CarouselItem[] = [
     title: 'Arafat & Jabal Rahmah',
     text: 'Un repère fondamental du Hajj, expliqué avec simplicité même pendant une Omra.',
     href: '/lieux-saints',
+    image: '/images/landing/place-arafat.jpg',
     cta: 'Explorer tous les lieux',
   },
   {
@@ -696,6 +704,89 @@ function Modal({ content, onClose }: { content: ModalContent | null; onClose: ()
   );
 }
 
+const FLAG_STAR =
+  'M0 -1 L0.2245 -0.309 L0.951 -0.309 L0.3633 0.118 L0.5878 0.809 L0 0.382 L-0.5878 0.809 L-0.3633 0.118 L-0.951 -0.309 L-0.2245 -0.309 Z';
+
+// Croissant plein : deux cercles en fill-rule evenodd (le petit troue le grand).
+const crescent = (cx: number, cy: number, r: number, inset: number) =>
+  `M${cx - r},${cy} a${r},${r} 0 1,0 ${2 * r},0 a${r},${r} 0 1,0 ${-2 * r},0 ` +
+  `M${cx - r + inset * 2},${cy} a${r - inset},${r - inset} 0 1,0 ${2 * (r - inset)},0 a${r - inset},${r - inset} 0 1,0 ${-2 * (r - inset)},0`;
+
+function FlagIcon({ code }: { code: string }) {
+  return (
+    <svg className="sfr-flag-svg" viewBox="0 0 21 14" aria-hidden="true" focusable="false">
+      <defs>
+        <clipPath id={`sfr-flag-${code}`}>
+          <rect width="21" height="14" rx="2.4" />
+        </clipPath>
+      </defs>
+      <g clipPath={`url(#sfr-flag-${code})`}>
+        {code === 'fr' && (
+          <>
+            <rect width="7" height="14" fill="#3b5aa9" />
+            <rect x="7" width="7" height="14" fill="#f6f3ec" />
+            <rect x="14" width="7" height="14" fill="#c94b4b" />
+          </>
+        )}
+        {code === 'sa' && (
+          <>
+            <rect width="21" height="14" fill="#2f7d54" />
+            <rect x="4.6" y="5.1" width="11.8" height="1.25" rx="0.6" fill="#f6f3ec" opacity="0.95" />
+            <rect x="6.4" y="7.9" width="8.2" height="1.05" rx="0.5" fill="#f6f3ec" opacity="0.75" />
+          </>
+        )}
+        {code === 'dz' && (
+          <>
+            <rect width="10.5" height="14" fill="#2f7d54" />
+            <rect x="10.5" width="10.5" height="14" fill="#f6f3ec" />
+            <path fillRule="evenodd" d="M8,7 a3.1,3.1 0 1,0 6.2,0 a3.1,3.1 0 1,0 -6.2,0 M9.7,7 a2.45,2.45 0 1,0 4.9,0 a2.45,2.45 0 1,0 -4.9,0" fill="#c94b4b" transform="translate(-0.4 0)" />
+            <path d={FLAG_STAR} fill="#c94b4b" transform="translate(12.5 7) scale(1.5)" />
+          </>
+        )}
+        {code === 'ma' && (
+          <>
+            <rect width="21" height="14" fill="#b5453c" />
+            <path d={FLAG_STAR} fill="none" stroke="#2f7d54" strokeWidth="0.55" transform="translate(10.5 7.4) scale(3.4)" />
+          </>
+        )}
+        {code === 'gb' && (
+          <>
+            <rect width="21" height="14" fill="#33518f" />
+            <path d="M0,0 L21,14 M21,0 L0,14" stroke="#f6f3ec" strokeWidth="2.6" />
+            <path d="M0,0 L21,14 M21,0 L0,14" stroke="#c94b4b" strokeWidth="1" />
+            <path d="M10.5,0 V14 M0,7 H21" stroke="#f6f3ec" strokeWidth="3.6" />
+            <path d="M10.5,0 V14 M0,7 H21" stroke="#c94b4b" strokeWidth="1.9" />
+          </>
+        )}
+        {code === 'pk' && (
+          <>
+            <rect width="21" height="14" fill="#276043" />
+            <rect width="5" height="14" fill="#f6f3ec" />
+            <path fillRule="evenodd" d={crescent(12.6, 7, 3.1, 0.85)} fill="#f6f3ec" />
+            <path d={FLAG_STAR} fill="#f6f3ec" transform="translate(15.4 4.9) scale(1.35)" />
+          </>
+        )}
+        {code === 'sn' && (
+          <>
+            <rect width="7" height="14" fill="#2f7d54" />
+            <rect x="7" width="7" height="14" fill="#e9c46a" />
+            <rect x="14" width="7" height="14" fill="#c94b4b" />
+            <path d={FLAG_STAR} fill="#2f7d54" transform="translate(10.5 7.2) scale(2.2)" />
+          </>
+        )}
+        {code === 'tr' && (
+          <>
+            <rect width="21" height="14" fill="#bd4343" />
+            <path fillRule="evenodd" d={crescent(9, 7, 3.3, 0.95)} fill="#f6f3ec" />
+            <path d={FLAG_STAR} fill="#f6f3ec" transform="translate(13.6 7) scale(1.45) rotate(15)" />
+          </>
+        )}
+      </g>
+      <rect width="21" height="14" rx="2.4" fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="0.6" />
+    </svg>
+  );
+}
+
 function LanguageFlipBoard() {
   const reduce = useReducedMotion();
   const [index, setIndex] = useState(0);
@@ -721,7 +812,7 @@ function LanguageFlipBoard() {
     >
       <span className="sfr-flip-letters" aria-hidden="true">
         {reduce ? (
-          <span className="sfr-flip-word">{current.word}</span>
+          <span className="sfr-flip-word" style={{ color: current.color }}>{current.word}</span>
         ) : (
           <AnimatePresence mode="popLayout" initial={false}>
             <motion.span
@@ -729,6 +820,7 @@ function LanguageFlipBoard() {
               className="sfr-flip-word"
               layout="position"
               dir={isRtlWord(current.word) ? 'rtl' : undefined}
+              style={{ color: current.color }}
             >
               {chunks.map((char, charIndex) => (
                 <motion.span
@@ -746,7 +838,9 @@ function LanguageFlipBoard() {
           </AnimatePresence>
         )}
       </span>
-      <span className="sfr-flip-flag" aria-hidden="true">{current.flag}</span>
+      <span className="sfr-flip-flag" aria-hidden="true">
+        <FlagIcon code={current.flag} />
+      </span>
     </span>
   );
 }
@@ -1185,27 +1279,6 @@ function FinalCtaSection() {
 function HomeFooter() {
   return (
     <footer className="sfr-footer">
-      <div className="sfr-footer-trust" aria-label="Garanties SAFARUMA">
-        <div>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M4.5 12.75l6 6 9-13.5" />
-          </svg>
-          Guides certifiés SAFARUMA
-        </div>
-        <div>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-          </svg>
-          Paiement sécurisé
-        </div>
-        <div>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <circle cx="12" cy="5" r="1.6" />
-            <path d="M9 9.5h6l-1 5h-4l-1-5zM10 14.5l-1.6 4M14 14.5l1.6 4" />
-          </svg>
-          Accessibilité PMR
-        </div>
-      </div>
       <div className="sfr-footer-inner">
         <div className="sfr-footer-brand">
           <Link href="/" className="sfr-footer-logo">

@@ -331,6 +331,7 @@ const steps: CarouselItem[] = [
     text: 'Un accès immédiat en 10 secondes pour préparer ton voyage, sauvegarder tes choix et contacter ton guide.',
     href: '/inscription',
     meta: 'Étape 1',
+    image: '/parcours/creer-compte.jpg',
     cta: 'Voir plus',
   },
   {
@@ -339,6 +340,7 @@ const steps: CarouselItem[] = [
     text: 'Visa, hébergement, checklist, rythme de la famille, questions de rite et contraintes terrain.',
     href: '/guide-omra',
     meta: 'Étape 2',
+    image: '/parcours/preparation-conseils.jpg',
     cta: 'Voir plus',
   },
   {
@@ -347,6 +349,7 @@ const steps: CarouselItem[] = [
     text: 'Repères dès l’aéroport, installation, premiers conseils pratiques et prise en charge rassurante.',
     href: '/services/transfert',
     meta: 'Étape 3',
+    image: '/parcours/accueil-personnalise.jpg',
     cta: 'Voir plus',
   },
   {
@@ -355,6 +358,7 @@ const steps: CarouselItem[] = [
     text: 'Lieux saints, sites historiques et explications adaptées à ta langue, ton niveau et ton rythme.',
     href: '/lieux-saints',
     meta: 'Étape 4',
+    image: '/parcours/accompagnement-visites.jpg',
     cta: 'Voir plus',
   },
   {
@@ -363,6 +367,7 @@ const steps: CarouselItem[] = [
     text: 'Suivi, conseils, souvenirs et continuité spirituelle pour ne pas repartir avec seulement des photos.',
     href: '/espace/tableau-de-bord',
     meta: 'Étape 5',
+    image: '/parcours/apres-omra.jpg',
     cta: 'Voir plus',
   },
 ];
@@ -791,7 +796,7 @@ function HeroSection() {
               <span />
             </div>
             <p>
-              <strong>147</strong> pèlerins ont réservé cette semaine
+              <strong>147+</strong> sont partis en Omra cette semaine
             </p>
           </div>
         </motion.div>
@@ -1062,9 +1067,14 @@ function StepsSection({ openModal }: { openModal: (item: ModalContent) => void }
                 })
               }
             >
-              <span className="sfr-step-num">{index + 1}</span>
-              <h3>{step.title}</h3>
-              <p>{step.text}</p>
+              <div className="sfr-photo-card-media">
+                <SmartImage src={step.image} alt={step.title} />
+              </div>
+              <div className="sfr-photo-card-overlay">
+                <span className="sfr-step-num">{index + 1}</span>
+                <h3>{step.title}</h3>
+                <p>{step.text}</p>
+              </div>
             </motion.button>
           ))}
         </Carousel>
@@ -1114,7 +1124,6 @@ function ReviewsSection({ openModal }: { openModal: (item: ModalContent) => void
               <div className="sfr-review-overlay">
                 <p>{review.text}</p>
                 <div className="sfr-review-head">
-                  <span className="sfr-review-avatar">{review.title.slice(0, 1)}</span>
                   <div>
                     <h3>{review.title}</h3>
                     <p>{review.meta}</p>
@@ -1149,7 +1158,7 @@ function FinalCtaSection() {
             <span />
           </div>
           <p>
-            <strong>147</strong> pèlerins ont réservé cette semaine
+            <strong>147+</strong> sont partis en Omra cette semaine
           </p>
         </div>
         <div className="sfr-final-actions">

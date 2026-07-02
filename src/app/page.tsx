@@ -17,7 +17,7 @@ const heroLanguages = [
   { word: 'algérien', flag: 'dz', color: '#5fc98e' },
   { word: 'darija', flag: 'ma', color: '#f08a8a' },
   { word: 'anglais', flag: 'gb', color: '#8fa8f5' },
-  { word: 'ourdou', flag: 'pk', color: '#5fc98e' },
+  { word: 'urdu', flag: 'pk', color: '#5fc98e' },
   { word: 'wolof', flag: 'sn', color: '#f2cf6b' },
   { word: 'turc', flag: 'tr', color: '#f08a8a' },
   { word: 'العربية', flag: 'sa', color: '#5fc98e' },
@@ -92,7 +92,7 @@ const whyCards: CarouselItem[] = [
     text: "Je veux emmener mes proches mais j'ai peur de mal organiser.",
     href: '/guides',
     cta: 'Trouver un guide famille',
-    image: '/images/landing/experience-spirituel.jpg',
+    image: '/why-safaruma/en-famille.jpg',
   },
   {
     id: 'parents',
@@ -101,7 +101,7 @@ const whyCards: CarouselItem[] = [
     text: 'SVP prenez soin de mes parents. — Ces mots que vous direz à leur guide.',
     href: '/guides',
     cta: 'Trouver un guide rassurant',
-    image: '/images/landing/experience-acces.jpg',
+    image: '/why-safaruma/mes-parents.jpg',
   },
   {
     id: 'premiere-omra',
@@ -110,7 +110,7 @@ const whyCards: CarouselItem[] = [
     text: 'Je prie, je jeûne. Je veux enfin faire la Omra mais je ne sais pas par où commencer.',
     href: '/guide-omra',
     cta: 'Préparer ma Omra',
-    image: '/images/landing/hero-kaaba-main.jpg',
+    image: '/why-safaruma/premiere-omra.jpg',
   },
   {
     id: 'pmr',
@@ -119,7 +119,7 @@ const whyCards: CarouselItem[] = [
     text: 'Fauteuil roulant, enfants, personnes âgées, rythme adapté et logistique pensée avant le départ.',
     href: '/omra-pmr',
     cta: 'En savoir plus',
-    image: '/images/landing/experience-historique.jpg',
+    image: '/why-safaruma/assistance-pmr.jpg',
   },
   {
     id: 'unique',
@@ -128,7 +128,7 @@ const whyCards: CarouselItem[] = [
     text: 'Accédez à des lieux et moments que les grands groupes ne peuvent pas vivre sereinement.',
     href: '/omra-avec-guide-prive',
     cta: 'En savoir plus',
-    image: '/images/landing/experience-acces.jpg',
+    image: '/why-safaruma/experience-lieux-saints.jpg',
   },
   {
     id: 'personnalise',
@@ -137,7 +137,7 @@ const whyCards: CarouselItem[] = [
     text: 'Un parcours humain, intime et sur-mesure pour comprendre chaque geste au lieu de simplement suivre.',
     href: '/histoire-premiere-omra',
     cta: 'En savoir plus',
-    image: '/images/landing/experience-spirituel.jpg',
+    image: '/why-safaruma/accompagnement-personnalise.jpg',
   },
   {
     id: 'assistance',
@@ -146,7 +146,7 @@ const whyCards: CarouselItem[] = [
     text: 'On répond à toutes vos questions. Nos guides et nos équipes restent disponibles pour que votre voyage soit le plus agréable possible.',
     href: '/contact',
     cta: 'Nous contacter',
-    image: '/images/landing/testi-bg.jpg',
+    image: '/why-safaruma/temp-reel.jpg',
   },
   {
     id: 'remplacement',
@@ -278,7 +278,7 @@ const experiences: CarouselItem[] = [
     title: 'Grotte de Hira',
     text: 'Là où la première révélation coranique fut révélée. Ton guide replace le lieu dans son contexte spirituel.',
     href: '/lieux-saints',
-    image: '/images/landing/experience-historique.jpg',
+    image: '/images/landing/place-hira.jpg',
     cta: 'Explorer tous les lieux',
   },
   {
@@ -374,7 +374,7 @@ const reviews: CarouselItem[] = [
     text: "Rachid nous a fait vivre l'histoire à chaque pas. La montée de Jabal Nour avec ses explications était le moment le plus fort de notre vie.",
     href: '#avis',
     meta: '★★★★★',
-    image: '/images/landing/experience-historique.jpg',
+    image: '/images/reviews/review-kaaba-regard.jpg',
     cta: 'Voir les avis',
   },
   {
@@ -383,7 +383,7 @@ const reviews: CarouselItem[] = [
     text: 'En tant que groupe de femmes, nous avions des appréhensions. Fatima a tout géré avec une douceur et une compétence incroyables.',
     href: '#avis',
     meta: '★★★★★',
-    image: '/images/landing/experience-rencontres.jpg',
+    image: '/images/reviews/review-nabawi-esplanade.jpg',
     cta: 'Voir les avis',
   },
   {
@@ -392,7 +392,7 @@ const reviews: CarouselItem[] = [
     text: "Youssouf parle Wolof, connaît les histoires que nos anciens nous ont transmises, et les relie aux lieux saints. Toute la famille est repartie transformée.",
     href: '#avis',
     meta: '★★★★★',
-    image: '/images/landing/experience-spirituel.jpg',
+    image: '/images/reviews/review-tawaf-foule.jpg',
     cta: 'Voir les avis',
   },
   {
@@ -401,7 +401,7 @@ const reviews: CarouselItem[] = [
     text: 'Une expérience incroyable. Notre guide a pris le temps d’expliquer chaque étape, de répondre aux questions de mes parents et de rendre la Omra plus profonde.',
     href: '#avis',
     meta: '★★★★★',
-    image: '/images/landing/testi-bg.jpg',
+    image: '/images/reviews/review-nabawi-parasols.jpg',
     cta: 'Voir les avis',
   },
   {
@@ -410,7 +410,7 @@ const reviews: CarouselItem[] = [
     text: "Tout juste converti, j'ai découvert la Omra sans me sentir perdu. Le guide expliquait chaque étape avec patience et respect.",
     href: '#avis',
     meta: '★★★★★',
-    image: '/images/landing/mosque-bg-beige.jpg',
+    image: '/images/reviews/review-kaaba-nuit.jpg',
     cta: 'Voir les avis',
   },
   {
@@ -419,7 +419,7 @@ const reviews: CarouselItem[] = [
     text: "J'ai hésité longtemps, je pensais que ce n'était pas le bon moment. L'accompagnement m'a rassurée dès la préparation.",
     href: '#avis',
     meta: '★★★★★',
-    image: '/images/landing/cta-bg.jpg',
+    image: '/images/reviews/review-mecque-vue.jpg',
     cta: 'Voir les avis',
   },
 ];
@@ -604,40 +604,6 @@ function SocialIcon({ type }: { type: 'instagram' | 'tiktok' | 'youtube' | 'x' |
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
       <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286ZM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065Zm1.782 13.019H3.555V9h3.564v11.452ZM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003Z" />
-    </svg>
-  );
-}
-
-function PaymentMark({ type }: { type: 'visa' | 'mastercard' | 'apple' | 'paypal' | 'amex' | 'bancontact' }) {
-  if (type === 'mastercard') {
-    return (
-      <svg viewBox="0 0 42 20" aria-label="Mastercard" role="img">
-        <circle cx="17" cy="10" r="7" />
-        <circle cx="25" cy="10" r="7" />
-      </svg>
-    );
-  }
-  if (type === 'apple') {
-    return (
-      <svg viewBox="0 0 56 20" aria-label="Apple Pay" role="img">
-        <path d="M11.4 5.2c.7-.9 1.2-2 1.1-3.2-1 .1-2.1.7-2.8 1.5-.6.7-1.2 1.9-1 3 .9.1 2-.5 2.7-1.3Z" />
-        <path d="M12.5 6.7c-1.5-.1-2.7.8-3.4.8-.7 0-1.8-.8-3-.8-1.6 0-3 1-3.8 2.5-1.6 2.8-.4 7 1.1 9.2.8 1.1 1.7 2.3 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7 2-.1 2.8-1.2c.9-1.3 1.3-2.5 1.3-2.6 0 0-2.5-1-2.5-3.8 0-2.4 2-3.5 2.1-3.6-1.1-1.7-2.9-1.8-3.5-1.8Z" />
-        <text x="25" y="14">Pay</text>
-      </svg>
-    );
-  }
-  if (type === 'bancontact') {
-    return (
-      <svg viewBox="0 0 68 20" aria-label="Bancontact" role="img">
-        <path d="M4 12h22l7-7h31" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-        <path d="M4 16h22l7-7h31" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" opacity="0.55" />
-      </svg>
-    );
-  }
-  const label = type === 'visa' ? 'VISA' : type === 'paypal' ? 'PayPal' : 'AMEX';
-  return (
-    <svg viewBox="0 0 58 20" aria-label={label} role="img">
-      <text x="29" y="13" textAnchor="middle">{label}</text>
     </svg>
   );
 }
@@ -1323,12 +1289,24 @@ function HomeFooter() {
         </div>
       </div>
       <div className="sfr-footer-payment-logos" aria-label="Moyens de paiement acceptés">
-        <PaymentMark type="visa" />
-        <PaymentMark type="mastercard" />
-        <PaymentMark type="apple" />
-        <PaymentMark type="paypal" />
-        <PaymentMark type="amex" />
-        <PaymentMark type="bancontact" />
+        {[
+          ['visa', 'Visa'],
+          ['mastercard', 'Mastercard'],
+          ['amex', 'American Express'],
+          ['applepay', 'Apple Pay'],
+          ['googlepay', 'Google Pay'],
+          ['paypal', 'PayPal'],
+          ['shoppay', 'Shop Pay'],
+          ['klarna', 'Klarna'],
+          ['bancontact', 'Bancontact'],
+          ['maestro', 'Maestro'],
+          ['unionpay', 'Union Pay'],
+          ['diners', 'Diners Club'],
+          ['discover', 'Discover'],
+        ].map(([slug, label]) => (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img key={slug} src={`/payment-icons/${slug}.svg`} alt={label} loading="lazy" />
+        ))}
       </div>
       <div className="sfr-footer-social-section">
         <div>Suivez-nous</div>

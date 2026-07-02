@@ -1658,28 +1658,25 @@ footer div::-webkit-scrollbar { display: none; }
 
 .sfr-flip-board {
   position: relative;
-  top: 0.1em;
+  top: 0.05em;
   display: inline-flex;
   align-items: center;
-  gap: 0.36em;
-  height: 1.55em;
-  padding: 0 0.5em;
+  gap: 0.16em;
+  height: 1.18em;
+  padding: 0 0.08em;
   overflow: hidden;
   vertical-align: baseline;
-  background: linear-gradient(135deg, #e9f3ea, #d3e5d6);
-  border-radius: 0.18em;
-  box-shadow: 0 14px 30px rgba(3, 5, 6, 0.35), inset 0 0 0 1px rgba(29, 92, 58, 0.22);
-  font-family: var(--font-manrope), 'Manrope', sans-serif;
-  font-size: 0.42em;
-  font-style: normal;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  text-transform: uppercase;
+  border-top: 1px solid rgba(213, 161, 74, 0.45);
+  border-bottom: 1px solid rgba(213, 161, 74, 0.45);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--sfr-gold-soft);
+  text-shadow: 0 0 24px rgba(213, 161, 74, 0.18);
   white-space: nowrap;
 }
 
 .sfr-flip-flag {
-  font-size: 1em;
+  font-size: 0.4em;
   line-height: 1;
   flex-shrink: 0;
 }
@@ -1687,14 +1684,14 @@ footer div::-webkit-scrollbar { display: none; }
 .sfr-flip-letters {
   position: relative;
   display: inline-flex;
-  height: 1.55em;
+  height: 1.18em;
   align-items: center;
   overflow: hidden;
 }
 
 .sfr-flip-word {
   display: inline-flex;
-  color: #1d5c3a;
+  color: var(--sfr-gold-soft);
 }
 
 .sfr-flip-letter {
@@ -1943,19 +1940,36 @@ footer div::-webkit-scrollbar { display: none; }
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   position: relative;
-  min-height: 320px;
+  min-height: 360px;
   border: 1px solid rgba(213, 161, 74, 0.14);
   border-radius: 8px;
   overflow: hidden;
-  background: #090b0d url("/images/landing/problem-bus.svg") center / cover no-repeat;
+  background: #090b0d;
+}
+
+.sfr-problem-photos {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.sfr-problem-photos > div {
+  position: relative;
+  overflow: hidden;
+}
+
+.sfr-problem-photos img {
+  object-fit: cover;
+  filter: brightness(0.92) saturate(0.94);
 }
 
 .sfr-problem-image {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(5, 6, 7, 0.92) 0%, rgba(5, 6, 7, 0.66) 42%, rgba(5, 6, 7, 0.18) 100%),
-    linear-gradient(180deg, rgba(5, 6, 7, 0.05), rgba(5, 6, 7, 0.58));
+    linear-gradient(90deg, rgba(5, 6, 7, 0.62) 0%, rgba(5, 6, 7, 0.34) 42%, rgba(5, 6, 7, 0.06) 100%),
+    linear-gradient(180deg, rgba(5, 6, 7, 0.04), rgba(5, 6, 7, 0.4));
 }
 
 .sfr-problem-image img {

@@ -842,8 +842,26 @@ function ProblemSection() {
   return (
     <section className="sfr-problem">
       <div className="sfr-problem-grid">
+        <div className="sfr-problem-photos" aria-hidden="true">
+          <div>
+            <Image
+              src="/images/landing/problem-bus.jpg"
+              alt=""
+              fill
+              sizes="(max-width: 1024px) 100vw, 680px"
+            />
+          </div>
+          <div>
+            <Image
+              src="/images/landing/problem-guide-flag.jpg"
+              alt=""
+              fill
+              sizes="(max-width: 1024px) 100vw, 680px"
+            />
+          </div>
+        </div>
         <Reveal className="sfr-problem-image">
-          <span className="sfr-sr-only">Groupe de pèlerins dans un bus</span>
+          <span className="sfr-sr-only">Groupe de pèlerins entassés dans un bus, guide brandissant un drapeau suivi par la foule</span>
         </Reveal>
         <Reveal className="sfr-problem-copy" delay={0.08}>
           <p className="sfr-eyebrow">Le Problème</p>

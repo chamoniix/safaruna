@@ -3480,13 +3480,13 @@ footer div::-webkit-scrollbar { display: none; }
     scroll-snap-type: none;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
-    touch-action: pan-x;
+    touch-action: pan-x pan-y pinch-zoom;
     padding: 0.2rem 0 0.7rem;
     margin: 0;
   }
   .sfr-carousel-track > * {
     scroll-snap-align: none;
-    touch-action: pan-x;
+    touch-action: pan-x pan-y pinch-zoom;
   }
   .sfr-carousel-arrow {
     display: grid;

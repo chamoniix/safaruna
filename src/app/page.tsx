@@ -188,6 +188,7 @@ const guides: CarouselItem[] = [
     title: 'Youssef',
     text: 'Accompagnement anglophone et arabe pour pèlerins internationaux, familles et petits groupes.',
     href: '/guides',
+    image: '/why-safaruma/accompagnement-personnalise.jpg',
     meta: 'Anglais + Arabe',
     cta: 'Voir les guides disponibles',
   },
@@ -196,6 +197,7 @@ const guides: CarouselItem[] = [
     title: 'Ibrahim',
     text: 'Profil turcophone et arabe, pensé pour les visiteurs qui veulent poser leurs questions sans barrière.',
     href: '/guides',
+    image: '/images/landing/experience-historique.jpg',
     meta: 'Turc + Arabe',
     cta: 'Voir les guides disponibles',
   },
@@ -204,6 +206,7 @@ const guides: CarouselItem[] = [
     title: 'Muhammad',
     text: 'Guide indonésien et arabe pour une Omra calme, structurée et adaptée aux familles.',
     href: '/guides',
+    image: '/why-safaruma/en-famille.jpg',
     meta: 'Indonésien + Arabe',
     cta: 'Voir les guides disponibles',
   },
@@ -212,6 +215,7 @@ const guides: CarouselItem[] = [
     title: 'Rachid',
     text: 'Accompagnement espagnol et arabe pour découvrir les rites et les lieux avec plus de profondeur.',
     href: '/guides',
+    image: '/images/landing/place-nabawi.jpg',
     meta: 'Espagnol + Arabe',
     cta: 'Voir les guides disponibles',
   },
@@ -467,9 +471,25 @@ function Carousel({
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
   const [coarsePointer, setCoarsePointer] = useState(false);
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(true);
   const items = React.Children.toArray(children);
+  const itemCount = React.Children.count(children);
+  const bounded = !auto;
+
+  const updateScrollBounds = React.useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const maxScrollLeft = el.scrollWidth - el.clientWidth;
+    setCanScrollPrev(el.scrollLeft > 2);
+    setCanScrollNext(el.scrollLeft < maxScrollLeft - 2);
+  }, []);
 
   const scrollBy = (direction: number) => {
+    if (bounded && direction < 0 && !canScrollPrev) return;
+    if (bounded && direction > 0 && !canScrollNext) return;
+
     ref.current?.scrollBy({ left: direction * 340, behavior: 'smooth' });
   };
 
@@ -480,6 +500,22 @@ function Carousel({
     query.addEventListener('change', update);
     return () => query.removeEventListener('change', update);
   }, []);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    updateScrollBounds();
+    const raf = window.requestAnimationFrame(updateScrollBounds);
+    el.addEventListener('scroll', updateScrollBounds, { passive: true });
+    window.addEventListener('resize', updateScrollBounds);
+
+    return () => {
+      window.cancelAnimationFrame(raf);
+      el.removeEventListener('scroll', updateScrollBounds);
+      window.removeEventListener('resize', updateScrollBounds);
+    };
+  }, [auto, coarsePointer, itemCount, updateScrollBounds]);
 
   useEffect(() => {
     if (!auto || reduce || coarsePointer) return;
@@ -509,9 +545,11 @@ function Carousel({
       className={`sfr-carousel-shell ${className ?? ''}`}
     >
       <motion.button
-        className="sfr-carousel-arrow sfr-carousel-arrow--left"
+        className={`sfr-carousel-arrow sfr-carousel-arrow--left${bounded && !canScrollPrev ? ' sfr-carousel-arrow-disabled' : ''}`}
         onClick={() => scrollBy(-1)}
         aria-label={`${label} précédent`}
+        aria-disabled={bounded && !canScrollPrev}
+        disabled={bounded && !canScrollPrev}
         whileHover={{ x: -3 }}
         whileTap={{ scale: 0.94 }}
       >
@@ -524,9 +562,11 @@ function Carousel({
         ))}
       </div>
       <motion.button
-        className="sfr-carousel-arrow sfr-carousel-arrow--right"
+        className={`sfr-carousel-arrow sfr-carousel-arrow--right${bounded && !canScrollNext ? ' sfr-carousel-arrow-disabled' : ''}`}
         onClick={() => scrollBy(1)}
         aria-label={`${label} suivant`}
+        aria-disabled={bounded && !canScrollNext}
+        disabled={bounded && !canScrollNext}
         whileHover={{ x: 3 }}
         whileTap={{ scale: 0.94 }}
       >
@@ -761,6 +801,7 @@ function HeroSection() {
 
       <div className="sfr-hero-content">
         <motion.div
+          className="sfr-hero-copy"
           initial={reduce ? false : { opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease: EASE_LUXURY }}
@@ -775,10 +816,13 @@ function HeroSection() {
               <LanguageFlipBoard />
             </span>
           </h1>
-          <p className="sfr-pill">Guides privés certifiés · 17 langues</p>
+          <p className="sfr-pill">
+            Guides privés certifiés <span>• 17 langues</span>
+          </p>
           <p className="sfr-hero-lead">
-            Guide certifié à La Mecque et Médine. Visite des lieux saints, sites historiques et endroits que les
-            agences Omra ne montrent pas.
+            <span>Guide certifié à La Mecque et Médine.</span>
+            <span>Visite des lieux saints, sites historiques</span>
+            <span>et endroits que les agences Omra ne montrent pas.</span>
           </p>
           <div className="sfr-hero-actions">
             <Link href="/guides" className="sfr-btn sfr-btn-gold">
@@ -795,8 +839,13 @@ function HeroSection() {
               <span />
               <span />
             </div>
+            <button className="sfr-video-mobile" type="button">
+              <span className="sfr-play">▶</span>
+              Vidéo
+            </button>
             <p>
-              <strong>147+</strong> sont partis en Omra cette semaine
+              <span><strong>147+</strong> sont partis en Omra</span>
+              <span>cette semaine</span>
             </p>
           </div>
         </motion.div>
@@ -964,16 +1013,41 @@ function GuidesSection({ openModal }: { openModal: (item: ModalContent) => void 
               ) : (
                 <>
                   <div className="sfr-guide-photo">
-                    <SmartImage src={guide.image} alt={`Guide ${guide.title}`} />
-                    {!guide.image && <span className="sfr-guide-initial">{guide.title.slice(0, 1)}</span>}
+                    {guide.id === 'naim-laamari' ? (
+                      <SmartImage src={guide.image} alt={`Guide ${guide.title}`} />
+                    ) : (
+                      <Image
+                        src="/guide-badge.jpg"
+                        alt=""
+                        fill
+                        sizes="245px"
+                        className="sfr-guide-badge-image"
+                      />
+                    )}
                   </div>
-                  <h3>{guide.title}</h3>
-                  <p>
-                    {guide.meta}{' '}
-                    <span className="sfr-flags">
-                      {['🇫🇷 🇸🇦', '', '🇬🇧 🇸🇦', '🇹🇷 🇸🇦', '🇮🇩 🇸🇦', '🇪🇸 🇸🇦'][index]}
-                    </span>
-                  </p>
+                  {guide.id === 'naim-laamari' ? (
+                    <>
+                      <div className="sfr-guide-trust sfr-guide-trust-compact">
+                        ★ OFFICIEL SAFARUMA <span className="sfr-guide-status-ring">VÉRIFIÉ ✓</span>
+                      </div>
+                      <div className="sfr-guide-meta-row">{guide.title} · Makkah · 8 ans</div>
+                      <div className="sfr-guide-rating sfr-guide-rating-compact">★★★★★ <strong>5.0</strong> · Français 🇫🇷 · Arabe 🇸🇦</div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="sfr-guide-trust">
+                        <span>VÉRIFIÉ ✓</span>
+                      </div>
+                      <h3>{guide.title}</h3>
+                      <p>
+                        {guide.meta}{' '}
+                        <span className="sfr-flags">
+                          {['🇫🇷 🇸🇦', '', '🇬🇧 🇸🇦', '🇹🇷 🇸🇦', '🇮🇩 🇸🇦', '🇪🇸 🇸🇦'][index]}
+                        </span>
+                      </p>
+                    </>
+                  )}
+                  <span className="sfr-guide-profile-btn">Voir le profil →</span>
                 </>
               )}
             </motion.button>
@@ -1050,7 +1124,7 @@ function StepsSection({ openModal }: { openModal: (item: ModalContent) => void }
             Créer ton espace gratuitement →
           </Link>
         </Reveal>
-        <Carousel label="Ton parcours Omra">
+        <Carousel label="Ton parcours Omra" auto={false}>
           {steps.map((step, index) => (
             <motion.button
               type="button"
@@ -1203,6 +1277,7 @@ function HomeFooter() {
         <div className="sfr-footer-col">
           <h4>SAFARUMA</h4>
           <Link href="/a-propos">À propos</Link>
+          <Link href="/nos-guides-certifies">Guides certifiés</Link>
           <Link href="/blog">Blog</Link>
           <Link href="/contact">Contact</Link>
           <Link href="/services">Services</Link>

@@ -20,23 +20,111 @@ export default function CharteIslamique() {
       ]}
     >
 
+      <div style={{
+        background: '#1A1209',
+        borderRadius: 12,
+        padding: '2rem 2.5rem',
+        marginBottom: '2.5rem',
+        color: '#FAF7F0',
+        boxShadow: '0 18px 48px rgba(26,18,9,0.18)',
+      }}>
+        <div style={{
+          fontFamily: 'var(--font-cormorant, Georgia, serif)',
+          fontSize: '2.25rem',
+          lineHeight: 1.35,
+          color: '#F0D897',
+          textAlign: 'center',
+          marginBottom: '1rem',
+          direction: 'rtl',
+        }}>
+          وَمَن يُعَظِّمْ شَعَائِرَ اللَّهِ
+        </div>
+        <p style={{
+          fontFamily: 'var(--font-cormorant, Georgia, serif)',
+          fontSize: '1.22rem',
+          lineHeight: 1.7,
+          color: 'rgba(255,255,255,0.9)',
+          textAlign: 'center',
+          margin: '0 0 0.75rem',
+          fontStyle: 'italic',
+        }}>
+          “Et quiconque honore les rites sacrés d&apos;Allah, c&apos;est assurément le fruit de la piété des cœurs.”
+        </p>
+        <p style={{
+          fontSize: '0.78rem',
+          color: 'rgba(240,216,151,0.68)',
+          textAlign: 'center',
+          margin: '0 0 1.75rem',
+          fontWeight: 700,
+          letterSpacing: '0.08em',
+          textTransform: 'uppercase',
+        }}>
+          Sourate Al-Hajj · 22:32
+        </p>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: '0.9rem',
+        }}>
+          {[
+            {
+              title: 'Authenticité',
+              text: "Nos guides ne font jamais de compromis sur les rituels. Chaque geste a un sens — ils vous l'expliquent.",
+            },
+            {
+              title: 'Confiance',
+              text: "La charte islamique que signent nos guides n'est pas un contrat. C'est un serment devant Allah.",
+            },
+            {
+              title: 'Connaissance',
+              text: "L'Omra sans savoir, c'est marcher dans le noir. Avec SAFARUMA, chaque pas a un sens.",
+            },
+          ].map((item) => (
+            <div key={item.title} style={{
+              border: '1px solid rgba(240,216,151,0.18)',
+              borderRadius: 10,
+              padding: '1rem',
+              background: 'rgba(255,255,255,0.045)',
+            }}>
+              <div style={{
+                fontFamily: 'var(--font-cormorant, Georgia, serif)',
+                fontSize: '1.15rem',
+                fontWeight: 700,
+                color: '#F0D897',
+                marginBottom: '0.45rem',
+              }}>
+                {item.title}
+              </div>
+              <p style={{
+                margin: 0,
+                color: 'rgba(255,255,255,0.76)',
+                fontSize: '0.88rem',
+                lineHeight: 1.65,
+              }}>
+                {item.text}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Hero quote */}
       <div style={{
         background: '#1A1209', borderRadius: 12, padding: '2rem 2.5rem',
         marginBottom: '2.5rem', textAlign: 'center',
       }}>
         <p style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.3rem', color: '#F0D897', lineHeight: 1.7, margin: 0, fontStyle: 'italic' }}>
-          "En rejoignant SAFARUMA, vous ne signez pas un simple contrat commercial.<br />
+          &quot;En rejoignant SAFARUMA, vous ne signez pas un simple contrat commercial.<br />
           Vous prenez un engagement spirituel devant Allah ﷻ,<br />
-          témoin de toutes choses."
+          témoin de toutes choses.&quot;
         </p>
       </div>
 
       <section id="preambule">
         <h2 style={h2}>Préambule</h2>
         <p style={p}>Cette charte est le fondement de la confiance que les pèlerins placent en vous. Elle dépasse le cadre du simple accord commercial — elle est un pacte moral, une promesse faite devant Allah ﷻ, qui voit et sait ce que cachent les cœurs.</p>
-        <p style={p}>Le pèlerin qui vous confie son Omra est souvent à l'un des moments les plus importants de sa vie spirituelle. Il vous confie sa sécurité, sa famille, et la qualité de son expérience sacrée. Cette responsabilité est immense.</p>
-        <p style={p}>La Charte de Confiance SAFARUMA n'est pas une contrainte imposée de l'extérieur — c'est le reflet de ce que tout bon guide Certifié SAFARUMA porte déjà dans son cœur.</p>
+        <p style={p}>Le pèlerin qui vous confie son Omra est souvent à l&apos;un des moments les plus importants de sa vie spirituelle. Il vous confie sa sécurité, sa famille, et la qualité de son expérience sacrée. Cette responsabilité est immense.</p>
+        <p style={p}>La Charte de Confiance SAFARUMA n&apos;est pas une contrainte imposée de l&apos;extérieur — c&apos;est le reflet de ce que tout bon guide Certifié SAFARUMA porte déjà dans son cœur.</p>
       </section>
 
       <section id="engagements">
@@ -102,7 +190,7 @@ export default function CharteIslamique() {
         <h2 style={h2}>Fondement spirituel</h2>
         <div style={{ background: '#1A1209', borderRadius: 12, padding: '2rem 2.5rem', margin: '1.5rem 0' }}>
           <p style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.15rem', color: '#F0D897', lineHeight: 1.8, margin: '0 0 1rem', fontStyle: 'italic', textAlign: 'center' }}>
-            « Celui qui trompe n'est pas des nôtres. »
+            « Celui qui trompe n&apos;est pas des nôtres. »
           </p>
           <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', textAlign: 'center', margin: 0 }}>
             Le Prophète Muhammad ﷺ — Rapporté par Muslim (n° 101)
@@ -110,19 +198,19 @@ export default function CharteIslamique() {
         </div>
         <div style={{ background: '#1A1209', borderRadius: 12, padding: '2rem 2.5rem', margin: '1.5rem 0' }}>
           <p style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.15rem', color: '#F0D897', lineHeight: 1.8, margin: '0 0 1rem', fontStyle: 'italic', textAlign: 'center' }}>
-            « La religion, c'est le conseil sincère (nasîha). »
+            « La religion, c&apos;est le conseil sincère (nasîha). »
           </p>
           <p style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.4)', textAlign: 'center', margin: 0 }}>
             Le Prophète Muhammad ﷺ — Rapporté par Muslim (n° 55)
           </p>
         </div>
-        <p style={p}>Ces paroles prophétiques résument l'esprit de la Charte SAFARUMA. Un Guide qui trompe — sur ses compétences, ses tarifs, ou en pratiquant des paiements cachés — s'expose non seulement aux sanctions de SAFARUMA, mais rompt un serment moral.</p>
-        <p style={p}>Nous croyons que les meilleurs guides sont ceux qui n'ont pas besoin d'être surveillés — parce qu'ils agissent par conscience, par foi, et par amour pour leurs frères et sœurs en Islam.</p>
+        <p style={p}>Ces paroles prophétiques résument l&apos;esprit de la Charte SAFARUMA. Un Guide qui trompe — sur ses compétences, ses tarifs, ou en pratiquant des paiements cachés — s&apos;expose non seulement aux sanctions de SAFARUMA, mais rompt un serment moral.</p>
+        <p style={p}>Nous croyons que les meilleurs guides sont ceux qui n&apos;ont pas besoin d&apos;être surveillés — parce qu&apos;ils agissent par conscience, par foi, et par amour pour leurs frères et sœurs en Islam.</p>
       </section>
 
       <section id="signature">
         <h2 style={h2}>Signature et application</h2>
-        <p style={p}>Cette Charte est signée électroniquement à l'étape 6 du processus d'inscription guide. En cochant la case de validation, le guide atteste sur l'honneur et devant Allah ﷻ qu'il a lu, compris et accepté les engagements de la Charte.</p>
+        <p style={p}>Cette Charte est signée électroniquement à l&apos;étape 6 du processus d&apos;inscription guide. En cochant la case de validation, le guide atteste sur l&apos;honneur et devant Allah ﷻ qu&apos;il a lu, compris et accepté les engagements de la Charte.</p>
         <div className="legal-box-gold">
           <div className="box-title">Ce que signifie votre signature</div>
           <ul style={{ ...ul, marginBottom: 0 }}>
@@ -132,7 +220,7 @@ export default function CharteIslamique() {
             <li style={li}>Vous reconnaissez que cette charte complète les <a href="/conditions-guides" style={{ color: '#C9A84C' }}>Conditions Guides</a></li>
           </ul>
         </div>
-        <p style={p}>En cas de violation de la Charte, SAFARUMA applique les sanctions prévues dans les <a href="/conditions-guides" style={{ color: '#C9A84C', fontWeight: 600 }}>Conditions Guides</a>, pouvant aller jusqu'à la suspension définitive du compte.</p>
+        <p style={p}>En cas de violation de la Charte, SAFARUMA applique les sanctions prévues dans les <a href="/conditions-guides" style={{ color: '#C9A84C', fontWeight: 600 }}>Conditions Guides</a>, pouvant aller jusqu&apos;à la suspension définitive du compte.</p>
         <p style={p}>Que Allah ﷻ facilite votre mission et bénisse vos efforts au service des pèlerins. <strong>Barak Allahu fik.</strong></p>
       </section>
 

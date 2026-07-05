@@ -73,6 +73,7 @@ export default function Footer() {
           <h4>SAFARUMA</h4>
           <ul>
             <li><Link href="/a-propos">À propos</Link></li>
+            <li><Link href="/nos-guides-certifies">Guides certifiés</Link></li>
             <li><Link href="/blog">Blog</Link></li>
             <li><Link href="/contact">Contact</Link></li>
             <li><Link href="/services">Services</Link></li>

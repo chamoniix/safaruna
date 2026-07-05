@@ -85,6 +85,7 @@ export default function Navbar({
   const [hasScrolled, setHasScrolled] = useState(false);
   const [atTop, setAtTop] = useState(true);
   const [ctaVisible, setCtaVisible] = useState(false);
+  const [footerVisible, setFooterVisible] = useState(false);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navRef = useRef<HTMLDivElement>(null);
@@ -104,6 +105,19 @@ export default function Navbar({
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, [transparentOnHero, darkHeroMode, scrollThreshold]);
+
+  useEffect(() => {
+    const footer = document.querySelector('footer');
+    if (!footer) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setFooterVisible(entry.isIntersecting),
+      { root: null, threshold: 0, rootMargin: '0px 0px -24% 0px' }
+    );
+
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const query = window.matchMedia('(max-width: 1023px)');
@@ -185,7 +199,7 @@ export default function Navbar({
             display: block;
             position: absolute; left: 50%; transform: translateX(-50%);
             font-family: var(--font-cormorant, Georgia, serif);
-            font-size: 1rem; font-weight: 700;
+            font-size: 1.16rem; font-weight: 700;
             color: white; letter-spacing: 0.1em;
             white-space: nowrap; text-decoration: none;
             opacity: 1; transition: opacity 250ms ease;
@@ -564,10 +578,10 @@ export default function Navbar({
         {/* ── Bar desktop ── */}
         <div className={`nb-bar${isDarkHero && (hasScrolled || pathname !== '/') ? ' nb-bar-dark' : ''}${isAtTop ? ' mobile-at-top' : ''}`}
           style={hasScrolled ? {
-            background: 'rgba(48,30,10,0.96)',
-            backdropFilter: 'blur(16px) saturate(1.6)',
-            WebkitBackdropFilter: 'blur(16px) saturate(1.6)',
-            boxShadow: '0 6px 28px rgba(0,0,0,0.55), 0 1px 0 rgba(201,168,76,0.25)',
+            background: 'rgba(12,14,13,0.94)',
+            backdropFilter: 'blur(18px) saturate(1.35)',
+            WebkitBackdropFilter: 'blur(18px) saturate(1.35)',
+            boxShadow: '0 8px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(240,216,151,0.13), 0 1px 0 rgba(201,168,76,0.22)',
             height: '38px',
             margin: '8px auto 0',
             width: 'min(1180px, calc(100% - 3rem))',
@@ -584,10 +598,10 @@ export default function Navbar({
             maxWidth: '1180px',
             boxSizing: 'border-box',
           } : {
-            background: 'rgba(48,30,10,0.88)',
-            backdropFilter: 'blur(14px) saturate(1.5)',
-            WebkitBackdropFilter: 'blur(14px) saturate(1.5)',
-            boxShadow: '0 4px 24px rgba(0,0,0,0.4), 0 1px 0 rgba(201,168,76,0.2)',
+            background: 'rgba(12,14,13,0.88)',
+            backdropFilter: 'blur(16px) saturate(1.3)',
+            WebkitBackdropFilter: 'blur(16px) saturate(1.3)',
+            boxShadow: '0 6px 26px rgba(0,0,0,0.44), inset 0 1px 0 rgba(240,216,151,0.12), 0 1px 0 rgba(201,168,76,0.2)',
             height: '42px',
             margin: '10px auto 0',
             width: 'min(1180px, calc(100% - 3rem))',
@@ -793,7 +807,7 @@ export default function Navbar({
       </div>
 
       {/* ── CTA flottant mobile — hors nb-root pour éviter tout bug de transform ── */}
-      {pathname === '/' && ctaVisible && (
+      {pathname === '/' && ctaVisible && !footerVisible && (
         <div className="nb-mobile-cta">
           <Link href="/guides" className="nb-mobile-cta-btn">
             Trouver mon guide →

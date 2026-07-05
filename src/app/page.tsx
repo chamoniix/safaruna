@@ -878,39 +878,47 @@ function PartnersSection() {
 function ProblemSection() {
   return (
     <section className="sfr-problem">
-      <div className="sfr-problem-grid">
-        <div className="sfr-problem-photos" aria-hidden="true">
-          <div>
-            <Image
-              src="/images/landing/problem-bus.jpg"
-              alt=""
-              fill
-              sizes="(max-width: 1024px) 100vw, 680px"
-            />
-          </div>
-          <div>
-            <Image
-              src="/images/landing/problem-guide-flag.jpg"
-              alt=""
-              fill
-              sizes="(max-width: 1024px) 100vw, 680px"
-            />
-          </div>
-        </div>
-        <Reveal className="sfr-problem-image">
-          <span className="sfr-sr-only">Groupe de pèlerins entassés dans un bus, guide brandissant un drapeau suivi par la foule</span>
-        </Reveal>
+      <div className="sfr-problem-stage">
+        <Image
+          src="/images/landing/problem-bus.jpg"
+          alt=""
+          fill
+          sizes="100vw"
+          className="sfr-problem-bg"
+          aria-hidden="true"
+        />
+        <div className="sfr-problem-image" aria-hidden="true" />
         <Reveal className="sfr-problem-copy" delay={0.08}>
-          <p className="sfr-eyebrow">Le Problème</p>
+          <div className="sfr-problem-kicker">
+            <span aria-hidden="true">!</span>
+            <p>Le problème</p>
+          </div>
           <h2>
-            35 personnes dans un bus.
-            <br />
-            <em>Tu imites les gestes de ceux devant toi…</em>
+            <span>35 personnes</span>
+            <em>dans un bus.</em>
           </h2>
-          <p>
-            Pas de réponses à tes questions. Pas de compréhension profonde. Tu rentres avec des photos, mais sans
-            transformation. L’Omra mérite mieux que ça.
-          </p>
+          <div className="sfr-problem-rule" aria-hidden="true" />
+          <div className="sfr-problem-points">
+            <div>
+              <span aria-hidden="true">?</span>
+              <p>Pas de réponses<br />à tes questions.</p>
+            </div>
+            <div>
+              <span aria-hidden="true">∅</span>
+              <p>Pas de compréhension<br />profonde.</p>
+            </div>
+            <div>
+              <span aria-hidden="true">▧</span>
+              <p>Pas de transformation.</p>
+            </div>
+          </div>
+          <div className="sfr-problem-promise">
+            <span aria-hidden="true">⌂</span>
+            <p>
+              Tu mérites une Omra vécue en toute sérénité,
+              <em> comprise, accompagnée, transformante.</em>
+            </p>
+          </div>
         </Reveal>
       </div>
     </section>

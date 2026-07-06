@@ -820,8 +820,8 @@ function HeroSection() {
             Guides privés certifiés <span>• 17 langues</span>
           </p>
           <p className="sfr-hero-lead">
-            <span>Guide certifié à La Mecque et Médine.</span>
-            <span>Visite des lieux saints, sites historiques</span>
+            <span>Guide certifié à La Mecque et Médine.</span>{' '}
+            <span>Visite des lieux saints, sites historiques</span>{' '}
             <span>et endroits que les agences Omra ne montrent pas.</span>
           </p>
           <div className="sfr-hero-actions">
@@ -844,7 +844,7 @@ function HeroSection() {
               Vidéo
             </button>
             <p>
-              <span><strong>147+</strong> sont partis en Omra</span>
+              <span><strong>147+</strong> sont partis en Omra</span>{' '}
               <span>cette semaine</span>
             </p>
           </div>

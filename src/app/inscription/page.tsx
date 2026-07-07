@@ -9,6 +9,11 @@ import { signIn } from 'next-auth/react';
 function RegisterForm() {
   const searchParams = useSearchParams();
   const refCode = searchParams.get('ref') || '';
+  const redirectParam = searchParams.get('redirect') || '';
+  // Préserve le tunnel de réservation en cours si l'utilisateur passe par "Se connecter".
+  const connexionHref = redirectParam
+    ? `/connexion?redirect=${encodeURIComponent(redirectParam)}`
+    : '/connexion';
   const [pwdError, setPwdError] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -237,6 +242,7 @@ function RegisterForm() {
 
             {/* Code parrainage — transmis silencieusement */}
             <input type="hidden" name="ref" value={refCode} />
+            <input type="hidden" name="redirect" value={redirectParam} />
 
             {/* Submit */}
             <button
@@ -279,7 +285,7 @@ function RegisterForm() {
           {/* Lien connexion */}
           <p style={{ textAlign: 'center', fontSize: '0.875rem', color: '#7A6D5A', marginTop: '1.5rem', marginBottom: 0 }}>
             Déjà un compte ?{' '}
-            <Link href="/connexion" style={{ fontWeight: 700, color: '#1A1209', textDecoration: 'none' }}>
+            <Link href={connexionHref} style={{ fontWeight: 700, color: '#1A1209', textDecoration: 'none' }}>
               Se connecter
             </Link>
           </p>

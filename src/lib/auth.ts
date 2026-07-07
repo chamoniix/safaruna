@@ -152,6 +152,16 @@ export const authOptions: AuthOptions = {
       }
       return session
     },
+    // Explicite plutôt qu'implicite : honore tout callbackUrl relatif ou de
+    // même origine (ex. reprendre le tunnel de réservation après OAuth),
+    // sans dépendre du comportement par défaut de NextAuth.
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith('/')) return `${baseUrl}${url}`
+      try {
+        if (new URL(url).origin === baseUrl) return url
+      } catch { /* url invalide — retombe sur baseUrl */ }
+      return baseUrl
+    },
   },
   secret: process.env.NEXTAUTH_SECRET,
 }

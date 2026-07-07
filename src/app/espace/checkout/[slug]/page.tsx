@@ -258,12 +258,15 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
-  // Redirect si non connecté
+  // Redirect si non connecté — on préserve l'URL complète (forfait, dates, pair…)
+  // pour que le retour post-connexion reprenne exactement où l'utilisateur était.
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push(`/connexion?redirect=/espace/checkout/${slug}`)
+      const qs = searchParams.toString()
+      const current = `/espace/checkout/${slug}${qs ? `?${qs}` : ''}`
+      router.push(`/connexion?redirect=${encodeURIComponent(current)}`)
     }
-  }, [status, slug, router])
+  }, [status, slug, router, searchParams])
 
   // Restaurer l'état depuis localStorage (survit aux rafraîchissements Safari)
   useEffect(() => {

@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Navbar from '@/components/Navbar';
@@ -5,6 +6,19 @@ import Footer from '@/components/Footer';
 import GuideProfileClient from './GuideProfileClient';
 import type { Metadata } from 'next';
 import prisma from '@/lib/prisma';
+
+// Mémoïsé par requête : generateMetadata() et la page appellent tous les deux
+// cette fonction avec le même slug — React.cache() évite de dupliquer l'aller-retour DB.
+const getGuideData = cache(async (slug: string) => {
+  try {
+    return await prisma.guideProfile.findUnique({
+      where: { slug },
+      include: { user: true, languages: true, packages: true },
+    });
+  } catch {
+    return null;
+  }
+});
 
 const GUIDE_META: Record<string, { name: string; title: string; desc: string }> = {
   'naim-laamari':       { name: 'Naïm LAAMARI',       title: 'Guide Officiel SAFARUMA',          desc: "Responsable Terrain SAFARUMA à Makkah. 8 ans d'expérience, guide certifié." },
@@ -17,28 +31,23 @@ const GUIDE_META: Record<string, { name: string; title: string; desc: string }> 
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  try {
-    const guideData = await prisma.guideProfile.findUnique({
-      where: { slug },
-      include: { user: true },
-    });
-    if (guideData) {
-      const name = guideData.user.name
-        || `${guideData.user.firstName ?? ''} ${guideData.user.lastName ?? ''}`.trim()
-        || 'Guide';
-      const desc = guideData.bio || `Profil guide — ${name}`;
-      return {
-        title: `${name} — Guide privé Omra certifié | SAFARUMA`,
+  const guideData = await getGuideData(slug);
+  if (guideData) {
+    const name = guideData.user.name
+      || `${guideData.user.firstName ?? ''} ${guideData.user.lastName ?? ''}`.trim()
+      || 'Guide';
+    const desc = guideData.bio || `Profil guide — ${name}`;
+    return {
+      title: `${name} — Guide privé Omra certifié | SAFARUMA`,
+      description: desc,
+      alternates: { canonical: `https://safaruma.com/guides/${slug}` },
+      openGraph: {
+        title: `${name} — SAFARUMA`,
         description: desc,
-        alternates: { canonical: `https://safaruma.com/guides/${slug}` },
-        openGraph: {
-          title: `${name} — SAFARUMA`,
-          description: desc,
-          url: `https://safaruma.com/guides/${slug}`,
-        },
-      };
-    }
-  } catch { /* fall through to hardcoded */ }
+        url: `https://safaruma.com/guides/${slug}`,
+      },
+    };
+  }
   const g = GUIDE_META[slug];
   if (!g) return { title: 'Guide — SAFARUMA' };
   return {
@@ -350,49 +359,39 @@ export default async function GuideProfilePage({
 }) {
   const { slug } = await params;
 
-  // ── Fetch from Neon ───────────────────────────────────────────────────────
-  let guideData: Awaited<ReturnType<typeof prisma.guideProfile.findUnique>> & {
+  // ── Fetch from Neon (mémoïsé — même requête que generateMetadata) ─────────
+  const guideData = await getGuideData(slug) as Awaited<ReturnType<typeof getGuideData>> & {
     user: NonNullable<unknown>;
     languages: NonNullable<unknown>[];
     packages: NonNullable<unknown>[];
-  } | null = null;
+  } | null;
 
-  try {
-    guideData = await prisma.guideProfile.findUnique({
-      where: { slug },
-      include: { user: true, languages: true, packages: true },
-    }) as typeof guideData;
-  } catch { /* DB error — fall through to hardcoded */ }
-
-  // ── Fetch active guide places ─────────────────────────────────────────────
+  // ── Places actives + note réelle : indépendantes, lancées en parallèle ────
   let activePlaceKeys: string[] = []
-  try {
-    if (guideData) {
-      const guidePlacesData = await prisma.guidePlace.findMany({
-        where: { guideProfileId: (guideData as any).id },
-      })
-      activePlaceKeys = guidePlacesData
-        .filter(p => p.isActive)
-        .map(p => p.placeKey)
-    }
-  } catch { /* DB error — show all places normally */ }
-
-  // ── Fetch real rating from reviews ────────────────────────────────────────
   let realRating: number | null = null
   let realReviewCount = 0
-  try {
-    if (guideData) {
-      const agg = await prisma.review.aggregate({
-        where: { reservation: { guideProfileId: (guideData as any).id } },
+
+  if (guideData) {
+    const guideProfileId = (guideData as any).id;
+    const [placesResult, ratingResult] = await Promise.allSettled([
+      prisma.guidePlace.findMany({ where: { guideProfileId } }),
+      prisma.review.aggregate({
+        where: { reservation: { guideProfileId } },
         _avg: { ratingOverall: true },
         _count: { ratingOverall: true },
-      })
-      if (agg._count.ratingOverall > 0) {
-        realRating = Math.round((agg._avg.ratingOverall ?? 0) * 10) / 10
-        realReviewCount = agg._count.ratingOverall
-      }
+      }),
+    ]);
+
+    if (placesResult.status === 'fulfilled') {
+      activePlaceKeys = placesResult.value
+        .filter(p => p.isActive)
+        .map(p => p.placeKey);
     }
-  } catch { /* DB error — fall through to hardcoded */ }
+    if (ratingResult.status === 'fulfilled' && ratingResult.value._count.ratingOverall > 0) {
+      realRating = Math.round((ratingResult.value._avg.ratingOverall ?? 0) * 10) / 10;
+      realReviewCount = ratingResult.value._count.ratingOverall;
+    }
+  }
 
   const hardcoded = GUIDES[slug] ?? null;
   if (!guideData && !hardcoded) notFound();

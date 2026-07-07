@@ -12,15 +12,19 @@ export async function signup(formData: FormData) {
   const lastName  = (formData.get('last_name')  as string)?.trim();
   const whatsapp  = (formData.get('whatsapp')   as string)?.trim() || null;
   const refCode   = (formData.get('ref')        as string)?.trim() || null;
+  const redirectTo = (formData.get('redirect')  as string)?.trim() || '';
+  // Reconstruit les query params à ajouter aux redirections de ce flow,
+  // pour ne pas perdre le tunnel de réservation (checkout) en cours.
+  const extra = redirectTo ? `&redirect=${encodeURIComponent(redirectTo)}` : '';
 
   if (!email || !password || password.length < 8) {
-    redirect('/inscription?error=InvalidData');
+    redirect(`/inscription?error=InvalidData${extra}`);
   }
 
   // Vérifier si l'email existe déjà
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
-    redirect('/inscription?error=EmailAlreadyExists');
+    redirect(`/inscription?error=EmailAlreadyExists${extra}`);
   }
 
   // Hasher le mot de passe
@@ -81,8 +85,8 @@ export async function signup(formData: FormData) {
 
   // Rediriger vers connexion avec message de vérification
   redirect(refCode
-    ? `/connexion?registered=1&verify=1&ref=${refCode}`
-    : '/connexion?registered=1&verify=1'
+    ? `/connexion?registered=1&verify=1&ref=${refCode}${extra}`
+    : `/connexion?registered=1&verify=1${extra}`
   );
 }
 

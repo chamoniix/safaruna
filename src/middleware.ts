@@ -73,17 +73,21 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith('/guide/forfaits')
   ) {
     if (!token || (role !== 'GUIDE' && role !== 'ADMIN')) {
-      return NextResponse.redirect(new URL('/guide/connexion', req.url));
+      const loginUrl = new URL('/guide/connexion', req.url);
+      loginUrl.searchParams.set('redirect', pathname + req.nextUrl.search);
+      return NextResponse.redirect(loginUrl);
     }
   }
 
   // ── Routes pèlerin → redirige vers /connexion si pas PELERIN
+  // On préserve le chemin + les query params (slug, forfait, dates…) pour
+  // que l'utilisateur reprenne son tunnel de réservation après connexion,
+  // au lieu d'atterrir sur le tableau de bord générique.
   if (pathname.startsWith('/espace/')) {
-    if (!token) {
-      return NextResponse.redirect(new URL('/connexion', req.url));
-    }
-    if (role !== 'PELERIN' && role !== 'ADMIN') {
-      return NextResponse.redirect(new URL('/connexion', req.url));
+    if (!token || (role !== 'PELERIN' && role !== 'ADMIN')) {
+      const loginUrl = new URL('/connexion', req.url);
+      loginUrl.searchParams.set('redirect', pathname + req.nextUrl.search);
+      return NextResponse.redirect(loginUrl);
     }
   }
 

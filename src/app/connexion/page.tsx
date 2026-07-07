@@ -8,7 +8,12 @@ import { useRouter, useSearchParams } from 'next/navigation';
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect') || '/espace/tableau-de-bord';
+  const redirectParam = searchParams.get('redirect');
+  const redirect = redirectParam || '/espace/tableau-de-bord';
+  // Préserve le tunnel de réservation en cours si l'utilisateur passe par "Créer un compte".
+  const inscriptionHref = redirectParam
+    ? `/inscription?redirect=${encodeURIComponent(redirectParam)}`
+    : '/inscription';
   const registered = searchParams.get('registered');
   const verify = searchParams.get('verify');
 
@@ -185,7 +190,7 @@ function LoginForm() {
 
             <p style={{ textAlign: 'center', fontSize: '0.82rem', color: '#7A6D5A', marginTop: '1.75rem', lineHeight: 1.6 }}>
               Nouveau sur SAFARUMA ?{' '}
-              <Link href="/inscription" className="link-create" style={{ color: '#C9A84C', fontWeight: 600, textDecoration: 'none' }}>
+              <Link href={inscriptionHref} className="link-create" style={{ color: '#C9A84C', fontWeight: 600, textDecoration: 'none' }}>
                 Créer un profil gratuitement
               </Link>
             </p>

@@ -21,7 +21,7 @@ const getGuideData = cache(async (slug: string) => {
 });
 
 const GUIDE_META: Record<string, { name: string; title: string; desc: string }> = {
-  'naim-laamari':       { name: 'Naïm LAAMARI',       title: 'Guide Officiel SAFARUMA',          desc: "Responsable Terrain SAFARUMA à Makkah. 8 ans d'expérience, guide certifié." },
+  'naim-laamari':       { name: 'Naïm LAAMARI',       title: 'Guide Officiel SAFARUMA',          desc: "Responsable Terrain SAFARUMA à Madinah. 8 ans d'expérience, guide certifié." },
   'rachid-al-madani':   { name: 'Rachid Al-Madani',   title: 'Cheikh · Spécialiste Sîra',        desc: 'Spécialiste de la Sîra du Prophète ﷺ. 14 ans d\'expérience, 2400+ pèlerins accompagnés.' },
   'fatima-al-omari':    { name: 'Fatima Al-Omari',    title: 'Guide femme · Familles',           desc: 'Guide femme certifiée, spécialisée dans l\'accompagnement des femmes et familles.' },
   'youssouf-konate':    { name: 'Youssouf Konaté',    title: "Spécialiste Afrique de l'Ouest",   desc: "Guide francophone spécialisé pour les communautés d'Afrique de l'Ouest." },
@@ -305,7 +305,7 @@ const GUIDES: Record<string, {
   'naim-laamari': {
     name: 'Naïm LAAMARI',
     initials: 'NL',
-    location: 'Makkah Al-Mukarramah',
+    location: 'Madinah Al-Munawwarah',
     experience: 8,
     rating: 5.0,
     reviewCount: 0,
@@ -313,9 +313,9 @@ const GUIDES: Record<string, {
     returnRate: 100,
     speciality: 'Guide Officiel SAFARUMA · Responsable Terrain',
     isOfficial: true,
-    languages: ['🇫🇷 Français', '🇸🇦 Arabe', '🇬🇧 English', '🇲🇦 Darija'],
+    languages: ['🇫🇷 Français', '🇸🇦 Arabe', '🇩🇿 Algérien'],
     shortBio:
-      "Responsable Terrain officiel de SAFARUMA à Makkah. Guide certifié depuis 8 ans, diplômé en sciences islamiques, formateur et référent de tous les guides SAFARUMA présents à Makkah.",
+      "Responsable Terrain officiel de SAFARUMA à Madinah. Guide certifié depuis 8 ans, diplômé en sciences islamiques, formateur et référent de tous les guides SAFARUMA présents à Madinah.",
     bioFull: [
       "Naïm LAAMARI est le Responsable Terrain officiel de SAFARUMA à Makkah. Guide certifié depuis 8 ans, diplômé en sciences islamiques et en histoire des lieux saints, il est la référence ultime pour tous les voyageurs SAFARUMA qui souhaitent vivre leur Omra dans les meilleures conditions spirituelles et logistiques.",
       "En tant que Responsable Terrain, Naïm est disponible 7j/7 pour intervenir en cas d'imprévu, assurer le remplacement d'un guide défaillant dans les deux heures, et garantir la qualité de chaque expérience SAFARUMA à Makkah. Il forme et certifie personnellement tous les guides SAFARUMA présents à La Mecque, assurant la cohérence et le niveau d'exigence de la plateforme sur le terrain.",

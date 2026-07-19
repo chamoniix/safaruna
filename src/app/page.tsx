@@ -11,21 +11,16 @@ const EASE_LUXURY = [0.16, 1, 0.3, 1] as const;
 // Deux tours : noms français d'abord, puis écritures natives.
 // `color` : couleur dominante du drapeau, appliquée au mot (déclinée claire
 // pour rester lisible sur le fond sombre du hero).
+// Uniquement les langues réellement parlées par les guides actifs — chaque
+// langue non francophone suivie de son écriture arabe.
 const heroLanguages = [
   { word: 'français', flag: 'fr', color: '#8fa8f5' },
   { word: 'arabe', flag: 'sa', color: '#5fc98e' },
-  { word: 'algérien', flag: 'dz', color: '#5fc98e' },
-  { word: 'darija', flag: 'ma', color: '#f08a8a' },
-  { word: 'anglais', flag: 'gb', color: '#8fa8f5' },
-  { word: 'urdu', flag: 'pk', color: '#5fc98e' },
-  { word: 'wolof', flag: 'sn', color: '#f2cf6b' },
-  { word: 'turc', flag: 'tr', color: '#f08a8a' },
   { word: 'العربية', flag: 'sa', color: '#5fc98e' },
-  { word: 'دزاير', flag: 'dz', color: '#5fc98e' },
+  { word: 'algérien', flag: 'dz', color: '#5fc98e' },
+  { word: 'الجزائر', flag: 'dz', color: '#5fc98e' },
+  { word: 'marocain', flag: 'ma', color: '#f08a8a' },
   { word: 'الدارجة', flag: 'ma', color: '#f08a8a' },
-  { word: 'English', flag: 'gb', color: '#8fa8f5' },
-  { word: 'اردو', flag: 'pk', color: '#5fc98e' },
-  { word: 'Türkçe', flag: 'tr', color: '#f08a8a' },
 ];
 
 const isRtlWord = (word: string) => /[؀-ۿ]/.test(word);
@@ -125,7 +120,7 @@ const whyCards: CarouselItem[] = [
     id: 'unique',
     icon: '✦',
     title: 'Expérience unique',
-    text: 'Accédez à des lieux et moments que les grands groupes ne peuvent pas vivre sereinement.',
+    text: 'Certains lieux sont fermés aux grands groupes. Avec un guide privé, tu y as accès.',
     href: '/omra-avec-guide-prive',
     cta: 'En savoir plus',
     image: '/why-safaruma/experience-lieux-saints.jpg',
@@ -765,7 +760,7 @@ function HeroSection() {
             </span>
           </h1>
           <p className="sfr-pill">
-            Guides privés certifiés <span>• 17 langues</span>
+            Guides privés certifiés
           </p>
           <p className="sfr-hero-lead">
             <span>Guide certifié à La Mecque et Médine.</span>{' '}
@@ -842,29 +837,29 @@ function ProblemSection() {
             <p>Le problème</p>
           </div>
           <h2>
-            <span>35 personnes</span>
-            <em>dans un bus.</em>
+            <span>L&apos;inconvénient</span>
+            <em>du nombre.</em>
           </h2>
           <div className="sfr-problem-rule" aria-hidden="true" />
           <div className="sfr-problem-points">
             <div>
               <span aria-hidden="true">?</span>
-              <p>Pas de réponses<br />à tes questions.</p>
+              <p>Un guide moins<br />disponible pour toi.</p>
             </div>
             <div>
               <span aria-hidden="true">∅</span>
-              <p>Pas de compréhension<br />profonde.</p>
+              <p>Toujours lié au<br />rythme du groupe.</p>
             </div>
             <div>
               <span aria-hidden="true">▧</span>
-              <p>Pas de transformation.</p>
+              <p>Un programme<br />figé, imposé.</p>
             </div>
           </div>
           <div className="sfr-problem-promise">
             <span aria-hidden="true">⌂</span>
             <p>
-              Tu mérites une Omra vécue en toute sérénité,
-              <em> comprise, accompagnée, transformante.</em>
+              Construis ton programme avec ton guide,
+              <em> à ton rythme, selon tes envies.</em>
             </p>
           </div>
         </Reveal>
@@ -986,8 +981,8 @@ function GuidesSection({ openModal }: { openModal: (item: ModalContent) => void 
                       <div className="sfr-guide-trust sfr-guide-trust-compact">
                         ★ OFFICIEL SAFARUMA <span className="sfr-guide-status-ring">VÉRIFIÉ ✓</span>
                       </div>
-                      <div className="sfr-guide-meta-row">{guide.title} · Makkah · 8 ans</div>
-                      <div className="sfr-guide-rating sfr-guide-rating-compact">★★★★★ <strong>5.0</strong> · Français 🇫🇷 · Arabe 🇸🇦</div>
+                      <div className="sfr-guide-meta-row">{guide.title} · Madinah · 8 ans</div>
+                      <div className="sfr-guide-rating sfr-guide-rating-compact">★★★★★ <strong>5.0</strong> · Français 🇫🇷 · Arabe 🇸🇦 · Algérien 🇩🇿</div>
                     </>
                   ) : (
                     <>

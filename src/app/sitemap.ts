@@ -21,10 +21,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const LIEUX_SLUGS = [
     'masjid-al-haram','jabal-al-nour','jabal-thawr','mina','arafat','safa-marwa',
-    'muzdalifah','masjid-aisha','hira','zamzam','hunayn','masjid-an-nabawi',
-    'masjid-quba','jabal-uhud','al-baqi','masjid-al-qiblatayn','masjid-al-miqat',
-    'masjid-al-jumua','wadi-al-aqiq','masjid-fateh','marche-dattes','badr',
-    'khandaq','bir-aris','masjid-ghamamah','masjid-al-jinn',
+    'muzdalifah','zamzam','masjid-an-nabawi',
+    'masjid-quba','jabal-uhud','al-baqi','masjid-al-qiblatayn',
+    'masjid-al-jumua','wadi-al-aqiq','sept-mosquees','badr',
+    'bir-aris','masjid-ghamamah','masjid-al-jinn',
   ];
 
   const BLOG_SLUGS = [

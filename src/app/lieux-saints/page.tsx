@@ -441,15 +441,9 @@ export default function LieuxSaintsPage() {
             </div>
 
             <div style={{ padding: '1.75rem' }}>
-              <p style={{ color: '#5A4E3A', lineHeight: 1.8, fontSize: '0.9rem', marginBottom: '1.5rem' }}>{selected.description}</p>
-
-              <div style={{ background: '#FAF7F0', borderRadius: 16, padding: '1.25rem', marginBottom: '1.5rem', border: '1px solid #EDE8DC' }}>
-                <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: '0.75rem' }}>Histoire</div>
-                <p style={{ color: '#5A4E3A', lineHeight: 1.8, fontSize: '0.85rem' }}>{selected.history}</p>
-              </div>
+              <p style={{ color: '#5A4E3A', lineHeight: 1.8, fontSize: '0.9rem', marginBottom: '1.5rem' }}>{selected.description} {selected.history}</p>
 
               <div style={{ background: 'linear-gradient(135deg, #0D0A06, #1A1209)', borderRadius: 16, padding: '1.5rem', border: '1px solid rgba(201,168,76,0.15)' }}>
-                <div style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: '1rem' }}>Du'a recommandée</div>
                 {/* Arabic text */}
                 <div style={{ fontFamily: 'serif', fontSize: '1.3rem', color: '#F0D897', direction: 'rtl', lineHeight: 1.9, marginBottom: '0.75rem', textAlign: 'center' }}>{selected.dua}</div>
                 {/* Translitération */}

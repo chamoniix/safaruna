@@ -752,7 +752,6 @@ function SimpleLieuPage({ lieu, city }: { lieu: LieuSimple; city: 'Makkah' | 'Ma
         </section>
         <section style={{ backgroundColor: '#1A1209', color: '#FDFBF7', padding: '3rem 1.5rem' }}>
           <div style={{ maxWidth: 720, margin: '0 auto' }}>
-            <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: 700, color: '#FDFBF7', marginBottom: '1.5rem' }}>Du&apos;a recommandée</h2>
             <p dir="rtl" lang="ar" style={{ fontFamily: 'serif', fontSize: 'clamp(1.15rem, 3.5vw, 1.6rem)', color: accentColor === '#1D5C3A' ? '#6DBF8A' : '#C9A84C', lineHeight: 2, marginBottom: '1.25rem', textAlign: 'right' }}>{lieu.dua}</p>
             <p style={{ fontSize: '0.95rem', lineHeight: 1.75, color: '#B8A88A', fontStyle: 'italic', borderLeft: `3px solid ${accentColor}`, paddingLeft: '1rem' }}>{lieu.duaTrad}</p>
           </div>

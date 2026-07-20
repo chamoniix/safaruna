@@ -248,12 +248,12 @@ export default function GuideProfileClient({
                     Responsable Terrain SAFARUMA
                   </div>
                   <p style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.75)', lineHeight: 1.8, marginBottom: '1.25rem' }}>
-                    Naïm LAAMARI est le garant de la qualité SAFARUMA sur le terrain à Makkah. En cas d&apos;imprévu, de remplacement de guide ou de situation d&apos;urgence, Naïm intervient en moins de 2h. Sa présence permanente à Makkah est votre assurance d&apos;une expérience réussie.
+                    Naïm LAAMARI est le garant de la qualité SAFARUMA sur le terrain à Médine. En cas d&apos;imprévu, de remplacement de guide ou de situation d&apos;urgence, Naïm intervient. Sa présence permanente à Médine est votre assurance d&apos;une expérience réussie.
                   </p>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                     {[
                       '✓ Disponible 7j/7',
-                      '✓ Intervention sous 2h',
+                      '✓ Intervention rapide',
                       '✓ Formateur certifié',
                       '✓ Urgences gérées',
                     ].map(item => (

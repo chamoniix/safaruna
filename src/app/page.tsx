@@ -1007,11 +1007,11 @@ function ExperiencesSection({ openModal }: { openModal: (item: ModalContent) => 
         <Reveal className="sfr-section-title">
           <p className="sfr-eyebrow">Expériences exclusives</p>
           <h2>
-            Découvrez des lieux
+            Découvre des lieux
             <br />
-            que les agences
+            au cœur de l&apos;histoire
             <br />
-            ne montrent pas.
+            islamique.
           </h2>
           <Link href="/lieux-saints" className="sfr-btn sfr-btn-outline sfr-title-action">
             Explorer tous les lieux →

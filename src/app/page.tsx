@@ -55,7 +55,6 @@ type CarouselItem = {
 
 const partners = [
   { name: 'Makkah', image: '/images/landing/partner-makkah.png' },
-  { name: 'Ministère du Hajj', text: 'وزارة الحج والعمرة' },
   { name: 'Saudia', image: '/images/landing/partner-saudia.png' },
   { name: 'Flynas', image: '/images/landing/partner-flynas.png' },
   { name: 'Hilton', image: '/images/landing/partner-hilton.png' },
@@ -66,7 +65,7 @@ const whyCards: CarouselItem[] = [
     id: 'langue',
     icon: '◆',
     title: 'Guide dans ta langue',
-    text: 'Tu choisis ton guide selon sa langue maternelle. Français, Wolof, Darija, Turc — ton guide te parle comme un ami, pas comme un conférencier.',
+    text: 'Tu choisis ton guide selon ta langue. Ton guide te parle comme un ami, pas comme un conférencier.',
     href: '/guides',
     cta: 'Trouver mon guide',
     image: '/images/landing/experience-rencontres.jpg',
@@ -102,7 +101,7 @@ const whyCards: CarouselItem[] = [
     id: 'premiere-omra',
     icon: '3',
     title: 'Ma 1ère Omra',
-    text: 'Je prie, je jeûne. Je veux enfin faire la Omra mais je ne sais pas par où commencer.',
+    text: 'Je veux enfin faire la Omra mais je ne sais pas par où commencer.',
     href: '/guide-omra',
     cta: 'Préparer ma Omra',
     image: '/why-safaruma/premiere-omra.jpg',
@@ -120,7 +119,7 @@ const whyCards: CarouselItem[] = [
     id: 'unique',
     icon: '✦',
     title: 'Expérience unique',
-    text: 'Certains lieux sont fermés aux grands groupes. Avec un guide privé, tu y as accès.',
+    text: 'Certains lieux sont inaccessibles aux agences à cause du nombre de personnes. Avec un guide privé, toi si.',
     href: '/omra-avec-guide-prive',
     cta: 'En savoir plus',
     image: '/why-safaruma/experience-lieux-saints.jpg',
@@ -172,7 +171,7 @@ const guides: CarouselItem[] = [
     kind: 'feature',
     icon: '◎',
     title: 'Profil guide transparent',
-    text: 'Biographie complète, certifications vérifiées, avis authentiques, lieux couverts et taux de retour. Tu sais exactement qui tu vas rencontrer.',
+    text: 'Bio, certifications et avis vérifiés : tu sais exactement qui va t\'accompagner.',
     href: '/guides',
     meta: 'Confiance',
     cta: 'Voir les guides',
@@ -764,8 +763,7 @@ function HeroSection() {
           </p>
           <p className="sfr-hero-lead">
             <span>Guide certifié à La Mecque et Médine.</span>{' '}
-            <span>Visite des lieux saints, sites historiques</span>{' '}
-            <span>et endroits que les agences Omra ne montrent pas.</span>
+            <span>Visite des lieux saints et sites historiques.</span>
           </p>
           <div className="sfr-hero-actions">
             <Link href="/guides" className="sfr-btn sfr-btn-gold">
@@ -803,14 +801,7 @@ function PartnersSection() {
       <Carousel label="Partenaires SAFARUMA" className="sfr-partners-carousel">
         {partners.map((partner) => (
           <motion.div key={partner.name} className="sfr-partner-card" whileHover={{ y: -3 }}>
-            {'image' in partner && partner.image ? (
-              <Image src={partner.image} alt={partner.name} width={190} height={62} className="sfr-partner-logo" />
-            ) : (
-              <div className="sfr-partner-text">
-                <strong>{partner.name}</strong>
-                <span>{partner.text}</span>
-              </div>
-            )}
+            <Image src={partner.image} alt={partner.name} width={190} height={62} className="sfr-partner-logo" />
           </motion.div>
         ))}
       </Carousel>
@@ -837,8 +828,8 @@ function ProblemSection() {
             <p>Le problème</p>
           </div>
           <h2>
-            <span>L&apos;inconvénient</span>
-            <em>du nombre.</em>
+            <span>Le poids</span>
+            <em>du groupe.</em>
           </h2>
           <div className="sfr-problem-rule" aria-hidden="true" />
           <div className="sfr-problem-points">
@@ -859,7 +850,7 @@ function ProblemSection() {
             <span aria-hidden="true">⌂</span>
             <p>
               Construis ton programme avec ton guide,
-              <em> à ton rythme, selon tes envies.</em>
+              <em> à ton rythme, en toute liberté.</em>
             </p>
           </div>
         </Reveal>

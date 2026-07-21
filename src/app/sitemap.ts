@@ -25,6 +25,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     'masjid-quba','jabal-uhud','al-baqi','masjid-al-qiblatayn',
     'masjid-al-jumua','wadi-al-aqiq','sept-mosquees','badr',
     'bir-aris','masjid-ghamamah','masjid-al-jinn',
+    'rawdah','masjid-bani-unayf','masjid-ad-dira','palmeraie-salman-al-farisi',
   ];
 
   const BLOG_SLUGS = [

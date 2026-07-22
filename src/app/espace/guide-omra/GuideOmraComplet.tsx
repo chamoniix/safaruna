@@ -67,6 +67,15 @@ const CHECKLIST = [
   { cat: "Pratique", items: ["Numéro de votre guide SAFARUMA noté", "Application SAFARUMA téléchargée", "Eau Zamzam réservée", "Monnaie saoudienne (SAR)"] },
 ];
 
+function ImagePlaceholder({ caption }: { caption: string }) {
+  return (
+    <div className="go-image-placeholder go-reveal">
+      <span style={{ fontSize: "1.3rem", opacity: 0.4 }}>🖼</span>
+      <span>{caption}</span>
+    </div>
+  );
+}
+
 export default function GuideOmraComplet() {
   const { data: session } = useSession();
   const emailVerified = session?.user?.emailVerified;
@@ -234,6 +243,10 @@ export default function GuideOmraComplet() {
         .go-alert { background: rgba(201,168,76,0.07); border: 1px solid rgba(201,168,76,0.25); border-radius: 10px; padding: 1.1rem 1.4rem; margin: 1.5rem 0; display: flex; gap: 0.85rem; align-items: flex-start; }
         .go-alert-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 0.05rem; }
         .go-alert p { font-size: 0.875rem; color: #4A3728; line-height: 1.75; margin: 0; }
+
+        /* Image placeholder */
+        .go-image-placeholder { border: 1.5px dashed rgba(201,168,76,0.4); border-radius: 12px; background: rgba(201,168,76,0.04); padding: 2.5rem 1.5rem; margin: 1.25rem 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; text-align: center; }
+        .go-image-placeholder span { font-size: 0.75rem; color: #9C8F72; font-style: italic; max-width: 420px; }
 
         /* Mobile TOC strip */
         .go-mobile-toc { display: none; position: sticky; top: 56px; z-index: 50; background: white; border-bottom: 1px solid var(--go-sand); padding: 0.75rem 1.25rem; overflow-x: auto; white-space: nowrap; gap: 0.5rem; scrollbar-width: none; }
@@ -418,6 +431,8 @@ export default function GuideOmraComplet() {
               ))}
             </div>
 
+            <ImagePlaceholder caption="Carte : position du Miqat (Dhul Hulayfah / Bir Ali) par rapport à Madinah et Makkah" />
+
             <h3 className="go-reveal" style={{ fontFamily: "'Cinzel', serif", fontSize: "1.1rem", color: "var(--go-deep)", margin: "2rem 0 1rem" }}>Comment entrer en Ihram</h3>
             <div className="go-steps go-reveal">
               {IHRAM.steps!.map((s) => (
@@ -430,6 +445,8 @@ export default function GuideOmraComplet() {
                 </div>
               ))}
             </div>
+
+            <ImagePlaceholder caption="Illustration : la tenue Ihram (Izar / Rida) — vue correcte vs erreur fréquente (épaule découverte hors Tawaf)" />
 
             <div className="go-dua-card go-reveal">
               <p className="go-dua-label">{MIQAT.duas[1].label}</p>
@@ -463,6 +480,8 @@ export default function GuideOmraComplet() {
                 </div>
               ))}
             </div>
+
+            <ImagePlaceholder caption="Schéma : plan du Tawaf avec Hajar Aswad, Hijr Ismaël, Rukn Yamani, Maqam Ibrahim et sens de circulation" />
 
             {TAWAF.duas.map((d) => (
               <div key={d.label} className="go-dua-card go-reveal">
@@ -502,6 +521,8 @@ export default function GuideOmraComplet() {
               ))}
             </div>
 
+            <ImagePlaceholder caption="Schéma : trajet du Sa'i entre Safa et Marwa avec les 7 trajets et les repères verts" />
+
             {SAI.duas.map((d) => (
               <div key={d.label} className="go-dua-card go-reveal">
                 <p className="go-dua-label">{d.label}</p>
@@ -525,6 +546,8 @@ export default function GuideOmraComplet() {
               <span className="go-alert-icon">✦</span>
               <p>{TAHALLUL.afterNote}</p>
             </div>
+
+            <ImagePlaceholder caption="Illustration : Halq (rasage complet) et Taqsir (raccourcissement) — les deux options pour les hommes" />
 
             <div className="go-dua-card go-reveal">
               <p className="go-dua-label">{TAHALLUL.duas[0].label}</p>

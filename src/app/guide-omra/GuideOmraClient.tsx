@@ -21,6 +21,15 @@ const SECTIONS = [
   { id: 'apres',        label: 'Après la Omra' },
 ];
 
+function ImagePlaceholder({ caption }: { caption: string }) {
+  return (
+    <div className="image-placeholder">
+      <span style={{ fontSize: '1.3rem', opacity: 0.4 }}>🖼</span>
+      <span>{caption}</span>
+    </div>
+  );
+}
+
 export default function GuideOmraClient() {
   const { data: session, status } = useSession();
   const [activeSection, setActiveSection] = useState('introduction');
@@ -229,6 +238,8 @@ export default function GuideOmraClient() {
             </div>
           </div>
 
+          <ImagePlaceholder caption="Carte : position du Miqat (Dhul Hulayfah / Bir Ali) par rapport à Madinah et Makkah" />
+
           <div className="faq-card" onClick={() => toggleFaq('p1')}>
             <div className="faq-header">
               <div className="faq-num">1</div>
@@ -290,6 +301,8 @@ export default function GuideOmraClient() {
                 climatisées, masque et lingettes pour les moments de forte affluence.
             </p></div>}
           </div>
+
+          <ImagePlaceholder caption="Illustration : la tenue Ihram (Izar / Rida) — vue correcte vs erreur fréquente (épaule découverte hors Tawaf)" />
         </section>
 
         {/* ── RITUELS ── */}
@@ -343,6 +356,8 @@ export default function GuideOmraClient() {
 
           <p>{TAWAF.afterNote}</p>
 
+          <ImagePlaceholder caption="Schéma : plan du Tawaf avec Hajar Aswad, Hijr Ismaël, Rukn Yamani, Maqam Ibrahim et sens de circulation" />
+
           <span className="label-overline">LE SA&apos;I</span>
           <h2>Entre Safa et Marwa</h2>
           <p>{SAI.intro[0]}</p>
@@ -374,6 +389,8 @@ export default function GuideOmraClient() {
             </p>
           </div>
 
+          <ImagePlaceholder caption="Schéma : trajet du Sa'i entre Safa et Marwa avec les 7 trajets et les repères verts" />
+
           <span className="label-overline">LE TAHALLUL</span>
           <h2>Sortir de l&apos;état de sacralisation</h2>
           <p>{TAHALLUL.intro[0]}</p>
@@ -389,6 +406,8 @@ export default function GuideOmraClient() {
               <p>{TAHALLUL.keyFacts[0].body} {TAHALLUL.keyFacts[1].body} {TAHALLUL.intro[1]}</p>
             </div>
           </div>
+
+          <ImagePlaceholder caption="Illustration : Halq (rasage complet) et Taqsir (raccourcissement) — les deux options pour les hommes" />
         </section>
 
         {/* ── FAQ PRATIQUE ── */}

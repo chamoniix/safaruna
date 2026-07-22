@@ -5,6 +5,12 @@ import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { OMRA_RITES } from '@/lib/omraRites';
+
+const MIQAT = OMRA_RITES.find(r => r.id === 'miqat')!;
+const TAWAF = OMRA_RITES.find(r => r.id === 'tawaf')!;
+const SAI = OMRA_RITES.find(r => r.id === 'sai')!;
+const TAHALLUL = OMRA_RITES.find(r => r.id === 'tahallul')!;
 
 const SECTIONS = [
   { id: 'introduction', label: 'Introduction' },
@@ -219,11 +225,7 @@ export default function GuideOmraClient() {
             </div>
             <div className="info-content">
               <h3>Il existe 5 Miqats terrestres</h3>
-              <p>
-                Le Miqat est la frontière sacrée à partir de laquelle l&apos;état d&apos;Ihram devient
-                obligatoire. Selon votre itinéraire et votre point de départ, vous franchirez l&apos;un
-                de ces 5 Miqats.
-              </p>
+              <p>{MIQAT.keyFacts[0].body}</p>
             </div>
           </div>
 
@@ -263,11 +265,11 @@ export default function GuideOmraClient() {
             {openFaq === 'p3' && <div className="faq-answer">
               <p>La Niyyah se prononce au moment du passage du Miqat.</p>
               <div className="arabic-dua">
-                <div className="dua-ar">لَبَّيْكَ اللَّهُمَّ عُمْرَةً</div>
-                <div className="dua-tr">Labbayka Allahumma &apos;Umratan</div>
-                <div className="dua-fr">« Me voici, ô Allah, pour la Omra. »</div>
+                <div className="dua-ar">{MIQAT.duas[0].ar}</div>
+                <div className="dua-tr">{MIQAT.duas[0].phon}</div>
+                <div className="dua-fr">{MIQAT.duas[0].fr}</div>
               </div>
-              <p>Suivi du Talbiyah que vous répéterez jusqu&apos;au début du Tawaf.</p>
+              <p>Suivi de la Talbiyah que vous répéterez jusqu&apos;au début du Tawaf.</p>
             </div>}
           </div>
 
@@ -294,12 +296,7 @@ export default function GuideOmraClient() {
         <section id="rituels">
           <span className="label-overline">LE TAWAF</span>
           <h2>Tourner autour de la Kaaba</h2>
-          <p>
-            Le Tawaf est le premier rituel après l&apos;arrivée à Makkah. Il consiste à effectuer
-            7 tours autour de la Kaaba dans le sens antihoraire, en commençant par la Pierre Noire
-            (Hajar al-Aswad). C&apos;est un acte d&apos;adoration où le pèlerin se rapproche
-            physiquement et spirituellement du centre du monde musulman.
-          </p>
+          <p>{TAWAF.intro[0]}</p>
 
           <div className="info-card">
             <div className="info-icon">
@@ -310,11 +307,7 @@ export default function GuideOmraClient() {
             </div>
             <div className="info-content">
               <h3>7 tours dans le sens antihoraire</h3>
-              <p>
-                Pour les hommes, les 3 premiers tours s&apos;effectuent en <strong>Raml</strong>
-                (marche rapide aux épaules redressées) lorsque c&apos;est possible. Les 4 derniers
-                tours s&apos;effectuent en marche normale.
-              </p>
+              <p>{TAWAF.keyFacts[1].body}</p>
             </div>
           </div>
 
@@ -326,29 +319,34 @@ export default function GuideOmraClient() {
               Du&apos;a du Tawaf
             </span>
             <p>
-              Entre la Pierre Noire (Yéménite) et le Coin Yéménite, récitez :<br/>
-              <strong>رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ</strong><br/>
-              <em>Rabbana atina fi&apos;d-dunya hasanatan wa fi&apos;l-akhirati hasanatan wa qina
-              &apos;adhaba&apos;n-nar</em><br/>
-              « Notre Seigneur, accorde-nous le meilleur en ce monde et le meilleur dans
-              l&apos;au-delà, et protège-nous du châtiment du feu. » (Bukhari)
+              {TAWAF.duas[1].label} :<br/>
+              <strong>{TAWAF.duas[1].ar}</strong><br/>
+              <em>{TAWAF.duas[1].phon}</em><br/>
+              {TAWAF.duas[1].fr}
             </p>
           </div>
 
-          <p>
-            Au début de chaque tour, en face de la Pierre Noire, levez la main droite et
-            dites : <em>« Bismillah, Allahu Akbar »</em>. Si vous ne pouvez pas la toucher ou
-            l&apos;embrasser en raison de la foule, pointer vers elle suffit — ne mettez jamais
-            en danger votre sécurité ou celle des autres pèlerins pour la toucher.
-          </p>
+          <div className="quote-block">
+            <span className="quote-icon">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M3 5h2v4H3V5zm6 0h2v4H9V5z" fill="#C9A84C"/>
+              </svg>
+              Du&apos;a face à la Pierre Noire
+            </span>
+            <p>
+              {TAWAF.duas[0].label} :<br/>
+              <strong>{TAWAF.duas[0].ar}</strong><br/>
+              <em>{TAWAF.duas[0].phon}</em><br/>
+              {TAWAF.duas[0].fr}
+            </p>
+          </div>
+
+          <p>{TAWAF.afterNote}</p>
 
           <span className="label-overline">LE SA&apos;I</span>
           <h2>Entre Safa et Marwa</h2>
-          <p>
-            Après le Tawaf, vous accomplissez le Sa&apos;i : 7 allers-retours entre les deux
-            collines de Safa et Marwa. Ce rituel commémore le geste de Hajar, la mère d&apos;Ismaïl
-            ﷺ, cherchant de l&apos;eau dans la vallée désertique de Bakka.
-          </p>
+          <p>{SAI.intro[0]}</p>
+          <p>{SAI.intro[1]}</p>
 
           <div className="info-card">
             <div className="info-icon">
@@ -358,12 +356,7 @@ export default function GuideOmraClient() {
             </div>
             <div className="info-content">
               <h3>7 trajets de Safa à Marwa</h3>
-              <p>
-                Safa → Marwa = 1 trajet. Marwa → Safa = 2e trajet. Au total, 7 trajets se
-                terminant à Marwa. Le Mas&apos;a (couloir) mesure environ 394 mètres — le pèlerin
-                parcourt au total environ 2 758 mètres (3,5 km). Une légère course est
-                recommandée entre les deux marqueurs verts pour les hommes.
-              </p>
+              <p>{SAI.keyFacts[0].body} {SAI.keyFacts[1].body}</p>
             </div>
           </div>
 
@@ -372,24 +365,18 @@ export default function GuideOmraClient() {
               <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                 <path d="M3 5h2v4H3V5zm6 0h2v4H9V5z" fill="#C9A84C"/>
               </svg>
-              Histoire de Hajar
+              {SAI.duas[0].label}
             </span>
             <p>
-              Ibrahim ﷺ avait laissé Hajar et son nourrisson Ismaïl ﷺ dans la vallée
-              désertique de Bakka, future Makkah, sur ordre d&apos;Allah ﷻ. Manquant d&apos;eau,
-              Hajar courut sept fois entre les collines de Safa et Marwa, cherchant de l&apos;aide
-              du regard. C&apos;est alors que la source de Zamzam jaillit sous les pieds d&apos;Ismaïl.
-              En accomplissant le Sa&apos;i, chaque pèlerin rejoue ce geste de foi absolue, de
-              persévérance et de confiance totale en la Providence d&apos;Allah ﷻ.
+              <strong>{SAI.duas[0].ar}</strong><br/>
+              <em>{SAI.duas[0].phon}</em><br/>
+              {SAI.duas[0].fr}
             </p>
           </div>
 
           <span className="label-overline">LE TAHALLUL</span>
           <h2>Sortir de l&apos;état de sacralisation</h2>
-          <p>
-            Le Tahallul marque la fin de la Omra. C&apos;est le moment où le pèlerin sort de
-            l&apos;état d&apos;Ihram. Il s&apos;effectue après le Sa&apos;i.
-          </p>
+          <p>{TAHALLUL.intro[0]}</p>
 
           <div className="info-card">
             <div className="info-icon">
@@ -399,12 +386,7 @@ export default function GuideOmraClient() {
             </div>
             <div className="info-content">
               <h3>Halq ou Taqsir</h3>
-              <p>
-                Les hommes choisissent entre se raser entièrement la tête (<strong>Halq</strong>,
-                recommandé) ou raccourcir leurs cheveux (<strong>Taqsir</strong>). Les femmes
-                coupent une mèche d&apos;environ la longueur d&apos;une phalange. Une fois le
-                Tahallul accompli, les interdits de l&apos;Ihram sont levés.
-              </p>
+              <p>{TAHALLUL.keyFacts[0].body} {TAHALLUL.keyFacts[1].body} {TAHALLUL.intro[1]}</p>
             </div>
           </div>
         </section>

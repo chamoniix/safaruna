@@ -5,6 +5,13 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { OMRA_RITES } from "@/lib/omraRites";
+
+const MIQAT = OMRA_RITES.find((r) => r.id === "miqat")!;
+const IHRAM = OMRA_RITES.find((r) => r.id === "ihram")!;
+const TAWAF = OMRA_RITES.find((r) => r.id === "tawaf")!;
+const SAI = OMRA_RITES.find((r) => r.id === "sai")!;
+const TAHALLUL = OMRA_RITES.find((r) => r.id === "tahallul")!;
 
 /* ─── Navigation sections ─── */
 const SECTIONS = [
@@ -393,19 +400,15 @@ export default function GuideOmraComplet() {
           <section id="ihram" className="go-section">
             <span className="go-section-tag">Rituel 1</span>
             <h2 className="go-reveal go-reveal-d1">L'Ihram — الإحرام</h2>
-            <p className="go-reveal go-reveal-d2">
-              L'Ihram est l'état sacré dans lequel le pèlerin entre pour accomplir la Omra. Il commence au <strong>miqat</strong> — la frontière géographique sacrée autour de La Mecque — et se compose d'une intention (niyyah), d'une tenue et d'un ensemble d'interdictions.
-            </p>
-            <p className="go-reveal go-reveal-d2">
-              En arabe, <em>ihram</em> vient de la racine «h-r-m» qui désigne le sacré et l'interdit. Entrer en Ihram, c'est quitter le monde ordinaire pour entrer dans un espace-temps consacré uniquement à Dieu.
-            </p>
+            <p className="go-reveal go-reveal-d2">{IHRAM.intro[0]}</p>
+            <p className="go-reveal go-reveal-d2">{IHRAM.intro[1]}</p>
 
             <div className="go-info-grid go-reveal go-reveal-d3">
               {[
-                { icon: "📍", title: "Le Miqat", body: "Frontière au-delà de laquelle on ne peut entrer à La Mecque sans Ihram. Pour les voyageurs aériens : Qarn Al-Manazil ou Dhoul Houlaïfa selon l'itinéraire." },
-                { icon: "🕊️", title: "Tenue hommes", body: "Deux pièces de tissu blanc non cousu : l'izar (autour des hanches) et la rida (sur les épaules). Tête nue, pieds en sandales ouvertes." },
-                { icon: "🌸", title: "Tenue femmes", body: "Vêtement couvrant habituel, sans parfum, visage et mains découverts. Pas de niqab ni de gants pendant la Omra selon la majorité des savants." },
-                { icon: "🚫", title: "Interdictions", body: "Parfum, couper ongles ou cheveux, rapports conjugaux, chasse, couvrir la tête (hommes), se disputer, jurer." },
+                { icon: "📍", title: "Le Miqat", body: MIQAT.keyFacts[0].body },
+                { icon: "🕊️", title: "Tenue hommes", body: IHRAM.keyFacts[0].body },
+                { icon: "🌸", title: "Tenue femmes", body: IHRAM.keyFacts[1].body },
+                { icon: "🚫", title: "Interdictions", body: IHRAM.keyFacts[2].body },
               ].map((b) => (
                 <div key={b.title} className="go-info-box">
                   <div className="go-info-box-icon">{b.icon}</div>
@@ -417,12 +420,7 @@ export default function GuideOmraComplet() {
 
             <h3 className="go-reveal" style={{ fontFamily: "'Cinzel', serif", fontSize: "1.1rem", color: "var(--go-deep)", margin: "2rem 0 1rem" }}>Comment entrer en Ihram</h3>
             <div className="go-steps go-reveal">
-              {[
-                { num: "1", title: "La purification", body: "Faites le ghusl (bain rituel complet) ou au moins le wudu (ablutions). Appliquez du parfum sur votre corps AVANT d'enfiler la tenue (interdit après)." },
-                { num: "2", title: "Enfiler la tenue", body: "Revêtez la tenue d'Ihram. Accompagnez ce geste d'une méditation : vous vous dépouilles de vos signes sociaux. Devant Dieu, tous les humains sont égaux." },
-                { num: "3", title: "La prière de 2 rak'at", body: "Avant le miqat, accomplissez 2 rak'at d'intention d'Ihram si possible. Lisez Sourate Al-Kafirun au 1er rak'at, Sourate Al-Ikhlas au 2e." },
-                { num: "4", title: "La niyyah et le Talbiyyah", body: "Au miqat, formulez votre intention : «Allahumma inni uridu al-'umrata fa yassir-ha li wa taqabbal-ha minni». Puis commencez à réciter la Talbiyyah à voix haute." },
-              ].map((s) => (
+              {IHRAM.steps!.map((s) => (
                 <div key={s.num} className="go-step">
                   <div className="go-step-num">{s.num}</div>
                   <div className="go-step-body">
@@ -434,10 +432,10 @@ export default function GuideOmraComplet() {
             </div>
 
             <div className="go-dua-card go-reveal">
-              <p className="go-dua-label">La Talbiyyah — à réciter depuis le miqat jusqu'au début du Tawaf</p>
-              <p className="go-dua-arabic">لَبَّيْكَ اللَّهُمَّ لَبَّيْكَ، لَبَّيْكَ لَا شَرِيكَ لَكَ لَبَّيْكَ، إِنَّ الْحَمْدَ وَالنِّعْمَةَ لَكَ وَالْمُلْكَ، لَا شَرِيكَ لَكَ</p>
-              <p className="go-dua-transliteration">Labbayk-Allahumma labbayk, labbayk la sharika laka labbayk, innal-hamda wan-ni'mata laka wal-mulk, la sharika lak</p>
-              <p className="go-dua-translation">«Me voici, ô Allah, me voici. Me voici, Tu n'as pas d'associé, me voici. En vérité, la louange, la grâce et la royauté T'appartiennent. Tu n'as pas d'associé.»</p>
+              <p className="go-dua-label">{MIQAT.duas[1].label}</p>
+              <p className="go-dua-arabic">{MIQAT.duas[1].ar}</p>
+              <p className="go-dua-transliteration">{MIQAT.duas[1].phon}</p>
+              <p className="go-dua-translation">{MIQAT.duas[1].fr}</p>
             </div>
           </section>
 
@@ -445,19 +443,18 @@ export default function GuideOmraComplet() {
           <section id="tawaf" className="go-section">
             <span className="go-section-tag">Rituel 2</span>
             <h2 className="go-reveal go-reveal-d1">Le Tawaf — الطواف</h2>
+            <p className="go-reveal go-reveal-d2">{TAWAF.intro[0]}</p>
+            <p className="go-reveal go-reveal-d2">{TAWAF.intro[1]}</p>
             <p className="go-reveal go-reveal-d2">
-              Le Tawaf consiste à tourner <strong>sept fois</strong> autour de la Kaaba dans le sens antihoraire, en commençant et en finissant à la Hajar Al-Aswad (la Pierre Noire). C'est l'image de l'âme qui tourne autour de son centre — Dieu.
-            </p>
-            <p className="go-reveal go-reveal-d2">
-              Durée estimée : <strong>1h30 à 3h</strong> selon l'affluence. Maintenez la wudu pendant tout le Tawaf. Si elle est rompue, quittez l'espace, refaites les ablutions et reprenez depuis le tour interrompu.
+              Durée estimée : <strong>1h30 à 3h</strong> selon l'affluence.
             </p>
 
             <div className="go-info-grid go-reveal go-reveal-d3">
               {[
-                { icon: "↩️", title: "Direction", body: "Sens antihoraire (la Kaaba à votre gauche). Commencez et finissez à la Hajar Al-Aswad." },
-                { icon: "7️⃣", title: "Nombre de tours", body: "7 tours complets. Chaque tour commence à la Hajar Al-Aswad et y revient." },
-                { icon: "💧", title: "Condition", body: "Être en état de wudu. Les femmes en période de menstrues ne font pas le Tawaf." },
-                { icon: "🟢", title: "La ligne verte", body: "Pour les 3 premiers tours, les hommes accélèrent légèrement le pas (raml) si possible." },
+                { icon: "↩️", title: TAWAF.keyFacts[0].title, body: TAWAF.keyFacts[0].body },
+                { icon: "7️⃣", title: TAWAF.keyFacts[1].title, body: TAWAF.keyFacts[1].body },
+                { icon: "💧", title: TAWAF.keyFacts[2].title, body: TAWAF.keyFacts[2].body },
+                { icon: "🟢", title: TAWAF.keyFacts[3].title, body: TAWAF.keyFacts[3].body },
               ].map((b) => (
                 <div key={b.title} className="go-info-box">
                   <div className="go-info-box-icon">{b.icon}</div>
@@ -467,28 +464,17 @@ export default function GuideOmraComplet() {
               ))}
             </div>
 
-            <div className="go-alert go-reveal">
-              <span className="go-alert-icon">✦</span>
-              <p>Il n'y a pas de du'a fixe à réciter pendant le Tawaf. Faites les du'as qui viennent de votre cœur, lisez le Coran, faites le dhikr. Evitez les formules récitées en groupe qui peuvent distraire — votre dialogue avec Dieu est personnel.</p>
-            </div>
+            {TAWAF.duas.map((d) => (
+              <div key={d.label} className="go-dua-card go-reveal">
+                <p className="go-dua-label">{d.label}</p>
+                <p className="go-dua-arabic">{d.ar}</p>
+                <p className="go-dua-transliteration">{d.phon}</p>
+                <p className="go-dua-translation">{d.fr}</p>
+              </div>
+            ))}
 
-            <div className="go-dua-card go-reveal">
-              <p className="go-dua-label">Du'a en face de la Hajar Al-Aswad — à chaque passage</p>
-              <p className="go-dua-arabic">بِسْمِ اللهِ وَاللهُ أَكْبَرُ</p>
-              <p className="go-dua-transliteration">Bismillahi wallahu akbar</p>
-              <p className="go-dua-translation">«Au nom d'Allah, Allah est le Plus Grand.» — Pointez ou embrassez la Pierre Noire à chaque tour si possible.</p>
-            </div>
-
-            <div className="go-dua-card go-reveal">
-              <p className="go-dua-label">Du'a entre les deux Rukn (entre le coin yéménite et la Hajar Al-Aswad)</p>
-              <p className="go-dua-arabic">رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ</p>
-              <p className="go-dua-transliteration">Rabbana atina fid-dunya hasanatan wa fil-akhirati hasanatan wa qina 'adhaban-nar</p>
-              <p className="go-dua-translation">«Seigneur, accorde-nous le bien ici-bas et le bien dans l'au-delà, et préserve-nous du châtiment du Feu.»</p>
-            </div>
-
-            <h3 className="go-reveal" style={{ fontFamily: "'Cinzel', serif", fontSize: "1.05rem", color: "var(--go-deep)", margin: "2rem 0 0.75rem" }}>Après le Tawaf : la prière des 2 rak'at</h3>
             <p className="go-reveal" style={{ fontSize: "0.9rem", color: "#4A3728", lineHeight: 1.8 }}>
-              Une fois le 7e tour accompli, dirigez-vous vers le Maqam Ibrahim et accomplissez 2 rak'at. Lisez Al-Kafirun au 1er rak'at et Al-Ikhlas au 2e. C'est une sunnah confirmée. Puis buvez de l'eau de Zamzam en faisant face à la Qibla.
+              {TAWAF.afterNote}
             </p>
           </section>
 
@@ -496,19 +482,17 @@ export default function GuideOmraComplet() {
           <section id="sai" className="go-section">
             <span className="go-section-tag">Rituel 3</span>
             <h2 className="go-reveal go-reveal-d1">La Sa'i — السعي</h2>
+            <p className="go-reveal go-reveal-d2">{SAI.intro[0]}</p>
             <p className="go-reveal go-reveal-d2">
-              La Sa'i commémore la course d'Hajar, femme d'Ibrahim ﷺ, entre les collines de Safa et Marwa à la recherche d'eau pour son fils Ismaïl. Dieu répondit à son effort et sa foi en faisant jaillir la source de Zamzam.
-            </p>
-            <p className="go-reveal go-reveal-d2">
-              Elle consiste en <strong>7 allers-retours</strong> entre Safa et Marwa (Safa → Marwa = 1 trajet). Elle commence à Safa et se termine à Marwa. Durée estimée : <strong>45min à 1h30</strong>.
+              {SAI.intro[1]} Durée estimée : <strong>45min à 1h30</strong>.
             </p>
 
             <div className="go-info-grid go-reveal go-reveal-d3">
               {[
-                { icon: "🏔️", title: "Safa → Marwa", body: "Aller de Safa à Marwa = 1 trajet. 7 trajets au total. On commence à Safa, on finit à Marwa." },
-                { icon: "💨", title: "La course légère", body: "Entre les deux panneaux verts (hommes seulement), accélérer légèrement le pas en souvenir d'Hajar." },
-                { icon: "💧", title: "Wudu", body: "La Sa'i est valide même sans wudu selon la majorité des savants, mais être en état de pureté est recommandé." },
-                { icon: "🌿", title: "Du'a libre", body: "Faites vos du'as personnelles. Chaque allez-retour est une opportunité de dialogue intime avec Dieu." },
+                { icon: "🏔️", title: SAI.keyFacts[0].title, body: SAI.keyFacts[0].body },
+                { icon: "💨", title: SAI.keyFacts[1].title, body: SAI.keyFacts[1].body },
+                { icon: "💧", title: SAI.keyFacts[2].title, body: SAI.keyFacts[2].body },
+                { icon: "🌿", title: SAI.keyFacts[3].title, body: SAI.keyFacts[3].body },
               ].map((b) => (
                 <div key={b.title} className="go-info-box">
                   <div className="go-info-box-icon">{b.icon}</div>
@@ -518,35 +502,35 @@ export default function GuideOmraComplet() {
               ))}
             </div>
 
-            <div className="go-dua-card go-reveal">
-              <p className="go-dua-label">Du'a sur la colline de Safa — au début et à chaque retour à Safa</p>
-              <p className="go-dua-arabic">إِنَّ الصَّفَا وَالْمَرْوَةَ مِنْ شَعَائِرِ اللَّهِ — أَبْدَأُ بِمَا بَدَأَ اللَّهُ بِهِ</p>
-              <p className="go-dua-transliteration">Innas-Safa wal-Marwata min sha'a'irillah — Abda'u bima bada'allahu bih</p>
-              <p className="go-dua-translation">«Safa et Marwa sont parmi les rites d'Allah» — puis «Je commence par ce qu'Allah a commencé.» Faites face à la Kaaba, levez les mains et faites du dhikr et des du'as.</p>
-            </div>
+            {SAI.duas.map((d) => (
+              <div key={d.label} className="go-dua-card go-reveal">
+                <p className="go-dua-label">{d.label}</p>
+                <p className="go-dua-arabic">{d.ar}</p>
+                <p className="go-dua-transliteration">{d.phon}</p>
+                <p className="go-dua-translation">{d.fr}</p>
+              </div>
+            ))}
           </section>
 
           {/* TAHALLUL */}
           <section id="tahallul" className="go-section">
             <span className="go-section-tag">Rituel 4</span>
             <h2 className="go-reveal go-reveal-d1">Le Tahallul — التحلل</h2>
+            <p className="go-reveal go-reveal-d2">{TAHALLUL.intro[0]}</p>
             <p className="go-reveal go-reveal-d2">
-              Le Tahallul — «sortir de l'état sacré» — marque la fin de la Omra. Pour les hommes, il consiste à se <strong>raser la tête</strong> (halq, recommandé) ou à couper les cheveux de façon égale (taqsir). Pour les femmes, couper une mèche de la longueur d'un bout de doigt suffit.
-            </p>
-            <p className="go-reveal go-reveal-d2">
-              Après le Tahallul, toutes les interdictions de l'Ihram sont levées. Vous avez accompli votre Omra — subhanAllah. Prenez un moment de gratitude, de sujud, de pleurs. C'est un moment de renaissance.
+              {TAHALLUL.intro[1]} Vous avez accompli votre Omra — subhanAllah. Prenez un moment de gratitude, de sujud, de pleurs. C'est un moment de renaissance.
             </p>
 
             <div className="go-alert go-reveal">
               <span className="go-alert-icon">✦</span>
-              <p>Le Prophète ﷺ a fait du'a trois fois pour ceux qui se rasent et une fois pour ceux qui coupent. Raser est donc préférable pour les hommes, mais couper est valide. Ne vous précipitez pas : savourez ce moment de clôture.</p>
+              <p>{TAHALLUL.afterNote}</p>
             </div>
 
             <div className="go-dua-card go-reveal">
-              <p className="go-dua-label">Du'a lors du Tahallul</p>
-              <p className="go-dua-arabic">اللَّهُمَّ تَقَبَّلْ مِنِّي</p>
-              <p className="go-dua-transliteration">Allahumma taqabbal minni</p>
-              <p className="go-dua-translation">«Ô Allah, accepte de moi.» — Une des du'as les plus simples et les plus profondes. Répétez-la autant que vous le souhaitez en ce moment privilégié.</p>
+              <p className="go-dua-label">{TAHALLUL.duas[0].label}</p>
+              <p className="go-dua-arabic">{TAHALLUL.duas[0].ar}</p>
+              <p className="go-dua-transliteration">{TAHALLUL.duas[0].phon}</p>
+              <p className="go-dua-translation">{TAHALLUL.duas[0].fr}</p>
             </div>
           </section>
 

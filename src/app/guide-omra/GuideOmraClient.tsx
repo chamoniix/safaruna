@@ -95,7 +95,7 @@ export default function GuideOmraClient() {
         <section id="introduction">
           <h2>Comprendre la Omra</h2>
           <p>
-            La Omra est un <strong>voyage de l&apos;âme</strong> bien plus qu&apos;un simple pèlerinage.
+            La Omra est un <strong>voyage de l&apos;âme</strong>{' '}bien plus qu&apos;un simple pèlerinage.
             C&apos;est l&apos;effacement des péchés d&apos;une vie entière, un retour vers Allah ﷻ
             dans les lieux les plus sacrés de l&apos;Islam.
           </p>

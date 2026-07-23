@@ -3,14 +3,16 @@ import { OMRA_RITES, type OmraRite } from '@/lib/omraRites';
 const TAG_COLORS: Record<OmraRite['id'], string> = {
   miqat: '#1D5C3A',
   ihram: '#C9A84C',
+  arrivee: '#5A2D82',
   tawaf: '#1A4A8A',
-  sai: '#5A2D82',
+  sai: '#1A4A8A',
   tahallul: '#8B2A1A',
 };
 
 const GUIDE_TIPS: Record<OmraRite['id'], string> = {
   miqat: "C'est souvent le moment le plus émouvant du trajet — laisse un temps de silence après la Talbiyah collective plutôt que d'enchaîner tout de suite sur les explications logistiques.",
   ihram: "Rappelle à ton groupe de se préparer AVANT le trajet vers le Miqat : ablutions et tenue faites à l'hôtel, pour ne pas être pris de court une fois sur place. Beaucoup de pèlerins découvrent l'Ihram pour la première fois — explique calmement chaque étape plutôt que de les presser. C'est aussi le point où les questions pratiques sur les interdits affluent (crème solaire, lunettes, ceinture porte-billets...) — prépare une réponse simple pour les cas les plus fréquents.",
+  arrivee: "Le premier regard sur la Kaaba est un choc émotionnel pour beaucoup de pèlerins — prévois une pause avant d'enchaîner sur les explications du Tawaf, certains ont besoin de quelques minutes.",
   tawaf: "Beaucoup de pèlerins pensent, à tort, qu'il existe une invocation précise pour chaque tour — corrige gentiment cette idée reçue avant de commencer, ça les libère de la pression de « bien réciter ». Rappelle aussi de ne jamais bousculer pour toucher la Pierre Noire : la sécurité du groupe passe avant le geste.",
   sai: "Le passage rapide entre les deux repères verts est physique — prévois de l'eau et des pauses pour les personnes âgées ou à mobilité réduite, et rappelle qu'il n'y a aucune obligation de courir si la santé ne le permet pas.",
   tahallul: "C'est un moment d'émotion pour beaucoup de pèlerins qui viennent d'achever leur Omra — laisse un temps calme avant d'enchaîner sur la suite du programme.",
@@ -19,6 +21,7 @@ const GUIDE_TIPS: Record<OmraRite['id'], string> = {
 const IMAGE_CAPTIONS: Record<OmraRite['id'], string> = {
   miqat: 'Carte : position du Miqat (Dhul Hulayfah / Bir Ali) par rapport à Madinah et Makkah',
   ihram: "Illustration : la tenue Ihram (Izar / Rida) — vue correcte vs erreur fréquente (épaule découverte hors Tawaf)",
+  arrivee: "Photo : première vue de la Kaaba depuis l'intérieur du Masjid Al-Haram",
   tawaf: 'Schéma : plan du Tawaf avec Hajar Aswad, Hijr Ismaël, Rukn Yamani, Maqam Ibrahim et sens de circulation',
   sai: "Schéma : trajet du Sa'i entre Safa et Marwa avec les 7 trajets et les repères verts",
   tahallul: 'Illustration : Halq (rasage complet) et Taqsir (raccourcissement) — les deux options pour les hommes',
@@ -79,14 +82,16 @@ export default function FormationPage() {
           </div>
 
           {/* Key facts */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-            {rite.keyFacts.map(f => (
-              <div key={f.title} style={{ background: '#F8F4EC', borderRadius: 8, padding: '0.9rem 1.1rem' }}>
-                <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.04em', color: TAG_COLORS[rite.id], marginBottom: '0.25rem' }}>{f.title}</div>
-                <div style={{ fontSize: '0.87rem', color: '#3D2B1A', lineHeight: 1.65 }}>{f.body}</div>
-              </div>
-            ))}
-          </div>
+          {rite.keyFacts.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              {rite.keyFacts.map(f => (
+                <div key={f.title} style={{ background: '#F8F4EC', borderRadius: 8, padding: '0.9rem 1.1rem' }}>
+                  <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.04em', color: TAG_COLORS[rite.id], marginBottom: '0.25rem' }}>{f.title}</div>
+                  <div style={{ fontSize: '0.87rem', color: '#3D2B1A', lineHeight: 1.65 }}>{f.body}</div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Numbered steps (Ihram entry sequence) */}
           {rite.steps && (

@@ -8,17 +8,20 @@ import Footer from '@/components/Footer';
 import { OMRA_RITES } from '@/lib/omraRites';
 
 const MIQAT = OMRA_RITES.find(r => r.id === 'miqat')!;
+const IHRAM = OMRA_RITES.find(r => r.id === 'ihram')!;
+const ARRIVEE = OMRA_RITES.find(r => r.id === 'arrivee')!;
 const TAWAF = OMRA_RITES.find(r => r.id === 'tawaf')!;
 const SAI = OMRA_RITES.find(r => r.id === 'sai')!;
 const TAHALLUL = OMRA_RITES.find(r => r.id === 'tahallul')!;
 
 const SECTIONS = [
   { id: 'introduction', label: 'Introduction' },
-  { id: 'omra-hajj',    label: 'Omra vs Hajj' },
-  { id: 'preparation',  label: 'Préparation' },
-  { id: 'rituels',      label: 'Rituels' },
-  { id: 'faq',          label: 'FAQ Pratique' },
-  { id: 'apres',        label: 'Après la Omra' },
+  { id: 'miqat',        label: 'Le Miqat' },
+  { id: 'ihram',        label: "L'Ihram" },
+  { id: 'arrivee',      label: 'Arrivée à Makkah' },
+  { id: 'tawaf',        label: 'Le Tawaf' },
+  { id: 'sai',          label: "La Sa'i" },
+  { id: 'tahallul',     label: 'Fin de la Omra' },
 ];
 
 function ImagePlaceholder({ caption }: { caption: string }) {
@@ -31,10 +34,8 @@ function ImagePlaceholder({ caption }: { caption: string }) {
 }
 
 export default function GuideOmraClient() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const [activeSection, setActiveSection] = useState('introduction');
-  const [openFaq, setOpenFaq] = useState<string | null>(null);
-  const toggleFaq = (id: string) => setOpenFaq(prev => prev === id ? null : id);
   const isGated = status === 'unauthenticated';
 
   useEffect(() => {
@@ -67,17 +68,16 @@ export default function GuideOmraClient() {
         <div className="guide-hero-inner">
           <h1>
             La Omra étape par étape
-            <span className="hero-subtitle">Rituels, Du&apos;as &amp; Conseils 2026</span>
+            <span className="hero-subtitle">Rituels &amp; Du&apos;as</span>
           </h1>
           <p className="hero-lead">
-            De l&apos;Ihram au Tahallul, chaque rituel expliqué simplement, avec ses du&apos;as
-            et ses conseils pratiques pour vivre pleinement ce voyage sacré.
+            Du Miqat au Tahallul, chaque rituel expliqué simplement, avec ses du&apos;as authentiques.
           </p>
           <div className="guide-tags">
+            <span className="tag-chip">Miqat</span>
             <span className="tag-chip">Ihram</span>
             <span className="tag-chip">Tawaf</span>
             <span className="tag-chip">Sa&apos;i</span>
-            <span className="tag-chip">Safa-Marwa</span>
           </div>
         </div>
       </section>
@@ -104,127 +104,28 @@ export default function GuideOmraClient() {
         <section id="introduction">
           <h2>Comprendre la Omra</h2>
           <p>
-            La Omra est un <strong>voyage de l&apos;âme</strong>{' '}bien plus qu&apos;un simple pèlerinage.
-            C&apos;est l&apos;effacement des péchés d&apos;une vie entière, un retour vers Allah ﷻ
-            dans les lieux les plus sacrés de l&apos;Islam.
+            La Omra — en arabe <strong>العمرة</strong> — est le pèlerinage mineur à La Mecque. Elle n&apos;est
+            pas obligatoire, mais fortement recommandée, et peut être accomplie à n&apos;importe quel moment
+            de l&apos;année.
           </p>
-          <div className="quote-block">
-            <span className="quote-icon">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <path d="M3 5h2v4H3V5zm6 0h2v4H9V5z" fill="#C9A84C"/>
-              </svg>
-              Hadith
-            </span>
-            <p>
-              Le Prophète a dit : <em>« La Omra jusqu&apos;à la Omra suivante est une expiation
-              pour ce qui s&apos;est passé entre elles. »</em> (Bukhari &amp; Muslim).
-            </p>
-          </div>
           <p>
-            Contrairement au Hajj, la Omra peut être accomplie à n&apos;importe quel moment de
-            l&apos;année. Elle est considérée comme une sunna mu&apos;akkadah — une pratique fortement
-            recommandée par le Prophète ﷺ. Elle comprend quatre rituels fondamentaux : l&apos;entrée
-            en état d&apos;Ihram, le Tawaf, le Sa&apos;i, et le Tahallul. Ce guide vous accompagne
-            à travers chacun d&apos;eux, avec les du&apos;as correspondants et les conseils pratiques
-            des guides certifiés SAFARUMA.
+            Une Omra n&apos;est acceptée que si elle réunit deux conditions : la sincérité de l&apos;intention
+            envers Allah, et la conformité aux gestes accomplis par le Prophète ﷺ. Elle comprend quatre
+            rituels fondamentaux : l&apos;Ihram, le Tawaf, le Sa&apos;i, et la fin de la Omra (Tahallul).
+            Ce guide vous accompagne à travers chacun d&apos;eux, avec les du&apos;as correspondantes.
           </p>
-        </section>
-
-        {/* ── OMRA VS HAJJ ── */}
-        <section id="omra-hajj">
-          <span className="label-overline">DIFFÉRENCES ESSENTIELLES</span>
-          <h2>Omra vs Hajj</h2>
-          <p>
-            La Omra et le Hajj sont deux pèlerinages distincts en Islam. Comprendre leurs différences
-            est essentiel pour préparer son voyage en toute connaissance de cause et choisir la formule
-            adaptée à sa situation.
-          </p>
-
-          <div className="cards-grid-2">
-          <div className="info-card">
-            <div className="info-icon">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <path d="M7 1l1.5 3.5L12 5l-2.5 2.5.6 3.5L7 9.5 3.9 11l.6-3.5L2 5l3.5-.5L7 1z" stroke="#C9A84C" strokeWidth="1" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <div className="info-content">
-              <h3>La Omra — Pèlerinage mineur</h3>
-              <p>
-                La Omra peut être accomplie à n&apos;importe quel moment de l&apos;année. Elle n&apos;est
-                pas obligatoire (fard) mais fortement recommandée (sunna mu&apos;akkadah). Elle
-                comprend quatre rituels : Ihram, Tawaf (7 tours), Sa&apos;i (7 allers-retours),
-                Tahallul. Durée minimale des rituels seuls : 3 à 4 heures. Le séjour complet
-                pour visiter les lieux saints dure généralement plusieurs jours.
-              </p>
-            </div>
-          </div>
-
-          <div className="info-card">
-            <div className="info-icon">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <path d="M7 2L2 5v4l5 3 5-3V5L7 2z" stroke="#C9A84C" strokeWidth="1" strokeLinejoin="round"/>
-                <path d="M7 5v5M4.5 6.5L7 5l2.5 1.5" stroke="#C9A84C" strokeWidth="0.8" strokeLinecap="round"/>
-              </svg>
-            </div>
-            <div className="info-content">
-              <h3>Le Hajj — Pèlerinage majeur</h3>
-              <p>
-                Le Hajj est le 5e pilier de l&apos;Islam, obligatoire une fois dans la vie pour
-                tout musulman adulte, sain et financièrement capable. Il s&apos;effectue
-                uniquement en Dhul Hijja (du 8 au 13). Ses rituels supplémentaires incluent
-                le séjour à Arafat (pilier central du Hajj), la nuit à Muzdalifah, le séjour
-                à Mina et la lapidation des Djamarat. Durée : 5 à 6 jours minimum.
-              </p>
-            </div>
-          </div>
-          </div>{/* end cards-grid-2 info */}
-
-          <div className="cards-grid-2">
-          <div className="faq-card" onClick={() => toggleFaq('h1')}>
-            <div className="faq-header">
-              <div className="faq-num">?</div>
-              <div className="faq-content"><h3>Quelle est la meilleure période pour la Omra en 2026 ?</h3></div>
-              <span className="faq-toggle">{openFaq === 'h1' ? '×' : '+'}</span>
-            </div>
-            {openFaq === 'h1' && <div className="faq-answer"><p>
-                La Omra peut s&apos;accomplir toute l&apos;année. Les mois les moins chargés sont
-                Muharram, Safar et Rabi&apos;al-Awwal. Le Ramadan 2026 se déroulera fin
-                février–mars, la foule y sera importante mais la récompense spirituelle
-                incomparable (le Prophète ﷺ a dit qu&apos;une Omra en Ramadan équivaut en
-                récompense à un Hajj, Bukhari). Pour un premier voyage serein, mars–avril ou
-                octobre offrent un bon équilibre entre affluence modérée et température agréable.
-            </p></div>}
-          </div>
-
-          <div className="faq-card" onClick={() => toggleFaq('h2')}>
-            <div className="faq-header">
-              <div className="faq-num">?</div>
-              <div className="faq-content"><h3>Peut-on effectuer plusieurs Omra dans sa vie ?</h3></div>
-              <span className="faq-toggle">{openFaq === 'h2' ? '×' : '+'}</span>
-            </div>
-            {openFaq === 'h2' && <div className="faq-answer"><p>
-                Oui, absolument. Le Prophète ﷺ a encouragé à répéter la Omra aussi souvent
-                que possible. Chaque Omra acceptée est une expiation des péchés commis depuis
-                la précédente. Certains pèlerins effectuent plusieurs Omra par an, chaque
-                retour aux Lieux Saints est une opportunité de rapprochement spirituel unique.
-            </p></div>}
-          </div>
-          </div>{/* end cards-grid-2 faq */}
         </section>
 
         {/* ── CONTENT GATE ── */}
         <div style={{ position: 'relative' }}>
           <div className={isGated ? 'guide-gate-blur' : ''}>
 
-        {/* ── PRÉPARATION ── */}
-        <section id="preparation">
-          <span className="label-overline">AVANT LE DÉPART</span>
-          <h2>La Préparation</h2>
-          <p>
-            La Omra commence bien avant d&apos;embarquer. Une préparation sérieuse, à la fois
-            spirituelle, physique et logistique, fait toute la différence entre un voyage accompli
-            mécaniquement et une expérience qui transforme.
-          </p>
+        {/* ── MIQAT ── */}
+        <section id="miqat">
+          <span className="label-overline">AVANT L&apos;IHRAM</span>
+          <h2>Le Miqat</h2>
+          <p>{MIQAT.intro[0]}</p>
+          <p>{MIQAT.intro[1]}</p>
 
           <div className="info-card">
             <div className="info-icon">
@@ -233,83 +134,134 @@ export default function GuideOmraClient() {
               </svg>
             </div>
             <div className="info-content">
-              <h3>Il existe 5 Miqats terrestres</h3>
+              <h3>{MIQAT.keyFacts[0].title}</h3>
               <p>{MIQAT.keyFacts[0].body}</p>
             </div>
           </div>
 
           <ImagePlaceholder caption="Carte : position du Miqat (Dhul Hulayfah / Bir Ali) par rapport à Madinah et Makkah" />
 
-          <div className="faq-card" onClick={() => toggleFaq('p1')}>
-            <div className="faq-header">
-              <div className="faq-num">1</div>
-              <div className="faq-content"><h3>Quand dois-je enfiler l&apos;Ihram ?</h3></div>
-              <span className="faq-toggle">{openFaq === 'p1' ? '×' : '+'}</span>
-            </div>
-            {openFaq === 'p1' && <div className="faq-answer"><p>
-                Selon votre itinéraire. En général <strong>environ 1h avant le passage du Miqat
-                dans l&apos;avion</strong>. L&apos;équipage annoncera le moment précis pour que vous
-                ne le franchissiez pas sans être en état de sacralisation.
-            </p></div>}
+          <div className="quote-block">
+            <span className="quote-icon">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M3 5h2v4H3V5zm6 0h2v4H9V5z" fill="#C9A84C"/>
+              </svg>
+              {MIQAT.duas[0].label}
+            </span>
+            <p>
+              <strong>{MIQAT.duas[0].ar}</strong><br/>
+              <em>{MIQAT.duas[0].phon}</em><br/>
+              {MIQAT.duas[0].fr}
+            </p>
           </div>
 
-          <div className="faq-card" onClick={() => toggleFaq('p2')}>
-            <div className="faq-header">
-              <div className="faq-num">2</div>
-              <div className="faq-content"><h3>Puis-je enlever l&apos;Ihram à l&apos;arrivée pour me reposer ?</h3></div>
-              <span className="faq-toggle">{openFaq === 'p2' ? '×' : '+'}</span>
-            </div>
-            {openFaq === 'p2' && <div className="faq-answer"><p>
-                <strong>Non.</strong> Une fois l&apos;Ihram enfilé et la Niyyah prononcée au Miqat,
-                vous êtes en état de sacralisation. Vous ne pouvez plus l&apos;enlever avant
-                d&apos;avoir accompli la Omra complète. Vous pouvez vous reposer en Ihram, mais
-                l&apos;enlever avant la Omra entraîne une pénalité (<em>Fidya</em>).
-            </p></div>}
+          <div className="quote-block">
+            <span className="quote-icon">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M3 5h2v4H3V5zm6 0h2v4H9V5z" fill="#C9A84C"/>
+              </svg>
+              {MIQAT.duas[1].label}
+            </span>
+            <p>
+              <strong>{MIQAT.duas[1].ar}</strong><br/>
+              <em>{MIQAT.duas[1].phon}</em><br/>
+              {MIQAT.duas[1].fr}
+            </p>
           </div>
 
-          <div className="faq-card" onClick={() => toggleFaq('p3')}>
-            <div className="faq-header">
-              <div className="faq-num">3</div>
-              <div className="faq-content"><h3>Comment prononcer la Niyyah ?</h3></div>
-              <span className="faq-toggle">{openFaq === 'p3' ? '×' : '+'}</span>
-            </div>
-            {openFaq === 'p3' && <div className="faq-answer">
-              <p>La Niyyah se prononce au moment du passage du Miqat.</p>
-              <div className="arabic-dua">
-                <div className="dua-ar">{MIQAT.duas[0].ar}</div>
-                <div className="dua-tr">{MIQAT.duas[0].phon}</div>
-                <div className="dua-fr">{MIQAT.duas[0].fr}</div>
+          <p>{MIQAT.afterNote}</p>
+        </section>
+
+        {/* ── IHRAM ── */}
+        <section id="ihram">
+          <span className="label-overline">RITUEL 1</span>
+          <h2>L&apos;Ihram</h2>
+          <p>{IHRAM.intro[0]}</p>
+
+          <div className="cards-grid-2">
+            <div className="info-card">
+              <div className="info-icon">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <path d="M2 5l5-3 5 3v6l-5 3-5-3V5z" stroke="#C9A84C" strokeWidth="1" strokeLinejoin="round"/>
+                </svg>
               </div>
-              <p>Suivi de la Talbiyah que vous répéterez jusqu&apos;au début du Tawaf.</p>
-            </div>}
+              <div className="info-content">
+                <h3>{IHRAM.keyFacts[0].title}</h3>
+                <p>{IHRAM.keyFacts[0].body}</p>
+              </div>
+            </div>
+            <div className="info-card">
+              <div className="info-icon">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <path d="M2 5l5-3 5 3v6l-5 3-5-3V5z" stroke="#C9A84C" strokeWidth="1" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <div className="info-content">
+                <h3>{IHRAM.keyFacts[1].title}</h3>
+                <p>{IHRAM.keyFacts[1].body}</p>
+              </div>
+            </div>
           </div>
 
-          <div className="faq-card" onClick={() => toggleFaq('p4')}>
-            <div className="faq-header">
-              <div className="faq-num">4</div>
-              <div className="faq-content"><h3>La valise de la Omra — Que prendre ?</h3></div>
-              <span className="faq-toggle">{openFaq === 'p4' ? '×' : '+'}</span>
+          <div className="info-card">
+            <div className="info-icon">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M2 7h10M9 4l3 3-3 3" stroke="#C9A84C" strokeWidth="1" strokeLinecap="round"/>
+              </svg>
             </div>
-            {openFaq === 'p4' && <div className="faq-answer"><p>
-                <strong>Pour les hommes :</strong> 2 pièces d&apos;Ihram blanches (une de rechange),
-                sandales ouvertes pour l&apos;Ihram, chaussures fermées pour les visites.
-                <strong> Pour les femmes :</strong> abaya ample sans coutures ni ornements
-                excessifs + hijab, vêtements couvrants pour les sorties.
-                <strong> Pour tous :</strong> livret de du&apos;as, médicaments habituels,
-                crème solaire halal, gourde pour l&apos;eau de Zamzam, copies du passeport et visa,
-                argent liquide en SAR, chargeur universel, couverture légère pour les nuits
-                climatisées, masque et lingettes pour les moments de forte affluence.
-            </p></div>}
+            <div className="info-content">
+              <h3>{IHRAM.keyFacts[2].title}</h3>
+              <p>{IHRAM.keyFacts[2].body}</p>
+            </div>
+          </div>
+
+          <div className="info-card">
+            <div className="info-icon">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M2 7h10M9 4l3 3-3 3" stroke="#C9A84C" strokeWidth="1" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <div className="info-content">
+              <h3>{IHRAM.keyFacts[3].title}</h3>
+              <p>{IHRAM.keyFacts[3].body}</p>
+            </div>
           </div>
 
           <ImagePlaceholder caption="Illustration : la tenue Ihram (Izar / Rida) — vue correcte vs erreur fréquente (épaule découverte hors Tawaf)" />
         </section>
 
-        {/* ── RITUELS ── */}
-        <section id="rituels">
-          <span className="label-overline">LE TAWAF</span>
-          <h2>Tourner autour de la Kaaba</h2>
+        {/* ── ARRIVÉE À MAKKAH ── */}
+        <section id="arrivee">
+          <span className="label-overline">EN ARRIVANT</span>
+          <h2>Arrivée à Makkah</h2>
+          <p>{ARRIVEE.intro[0]}</p>
+          <p>{ARRIVEE.intro[1]}</p>
+
+          <ImagePlaceholder caption="Photo : première vue de la Kaaba depuis l'intérieur du Masjid Al-Haram" />
+
+          {ARRIVEE.duas.map(d => (
+            <div key={d.label} className="quote-block">
+              <span className="quote-icon">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <path d="M3 5h2v4H3V5zm6 0h2v4H9V5z" fill="#C9A84C"/>
+                </svg>
+                {d.label}
+              </span>
+              <p>
+                <strong>{d.ar}</strong><br/>
+                <em>{d.phon}</em><br/>
+                {d.fr}
+              </p>
+            </div>
+          ))}
+        </section>
+
+        {/* ── TAWAF ── */}
+        <section id="tawaf">
+          <span className="label-overline">RITUEL 2</span>
+          <h2>Le Tawaf</h2>
           <p>{TAWAF.intro[0]}</p>
+          <p>{TAWAF.intro[1]}</p>
 
           <div className="info-card">
             <div className="info-icon">
@@ -319,46 +271,35 @@ export default function GuideOmraClient() {
               </svg>
             </div>
             <div className="info-content">
-              <h3>7 tours dans le sens antihoraire</h3>
+              <h3>{TAWAF.keyFacts[1].title}</h3>
               <p>{TAWAF.keyFacts[1].body}</p>
             </div>
           </div>
 
-          <div className="quote-block">
-            <span className="quote-icon">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <path d="M3 5h2v4H3V5zm6 0h2v4H9V5z" fill="#C9A84C"/>
-              </svg>
-              Du&apos;a du Tawaf
-            </span>
-            <p>
-              {TAWAF.duas[1].label} :<br/>
-              <strong>{TAWAF.duas[1].ar}</strong><br/>
-              <em>{TAWAF.duas[1].phon}</em><br/>
-              {TAWAF.duas[1].fr}
-            </p>
-          </div>
-
-          <div className="quote-block">
-            <span className="quote-icon">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <path d="M3 5h2v4H3V5zm6 0h2v4H9V5z" fill="#C9A84C"/>
-              </svg>
-              Du&apos;a face à la Pierre Noire
-            </span>
-            <p>
-              {TAWAF.duas[0].label} :<br/>
-              <strong>{TAWAF.duas[0].ar}</strong><br/>
-              <em>{TAWAF.duas[0].phon}</em><br/>
-              {TAWAF.duas[0].fr}
-            </p>
-          </div>
+          {TAWAF.duas.map(d => (
+            <div key={d.label} className="quote-block">
+              <span className="quote-icon">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <path d="M3 5h2v4H3V5zm6 0h2v4H9V5z" fill="#C9A84C"/>
+                </svg>
+                {d.label}
+              </span>
+              <p>
+                <strong>{d.ar}</strong><br/>
+                <em>{d.phon}</em><br/>
+                {d.fr}
+              </p>
+            </div>
+          ))}
 
           <p>{TAWAF.afterNote}</p>
 
           <ImagePlaceholder caption="Schéma : plan du Tawaf avec Hajar Aswad, Hijr Ismaël, Rukn Yamani, Maqam Ibrahim et sens de circulation" />
+        </section>
 
-          <span className="label-overline">LE SA&apos;I</span>
+        {/* ── SA'I ── */}
+        <section id="sai">
+          <span className="label-overline">RITUEL 3</span>
           <h2>Entre Safa et Marwa</h2>
           <p>{SAI.intro[0]}</p>
           <p>{SAI.intro[1]}</p>
@@ -370,215 +311,40 @@ export default function GuideOmraClient() {
               </svg>
             </div>
             <div className="info-content">
-              <h3>7 trajets de Safa à Marwa</h3>
+              <h3>{SAI.keyFacts[0].title}</h3>
               <p>{SAI.keyFacts[0].body} {SAI.keyFacts[1].body}</p>
             </div>
           </div>
 
-          <div className="quote-block">
-            <span className="quote-icon">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <path d="M3 5h2v4H3V5zm6 0h2v4H9V5z" fill="#C9A84C"/>
-              </svg>
-              {SAI.duas[0].label}
-            </span>
-            <p>
-              <strong>{SAI.duas[0].ar}</strong><br/>
-              <em>{SAI.duas[0].phon}</em><br/>
-              {SAI.duas[0].fr}
-            </p>
-          </div>
-
           <ImagePlaceholder caption="Schéma : trajet du Sa'i entre Safa et Marwa avec les 7 trajets et les repères verts" />
 
-          <span className="label-overline">LE TAHALLUL</span>
-          <h2>Sortir de l&apos;état de sacralisation</h2>
-          <p>{TAHALLUL.intro[0]}</p>
+          {SAI.duas.map(d => (
+            <div key={d.label} className="quote-block">
+              <span className="quote-icon">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <path d="M3 5h2v4H3V5zm6 0h2v4H9V5z" fill="#C9A84C"/>
+                </svg>
+                {d.label}
+              </span>
+              <p>
+                <strong>{d.ar}</strong><br/>
+                <em>{d.phon}</em><br/>
+                {d.fr}
+              </p>
+            </div>
+          ))}
 
-          <div className="info-card">
-            <div className="info-icon">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <path d="M2 7h10M9 4l3 3-3 3" stroke="#C9A84C" strokeWidth="1" strokeLinecap="round"/>
-              </svg>
-            </div>
-            <div className="info-content">
-              <h3>Halq ou Taqsir</h3>
-              <p>{TAHALLUL.keyFacts[0].body} {TAHALLUL.keyFacts[1].body} {TAHALLUL.intro[1]}</p>
-            </div>
-          </div>
+          <p>{SAI.afterNote}</p>
+        </section>
+
+        {/* ── FIN DE LA OMRA ── */}
+        <section id="tahallul">
+          <span className="label-overline">RITUEL 4</span>
+          <h2>Fin de la Omra</h2>
+          <p>{TAHALLUL.intro[0]}</p>
+          <p>{TAHALLUL.intro[1]}</p>
 
           <ImagePlaceholder caption="Illustration : Halq (rasage complet) et Taqsir (raccourcissement) — les deux options pour les hommes" />
-        </section>
-
-        {/* ── FAQ PRATIQUE ── */}
-        <section id="faq">
-          <span className="label-overline">QUESTIONS FRÉQUENTES</span>
-          <h2>FAQ Pratique de la Omra</h2>
-          <p>
-            Les questions les plus posées par les pèlerins avant et pendant leur Omra,
-            avec des réponses claires et précises.
-          </p>
-
-          <div className="cards-grid-2">
-          <div className="faq-card" onClick={() => toggleFaq('f5')}>
-            <div className="faq-header">
-              <div className="faq-num">5</div>
-              <div className="faq-content"><h3>Puis-je effectuer la Omra si je suis en état de menstruation ?</h3></div>
-              <span className="faq-toggle">{openFaq === 'f5' ? '×' : '+'}</span>
-            </div>
-            {openFaq === 'f5' && <div className="faq-answer"><p>
-                Non. Les femmes en état de menstruation (haid) ou de lochies (nifas) ne peuvent
-                pas accomplir la Omra, car le Tawaf nécessite d&apos;être en état de pureté rituelle
-                (tahara). Si cela survient pendant le voyage, il faut patienter, accomplir le ghusl,
-                puis entrer en Ihram pour effectuer la Omra.
-            </p></div>}
-          </div>
-
-          <div className="faq-card" onClick={() => toggleFaq('f6')}>
-            <div className="faq-header">
-              <div className="faq-num">6</div>
-              <div className="faq-content"><h3>Puis-je porter des sandales pendant le Tawaf ?</h3></div>
-              <span className="faq-toggle">{openFaq === 'f6' ? '×' : '+'}</span>
-            </div>
-            {openFaq === 'f6' && <div className="faq-answer"><p>
-                Oui. Des sandales propres sont autorisées et recommandées. Le sol du Masjid Al-Haram
-                peut être très chaud en été (50°C) ou froid en hiver. Privilégiez des sandales légères
-                à semelle épaisse et antidérapante.
-            </p></div>}
-          </div>
-
-          <div className="faq-card" onClick={() => toggleFaq('f7')}>
-            <div className="faq-header">
-              <div className="faq-num">7</div>
-              <div className="faq-content"><h3>Doit-on jeûner pendant la Omra ?</h3></div>
-              <span className="faq-toggle">{openFaq === 'f7' ? '×' : '+'}</span>
-            </div>
-            {openFaq === 'f7' && <div className="faq-answer"><p>
-                Non, il n&apos;y a pas de jeûne obligatoire lié à la Omra. Si votre Omra tombe
-                pendant le Ramadan, vous continuez à jeûner selon les règles habituelles, sauf si
-                vous avez droit à l&apos;exemption du voyageur (consulter votre imam).
-            </p></div>}
-          </div>
-
-          <div className="faq-card" onClick={() => toggleFaq('f8')}>
-            <div className="faq-header">
-              <div className="faq-num">8</div>
-              <div className="faq-content"><h3>Puis-je faire du Tawaf volontaire après la Omra ?</h3></div>
-              <span className="faq-toggle">{openFaq === 'f8' ? '×' : '+'}</span>
-            </div>
-            {openFaq === 'f8' && <div className="faq-answer"><p>
-                Oui, et c&apos;est fortement recommandé. Chaque tour autour de la Kaaba est une
-                ibadah à part entière. Profitez de votre présence à Makkah pour accomplir autant
-                de Tawaf volontaires que possible, particulièrement la nuit où la foule est moins dense.
-            </p></div>}
-          </div>
-
-          <div className="faq-card" onClick={() => toggleFaq('f9')}>
-            <div className="faq-header">
-              <div className="faq-num">9</div>
-              <div className="faq-content"><h3>Le Tawaf est-il accessible aux personnes à mobilité réduite ?</h3></div>
-              <span className="faq-toggle">{openFaq === 'f9' ? '×' : '+'}</span>
-            </div>
-            {openFaq === 'f9' && <div className="faq-answer"><p>
-                Oui. Le Masjid Al-Haram dispose de fauteuils roulants gratuits et d&apos;un étage
-                dédié avec vue directe sur la Kaaba. Le Sa&apos;i est entièrement climatisé et
-                accessible en fauteuil roulant. Un guide SAFARUMA formé à l&apos;accompagnement PMR
-                connaît tous les itinéraires et accès prioritaires.
-            </p></div>}
-          </div>
-
-          <div className="faq-card" onClick={() => toggleFaq('f10')}>
-            <div className="faq-header">
-              <div className="faq-num">10</div>
-              <div className="faq-content"><h3>Faut-il un guide pour accomplir la Omra ?</h3></div>
-              <span className="faq-toggle">{openFaq === 'f10' ? '×' : '+'}</span>
-            </div>
-            {openFaq === 'f10' && <div className="faq-answer"><p>
-                La Omra est techniquement réalisable seul. Mais un guide certifié change
-                profondément l&apos;expérience : il sécurise les rituels, explique la signification
-                spirituelle de chaque lieu et gère la logistique. C&apos;est particulièrement précieux
-                pour les premiers voyages, les familles et les personnes âgées.
-            </p></div>}
-          </div>
-
-          <div className="faq-card" onClick={() => toggleFaq('f11')}>
-            <div className="faq-header">
-              <div className="faq-num">11</div>
-              <div className="faq-content"><h3>Combien coûte la Omra avec un guide privé SAFARUMA ?</h3></div>
-              <span className="faq-toggle">{openFaq === 'f11' ? '×' : '+'}</span>
-            </div>
-            {openFaq === 'f11' && <div className="faq-answer"><p>
-                Les tarifs débutent à <strong>150 € pour une visite guidée</strong> de 4h,
-                à <strong>350 € pour l&apos;accompagnement complet de la Omra</strong> (rituels
-                + lieux saints), et jusqu&apos;à <strong>600–780 € pour les forfaits VIP</strong>
-                incluant transport, hôtel et accès prioritaires. Chaque guide fixe librement ses
-                tarifs. SAFARUMA prélève une commission de 12% seulement en cas de mission réalisée.
-            </p></div>}
-          </div>
-          </div>{/* end cards-grid-2 faq */}
-        </section>
-
-        {/* ── APRÈS LA OMRA ── */}
-        <section id="apres">
-          <span className="label-overline">LE RETOUR</span>
-          <h2>Après la Omra — Préserver la baraka</h2>
-          <p>
-            La Omra ne s&apos;arrête pas au Tahallul. Le véritable pèlerin revient transformé —
-            et cette transformation doit se maintenir dans la durée. Voici ce que la Sunnah
-            enseigne sur les jours qui suivent l&apos;accomplissement de ce voyage béni.
-          </p>
-
-          <div className="info-card">
-            <div className="info-icon">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <path d="M7 2v5l3 2" stroke="#C9A84C" strokeWidth="1" strokeLinecap="round"/>
-                <circle cx="7" cy="7" r="5" stroke="#C9A84C" strokeWidth="1"/>
-              </svg>
-            </div>
-            <div className="info-content">
-              <h3>Ce que la Sunnah recommande après la Omra</h3>
-              <p>
-                Après l&apos;accomplissement de la Omra, il est recommandé de prier 2 rak&apos;ats
-                de shukr (remerciement) à Allah ﷻ. Profitez de votre présence à Makkah pour
-                accomplir des Tawaf volontaires supplémentaires — chaque tour compte.
-                Buvez de l&apos;eau de Zamzam en abondance en faisant du du&apos;a. Avant de
-                quitter Makkah, accomplissez le <strong>Tawaf de Wada&apos;</strong> (Tawaf
-                d&apos;adieu), obligatoire selon la majorité des savants.
-              </p>
-            </div>
-          </div>
-
-          <div className="info-card">
-            <div className="info-icon">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <path d="M3 7l3 3 5-5" stroke="#C9A84C" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <div className="info-content">
-              <h3>Maintenir la baraka à votre retour</h3>
-              <p>
-                La Omra acceptée laisse une empreinte durable. Revenez avec la résolution
-                ferme de changer : renforcer votre prière, réparer vos relations, réduire
-                ce qui éloigne d&apos;Allah ﷻ. Partagez votre expérience pour inspirer d&apos;autres
-                à faire le voyage. Le Prophète ﷺ a dit : <em>« Pour le pèlerin accepté,
-                il n&apos;y a pas de récompense autre que le Paradis. »</em> (Bukhari &amp; Muslim)
-              </p>
-            </div>
-          </div>
-
-          <div className="quote-block">
-            <span className="quote-icon">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <path d="M3 5h2v4H3V5zm6 0h2v4H9V5z" fill="#C9A84C"/>
-              </svg>
-              Un conseil de guide
-            </span>
-            <p>
-              Nos guides SAFARUMA vous préparent non seulement aux rituels, mais aussi à la
-              dimension spirituelle du retour. Une Omra bien accompagnée se ressent encore
-              des années après le voyage.
-            </p>
-          </div>
         </section>
 
         {/* ── Bandeau fin de guide ── */}
@@ -598,7 +364,7 @@ export default function GuideOmraClient() {
               La suite du guide dans votre espace pèlerin
             </div>
             <div style={{ fontSize: '12px', color: '#5A4E3A', lineHeight: 1.55 }}>
-              Version complète avec checklist cochable, audio des du&apos;as, marque-pages et suivi — gratuit.
+              Version complète, avec suivi de progression — gratuit.
             </div>
           </div>
           <Link href="/inscription" style={{
@@ -627,9 +393,7 @@ export default function GuideOmraClient() {
 
 const GATE_FEATURES = [
   "Rituels complets avec du'as",
-  'Checklist de préparation cochable',
-  '11 FAQ pratiques — réponses complètes',
-  'Après la Omra — préserver la baraka',
+  'Miqat, Ihram, Tawaf, Sa\'i et fin de la Omra',
 ];
 
 function GateOverlay() {

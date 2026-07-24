@@ -628,14 +628,16 @@ footer div::-webkit-scrollbar { display: none; }
   padding: 20px clamp(16px, 3vw, 24px) 32px;
   max-width: 1200px; margin: 0 auto; background: #FAF7F0;
 }
-/* ── Content gate ── */
+/* ── Content gate ──
+   Pas de mask-image ici : le fondu visuel est entièrement peint par le dégradé
+   crème du GateOverlay. Un mask alpha sur cette boîte clippée (contenu débordant
+   ~2600px + voisin animé composité) déclenche un bug de rendu Safari qui masque
+   toute la fenêtre de 380px. */
 .guide-gate-blur {
   pointer-events: none;
   user-select: none;
   max-height: 380px;
   overflow: hidden;
-  mask-image: linear-gradient(to bottom, black 0%, black 70%, rgba(0,0,0,0.15) 90%, rgba(0,0,0,0) 100%);
-  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 70%, rgba(0,0,0,0.15) 90%, rgba(0,0,0,0) 100%);
 }
 @keyframes gateCardIn {
   from { opacity: 0; transform: translateY(14px) scale(0.97); }

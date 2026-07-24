@@ -400,7 +400,7 @@ function GateOverlay() {
   return (
     <div style={{
       position: 'relative', marginTop: '-280px', zIndex: 10,
-      background: 'linear-gradient(to bottom, transparent 0%, rgba(250,247,240,0.92) 22%, rgba(250,247,240,1) 40%)',
+      background: 'linear-gradient(to bottom, rgba(250,247,240,0) 0px, rgba(250,247,240,0.92) 110px, #FAF7F0 190px)',
       paddingTop: '48px', paddingBottom: '40px',
       display: 'flex', justifyContent: 'center',
     }}>

@@ -264,7 +264,11 @@ export default function Navbar({
           position: relative; overflow: hidden;
           display: flex; align-items: center; justify-content: space-between;
           width: 100%; gap: 12px;
-          background: rgba(201,168,76,0.07);
+          /* Fond opaque : le texte des pages claires et la carte du gate ne
+             doivent pas transparaître à travers le bandeau pendant le scroll. */
+          background: rgba(12,14,13,0.94);
+          backdrop-filter: blur(18px) saturate(1.35);
+          -webkit-backdrop-filter: blur(18px) saturate(1.35);
           border: 1px solid rgba(201,168,76,0.2);
           border-radius: 8px; padding: 4px 8px 4px 16px;
           box-shadow: 0 12px 48px rgba(0,0,0,0.92), 0 4px 16px rgba(0,0,0,0.75);

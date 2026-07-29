@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { OMRA_RITES, type OmraRite } from '@/lib/omraRites';
 
 const TAG_COLORS: Record<OmraRite['id'], string> = {
@@ -27,12 +28,30 @@ const IMAGE_CAPTIONS: Record<OmraRite['id'], string> = {
   tahallul: 'Illustration : Halq (rasage complet) et Taqsir (raccourcissement) — les deux options pour les hommes',
 };
 
+const RITE_IMAGES: Partial<Record<OmraRite['id'], string>> = {
+  miqat: '/images/guide-omra/miqat.jpg',
+};
+
 function ImagePlaceholder({ caption }: { caption: string }) {
   return (
     <div style={{ border: '1.5px dashed #D8CDB0', borderRadius: 10, background: '#FAF8F3', padding: '2rem 1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', textAlign: 'center' }}>
       <span style={{ fontSize: '1.3rem', opacity: 0.35 }}>🖼</span>
       <span style={{ fontSize: '0.72rem', color: '#9C8F72', fontStyle: 'italic', maxWidth: 420 }}>{caption}</span>
     </div>
+  );
+}
+
+function RiteImage({ id }: { id: OmraRite['id'] }) {
+  const src = RITE_IMAGES[id];
+  if (!src) return <ImagePlaceholder caption={IMAGE_CAPTIONS[id]} />;
+  return (
+    <Image
+      src={src}
+      alt={IMAGE_CAPTIONS[id]}
+      width={1254}
+      height={1254}
+      style={{ width: '100%', height: 'auto', borderRadius: 10 }}
+    />
   );
 }
 
@@ -124,7 +143,7 @@ export default function FormationPage() {
           )}
 
           {/* Image placeholder */}
-          <ImagePlaceholder caption={IMAGE_CAPTIONS[rite.id]} />
+          <RiteImage id={rite.id} />
 
           {/* Guide tip */}
           <div style={{ background: '#F0F9F4', border: '1px solid #C7E4D3', borderRadius: 8, padding: '1rem 1.25rem', display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>

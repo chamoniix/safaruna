@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { OMRA_RITES } from "@/lib/omraRites";
@@ -303,7 +304,14 @@ export default function GuideOmraComplet() {
               ))}
             </div>
 
-            <ImagePlaceholder caption="Carte : position du Miqat (Dhul Hulayfah / Bir Ali) par rapport à Madinah et Makkah" />
+            <Image
+              src="/images/guide-omra/miqat.jpg"
+              alt="Carte du Miqat : Dhul Hulayfah (Bir Ali) entre Madinah et Makkah, avec Jeddah et Qarn Al-Manazil"
+              width={1254}
+              height={1254}
+              className="go-reveal"
+              style={{ width: "100%", height: "auto", borderRadius: 12, margin: "1.25rem 0" }}
+            />
 
             {MIQAT.duas.map((d) => (
               <div key={d.label} className="go-dua-card go-reveal">

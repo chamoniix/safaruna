@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useSession } from 'next-auth/react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -139,7 +140,13 @@ export default function GuideOmraClient() {
             </div>
           </div>
 
-          <ImagePlaceholder caption="Carte : position du Miqat (Dhul Hulayfah / Bir Ali) par rapport à Madinah et Makkah" />
+          <Image
+            src="/images/guide-omra/miqat.jpg"
+            alt="Carte du Miqat : Dhul Hulayfah (Bir Ali) entre Madinah et Makkah, avec Jeddah et Qarn Al-Manazil"
+            width={1254}
+            height={1254}
+            style={{ width: '100%', height: 'auto', borderRadius: 12, margin: '16px 0' }}
+          />
 
           <div className="quote-block">
             <span className="quote-icon">

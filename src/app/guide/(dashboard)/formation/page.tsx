@@ -31,6 +31,7 @@ const IMAGE_CAPTIONS: Record<OmraRite['id'], string> = {
 const RITE_IMAGES: Partial<Record<OmraRite['id'], { src: string; w: number; h: number }>> = {
   miqat: { src: '/images/guide-omra/miqat.jpg', w: 1254, h: 1254 },
   ihram: { src: '/images/guide-omra/ihram.jpg', w: 1536, h: 1024 },
+  arrivee: { src: '/images/guide-omra/arrivee-kaaba.jpg', w: 1536, h: 1024 },
 };
 
 function ImagePlaceholder({ caption }: { caption: string }) {

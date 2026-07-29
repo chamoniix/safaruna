@@ -250,7 +250,13 @@ export default function GuideOmraClient() {
           <p>{ARRIVEE.intro[0]}</p>
           <p>{ARRIVEE.intro[1]}</p>
 
-          <ImagePlaceholder caption="Photo : première vue de la Kaaba depuis l'intérieur du Masjid Al-Haram" />
+          <Image
+            src="/images/guide-omra/arrivee-kaaba.jpg"
+            alt="Première vue de la Kaaba depuis l'intérieur du Masjid Al-Haram, pèlerins de dos à l'heure dorée"
+            width={1536}
+            height={1024}
+            style={{ width: '100%', height: 'auto', borderRadius: 12, margin: '16px 0' }}
+          />
 
           {ARRIVEE.duas.map(d => (
             <div key={d.label} className="quote-block">

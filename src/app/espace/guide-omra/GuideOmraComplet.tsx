@@ -365,7 +365,14 @@ export default function GuideOmraComplet() {
             <p className="go-reveal go-reveal-d2">{ARRIVEE.intro[0]}</p>
             <p className="go-reveal go-reveal-d2">{ARRIVEE.intro[1]}</p>
 
-            <ImagePlaceholder caption="Photo : première vue de la Kaaba depuis l'intérieur du Masjid Al-Haram" />
+            <Image
+              src="/images/guide-omra/arrivee-kaaba.jpg"
+              alt="Première vue de la Kaaba depuis l'intérieur du Masjid Al-Haram, pèlerins de dos à l'heure dorée"
+              width={1536}
+              height={1024}
+              className="go-reveal"
+              style={{ width: "100%", height: "auto", borderRadius: 12, margin: "1.25rem 0" }}
+            />
 
             {ARRIVEE.duas.map((d) => (
               <div key={d.label} className="go-dua-card go-reveal">

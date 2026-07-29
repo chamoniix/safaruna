@@ -28,8 +28,9 @@ const IMAGE_CAPTIONS: Record<OmraRite['id'], string> = {
   tahallul: 'Illustration : Halq (rasage complet) et Taqsir (raccourcissement) — les deux options pour les hommes',
 };
 
-const RITE_IMAGES: Partial<Record<OmraRite['id'], string>> = {
-  miqat: '/images/guide-omra/miqat.jpg',
+const RITE_IMAGES: Partial<Record<OmraRite['id'], { src: string; w: number; h: number }>> = {
+  miqat: { src: '/images/guide-omra/miqat.jpg', w: 1254, h: 1254 },
+  ihram: { src: '/images/guide-omra/ihram.jpg', w: 1536, h: 1024 },
 };
 
 function ImagePlaceholder({ caption }: { caption: string }) {
@@ -42,14 +43,14 @@ function ImagePlaceholder({ caption }: { caption: string }) {
 }
 
 function RiteImage({ id }: { id: OmraRite['id'] }) {
-  const src = RITE_IMAGES[id];
-  if (!src) return <ImagePlaceholder caption={IMAGE_CAPTIONS[id]} />;
+  const img = RITE_IMAGES[id];
+  if (!img) return <ImagePlaceholder caption={IMAGE_CAPTIONS[id]} />;
   return (
     <Image
-      src={src}
+      src={img.src}
       alt={IMAGE_CAPTIONS[id]}
-      width={1254}
-      height={1254}
+      width={img.w}
+      height={img.h}
       style={{ width: '100%', height: 'auto', borderRadius: 10 }}
     />
   );

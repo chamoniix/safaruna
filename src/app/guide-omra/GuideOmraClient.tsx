@@ -234,7 +234,13 @@ export default function GuideOmraClient() {
             </div>
           </div>
 
-          <ImagePlaceholder caption="Illustration : la tenue Ihram (Izar / Rida) — vue correcte vs erreur fréquente (épaule découverte hors Tawaf)" />
+          <Image
+            src="/images/guide-omra/ihram.jpg"
+            alt="La tenue Ihram (Izar / Rida) — vue correcte (deux épaules couvertes) vs incorrecte (épaule droite découverte)"
+            width={1536}
+            height={1024}
+            style={{ width: '100%', height: 'auto', borderRadius: 12, margin: '16px 0' }}
+          />
         </section>
 
         {/* ── ARRIVÉE À MAKKAH ── */}

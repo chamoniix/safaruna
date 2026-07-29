@@ -32,6 +32,7 @@ const RITE_IMAGES: Partial<Record<OmraRite['id'], { src: string; w: number; h: n
   miqat: { src: '/images/guide-omra/miqat.jpg', w: 1254, h: 1254 },
   ihram: { src: '/images/guide-omra/ihram.jpg', w: 1536, h: 1024 },
   arrivee: { src: '/images/guide-omra/arrivee-kaaba.jpg', w: 1536, h: 1024 },
+  tawaf: { src: '/images/guide-omra/tawaf.jpg', w: 1254, h: 1254 },
 };
 
 function ImagePlaceholder({ caption }: { caption: string }) {

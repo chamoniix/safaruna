@@ -406,7 +406,14 @@ export default function GuideOmraComplet() {
               ))}
             </div>
 
-            <ImagePlaceholder caption="Schéma : plan du Tawaf avec Hajar Aswad, Hijr Ismaël, Rukn Yamani, Maqam Ibrahim et sens de circulation" />
+            <Image
+              src="/images/guide-omra/tawaf.jpg"
+              alt="Schéma du Tawaf : la Kaaba avec Hajar Al-Aswad, Rukn Yamani, Moultazam, Al-Hijr, Maqam Ibrahim, sens antihoraire ×7 et l'Idtiba"
+              width={1254}
+              height={1254}
+              className="go-reveal"
+              style={{ width: "100%", height: "auto", borderRadius: 12, margin: "1.25rem 0" }}
+            />
 
             {TAWAF.duas.map((d) => (
               <div key={d.label} className="go-dua-card go-reveal">

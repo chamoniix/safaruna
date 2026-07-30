@@ -341,7 +341,13 @@ export default function GuideOmraClient() {
             </div>
           </div>
 
-          <ImagePlaceholder caption="Schéma : trajet du Sa'i entre Safa et Marwa avec les 7 trajets et les repères verts" />
+          <Image
+            src="/images/guide-omra/sai.jpg"
+            alt="Schéma du Sa'i : 7 trajets entre Safa (départ) et Marwa (arrivée), aller 1-3-5-7, retour 2-4-6, zone d'accélération entre les deux repères verts"
+            width={1448}
+            height={1086}
+            style={{ width: '100%', height: 'auto', borderRadius: 12, margin: '16px 0' }}
+          />
 
           {SAI.duas.map(d => (
             <div key={d.label} className="quote-block">

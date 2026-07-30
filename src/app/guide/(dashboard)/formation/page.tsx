@@ -33,6 +33,7 @@ const RITE_IMAGES: Partial<Record<OmraRite['id'], { src: string; w: number; h: n
   ihram: { src: '/images/guide-omra/ihram.jpg', w: 1536, h: 1024 },
   arrivee: { src: '/images/guide-omra/arrivee-kaaba.jpg', w: 1536, h: 1024 },
   tawaf: { src: '/images/guide-omra/tawaf.jpg', w: 1254, h: 1254 },
+  sai: { src: '/images/guide-omra/sai.jpg', w: 1448, h: 1086 },
 };
 
 function ImagePlaceholder({ caption }: { caption: string }) {
@@ -166,7 +167,13 @@ export default function FormationPage() {
         <p style={{ fontSize: '0.88rem', color: '#6B5A3A', margin: 0 }}>
           Miqat (Ihram) → Tawaf (7 tours) → Sa&apos;i (7 trajets) → Taqsir (raccourcir les cheveux)
         </p>
-        <ImagePlaceholder caption="Infographie récapitulative : les 4 étapes de la Omra, du Miqat à la Taqsir" />
+        <Image
+          src="/images/guide-omra/recap.jpg"
+          alt="Infographie récapitulative : les 4 étapes de la Omra — Miqat, Tawaf ×7, Sa'i, Taqsir"
+          width={1774}
+          height={887}
+          style={{ width: '100%', height: 'auto', borderRadius: 10 }}
+        />
       </div>
     </div>
   );

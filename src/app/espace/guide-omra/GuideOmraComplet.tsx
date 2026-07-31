@@ -458,6 +458,19 @@ export default function GuideOmraComplet() {
               style={{ width: "100%", height: "auto", borderRadius: 12, margin: "1.25rem 0" }}
             />
 
+            <figure className="go-reveal" style={{ margin: "1.25rem 0" }}>
+              <Image
+                src="/images/guide-omra/sai-masa.jpg"
+                alt="Le couloir du Mas'a à l'intérieur du Masjid Al-Haram, avec la zone d'accélération signalée par les néons verts"
+                width={2048}
+                height={1152}
+                style={{ width: "100%", height: "auto", borderRadius: 12 }}
+              />
+              <figcaption style={{ fontSize: 11, color: "#9C8F72", marginTop: 4, textAlign: "right" }}>
+                Photo : Tahir mq · CC BY-SA 4.0
+              </figcaption>
+            </figure>
+
             {SAI.duas.map((d) => (
               <div key={d.label} className="go-dua-card go-reveal">
                 <p className="go-dua-label">{d.label}</p>

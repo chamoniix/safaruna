@@ -7,7 +7,7 @@ export const viewport: Viewport = { themeColor: '#FAF7F0' };
 import Link from 'next/link';
 import { IconShield, IconCar, IconAccessibility, IconBuilding, IconDocument, IconGraduationCap } from '@/components/Icons';
 
-const WHATSAPP = 'https://wa.me/message/ZGUPRJRNVJRGN1';
+const WHATSAPP = 'https://wa.me/message/3LAXCIZV7FFEK1';
 
 const WhatsAppSVG = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">

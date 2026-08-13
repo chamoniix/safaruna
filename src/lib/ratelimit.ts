@@ -2,14 +2,18 @@ import { Ratelimit } from '@upstash/ratelimit'
 import { Redis } from '@upstash/redis'
 import { NextRequest, NextResponse } from 'next/server'
 
-function makeRatelimit(requests: number, window: `${number} s` | `${number} m` | `${number} h`) {
+function makeRatelimit(
+  requests: number,
+  window: `${number} s` | `${number} m` | `${number} h`,
+  prefix = 'safaruma:rl'
+) {
   if (!process.env.UPSTASH_REDIS_REST_URL || !process.env.UPSTASH_REDIS_REST_TOKEN) {
     return null
   }
   return new Ratelimit({
     redis: Redis.fromEnv(),
     limiter: Ratelimit.slidingWindow(requests, window),
-    prefix: 'safaruma:rl',
+    prefix,
   })
 }
 
@@ -17,6 +21,8 @@ function makeRatelimit(requests: number, window: `${number} s` | `${number} m` |
 export const authRatelimit = makeRatelimit(5, '15 m')
 // 30 requests / minute for conversation/message endpoints
 export const apiRatelimit = makeRatelimit(30, '1 m')
+// 5 contact form submissions / 15 minutes per IP
+export const contactRatelimit = makeRatelimit(5, '15 m', 'safaruma:rl:contact')
 
 /**
  * Returns a 429 response if rate-limited, null otherwise.

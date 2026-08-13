@@ -18,10 +18,33 @@ const SUBJECTS = [
 export default function ContactPage() {
   const [form, setForm] = useState({ nom: '', prenom: '', email: '', telephone: '', sujet: '', message: '' });
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSent(true);
+    setSending(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Impossible d’envoyer votre message.');
+      }
+
+      setSent(true);
+      setForm({ nom: '', prenom: '', email: '', telephone: '', sujet: '', message: '' });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Impossible d’envoyer votre message.');
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -91,7 +114,7 @@ export default function ContactPage() {
             <span style={{ color: '#C9A84C' }}>Nous sommes là.</span>
           </h1>
           <p style={{ fontSize: '1rem', color: 'rgba(255,255,255,0.6)', lineHeight: 1.7, margin: 0 }}>
-            Notre équipe répond en moins de 24h. Pour les urgences, contactez-nous directement par WhatsApp.
+            Notre équipe répond en moins de 24h. Une assistance WhatsApp est disponible 24h/24 pendant votre séjour.
           </p>
         </div>
       </section>
@@ -147,7 +170,8 @@ export default function ContactPage() {
                   <textarea className="contact-input" required rows={5} placeholder="Décrivez votre demande..." value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} style={{ resize: 'vertical', minHeight: 120 }} />
                 </div>
 
-                <button type="submit" className="contact-submit">Envoyer le message</button>
+                {error && <p role="alert" style={{ fontSize: '0.78rem', color: '#B42318', textAlign: 'center', margin: 0 }}>{error}</p>}
+                <button type="submit" className="contact-submit" disabled={sending}>{sending ? 'Envoi en cours…' : 'Envoyer le message'}</button>
                 <p style={{ fontSize: '0.68rem', color: '#AEA491', textAlign: 'center', margin: 0 }}>Réponse garantie sous 24h · Données protégées</p>
               </form>
             )}
@@ -171,7 +195,7 @@ export default function ContactPage() {
                   <div className="contact-info-icon">📞</div>
                   <div>
                     <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: 2 }}>Téléphone</div>
-                    <a href="tel:+33187661234" style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1A1209', textDecoration: 'none' }}>+33 1 87 66 12 34</a>
+                    <a href="tel:+33743959170" style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1A1209', textDecoration: 'none' }}>+33 7 43 95 91 70</a>
                   </div>
                 </div>
 
@@ -179,8 +203,8 @@ export default function ContactPage() {
                   <div className="contact-info-icon">💬</div>
                   <div>
                     <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: 2 }}>WhatsApp</div>
-                    <a href="https://wa.me/33755981234" style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1A1209', textDecoration: 'none' }}>+33 7 55 98 12 34</a>
-                    <div style={{ fontSize: '0.72rem', color: '#7A6D5A' }}>Lun–Sam · 9h–20h</div>
+                    <a href="https://wa.me/message/3LAXCIZV7FFEK1" style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1A1209', textDecoration: 'none' }}>+33 7 43 95 91 70</a>
+                    <div style={{ fontSize: '0.72rem', color: '#7A6D5A' }}>Lundi–dimanche · 24h/24</div>
                   </div>
                 </div>
 
@@ -194,18 +218,17 @@ export default function ContactPage() {
                 <div className="contact-info-card">
                   <div className="contact-info-icon">🗼</div>
                   <div>
-                    <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: 2 }}>Paris — Siège</div>
-                    <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1A1209' }}>12 Rue de la Paix</div>
-                    <div style={{ fontSize: '0.78rem', color: '#7A6D5A' }}>75001 Paris, France</div>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: 2 }}>United Kingdom — Siège</div>
+                    <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1A1209' }}>Unit 13 Freeland Park Wareham Road</div>
+                    <div style={{ fontSize: '0.78rem', color: '#7A6D5A' }}>Lytchett Matravers, Poole, England, BH16 6FA</div>
                   </div>
                 </div>
 
                 <div className="contact-info-card">
                   <div className="contact-info-icon">🕌</div>
                   <div>
-                    <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: 2 }}>Makkah — Bureau local</div>
-                    <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1A1209' }}>Al-Aziziyah District</div>
-                    <div style={{ fontSize: '0.78rem', color: '#7A6D5A' }}>Makkah Al-Mukarramah, KSA</div>
+                    <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: 2 }}>Medine — Bureau local</div>
+                    <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#1A1209' }}>Madinah, KSA</div>
                   </div>
                 </div>
 
@@ -216,9 +239,7 @@ export default function ContactPage() {
               <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.18em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: '1rem' }}>Horaires</div>
               <div style={{ background: 'white', border: '1px solid #EDE8DC', borderRadius: 16, padding: '1.25rem 1.5rem' }}>
                 {[
-                  { j: 'Lundi – Vendredi', h: '9h00 – 20h00' },
-                  { j: 'Samedi', h: '10h00 – 18h00' },
-                  { j: 'Dimanche', h: 'Fermé' },
+                  { j: 'Lundi – Dimanche', h: '24h/24' },
                 ].map(({ j, h }) => (
                   <div key={j} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', padding: '0.4rem 0', borderBottom: '1px solid #F5F2EC', color: '#5A4E3A' }}>
                     <span>{j}</span>

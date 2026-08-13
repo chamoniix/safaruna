@@ -45,7 +45,7 @@ export default function ConfidentialitePage() {
 
       <section id="preambule">
         <h2 style={h2}>1. Préambule</h2>
-        <p style={p}>SAFARUMA est exploité par <strong>HOLDINGAI LTD</strong>, société immatriculée en Angleterre et au Pays de Galles (numéro 16382871), dont le siège social est situé Wareham Road, Freeland Park, Poole, BH16 6FA, Royaume-Uni.</p>
+        <p style={p}>SAFARUMA est exploité par <strong>HOLDINGAI LTD</strong>, société immatriculée en Angleterre et au Pays de Galles (numéro 16382871), dont le siège social est situé Unit 13 Freeland Park Wareham Road, Lytchett Matravers, Poole, England, BH16 6FA.</p>
         <p style={p}>Nous accordons la plus grande importance à la protection de vos données personnelles. Cette politique vous explique quelles données nous collectons, pourquoi et comment nous les utilisons, avec qui nous les partageons, et quels sont vos droits.</p>
       </section>
 
@@ -55,7 +55,7 @@ export default function ConfidentialitePage() {
           <div className="box-title">Coordonnées du responsable</div>
           <p style={{ ...p, marginBottom: 0 }}>
             <strong>HOLDINGAI LTD</strong><br />
-            Wareham Road, Freeland Park, Poole, BH16 6FA, GB<br />
+            Unit 13 Freeland Park Wareham Road, Lytchett Matravers, Poole, England, BH16 6FA<br />
             Email : <a href="mailto:contact@safaruma.com" style={{ color: '#C9A84C' }}>contact@safaruma.com</a>
           </p>
         </div>
@@ -171,7 +171,7 @@ export default function ConfidentialitePage() {
         <p style={p}>Pour toute question relative à cette politique ou à vos données :</p>
         <ul style={ul}>
           <li style={li}>Email : <a href="mailto:contact@safaruma.com" style={{ color: '#C9A84C' }}>contact@safaruma.com</a></li>
-          <li style={li}>Courrier : HOLDINGAI LTD, Wareham Road, Freeland Park, Poole, BH16 6FA, GB</li>
+          <li style={li}>Courrier : HOLDINGAI LTD, Unit 13 Freeland Park Wareham Road, Lytchett Matravers, Poole, England, BH16 6FA</li>
         </ul>
       </section>
 

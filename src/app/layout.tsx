@@ -83,7 +83,7 @@ export default async function RootLayout({
                 "logo": { "@type": "ImageObject", "url": "https://safaruma.com/logo.png", "width": 512, "height": 512 },
                 "description": "Plateforme francophone de guides privés certifiés pour la Omra à La Mecque et Médine.",
                 "slogan": "La première plateforme dédiée aux guides privés pour la Omra",
-                "address": { "@type": "PostalAddress", "streetAddress": "Wareham Road", "addressLocality": "Freeland Park, Poole", "postalCode": "BH16 6FA", "addressCountry": "GB" },
+                "address": { "@type": "PostalAddress", "streetAddress": "Unit 13 Freeland Park Wareham Road", "addressLocality": "Lytchett Matravers, Poole", "addressRegion": "England", "postalCode": "BH16 6FA", "addressCountry": "GB" },
                 "areaServed": ["FR","BE","CH","MC","LU","MA","DZ","TN","SN","CI","ML","BF","GN","NE","TG","BJ","CM","GA","CA"],
                 "knowsAbout": ["Omra","Pèlerinage islamique","La Mecque","Médine","Tawaf","Sa'i","Ihram","Lieux saints"],
                 "sameAs": [

@@ -550,7 +550,7 @@ export default function CertificationClient() {
           </p>
           <div className="cert-btn-row cert-reveal cert-reveal-d3">
             <Link href="/guide/inscription" className="cert-btn-gold">Passer la certification →</Link>
-            <a href="https://wa.me/message/ZGUPRJRNVJRGN1" target="_blank" rel="noopener noreferrer" className="cert-btn-ghost">Questions ? WhatsApp</a>
+            <a href="https://wa.me/message/3LAXCIZV7FFEK1" target="_blank" rel="noopener noreferrer" className="cert-btn-ghost">Questions ? WhatsApp</a>
           </div>
         </div>
       </section>

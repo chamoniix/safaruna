@@ -47,7 +47,7 @@ const FORMULES = [
     cta: 'Construire mon voyage complet',
     ctaHref: '/guides',
     ctaSecondaire: 'Parler à un conseiller',
-    ctaSecondaireHref: 'https://wa.me/33600000000',
+    ctaSecondaireHref: 'https://wa.me/message/3LAXCIZV7FFEK1',
     highlight: true,
   },
   {

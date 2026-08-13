@@ -5,7 +5,7 @@ const BREVO_URL = 'https://api.brevo.com/v3/smtp/email';
 // ─── Sécurité : échappement HTML ────────────────────────────────
 // Toutes les données dynamiques (noms, messages, etc.) passent par
 // cette fonction avant injection dans les templates HTML.
-function escapeHtml(str: unknown): string {
+export function escapeHtml(str: unknown): string {
   return String(str ?? '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -18,12 +18,15 @@ interface EmailPayload {
   to: { email: string; name?: string };
   subject: string;
   html: string;
+  replyTo?: { email: string; name?: string };
+  throwOnError?: boolean;
 }
 
-export async function sendEmail({ to, subject, html }: EmailPayload): Promise<void> {
+export async function sendEmail({ to, subject, html, replyTo, throwOnError = false }: EmailPayload): Promise<void> {
   const apiKey = process.env.BREVO_API_KEY;
   if (!apiKey) {
     console.warn('[email] BREVO_API_KEY not set — skipping send');
+    if (throwOnError) throw new Error('BREVO_API_KEY not set');
     return;
   }
 
@@ -33,6 +36,7 @@ export async function sendEmail({ to, subject, html }: EmailPayload): Promise<vo
       email: process.env.SMTP_FROM ?? 'noreply@safaruma.com',
     },
     to: [{ email: to.email, name: to.name ?? to.email }],
+    ...(replyTo && { replyTo: { email: replyTo.email, name: replyTo.name ?? replyTo.email } }),
     subject,
     htmlContent: html,
   };
@@ -51,9 +55,11 @@ export async function sendEmail({ to, subject, html }: EmailPayload): Promise<vo
     if (!res.ok) {
       const err = await res.text();
       console.error('[email] Brevo error', res.status, err);
+      if (throwOnError) throw new Error(`Brevo error ${res.status}`);
     }
   } catch (err) {
     console.error('[email] fetch failed', err);
+    if (throwOnError) throw err;
   }
 }
 
@@ -177,7 +183,7 @@ export function sendWelcomeGuide(to: string, name: string): Promise<void> {
         </ol>
       </div>
       ${divider()}
-      ${p('Des questions ? Contactez-nous directement à <a href="mailto:guides@safaruma.com" style="color:#C9A84C;">guides@safaruma.com</a>')}
+      ${p('Des questions ? Contactez-nous directement à <a href="mailto:contact@safaruma.com" style="color:#C9A84C;">contact@safaruma.com</a>')}
     `),
   });
 }
@@ -218,7 +224,7 @@ export function sendGuideAccess(opts: {
       <div style="text-align:center;padding:8px 0;">
         ${btn('Accéder à mon espace guide', loginUrl)}
       </div>
-      ${p('<small style="color:#9A8D7A;">Conservez ces identifiants en lieu sûr. En cas de problème : <a href="mailto:guide@safaruma.com" style="color:#C9A84C;">guide@safaruma.com</a></small>')}
+      ${p('<small style="color:#9A8D7A;">Conservez ces identifiants en lieu sûr. En cas de problème : <a href="mailto:contact@safaruma.com" style="color:#C9A84C;">contact@safaruma.com</a></small>')}
     `),
   });
 }

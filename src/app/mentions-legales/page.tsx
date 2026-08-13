@@ -29,7 +29,7 @@ export default function MentionsLegales() {
           {[
             ['Société',                  'HOLDINGAI LTD'],
             ['Numéro d\'enregistrement', '16382871 (Companies House, England & Wales)'],
-            ['Siège social',             'Lytchett House, 13 Freeland Park, Wareham Road, Poole, Dorset, BH16 6FA, United Kingdom'],
+            ['Siège social',             'Unit 13 Freeland Park Wareham Road, Lytchett Matravers, Poole, England, BH16 6FA'],
             ['Incorporée le',            '11 avril 2025'],
             ['Marque exploitée',         'SAFARUMA — plateforme de mise en relation pèlerins / guides privés pour la Omra'],
             ['Email de contact',         'contact@safaruma.com'],

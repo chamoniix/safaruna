@@ -501,7 +501,7 @@ export default function GuideOmraComplet() {
             <p>Naïm LAAMARI et les guides SAFARUMA vous accompagnent pas à pas — rituels, du'as, histoire et spiritualité — pour que votre Omra soit inoubliable.</p>
             <div className="go-cta-btns">
               <Link href="/guides" className="go-btn-gold">Trouver mon guide →</Link>
-              <a href="https://wa.me/message/ZGUPRJRNVJRGN1" target="_blank" rel="noopener noreferrer" className="go-btn-outline">WhatsApp SAFARUMA</a>
+              <a href="https://wa.me/message/3LAXCIZV7FFEK1" target="_blank" rel="noopener noreferrer" className="go-btn-outline">WhatsApp SAFARUMA</a>
             </div>
           </div>
 

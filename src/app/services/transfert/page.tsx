@@ -2,6 +2,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
+import { BOOKING_PRICES } from "@/lib/booking-pricing";
 
 export const metadata = {
   title: "Transferts Omra : voiture privée, van & Train Haramayn | SAFARUMA",
@@ -13,12 +14,12 @@ const OPTIONS = [
   {
     icon: '🚗',
     title: 'Voiture privée 4–5 places',
-    price: 'Inclus',
-    sub: 'Forfaits Essentielle & Histoire',
+    price: `${BOOKING_PRICES.localCarPerDay}€/jour`,
+    sub: 'Visites locales',
     features: [
       'Berline ou SUV climatisé',
       'Chauffeur guide ou chauffeur dédié',
-      'Aéroport ↔ hôtel ↔ lieux saints',
+      'Hôtel ↔ lieux de visite locaux',
       'Masjid Al-Haram, Jabal Nour, Jabal Thawr',
       'Disponibilité journalière flexible',
     ],
@@ -27,8 +28,8 @@ const OPTIONS = [
   {
     icon: '🚐',
     title: 'Van 7–9 places',
-    price: 'Inclus',
-    sub: 'Forfaits famille & groupe',
+    price: 'Sur devis',
+    sub: 'Familles et groupes',
     features: [
       'Van Hiace ou Toyota Coaster 9 places',
       'Idéal familles ou groupes d\'amis',
@@ -160,10 +161,10 @@ export default function TransfertPage() {
       {/* CTA */}
       <section className="cta-section">
         <h2 className="reveal" style={{ color: 'white' }}>
-          Votre transfert est <em style={{ color: 'var(--gold)' }}>inclus.</em>
+          Votre transport, <em style={{ color: 'var(--gold)' }}>adapté à vos besoins.</em>
         </h2>
         <p className="reveal reveal-d1" style={{ color: 'rgba(255,255,255,0.5)', maxWidth: 440, margin: '1rem auto 2.5rem', lineHeight: 1.8 }}>
-          Choisissez un guide SAFARUMA et votre voiture privée ou van est inclus dans votre forfait dès le premier jour.
+          La voiture privée pour les visites locales est disponible à {BOOKING_PRICES.localCarPerDay}€/jour. Les vans et minibus sont proposés sur devis selon la taille du groupe.
         </p>
         <div className="reveal reveal-d2">
           <Link href="/guides" className="btn-primary" style={{ background: 'var(--gold)', color: 'var(--deep)', fontWeight: 700 }}>

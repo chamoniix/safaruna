@@ -4,7 +4,13 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { apiRatelimit, checkRateLimit } from '@/lib/ratelimit'
-import { BASE_PACKAGES } from '@/lib/packages'
+import { BASE_PACKAGES, type CityChoice } from '@/lib/packages'
+import {
+  BOOKING_PRICES,
+  calculateBookingTransportPrice,
+  isLocalTransportOption,
+  isTransportOption,
+} from '@/lib/booking-pricing'
 
 export async function POST(req: NextRequest) {
   const limited = await checkRateLimit(req, apiRatelimit)
@@ -30,15 +36,31 @@ export async function POST(req: NextRequest) {
     selectedGuideSlugMadinah,
     selectedPlaces,
     transportOption,
-    withCar,
+    taxiDirection,
+    localTransportMakkah,
+    localTransportMadinah,
   } = body
 
-  if (!totalPrice || totalPrice <= 0)
+  const clientTotal = Number(totalPrice)
+  if (!Number.isFinite(clientTotal) || clientTotal <= 0)
     return NextResponse.json({ error: 'Montant invalide' }, { status: 400 })
 
   const nbP = Number(nbPersonnes)
   if (!Number.isInteger(nbP) || nbP < 1 || nbP > 20)
     return NextResponse.json({ error: 'Nombre de personnes invalide' }, { status: 400 })
+
+  if (!['MAKKAH', 'MADINAH', 'BOTH'].includes(cityChoice))
+    return NextResponse.json({ error: 'Destination invalide' }, { status: 400 })
+  if (!isTransportOption(transportOption))
+    return NextResponse.json({ error: 'Transport intercité invalide' }, { status: 400 })
+  if (!isLocalTransportOption(localTransportMakkah) || !isLocalTransportOption(localTransportMadinah))
+    return NextResponse.json({ error: 'Transport local invalide' }, { status: 400 })
+  if (transportOption === 'TAXI_ONE' && !['MAKKAH', 'MADINAH'].includes(taxiDirection))
+    return NextResponse.json({ error: 'Direction du taxi invalide' }, { status: 400 })
+
+  const selectedPlaceKeys: string[] = Array.isArray(selectedPlaces)
+    ? selectedPlaces.filter((key: unknown): key is string => typeof key === 'string')
+    : []
 
   // ── Validation du prix côté serveur ──────────────────────────────────────
   // Le prix doit être calculé à partir de la base de données, jamais depuis le client
@@ -70,9 +92,7 @@ export async function POST(req: NextRequest) {
   // Prix de base : guide-specific si dispo, sinon BASE_PACKAGES
   const expectedBase = pkg?.pricePerPerson ?? libPkg!.basePrice
   const includedPlaces: string[] = libPkg?.includedPlaces ?? []
-  const extraPlaceKeys: string[] = Array.isArray(selectedPlaces)
-    ? selectedPlaces.filter((pk: string) => !includedPlaces.includes(pk))
-    : []
+  const extraPlaceKeys = selectedPlaceKeys.filter(placeKey => !includedPlaces.includes(placeKey))
   let extraPlacesTotal = 0
   if (extraPlaceKeys.length > 0) {
     const placePriceRecords = await prisma.placePrice.findMany({
@@ -80,23 +100,27 @@ export async function POST(req: NextRequest) {
     })
     extraPlacesTotal = extraPlaceKeys.reduce((sum, pk) => {
       const rec = placePriceRecords.find(r => r.placeKey === pk)
-      return sum + (rec?.price ?? 50)
+      return sum + (rec?.price ?? BOOKING_PRICES.defaultPlace)
     }, 0)
   }
 
-  // Transport
-  const prixTransport = cityChoice === 'BOTH'
-    ? transportOption === 'TRAIN' ? 80 * nbP
-    : (transportOption === 'TAXI_RT' || transportOption === 'TAXI_ONE') ? 240
-    : 0
-    : 0
-  const prixVoiture = withCar ? 280 : 0
-  const prixGroupe = nbP > 7 ? 200 : 0
+  // Transport : même calcul partagé avec le récapitulatif, validé côté serveur.
+  const transportPricing = calculateBookingTransportPrice({
+    cityChoice: cityChoice as CityChoice,
+    nbPeople: nbP,
+    selectedPlaces: selectedPlaceKeys,
+    transportOption,
+    localTransportMakkah,
+    localTransportMadinah,
+  })
+  const prixTransport = transportPricing.intercity
+  const prixVoiture = transportPricing.localCar
+  const prixGroupe = nbP > 7 ? BOOKING_PRICES.groupSurcharge : 0
 
   const expectedPrice = expectedBase + extraPlacesTotal + prixTransport + prixVoiture + prixGroupe
   // Tolérance de 1€ pour les arrondis éventuels
-  if (Math.abs(totalPrice - expectedPrice) > 1) {
-    console.error(`[SECURITY] Prix client ${totalPrice}€ ≠ prix serveur ${expectedPrice}€ pour ${effectiveSlug}/${packageName}`)
+  if (Math.abs(clientTotal - expectedPrice) > 1) {
+    console.error(`[SECURITY] Prix client ${clientTotal}€ ≠ prix serveur ${expectedPrice}€ pour ${effectiveSlug}/${packageName}`)
     return NextResponse.json({ error: 'Montant invalide' }, { status: 400 })
   }
   // ─────────────────────────────────────────────────────────────────────────
@@ -108,11 +132,30 @@ export async function POST(req: NextRequest) {
     Math.random().toString(36).slice(2, 5).toUpperCase()
 
   try {
+    const normalizedBody = {
+      ...body,
+      nbPersonnes: nbP,
+      selectedPlaces: selectedPlaceKeys,
+      totalPrice: expectedPrice,
+      withCar: localTransportMakkah === 'CAR' || localTransportMadinah === 'CAR',
+      pricing: {
+        base: expectedBase,
+        places: extraPlacesTotal,
+        intercityTransport: prixTransport,
+        localCarMakkah: transportPricing.localCarMakkah,
+        localCarMadinah: transportPricing.localCarMadinah,
+        localCarDaysMakkah: transportPricing.makkahDays,
+        localCarDaysMadinah: transportPricing.madinahDays,
+        group: prixGroupe,
+        total: expectedPrice,
+      },
+    }
+
     // Sauvegarde le draft
     await prisma.reservationDraft.create({
       data: {
         refNumber,
-        data: JSON.stringify(body),
+        data: JSON.stringify(normalizedBody),
         expiresAt: new Date(Date.now() + 30 * 60 * 1000),
       },
     })
@@ -134,7 +177,7 @@ export async function POST(req: NextRequest) {
               description: `Voyage spirituel · ${destLabel} · ${nbPersonnes} personne(s)`,
               images: ['https://safaruma.com/og-image.jpg'],
             },
-            unit_amount: Math.round(totalPrice * 100),
+            unit_amount: Math.round(expectedPrice * 100),
           },
           quantity: 1,
         },

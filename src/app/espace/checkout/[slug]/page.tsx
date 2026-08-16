@@ -9,10 +9,16 @@ import { fr as frLocale } from 'date-fns/locale'
 import 'react-day-picker/style.css'
 import { PLACES, type Place } from '@/lib/places'
 import { BASE_PACKAGES, getPackageForCity, type CityChoice } from '@/lib/packages'
+import {
+  BOOKING_PRICES,
+  calculateBookingTransportPrice,
+  calculateLocalCarDays,
+  type LocalTransportOption,
+  type TransportOption,
+} from '@/lib/booking-pricing'
 
 // ── Types ─────────────────────────────────────────
 type Gender = 'HOMME' | 'FEMME' | 'MIXTE'
-type TransportOption = 'NONE' | 'TRAIN' | 'TAXI_RT' | 'TAXI_ONE'
 
 const STEPS_SINGLE = ['Destination', 'Dates & Profil', 'Visites', 'Votre guide', 'Récap']
 const STEPS_BOTH   = ['Destination', 'Vos guides', 'Dates & Profil', 'Visites', 'Récap']
@@ -42,7 +48,7 @@ function PlaceSelector({
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
         {places.map(place => {
           const isSelected = selected.includes(place.key)
-          const prix = prices[place.key] ?? 50
+          const prix = prices[place.key] ?? BOOKING_PRICES.defaultPlace
           return (
             <div key={place.key} style={{
               background: isSelected ? 'rgba(201,168,76,0.06)' : 'white',
@@ -168,45 +174,6 @@ function formatGuideCity(city: string): string {
 const MAKKAH_HISTORIQUE = ['hunayn']
 const MADINAH_HISTORIQUE = ['badr', 'khandaq', 'bir-aris', 'masjid-ghamamah']
 
-// Durée de visite en heures par lieu
-const PLACE_HOURS: Record<string, number> = {
-  // Makkah
-  'jabal-nour':  2.5,
-  'hira':        2.5,   // même montagne → bonus combo -1h
-  'jabal-thawr': 3.0,
-  'arafat':      2.0,
-  'muzdalifah':  1.0,
-  'mina':        1.0,
-  'hunayn':      2.0,   // historique Makkah
-  // Madinah
-  'masjid-quba':     1.0,
-  'qiblatayn':       1.0,  // combo avec Quba → -0.5h
-  'baqi':            1.0,
-  'ohoud':           2.5,
-  'masjid-fateh':    1.0,  // combo avec Ohoud → -0.5h
-  'marche-dattes':   1.0,
-  'badr':            4.0,  // loin de Madinah (2h de route)
-  'khandaq':         1.5,
-  'bir-aris':        1.0,
-  'masjid-ghamamah': 1.0,
-}
-
-const HOURS_PER_DAY = 6
-
-function calcCarDays(selectedPlaces: string[], city: 'MAKKAH' | 'MADINAH'): number {
-  const cityKeys = city === 'MAKKAH'
-    ? [...PLACES.filter(p => p.category === 'MAKKAH' && !p.includedInBase).map(p => p.key), ...MAKKAH_HISTORIQUE]
-    : [...PLACES.filter(p => p.category === 'MADINAH' && !p.includedInBase).map(p => p.key), ...MADINAH_HISTORIQUE]
-  const selected = selectedPlaces.filter(k => cityKeys.includes(k))
-  if (selected.length === 0) return 1
-  let h = selected.reduce((sum, k) => sum + (PLACE_HOURS[k] ?? 1.5), 0)
-  // Bonuses de proximité
-  if (city === 'MAKKAH' && selected.includes('jabal-nour') && selected.includes('hira')) h -= 1.0
-  if (city === 'MADINAH' && selected.includes('masjid-quba') && selected.includes('qiblatayn')) h -= 0.5
-  if (city === 'MADINAH' && selected.includes('ohoud') && selected.includes('masjid-fateh')) h -= 0.5
-  return Math.max(1, Math.ceil(h / HOURS_PER_DAY))
-}
-
 // ── Page principale ───────────────────────────────
 export default function CheckoutPage() {
   const params = useParams<{ slug: string }>()
@@ -247,8 +214,8 @@ export default function CheckoutPage() {
   const [selectedPlaces, setSelectedPlaces] = useState<string[]>([])
   const [transportOption, setTransportOption] = useState<TransportOption>('NONE')
   const [taxiDirection, setTaxiDirection] = useState<'MAKKAH' | 'MADINAH' | null>(null)
-  const [localTransportMakkah, setLocalTransportMakkah] = useState<'NONE' | 'TAXI' | 'CAR'>('NONE')
-  const [localTransportMadinah, setLocalTransportMadinah] = useState<'NONE' | 'TAXI' | 'CAR'>('NONE')
+  const [localTransportMakkah, setLocalTransportMakkah] = useState<LocalTransportOption>('NONE')
+  const [localTransportMadinah, setLocalTransportMadinah] = useState<LocalTransportOption>('NONE')
   const [visitSubStep, setVisitSubStep] = useState<'MAKKAH' | 'MADINAH' | 'TRANSPORT'>('MAKKAH')
   const [localTransportTab, setLocalTransportTab] = useState<'MAKKAH' | 'MADINAH'>('MAKKAH')
   const [localTransportMadinahSeen, setLocalTransportMadinahSeen] = useState(false)
@@ -392,20 +359,31 @@ export default function CheckoutPage() {
   // Calcul prix — forfait flat 1-7 personnes
   const prixBase = basePackage?.basePrice ?? 0
   const extraPlaces = selectedPlaces.filter(pk => !basePackage?.includedPlaces.includes(pk))
-  const prixLieux = extraPlaces.reduce((sum, pk) => sum + (placePrices[pk] ?? 50), 0)
-  const prixTransport = cityChoice === 'BOTH'
-    ? transportOption === 'TRAIN' ? 80 * nbPersonnes
-    : transportOption === 'TAXI_RT' ? 240
-    : transportOption === 'TAXI_ONE' ? 120
-    : 0
-    : 0
-  const daysMakkah   = calcCarDays(selectedPlaces, 'MAKKAH')
-  const daysMadinah  = calcCarDays(selectedPlaces, 'MADINAH')
-  const prixVoitureMakkah  = localTransportMakkah  === 'CAR' ? daysMakkah  * 45 : 0
-  const prixVoitureMadinah = localTransportMadinah === 'CAR' ? daysMadinah * 45 : 0
-  const prixVoiture = prixVoitureMakkah + prixVoitureMadinah
-  const TARIF_GROUPE = 200
-  const prixGroupe = nbPersonnes > 7 ? TARIF_GROUPE : 0
+  const prixLieux = extraPlaces.reduce((sum, pk) => sum + (placePrices[pk] ?? BOOKING_PRICES.defaultPlace), 0)
+  const transportPricing = cityChoice
+    ? calculateBookingTransportPrice({
+        cityChoice,
+        nbPeople: nbPersonnes,
+        selectedPlaces,
+        transportOption,
+        localTransportMakkah,
+        localTransportMadinah,
+      })
+    : {
+        intercity: 0,
+        localCarMakkah: 0,
+        localCarMadinah: 0,
+        localCar: 0,
+        makkahDays: calculateLocalCarDays(selectedPlaces, 'MAKKAH'),
+        madinahDays: calculateLocalCarDays(selectedPlaces, 'MADINAH'),
+      }
+  const prixTransport = transportPricing.intercity
+  const daysMakkah = transportPricing.makkahDays
+  const daysMadinah = transportPricing.madinahDays
+  const prixVoitureMakkah = transportPricing.localCarMakkah
+  const prixVoitureMadinah = transportPricing.localCarMadinah
+  const prixVoiture = transportPricing.localCar
+  const prixGroupe = nbPersonnes > 7 ? BOOKING_PRICES.groupSurcharge : 0
   const total = prixBase + prixLieux + prixTransport + prixVoiture + prixGroupe
 
   // Lieux supplémentaires par ville — historiques fusionnés dans la bonne ville
@@ -947,9 +925,9 @@ export default function CheckoutPage() {
           )
 
           // Sélecteur voiture avec prix dynamique
-          const CarSelector = ({ city, value, onChange }: { city: 'MAKKAH' | 'MADINAH', value: 'NONE' | 'TAXI' | 'CAR', onChange: (v: 'NONE' | 'TAXI' | 'CAR') => void }) => {
-            const days = calcCarDays(selectedPlaces, city)
-            const carPrice = days * 45
+          const CarSelector = ({ city, value, onChange }: { city: 'MAKKAH' | 'MADINAH', value: LocalTransportOption, onChange: (v: LocalTransportOption) => void }) => {
+            const days = calculateLocalCarDays(selectedPlaces, city)
+            const carPrice = days * BOOKING_PRICES.localCarPerDay
             return (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.75rem' }}>
                 {/* Taxi */}
@@ -972,7 +950,7 @@ export default function CheckoutPage() {
                     <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1A1209' }}>🚗 Voiture privée</div>
                     <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>
                       {days} jour{days > 1 ? 's' : ''} estimé{days > 1 ? 's' : ''} selon vos visites
-                      <span style={{ color: '#C9A84C', fontWeight: 600 }}> · 45€/jour</span>
+                      <span style={{ color: '#C9A84C', fontWeight: 600 }}> · {BOOKING_PRICES.localCarPerDay}€/jour</span>
                     </div>
                   </div>
                   <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#C9A84C' }}>+{carPrice}€</div>
@@ -1096,7 +1074,7 @@ export default function CheckoutPage() {
                   {/* Options principale */}
                   {([
                     { key: 'NONE' as TransportOption, title: 'Sans transport', desc: 'Je gère mes déplacements moi-même', price: 'Gratuit' },
-                    { key: 'TRAIN' as TransportOption, title: '🚄 Train Haramayn', desc: 'Aller-retour Makkah ↔ Madinah · Rapide et confortable', price: `+${80 * nbPersonnes}€`, perPerson: '80€/pers' },
+                    { key: 'TRAIN' as TransportOption, title: '🚄 Train Haramayn', desc: 'Aller-retour Makkah ↔ Madinah · Rapide et confortable', price: `+${BOOKING_PRICES.trainPerPerson * nbPersonnes}€`, perPerson: `${BOOKING_PRICES.trainPerPerson}€/pers` },
                     { key: 'TAXI_RT' as TransportOption, title: '🚕 Taxi privé', desc: 'Véhicule privatisé pour votre groupe', price: '', perPerson: '' },
                   ] as { key: TransportOption; title: string; desc: string; price: string; perPerson?: string }[]).map(opt => {
                     const isTaxi = opt.key === 'TAXI_RT'
@@ -1138,7 +1116,7 @@ export default function CheckoutPage() {
                                 <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1A1209' }}>Aller-retour</div>
                                 <div style={{ fontSize: '0.68rem', color: '#7A6D5A' }}>Makkah ↔ Madinah · forfait groupe</div>
                               </div>
-                              <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#C9A84C' }}>+240€</div>
+                              <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#C9A84C' }}>+{BOOKING_PRICES.taxiRoundTrip}€</div>
                             </div>
 
                             {/* Aller simple */}
@@ -1153,7 +1131,7 @@ export default function CheckoutPage() {
                                 <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1A1209' }}>Aller simple</div>
                                 <div style={{ fontSize: '0.68rem', color: '#7A6D5A' }}>Vers une seule ville · forfait groupe</div>
                               </div>
-                              <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#C9A84C' }}>+120€</div>
+                              <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#C9A84C' }}>+{BOOKING_PRICES.taxiOneWay}€</div>
                             </div>
 
                             {/* Choix direction si aller simple */}
@@ -1245,9 +1223,9 @@ export default function CheckoutPage() {
                     )}
 
                     {/* Choix voiture selon ville active */}
-                    {localTransportTab === 'MAKKAH'
-                      ? <CarSelector city="MAKKAH" value={localTransportMakkah} onChange={setLocalTransportMakkah} />
-                      : <CarSelector city="MADINAH" value={localTransportMadinah} onChange={(v) => { setLocalTransportMadinah(v); setLocalTransportMadinahSeen(true) }} />
+                    {(cityChoice === 'MADINAH' || (cityChoice === 'BOTH' && localTransportTab === 'MADINAH'))
+                      ? <CarSelector city="MADINAH" value={localTransportMadinah} onChange={(v) => { setLocalTransportMadinah(v); setLocalTransportMadinahSeen(true) }} />
+                      : <CarSelector city="MAKKAH" value={localTransportMakkah} onChange={setLocalTransportMakkah} />
                     }
 
                     {/* Hint si Madinah non encore vu */}
@@ -1261,10 +1239,10 @@ export default function CheckoutPage() {
                     {(localTransportMakkah !== 'NONE' || localTransportMadinah !== 'NONE') && (
                       <div style={{ marginTop: '1rem', padding: '0.75rem 1rem', background: '#FAF8F0', border: '1px solid #E8DFC8', borderRadius: 10, fontSize: '0.75rem', color: '#4A3F30' }}>
                         {localTransportMakkah !== 'NONE' && (
-                          <div>🕋 Makkah : {localTransportMakkah === 'TAXI' ? 'Taxi à la course (0€)' : `Voiture privée — ${calcCarDays(selectedPlaces, 'MAKKAH')} jour(s) · +${calcCarDays(selectedPlaces, 'MAKKAH') * 45}€`}</div>
+                          <div>🕋 Makkah : {localTransportMakkah === 'TAXI' ? 'Taxi à la course (0€)' : `Voiture privée — ${calculateLocalCarDays(selectedPlaces, 'MAKKAH')} jour(s) · +${calculateLocalCarDays(selectedPlaces, 'MAKKAH') * BOOKING_PRICES.localCarPerDay}€`}</div>
                         )}
                         {localTransportMadinah !== 'NONE' && (
-                          <div style={{ marginTop: localTransportMakkah !== 'NONE' ? '0.35rem' : 0 }}>🌿 Madinah : {localTransportMadinah === 'TAXI' ? 'Taxi à la course (0€)' : `Voiture privée — ${calcCarDays(selectedPlaces, 'MADINAH')} jour(s) · +${calcCarDays(selectedPlaces, 'MADINAH') * 45}€`}</div>
+                          <div style={{ marginTop: localTransportMakkah !== 'NONE' ? '0.35rem' : 0 }}>🌿 Madinah : {localTransportMadinah === 'TAXI' ? 'Taxi à la course (0€)' : `Voiture privée — ${calculateLocalCarDays(selectedPlaces, 'MADINAH')} jour(s) · +${calculateLocalCarDays(selectedPlaces, 'MADINAH') * BOOKING_PRICES.localCarPerDay}€`}</div>
                         )}
                       </div>
                     )}
@@ -1276,7 +1254,7 @@ export default function CheckoutPage() {
               {detailPlace && (() => {
                 const place = PLACES.find(p => p.key === detailPlace)
                 const isSelected = selectedPlaces.includes(detailPlace)
-                const prix = place ? (placePrices[place.key] ?? 50) : 0
+                const prix = place ? (placePrices[place.key] ?? BOOKING_PRICES.defaultPlace) : 0
                 // Couleur de fond illustrative selon catégorie
                 const bgGradient = place?.category === 'MAKKAH' || place?.key === 'hunayn'
                   ? 'linear-gradient(135deg, #2C1A06 0%, #8B4513 40%, #C9A84C 100%)'
@@ -1720,7 +1698,7 @@ export default function CheckoutPage() {
               {/* Visites supp */}
               {extraPlaces.map(pk => {
                 const place = PLACES.find(p => p.key === pk)
-                const prix = placePrices[pk] ?? 50
+                const prix = placePrices[pk] ?? BOOKING_PRICES.defaultPlace
                 return place ? (
                   <div key={pk} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 1.25rem', borderBottom: '1px solid #F5F0E8' }}>
                     <div>
@@ -1760,7 +1738,7 @@ export default function CheckoutPage() {
                     <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>Supplément groupe (8+ personnes)</div>
                     <div style={{ fontSize: '0.7rem', color: '#7A6D5A', marginTop: 2 }}>Forfait groupe</div>
                   </div>
-                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{TARIF_GROUPE}€</div>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{BOOKING_PRICES.groupSurcharge}€</div>
                 </div>
               )}
 

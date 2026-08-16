@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 export const viewport: Viewport = { themeColor: '#FAF7F0' };
 import Link from 'next/link';
 import { IconShield, IconCar, IconAccessibility, IconBuilding, IconDocument, IconGraduationCap } from '@/components/Icons';
+import { BOOKING_PRICES } from '@/lib/booking-pricing';
 
 const WHATSAPP = 'https://wa.me/message/3LAXCIZV7FFEK1';
 
@@ -50,7 +51,7 @@ const SERVICES: Service[] = [
     title: 'Transfert & Transport',
     desc: 'Navettes aéroport, transferts Makkah–Madinah, véhicules privés avec chauffeur certifié. Ponctualité garantie.',
     features: ['Aéroports JED & MED', 'Navette Makkah → Madinah', 'Véhicule privé 4–8 places', 'Suivi temps réel'],
-    price: 'À partir de 45€',
+    price: `À partir de ${BOOKING_PRICES.localCarPerDay}€/jour`,
     color: '#1D5C3A',
     bgLight: '#EAF4EE',
   },

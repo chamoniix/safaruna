@@ -1,15 +1,30 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useActionState, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { signup } from '../connexion/actions';
 import { signIn } from 'next-auth/react';
 
+function safePelerinRedirect(value: string | null): string {
+  if (!value || value.length > 2048 || !value.startsWith('/') || value.startsWith('//') || value.includes('\\')) {
+    return '';
+  }
+
+  try {
+    const url = new URL(value, 'https://safaruma.com');
+    if (url.origin !== 'https://safaruma.com') return '';
+    if (url.pathname !== '/espace' && !url.pathname.startsWith('/espace/')) return '';
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return '';
+  }
+}
+
 function RegisterForm() {
   const searchParams = useSearchParams();
   const refCode = searchParams.get('ref') || '';
-  const redirectParam = searchParams.get('redirect') || '';
+  const redirectParam = safePelerinRedirect(searchParams.get('redirect'));
   // Préserve le tunnel de réservation en cours si l'utilisateur passe par "Se connecter".
   const connexionHref = redirectParam
     ? `/connexion?redirect=${encodeURIComponent(redirectParam)}`
@@ -17,7 +32,7 @@ function RegisterForm() {
   const [pwdError, setPwdError] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [signupState, signupAction, signupPending] = useActionState(signup, { error: '' });
 
   return (
     <>
@@ -144,7 +159,7 @@ function RegisterForm() {
           </div>
 
           {/* Form */}
-          <form style={{ display: 'flex', flexDirection: 'column', gap: '1.125rem' }}>
+          <form action={signupAction} style={{ display: 'flex', flexDirection: 'column', gap: '1.125rem' }}>
 
             {/* Prénom + Nom */}
             <div className="ins-row">
@@ -244,15 +259,20 @@ function RegisterForm() {
             <input type="hidden" name="ref" value={refCode} />
             <input type="hidden" name="redirect" value={redirectParam} />
 
+            {signupState.error && (
+              <p role="alert" aria-live="polite" style={{ fontSize: '0.8rem', color: '#C0392B', margin: 0, textAlign: 'center' }}>
+                {signupState.error}
+              </p>
+            )}
+
             {/* Submit */}
             <button
-              formAction={signup}
+              type="submit"
               className="ins-btn-primary"
-              style={{ marginTop: 4, opacity: (password !== confirmPassword || loading) ? 0.5 : 1, cursor: (password !== confirmPassword || loading) ? 'not-allowed' : 'pointer' }}
-              disabled={password !== confirmPassword || loading}
-              onClick={() => setLoading(true)}
+              style={{ marginTop: 4, opacity: (password !== confirmPassword || signupPending) ? 0.5 : 1, cursor: (password !== confirmPassword || signupPending) ? 'not-allowed' : 'pointer' }}
+              disabled={password !== confirmPassword || signupPending}
             >
-              M&apos;inscrire avec Email
+              {signupPending ? 'Inscription…' : "M'inscrire avec Email"}
             </button>
           </form>
 
@@ -266,11 +286,7 @@ function RegisterForm() {
           {/* Google */}
           <button
             type="button"
-            onClick={() => {
-              const params = new URLSearchParams(window.location.search);
-              const redirect = params.get('redirect') || '/espace/tableau-de-bord';
-              signIn('google', { callbackUrl: redirect });
-            }}
+            onClick={() => signIn('google', { callbackUrl: redirectParam || '/espace/tableau-de-bord' })}
             className="ins-btn-google"
           >
             <svg width="20" height="20" viewBox="0 0 24 24">

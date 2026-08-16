@@ -2,14 +2,36 @@
 import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 
+function safePelerinRedirect(value: string | null): string {
+  if (!value || value.length > 2048 || !value.startsWith('/') || value.startsWith('//') || value.includes('\\')) {
+    return ''
+  }
+
+  try {
+    const url = new URL(value, 'https://safaruma.com')
+    if (url.origin !== 'https://safaruma.com') return ''
+    if (url.pathname !== '/espace' && !url.pathname.startsWith('/espace/')) return ''
+    return `${url.pathname}${url.search}${url.hash}`
+  } catch {
+    return ''
+  }
+}
+
 function VerifyEmailContent() {
   const params = useSearchParams()
   const router = useRouter()
   const token = params.get('token')
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
+  const redirectParam = safePelerinRedirect(params.get('redirect'))
+  const connexionUrl = redirectParam
+    ? `/connexion?verified=1&redirect=${encodeURIComponent(redirectParam)}`
+    : '/connexion?verified=1'
+  const inscriptionUrl = redirectParam
+    ? `/inscription?redirect=${encodeURIComponent(redirectParam)}`
+    : '/inscription'
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>(token ? 'loading' : 'error')
 
   useEffect(() => {
-    if (!token) { setStatus('error'); return }
+    if (!token) return
     fetch('/api/verify-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -19,13 +41,13 @@ function VerifyEmailContent() {
       .then(d => {
         if (d.success) {
           setStatus('success')
-          setTimeout(() => router.push('/connexion?verified=1'), 2000)
+          setTimeout(() => router.push(connexionUrl), 2000)
         } else {
           setStatus('error')
         }
       })
       .catch(() => setStatus('error'))
-  }, [token, router])
+  }, [token, router, connexionUrl])
 
   return (
     <div style={{
@@ -49,7 +71,7 @@ function VerifyEmailContent() {
             <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>✅</div>
             <h2 style={{ color: '#1D5C3A' }}>Email confirmé !</h2>
             <p style={{ color: '#7A6D5A' }}>
-              Redirection vers votre espace...
+              Redirection vers la connexion...
             </p>
           </>
         )}
@@ -60,7 +82,7 @@ function VerifyEmailContent() {
             <p style={{ color: '#7A6D5A', marginBottom: '1.5rem' }}>
               Ce lien a expiré ou a déjà été utilisé.
             </p>
-            <a href="/inscription" style={{
+            <a href={inscriptionUrl} style={{
               display: 'inline-block',
               background: '#C9A84C', color: '#1A1209',
               padding: '0.75rem 1.5rem', borderRadius: 50,

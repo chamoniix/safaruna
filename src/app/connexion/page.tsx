@@ -4,11 +4,27 @@ import Link from 'next/link';
 import { useState, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { resendVerificationEmail } from './actions';
+
+function safePelerinRedirect(value: string | null): string {
+  if (!value || value.length > 2048 || !value.startsWith('/') || value.startsWith('//') || value.includes('\\')) {
+    return '';
+  }
+
+  try {
+    const url = new URL(value, 'https://safaruma.com');
+    if (url.origin !== 'https://safaruma.com') return '';
+    if (url.pathname !== '/espace' && !url.pathname.startsWith('/espace/')) return '';
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return '';
+  }
+}
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectParam = searchParams.get('redirect');
+  const redirectParam = safePelerinRedirect(searchParams.get('redirect'));
   const redirect = redirectParam || '/espace/tableau-de-bord';
   // Préserve le tunnel de réservation en cours si l'utilisateur passe par "Créer un compte".
   const inscriptionHref = redirectParam
@@ -16,11 +32,15 @@ function LoginForm() {
     : '/inscription';
   const registered = searchParams.get('registered');
   const verify = searchParams.get('verify');
+  const verified = searchParams.get('verified');
+  const emailError = searchParams.get('emailError');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendResult, setResendResult] = useState<{ success: boolean; message: string } | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -33,6 +53,17 @@ function LoginForm() {
     } else {
       setError('Identifiants incorrects. Vérifiez votre e-mail et mot de passe.');
     }
+  }
+
+  async function handleResend() {
+    setResendLoading(true);
+    setResendResult(null);
+    const formData = new FormData();
+    formData.set('email', email);
+    formData.set('redirect', redirectParam);
+    const result = await resendVerificationEmail(formData);
+    setResendResult(result);
+    setResendLoading(false);
   }
 
   return (
@@ -90,6 +121,12 @@ function LoginForm() {
               </div>
             )}
 
+            {verified && (
+              <div style={{ background: '#E8F5EE', border: '1px solid rgba(29,92,58,0.2)', borderRadius: 10, padding: '0.75rem 1rem', marginBottom: '1rem', fontSize: '0.85rem', color: '#1D5C3A', fontWeight: 600, textAlign: 'center' }}>
+                ✓ Adresse email confirmée. Vous pouvez maintenant vous connecter.
+              </div>
+            )}
+
             {verify && (
               <div style={{
                 background: '#FEF9EC',
@@ -107,9 +144,23 @@ function LoginForm() {
                     Vérifiez votre boîte mail
                   </div>
                   <div style={{ color: '#7A6D5A', fontSize: '0.82rem', lineHeight: 1.6 }}>
-                    Un email de confirmation a été envoyé.
-                    Cliquez sur le lien pour activer votre compte.
+                    {emailError
+                      ? 'L’envoi initial a échoué. Saisissez votre adresse email ci-dessous, puis demandez un nouvel envoi.'
+                      : 'Un email de confirmation a été envoyé. Cliquez sur le lien pour activer votre compte.'}
                   </div>
+                  <button
+                    type="button"
+                    onClick={handleResend}
+                    disabled={resendLoading}
+                    style={{ marginTop: '0.65rem', padding: 0, border: 'none', background: 'transparent', color: '#9A7418', fontSize: '0.78rem', fontWeight: 700, cursor: resendLoading ? 'not-allowed' : 'pointer' }}
+                  >
+                    {resendLoading ? 'Envoi…' : 'Renvoyer l’email de vérification'}
+                  </button>
+                  {resendResult && (
+                    <div role="status" aria-live="polite" style={{ marginTop: '0.45rem', color: resendResult.success ? '#1D5C3A' : '#C0392B', fontSize: '0.76rem', lineHeight: 1.5 }}>
+                      {resendResult.message}
+                    </div>
+                  )}
                 </div>
               </div>
             )}

@@ -39,7 +39,16 @@ export async function checkRateLimit(
     req.headers.get('x-real-ip') ||
     'unknown'
 
-  const { success, limit, remaining, reset } = await limiter.limit(ip)
+  let result: Awaited<ReturnType<Ratelimit['limit']>>
+  try {
+    result = await limiter.limit(ip)
+  } catch (error) {
+    // Le service Upstash ne doit pas rendre les routes métier indisponibles.
+    console.error('[rate-limit] Upstash indisponible, requête autorisée', error)
+    return null
+  }
+
+  const { success, limit, remaining, reset } = result
 
   if (!success) {
     return NextResponse.json(

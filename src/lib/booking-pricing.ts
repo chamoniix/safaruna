@@ -7,11 +7,14 @@ export type LocalTransportOption = 'NONE' | 'TAXI' | 'CAR'
 const TAXI_ONE_WAY = 120
 
 export const BOOKING_PRICES = {
-  trainPerPerson: 80,
+  trainPerTrip: 80,
+  trainRoundTrip: 160,
   taxiOneWay: TAXI_ONE_WAY,
   taxiRoundTrip: TAXI_ONE_WAY * 2,
   localCarPerDay: 45,
-  groupSurcharge: 200,
+  localMinivanPerDay: 120,
+  localBusPerDay: 500,
+  guideHotelPerNight: 80,
   defaultPlace: 50,
 } as const
 
@@ -53,8 +56,8 @@ export function isLocalTransportOption(value: unknown): value is LocalTransportO
 
 export function calculateLocalCarDays(selectedPlaces: string[], city: 'MAKKAH' | 'MADINAH'): number {
   const cityKeys = city === 'MAKKAH'
-    ? [...PLACES.filter(place => place.category === 'MAKKAH' && !place.includedInBase).map(place => place.key), ...MAKKAH_HISTORICAL]
-    : [...PLACES.filter(place => place.category === 'MADINAH' && !place.includedInBase).map(place => place.key), ...MADINAH_HISTORICAL]
+    ? [...PLACES.filter(place => place.category === 'MAKKAH').map(place => place.key), ...MAKKAH_HISTORICAL]
+    : [...PLACES.filter(place => place.category === 'MADINAH').map(place => place.key), ...MADINAH_HISTORICAL]
   const selected = selectedPlaces.filter(key => cityKeys.includes(key))
 
   if (selected.length === 0) return 1
@@ -67,6 +70,20 @@ export function calculateLocalCarDays(selectedPlaces: string[], city: 'MAKKAH' |
   return Math.max(1, Math.ceil(hours / HOURS_PER_LOCAL_CAR_DAY))
 }
 
+export function getLocalVehiclePricing(nbPeople: number): {
+  dailyRate: number
+  vehicle: 'CAR' | 'MINIVAN' | 'BUS'
+  label: string
+} {
+  if (nbPeople <= 6) {
+    return { dailyRate: BOOKING_PRICES.localCarPerDay, vehicle: 'CAR', label: 'Voiture privée' }
+  }
+  if (nbPeople <= 15) {
+    return { dailyRate: BOOKING_PRICES.localMinivanPerDay, vehicle: 'MINIVAN', label: 'Minivan avec chauffeur' }
+  }
+  return { dailyRate: BOOKING_PRICES.localBusPerDay, vehicle: 'BUS', label: 'Bus avec chauffeur' }
+}
+
 export function calculateBookingTransportPrice(input: {
   cityChoice: CityChoice
   nbPeople: number
@@ -74,6 +91,9 @@ export function calculateBookingTransportPrice(input: {
   transportOption: TransportOption
   localTransportMakkah: LocalTransportOption
   localTransportMadinah: LocalTransportOption
+  sameGuideForBothCities?: boolean
+  sameGuidePrimaryCity?: 'MAKKAH' | 'MADINAH' | null
+  guideBedProvided?: boolean
 }) {
   const {
     cityChoice,
@@ -82,11 +102,14 @@ export function calculateBookingTransportPrice(input: {
     transportOption,
     localTransportMakkah,
     localTransportMadinah,
+    sameGuideForBothCities = false,
+    sameGuidePrimaryCity = null,
+    guideBedProvided = false,
   } = input
 
-  const intercity = cityChoice === 'BOTH'
+  const intercity = cityChoice === 'BOTH' && sameGuideForBothCities
     ? transportOption === 'TRAIN'
-      ? BOOKING_PRICES.trainPerPerson * nbPeople
+      ? BOOKING_PRICES.trainRoundTrip
       : transportOption === 'TAXI_RT'
         ? BOOKING_PRICES.taxiRoundTrip
         : transportOption === 'TAXI_ONE'
@@ -96,12 +119,18 @@ export function calculateBookingTransportPrice(input: {
 
   const makkahDays = calculateLocalCarDays(selectedPlaces, 'MAKKAH')
   const madinahDays = calculateLocalCarDays(selectedPlaces, 'MADINAH')
+  const localVehicle = getLocalVehiclePricing(nbPeople)
   const localCarMakkah = cityChoice !== 'MADINAH' && localTransportMakkah === 'CAR'
-    ? makkahDays * BOOKING_PRICES.localCarPerDay
+    ? makkahDays * localVehicle.dailyRate
     : 0
   const localCarMadinah = cityChoice !== 'MAKKAH' && localTransportMadinah === 'CAR'
-    ? madinahDays * BOOKING_PRICES.localCarPerDay
+    ? madinahDays * localVehicle.dailyRate
     : 0
+
+  const guideHotelNights = cityChoice === 'BOTH' && sameGuideForBothCities && !guideBedProvided
+    ? Math.max(0, (sameGuidePrimaryCity === 'MAKKAH' ? madinahDays : makkahDays) - 1)
+    : 0
+  const guideHotel = guideHotelNights * BOOKING_PRICES.guideHotelPerNight
 
   return {
     intercity,
@@ -110,5 +139,8 @@ export function calculateBookingTransportPrice(input: {
     localCar: localCarMakkah + localCarMadinah,
     makkahDays,
     madinahDays,
+    localVehicle,
+    guideHotelNights,
+    guideHotel,
   }
 }

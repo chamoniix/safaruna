@@ -10,6 +10,7 @@ type Mission = {
   pelerinCountry: string | null;
   packageName: string;
   durationDays: number;
+  missionCities: string[];
   startDate: string;
   endDate: string;
   nbPeople: number;
@@ -156,7 +157,7 @@ export default function GuideMissions() {
                         {r.pelerinCountry && <span style={{ fontSize: '0.68rem', color: '#7A6D5A', display: 'block' }}>{r.pelerinCountry}</span>}
                       </td>
                       <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.75rem', color: '#7A6D5A' }}>
-                        {r.packageName}<br />
+                        {r.missionCities?.length ? r.missionCities.map(city => city === 'MAKKAH' ? 'Makkah' : 'Médine').join(' + ') : r.packageName}<br />
                         <span style={{ fontSize: '0.65rem' }}>{r.durationDays}j</span>
                       </td>
                       <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.72rem', color: '#4A3F30', whiteSpace: 'nowrap' }}>

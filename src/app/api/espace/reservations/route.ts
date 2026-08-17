@@ -49,6 +49,10 @@ export async function GET() {
         },
         package: { select: { name: true, durationDays: true } },
         reviews: { select: { ratingOverall: true, comment: true } },
+        missions: {
+          orderBy: { startDate: 'asc' },
+          include: { guideProfile: { include: { user: { select: { name: true, firstName: true, lastName: true } } } } },
+        },
       }
     }),
     prisma.reservation.aggregate({
@@ -70,9 +74,18 @@ export async function GET() {
     reservations: reservations.map(r => ({
       id: r.id,
       refNumber: r.refNumber,
-      guideName: r.guideProfile.user.name
-        || `${r.guideProfile.user.firstName ?? ''} ${r.guideProfile.user.lastName ?? ''}`.trim()
-        || '—',
+      guideName: r.missions.length > 0
+        ? [...new Set(r.missions.map(mission => mission.guideProfile.user.name
+          || `${mission.guideProfile.user.firstName ?? ''} ${mission.guideProfile.user.lastName ?? ''}`.trim()
+          || 'Guide SAFARUMA'))].join(' · ')
+        : r.guideProfile.user.name
+          || `${r.guideProfile.user.firstName ?? ''} ${r.guideProfile.user.lastName ?? ''}`.trim()
+          || '—',
+      missions: r.missions.map(mission => ({
+        city: mission.city,
+        startDate: mission.startDate.toISOString(),
+        endDate: mission.endDate.toISOString(),
+      })),
       packageName: r.package.name,
       durationDays: r.package.durationDays,
       startDate: new Date(r.startDate).toLocaleDateString('fr-FR'),

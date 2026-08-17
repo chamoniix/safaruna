@@ -16,6 +16,9 @@ type Profile = {
   status: string;
   bio: string | null;
   city: string | null;
+  gender: 'HOMME' | 'FEMME' | null;
+  servesMakkah: boolean;
+  servesMadinah: boolean;
   nationality: string | null;
   experienceYears: number | null;
   languages: { id: string; languageCode: string; level: string }[];
@@ -68,6 +71,9 @@ export default function GuideProfil() {
   const [country, setCountry] = useState('');
   const [bio, setBio] = useState('');
   const [city, setCity] = useState('');
+  const [gender, setGender] = useState<'HOMME' | 'FEMME'>('HOMME');
+  const [servesMakkah, setServesMakkah] = useState(false);
+  const [servesMadinah, setServesMadinah] = useState(false);
   const [nationality, setNationality] = useState('');
   const [experienceYears, setExperienceYears] = useState('');
 
@@ -89,6 +95,9 @@ export default function GuideProfil() {
         setCountry(p.country || '');
         setBio(p.bio || '');
         setCity(p.city || '');
+        setGender(p.gender || 'HOMME');
+        setServesMakkah(p.servesMakkah);
+        setServesMadinah(p.servesMadinah);
         setNationality(p.nationality || '');
         setExperienceYears(p.experienceYears?.toString() || '');
         setLanguages(p.languages);
@@ -106,11 +115,11 @@ export default function GuideProfil() {
       const res = await fetch('/api/guide/profil', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ firstName, lastName, phoneWhatsapp, country, bio, city, nationality, experienceYears }),
+        body: JSON.stringify({ firstName, lastName, phoneWhatsapp, country, bio, city, gender, servesMakkah, servesMadinah, nationality, experienceYears }),
       });
       if (!res.ok) throw new Error('Erreur lors de la sauvegarde');
       setSuccess('Profil mis à jour avec succès.');
-      setProfile(p => p ? { ...p, firstName, lastName, name: `${firstName} ${lastName}`.trim() || p.name, phoneWhatsapp, country, bio, city, nationality, experienceYears: parseInt(experienceYears) || null } : p);
+      setProfile(p => p ? { ...p, firstName, lastName, name: `${firstName} ${lastName}`.trim() || p.name, phoneWhatsapp, country, bio, city, gender, servesMakkah, servesMadinah, nationality, experienceYears: parseInt(experienceYears) || null } : p);
     } catch (e: unknown) {
       setSaveError(e instanceof Error ? e.message : 'Erreur inconnue');
     } finally {
@@ -228,6 +237,23 @@ export default function GuideProfil() {
               <div>
                 <span style={label}>Nationalité</span>
                 <input style={input} value={nationality} onChange={e => setNationality(e.target.value)} placeholder="Marocain(e)" />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div>
+                <span style={label}>Genre du guide</span>
+                <select style={input} value={gender} onChange={e => setGender(e.target.value as 'HOMME' | 'FEMME')}>
+                  <option value="HOMME">Homme</option>
+                  <option value="FEMME">Femme</option>
+                </select>
+              </div>
+              <div>
+                <span style={label}>Villes proposées</span>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <label style={{ ...input, width: 'auto', flex: 1 }}><input type="checkbox" checked={servesMakkah} onChange={e => setServesMakkah(e.target.checked)} /> Makkah</label>
+                  <label style={{ ...input, width: 'auto', flex: 1 }}><input type="checkbox" checked={servesMadinah} onChange={e => setServesMadinah(e.target.checked)} /> Médine</label>
+                </div>
               </div>
             </div>
 

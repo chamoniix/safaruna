@@ -57,6 +57,8 @@ export default function GuideOnboarding() {
   const [guideEmail, setGuideEmail]   = useState('');
   const [whatsapp, setWhatsapp]       = useState('');
   const [city, setCity]               = useState('');
+  const [gender, setGender]           = useState<'HOMME' | 'FEMME' | ''>('');
+  const [serviceCities, setServiceCities] = useState<Array<'MAKKAH' | 'MADINAH'>>([]);
   const [nationality, setNationality] = useState('');
 
   // Step 2
@@ -82,7 +84,7 @@ export default function GuideOnboarding() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           firstName: prenom, lastName: nom, email: guideEmail,
-          whatsapp, city, nationality, bio,
+          whatsapp, city, gender, serviceCities, nationality, bio,
           experienceYears: experienceYears ? Number(experienceYears) : undefined,
           languages: selectedLangues,
           iban: iban || undefined,
@@ -319,6 +321,23 @@ export default function GuideOnboarding() {
                   </Field>
                   <Field label="Nationalité">
                     <input type="text" className="ins-input" style={inputStyle} placeholder="Sénégalaise" value={nationality} onChange={e => setNationality(e.target.value)} />
+                  </Field>
+                  <Field label="Genre du guide">
+                    <select className="ins-input" style={inputStyle} required value={gender} onChange={e => setGender(e.target.value as 'HOMME' | 'FEMME' | '')}>
+                      <option value="">Sélectionner</option>
+                      <option value="HOMME">Homme</option>
+                      <option value="FEMME">Femme</option>
+                    </select>
+                  </Field>
+                  <Field label="Villes proposées">
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      {(['MAKKAH', 'MADINAH'] as const).map(serviceCity => (
+                        <label key={serviceCity} style={{ flex: 1, padding: '0.7rem', border: serviceCities.includes(serviceCity) ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', borderRadius: 10, background: 'white', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}>
+                          <input type="checkbox" checked={serviceCities.includes(serviceCity)} onChange={() => setServiceCities(previous => previous.includes(serviceCity) ? previous.filter(item => item !== serviceCity) : [...previous, serviceCity])} style={{ marginRight: 6 }} />
+                          {serviceCity === 'MAKKAH' ? 'Makkah' : 'Médine'}
+                        </label>
+                      ))}
+                    </div>
                   </Field>
                 </div>
                 <Field label="Photo de profil (JPG/PNG · max 5 Mo)">

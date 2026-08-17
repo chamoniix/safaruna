@@ -17,12 +17,18 @@ export async function GET() {
   }
 
   const reservations = await prisma.reservation.findMany({
-    where: { guideProfileId: guideProfile.id },
+    where: {
+      OR: [
+        { guideProfileId: guideProfile.id },
+        { missions: { some: { guideProfileId: guideProfile.id } } },
+      ],
+    },
     include: {
       pelerin: {
         select: { name: true, firstName: true, lastName: true, email: true },
       },
       package: true,
+      missions: { where: { guideProfileId: guideProfile.id }, orderBy: { startDate: 'asc' } },
     },
     orderBy: { createdAt: 'desc' },
   })

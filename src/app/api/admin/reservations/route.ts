@@ -68,7 +68,11 @@ export async function PATCH(req: NextRequest) {
     },
   });
 
-  if (status === 'CONFIRMED') {
+  if (status === 'CANCELLED' && existing?.status !== 'CANCELLED') {
+    await prisma.availability.deleteMany({ where: { reservationId } });
+  }
+
+  if (status === 'CONFIRMED' && existing?.status !== 'CONFIRMED') {
     const p = reservation.pelerin;
     const gu = reservation.guideProfile.user;
     const pelerinName = p.name || `${p.firstName ?? ''} ${p.lastName ?? ''}`.trim() || 'Pèlerin';

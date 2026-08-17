@@ -1,169 +1,121 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { Prisma } from '@prisma/client'
 import prisma from '@/lib/prisma'
-import { sendEmail } from '@/lib/email'
+import { baseTemplate, btn, divider, escapeHtml, heading, p, sendEmail } from '@/lib/email'
+
+const DAY_MS = 86_400_000
+
+function personName(person: { name: string | null; firstName: string | null; lastName: string | null; email: string | null }): string {
+  return person.name || `${person.firstName ?? ''} ${person.lastName ?? ''}`.trim() || person.email || '—'
+}
+
+function dateFr(date: Date): string {
+  return date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
+}
 
 export async function GET(req: NextRequest) {
-  // Sécurité : vérifie le secret Vercel Cron
   const cronSecret = process.env.CRON_SECRET
-  if (!cronSecret) {
-    console.error('[SECURITY] CRON_SECRET manquant — cron désactivé')
-    return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-  }
-  const authHeader = req.headers.get('authorization')
-  if (authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret || req.headers.get('authorization') !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
   }
 
   const today = new Date()
-  today.setHours(0, 0, 0, 0)
-
-  // Calcule J-3 et J-1
-  const j3 = new Date(today)
-  j3.setDate(j3.getDate() + 3)
-  const j3End = new Date(j3)
-  j3End.setHours(23, 59, 59, 999)
-
-  const j1 = new Date(today)
-  j1.setDate(j1.getDate() + 1)
-  const j1End = new Date(j1)
-  j1End.setHours(23, 59, 59, 999)
-
-  // Récupère les réservations CONFIRMED avec départ J-3 ou J-1
+  today.setUTCHours(0, 0, 0, 0)
+  const j1 = new Date(today.getTime() + DAY_MS)
+  const j3End = new Date(today.getTime() + 4 * DAY_MS - 1)
   const reservations = await prisma.reservation.findMany({
     where: {
       status: 'CONFIRMED',
-      startDate: {
-        gte: j1, // au moins demain
-        lte: j3End, // au plus dans 3 jours
-      },
+      OR: [
+        { startDate: { gte: j1, lte: j3End } },
+        { missions: { some: { startDate: { gte: j1, lte: j3End } } } },
+      ],
     },
     include: {
-      pelerin: {
-        select: {
-          email: true, name: true,
-          firstName: true, lastName: true,
-        },
+      pelerin: { select: { email: true, name: true, firstName: true, lastName: true } },
+      guideProfile: { include: { user: { select: { email: true, name: true, firstName: true, lastName: true } } } },
+      missions: {
+        orderBy: { startDate: 'asc' },
+        include: { guideProfile: { include: { user: { select: { email: true, name: true, firstName: true, lastName: true } } } } },
       },
-      guideProfile: {
-        include: {
-          user: {
-            select: {
-              email: true, name: true,
-              firstName: true, lastName: true,
-            },
-          },
-        },
-      },
-      package: true,
     },
   })
 
   let sent = 0
-  for (const resa of reservations) {
-    const daysUntil = Math.round(
-      (resa.startDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
-    )
-    const isJ3 = daysUntil === 3
-    const isJ1 = daysUntil === 1
+  for (const reservation of reservations) {
+    const flags = ((reservation.optionsJson as Record<string, unknown> | null) ?? {})
+    const nextFlags = { ...flags }
+    const pelerinName = personName(reservation.pelerin)
+    const reservationDays = Math.round((reservation.startDate.getTime() - today.getTime()) / DAY_MS)
 
-    if (!isJ3 && !isJ1) continue
-
-    // Anti-doublon : vérifie optionsJson pour les flags de notification
-    const opts = (resa as any).optionsJson as Record<string, unknown> | null ?? {}
-    const flagKey = isJ1 ? 'notifiedJ1' : 'notifiedJ3'
-    if (opts[flagKey]) continue // déjà envoyé, on skip
-
-    const label = isJ1 ? 'demain' : 'dans 3 jours'
-    const pelerinName = resa.pelerin.name ||
-      `${resa.pelerin.firstName ?? ''} ${resa.pelerin.lastName ?? ''}`.trim() ||
-      resa.pelerin.email || '—'
-    const guideName = resa.guideProfile.user.name ||
-      `${resa.guideProfile.user.firstName ?? ''} ${resa.guideProfile.user.lastName ?? ''}`.trim()
-
-    let emailSentForResa = false
-
-    // Email pèlerin
-    if (resa.pelerin.email) {
-      try {
-        await sendEmail({
-          to: { email: resa.pelerin.email, name: pelerinName },
-          subject: `Rappel — Votre voyage commence ${label} · ${resa.refNumber}`,
-          html: `
-            <h2>Votre voyage commence ${label} !</h2>
-            <p>Référence : <strong>${resa.refNumber}</strong></p>
-            <p>Guide : <strong>${guideName}</strong></p>
-            <p>Destination : ${resa.selectedCities === 'BOTH'
-              ? 'Makkah + Madinah'
-              : resa.selectedCities === 'MAKKAH' ? 'Makkah' : 'Madinah'}</p>
-            <p>Date de départ : <strong>${resa.startDate.toLocaleDateString('fr-FR', {
-              weekday: 'long', day: 'numeric',
-              month: 'long', year: 'numeric',
-            })}</strong></p>
-            <p>Personnes : ${resa.nbPeople}</p>
-            <br/>
-            <p>Votre guide vous contactera pour confirmer le point de rendez-vous.</p>
-            <a href="https://safaruma.com/espace/reservations">
-              Voir les détails de ma réservation
-            </a>
-          `,
-        })
-        sent++
-        emailSentForResa = true
-      } catch (e) { console.error('Email pèlerin notif error:', e) }
+    if ((reservationDays === 1 || reservationDays === 3) && reservation.pelerin.email) {
+      const key = `notifiedClientJ${reservationDays}`
+      if (!flags[key]) {
+        const label = reservationDays === 1 ? 'demain' : 'dans 3 jours'
+        const missionSummary = reservation.missions.length > 0
+          ? reservation.missions.map(mission => `${mission.city === 'MAKKAH' ? 'Makkah' : 'Médine'} : ${dateFr(mission.startDate)}`).join(' · ')
+          : dateFr(reservation.startDate)
+        try {
+          await sendEmail({
+            to: { email: reservation.pelerin.email, name: pelerinName },
+            subject: `Rappel — Votre voyage commence ${label} · ${reservation.refNumber}`,
+            throwOnError: true,
+            html: baseTemplate(`
+              ${heading(`Votre voyage commence ${label} !`)}
+              ${p(`Référence : <strong>${escapeHtml(reservation.refNumber)}</strong>`)}
+              ${p(`Programme : ${escapeHtml(missionSummary)}<br>Voyageurs : ${reservation.nbPeople}`)}
+              ${reservation.ihramAlert ? `<div style="background:#FEE2E2;border:1px solid #DC2626;border-radius:8px;padding:12px 16px;color:#991B1B;font-size:13px;font-weight:700">Attention : mettez votre Ihram dans l’avion ou rendez-vous au Miqat le plus proche avant la Omra.</div>` : ''}
+              ${divider()}
+              ${btn('Voir ma réservation et contacter mon guide', 'https://safaruma.com/espace/reservations')}
+            `),
+          })
+          nextFlags[key] = true
+          sent++
+        } catch (error) { console.error('[cron] rappel pèlerin', error) }
+      }
     }
 
-    // Email guide
-    if (resa.guideProfile.user.email) {
+    const assignments = reservation.missions.length > 0
+      ? reservation.missions.map(mission => ({
+          id: mission.id,
+          city: mission.city,
+          startDate: mission.startDate,
+          endDate: mission.endDate,
+          guide: mission.guideProfile,
+        }))
+      : [{ id: 'legacy', city: reservation.selectedCities || 'MISSION', startDate: reservation.startDate, endDate: reservation.endDate, guide: reservation.guideProfile }]
+
+    for (const assignment of assignments) {
+      const daysUntil = Math.round((assignment.startDate.getTime() - today.getTime()) / DAY_MS)
+      if (daysUntil !== 1 && daysUntil !== 3) continue
+      const key = `notifiedGuide_${assignment.id}_J${daysUntil}`
+      if (flags[key] || !assignment.guide.user.email) continue
+      const guideName = personName(assignment.guide.user)
+      const label = daysUntil === 1 ? 'demain' : 'dans 3 jours'
       try {
         await sendEmail({
-          to: {
-            email: resa.guideProfile.user.email,
-            name: guideName,
-          },
-          subject: `[SAFARUMA] Rappel — Mission ${label} · ${resa.refNumber}`,
-          html: `
-            <h2>Rappel : votre mission commence ${label}</h2>
-            <p>Référence : <strong>${resa.refNumber}</strong></p>
-            <p>Pèlerin : <strong>${pelerinName}</strong></p>
-            <p>Destination : ${resa.selectedCities === 'BOTH'
-              ? 'Makkah + Madinah'
-              : resa.selectedCities === 'MAKKAH' ? 'Makkah' : 'Madinah'}</p>
-            <p>Date : <strong>${resa.startDate.toLocaleDateString('fr-FR', {
-              weekday: 'long', day: 'numeric',
-              month: 'long', year: 'numeric',
-            })}</strong></p>
-            <p>Personnes : ${resa.nbPeople}</p>
-            <br/>
-            <a href="https://safaruma.com/guide/missions">
-              Voir dans mon espace
-            </a>
-          `,
+          to: { email: assignment.guide.user.email, name: guideName },
+          subject: `[SAFARUMA] Rappel — Mission ${label} · ${reservation.refNumber}`,
+          throwOnError: true,
+          html: baseTemplate(`
+            ${heading(`Votre mission commence ${label}`)}
+            ${p(`Référence : <strong>${escapeHtml(reservation.refNumber)}</strong><br>Pèlerin : <strong>${escapeHtml(pelerinName)}</strong>`)}
+            ${p(`Ville : ${escapeHtml(assignment.city === 'MAKKAH' ? 'Makkah' : 'Médine')}<br>Dates : ${escapeHtml(dateFr(assignment.startDate))} au ${escapeHtml(dateFr(assignment.endDate))}<br>Voyageurs : ${reservation.nbPeople}`)}
+            ${reservation.ihramAlert ? `<div style="background:#FEE2E2;border:1px solid #DC2626;border-radius:8px;padding:12px 16px;color:#991B1B;font-size:13px;font-weight:700">Alerte Ihram active pour ce séjour.</div>` : ''}
+            ${divider()}
+            ${btn('Voir dans mon espace guide', 'https://safaruma.com/guide/missions')}
+          `),
         })
+        nextFlags[key] = true
         sent++
-        emailSentForResa = true
-      } catch (e) { console.error('Email guide notif error:', e) }
+      } catch (error) { console.error('[cron] rappel guide', error) }
     }
 
-    // Marque le flag anti-doublon dans optionsJson
-    if (emailSentForResa) {
-      try {
-        await prisma.reservation.update({
-          where: { id: resa.id },
-          data: { optionsJson: { ...opts, [flagKey]: true } as any },
-        })
-      } catch (e) { console.error('Update optionsJson notif error:', e) }
+    if (JSON.stringify(nextFlags) !== JSON.stringify(flags)) {
+      await prisma.reservation.update({ where: { id: reservation.id }, data: { optionsJson: nextFlags as Prisma.InputJsonValue } })
     }
   }
 
-  // Nettoyage des drafts expirés
-  await prisma.reservationDraft.deleteMany({
-    where: { expiresAt: { lt: new Date() } }
-  })
-
-  return NextResponse.json({
-    success: true,
-    reservationsChecked: reservations.length,
-    emailsSent: sent,
-    checkedAt: new Date().toISOString(),
-  })
+  const deletedDrafts = await prisma.reservationDraft.deleteMany({ where: { expiresAt: { lt: new Date() } } })
+  return NextResponse.json({ success: true, reservationsChecked: reservations.length, emailsSent: sent, draftsReleased: deletedDrafts.count, checkedAt: new Date().toISOString() })
 }

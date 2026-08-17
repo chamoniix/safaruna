@@ -11,6 +11,9 @@ const profilPatchSchema = z.object({
   country:         z.string().max(100).optional(),
   bio:             z.string().max(2000).optional(),
   city:            z.string().max(100).optional(),
+  gender:          z.enum(['HOMME', 'FEMME']).optional(),
+  servesMakkah:    z.boolean().optional(),
+  servesMadinah:   z.boolean().optional(),
   nationality:     z.string().max(100).optional(),
   experienceYears: z.coerce.number().int().min(0).max(60).optional(),
 });
@@ -53,6 +56,9 @@ export async function GET() {
       status: gp.status,
       bio: gp.bio,
       city: gp.city,
+      gender: gp.gender,
+      servesMakkah: gp.servesMakkah,
+      servesMadinah: gp.servesMadinah,
       nationality: gp.nationality,
       experienceYears: gp.experienceYears,
       languages: gp.languages,
@@ -82,7 +88,7 @@ export async function PATCH(req: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Données invalides' }, { status: 400 });
   }
-  const { firstName, lastName, phoneWhatsapp, country, bio, city, nationality, experienceYears } = parsed.data;
+  const { firstName, lastName, phoneWhatsapp, country, bio, city, gender, servesMakkah, servesMadinah, nationality, experienceYears } = parsed.data;
 
   await Promise.all([
     prisma.user.update({
@@ -100,6 +106,9 @@ export async function PATCH(req: NextRequest) {
       data: {
         ...(bio !== undefined && { bio: bio.trim() || null }),
         ...(city !== undefined && { city: city.trim() || null }),
+        ...(gender !== undefined && { gender }),
+        ...(servesMakkah !== undefined && { servesMakkah }),
+        ...(servesMadinah !== undefined && { servesMadinah }),
         ...(nationality !== undefined && { nationality: nationality.trim() || null }),
         ...(experienceYears !== undefined && { experienceYears: experienceYears || null }),
       },

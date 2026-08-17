@@ -209,6 +209,7 @@ export default function CheckoutPage() {
   const [langue, setLangue] = useState('fr')
   const [showAllLangues, setShowAllLangues] = useState(false)
   const [showCalendar, setShowCalendar] = useState(false)
+  const [arrivalPoint, setArrivalPoint] = useState<'JEDDAH' | 'MADINAH' | 'MAKKAH' | ''>('')
 
   // Étape 3
   const [selectedPlaces, setSelectedPlaces] = useState<string[]>([])
@@ -216,6 +217,7 @@ export default function CheckoutPage() {
   const [taxiDirection, setTaxiDirection] = useState<'MAKKAH' | 'MADINAH' | null>(null)
   const [localTransportMakkah, setLocalTransportMakkah] = useState<LocalTransportOption>('NONE')
   const [localTransportMadinah, setLocalTransportMadinah] = useState<LocalTransportOption>('NONE')
+  const [guideBedProvided, setGuideBedProvided] = useState(false)
   const [visitSubStep, setVisitSubStep] = useState<'MAKKAH' | 'MADINAH' | 'TRANSPORT'>('MAKKAH')
   const [localTransportTab, setLocalTransportTab] = useState<'MAKKAH' | 'MADINAH'>('MAKKAH')
   const [localTransportMadinahSeen, setLocalTransportMadinahSeen] = useState(false)
@@ -256,11 +258,13 @@ export default function CheckoutPage() {
       if (s.nbPersonnes) setNbPersonnes(s.nbPersonnes)
       if (s.gender) setGender(s.gender)
       if (s.langue) setLangue(s.langue)
+      if (s.arrivalPoint) setArrivalPoint(s.arrivalPoint)
       if (s.selectedPlaces) setSelectedPlaces(s.selectedPlaces)
       if (s.transportOption) setTransportOption(s.transportOption)
       if (s.taxiDirection) setTaxiDirection(s.taxiDirection)
       if (s.localTransportMakkah) setLocalTransportMakkah(s.localTransportMakkah)
       if (s.localTransportMadinah) setLocalTransportMadinah(s.localTransportMadinah)
+      if (typeof s.guideBedProvided === 'boolean') setGuideBedProvided(s.guideBedProvided)
       if (s.localTransportMadinahSeen) setLocalTransportMadinahSeen(true)
       if (s.visitSubStep) setVisitSubStep(s.visitSubStep)
       if (s.selectedGuideSlug) setSelectedGuideSlug(s.selectedGuideSlug)
@@ -276,12 +280,12 @@ export default function CheckoutPage() {
         _ts: Date.now(),
         step, cityChoice,
         range: range ? { from: range.from?.toISOString(), to: range.to?.toISOString() } : undefined,
-        nbPersonnes, gender, langue, selectedPlaces, transportOption, taxiDirection,
-        localTransportMakkah, localTransportMadinah, localTransportMadinahSeen, visitSubStep,
+        nbPersonnes, gender, langue, arrivalPoint, selectedPlaces, transportOption, taxiDirection,
+        localTransportMakkah, localTransportMadinah, guideBedProvided, localTransportMadinahSeen, visitSubStep,
         selectedGuideSlug, selectedGuideSlugMadinah,
       }))
     } catch { /* ignore */ }
-  }, [slug, step, cityChoice, range, nbPersonnes, gender, langue, selectedPlaces, transportOption, taxiDirection, localTransportMakkah, localTransportMadinah, localTransportMadinahSeen, visitSubStep, selectedGuideSlug, selectedGuideSlugMadinah])
+  }, [slug, step, cityChoice, range, nbPersonnes, gender, langue, arrivalPoint, selectedPlaces, transportOption, taxiDirection, localTransportMakkah, localTransportMadinah, guideBedProvided, localTransportMadinahSeen, visitSubStep, selectedGuideSlug, selectedGuideSlugMadinah])
 
   // Initialise selectedGuideSlug depuis l'URL
   useEffect(() => {
@@ -353,6 +357,19 @@ export default function CheckoutPage() {
     }
   }, [localTransportMakkah, cityChoice])
 
+  useEffect(() => {
+    if (cityChoice === 'BOTH' && selectedGuideSlug && selectedGuideSlugMadinah) {
+      if (selectedGuideSlug !== selectedGuideSlugMadinah) {
+        setTransportOption('NONE')
+        setGuideBedProvided(false)
+      } else if (transportOption === 'TAXI_ONE') {
+        // Une ancienne réservation sauvegardée peut encore contenir l'option
+        // aller simple, désormais interdite lorsque le même guide fait les 2 villes.
+        setTransportOption('TAXI_RT')
+      }
+    }
+  }, [cityChoice, selectedGuideSlug, selectedGuideSlugMadinah, transportOption])
+
   // Package de base
   const basePackage = cityChoice ? getPackageForCity(cityChoice) : null
 
@@ -360,22 +377,36 @@ export default function CheckoutPage() {
   const prixBase = basePackage?.basePrice ?? 0
   const extraPlaces = selectedPlaces.filter(pk => !basePackage?.includedPlaces.includes(pk))
   const prixLieux = extraPlaces.reduce((sum, pk) => sum + (placePrices[pk] ?? BOOKING_PRICES.defaultPlace), 0)
+  const allVisitPlaces = [...new Set([...(basePackage?.includedPlaces ?? []), ...selectedPlaces])]
+  const sameGuideForBothCities = cityChoice === 'BOTH' && !!selectedGuideSlug && selectedGuideSlug === selectedGuideSlugMadinah
+  const primaryCityRaw = sameGuideForBothCities ? String(guide?.city || '').toUpperCase() : ''
+  const sameGuidePrimaryCity = primaryCityRaw.includes('MADINAH') || primaryCityRaw.includes('MEDINE') || primaryCityRaw.includes('MÉDINE')
+    ? 'MADINAH' as const
+    : primaryCityRaw.includes('MAKKAH') || primaryCityRaw.includes('MECQUE')
+      ? 'MAKKAH' as const
+      : null
   const transportPricing = cityChoice
     ? calculateBookingTransportPrice({
         cityChoice,
         nbPeople: nbPersonnes,
-        selectedPlaces,
+        selectedPlaces: allVisitPlaces,
         transportOption,
         localTransportMakkah,
         localTransportMadinah,
+        sameGuideForBothCities,
+        sameGuidePrimaryCity,
+        guideBedProvided,
       })
     : {
         intercity: 0,
         localCarMakkah: 0,
         localCarMadinah: 0,
         localCar: 0,
-        makkahDays: calculateLocalCarDays(selectedPlaces, 'MAKKAH'),
-        madinahDays: calculateLocalCarDays(selectedPlaces, 'MADINAH'),
+        makkahDays: calculateLocalCarDays(allVisitPlaces, 'MAKKAH'),
+        madinahDays: calculateLocalCarDays(allVisitPlaces, 'MADINAH'),
+        localVehicle: { dailyRate: BOOKING_PRICES.localCarPerDay, vehicle: 'CAR' as const, label: 'Voiture privée' },
+        guideHotelNights: 0,
+        guideHotel: 0,
       }
   const prixTransport = transportPricing.intercity
   const daysMakkah = transportPricing.makkahDays
@@ -383,8 +414,8 @@ export default function CheckoutPage() {
   const prixVoitureMakkah = transportPricing.localCarMakkah
   const prixVoitureMadinah = transportPricing.localCarMadinah
   const prixVoiture = transportPricing.localCar
-  const prixGroupe = nbPersonnes > 7 ? BOOKING_PRICES.groupSurcharge : 0
-  const total = prixBase + prixLieux + prixTransport + prixVoiture + prixGroupe
+  const prixHotelGuide = transportPricing.guideHotel
+  const total = prixBase + prixLieux + prixTransport + prixVoiture + prixHotelGuide
 
   // Lieux supplémentaires par ville — historiques fusionnés dans la bonne ville
   const getAvailablePlacesByCity = (city: 'MAKKAH' | 'MADINAH'): Place[] => {
@@ -419,11 +450,13 @@ export default function CheckoutPage() {
           nbPersonnes,
           gender,
           langue,
+          arrivalPoint,
           selectedPlaces,
           transportOption,
           taxiDirection,
           localTransportMakkah,
           localTransportMadinah,
+          guideBedProvided,
           totalPrice: total,
           packageName: basePackage?.name,
           selectedGuideSlug,
@@ -822,6 +855,28 @@ export default function CheckoutPage() {
                 )}
               </div>
 
+              <div>
+                <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.4rem' }}>
+                  Point d’arrivée *
+                </label>
+                <select value={arrivalPoint} onChange={event => setArrivalPoint(event.target.value as typeof arrivalPoint)} style={{ width: '100%', padding: '0.7rem 0.875rem', border: '1.5px solid #E8DFC8', borderRadius: 10, background: 'white', color: '#1A1209', fontFamily: 'inherit', fontSize: '0.85rem' }}>
+                  <option value="">Rechercher ou sélectionner</option>
+                  <option value="JEDDAH">Aéroport de Jeddah</option>
+                  <option value="MADINAH">Médine</option>
+                  <option value="MAKKAH">Makkah</option>
+                </select>
+                {cityChoice === 'BOTH' && (arrivalPoint === 'JEDDAH' || arrivalPoint === 'MADINAH') && (
+                  <div style={{ marginTop: '0.5rem', background: '#ECFDF5', border: '1px solid #A7F3D0', color: '#166534', borderRadius: 8, padding: '0.6rem 0.75rem', fontSize: '0.75rem', fontWeight: 600 }}>
+                    Votre accompagnement commencera à Médine, puis à Makkah.
+                  </div>
+                )}
+                {(arrivalPoint === 'MAKKAH' || (arrivalPoint === 'JEDDAH' && cityChoice === 'MAKKAH')) && (
+                  <div style={{ marginTop: '0.5rem', background: '#FEE2E2', border: '1px solid #DC2626', color: '#991B1B', borderRadius: 8, padding: '0.65rem 0.75rem', fontSize: '0.75rem', fontWeight: 700 }}>
+                    Attention : mettez votre Ihram dans l’avion ou rendez-vous au Miqat le plus proche avant la Omra.
+                  </div>
+                )}
+              </div>
+
               {/* Nb personnes */}
               <div>
                 <label style={{ display: 'block', fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.4rem' }}>
@@ -832,7 +887,7 @@ export default function CheckoutPage() {
                   <div style={{ flex: 1, textAlign: 'center', fontWeight: 700, fontSize: '0.95rem', color: '#1A1209', borderLeft: '1px solid #E8DFC8', borderRight: '1px solid #E8DFC8', padding: '0.6rem 0' }}>
                     {nbPersonnes} {nbPersonnes === 1 ? 'personne' : 'personnes'}
                   </div>
-                  <button onClick={() => setNbPersonnes(n => Math.min(20, n + 1))} style={{ width: 44, height: 44, border: 'none', background: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#1A1209', fontFamily: 'inherit' }}>+</button>
+                  <button onClick={() => setNbPersonnes(n => Math.min(32, n + 1))} style={{ width: 44, height: 44, border: 'none', background: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#1A1209', fontFamily: 'inherit' }}>+</button>
                 </div>
               </div>
 
@@ -884,7 +939,7 @@ export default function CheckoutPage() {
               </div>
             </div>
 
-            {nextBtn('Continuer', () => setStep(step + 1), !range?.from || !range?.to)}
+            {nextBtn('Continuer', () => setStep(step + 1), !range?.from || !range?.to || !arrivalPoint)}
           </div>
         )}
 
@@ -926,8 +981,8 @@ export default function CheckoutPage() {
 
           // Sélecteur voiture avec prix dynamique
           const CarSelector = ({ city, value, onChange }: { city: 'MAKKAH' | 'MADINAH', value: LocalTransportOption, onChange: (v: LocalTransportOption) => void }) => {
-            const days = calculateLocalCarDays(selectedPlaces, city)
-            const carPrice = days * BOOKING_PRICES.localCarPerDay
+            const days = calculateLocalCarDays(allVisitPlaces, city)
+            const carPrice = days * transportPricing.localVehicle.dailyRate
             return (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.75rem' }}>
                 {/* Taxi */}
@@ -937,7 +992,7 @@ export default function CheckoutPage() {
                   </div>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1A1209' }}>🚕 Taxi à la course</div>
-                    <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>Paiement directement au chauffeur · Transport du guide inclus</div>
+                    <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>Les courses du guide pendant les visites sont à votre charge et se règlent sur place.</div>
                   </div>
                   <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#7A6D5A' }}>0€</div>
                 </div>
@@ -947,10 +1002,10 @@ export default function CheckoutPage() {
                     {value === 'CAR' && <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'white' }} />}
                   </div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1A1209' }}>🚗 Voiture privée</div>
+                    <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1A1209' }}>🚗 {transportPricing.localVehicle.label}</div>
                     <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>
                       {days} jour{days > 1 ? 's' : ''} estimé{days > 1 ? 's' : ''} selon vos visites
-                      <span style={{ color: '#C9A84C', fontWeight: 600 }}> · {BOOKING_PRICES.localCarPerDay}€/jour</span>
+                      <span style={{ color: '#C9A84C', fontWeight: 600 }}> · {transportPricing.localVehicle.dailyRate}€/jour</span>
                     </div>
                   </div>
                   <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#C9A84C' }}>+{carPrice}€</div>
@@ -1072,13 +1127,16 @@ export default function CheckoutPage() {
                   </div>
 
                   {/* Options principale */}
-                  {([
-                    { key: 'NONE' as TransportOption, title: 'Sans transport', desc: 'Je gère mes déplacements moi-même', price: 'Gratuit' },
-                    { key: 'TRAIN' as TransportOption, title: '🚄 Train Haramayn', desc: 'Aller-retour Makkah ↔ Madinah · Rapide et confortable', price: `+${BOOKING_PRICES.trainPerPerson * nbPersonnes}€`, perPerson: `${BOOKING_PRICES.trainPerPerson}€/pers` },
-                    { key: 'TAXI_RT' as TransportOption, title: '🚕 Taxi privé', desc: 'Véhicule privatisé pour votre groupe', price: '', perPerson: '' },
+                  {!sameGuideForBothCities ? (
+                    <div style={{ background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: 12, padding: '1rem 1.25rem', color: '#166534', fontSize: '0.8rem', lineHeight: 1.6, marginBottom: '1rem' }}>
+                      Vous avez choisi un guide différent dans chaque ville : aucun transport ni hôtel de guide supplémentaire n’est facturé.
+                    </div>
+                  ) : ([
+                    { key: 'TRAIN' as TransportOption, title: '🚄 Train Haramayn', desc: 'Billet aller-retour du guide uniquement · Vous prenez vos propres billets sur place', price: `+${BOOKING_PRICES.trainRoundTrip}€` },
+                    { key: 'TAXI_RT' as TransportOption, title: '🚗 Voiture privée', desc: 'Aller-retour obligatoire du guide entre Makkah et Médine', price: '', perPerson: '' },
                   ] as { key: TransportOption; title: string; desc: string; price: string; perPerson?: string }[]).map(opt => {
                     const isTaxi = opt.key === 'TAXI_RT'
-                    const taxiActive = isTaxi && (transportOption === 'TAXI_RT' || transportOption === 'TAXI_ONE')
+                    const taxiActive = isTaxi && transportOption === 'TAXI_RT'
                     const isActive = taxiActive || transportOption === opt.key
                     return (
                       <div key={opt.key}>
@@ -1119,50 +1177,27 @@ export default function CheckoutPage() {
                               <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#C9A84C' }}>+{BOOKING_PRICES.taxiRoundTrip}€</div>
                             </div>
 
-                            {/* Aller simple */}
-                            <div
-                              onClick={() => setTransportOption('TAXI_ONE')}
-                              style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 0.75rem', borderRadius: 8, cursor: 'pointer', background: transportOption === 'TAXI_ONE' ? 'rgba(201,168,76,0.08)' : 'transparent' }}
-                            >
-                              <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid #C9A84C', flexShrink: 0, background: transportOption === 'TAXI_ONE' ? '#C9A84C' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                {transportOption === 'TAXI_ONE' && <div style={{ width: 5, height: 5, borderRadius: '50%', background: 'white' }} />}
-                              </div>
-                              <div style={{ flex: 1 }}>
-                                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1A1209' }}>Aller simple</div>
-                                <div style={{ fontSize: '0.68rem', color: '#7A6D5A' }}>Vers une seule ville · forfait groupe</div>
-                              </div>
-                              <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#C9A84C' }}>+{BOOKING_PRICES.taxiOneWay}€</div>
-                            </div>
-
-                            {/* Choix direction si aller simple */}
-                            {transportOption === 'TAXI_ONE' && (
-                              <div style={{ marginTop: '0.75rem', padding: '0.75rem 1rem', background: '#FAF8F0', borderRadius: 8, border: '1px solid #E8DFC8' }}>
-                                <div style={{ fontSize: '0.68rem', fontWeight: 700, color: '#8B6914', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: '0.6rem' }}>Direction</div>
-                                {([
-                                  { dir: 'MAKKAH' as const, label: '🕋 Vers La Mecque', sub: 'Madinah → Makkah' },
-                                  { dir: 'MADINAH' as const, label: '🌿 Vers Médine', sub: 'Makkah → Madinah' },
-                                ]).map(({ dir, label, sub }) => (
-                                  <div
-                                    key={dir}
-                                    onClick={e => { e.stopPropagation(); setTaxiDirection(dir) }}
-                                    style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.5rem 0.6rem', borderRadius: 6, cursor: 'pointer', background: taxiDirection === dir ? 'rgba(201,168,76,0.1)' : 'transparent', marginBottom: '0.25rem' }}
-                                  >
-                                    <div style={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid #C9A84C', flexShrink: 0, background: taxiDirection === dir ? '#C9A84C' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                      {taxiDirection === dir && <div style={{ width: 4, height: 4, borderRadius: '50%', background: 'white' }} />}
-                                    </div>
-                                    <div>
-                                      <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1A1209' }}>{label}</div>
-                                      <div style={{ fontSize: '0.65rem', color: '#7A6D5A' }}>{sub}</div>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
                           </div>
                         )}
                       </div>
                     )
                   })}
+
+                  {sameGuideForBothCities && (
+                    <div style={{ marginTop: '1rem', background: '#FAF8F0', border: '1px solid #E8DFC8', borderRadius: 12, padding: '1rem 1.25rem' }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1A1209' }}>Hébergement du guide hors de sa ville principale</div>
+                      <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 3 }}>
+                        {transportPricing.guideHotelNights} nuit(s) estimée(s) · {BOOKING_PRICES.guideHotelPerNight} €/nuit
+                      </div>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginTop: '0.8rem', cursor: 'pointer', fontSize: '0.78rem', color: '#4A3F30' }}>
+                        <input type="checkbox" checked={guideBedProvided} onChange={event => setGuideBedProvided(event.target.checked)} />
+                        J’ajoute un lit pour le guide à ma réservation d’hôtel
+                      </label>
+                      <div style={{ marginTop: '0.65rem', fontWeight: 700, color: '#C9A84C', fontSize: '0.85rem' }}>
+                        {guideBedProvided ? '0 € — lit fourni' : `${prixHotelGuide} €`}
+                      </div>
+                    </div>
+                  )}
 
                   {/* Transport local — toggle Makkah / Madinah */}
                   <div style={{ marginTop: '2rem' }}>
@@ -1239,10 +1274,10 @@ export default function CheckoutPage() {
                     {(localTransportMakkah !== 'NONE' || localTransportMadinah !== 'NONE') && (
                       <div style={{ marginTop: '1rem', padding: '0.75rem 1rem', background: '#FAF8F0', border: '1px solid #E8DFC8', borderRadius: 10, fontSize: '0.75rem', color: '#4A3F30' }}>
                         {localTransportMakkah !== 'NONE' && (
-                          <div>🕋 Makkah : {localTransportMakkah === 'TAXI' ? 'Taxi à la course (0€)' : `Voiture privée — ${calculateLocalCarDays(selectedPlaces, 'MAKKAH')} jour(s) · +${calculateLocalCarDays(selectedPlaces, 'MAKKAH') * BOOKING_PRICES.localCarPerDay}€`}</div>
+                          <div>🕋 Makkah : {localTransportMakkah === 'TAXI' ? 'Taxi public — courses du guide à régler sur place' : `${transportPricing.localVehicle.label} — ${daysMakkah} jour(s) · +${prixVoitureMakkah}€`}</div>
                         )}
                         {localTransportMadinah !== 'NONE' && (
-                          <div style={{ marginTop: localTransportMakkah !== 'NONE' ? '0.35rem' : 0 }}>🌿 Madinah : {localTransportMadinah === 'TAXI' ? 'Taxi à la course (0€)' : `Voiture privée — ${calculateLocalCarDays(selectedPlaces, 'MADINAH')} jour(s) · +${calculateLocalCarDays(selectedPlaces, 'MADINAH') * BOOKING_PRICES.localCarPerDay}€`}</div>
+                          <div style={{ marginTop: localTransportMakkah !== 'NONE' ? '0.35rem' : 0 }}>🌿 Madinah : {localTransportMadinah === 'TAXI' ? 'Taxi public — courses du guide à régler sur place' : `${transportPricing.localVehicle.label} — ${daysMadinah} jour(s) · +${prixVoitureMadinah}€`}</div>
                         )}
                       </div>
                     )}
@@ -1319,7 +1354,7 @@ export default function CheckoutPage() {
               })()}
 
               {nextBtn('Continuer', handleNext3,
-                (visitSubStep === 'TRANSPORT' && transportOption === 'TAXI_ONE' && !taxiDirection) ||
+                (visitSubStep === 'TRANSPORT' && sameGuideForBothCities && transportOption === 'NONE') ||
                 (visitSubStep === 'TRANSPORT' && cityChoice === 'BOTH' && !localTransportMadinahSeen)
               )}
             </div>
@@ -1335,6 +1370,8 @@ export default function CheckoutPage() {
             : null
 
           const handleChoose = (slug: string) => {
+            const candidate = availableGuides.find(item => item.slug === slug)
+            if (nextSlot && !candidate?.serviceCities?.includes(nextSlot)) return
             if (cityChoice !== 'BOTH') { setSelectedGuideSlug(slug); return }
             if (!selectedGuideSlug) { setSelectedGuideSlug(slug); return }
             if (!selectedGuideSlugMadinah) { setSelectedGuideSlugMadinah(slug); return }
@@ -1518,6 +1555,7 @@ export default function CheckoutPage() {
                     const isMakkah = selectedGuideSlug === g.slug
                     const isMadinah = selectedGuideSlugMadinah === g.slug
                     const hasBadge = isMakkah || isMadinah
+                    const canServeNext = !nextSlot || g.serviceCities?.includes(nextSlot)
 
                     return (
                       <div key={g.slug} style={{
@@ -1543,8 +1581,9 @@ export default function CheckoutPage() {
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', alignItems: 'flex-end', flexShrink: 0 }}>
                             <button
                               onClick={() => handleChoose(g.slug)}
+                              disabled={!canServeNext}
                               style={{
-                                padding: '0.45rem 0.9rem', borderRadius: 50, border: 'none', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
+                                padding: '0.45rem 0.9rem', borderRadius: 50, border: 'none', fontSize: '0.75rem', fontWeight: 700, cursor: canServeNext ? 'pointer' : 'not-allowed', whiteSpace: 'nowrap',
                                 background: nextSlot === null && !hasBadge ? '#E8DFC8'
                                   : nextSlot === 'MAKKAH' ? 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)'
                                   : nextSlot === 'MADINAH' ? 'linear-gradient(135deg, #27AE60 0%, #1D5C3A 100%)'
@@ -1552,7 +1591,7 @@ export default function CheckoutPage() {
                                 color: nextSlot === null && !hasBadge ? '#4A3F30' : nextSlot ? 'white' : '#4A3F30',
                               }}
                             >
-                              {nextSlot === 'MAKKAH' ? 'Choisir · 🕋' : nextSlot === 'MADINAH' ? 'Choisir · 🌿' : 'Choisir'}
+                              {!canServeNext ? 'Non proposé' : nextSlot === 'MAKKAH' ? 'Choisir · 🕋' : nextSlot === 'MADINAH' ? 'Choisir · 🌿' : 'Choisir'}
                             </button>
                             <button
                               onClick={() => setGuideDetailSlug(g.slug)}
@@ -1672,7 +1711,7 @@ export default function CheckoutPage() {
                   {nbPersonnes} {nbPersonnes === 1 ? 'personne' : 'personnes'}
                 </span>
                 <button
-                  onClick={() => setNbPersonnes(n => Math.min(20, n + 1))}
+                  onClick={() => setNbPersonnes(n => Math.min(32, n + 1))}
                   style={{
                     width: 32, height: 32, borderRadius: '50%',
                     border: '1.5px solid #E8DFC8', background: 'white',
@@ -1690,7 +1729,7 @@ export default function CheckoutPage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 1.25rem', borderBottom: '1px solid #F5F0E8' }}>
                 <div>
                   <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1A1209' }}>{basePackage?.name}</div>
-                  <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>Forfait 1-7 personnes</div>
+                  <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>Accompagnement sélectionné</div>
                 </div>
                 <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>{prixBase}€</div>
               </div>
@@ -1713,7 +1752,7 @@ export default function CheckoutPage() {
               {transportOption !== 'NONE' && cityChoice === 'BOTH' && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 1.25rem', borderBottom: '1px solid #F5F0E8' }}>
                   <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>
-                    {transportOption === 'TRAIN' ? '🚄 Train Haramayn A/R' : transportOption === 'TAXI_RT' ? '🚕 Taxi privé A/R' : '🚕 Taxi privé aller simple'}
+                    {transportOption === 'TRAIN' ? '🚄 Billet de train A/R du guide' : '🚗 Voiture privée A/R du guide'}
                   </div>
                   <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{prixTransport}€</div>
                 </div>
@@ -1721,24 +1760,34 @@ export default function CheckoutPage() {
 
               {localTransportMakkah === 'CAR' && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 1.25rem', borderBottom: '1px solid #F5F0E8' }}>
-                  <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>🚗 Voiture privée — La Mecque ({daysMakkah} j.)</div>
+                  <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>🚗 {transportPricing.localVehicle.label} — Makkah ({daysMakkah} j.)</div>
                   <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{prixVoitureMakkah}€</div>
                 </div>
               )}
               {localTransportMadinah === 'CAR' && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 1.25rem', borderBottom: '1px solid #F5F0E8' }}>
-                  <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>🚗 Voiture privée — Médine ({daysMadinah} j.)</div>
+                  <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>🚗 {transportPricing.localVehicle.label} — Médine ({daysMadinah} j.)</div>
                   <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{prixVoitureMadinah}€</div>
                 </div>
               )}
 
-              {nbPersonnes > 7 && (
+              {(localTransportMakkah === 'TAXI' || localTransportMadinah === 'TAXI') && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 1.25rem', borderBottom: '1px solid #F5F0E8' }}>
                   <div>
-                    <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>Supplément groupe (8+ personnes)</div>
-                    <div style={{ fontSize: '0.7rem', color: '#7A6D5A', marginTop: 2 }}>Forfait groupe</div>
+                    <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>🚕 Taxi public</div>
+                    <div style={{ fontSize: '0.7rem', color: '#7A6D5A', marginTop: 2 }}>Les courses du guide pendant les visites sont à votre charge et se règlent sur place.</div>
                   </div>
-                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{BOOKING_PRICES.groupSurcharge}€</div>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>0€</div>
+                </div>
+              )}
+
+              {sameGuideForBothCities && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 1.25rem', borderBottom: '1px solid #F5F0E8' }}>
+                  <div>
+                    <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>🏨 Hébergement du guide</div>
+                    <div style={{ fontSize: '0.7rem', color: '#7A6D5A', marginTop: 2 }}>{guideBedProvided ? 'Lit fourni par le client' : `${transportPricing.guideHotelNights} nuit(s) hors ville principale`}</div>
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{prixHotelGuide}€</div>
                 </div>
               )}
 
@@ -1763,6 +1812,8 @@ export default function CheckoutPage() {
                 ['Destination', cityChoice === 'BOTH' ? 'Makkah + Madinah' : cityChoice === 'MAKKAH' ? 'Makkah' : 'Madinah'],
                 ['Date de départ', range?.from ? format(range.from, 'd MMMM yyyy', { locale: frLocale }) : '—'],
                 ['Date de retour', range?.to ? format(range.to, 'd MMMM yyyy', { locale: frLocale }) : '—'],
+                ['Point d’arrivée', arrivalPoint === 'JEDDAH' ? 'Aéroport de Jeddah' : arrivalPoint === 'MADINAH' ? 'Médine' : 'Makkah'],
+                ...(cityChoice === 'BOTH' ? [['Ordre des villes', arrivalPoint === 'MAKKAH' ? 'Makkah → Médine' : 'Médine → Makkah']] : []),
                 ['Personnes', `${nbPersonnes} personne${nbPersonnes > 1 ? 's' : ''}`],
                 ['Profil', gender],
                 ['Langue', LANGUES.find(l => l.code === langue)?.label ?? langue],
@@ -1773,6 +1824,12 @@ export default function CheckoutPage() {
                 </div>
               ))}
             </div>
+
+            {(arrivalPoint === 'MAKKAH' || (arrivalPoint === 'JEDDAH' && cityChoice === 'MAKKAH')) && (
+              <div style={{ background: '#FEE2E2', border: '1px solid #DC2626', color: '#991B1B', borderRadius: 10, padding: '0.8rem 1rem', marginBottom: '1.5rem', fontSize: '0.8rem', fontWeight: 700 }}>
+                Attention : mettez votre Ihram dans l’avion ou rendez-vous au Miqat le plus proche avant la Omra.
+              </div>
+            )}
 
             {/* Trust badges */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', padding: '0.75rem 1rem', background: '#FAF8F0', borderRadius: 10, border: '1px solid #E8DFC8', marginBottom: '1.5rem' }}>

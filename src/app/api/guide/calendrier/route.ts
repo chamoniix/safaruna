@@ -1,104 +1,124 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import prisma from '@/lib/prisma';
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import prisma from '@/lib/prisma'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function getGuideProfile(session: any) {
-  const email = session?.user?.email as string | undefined;
-  if (!email) return null;
+type ServiceCity = 'MAKKAH' | 'MADINAH'
+
+async function getGuideProfile() {
+  const session = await getServerSession(authOptions)
+  const email = session?.user?.email
+  if (!email) return null
   const user = await prisma.user.findUnique({
     where: { email },
-    include: { guideProfile: { select: { id: true } } },
-  });
-  return user?.guideProfile ?? null;
+    include: {
+      guideProfile: {
+        select: { id: true, servesMakkah: true, servesMadinah: true, city: true },
+      },
+    },
+  })
+  return user?.guideProfile ?? null
 }
 
-export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+function parseCity(value: unknown): ServiceCity | null {
+  return value === 'MAKKAH' || value === 'MADINAH' ? value : null
+}
 
-  const guideProfile = await getGuideProfile(session);
-  if (!guideProfile) return NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 });
+function parseDate(value: unknown): Date | null {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null
+  const date = new Date(`${value}T12:00:00.000Z`)
+  return Number.isNaN(date.getTime()) ? null : date
+}
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const in90days = new Date(today);
-  in90days.setDate(in90days.getDate() + 90);
+export async function GET(req: NextRequest) {
+  const guide = await getGuideProfile()
+  if (!guide) return NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 })
+  const city = parseCity(new URL(req.url).searchParams.get('city')) ?? 'MAKKAH'
+  const today = new Date()
+  today.setUTCHours(0, 0, 0, 0)
+  const in365days = new Date(today)
+  in365days.setUTCDate(in365days.getUTCDate() + 365)
 
-  const availabilities = await prisma.availability.findMany({
+  const records = await prisma.availability.findMany({
     where: {
-      guideProfileId: guideProfile.id,
-      date: { gte: today, lte: in90days },
+      guideProfileId: guide.id,
+      date: { gte: today, lte: in365days },
+      OR: [{ city }, { city: 'BOTH' }, { status: 'BOOKED' }],
     },
     orderBy: { date: 'asc' },
-  });
+  })
+  const priority: Record<string, number> = { BOOKED: 3, UNAVAILABLE: 2, AVAILABLE: 1 }
+  const byDate = new Map<string, typeof records[number]>()
+  for (const record of records) {
+    const key = record.date.toISOString().slice(0, 10)
+    if (!byDate.has(key) || priority[record.status] > priority[byDate.get(key)!.status]) {
+      byDate.set(key, record)
+    }
+  }
 
   return NextResponse.json({
-    availabilities: availabilities.map(a => ({
-      id: a.id,
-      date: a.date.toISOString().split('T')[0],
-      status: a.status,
+    city,
+    serviceEnabled: city === 'MAKKAH' ? guide.servesMakkah : guide.servesMadinah,
+    services: { makkah: guide.servesMakkah, madinah: guide.servesMadinah },
+    availabilities: [...byDate.values()].map(record => ({
+      id: record.id,
+      date: record.date.toISOString().slice(0, 10),
+      status: record.status,
+      city: record.city,
     })),
-  });
+  })
+}
+
+export async function PATCH(req: NextRequest) {
+  const guide = await getGuideProfile()
+  if (!guide) return NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 })
+  const body = await req.json()
+  const city = parseCity(body.city)
+  if (!city || typeof body.enabled !== 'boolean') {
+    return NextResponse.json({ error: 'Paramètres invalides' }, { status: 400 })
+  }
+  await prisma.guideProfile.update({
+    where: { id: guide.id },
+    data: city === 'MAKKAH' ? { servesMakkah: body.enabled } : { servesMadinah: body.enabled },
+  })
+  return NextResponse.json({ success: true })
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-
-  const guideProfile = await getGuideProfile(session);
-  if (!guideProfile) return NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 });
-
-  const body = await req.json();
-  const { date, status } = body as { date: string; status: 'AVAILABLE' | 'UNAVAILABLE' };
-
-  if (!date || !['AVAILABLE', 'UNAVAILABLE'].includes(status)) {
-    return NextResponse.json({ error: 'Paramètres invalides' }, { status: 400 });
+  const guide = await getGuideProfile()
+  if (!guide) return NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 })
+  const body = await req.json()
+  const city = parseCity(body.city)
+  const date = parseDate(body.date)
+  if (!city || !date || body.status !== 'UNAVAILABLE') {
+    return NextResponse.json({ error: 'Paramètres invalides' }, { status: 400 })
   }
-
-  const dateObj = new Date(date);
-  dateObj.setHours(12, 0, 0, 0);
-
+  const held = await prisma.reservationHold.findFirst({
+    where: { guideProfileId: guide.id, date, expiresAt: { gt: new Date() } },
+  })
+  const booked = await prisma.availability.findFirst({
+    where: { guideProfileId: guide.id, date, status: 'BOOKED' },
+  })
+  if (held || booked) {
+    return NextResponse.json({ error: 'Cette date est réservée ou en cours de paiement' }, { status: 409 })
+  }
   await prisma.availability.upsert({
-    where: {
-      guideProfileId_date: {
-        guideProfileId: guideProfile.id,
-        date: dateObj,
-      },
-    },
-    update: { status },
-    create: {
-      guideProfileId: guideProfile.id,
-      date: dateObj,
-      status,
-    },
-  });
-
-  return NextResponse.json({ success: true });
+    where: { guideProfileId_date_city: { guideProfileId: guide.id, date, city } },
+    update: { status: 'UNAVAILABLE', reservationId: null },
+    create: { guideProfileId: guide.id, date, city, status: 'UNAVAILABLE' },
+  })
+  return NextResponse.json({ success: true })
 }
 
 export async function DELETE(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-
-  const guideProfile = await getGuideProfile(session);
-  if (!guideProfile) return NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 });
-
-  const body = await req.json();
-  const { date } = body as { date: string };
-
-  if (!date) return NextResponse.json({ error: 'Date manquante' }, { status: 400 });
-
-  const dateObj = new Date(date);
-  dateObj.setHours(12, 0, 0, 0);
-
+  const guide = await getGuideProfile()
+  if (!guide) return NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 })
+  const body = await req.json()
+  const city = parseCity(body.city)
+  const date = parseDate(body.date)
+  if (!city || !date) return NextResponse.json({ error: 'Paramètres invalides' }, { status: 400 })
   await prisma.availability.deleteMany({
-    where: {
-      guideProfileId: guideProfile.id,
-      date: dateObj,
-    },
-  });
-
-  return NextResponse.json({ success: true });
+    where: { guideProfileId: guide.id, date, city, status: { in: ['AVAILABLE', 'UNAVAILABLE'] } },
+  })
+  return NextResponse.json({ success: true })
 }

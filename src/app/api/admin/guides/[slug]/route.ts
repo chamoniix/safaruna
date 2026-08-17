@@ -75,6 +75,9 @@ export async function GET(
         slug: guide.slug,
         bio: guide.bio,
         city: guide.city,
+        gender: guide.gender,
+        servesMakkah: guide.servesMakkah,
+        servesMadinah: guide.servesMadinah,
         nationality: guide.nationality,
         experienceYears: guide.experienceYears,
         status: guide.status,
@@ -262,6 +265,9 @@ export async function PATCH(
       data: {
         ...(body.bio !== undefined && { bio: body.bio }),
         ...(body.city !== undefined && { city: body.city }),
+        ...(body.gender !== undefined && { gender: body.gender }),
+        ...(body.servesMakkah !== undefined && { servesMakkah: Boolean(body.servesMakkah) }),
+        ...(body.servesMadinah !== undefined && { servesMadinah: Boolean(body.servesMadinah) }),
         ...(body.nationality !== undefined && { nationality: body.nationality }),
         ...(body.experienceYears !== undefined && {
           experienceYears: Number(body.experienceYears)

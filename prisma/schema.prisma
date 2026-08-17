@@ -42,7 +42,7 @@ model User {
   emailVerified DateTime?
   image         String?
   passwordHash  String?
-  
+
   // Safaruna specific fields
   role          Role      @default(PELERIN)
   firstName     String?
@@ -55,18 +55,18 @@ model User {
   newsletterOptIn Boolean @default(false)
 
   // Relations
-  accounts       Account[]
-  sessions       Session[]
-  guideProfile   GuideProfile?
+  accounts     Account[]
+  sessions     Session[]
+  guideProfile GuideProfile?
 
   // As a Pelerin
-  reservations   Reservation[] @relation("PelerinReservations")
-  conversationsAsPelerin Conversation[] @relation("PelerinConversations")
-  messages       Message[]
-  reviews        Review[]
-  savedDuas      SavedDua[]
-  courseProgress CourseProgress[]
-  notifications  Notification[]
+  reservations           Reservation[]    @relation("PelerinReservations")
+  conversationsAsPelerin Conversation[]   @relation("PelerinConversations")
+  messages               Message[]
+  reviews                Review[]
+  savedDuas              SavedDua[]
+  courseProgress         CourseProgress[]
+  notifications          Notification[]
 }
 
 model VerificationToken {
@@ -86,36 +86,41 @@ enum Role {
 // Safaruna Core Models
 
 model GuideProfile {
-  id                String   @id @default(cuid())
-  userId            String   @unique
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  slug              String?  @unique
-  bio               String? 
-  city              String?
-  nationality       String?
-  experienceYears   Int?
-  university        String?
-  diplomaUrl        String?
-  idDocUrl          String?
-  videoUrl          String?
-  ibanEncrypted     String?
-  status            ProfileStatus @default(DRAFT)
-  responseTimeAvg   String?
-  completionRate    Int?     @default(0)
-  commissionRate    Float    @default(0.15)
-  interviewScore    Int?
-  interviewNotes    String?
-  interviewDate     DateTime?
-  interviewedBy     String?
+  id              String        @id @default(cuid())
+  userId          String        @unique
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slug            String?       @unique
+  bio             String?
+  city            String?
+  gender          String?
+  servesMakkah    Boolean       @default(false)
+  servesMadinah   Boolean       @default(false)
+  nationality     String?
+  experienceYears Int?
+  university      String?
+  diplomaUrl      String?
+  idDocUrl        String?
+  videoUrl        String?
+  ibanEncrypted   String?
+  status          ProfileStatus @default(DRAFT)
+  responseTimeAvg String?
+  completionRate  Int?          @default(0)
+  commissionRate  Float         @default(0.15)
+  interviewScore  Int?
+  interviewNotes  String?
+  interviewDate   DateTime?
+  interviewedBy   String?
 
   // Relations
-  packages          Package[]
-  availabilities    Availability[]
-  reservations      Reservation[] @relation("GuideReservations")
-  conversationsAsGuide Conversation[] @relation("GuideConversations")
-  languages         GuideLanguage[]
-  places            GuidePlace[]
-  transfers         Transfer[]
+  packages             Package[]
+  availabilities       Availability[]
+  reservations         Reservation[]        @relation("GuideReservations")
+  conversationsAsGuide Conversation[]       @relation("GuideConversations")
+  languages            GuideLanguage[]
+  places               GuidePlace[]
+  transfers            Transfer[]
+  reservationMissions  ReservationMission[]
+  reservationHolds     ReservationHold[]
 }
 
 enum ProfileStatus {
@@ -126,7 +131,7 @@ enum ProfileStatus {
 }
 
 model GuideLanguage {
-  id             String @id @default(cuid())
+  id             String       @id @default(cuid())
   guideProfileId String
   guideProfile   GuideProfile @relation(fields: [guideProfileId], references: [id], onDelete: Cascade)
   languageCode   String
@@ -134,19 +139,19 @@ model GuideLanguage {
 }
 
 model GuidePlace {
-  id             String      @id @default(cuid())
+  id             String       @id @default(cuid())
   guideProfileId String
   guideProfile   GuideProfile @relation(fields: [guideProfileId], references: [id], onDelete: Cascade)
   placeKey       String
-  isActive       Boolean     @default(true)
-  createdAt      DateTime    @default(now())
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
 
   @@unique([guideProfileId, placeKey])
 }
 
 model Place {
-  id          String   @id @default(cuid())
-  slug        String   @unique
+  id          String  @id @default(cuid())
+  slug        String  @unique
   nameFr      String
   nameAr      String?
   city        String
@@ -156,28 +161,33 @@ model Place {
 }
 
 model Package {
-  id                 String   @id @default(cuid())
+  id                 String       @id @default(cuid())
   guideProfileId     String
   guideProfile       GuideProfile @relation(fields: [guideProfileId], references: [id], onDelete: Cascade)
   name               String
   durationDays       Int
   pricePerPerson     Float
   priceGroup         Float?
-  minPeople          Int      @default(1)
+  minPeople          Int          @default(1)
   maxPeople          Int
-  cancellationPolicy String? 
-  
-  reservations       Reservation[]
+  cancellationPolicy String?
+
+  reservations Reservation[]
 }
 
 model Availability {
-  id             String   @id @default(cuid())
+  id             String             @id @default(cuid())
   guideProfileId String
-  guideProfile   GuideProfile @relation(fields: [guideProfileId], references: [id], onDelete: Cascade)
+  guideProfile   GuideProfile       @relation(fields: [guideProfileId], references: [id], onDelete: Cascade)
   date           DateTime
+  city           String             @default("BOTH")
   status         AvailabilityStatus @default(AVAILABLE)
+  reservationId  String?
+  reservation    Reservation?       @relation(fields: [reservationId], references: [id], onDelete: SetNull)
 
-  @@unique([guideProfileId, date])
+  @@unique([guideProfileId, date, city])
+  @@index([guideProfileId, city, date])
+  @@index([reservationId])
 }
 
 enum AvailabilityStatus {
@@ -187,35 +197,60 @@ enum AvailabilityStatus {
 }
 
 model Reservation {
-  id                String   @id @default(cuid())
-  refNumber         String   @unique // SAF-2025-XXXXX
-  pelerinId         String
-  pelerin           User     @relation("PelerinReservations", fields: [pelerinId], references: [id])
-  guideProfileId    String
-  guideProfile      GuideProfile @relation("GuideReservations", fields: [guideProfileId], references: [id])
-  packageId         String
-  package           Package  @relation(fields: [packageId], references: [id])
-  startDate         DateTime
-  endDate           DateTime
-  nbPeople          Int
-  transportOption   String?
-  optionsJson       Json?
-  basePrice         Float
-  commissionAmount  Float
-  totalPrice        Float
-  status            ReservationStatus @default(PENDING)
-  stripePaymentId   String?
-  notes             String?
-  selectedPlaces    Json?
-  selectedCities    String?
-  withTransport     Boolean  @default(false)
-  withCar           Boolean  @default(false)
-  gender            String?
-  langue            String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id               String            @id @default(cuid())
+  refNumber        String            @unique // SAF-2025-XXXXX
+  pelerinId        String
+  pelerin          User              @relation("PelerinReservations", fields: [pelerinId], references: [id])
+  guideProfileId   String
+  guideProfile     GuideProfile      @relation("GuideReservations", fields: [guideProfileId], references: [id])
+  packageId        String
+  package          Package           @relation(fields: [packageId], references: [id])
+  startDate        DateTime
+  endDate          DateTime
+  nbPeople         Int
+  transportOption  String?
+  optionsJson      Json?
+  basePrice        Float
+  commissionAmount Float
+  totalPrice       Float
+  status           ReservationStatus @default(PENDING)
+  stripePaymentId  String?
+  notes            String?
+  selectedPlaces   Json?
+  selectedCities   String?
+  withTransport    Boolean           @default(false)
+  withCar          Boolean           @default(false)
+  gender           String?
+  langue           String?
+  arrivalPoint     String?
+  cityOrder        String?
+  guideBedProvided Boolean           @default(false)
+  ihramAlert       Boolean           @default(false)
+  pricingJson      Json?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
 
-  reviews           Review[]
+  reviews     Review[]
+  missions    ReservationMission[]
+  bookedDates Availability[]
+}
+
+model ReservationMission {
+  id                 String       @id @default(cuid())
+  reservationId      String
+  reservation        Reservation  @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  guideProfileId     String
+  guideProfile       GuideProfile @relation(fields: [guideProfileId], references: [id])
+  city               String
+  startDate          DateTime
+  endDate            DateTime
+  selectedPlaces     Json?
+  localTransport     String?
+  localTransportDays Int          @default(1)
+  createdAt          DateTime     @default(now())
+
+  @@unique([reservationId, city])
+  @@index([guideProfileId, startDate, endDate])
 }
 
 enum ReservationStatus {
@@ -237,41 +272,41 @@ model PlacePrice {
 // ---------------------------------------------------------
 
 model Conversation {
-  id            String   @id @default(cuid())
-  pelerinId     String
-  pelerin       User     @relation("PelerinConversations", fields: [pelerinId], references: [id])
+  id             String       @id @default(cuid())
+  pelerinId      String
+  pelerin        User         @relation("PelerinConversations", fields: [pelerinId], references: [id])
   guideProfileId String
-  guideProfile  GuideProfile @relation("GuideConversations", fields: [guideProfileId], references: [id])
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  
-  messages      Message[]
+  guideProfile   GuideProfile @relation("GuideConversations", fields: [guideProfileId], references: [id])
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  messages Message[]
 }
 
 model Message {
-  id             String   @id @default(cuid())
+  id             String       @id @default(cuid())
   conversationId String
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   senderId       String
-  sender         User     @relation(fields: [senderId], references: [id])
-  content        String  
+  sender         User         @relation(fields: [senderId], references: [id])
+  content        String
   readAt         DateTime?
-  createdAt      DateTime @default(now())
+  createdAt      DateTime     @default(now())
 }
 
 model Review {
-  id                 String   @id @default(cuid())
-  reservationId      String
-  reservation        Reservation @relation(fields: [reservationId], references: [id])
-  pelerinId          String
-  pelerin            User     @relation(fields: [pelerinId], references: [id])
-  ratingOverall      Int
-  ratingPunctuality  Int?
-  ratingPedagogy     Int?
-  ratingKnowledge    Int?
-  comment            String  
-  guideResponse      String? 
-  createdAt          DateTime @default(now())
+  id                String      @id @default(cuid())
+  reservationId     String
+  reservation       Reservation @relation(fields: [reservationId], references: [id])
+  pelerinId         String
+  pelerin           User        @relation(fields: [pelerinId], references: [id])
+  ratingOverall     Int
+  ratingPunctuality Int?
+  ratingPedagogy    Int?
+  ratingKnowledge   Int?
+  comment           String
+  guideResponse     String?
+  createdAt         DateTime    @default(now())
 }
 
 // ---------------------------------------------------------
@@ -279,15 +314,15 @@ model Review {
 // ---------------------------------------------------------
 
 model Transfer {
-  id             String   @id @default(cuid())
+  id             String         @id @default(cuid())
   guideProfileId String
-  guideProfile   GuideProfile @relation(fields: [guideProfileId], references: [id])
+  guideProfile   GuideProfile   @relation(fields: [guideProfileId], references: [id])
   amount         Float
   commission     Float
   net            Float
   period         String
   status         TransferStatus @default(PENDING)
-  createdAt      DateTime @default(now())
+  createdAt      DateTime       @default(now())
 }
 
 enum TransferStatus {
@@ -301,17 +336,17 @@ enum TransferStatus {
 // ---------------------------------------------------------
 
 model Course {
-  id            String   @id @default(cuid())
-  slug          String   @unique
-  title         String
-  category      String
-  durationMin   Int
-  level         String
-  description   String? 
-  videoUrl      String?
-  thumbnailUrl  String?
-  
-  progress      CourseProgress[]
+  id           String  @id @default(cuid())
+  slug         String  @unique
+  title        String
+  category     String
+  durationMin  Int
+  level        String
+  description  String?
+  videoUrl     String?
+  thumbnailUrl String?
+
+  progress CourseProgress[]
 }
 
 model CourseProgress {
@@ -327,38 +362,38 @@ model CourseProgress {
 }
 
 model Dua {
-  id              String   @id @default(cuid())
+  id              String  @id @default(cuid())
   category        String
   title           String?
-  arabicText      String  
-  transliteration String? 
-  translationFr   String  
+  arabicText      String
+  transliteration String?
+  translationFr   String
   source          String?
   audioUrl        String?
-  
-  savedBy         SavedDua[]
+
+  savedBy SavedDua[]
 }
 
 model SavedDua {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  duaId     String
-  dua       Dua      @relation(fields: [duaId], references: [id], onDelete: Cascade)
-  savedAt   DateTime @default(now())
+  id      String   @id @default(cuid())
+  userId  String
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  duaId   String
+  dua     Dua      @relation(fields: [duaId], references: [id], onDelete: Cascade)
+  savedAt DateTime @default(now())
 
   @@unique([userId, duaId])
 }
 
 model Notification {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   type      String
   title     String
   message   String
   readAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 }
 
 model NewsletterSubscription {
@@ -370,20 +405,38 @@ model NewsletterSubscription {
 }
 
 model PasswordResetToken {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   email     String
-  token     String   @unique
+  token     String    @unique
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
 }
 
 model ReservationDraft {
-  id        String   @id @default(cuid())
-  refNumber String   @unique
-  data      String   // JSON stringifié
-  expiresAt DateTime
-  createdAt DateTime @default(now())
+  id              String            @id @default(cuid())
+  refNumber       String            @unique
+  data            String // JSON stringifié
+  expiresAt       DateTime
+  createdAt       DateTime          @default(now())
+  stripeSessionId String?           @unique
+  holds           ReservationHold[]
+}
+
+model ReservationHold {
+  id             String           @id @default(cuid())
+  draftRefNumber String
+  draft          ReservationDraft @relation(fields: [draftRefNumber], references: [refNumber], onDelete: Cascade)
+  guideProfileId String
+  guideProfile   GuideProfile     @relation(fields: [guideProfileId], references: [id], onDelete: Cascade)
+  city           String
+  date           DateTime
+  expiresAt      DateTime
+  createdAt      DateTime         @default(now())
+
+  @@unique([guideProfileId, date])
+  @@index([expiresAt])
+  @@index([draftRefNumber])
 }
 
 model EmailVerificationToken {
@@ -397,10 +450,10 @@ model EmailVerificationToken {
 model AuditLog {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
-  actor     String   // email ou "system" ou "stripe"
-  actorRole String   // "ADMIN" | "GUIDE" | "CLIENT" | "SYSTEM"
-  action    String   // "RESERVATION_CREATED" | "PAYMENT_CONFIRMED" etc.
-  target    String?  // refNumber, placeKey, userId...
-  detail    String?  // JSON ou texte libre
+  actor     String // email ou "system" ou "stripe"
+  actorRole String // "ADMIN" | "GUIDE" | "CLIENT" | "SYSTEM"
+  action    String // "RESERVATION_CREATED" | "PAYMENT_CONFIRMED" etc.
+  target    String? // refNumber, placeKey, userId...
+  detail    String? // JSON ou texte libre
   ip        String?
 }

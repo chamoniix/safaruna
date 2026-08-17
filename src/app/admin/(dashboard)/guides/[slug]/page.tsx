@@ -12,6 +12,7 @@ type Reservation = { id: string; refNumber: string; startDate: string; nbPeople:
 type GuidePlace = { id: string; placeKey: string; isActive: boolean };
 type Guide = {
   id: string; slug: string; bio: string | null; city: string | null;
+  gender: 'HOMME' | 'FEMME' | null; servesMakkah: boolean; servesMadinah: boolean;
   nationality: string | null; experienceYears: number | null; status: string;
   responseTimeAvg: string | null; completionRate: number | null;
   ibanMasked: string | null;
@@ -61,6 +62,9 @@ export default function AdminGuideDetailPage() {
   // Editable fields
   const [bio, setBio]                     = useState('');
   const [city, setCity]                   = useState('');
+  const [gender, setGender]               = useState<'HOMME' | 'FEMME'>('HOMME');
+  const [servesMakkah, setServesMakkah]   = useState(false);
+  const [servesMadinah, setServesMadinah] = useState(false);
   const [nationality, setNationality]     = useState('');
   const [expYears, setExpYears]           = useState('');
   const [status, setStatus]               = useState('');
@@ -117,6 +121,9 @@ export default function AdminGuideDetailPage() {
       setGuide(g);
       setBio(g.bio || '');
       setCity(g.city || '');
+      setGender(g.gender || 'HOMME');
+      setServesMakkah(g.servesMakkah);
+      setServesMadinah(g.servesMadinah);
       setNationality(g.nationality || '');
       setExpYears(g.experienceYears?.toString() || '');
       setStatus(g.status);
@@ -141,7 +148,7 @@ export default function AdminGuideDetailPage() {
       const res = await fetch(`/api/admin/guides/${slug}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bio, city, nationality, experienceYears: expYears ? Number(expYears) : null, status }),
+        body: JSON.stringify({ bio, city, gender, servesMakkah, servesMadinah, nationality, experienceYears: expYears ? Number(expYears) : null, status }),
       });
       if (!res.ok) throw new Error();
       setSaveMsg('✓ Modifications sauvegardées');
@@ -540,6 +547,20 @@ export default function AdminGuideDetailPage() {
             <select value={status} onChange={e => setStatus(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
               {PROFILE_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
+          </div>
+          <div>
+            <label style={labelStyle}>Genre du guide</label>
+            <select value={gender} onChange={e => setGender(e.target.value as 'HOMME' | 'FEMME')} style={inputStyle}>
+              <option value="HOMME">Homme</option>
+              <option value="FEMME">Femme</option>
+            </select>
+          </div>
+          <div>
+            <label style={labelStyle}>Villes proposées</label>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <label style={{ ...inputStyle, width: 'auto', flex: 1 }}><input type="checkbox" checked={servesMakkah} onChange={e => setServesMakkah(e.target.checked)} /> Makkah</label>
+              <label style={{ ...inputStyle, width: 'auto', flex: 1 }}><input type="checkbox" checked={servesMadinah} onChange={e => setServesMadinah(e.target.checked)} /> Médine</label>
+            </div>
           </div>
         </div>
 

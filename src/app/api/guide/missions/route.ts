@@ -22,7 +22,12 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const statusFilter = searchParams.get('status'); // PENDING | CONFIRMED | COMPLETED | CANCELLED
 
-  const where: Record<string, unknown> = { guideProfileId: user.guideProfile.id };
+  const where: Record<string, unknown> = {
+    OR: [
+      { guideProfileId: user.guideProfile.id },
+      { missions: { some: { guideProfileId: user.guideProfile.id } } },
+    ],
+  };
   if (statusFilter && statusFilter !== 'ALL') where.status = statusFilter;
 
   const reservations = await prisma.reservation.findMany({
@@ -32,6 +37,10 @@ export async function GET(req: NextRequest) {
       pelerin: { select: { name: true, firstName: true, lastName: true, country: true, email: true } },
       package: { select: { name: true, durationDays: true } },
       reviews: { select: { ratingOverall: true, comment: true } },
+      missions: {
+        where: { guideProfileId: user.guideProfile.id },
+        orderBy: { startDate: 'asc' },
+      },
     },
   });
 
@@ -55,9 +64,12 @@ export async function GET(req: NextRequest) {
         pelerinName,
         pelerinCountry: r.pelerin.country,
         packageName: r.package.name,
-        durationDays: r.package.durationDays,
-        startDate: new Date(r.startDate).toLocaleDateString('fr-FR'),
-        endDate: new Date(r.endDate).toLocaleDateString('fr-FR'),
+        durationDays: r.missions.length > 0
+          ? r.missions.reduce((sum, mission) => sum + Math.round((mission.endDate.getTime() - mission.startDate.getTime()) / 86_400_000) + 1, 0)
+          : r.package.durationDays,
+        startDate: new Date(r.missions[0]?.startDate ?? r.startDate).toLocaleDateString('fr-FR'),
+        endDate: new Date(r.missions.at(-1)?.endDate ?? r.endDate).toLocaleDateString('fr-FR'),
+        missionCities: r.missions.map(mission => mission.city),
         nbPeople: r.nbPeople,
         totalPrice: r.totalPrice,
         status: r.status,

@@ -11,6 +11,8 @@ const inscriptionSchema = z.object({
   email:           z.string().email().max(254),
   whatsapp:        z.string().max(20).optional(),
   city:            z.string().max(100).optional(),
+  gender:          z.enum(['HOMME', 'FEMME']),
+  serviceCities:   z.array(z.enum(['MAKKAH', 'MADINAH'])).min(1).max(2),
   nationality:     z.string().max(100).optional(),
   bio:             z.string().max(2000).optional(),
   experienceYears: z.number().int().min(0).max(60).optional(),
@@ -25,7 +27,7 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Données invalides' }, { status: 400 });
   }
-  const { firstName, lastName, email, whatsapp, city, nationality, bio, experienceYears, languages, iban } = parsed.data;
+  const { firstName, lastName, email, whatsapp, city, gender, serviceCities, nationality, bio, experienceYears, languages, iban } = parsed.data;
 
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) {
@@ -65,6 +67,9 @@ export async function POST(req: NextRequest) {
           slug,
           bio: bio ?? undefined,
           city: city ?? undefined,
+          gender,
+          servesMakkah: serviceCities.includes('MAKKAH'),
+          servesMadinah: serviceCities.includes('MADINAH'),
           nationality: nationality ?? undefined,
           experienceYears: experienceYears ? Number(experienceYears) : undefined,
           ibanEncrypted: iban ? encrypt(iban) : undefined,

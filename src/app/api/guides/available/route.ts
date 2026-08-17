@@ -5,12 +5,14 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const city = searchParams.get('city') || ''
   const langue = searchParams.get('langue') || ''
+  const gender = searchParams.get('gender') || ''
 
   try {
     const guides = await prisma.guideProfile.findMany({
       where: {
         status: 'ACTIVE',
         ...(langue ? { languages: { some: { languageCode: langue } } } : {}),
+        ...(gender === 'HOMME' || gender === 'FEMME' ? { gender } : {}),
       },
       include: {
         user: {
@@ -30,8 +32,12 @@ export async function GET(req: NextRequest) {
         g.user.name ||
         `${g.user.firstName ?? ''} ${g.user.lastName ?? ''}`.trim()
 
-      // Filter by city if provided
-      if (city && city !== '' && g.city && !g.city.toUpperCase().includes(city.toUpperCase()) && city !== 'BOTH') {
+      const servesMakkah = g.servesMakkah
+      const servesMadinah = g.servesMadinah
+      if (city === 'MAKKAH' && !servesMakkah) {
+        return null
+      }
+      if (city === 'MADINAH' && !servesMadinah) {
         return null
       }
 
@@ -39,6 +45,11 @@ export async function GET(req: NextRequest) {
         slug: g.slug,
         name,
         city: g.city,
+        gender: g.gender,
+        serviceCities: [
+          ...(servesMakkah ? ['MAKKAH'] : []),
+          ...(servesMadinah ? ['MADINAH'] : []),
+        ],
         bio: g.bio,
         image: g.user.image || null,
         languages: g.languages.map(l => l.languageCode),

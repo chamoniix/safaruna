@@ -6,7 +6,10 @@ import {
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { hasValidSession } from '@/lib/auth'
-import { getAnalyticsData, getGa4RealtimeData, type AnalyticsData, type Ga4RealtimeData } from '@/lib/data'
+import {
+  getAnalyticsData, getGa4RealtimeData, type AnalyticsData, type Ga4ComparisonRow,
+  type Ga4MetricComparison, type Ga4RealtimeData,
+} from '@/lib/data'
 import AutoRefresh from './AutoRefresh'
 import LogoutButton from './LogoutButton'
 
@@ -66,13 +69,59 @@ function RankedList({ rows, kind }: { rows: Array<{ label: string; count: number
   })}</div>
 }
 
+function percentChange(value: number | null) {
+  if (value === null) return 'Nouveau'
+  return `${value > 0 ? '+' : ''}${new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 }).format(value)} %`
+}
+
+function comparisonNote(metric: Ga4MetricComparison) {
+  return `${percentChange(metric.change)} vs période précédente`
+}
+
+function ComparisonRankedList({ rows }: { rows: Ga4ComparisonRow[] }) {
+  const max = Math.max(1, ...rows.map(row => row.count))
+  if (!rows.length) return <div className="empty">Aucune donnée pour cette période.</div>
+  return <div className="ranked-list comparison-list">{rows.map(row => <div className="ranked-row" key={row.label}>
+    <div className="ranked-label"><span title={row.label}>{row.label}</span><em className={row.change !== null && row.change < 0 ? 'down' : 'up'}>{percentChange(row.change)}</em><b>{number(row.count)}</b></div>
+    <div className="bar"><i style={{ width: `${(row.count / max) * 100}%` }} /></div>
+  </div>)}</div>
+}
+
+function LineChart({ rows, previous = true }: { rows: Array<{ label: string; current: number; previous?: number }>; previous?: boolean }) {
+  if (!rows.length) return <div className="empty">Aucune donnée pour cette période.</div>
+  const width = 900
+  const height = 240
+  const padding = { top: 18, right: 14, bottom: 34, left: 42 }
+  const chartWidth = width - padding.left - padding.right
+  const chartHeight = height - padding.top - padding.bottom
+  const max = Math.max(1, ...rows.flatMap(row => [row.current, row.previous || 0]))
+  const point = (value: number, index: number) => {
+    const x = padding.left + (rows.length === 1 ? chartWidth / 2 : index / (rows.length - 1) * chartWidth)
+    const y = padding.top + chartHeight - value / max * chartHeight
+    return `${x},${y}`
+  }
+  const labelIndexes = new Set([0, Math.floor((rows.length - 1) / 2), rows.length - 1])
+  return <div className="chart-wrap">
+    <div className="chart-legend"><span className="current">Période actuelle</span>{previous && <span className="previous">Période précédente</span>}</div>
+    <svg className="line-chart" viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Évolution des utilisateurs actifs">
+      {[0, .25, .5, .75, 1].map(step => {
+        const y = padding.top + chartHeight - step * chartHeight
+        return <g key={step}><line x1={padding.left} y1={y} x2={width - padding.right} y2={y} className="chart-grid" /><text x={padding.left - 10} y={y + 4} textAnchor="end">{Math.round(max * step)}</text></g>
+      })}
+      {previous && <polyline points={rows.map((row, index) => point(row.previous || 0, index)).join(' ')} className="chart-line chart-previous" />}
+      <polyline points={rows.map((row, index) => point(row.current, index)).join(' ')} className="chart-line chart-current" />
+      {rows.map((row, index) => labelIndexes.has(index) ? <text key={`${row.label}-${index}`} x={Number(point(0, index).split(',')[0])} y={height - 8} textAnchor={index === 0 ? 'start' : index === rows.length - 1 ? 'end' : 'middle'}>{row.label}</text> : null)}
+    </svg>
+  </div>
+}
+
 function Dashboard({ data, ga4, days, query }: { data: AnalyticsData; ga4: Ga4RealtimeData; days: number; query: string }) {
   const maxFunnel = Math.max(1, ...data.funnel.map(item => item.count))
   return <main>
     <AutoRefresh />
     <header className="topbar">
       <div className="brand"><span>SAFAR<span>U</span>MA</span><small>Analytics privé</small></div>
-      <nav><a href="#vue">Vue générale</a><a href="#ga4">GA4 temps réel</a><a href="#paiements">Paiements</a><a href="#erreurs">Erreurs</a><a href="#parcours">Parcours</a></nav>
+      <nav><a href="#vue">Vue générale</a><a href="#ga4">GA4 complet</a><a href="#paiements">Paiements</a><a href="#erreurs">Erreurs</a><a href="#parcours">Parcours</a></nav>
       <LogoutButton />
     </header>
 
@@ -101,6 +150,36 @@ function Dashboard({ data, ga4, days, query }: { data: AnalyticsData; ga4: Ga4Re
 
       <section id="ga4">
         <article className="panel">
+          <div className="panel-title"><div><p className="eyebrow">Google Analytics 4</p><h2>Vue d’ensemble — {days} derniers jours</h2></div>{ga4.available ? <CheckCircle2 className="ok" /> : <AlertTriangle className="warn" />}</div>
+          {!ga4.available ? <div className="empty">{ga4.error || 'Connexion GA4 indisponible.'}</div> : <>
+            <div className="metrics ga4-history-metrics">
+              <Metric icon={<UsersRound />} label="Utilisateurs actifs" value={number(ga4.historical.overview.activeUsers.current)} note={comparisonNote(ga4.historical.overview.activeUsers)} />
+              <Metric icon={<Activity />} label="Événements" value={number(ga4.historical.overview.eventCount.current)} note={comparisonNote(ga4.historical.overview.eventCount)} />
+              <Metric icon={<CheckCircle2 />} label="Événements clés" value={number(ga4.historical.overview.keyEvents.current)} note={comparisonNote(ga4.historical.overview.keyEvents)} />
+              <Metric icon={<UserRound />} label="Nouveaux utilisateurs" value={number(ga4.historical.overview.newUsers.current)} note={comparisonNote(ga4.historical.overview.newUsers)} />
+            </div>
+            <div className="status-line"><span><Activity size={14} /> Données complètes : {ga4.historical.currentLabel}</span><span>Comparaison : {ga4.historical.previousLabel}</span></div>
+          </>}
+        </article>
+        {ga4.available && <>
+          <article className="panel">
+            <div className="panel-title"><div><p className="eyebrow">Évolution</p><h2>Utilisateurs actifs par jour</h2></div><BarChart3 /></div>
+            <LineChart rows={ga4.historical.daily} />
+          </article>
+          <div className="grid two ga4-breakdowns">
+            <article className="panel"><div className="panel-title"><div><p className="eyebrow">Audience</p><h2>Utilisateurs par pays</h2></div><Globe2 /></div><ComparisonRankedList rows={ga4.historical.countries} /></article>
+            <article className="panel"><div className="panel-title"><div><p className="eyebrow">Audience</p><h2>Utilisateurs par ville</h2></div><Globe2 /></div><ComparisonRankedList rows={ga4.historical.cities} /></article>
+            <article className="panel"><div className="panel-title"><div><p className="eyebrow">Contenu</p><h2>Vues par page</h2></div><Eye /></div><ComparisonRankedList rows={ga4.historical.pages} /></article>
+            <article className="panel"><div className="panel-title"><div><p className="eyebrow">Acquisition</p><h2>Sessions par canal</h2></div><BarChart3 /></div><ComparisonRankedList rows={ga4.historical.channels} /></article>
+            <article className="panel"><div className="panel-title"><div><p className="eyebrow">Acquisition initiale</p><h2>Utilisateurs par source / support</h2></div><UsersRound /></div><ComparisonRankedList rows={ga4.historical.firstSources} /></article>
+            <article className="panel"><div className="panel-title"><div><p className="eyebrow">Acquisition des sessions</p><h2>Sessions par source / support</h2></div><Activity /></div><ComparisonRankedList rows={ga4.historical.sessionSources} /></article>
+            <article className="panel"><div className="panel-title"><div><p className="eyebrow">Conversions</p><h2>Événements clés par plateforme</h2></div><CheckCircle2 /></div><ComparisonRankedList rows={ga4.historical.platforms} /></article>
+          </div>
+        </>}
+      </section>
+
+      <section id="ga4-realtime">
+        <article className="panel">
           <div className="panel-title"><div><p className="eyebrow">Google Analytics 4</p><h2>Temps réel — 30 dernières minutes</h2></div>{ga4.available ? <CheckCircle2 className="ok" /> : <AlertTriangle className="warn" />}</div>
           {!ga4.available ? <div className="empty">{ga4.error || 'Connexion GA4 indisponible.'}</div> : <>
             <div className="payment-summary ga4-summary">
@@ -112,6 +191,10 @@ function Dashboard({ data, ga4, days, query }: { data: AnalyticsData; ga4: Ga4Re
             <div className="status-line"><span><Activity size={14} /> GA4 actualisé {date(ga4.generatedAt)}</span><span>Propriété 536896629</span></div>
           </>}
         </article>
+        {ga4.available && <article className="panel">
+          <div className="panel-title"><div><p className="eyebrow">GA4 en direct</p><h2>Utilisateurs actifs par minute</h2></div><Activity /></div>
+          <LineChart rows={ga4.minuteSeries.map(row => ({ label: row.label, current: row.value }))} previous={false} />
+        </article>}
         {ga4.available && <div className="grid two">
           <article className="panel"><div className="panel-title"><div><p className="eyebrow">GA4 en direct</p><h2>Pays</h2></div><Globe2 /></div><RankedList rows={ga4.countries} kind="plain" /></article>
           <article className="panel"><div className="panel-title"><div><p className="eyebrow">GA4 en direct</p><h2>Appareils</h2></div><MonitorSmartphone /></div><RankedList rows={ga4.devices} kind="device" /></article>
@@ -189,7 +272,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ d
     getAnalyticsData(days, query)
       .then(data => ({ data, error: null }))
       .catch(error => ({ data: null, error: error instanceof Error ? error.message : 'Erreur inconnue' })),
-    getGa4RealtimeData(),
+    getGa4RealtimeData(days),
   ])
   if (!result.data) {
     return <main className="login-shell"><div className="login-card error-card"><AlertTriangle size={28} /><h1>Données indisponibles</h1><p className="muted">{result.error}</p><Link href="/">Réessayer</Link><LogoutButton /></div></main>

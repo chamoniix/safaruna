@@ -1,4 +1,5 @@
 import Stripe from 'stripe'
+import * as Sentry from '@sentry/nextjs'
 import { Prisma } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
@@ -15,6 +16,7 @@ import {
 import { createAuditLog } from '@/lib/audit'
 import { getPackageForCity, type CityChoice } from '@/lib/packages'
 import { PLACES } from '@/lib/places'
+import { recordAnalyticsEvent } from '@/lib/analytics'
 
 type DraftMission = {
   city: 'MAKKAH' | 'MADINAH'
@@ -252,6 +254,12 @@ export async function POST(req: NextRequest) {
     const session = event.data.object as Stripe.Checkout.Session
     const refNumber = session.metadata?.refNumber
     if (refNumber) {
+      await recordAnalyticsEvent({
+        eventName: 'payment_expired',
+        sessionHash: session.metadata?.analyticsSessionHash || null,
+        path: '/checkout.stripe.com',
+        metadata: { refNumber },
+      })
       await prisma.reservationDraft.deleteMany({ where: { refNumber } })
       await createAuditLog({
         actor: 'stripe', actorRole: 'SYSTEM', action: 'PAYMENT_SESSION_EXPIRED', target: refNumber,
@@ -407,6 +415,7 @@ export async function POST(req: NextRequest) {
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable })
   } catch (error) {
     console.error('[stripe/webhook transaction]', error)
+    Sentry.captureException(error, { tags: { area: 'stripe-webhook-reservation' }, extra: { refNumber } })
     return NextResponse.json({ error: 'Création de réservation impossible' }, { status: 500 })
   }
 
@@ -418,8 +427,23 @@ export async function POST(req: NextRequest) {
     detail: JSON.stringify({ amount: confirmedAmount, cityChoice: data.cityChoice, missions: data.missions.length }),
   })
 
+  await recordAnalyticsEvent({
+    eventName: 'purchase',
+    sessionHash: session.metadata?.analyticsSessionHash || null,
+    userId: pelerin.id,
+    path: '/checkout.stripe.com',
+    metadata: {
+      refNumber,
+      cityChoice: data.cityChoice,
+      amountCents: Math.round(confirmedAmount * 100),
+    },
+  })
+
   await sendConfirmationEmails({ refNumber, amount: confirmedAmount, data, pelerin, guides })
-    .catch(error => console.error('[stripe/webhook emails]', error))
+    .catch(error => {
+      console.error('[stripe/webhook emails]', error)
+      Sentry.captureException(error, { tags: { area: 'stripe-confirmation-email' }, extra: { refNumber } })
+    })
 
   return NextResponse.json({ received: true })
 }

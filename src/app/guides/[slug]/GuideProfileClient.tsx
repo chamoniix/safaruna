@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PLACES as LIB_PLACES } from '@/lib/places';
+import { trackAnalyticsEvent } from '@/lib/analytics-client';
 
 interface Package {
   name: string;
@@ -75,6 +76,10 @@ export default function GuideProfileClient({
 }: GuideProfileClientProps) {
   const [activeTab, setActiveTab] = useState(0);
   const [companionSlug, setCompanionSlug] = useState<string | null>(null);
+
+  useEffect(() => {
+    trackAnalyticsEvent('guide_viewed', { guideSlug: slug, guideName });
+  }, [slug, guideName]);
 
   const companionCity: 'MAKKAH' | 'MADINAH' | null =
     guideCity === 'MAKKAH' ? 'MADINAH' :

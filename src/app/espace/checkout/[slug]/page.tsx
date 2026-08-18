@@ -16,6 +16,7 @@ import {
   type LocalTransportOption,
   type TransportOption,
 } from '@/lib/booking-pricing'
+import { getAnalyticsSessionId, trackAnalyticsEvent } from '@/lib/analytics-client'
 
 // ── Types ─────────────────────────────────────────
 type Gender = 'HOMME' | 'FEMME' | 'MIXTE'
@@ -198,6 +199,7 @@ export default function CheckoutPage() {
   const [guideDetailSlug, setGuideDetailSlug] = useState<string | null>(null)
   const [guidePickerMode, setGuidePickerMode] = useState(false)
   const guideFetchKey = useRef('')
+  const bookingStartedSlug = useRef<string | null>(null)
 
   // Étape 1
   const [cityChoice, setCityChoice] = useState<CityChoice | null>(null)
@@ -236,6 +238,26 @@ export default function CheckoutPage() {
       router.push(`/connexion?redirect=${encodeURIComponent(current)}`)
     }
   }, [status, slug, router, searchParams])
+
+  useEffect(() => {
+    if (!slug || bookingStartedSlug.current === slug) return
+    bookingStartedSlug.current = slug
+    trackAnalyticsEvent('booking_started', { guideSlug: slug })
+  }, [slug])
+
+  useEffect(() => {
+    trackAnalyticsEvent('booking_step', {
+      guideSlug: slug,
+      step,
+      cityChoice: cityChoice ?? 'UNSET',
+    })
+  }, [slug, step, cityChoice])
+
+  useEffect(() => {
+    if (searchParams.get('cancelled') === '1') {
+      trackAnalyticsEvent('payment_cancelled', { guideSlug: slug })
+    }
+  }, [searchParams, slug])
 
   // Restaurer l'état depuis localStorage (survit aux rafraîchissements Safari)
   useEffect(() => {
@@ -438,6 +460,11 @@ export default function CheckoutPage() {
   const handleSubmit = async () => {
     setSubmitting(true)
     setError('')
+    trackAnalyticsEvent('begin_checkout', {
+      guideSlug: selectedGuideSlug || slug,
+      cityChoice: cityChoice ?? 'UNSET',
+      amountCents: Math.round(total * 100),
+    })
     try {
       const res = await fetch('/api/stripe/create-session', {
         method: 'POST',
@@ -461,14 +488,20 @@ export default function CheckoutPage() {
           packageName: basePackage?.name,
           selectedGuideSlug,
           selectedGuideSlugMadinah,
+          analyticsSessionId: getAnalyticsSessionId(),
         }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Erreur')
       try { localStorage.removeItem(`safaruna_checkout_${slug}`) } catch { /* ignore */ }
       window.location.href = data.sessionUrl
-    } catch (e: any) {
-      setError(e.message)
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Erreur lors de la préparation du paiement'
+      trackAnalyticsEvent('checkout_error', {
+        guideSlug: selectedGuideSlug || slug,
+        message: message.slice(0, 160),
+      })
+      setError(message)
       setSubmitting(false)
     }
   }

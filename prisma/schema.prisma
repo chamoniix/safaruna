@@ -67,6 +67,7 @@ model User {
   savedDuas              SavedDua[]
   courseProgress         CourseProgress[]
   notifications          Notification[]
+  analyticsEvents        AnalyticsEvent[]
 }
 
 model VerificationToken {
@@ -456,4 +457,44 @@ model AuditLog {
   target    String? // refNumber, placeKey, userId...
   detail    String? // JSON ou texte libre
   ip        String?
+}
+
+// ---------------------------------------------------------
+// PRIVACY-FIRST PRODUCT ANALYTICS
+// ---------------------------------------------------------
+
+model AnalyticsEvent {
+  id          String   @id @default(cuid())
+  eventName   String
+  sessionHash String?
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  path        String?
+  referrer    String?
+  country     String?
+  device      String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([eventName, createdAt])
+  @@index([sessionHash, createdAt])
+  @@index([userId, createdAt])
+}
+
+model AnalyticsDailyAggregate {
+  id             String   @id @default(cuid())
+  day            DateTime
+  eventName      String
+  country        String   @default("UNKNOWN")
+  device         String   @default("UNKNOWN")
+  path           String   @default("")
+  count          Int      @default(0)
+  uniqueSessions Int      @default(0)
+  revenueCents   Int      @default(0)
+  updatedAt      DateTime @updatedAt
+
+  @@unique([day, eventName, country, device, path])
+  @@index([day])
+  @@index([eventName, day])
 }

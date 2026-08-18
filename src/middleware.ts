@@ -11,7 +11,7 @@ function buildCspResponse(req: NextRequest): NextResponse {
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ''} https://js.stripe.com https://*.sentry.io`,
     "frame-src https://js.stripe.com https://checkout.stripe.com",
     "img-src 'self' data: https:",
-    "connect-src 'self' https://api.stripe.com https://*.sentry.io https://*.ingest.de.sentry.io",
+    "connect-src 'self' https://api.stripe.com https://*.sentry.io https://*.ingest.de.sentry.io https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com",
     "font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "object-src 'none'",

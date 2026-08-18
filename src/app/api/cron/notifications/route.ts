@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { Prisma } from '@prisma/client'
 import prisma from '@/lib/prisma'
 import { baseTemplate, btn, divider, escapeHtml, heading, p, sendEmail } from '@/lib/email'
+import { archiveExpiredAnalyticsEvents } from '@/lib/analytics-retention'
 
 const DAY_MS = 86_400_000
 
@@ -117,5 +118,6 @@ export async function GET(req: NextRequest) {
   }
 
   const deletedDrafts = await prisma.reservationDraft.deleteMany({ where: { expiresAt: { lt: new Date() } } })
-  return NextResponse.json({ success: true, reservationsChecked: reservations.length, emailsSent: sent, draftsReleased: deletedDrafts.count, checkedAt: new Date().toISOString() })
+  const analyticsEventsArchived = await archiveExpiredAnalyticsEvents()
+  return NextResponse.json({ success: true, reservationsChecked: reservations.length, emailsSent: sent, draftsReleased: deletedDrafts.count, analyticsEventsArchived, checkedAt: new Date().toISOString() })
 }

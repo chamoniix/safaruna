@@ -1,4 +1,5 @@
 import Stripe from 'stripe'
+import * as Sentry from '@sentry/nextjs'
 import { Prisma } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
@@ -13,6 +14,12 @@ import {
   calculateBookingTransportPrice,
   calculateLocalCarDays,
 } from '@/lib/booking-pricing'
+import {
+  analyticsCountry,
+  analyticsDevice,
+  hashAnalyticsSession,
+  recordAnalyticsEvent,
+} from '@/lib/analytics'
 
 // Stripe exige une expiration située au moins 30 minutes après la création de
 // la session. Une minute technique couvre le temps de transaction et réseau.
@@ -38,6 +45,7 @@ const checkoutSchema = z.object({
   selectedGuideSlugMadinah: z.string().min(1).max(120).nullable().optional(),
   arrivalPoint: z.enum(['JEDDAH', 'MADINAH', 'MAKKAH']),
   guideBedProvided: z.boolean().default(false),
+  analyticsSessionId: z.string().min(20).max(100).nullable().optional(),
 })
 
 type MissionCity = 'MAKKAH' | 'MADINAH'
@@ -251,6 +259,7 @@ export async function POST(req: NextRequest) {
   const refNumber = 'SAF-' + Date.now().toString(36).toUpperCase() +
     Math.random().toString(36).slice(2, 5).toUpperCase()
   const expiresAt = new Date(Date.now() + HOLD_DURATION_MS)
+  const analyticsSessionHash = hashAnalyticsSession(body.analyticsSessionId)
   const normalizedBody = {
     ...body,
     selectedPlaces: selectedPlaceKeys,
@@ -261,6 +270,7 @@ export async function POST(req: NextRequest) {
     sameGuideForBothCities,
     cityOrder,
     ihramAlert,
+    analyticsSessionHash,
     missions: missions.map(mission => ({ ...mission, dates: undefined })),
     pricing: {
       base: basePackage.basePrice,
@@ -319,6 +329,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Ces dates viennent d’être réservées. Choisissez d’autres dates.' }, { status: 409 })
     }
     console.error('[stripe/create-session hold]', error)
+    Sentry.captureException(error, { tags: { area: 'checkout-hold' } })
     return NextResponse.json({ error: 'Impossible de bloquer ces disponibilités' }, { status: 500 })
   }
 
@@ -345,6 +356,7 @@ export async function POST(req: NextRequest) {
         guideSlug: makkahGuideSlug,
         guideSlugMadinah: madinahGuideSlug || '',
         pelerinEmail: userSession.user.email,
+        analyticsSessionHash: analyticsSessionHash || '',
       },
       success_url: `${baseUrl}/espace/checkout/${body.guideSlug}/confirmation?ref=${refNumber}&payment=success`,
       cancel_url: `${baseUrl}/espace/checkout/${body.guideSlug}?cancelled=1`,
@@ -356,10 +368,25 @@ export async function POST(req: NextRequest) {
       where: { refNumber },
       data: { stripeSessionId: checkoutSession.id },
     })
+    await recordAnalyticsEvent({
+      eventName: 'checkout_created',
+      sessionHash: analyticsSessionHash,
+      userId: userSession.user.id,
+      path: `/espace/checkout/${body.guideSlug}`,
+      country: analyticsCountry(req.headers.get('x-vercel-ip-country')),
+      device: analyticsDevice(req.headers.get('user-agent')),
+      metadata: {
+        refNumber,
+        guideSlug: makkahGuideSlug,
+        cityChoice,
+        amountCents: Math.round(expectedPrice * 100),
+      },
+    })
     return NextResponse.json({ sessionUrl: checkoutSession.url, refNumber })
   } catch (error) {
     await prisma.reservationDraft.deleteMany({ where: { refNumber } })
     console.error('[stripe/create-session Stripe]', error)
+    Sentry.captureException(error, { tags: { area: 'stripe-session-create' } })
     return NextResponse.json({ error: 'Erreur lors de la préparation du paiement' }, { status: 500 })
   }
 }

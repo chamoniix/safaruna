@@ -42,6 +42,11 @@ function pushConsentToGtag(choice: ConsentChoice) {
   }
 }
 
+export function restoreSavedConsent(): void {
+  const choice = getConsent();
+  if (choice) pushConsentToGtag(choice);
+}
+
 export function getConsent(): ConsentChoice | null {
   if (typeof window === 'undefined') return null;
   try {

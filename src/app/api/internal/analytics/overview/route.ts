@@ -51,9 +51,9 @@ async function sentryIssues(days: number) {
   if (!token) return { available: false, issues: [] }
 
   try {
-    const params = new URLSearchParams({ query: 'is:unresolved', statsPeriod: `${days}d`, limit: '25' })
+    const params = new URLSearchParams({ project, query: 'is:unresolved', statsPeriod: `${days}d`, limit: '25' })
     const response = await fetch(
-      `https://sentry.io/api/0/projects/${encodeURIComponent(org)}/${encodeURIComponent(project)}/issues/?${params}`,
+      `https://sentry.io/api/0/organizations/${encodeURIComponent(org)}/issues/?${params}`,
       { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }
     )
     if (!response.ok) return { available: false, issues: [] }
@@ -243,4 +243,3 @@ export async function GET(req: NextRequest) {
     },
   })
 }
-

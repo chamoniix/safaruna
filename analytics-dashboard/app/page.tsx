@@ -170,7 +170,7 @@ function Dashboard({ data, ga4, days, query }: { data: AnalyticsData; ga4: Ga4Re
       </section>
 
       <section id="ga4">
-        <article className="panel">
+        <article className="panel tone-blue">
           <div className="panel-title"><div><p className="eyebrow">Google Analytics 4</p><h2>Vue d’ensemble — {days} derniers jours</h2></div>{ga4.available ? <CheckCircle2 className="ok" /> : <AlertTriangle className="warn" />}</div>
           {!ga4.available ? <div className="empty">{ga4.error || 'Connexion GA4 indisponible.'}</div> : <>
             <div className="metrics ga4-history-metrics">
@@ -183,24 +183,24 @@ function Dashboard({ data, ga4, days, query }: { data: AnalyticsData; ga4: Ga4Re
           </>}
         </article>
         {ga4.available && <>
-          <article className="panel">
+          <article className="panel tone-teal">
             <div className="panel-title"><div><p className="eyebrow">Évolution</p><h2>Utilisateurs actifs par jour</h2></div><BarChart3 /></div>
             <LineChart rows={ga4.historical.daily} />
           </article>
           <div className="grid two ga4-breakdowns">
-            <article className="panel"><div className="panel-title"><div><p className="eyebrow">Audience</p><h2>Utilisateurs par pays</h2></div><Globe2 /></div><ComparisonRankedList rows={ga4.historical.countries} /></article>
-            <article className="panel"><div className="panel-title"><div><p className="eyebrow">Audience</p><h2>Utilisateurs par ville</h2></div><Globe2 /></div><ComparisonRankedList rows={ga4.historical.cities} /></article>
-            <article className="panel"><div className="panel-title"><div><p className="eyebrow">Contenu</p><h2>Vues par page</h2></div><Eye /></div><ComparisonRankedList rows={ga4.historical.pages} /></article>
-            <article className="panel"><div className="panel-title"><div><p className="eyebrow">Acquisition</p><h2>Sessions par canal</h2></div><BarChart3 /></div><ComparisonRankedList rows={ga4.historical.channels} /></article>
-            <article className="panel"><div className="panel-title"><div><p className="eyebrow">Acquisition initiale</p><h2>Utilisateurs par source / support</h2></div><UsersRound /></div><ComparisonRankedList rows={ga4.historical.firstSources} /></article>
-            <article className="panel"><div className="panel-title"><div><p className="eyebrow">Acquisition des sessions</p><h2>Sessions par source / support</h2></div><Activity /></div><ComparisonRankedList rows={ga4.historical.sessionSources} /></article>
-            <article className="panel"><div className="panel-title"><div><p className="eyebrow">Conversions</p><h2>Événements clés par plateforme</h2></div><CheckCircle2 /></div><ComparisonRankedList rows={ga4.historical.platforms} /></article>
+            <article className="panel tone-blue"><div className="panel-title"><div><p className="eyebrow">Audience</p><h2>Utilisateurs par pays</h2></div><Globe2 /></div><ComparisonRankedList rows={ga4.historical.countries} /></article>
+            <article className="panel tone-teal"><div className="panel-title"><div><p className="eyebrow">Audience</p><h2>Utilisateurs par ville</h2></div><Globe2 /></div><ComparisonRankedList rows={ga4.historical.cities} /></article>
+            <article className="panel tone-orange"><div className="panel-title"><div><p className="eyebrow">Contenu</p><h2>Vues par page</h2></div><Eye /></div><ComparisonRankedList rows={ga4.historical.pages} /></article>
+            <article className="panel tone-green"><div className="panel-title"><div><p className="eyebrow">Acquisition</p><h2>Sessions par canal</h2></div><BarChart3 /></div><ComparisonRankedList rows={ga4.historical.channels} /></article>
+            <article className="panel tone-blue"><div className="panel-title"><div><p className="eyebrow">Acquisition initiale</p><h2>Utilisateurs par source / support</h2></div><UsersRound /></div><ComparisonRankedList rows={ga4.historical.firstSources} /></article>
+            <article className="panel tone-teal"><div className="panel-title"><div><p className="eyebrow">Acquisition des sessions</p><h2>Sessions par source / support</h2></div><Activity /></div><ComparisonRankedList rows={ga4.historical.sessionSources} /></article>
+            <article className="panel tone-orange"><div className="panel-title"><div><p className="eyebrow">Conversions</p><h2>Événements clés par plateforme</h2></div><CheckCircle2 /></div><ComparisonRankedList rows={ga4.historical.platforms} /></article>
           </div>
         </>}
       </section>
 
       <section id="ga4-realtime">
-        <article className="panel">
+        <article className="panel tone-green">
           <div className="panel-title"><div><p className="eyebrow">Google Analytics 4</p><h2>Temps réel — 30 dernières minutes</h2></div>{ga4.available ? <CheckCircle2 className="ok" /> : <AlertTriangle className="warn" />}</div>
           {!ga4.available ? <div className="empty">{ga4.error || 'Connexion GA4 indisponible.'}</div> : <>
             <div className="payment-summary ga4-summary">
@@ -212,39 +212,39 @@ function Dashboard({ data, ga4, days, query }: { data: AnalyticsData; ga4: Ga4Re
             <div className="status-line"><span><Activity size={14} /> GA4 actualisé {date(ga4.generatedAt)}</span><span>Propriété 536896629</span></div>
           </>}
         </article>
-        {ga4.available && <article className="panel">
+        {ga4.available && <article className="panel tone-blue">
           <div className="panel-title"><div><p className="eyebrow">GA4 en direct</p><h2>Utilisateurs actifs par minute</h2></div><Activity /></div>
           <LineChart rows={ga4.minuteSeries.map(row => ({ label: row.label, current: row.value }))} previous={false} />
         </article>}
         {ga4.available && <div className="grid two">
-          <article className="panel"><div className="panel-title"><div><p className="eyebrow">GA4 en direct</p><h2>Pays</h2></div><Globe2 /></div><RankedList rows={ga4.countries} kind="plain" /></article>
-          <article className="panel"><div className="panel-title"><div><p className="eyebrow">GA4 en direct</p><h2>Appareils</h2></div><MonitorSmartphone /></div><RankedList rows={ga4.devices} kind="device" /></article>
-          <article className="panel"><div className="panel-title"><div><p className="eyebrow">GA4 en direct</p><h2>Pages consultées</h2></div><Eye /></div><RankedList rows={ga4.pages} kind="plain" /></article>
-          <article className="panel"><div className="panel-title"><div><p className="eyebrow">GA4 en direct</p><h2>Événements</h2></div><Activity /></div><RankedList rows={ga4.events.map(row => ({ ...row, label: eventLabels[row.label] || row.label }))} kind="plain" /></article>
+          <article className="panel tone-blue"><div className="panel-title"><div><p className="eyebrow">GA4 en direct</p><h2>Pays</h2></div><Globe2 /></div><RankedList rows={ga4.countries} kind="plain" /></article>
+          <article className="panel tone-teal"><div className="panel-title"><div><p className="eyebrow">GA4 en direct</p><h2>Appareils</h2></div><MonitorSmartphone /></div><RankedList rows={ga4.devices} kind="device" /></article>
+          <article className="panel tone-orange"><div className="panel-title"><div><p className="eyebrow">GA4 en direct</p><h2>Pages consultées</h2></div><Eye /></div><RankedList rows={ga4.pages} kind="plain" /></article>
+          <article className="panel tone-green"><div className="panel-title"><div><p className="eyebrow">GA4 en direct</p><h2>Événements</h2></div><Activity /></div><RankedList rows={ga4.events.map(row => ({ ...row, label: eventLabels[row.label] || row.label }))} kind="plain" /></article>
         </div>}
       </section>
 
       <section className="grid two">
-        <article className="panel">
+        <article className="panel tone-orange">
           <div className="panel-title"><div><p className="eyebrow">Tunnel</p><h2>Conversion réservation</h2></div><BarChart3 /></div>
           <div className="funnel">{data.funnel.map((item, index) => <div className="funnel-row" key={item.name}>
             <span className="funnel-index">{index + 1}</span><span>{funnelLabels[item.name] || item.name}</span>
             <div className="funnel-bar"><i style={{ width: `${Math.max(2, item.count / maxFunnel * 100)}%` }} /></div><b>{number(item.count)}</b>
           </div>)}</div>
         </article>
-        <article className="panel">
+        <article className="panel tone-blue">
           <div className="panel-title"><div><p className="eyebrow">Audience</p><h2>Pays des visiteurs</h2></div><Globe2 /></div>
           <RankedList rows={data.breakdowns.countries} kind="country" />
         </article>
       </section>
 
       <section className="grid three">
-        <article className="panel"><div className="panel-title"><div><p className="eyebrow">Support</p><h2>Appareils</h2></div><MonitorSmartphone /></div><RankedList rows={data.breakdowns.devices} kind="device" /></article>
-        <article className="panel"><div className="panel-title"><div><p className="eyebrow">Contenu</p><h2>Pages consultées</h2></div><Eye /></div><RankedList rows={data.breakdowns.pages} kind="plain" /></article>
-        <article className="panel"><div className="panel-title"><div><p className="eyebrow">Marketplace</p><h2>Guides consultés</h2></div><UsersRound /></div><RankedList rows={data.breakdowns.guides} kind="plain" /></article>
+        <article className="panel tone-teal"><div className="panel-title"><div><p className="eyebrow">Support</p><h2>Appareils</h2></div><MonitorSmartphone /></div><RankedList rows={data.breakdowns.devices} kind="device" /></article>
+        <article className="panel tone-orange"><div className="panel-title"><div><p className="eyebrow">Contenu</p><h2>Pages consultées</h2></div><Eye /></div><RankedList rows={data.breakdowns.pages} kind="plain" /></article>
+        <article className="panel tone-blue"><div className="panel-title"><div><p className="eyebrow">Marketplace</p><h2>Guides consultés</h2></div><UsersRound /></div><RankedList rows={data.breakdowns.guides} kind="plain" /></article>
       </section>
 
-      <section className="panel" id="paiements">
+      <section className="panel tone-green" id="paiements">
         <div className="panel-title"><div><p className="eyebrow">Stripe + base SAFARUMA</p><h2>État des paiements</h2></div><CreditCard /></div>
         <div className="payment-summary">
           <div><span>Arrivées Stripe</span><b>{number(data.payments.checkoutCreated)}</b></div>
@@ -259,22 +259,22 @@ function Dashboard({ data, ga4, days, query }: { data: AnalyticsData; ga4: Ga4Re
       </section>
 
       <section className="grid two">
-        <article className="panel" id="erreurs">
+        <article className="panel tone-red" id="erreurs">
           <div className="panel-title"><div><p className="eyebrow">Sentry</p><h2>Erreurs non résolues</h2></div>{data.sentry.available ? <CheckCircle2 className="ok" /> : <AlertTriangle className="warn" />}</div>
           {!data.sentry.available ? <div className="empty">Connexion Sentry indisponible.</div> : <div className="issues">{data.sentry.issues.slice(0, 12).map(issue => <a href={issue.permalink} target="_blank" rel="noreferrer" key={issue.id}><div><b>{issue.title}</b><span>{issue.culprit || 'Emplacement inconnu'}</span></div><em>{number(issue.count)} occurrences<ArrowRight size={14} /></em></a>)}{!data.sentry.issues.length && <div className="empty success-empty">Aucune erreur non résolue.</div>}</div>}
         </article>
-        <article className="panel">
+        <article className="panel tone-blue">
           <div className="panel-title"><div><p className="eyebrow">Comptes</p><h2>Dernières inscriptions</h2></div><UserRound /></div>
           <div className="account-list">{data.accounts.recent.slice(0, 12).map(user => <div key={user.id}><span className="avatar">{(user.name || user.email || '?').charAt(0).toUpperCase()}</span><div><b>{user.name || 'Sans nom'}</b><span>{user.email || 'Sans email'}</span></div><em><span>{user.role}</span><small>Créé {date(user.createdAt)}</small><small>Connexion {date(user.lastLogin)}</small></em></div>)}</div>
         </article>
       </section>
 
-      <section className="panel" id="parcours">
+      <section className="panel tone-teal" id="parcours">
         <div className="panel-title"><div><p className="eyebrow">Parcours détaillés</p><h2>Dernières sessions</h2></div><Clock3 /></div>
         <div className="journeys">{data.journeys.slice(0, 20).map(journey => <details key={`${journey.id}-${journey.lastActivity}`}><summary><div><b>{journey.user?.name || journey.user?.email || `Visiteur ${journey.id}`}</b><span>{countryName(journey.country)} · {deviceName(journey.device)}</span></div><em>{journey.events.length} actions · {date(journey.lastActivity)}</em></summary><ol>{journey.events.map((event, index) => <li key={`${event.at}-${index}`}><i /><div><b>{eventLabels[event.name] || event.name}</b><span>{event.path || 'Action serveur'} · {date(event.at)}</span></div></li>)}</ol></details>)}</div>
       </section>
 
-      <section className="panel lookup">
+      <section className="panel lookup tone-orange">
         <div className="panel-title"><div><p className="eyebrow">Recherche</p><h2>Client ou référence de réservation</h2></div><Search /></div>
         <form method="get"><input type="hidden" name="days" value={days} /><input name="q" defaultValue={query} placeholder="Nom, email ou SAF-…" minLength={2} /><button><Search size={16} /> Rechercher</button></form>
         {data.lookup && <div className="lookup-results"><div><b>{data.lookup.users.length}</b><span>comptes trouvés</span></div><div><b>{data.lookup.reservations.length}</b><span>réservations trouvées</span></div><div><b>{data.lookup.events.length}</b><span>actions reliées</span></div></div>}

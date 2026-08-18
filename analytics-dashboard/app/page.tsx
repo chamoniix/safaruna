@@ -6,7 +6,7 @@ import {
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { hasValidSession } from '@/lib/auth'
-import { getAnalyticsData, type AnalyticsData } from '@/lib/data'
+import { getAnalyticsData, getGa4RealtimeData, type AnalyticsData, type Ga4RealtimeData } from '@/lib/data'
 import AutoRefresh from './AutoRefresh'
 import LogoutButton from './LogoutButton'
 
@@ -46,7 +46,7 @@ function countryName(code: string) {
 }
 
 function deviceName(device: string) {
-  return ({ MOBILE: 'Mobile', TABLET: 'Tablette', DESKTOP: 'Ordinateur', UNKNOWN: 'Inconnu' } as Record<string, string>)[device] || device
+  return ({ MOBILE: 'Mobile', TABLET: 'Tablette', DESKTOP: 'Ordinateur', UNKNOWN: 'Inconnu' } as Record<string, string>)[device.toUpperCase()] || device
 }
 
 function Metric({ icon, label, value, note }: { icon: React.ReactNode; label: string; value: string; note: string }) {
@@ -66,13 +66,13 @@ function RankedList({ rows, kind }: { rows: Array<{ label: string; count: number
   })}</div>
 }
 
-function Dashboard({ data, days, query }: { data: AnalyticsData; days: number; query: string }) {
+function Dashboard({ data, ga4, days, query }: { data: AnalyticsData; ga4: Ga4RealtimeData; days: number; query: string }) {
   const maxFunnel = Math.max(1, ...data.funnel.map(item => item.count))
   return <main>
     <AutoRefresh />
     <header className="topbar">
       <div className="brand"><span>SAFAR<span>U</span>MA</span><small>Analytics privé</small></div>
-      <nav><a href="#vue">Vue générale</a><a href="#paiements">Paiements</a><a href="#erreurs">Erreurs</a><a href="#parcours">Parcours</a></nav>
+      <nav><a href="#vue">Vue générale</a><a href="#ga4">GA4 temps réel</a><a href="#paiements">Paiements</a><a href="#erreurs">Erreurs</a><a href="#parcours">Parcours</a></nav>
       <LogoutButton />
     </header>
 
@@ -97,6 +97,27 @@ function Dashboard({ data, days, query }: { data: AnalyticsData; days: number; q
         <Metric icon={<CreditCard />} label="Réservations" value={number(data.overview.confirmedReservations)} note={`${number(data.overview.reservations)} demandes créées`} />
         <Metric icon={<CircleDollarSign />} label="Chiffre d’affaires" value={euro(data.overview.revenue)} note="réservations confirmées" />
         <Metric icon={<BarChart3 />} label="Conversion" value={`${(data.overview.conversionRate * 100).toFixed(1)} %`} note={`${number(data.overview.guidesActive)} guides actifs`} />
+      </section>
+
+      <section id="ga4">
+        <article className="panel">
+          <div className="panel-title"><div><p className="eyebrow">Google Analytics 4</p><h2>Temps réel — 30 dernières minutes</h2></div>{ga4.available ? <CheckCircle2 className="ok" /> : <AlertTriangle className="warn" />}</div>
+          {!ga4.available ? <div className="empty">{ga4.error || 'Connexion GA4 indisponible.'}</div> : <>
+            <div className="payment-summary ga4-summary">
+              <div><span>Visiteurs actifs</span><b>{number(ga4.overview.activeUsers)}</b></div>
+              <div><span>Pages vues</span><b>{number(ga4.overview.pageViews)}</b></div>
+              <div><span>Événements</span><b>{number(ga4.overview.eventCount)}</b></div>
+              <div className="success"><span>Événements clés</span><b>{number(ga4.overview.keyEvents)}</b></div>
+            </div>
+            <div className="status-line"><span><Activity size={14} /> GA4 actualisé {date(ga4.generatedAt)}</span><span>Propriété 536896629</span></div>
+          </>}
+        </article>
+        {ga4.available && <div className="grid two">
+          <article className="panel"><div className="panel-title"><div><p className="eyebrow">GA4 en direct</p><h2>Pays</h2></div><Globe2 /></div><RankedList rows={ga4.countries} kind="plain" /></article>
+          <article className="panel"><div className="panel-title"><div><p className="eyebrow">GA4 en direct</p><h2>Appareils</h2></div><MonitorSmartphone /></div><RankedList rows={ga4.devices} kind="device" /></article>
+          <article className="panel"><div className="panel-title"><div><p className="eyebrow">GA4 en direct</p><h2>Pages consultées</h2></div><Eye /></div><RankedList rows={ga4.pages} kind="plain" /></article>
+          <article className="panel"><div className="panel-title"><div><p className="eyebrow">GA4 en direct</p><h2>Événements</h2></div><Activity /></div><RankedList rows={ga4.events.map(row => ({ ...row, label: eventLabels[row.label] || row.label }))} kind="plain" /></article>
+        </div>}
       </section>
 
       <section className="grid two">
@@ -164,11 +185,14 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ d
   const requestedDays = Number(params.days ?? '30')
   const days = [7, 30, 90].includes(requestedDays) ? requestedDays : 30
   const query = (params.q || '').trim().slice(0, 120)
-  const result = await getAnalyticsData(days, query)
-    .then(data => ({ data, error: null }))
-    .catch(error => ({ data: null, error: error instanceof Error ? error.message : 'Erreur inconnue' }))
+  const [result, ga4] = await Promise.all([
+    getAnalyticsData(days, query)
+      .then(data => ({ data, error: null }))
+      .catch(error => ({ data: null, error: error instanceof Error ? error.message : 'Erreur inconnue' })),
+    getGa4RealtimeData(),
+  ])
   if (!result.data) {
     return <main className="login-shell"><div className="login-card error-card"><AlertTriangle size={28} /><h1>Données indisponibles</h1><p className="muted">{result.error}</p><Link href="/">Réessayer</Link><LogoutButton /></div></main>
   }
-  return <Dashboard data={result.data} days={days} query={query} />
+  return <Dashboard data={result.data} ga4={ga4} days={days} query={query} />
 }

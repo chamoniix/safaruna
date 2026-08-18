@@ -95,9 +95,13 @@ function LineChart({ rows, previous = true }: { rows: Array<{ label: string; cur
   const chartWidth = width - padding.left - padding.right
   const chartHeight = height - padding.top - padding.bottom
   const max = Math.max(1, ...rows.flatMap(row => [row.current, row.previous || 0]))
-  const point = (value: number, index: number) => {
+  const coordinates = (value: number, index: number) => {
     const x = padding.left + (rows.length === 1 ? chartWidth / 2 : index / (rows.length - 1) * chartWidth)
     const y = padding.top + chartHeight - value / max * chartHeight
+    return { x, y }
+  }
+  const point = (value: number, index: number) => {
+    const { x, y } = coordinates(value, index)
     return `${x},${y}`
   }
   const labelIndexes = new Set([0, Math.floor((rows.length - 1) / 2), rows.length - 1])
@@ -110,7 +114,24 @@ function LineChart({ rows, previous = true }: { rows: Array<{ label: string; cur
       })}
       {previous && <polyline points={rows.map((row, index) => point(row.previous || 0, index)).join(' ')} className="chart-line chart-previous" />}
       <polyline points={rows.map((row, index) => point(row.current, index)).join(' ')} className="chart-line chart-current" />
-      {rows.map((row, index) => labelIndexes.has(index) ? <text key={`${row.label}-${index}`} x={Number(point(0, index).split(',')[0])} y={height - 8} textAnchor={index === 0 ? 'start' : index === rows.length - 1 ? 'end' : 'middle'}>{row.label}</text> : null)}
+      {rows.map((row, index) => {
+        const { x, y } = coordinates(row.current, index)
+        const tooltipWidth = previous ? 210 : 150
+        const tooltipX = Math.min(width - padding.right - tooltipWidth, Math.max(padding.left, x - tooltipWidth / 2))
+        const tooltipY = y < padding.top + 52 ? y + 14 : y - 50
+        const detail = previous ? `${number(row.current)} actuels · ${number(row.previous || 0)} précédents` : `${number(row.current)} utilisateur${row.current > 1 ? 's' : ''}`
+        return <g className="chart-point" key={`${row.label}-${index}`}>
+          <circle cx={x} cy={y} r="10" className="chart-point-hit" />
+          <circle cx={x} cy={y} r="3.5" className="chart-point-dot" />
+          <g className="chart-tooltip">
+            <rect x={tooltipX} y={tooltipY} width={tooltipWidth} height="38" rx="8" />
+            <text x={tooltipX + 10} y={tooltipY + 15} className="chart-tooltip-date">{row.label}</text>
+            <text x={tooltipX + 10} y={tooltipY + 29}>{detail}</text>
+          </g>
+          <title>{`${row.label} : ${detail}`}</title>
+        </g>
+      })}
+      {rows.map((row, index) => labelIndexes.has(index) ? <text key={`label-${row.label}-${index}`} x={coordinates(0, index).x} y={height - 8} textAnchor={index === 0 ? 'start' : index === rows.length - 1 ? 'end' : 'middle'}>{row.label}</text> : null)}
     </svg>
   </div>
 }

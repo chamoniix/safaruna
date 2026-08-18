@@ -54,7 +54,7 @@ button,a { -webkit-tap-highlight-color:transparent; }
 .comparison-list .ranked-label em.up { color:var(--green); }
 .comparison-list .ranked-label em.down { color:var(--red); }
 .chart-wrap { width:100%; overflow:hidden; }
-.chart-legend { display:flex; justify-content:flex-end; gap:20px; color:var(--muted); font-size:10px; margin:-8px 0 8px; }
+.chart-legend { display:flex; justify-content:flex-end; gap:20px; color:var(--muted); font-size:10px; margin:0 0 12px; min-height:16px; }
 .chart-legend span { display:flex; align-items:center; gap:6px; }
 .chart-legend span:before { content:""; display:block; width:18px; height:3px; border-radius:4px; background:var(--gold); }
 .chart-legend .previous:before { background:#cfc8bc; }
@@ -64,6 +64,15 @@ button,a { -webkit-tap-highlight-color:transparent; }
 .chart-line { fill:none; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
 .chart-current { stroke:var(--gold); }
 .chart-previous { stroke:#cfc8bc; stroke-width:2; stroke-dasharray:7 6; }
+.chart-point { cursor:crosshair; }
+.chart-point-hit { fill:transparent; }
+.chart-point-dot { fill:var(--gold); stroke:white; stroke-width:1.5; transition:r .15s ease,fill .15s ease; }
+.chart-point:hover .chart-point-dot { r:5.5; fill:#8f6a14; }
+.chart-tooltip { opacity:0; pointer-events:none; transition:opacity .12s ease; }
+.chart-point:hover .chart-tooltip { opacity:1; }
+.chart-tooltip rect { fill:#17130d; filter:drop-shadow(0 5px 10px rgba(23,19,13,.2)); }
+.line-chart .chart-tooltip text { fill:white; font-size:10px; font-weight:650; }
+.line-chart .chart-tooltip-date { fill:#e6c66f; font-size:9px; font-weight:800; }
 .table-wrap { overflow-x:auto; }.table-wrap table{width:100%;border-collapse:collapse;min-width:850px}.table-wrap th{text-align:left;color:#91877a;text-transform:uppercase;letter-spacing:.08em;font-size:9px;padding:10px;border-bottom:1px solid var(--line)}.table-wrap td{padding:12px 10px;border-bottom:1px solid #f0ece4;font-size:11px}.table-wrap code{font-weight:700;color:#7e651f}.pill{font-size:9px;font-weight:800;border-radius:20px;padding:4px 7px;background:#eee}.pill.confirmed{color:var(--green);background:#e7f5ee}.pill.cancelled{color:var(--red);background:#fff0ee}
 .issues,.account-list { display:flex;flex-direction:column; }.issues a,.account-list>div{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #f0ece4;text-decoration:none;color:inherit}.issues a:hover b{color:#917020}.issues a>div,.account-list>div>div{display:flex;flex-direction:column;gap:4px;min-width:0}.issues b,.account-list b{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.issues span,.account-list span,.account-list small{font-size:9px;color:#91877a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.issues em{font-style:normal;font-size:9px;color:#8c7d68;display:flex;align-items:center;gap:5px;white-space:nowrap}.ok{color:var(--green)!important}.warn{color:var(--red)!important}.avatar{width:31px;height:31px;border-radius:50%;background:#f1ead9!important;color:#80631f!important;display:grid!important;place-items:center;flex:none;font-weight:800}.account-list>div{align-items:center}.account-list>div>div{flex:1}.account-list em{font-style:normal;text-align:right;display:flex;flex-direction:column;gap:2px;max-width:180px}.account-list em>span{color:#866b29;font-weight:800}
 .journeys details{border-top:1px solid #eee8df}.journeys summary{list-style:none;cursor:pointer;padding:14px 2px;display:flex;justify-content:space-between;gap:18px;align-items:center}.journeys summary::-webkit-details-marker{display:none}.journeys summary>div{display:flex;flex-direction:column;gap:4px}.journeys summary b{font-size:11px}.journeys summary span,.journeys summary em{font-size:9px;color:#8c8275;font-style:normal}.journeys ol{list-style:none;margin:0 0 14px 10px;padding:0 0 0 18px;border-left:1px solid #ded5c7}.journeys li{position:relative;padding:6px 0 6px 13px}.journeys li>i{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--gold);left:-22px;top:10px}.journeys li>div{display:flex;flex-direction:column;gap:2px}.journeys li b{font-size:10px}.journeys li span{font-size:9px;color:#92887a}

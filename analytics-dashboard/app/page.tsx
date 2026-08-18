@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { hasValidSession } from '@/lib/auth'
 import { getAnalyticsData, type AnalyticsData } from '@/lib/data'
+import AutoRefresh from './AutoRefresh'
 import LogoutButton from './LogoutButton'
 
 export const dynamic = 'force-dynamic'
@@ -68,6 +69,7 @@ function RankedList({ rows, kind }: { rows: Array<{ label: string; count: number
 function Dashboard({ data, days, query }: { data: AnalyticsData; days: number; query: string }) {
   const maxFunnel = Math.max(1, ...data.funnel.map(item => item.count))
   return <main>
+    <AutoRefresh />
     <header className="topbar">
       <div className="brand"><span>SAFAR<span>U</span>MA</span><small>Analytics privé</small></div>
       <nav><a href="#vue">Vue générale</a><a href="#paiements">Paiements</a><a href="#erreurs">Erreurs</a><a href="#parcours">Parcours</a></nav>

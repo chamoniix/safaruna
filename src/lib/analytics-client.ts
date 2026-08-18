@@ -1,7 +1,5 @@
 'use client'
 
-import { getConsent } from '@/lib/consent'
-
 type ClientEventName =
   | 'page_view'
   | 'guide_viewed'
@@ -14,7 +12,7 @@ type ClientEventName =
 const SESSION_KEY = 'safaruma_analytics_session'
 
 export function getAnalyticsSessionId(): string | null {
-  if (typeof window === 'undefined' || !getConsent()?.analytics) return null
+  if (typeof window === 'undefined') return null
   try {
     const current = sessionStorage.getItem(SESSION_KEY)
     if (current) return current
@@ -47,4 +45,3 @@ export function trackAnalyticsEvent(
     }),
   }).catch(() => {})
 }
-

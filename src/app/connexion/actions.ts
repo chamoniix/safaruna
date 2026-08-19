@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { sendEmail } from '@/lib/email';
+import { recordAnalyticsEvent } from '@/lib/analytics';
 
 type SignupState = { error: string };
 type ResendState = { success: boolean; message: string };
@@ -80,7 +81,7 @@ export async function signup(_previousState: SignupState, formData: FormData): P
   const token = crypto.randomUUID();
 
   // Créer ensemble l'utilisateur et son token de vérification.
-  await prisma.$transaction([
+  const [createdUser] = await prisma.$transaction([
     prisma.user.create({
       data: {
         email,
@@ -100,6 +101,13 @@ export async function signup(_previousState: SignupState, formData: FormData): P
       },
     }),
   ]);
+
+  await recordAnalyticsEvent({
+    eventName: 'account_created',
+    userId: createdUser.id,
+    path: '/inscription',
+    metadata: { method: 'email', role: 'PELERIN' },
+  });
 
   if (refCode) {
     console.log(`[parrainage] Nouvel inscrit ${email} parrainé par code ${refCode}`);

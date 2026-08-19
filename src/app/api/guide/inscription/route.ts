@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import { sendWelcomeGuide } from '@/lib/email';
 import { encrypt } from '@/lib/crypto';
 import { z } from 'zod';
+import { recordAnalyticsEvent } from '@/lib/analytics';
 
 const inscriptionSchema = z.object({
   firstName:       z.string().min(1).max(50),
@@ -87,6 +88,13 @@ export async function POST(req: NextRequest) {
 
   // Envoyer email de bienvenue guide (fire-and-forget)
   sendWelcomeGuide(email, `${firstName} ${lastName}`.trim()).catch(() => {});
+
+  await recordAnalyticsEvent({
+    eventName: 'guide_application_submitted',
+    userId: user.id,
+    path: '/guide/inscription',
+    metadata: { city: city || null, gender, serviceCities: serviceCities.join(',') },
+  });
 
   return NextResponse.json({ id: user.id, email: user.email, name: `${user.firstName} ${user.lastName}`.trim() }, { status: 201 });
 }

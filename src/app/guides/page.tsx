@@ -7,6 +7,7 @@ import Image from 'next/image';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { IconStar, IconAccessibility, IconMap } from '@/components/Icons';
+import { trackAnalyticsEvent } from '@/lib/analytics-client';
 
 const LANGUES = [
   '🇫🇷 Français',
@@ -602,7 +603,17 @@ export default function GuideSearchPage() {
 
               {/* Chercher */}
               <button
-                onClick={() => { setHasSearched(true); setOpenPop(null); }}
+                onClick={() => {
+                  setHasSearched(true);
+                  setOpenPop(null);
+                  trackAnalyticsEvent('guide_search', {
+                    city: selectedCity || null,
+                    language: selectedLangue || null,
+                    gender: selectedGender || null,
+                    people: nbPersonnes,
+                    pmr,
+                  });
+                }}
                 className="search-btn"
               >
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

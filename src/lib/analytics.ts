@@ -7,7 +7,14 @@ import prisma from '@/lib/prisma'
 
 export const ANALYTICS_EVENT_NAMES = [
   'page_view',
+  'cta_click',
+  'guide_search',
   'guide_viewed',
+  'guide_application_started',
+  'guide_application_step',
+  'guide_application_submitted',
+  'account_created',
+  'login_success',
   'booking_started',
   'booking_step',
   'begin_checkout',
@@ -16,6 +23,8 @@ export const ANALYTICS_EVENT_NAMES = [
   'payment_cancelled',
   'purchase',
   'payment_expired',
+  'web_vital',
+  'client_error',
 ] as const
 
 export type AnalyticsEventName = (typeof ANALYTICS_EVENT_NAMES)[number]
@@ -103,4 +112,3 @@ export async function recordAnalyticsEvent(input: {
     return false
   }
 }
-

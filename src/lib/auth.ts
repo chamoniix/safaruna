@@ -3,6 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
 import prisma from '@/lib/prisma';
 import bcrypt from "bcryptjs"
+import { recordAnalyticsEvent } from '@/lib/analytics'
 
 export const authOptions: AuthOptions = {
   session: {
@@ -39,6 +40,7 @@ export const authOptions: AuthOptions = {
             where: { id: user.id },
             data: { lastLogin: new Date() },
           })
+          await recordAnalyticsEvent({ eventName: 'login_success', userId: user.id, path: '/guide/connexion', metadata: { method: 'email', role: 'GUIDE' } })
           return {
             id: user.id,
             email: user.email,
@@ -74,6 +76,7 @@ export const authOptions: AuthOptions = {
             where: { id: user.id },
             data: { lastLogin: new Date() },
           })
+          await recordAnalyticsEvent({ eventName: 'login_success', userId: user.id, path: '/connexion', metadata: { method: 'email', role: 'PELERIN' } })
           return {
             id: user.id,
             email: user.email,
@@ -91,6 +94,7 @@ export const authOptions: AuthOptions = {
   callbacks: {
     async signIn({ user, account }) {
       if (account?.provider === "google" && user.email) {
+        let accountCreated = false
         try {
           const existing = await prisma.user.findUnique({ where: { email: user.email } });
           if (!existing) {
@@ -104,6 +108,7 @@ export const authOptions: AuthOptions = {
               },
             });
             user.id = created.id;
+            accountCreated = true
           } else {
             user.id = existing.id;
             // Set emailVerified if missing (first Google login after email/password account)
@@ -114,6 +119,10 @@ export const authOptions: AuthOptions = {
               });
             }
           }
+          if (accountCreated) {
+            await recordAnalyticsEvent({ eventName: 'account_created', userId: user.id, path: '/inscription', metadata: { method: 'google', role: 'PELERIN' } })
+          }
+          await recordAnalyticsEvent({ eventName: 'login_success', userId: user.id, path: '/connexion', metadata: { method: 'google', role: 'PELERIN' } })
         } catch (e) {
           console.error('[auth] Google signIn upsert error', e);
           return false;

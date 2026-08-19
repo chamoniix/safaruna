@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { trackAnalyticsEvent } from '@/lib/analytics-client';
 
 const STEPS = [
   { num: 1, label: "Informations personnelles", icon: "👤" },
@@ -72,7 +73,15 @@ export default function GuideOnboarding() {
   const toggleLangue = (name: string) =>
     setSelectedLangues(prev => prev.includes(name) ? prev.filter(l => l !== name) : [...prev, name]);
 
-  const handleNext = () => setCurrentStep(p => Math.min(p + 1, 6));
+  useEffect(() => {
+    trackAnalyticsEvent('guide_application_started');
+  }, []);
+
+  const handleNext = () => setCurrentStep(p => {
+    const nextStep = Math.min(p + 1, 6);
+    trackAnalyticsEvent('guide_application_step', { step: nextStep });
+    return nextStep;
+  });
   const handlePrev = () => setCurrentStep(p => Math.max(p - 1, 1));
 
   const handleSubmit = async (e: React.FormEvent) => {

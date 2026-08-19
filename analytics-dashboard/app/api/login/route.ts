@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createSession, verifyCredentials } from '@/lib/auth'
 import { checkLoginRateLimit } from '@/lib/ratelimit'
+import { recordAdminLoginAttempt } from '@/lib/admin-audit'
 
 export async function POST(req: NextRequest) {
   const origin = req.headers.get('origin')
@@ -24,12 +25,15 @@ export async function POST(req: NextRequest) {
   }
 
   if (!await checkLoginRateLimit(username)) {
+    await recordAdminLoginAttempt(req, username, false, 'rate_limited')
     return NextResponse.json({ error: 'Trop de tentatives. Réessayez dans 15 minutes.' }, { status: 429 })
   }
   if (!verifyCredentials(username, password)) {
+    await recordAdminLoginAttempt(req, username, false, 'invalid_credentials')
     return NextResponse.json({ error: 'Identifiants invalides' }, { status: 401 })
   }
 
   await createSession()
+  await recordAdminLoginAttempt(req, username, true, 'success')
   return NextResponse.json({ success: true })
 }

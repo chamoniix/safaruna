@@ -85,10 +85,13 @@ export async function GET(req: NextRequest) {
   const requestedDays = Number(req.nextUrl.searchParams.get('days') ?? '30')
   const days = Number.isInteger(requestedDays) ? Math.min(90, Math.max(1, requestedDays)) : 30
   const query = (req.nextUrl.searchParams.get('q') ?? '').trim().slice(0, 120)
+  const requestedAccountPage = Number(req.nextUrl.searchParams.get('accountPage') ?? '1')
+  const accountPage = Number.isInteger(requestedAccountPage) ? Math.max(1, requestedAccountPage) : 1
+  const accountPageSize = 10
   const start = new Date(Date.now() - days * 86_400_000)
   const activeSince = new Date(Date.now() - 5 * 60_000)
 
-  const [events, usersTotal, usersNew, recentUsers, reservations, guidesActive, sentry] = await Promise.all([
+  const [events, usersTotal, usersNew, usersByRole, recentUsers, reservations, guidesActive, guidesPending, sentry] = await Promise.all([
     prisma.analyticsEvent.findMany({
       where: { createdAt: { gte: start } },
       orderBy: { createdAt: 'desc' },
@@ -97,9 +100,11 @@ export async function GET(req: NextRequest) {
     }),
     prisma.user.count(),
     prisma.user.count({ where: { createdAt: { gte: start } } }),
+    prisma.user.groupBy({ by: ['role'], _count: { _all: true } }),
     prisma.user.findMany({
       orderBy: { createdAt: 'desc' },
-      take: 30,
+      skip: (accountPage - 1) * accountPageSize,
+      take: accountPageSize,
       select: { id: true, name: true, email: true, role: true, country: true, createdAt: true, lastLogin: true },
     }),
     prisma.reservation.findMany({
@@ -113,6 +118,7 @@ export async function GET(req: NextRequest) {
       },
     }),
     prisma.guideProfile.count({ where: { status: 'ACTIVE' } }),
+    prisma.guideProfile.count({ where: { status: 'REVIEW' } }),
     sentryIssues(days),
   ])
 
@@ -122,6 +128,8 @@ export async function GET(req: NextRequest) {
   const devices = new Map<string, number>()
   const pages = new Map<string, number>()
   const guides = new Map<string, number>()
+  const referrers = new Map<string, number>()
+  const vitalValues = new Map<string, number[]>()
   const activeSessions = new Set<string>()
   const visitorSessions = new Set<string>()
 
@@ -133,10 +141,21 @@ export async function GET(req: NextRequest) {
       addCount(countries, event.country)
       addCount(devices, event.device)
       addCount(pages, event.path)
+      addCount(referrers, event.referrer)
     }
     if (event.eventName === 'guide_viewed') {
       const slug = metadataObject(event.metadata).guideSlug
       if (typeof slug === 'string') addCount(guides, slug)
+    }
+    if (event.eventName === 'web_vital') {
+      const metadata = metadataObject(event.metadata)
+      const metric = metadata.metric
+      const value = metadata.value
+      if (typeof metric === 'string' && typeof value === 'number' && Number.isFinite(value)) {
+        const values = vitalValues.get(metric) ?? []
+        values.push(value)
+        vitalValues.set(metric, values)
+      }
     }
   }
 
@@ -216,6 +235,8 @@ export async function GET(req: NextRequest) {
       revenue,
       conversionRate: visitorSessions.size > 0 ? confirmed.length / visitorSessions.size : 0,
       guidesActive,
+      guidesPending,
+      guideApplications: eventCounts.get('guide_application_submitted') ?? 0,
     },
     funnel,
     breakdowns: {
@@ -223,6 +244,8 @@ export async function GET(req: NextRequest) {
       devices: ranked(devices),
       pages: ranked(pages),
       guides: ranked(guides),
+      referrers: ranked(referrers),
+      events: ranked(eventCounts),
     },
     payments: {
       checkoutCreated: eventCounts.get('checkout_created') ?? 0,
@@ -232,7 +255,23 @@ export async function GET(req: NextRequest) {
       expired: eventCounts.get('payment_expired') ?? 0,
       reservations: reservations.slice(0, 50),
     },
-    accounts: { recent: recentUsers },
+    accounts: {
+      recent: recentUsers,
+      total: usersTotal,
+      page: accountPage,
+      pageSize: accountPageSize,
+      pages: Math.max(1, Math.ceil(usersTotal / accountPageSize)),
+      byRole: Object.fromEntries(usersByRole.map(row => [row.role, row._count._all])),
+    },
+    performance: [...vitalValues.entries()].map(([metric, values]) => {
+      const sorted = [...values].sort((a, b) => a - b)
+      return {
+        metric,
+        samples: values.length,
+        average: values.reduce((sum, value) => sum + value, 0) / values.length,
+        p75: sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * 0.75))] || 0,
+      }
+    }),
     journeys,
     sentry,
     lookup,

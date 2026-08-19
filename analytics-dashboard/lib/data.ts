@@ -1,6 +1,23 @@
 import 'server-only'
 
 import { createSign } from 'node:crypto'
+import { Redis } from '@upstash/redis'
+
+export type DashboardView = 'overview' | 'realtime' | 'audience' | 'acquisition' | 'content' | 'auth' | 'guides' | 'payments' | 'errors' | 'search' | 'infrastructure'
+
+export type BigQueryUsage = {
+  available: boolean
+  linked: boolean
+  projectId: string
+  dataset: string
+  location: 'EU'
+  storageBytes: number
+  storagePercent: number
+  queryBytes: number
+  queryPercent: number
+  warning: 'ok' | 'watch' | 'critical'
+  error: string | null
+}
 
 export type AnalyticsData = {
   generatedAt: string
@@ -9,9 +26,10 @@ export type AnalyticsData = {
     activeVisitors: number; uniqueVisitors: number; pageViews: number
     accountsTotal: number; accountsNew: number; reservations: number
     confirmedReservations: number; revenue: number; conversionRate: number; guidesActive: number
+    guidesPending: number; guideApplications: number
   }
   funnel: Array<{ name: string; count: number }>
-  breakdowns: Record<'countries' | 'devices' | 'pages' | 'guides', Array<{ label: string; count: number }>>
+  breakdowns: Record<'countries' | 'devices' | 'pages' | 'guides' | 'referrers' | 'events', Array<{ label: string; count: number }>>
   payments: {
     checkoutCreated: number; purchases: number; errors: number; cancelled: number; expired: number
     reservations: Array<{
@@ -20,7 +38,11 @@ export type AnalyticsData = {
       pelerin: { id: string; name: string | null; email: string | null }
     }>
   }
-  accounts: { recent: Array<{ id: string; name: string | null; email: string | null; role: string; country: string | null; createdAt: string; lastLogin: string | null }> }
+  accounts: {
+    recent: Array<{ id: string; name: string | null; email: string | null; role: string; country: string | null; createdAt: string; lastLogin: string | null }>
+    total: number; page: number; pageSize: number; pages: number; byRole: Record<string, number>
+  }
+  performance: Array<{ metric: string; samples: number; average: number; p75: number }>
   journeys: Array<{
     id: string; user: { name: string | null; email: string | null } | null
     country: string; device: string; lastActivity: string
@@ -41,6 +63,7 @@ export type Ga4RealtimeData = {
   pages: Array<{ label: string; count: number }>
   events: Array<{ label: string; count: number }>
   historical: Ga4HistoricalData
+  quota: { consumed: number; remaining: number; limit: number } | null
 }
 
 export type Ga4MetricComparison = {
@@ -65,6 +88,11 @@ export type Ga4HistoricalData = {
     eventCount: Ga4MetricComparison
     keyEvents: Ga4MetricComparison
     newUsers: Ga4MetricComparison
+    sessions: Ga4MetricComparison
+    pageViews: Ga4MetricComparison
+    engagementRate: Ga4MetricComparison
+    averageSessionDuration: Ga4MetricComparison
+    totalRevenue: Ga4MetricComparison
   }
   daily: Array<{ label: string; current: number; previous: number }>
   countries: Ga4ComparisonRow[]
@@ -74,6 +102,14 @@ export type Ga4HistoricalData = {
   firstSources: Ga4ComparisonRow[]
   sessionSources: Ga4ComparisonRow[]
   cities: Ga4ComparisonRow[]
+  languages: Ga4ComparisonRow[]
+  devices: Ga4ComparisonRow[]
+  browsers: Ga4ComparisonRow[]
+  operatingSystems: Ga4ComparisonRow[]
+  campaigns: Ga4ComparisonRow[]
+  landingPages: Ga4ComparisonRow[]
+  referrers: Ga4ComparisonRow[]
+  events: Ga4ComparisonRow[]
 }
 
 type Ga4ServiceAccount = {
@@ -89,10 +125,16 @@ type Ga4Report = {
     metricValues?: Array<{ value?: string }>
   }>
   error?: { message?: string }
+  propertyQuota?: {
+    tokensPerPropertyPerHour?: { consumed?: number; remaining?: number }
+  }
 }
 
 let ga4AccessToken: { value: string; expiresAt: number } | null = null
-const ga4HistoryCache = new Map<number, { expiresAt: number; data: Ga4HistoricalData }>()
+const ga4HistoryCache = new Map<string, { expiresAt: number; data: Ga4HistoricalData }>()
+const redisUrl = process.env.RATE_LIMIT_KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL
+const redisToken = process.env.RATE_LIMIT_KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN
+const analyticsRedis = redisUrl && redisToken ? new Redis({ url: redisUrl, token: redisToken }) : null
 
 function base64Url(value: string | Buffer) {
   return Buffer.from(value).toString('base64url')
@@ -106,7 +148,7 @@ async function getGa4AccessToken(credentials: Ga4ServiceAccount) {
   const header = base64Url(JSON.stringify({ alg: 'RS256', typ: 'JWT', kid: credentials.private_key_id }))
   const claims = base64Url(JSON.stringify({
     iss: credentials.client_email,
-    scope: 'https://www.googleapis.com/auth/analytics.readonly',
+    scope: 'https://www.googleapis.com/auth/analytics.readonly https://www.googleapis.com/auth/bigquery',
     aud: tokenUri,
     iat: now,
     exp: now + 3600,
@@ -152,6 +194,7 @@ async function runGa4RealtimeReport(
       metrics: metrics.map(name => ({ name })),
       limit: '10',
       ...(dimensions.length ? { orderBys: [{ metric: { metricName: metrics[0] }, desc: true }] } : {}),
+      returnPropertyQuota: true,
     }),
     cache: 'no-store',
   })
@@ -179,6 +222,7 @@ async function runGa4Report(
       metrics: metrics.map(name => ({ name })),
       limit: '100',
       ...(dimensions.length ? { orderBys: [{ metric: { metricName: metrics[0] }, desc: true }] } : {}),
+      returnPropertyQuota: true,
     }),
     cache: 'no-store',
   })
@@ -274,45 +318,95 @@ function rangeLabel(daysAgoStart: number, daysAgoEnd: number) {
   return `${formatter.format(start)} – ${formatter.format(end)}`
 }
 
-async function getGa4HistoricalData(propertyId: string, accessToken: string, days: number): Promise<Ga4HistoricalData> {
-  const cached = ga4HistoryCache.get(days)
+function emptyHistorical(days: number): Ga4HistoricalData {
+  const zero = comparison(0, 0)
+  return {
+    days,
+    currentLabel: rangeLabel(days, 1),
+    previousLabel: rangeLabel(days * 2, days + 1),
+    overview: {
+      activeUsers: zero, eventCount: zero, keyEvents: zero, newUsers: zero,
+      sessions: zero, pageViews: zero, engagementRate: zero,
+      averageSessionDuration: zero, totalRevenue: zero,
+    },
+    daily: [], countries: [], pages: [], channels: [], platforms: [], firstSources: [], sessionSources: [], cities: [],
+    languages: [], devices: [], browsers: [], operatingSystems: [], campaigns: [], landingPages: [], referrers: [], events: [],
+  }
+}
+
+async function getGa4HistoricalData(propertyId: string, accessToken: string, days: number, view: DashboardView): Promise<Ga4HistoricalData> {
+  const cacheKey = `${days}:${view}`
+  const cached = ga4HistoryCache.get(cacheKey)
   if (cached && cached.expiresAt > Date.now()) return cached.data
+
+  if (analyticsRedis) {
+    try {
+      const shared = await analyticsRedis.get<Ga4HistoricalData>(`safaruma:analytics:ga4:${cacheKey}`)
+      if (shared) {
+        ga4HistoryCache.set(cacheKey, { expiresAt: Date.now() + 5 * 60_000, data: shared })
+        return shared
+      }
+    } catch { /* cache partagé indisponible : repli mémoire */ }
+  }
 
   const dateRanges = [
     { startDate: `${days}daysAgo`, endDate: 'yesterday', name: 'current' },
     { startDate: `${days * 2}daysAgo`, endDate: `${days + 1}daysAgo`, name: 'previous' },
   ]
-  const [overview, daily, countries, pages, channels, platforms, firstSources, sessionSources, cities] = await Promise.all([
-    runGa4Report(propertyId, accessToken, [], ['activeUsers', 'eventCount', 'keyEvents', 'newUsers'], dateRanges),
-    runGa4Report(propertyId, accessToken, ['date'], ['activeUsers'], dateRanges),
-    runGa4Report(propertyId, accessToken, ['country'], ['activeUsers'], dateRanges),
-    runGa4Report(propertyId, accessToken, ['pageTitle'], ['screenPageViews'], dateRanges),
-    runGa4Report(propertyId, accessToken, ['sessionDefaultChannelGroup'], ['sessions'], dateRanges),
-    runGa4Report(propertyId, accessToken, ['platform'], ['keyEvents'], dateRanges),
-    runGa4Report(propertyId, accessToken, ['firstUserSourceMedium'], ['activeUsers'], dateRanges),
-    runGa4Report(propertyId, accessToken, ['sessionSourceMedium'], ['sessions'], dateRanges),
-    runGa4Report(propertyId, accessToken, ['city'], ['activeUsers'], dateRanges),
-  ])
-  const data: Ga4HistoricalData = {
-    days,
-    currentLabel: rangeLabel(days, 1),
-    previousLabel: rangeLabel(days * 2, days + 1),
-    overview: {
-      activeUsers: historicalValues(overview, 0),
-      eventCount: historicalValues(overview, 1),
-      keyEvents: historicalValues(overview, 2),
-      newUsers: historicalValues(overview, 3),
-    },
-    daily: historicalDaily(daily, days),
-    countries: historicalBreakdown(countries),
-    pages: historicalBreakdown(pages),
-    channels: historicalBreakdown(channels),
-    platforms: historicalBreakdown(platforms),
-    firstSources: historicalBreakdown(firstSources),
-    sessionSources: historicalBreakdown(sessionSources),
-    cities: historicalBreakdown(cities),
+  const data = emptyHistorical(days)
+
+  if (view === 'overview') {
+    const [overview, daily] = await Promise.all([
+      runGa4Report(propertyId, accessToken, [], ['activeUsers', 'eventCount', 'keyEvents', 'newUsers', 'sessions', 'screenPageViews', 'engagementRate', 'averageSessionDuration', 'totalRevenue'], dateRanges),
+      runGa4Report(propertyId, accessToken, ['date'], ['activeUsers'], dateRanges),
+    ])
+    data.overview = {
+      activeUsers: historicalValues(overview, 0), eventCount: historicalValues(overview, 1),
+      keyEvents: historicalValues(overview, 2), newUsers: historicalValues(overview, 3),
+      sessions: historicalValues(overview, 4), pageViews: historicalValues(overview, 5),
+      engagementRate: historicalValues(overview, 6), averageSessionDuration: historicalValues(overview, 7),
+      totalRevenue: historicalValues(overview, 8),
+    }
+    data.daily = historicalDaily(daily, days)
+  } else if (view === 'audience') {
+    const [countries, cities, languages, devices, browsers, operatingSystems] = await Promise.all([
+      runGa4Report(propertyId, accessToken, ['country'], ['activeUsers'], dateRanges),
+      runGa4Report(propertyId, accessToken, ['city'], ['activeUsers'], dateRanges),
+      runGa4Report(propertyId, accessToken, ['language'], ['activeUsers'], dateRanges),
+      runGa4Report(propertyId, accessToken, ['deviceCategory'], ['activeUsers'], dateRanges),
+      runGa4Report(propertyId, accessToken, ['browser'], ['activeUsers'], dateRanges),
+      runGa4Report(propertyId, accessToken, ['operatingSystem'], ['activeUsers'], dateRanges),
+    ])
+    data.countries = historicalBreakdown(countries); data.cities = historicalBreakdown(cities)
+    data.languages = historicalBreakdown(languages); data.devices = historicalBreakdown(devices)
+    data.browsers = historicalBreakdown(browsers); data.operatingSystems = historicalBreakdown(operatingSystems)
+  } else if (view === 'acquisition') {
+    const [channels, firstSources, sessionSources, campaigns, landingPages, referrers] = await Promise.all([
+      runGa4Report(propertyId, accessToken, ['sessionDefaultChannelGroup'], ['sessions'], dateRanges),
+      runGa4Report(propertyId, accessToken, ['firstUserSourceMedium'], ['activeUsers'], dateRanges),
+      runGa4Report(propertyId, accessToken, ['sessionSourceMedium'], ['sessions'], dateRanges),
+      runGa4Report(propertyId, accessToken, ['sessionCampaignName'], ['sessions'], dateRanges),
+      runGa4Report(propertyId, accessToken, ['landingPagePlusQueryString'], ['sessions'], dateRanges),
+      runGa4Report(propertyId, accessToken, ['pageReferrer'], ['screenPageViews'], dateRanges),
+    ])
+    data.channels = historicalBreakdown(channels); data.firstSources = historicalBreakdown(firstSources)
+    data.sessionSources = historicalBreakdown(sessionSources); data.campaigns = historicalBreakdown(campaigns)
+    data.landingPages = historicalBreakdown(landingPages); data.referrers = historicalBreakdown(referrers)
+  } else if (view === 'content') {
+    const [pages, landingPages, events, platforms] = await Promise.all([
+      runGa4Report(propertyId, accessToken, ['pagePathPlusQueryString'], ['screenPageViews'], dateRanges),
+      runGa4Report(propertyId, accessToken, ['landingPagePlusQueryString'], ['sessions'], dateRanges),
+      runGa4Report(propertyId, accessToken, ['eventName'], ['eventCount'], dateRanges),
+      runGa4Report(propertyId, accessToken, ['platform'], ['keyEvents'], dateRanges),
+    ])
+    data.pages = historicalBreakdown(pages); data.landingPages = historicalBreakdown(landingPages)
+    data.events = historicalBreakdown(events); data.platforms = historicalBreakdown(platforms)
   }
-  ga4HistoryCache.set(days, { expiresAt: Date.now() + 5 * 60_000, data })
+
+  ga4HistoryCache.set(cacheKey, { expiresAt: Date.now() + 5 * 60_000, data })
+  if (analyticsRedis) {
+    try { await analyticsRedis.set(`safaruma:analytics:ga4:${cacheKey}`, data, { ex: 300 }) } catch { /* repli mémoire */ }
+  }
   return data
 }
 
@@ -324,18 +418,12 @@ function emptyGa4(error: string | null): Ga4RealtimeData {
     overview: { activeUsers: 0, pageViews: 0, eventCount: 0, keyEvents: 0 },
     minuteSeries: [],
     countries: [], devices: [], pages: [], events: [],
-    historical: {
-      days: 30, currentLabel: '', previousLabel: '',
-      overview: {
-        activeUsers: comparison(0, 0), eventCount: comparison(0, 0),
-        keyEvents: comparison(0, 0), newUsers: comparison(0, 0),
-      },
-      daily: [], countries: [], pages: [], channels: [], platforms: [], firstSources: [], sessionSources: [], cities: [],
-    },
+    historical: emptyHistorical(30),
+    quota: null,
   }
 }
 
-export async function getGa4RealtimeData(days: number): Promise<Ga4RealtimeData> {
+export async function getGa4RealtimeData(days: number, view: DashboardView = 'overview'): Promise<Ga4RealtimeData> {
   const propertyId = process.env.GA4_PROPERTY_ID
   const rawCredentials = process.env.GA4_SERVICE_ACCOUNT_JSON
   if (!propertyId || !rawCredentials) return emptyGa4('Connexion GA4 non configurée')
@@ -344,7 +432,28 @@ export async function getGa4RealtimeData(days: number): Promise<Ga4RealtimeData>
     const credentials = JSON.parse(rawCredentials) as Ga4ServiceAccount
     if (!credentials.client_email || !credentials.private_key) throw new Error('Identifiants GA4 incomplets')
     const accessToken = await getGa4AccessToken(credentials)
-    const historical = await getGa4HistoricalData(propertyId, accessToken, days)
+    const historical = await getGa4HistoricalData(propertyId, accessToken, days, view)
+    if (view !== 'realtime' && view !== 'infrastructure') {
+      return {
+        available: true, generatedAt: new Date().toISOString(), error: null,
+        overview: { activeUsers: 0, pageViews: 0, eventCount: 0, keyEvents: 0 },
+        minuteSeries: [], countries: [], devices: [], pages: [], events: [], historical, quota: null,
+      }
+    }
+    if (view === 'infrastructure') {
+      const overview = await runGa4RealtimeReport(propertyId, accessToken, [], ['activeUsers'])
+      const quotaValues = overview.propertyQuota?.tokensPerPropertyPerHour
+      return {
+        available: true, generatedAt: new Date().toISOString(), error: null,
+        overview: { activeUsers: ga4Number(overview.rows?.[0]?.metricValues?.[0]?.value), pageViews: 0, eventCount: 0, keyEvents: 0 },
+        minuteSeries: [], countries: [], devices: [], pages: [], events: [], historical,
+        quota: quotaValues ? {
+          consumed: quotaValues.consumed || 0,
+          remaining: quotaValues.remaining || 0,
+          limit: (quotaValues.consumed || 0) + (quotaValues.remaining || 0),
+        } : null,
+      }
+    }
     const [overview, minutes, countries, devices, pages, events] = await Promise.all([
       runGa4RealtimeReport(propertyId, accessToken, [], ['activeUsers', 'screenPageViews', 'eventCount', 'keyEvents']),
       runGa4RealtimeReport(propertyId, accessToken, ['minutesAgo'], ['activeUsers']),
@@ -374,6 +483,11 @@ export async function getGa4RealtimeData(days: number): Promise<Ga4RealtimeData>
       pages: ga4Breakdown(pages),
       events: ga4Breakdown(events),
       historical,
+      quota: overview.propertyQuota?.tokensPerPropertyPerHour ? {
+        consumed: overview.propertyQuota.tokensPerPropertyPerHour.consumed || 0,
+        remaining: overview.propertyQuota.tokensPerPropertyPerHour.remaining || 0,
+        limit: (overview.propertyQuota.tokensPerPropertyPerHour.consumed || 0) + (overview.propertyQuota.tokensPerPropertyPerHour.remaining || 0),
+      } : null,
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Connexion GA4 indisponible'
@@ -381,16 +495,81 @@ export async function getGa4RealtimeData(days: number): Promise<Ga4RealtimeData>
   }
 }
 
-export async function getAnalyticsData(days: number, query: string): Promise<AnalyticsData> {
+export async function getAnalyticsData(days: number, query: string, accountPage = 1): Promise<AnalyticsData> {
   const baseUrl = process.env.SAFARUMA_API_BASE?.replace(/\/$/, '')
   const secret = process.env.ANALYTICS_INTERNAL_SECRET
   if (!baseUrl || !secret) throw new Error('Connexion analytics non configurée')
   const params = new URLSearchParams({ days: String(days) })
   if (query) params.set('q', query)
+  params.set('accountPage', String(accountPage))
   const response = await fetch(`${baseUrl}/api/internal/analytics/overview?${params}`, {
     headers: { Authorization: `Bearer ${secret}` },
     cache: 'no-store',
   })
   if (!response.ok) throw new Error(`API analytics indisponible (${response.status})`)
   return response.json() as Promise<AnalyticsData>
+}
+
+export async function getBigQueryUsage(): Promise<BigQueryUsage> {
+  const projectId = process.env.GCP_PROJECT_ID || 'safaruma-analytics-536896629'
+  const propertyId = process.env.GA4_PROPERTY_ID || '536896629'
+  const dataset = `analytics_${propertyId}`
+  const empty: BigQueryUsage = {
+    available: false, linked: false, projectId, dataset, location: 'EU',
+    storageBytes: 0, storagePercent: 0, queryBytes: 0, queryPercent: 0,
+    warning: 'ok', error: null,
+  }
+  const rawCredentials = process.env.GA4_SERVICE_ACCOUNT_JSON
+  if (!rawCredentials) return { ...empty, error: 'Compte technique Google non configuré' }
+
+  try {
+    const credentials = JSON.parse(rawCredentials) as Ga4ServiceAccount
+    const accessToken = await getGa4AccessToken(credentials)
+    const datasetResponse = await fetch(
+      `https://bigquery.googleapis.com/bigquery/v2/projects/${encodeURIComponent(projectId)}/datasets/${encodeURIComponent(dataset)}`,
+      { headers: { Authorization: `Bearer ${accessToken}` }, cache: 'no-store' },
+    )
+    if (datasetResponse.status === 404) return { ...empty, available: true }
+    if (!datasetResponse.ok) {
+      const payload = await datasetResponse.json() as { error?: { message?: string } }
+      throw new Error(payload.error?.message || `BigQuery indisponible (${datasetResponse.status})`)
+    }
+
+    const query = `
+      SELECT
+        (SELECT COALESCE(SUM(total_logical_bytes), 0)
+         FROM \`region-eu\`.INFORMATION_SCHEMA.TABLE_STORAGE_BY_PROJECT
+         WHERE table_schema = @dataset) AS storage_bytes,
+        (SELECT COALESCE(SUM(total_bytes_billed), 0)
+         FROM \`region-eu\`.INFORMATION_SCHEMA.JOBS_BY_PROJECT
+         WHERE creation_time >= TIMESTAMP_TRUNC(CURRENT_TIMESTAMP(), MONTH)
+           AND job_type = 'QUERY') AS query_bytes
+    `
+    const usageResponse = await fetch(
+      `https://bigquery.googleapis.com/bigquery/v2/projects/${encodeURIComponent(projectId)}/queries`,
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          query, useLegacySql: false, location: 'EU', maximumBytesBilled: '10485760', timeoutMs: 10_000,
+          parameterMode: 'NAMED',
+          queryParameters: [{ name: 'dataset', parameterType: { type: 'STRING' }, parameterValue: { value: dataset } }],
+        }),
+        cache: 'no-store',
+      },
+    )
+    const usage = await usageResponse.json() as { rows?: Array<{ f?: Array<{ v?: string }> }>; error?: { message?: string } }
+    if (!usageResponse.ok) throw new Error(usage.error?.message || `Mesure BigQuery indisponible (${usageResponse.status})`)
+    const storageBytes = Number(usage.rows?.[0]?.f?.[0]?.v || 0)
+    const queryBytes = Number(usage.rows?.[0]?.f?.[1]?.v || 0)
+    const storagePercent = storageBytes / (10 * 1024 ** 3) * 100
+    const queryPercent = queryBytes / (1024 ** 4) * 100
+    const highest = Math.max(storagePercent, queryPercent)
+    return {
+      ...empty, available: true, linked: true, storageBytes, queryBytes, storagePercent, queryPercent,
+      warning: highest >= 90 ? 'critical' : highest >= 70 ? 'watch' : 'ok',
+    }
+  } catch (error) {
+    return { ...empty, error: error instanceof Error ? error.message : 'Connexion BigQuery indisponible' }
+  }
 }

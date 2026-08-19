@@ -23,15 +23,56 @@ export async function GET() {
         { missions: { some: { guideProfileId: guideProfile.id } } },
       ],
     },
-    include: {
+    select: {
+      id: true,
+      refNumber: true,
+      startDate: true,
+      endDate: true,
+      nbPeople: true,
+      status: true,
+      selectedPlaces: true,
+      selectedCities: true,
+      gender: true,
+      langue: true,
+      arrivalPoint: true,
+      cityOrder: true,
+      guideBedProvided: true,
+      ihramAlert: true,
+      createdAt: true,
       pelerin: {
         select: { name: true, firstName: true, lastName: true, email: true },
       },
-      package: true,
+      package: { select: { name: true, durationDays: true } },
       missions: { where: { guideProfileId: guideProfile.id }, orderBy: { startDate: 'asc' } },
+      guideEarnings: {
+        where: { guideProfileId: guideProfile.id },
+        select: {
+          serviceNetCents: true,
+          placesNetCents: true,
+          transportNetCents: true,
+          hotelNetCents: true,
+          totalNetCents: true,
+          status: true,
+        },
+      },
     },
     orderBy: { createdAt: 'desc' },
   })
 
-  return NextResponse.json({ reservations })
+  return NextResponse.json({
+    reservations: reservations.map(reservation => ({
+      ...reservation,
+      guideEarning: reservation.guideEarnings[0]
+        ? {
+            service: reservation.guideEarnings[0].serviceNetCents / 100,
+            places: reservation.guideEarnings[0].placesNetCents / 100,
+            transport: reservation.guideEarnings[0].transportNetCents / 100,
+            hotel: reservation.guideEarnings[0].hotelNetCents / 100,
+            total: reservation.guideEarnings[0].totalNetCents / 100,
+            status: reservation.guideEarnings[0].status,
+          }
+        : null,
+      guideEarnings: undefined,
+    })),
+  })
 }

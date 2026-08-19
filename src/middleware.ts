@@ -61,17 +61,7 @@ export async function middleware(req: NextRequest) {
   const role = (token?.role as string) || '';
 
   // ── Routes guide protégées → redirige vers /guide/connexion si pas GUIDE
-  if (
-    pathname.startsWith('/guide/tableau-de-bord') ||
-    pathname.startsWith('/guide/missions') ||
-    pathname.startsWith('/guide/demandes') ||
-    pathname.startsWith('/guide/revenus') ||
-    pathname.startsWith('/guide/calendrier') ||
-    pathname.startsWith('/guide/messages') ||
-    pathname.startsWith('/guide/profil') ||
-    pathname.startsWith('/guide/avis') ||
-    pathname.startsWith('/guide/forfaits')
-  ) {
+  if (pathname.startsWith('/guide/')) {
     if (!token || (role !== 'GUIDE' && role !== 'ADMIN')) {
       const loginUrl = new URL('/guide/connexion', req.url);
       loginUrl.searchParams.set('redirect', pathname + req.nextUrl.search);

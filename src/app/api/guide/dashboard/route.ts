@@ -7,7 +7,7 @@ export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
 
-  const email = (session.user as any).email as string | undefined;
+  const email = (session.user as { email?: string }).email;
   if (!email) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
 
   const user = await prisma.user.findUnique({
@@ -16,15 +16,6 @@ export async function GET() {
       guideProfile: {
         include: {
           languages: { select: { languageCode: true, level: true } },
-          reservations: {
-            orderBy: { createdAt: 'desc' },
-            take: 5,
-            include: {
-              pelerin: { select: { firstName: true, lastName: true, name: true, country: true } },
-              package: { select: { name: true, durationDays: true } },
-            },
-          },
-          _count: { select: { reservations: true } },
         },
       },
     },
@@ -37,21 +28,39 @@ export async function GET() {
 
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const guideReservationWhere = {
+    OR: [
+      { guideProfileId: guideProfile.id },
+      { missions: { some: { guideProfileId: guideProfile.id } } },
+    ],
+  };
 
-  const [reservationsMois, revenuesMois, totalCompleted, reviewsData] = await Promise.all([
+  const [totalReservations, reservationsMois, revenuesMois, totalCompleted, reviewsData, recentReservations] = await Promise.all([
+    prisma.reservation.count({ where: guideReservationWhere }),
     prisma.reservation.count({
-      where: { guideProfileId: guideProfile.id, createdAt: { gte: startOfMonth } },
+      where: { ...guideReservationWhere, createdAt: { gte: startOfMonth } },
     }),
-    prisma.reservation.aggregate({
-      where: { guideProfileId: guideProfile.id, status: 'COMPLETED', createdAt: { gte: startOfMonth } },
-      _sum: { totalPrice: true },
+    prisma.guideEarning.aggregate({
+      where: { guideProfileId: guideProfile.id, reservation: { status: 'COMPLETED' }, createdAt: { gte: startOfMonth } },
+      _sum: { totalNetCents: true },
     }),
     prisma.reservation.count({
-      where: { guideProfileId: guideProfile.id, status: 'COMPLETED' },
+      where: { ...guideReservationWhere, status: 'COMPLETED' },
     }),
     prisma.review.findMany({
-      where: { reservation: { guideProfileId: guideProfile.id } },
+      where: { reservation: guideReservationWhere },
       select: { ratingOverall: true },
+    }),
+    prisma.reservation.findMany({
+      where: guideReservationWhere,
+      orderBy: { createdAt: 'desc' },
+      take: 5,
+      include: {
+        pelerin: { select: { firstName: true, lastName: true, name: true, country: true } },
+        package: { select: { name: true, durationDays: true } },
+        missions: { where: { guideProfileId: guideProfile.id }, orderBy: { startDate: 'asc' } },
+        guideEarnings: { where: { guideProfileId: guideProfile.id }, select: { totalNetCents: true } },
+      },
     }),
   ]);
 
@@ -73,17 +82,20 @@ export async function GET() {
       slug: guideProfile.slug,
       city: guideProfile.city,
       bio: guideProfile.bio,
+      acceptingBookings: guideProfile.acceptingBookings,
+      servesMakkah: guideProfile.servesMakkah,
+      servesMadinah: guideProfile.servesMadinah,
       languages: guideProfile.languages,
     },
     stats: {
-      totalReservations: guideProfile._count.reservations,
+      totalReservations,
       reservationsMois,
       totalCompleted,
-      revenuesMois: Math.round(revenuesMois._sum.totalPrice ?? 0),
+      revenuesMois: Math.round((revenuesMois._sum.totalNetCents ?? 0) / 100),
       avgRating,
       totalReviews: reviewsData.length,
     },
-    recentReservations: guideProfile.reservations.map(r => ({
+    recentReservations: recentReservations.map(r => ({
       id: r.id,
       refNumber: r.refNumber,
       pelerinName: r.pelerin.name
@@ -91,10 +103,12 @@ export async function GET() {
         || '—',
       pelerinCountry: r.pelerin.country,
       packageName: r.package.name,
-      durationDays: r.package.durationDays,
-      startDate: new Date(r.startDate).toLocaleDateString('fr-FR'),
+      durationDays: r.missions.length > 0
+        ? r.missions.reduce((sum, mission) => sum + Math.round((mission.endDate.getTime() - mission.startDate.getTime()) / 86_400_000) + 1, 0)
+        : r.package.durationDays,
+      startDate: new Date(r.missions[0]?.startDate ?? r.startDate).toLocaleDateString('fr-FR'),
       nbPeople: r.nbPeople,
-      totalPrice: r.totalPrice,
+      guideRevenue: (r.guideEarnings[0]?.totalNetCents ?? 0) / 100,
       status: r.status,
     })),
   });

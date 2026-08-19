@@ -2,13 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSession, signOut } from 'next-auth/react';
 
 export default function GuideLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [isAvailable, setIsAvailable] = useState(true);
+  const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
+  const [savingAvailability, setSavingAvailability] = useState(false);
   const { data: session } = useSession();
   const isActive = (p: string) => pathname === p || pathname.startsWith(p + '/');
 
@@ -17,6 +18,34 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
     ? `${su.firstName} ${su.lastName}`
     : su?.name || su?.email || 'Guide';
   const initials = displayName.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase() || 'G';
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/guide/profil')
+      .then(response => response.ok ? response.json() : Promise.reject(new Error('Chargement impossible')))
+      .then(data => { if (!cancelled) setIsAvailable(Boolean(data.profile?.acceptingBookings)); })
+      .catch(() => { if (!cancelled) setIsAvailable(null); });
+    return () => { cancelled = true; };
+  }, []);
+
+  const toggleAvailability = async () => {
+    if (isAvailable === null || savingAvailability) return;
+    const nextValue = !isAvailable;
+    setIsAvailable(nextValue);
+    setSavingAvailability(true);
+    try {
+      const response = await fetch('/api/guide/profil', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ acceptingBookings: nextValue }),
+      });
+      if (!response.ok) throw new Error('Sauvegarde impossible');
+    } catch {
+      setIsAvailable(!nextValue);
+    } finally {
+      setSavingAvailability(false);
+    }
+  };
 
   return (
     <>
@@ -95,17 +124,17 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
           <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
             <div style={{ position: 'relative', flexShrink: 0 }}>
               <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#1A1209' }}>{initials}</div>
-              <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10, borderRadius: '50%', background: isAvailable ? '#27AE60' : 'rgba(255,255,255,0.3)', border: '2px solid #1A1209' }} />
+              <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10, borderRadius: '50%', background: isAvailable === true ? '#27AE60' : 'rgba(255,255,255,0.3)', border: '2px solid #1A1209' }} />
             </div>
             <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'white', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayName}</div>
               <div style={{ fontSize: '0.65rem', color: '#C9A84C', marginBottom: 6 }}>★★★★★ 4.97</div>
               {/* Toggle */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }} onClick={() => setIsAvailable(!isAvailable)}>
-                <div style={{ width: 30, height: 16, borderRadius: 50, background: isAvailable ? '#27AE60' : 'rgba(255,255,255,0.15)', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
-                  <div style={{ position: 'absolute', top: 3, width: 10, height: 10, borderRadius: '50%', background: 'white', transition: 'left 0.2s', left: isAvailable ? 17 : 3 }} />
+              <div role="button" aria-disabled={isAvailable === null || savingAvailability} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: isAvailable === null || savingAvailability ? 'wait' : 'pointer', opacity: savingAvailability ? 0.65 : 1 }} onClick={toggleAvailability}>
+                <div style={{ width: 30, height: 16, borderRadius: 50, background: isAvailable === true ? '#27AE60' : 'rgba(255,255,255,0.15)', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>
+                  <div style={{ position: 'absolute', top: 3, width: 10, height: 10, borderRadius: '50%', background: 'white', transition: 'left 0.2s', left: isAvailable === true ? 17 : 3 }} />
                 </div>
-                <span style={{ fontSize: '0.6rem', fontWeight: 600, color: isAvailable ? '#6EC68A' : 'rgba(255,255,255,0.35)' }}>{isAvailable ? 'Disponible' : 'Indisponible'}</span>
+                <span style={{ fontSize: '0.6rem', fontWeight: 600, color: isAvailable === true ? '#6EC68A' : 'rgba(255,255,255,0.35)' }}>{isAvailable === null ? 'Chargement…' : isAvailable ? 'Disponible' : 'Indisponible'}</span>
               </div>
             </div>
           </div>

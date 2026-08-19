@@ -19,6 +19,13 @@ type Profile = {
   gender: 'HOMME' | 'FEMME' | null;
   servesMakkah: boolean;
   servesMadinah: boolean;
+  acceptingBookings: boolean;
+  makkahNetUpTo6Cents: number;
+  makkahNetUpTo15Cents: number;
+  makkahNetUpTo32Cents: number;
+  madinahNetUpTo6Cents: number;
+  madinahNetUpTo15Cents: number;
+  madinahNetUpTo32Cents: number;
   nationality: string | null;
   experienceYears: number | null;
   languages: { id: string; languageCode: string; level: string }[];
@@ -197,6 +204,28 @@ export default function GuideProfil() {
             Voir profil public ↗
           </Link>
         )}
+      </div>
+
+      <div style={{ ...card, padding: '1.25rem' }}>
+        <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209', marginBottom: '0.25rem' }}>Tarifs nets validés</div>
+        <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginBottom: '1rem' }}>Montants qui vous sont reversés par ville. Seule l’administration peut les modifier.</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '0.75rem' }}>
+          {[
+            { label: 'Makkah', enabled: profile.servesMakkah, values: [profile.makkahNetUpTo6Cents, profile.makkahNetUpTo15Cents, profile.makkahNetUpTo32Cents] },
+            { label: 'Médine', enabled: profile.servesMadinah, values: [profile.madinahNetUpTo6Cents, profile.madinahNetUpTo15Cents, profile.madinahNetUpTo32Cents] },
+          ].map(item => (
+            <div key={item.label} style={{ border: `1px solid ${item.enabled ? '#C9A84C' : '#E5E7EB'}`, borderRadius: 10, padding: '0.875rem', background: item.enabled ? '#FEF9EC' : '#F9FAFB', opacity: item.enabled ? 1 : 0.65 }}>
+              <div style={{ fontWeight: 800, fontSize: '0.82rem', color: '#1A1209', marginBottom: '0.5rem' }}>{item.label} · {item.enabled ? 'Disponible' : 'Indisponible'}</div>
+              {item.enabled && [
+                ['1–6 clients', item.values[0]], ['7–15 clients', item.values[1]], ['16–32 clients', item.values[2]],
+              ].map(([group, cents]) => (
+                <div key={String(group)} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#7A6D5A', padding: '0.2rem 0' }}>
+                  <span>{group}</span><strong style={{ color: '#1A1209' }}>{Number(cents) / 100} €</strong>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Edit form */}

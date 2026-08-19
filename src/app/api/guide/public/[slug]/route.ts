@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
+import { centsToEuros, guideServiceRetailCents } from '@/lib/guide-pricing'
 
 export async function GET(
   _req: NextRequest,
@@ -8,8 +9,8 @@ export async function GET(
   const { slug } = await params
 
   try {
-    const guide = await prisma.guideProfile.findUnique({
-      where: { slug },
+    const guide = await prisma.guideProfile.findFirst({
+      where: { slug, status: 'ACTIVE' },
       include: {
         user: {
           select: {
@@ -24,10 +25,6 @@ export async function GET(
 
     if (!guide)
       return NextResponse.json({ error: 'Guide introuvable' }, { status: 404 })
-
-    const placePrices = await prisma.placePrice.findMany()
-    const priceMap: Record<string, number> = {}
-    placePrices.forEach(p => { priceMap[p.placeKey] = p.price })
 
     const name =
       guide.user.name ||
@@ -45,9 +42,23 @@ export async function GET(
         bio: guide.bio,
         image: guide.user.image || null,
         status: guide.status,
+        acceptingBookings: guide.acceptingBookings,
+        bookable: guide.acceptingBookings && (guide.servesMakkah || guide.servesMadinah),
+        prices: {
+          makkah: {
+            upTo6: centsToEuros(guideServiceRetailCents(guide, 'MAKKAH', 6)),
+            upTo15: centsToEuros(guideServiceRetailCents(guide, 'MAKKAH', 15)),
+            upTo32: centsToEuros(guideServiceRetailCents(guide, 'MAKKAH', 32)),
+          },
+          madinah: {
+            upTo6: centsToEuros(guideServiceRetailCents(guide, 'MADINAH', 6)),
+            upTo15: centsToEuros(guideServiceRetailCents(guide, 'MADINAH', 15)),
+            upTo32: centsToEuros(guideServiceRetailCents(guide, 'MADINAH', 32)),
+          },
+        },
       },
       activePlaces: guide.places.map(p => p.placeKey),
-      placePrices: priceMap,
+      placePrices: {},
       packages: guide.packages.map(p => ({
         id: p.id,
         name: p.name,

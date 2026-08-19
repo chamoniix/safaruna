@@ -10,10 +10,16 @@ import { apiRatelimit, checkRateLimit } from '@/lib/ratelimit'
 import { getPackageForCity, type CityChoice } from '@/lib/packages'
 import { PLACES } from '@/lib/places'
 import {
-  BOOKING_PRICES,
   calculateBookingTransportPrice,
   calculateLocalCarDays,
 } from '@/lib/booking-pricing'
+import {
+  centsToEuros,
+  guideServiceNetCents,
+  guideServiceRetailCents,
+  placeNetCents,
+  placeRetailCents,
+} from '@/lib/guide-pricing'
 import {
   analyticsCountry,
   analyticsDevice,
@@ -165,7 +171,7 @@ export async function POST(req: NextRequest) {
   }
 
   for (const { city, guide } of missionGuides) {
-    if (guide.status !== 'ACTIVE' || !servesCity(guide, city)) {
+    if (guide.status !== 'ACTIVE' || !guide.acceptingBookings || !servesCity(guide, city)) {
       return NextResponse.json({ error: `Ce guide ne propose pas actuellement ${city === 'MAKKAH' ? 'Makkah' : 'Médine'}` }, { status: 409 })
     }
     if (!guide.languages.some(language => language.languageCode === body.langue)) {
@@ -229,14 +235,7 @@ export async function POST(req: NextRequest) {
   }
 
   const extraPlaceKeys = selectedPlaceKeys.filter(key => !basePackage.includedPlaces.includes(key))
-  const placePriceRecords = extraPlaceKeys.length > 0
-    ? await prisma.placePrice.findMany({ where: { placeKey: { in: extraPlaceKeys }, isActive: true } })
-    : []
-  const priceByPlace = new Map(placePriceRecords.map(record => [record.placeKey, record.price]))
-  const extraPlacesTotal = extraPlaceKeys.reduce(
-    (sum, key) => sum + (priceByPlace.get(key) ?? BOOKING_PRICES.defaultPlace),
-    0
-  )
+  const extraPlacesRetailCents = extraPlaceKeys.length * placeRetailCents(body.nbPersonnes)
 
   const transportPricing = calculateBookingTransportPrice({
     cityChoice,
@@ -249,9 +248,79 @@ export async function POST(req: NextRequest) {
     sameGuidePrimaryCity,
     guideBedProvided: body.guideBedProvided,
   })
-  const expectedPrice = basePackage.basePrice + extraPlacesTotal + transportPricing.intercity +
-    transportPricing.localCar + transportPricing.guideHotel
-  if (Math.abs(body.totalPrice - expectedPrice) > 1) {
+  type EarningDraft = {
+    guideProfileId: string
+    serviceNetCents: number
+    placesNetCents: number
+    transportNetCents: number
+    hotelNetCents: number
+    totalNetCents: number
+    breakdown: {
+      missions: Array<{
+        city: MissionCity
+        serviceNetCents: number
+        extraPlaceCount: number
+        placesNetCents: number
+        localTransportNetCents: number
+      }>
+      intercityNetCents: number
+      hotelNetCents: number
+    }
+  }
+
+  const earningByGuide = new Map<string, EarningDraft>()
+  let guideServicesRetailCents = 0
+  for (const mission of missions) {
+    const missionGuide = guides.find(item => item.id === mission.guideProfileId)!
+    const serviceNetCents = guideServiceNetCents(missionGuide, mission.city, body.nbPersonnes)
+    guideServicesRetailCents += guideServiceRetailCents(missionGuide, mission.city, body.nbPersonnes)
+    const missionExtraPlaces = mission.selectedPlaces.filter(key => extraPlaceKeys.includes(key))
+    const placesNetTotalCents = missionExtraPlaces.length * placeNetCents(body.nbPersonnes)
+    const localTransportNetCents = Math.round((mission.city === 'MAKKAH'
+      ? transportPricing.localCarNetMakkah
+      : transportPricing.localCarNetMadinah) * 100)
+    const earning = earningByGuide.get(mission.guideProfileId) ?? {
+      guideProfileId: mission.guideProfileId,
+      serviceNetCents: 0,
+      placesNetCents: 0,
+      transportNetCents: 0,
+      hotelNetCents: 0,
+      totalNetCents: 0,
+      breakdown: { missions: [], intercityNetCents: 0, hotelNetCents: 0 },
+    }
+    earning.serviceNetCents += serviceNetCents
+    earning.placesNetCents += placesNetTotalCents
+    earning.transportNetCents += localTransportNetCents
+    earning.breakdown.missions.push({
+      city: mission.city,
+      serviceNetCents,
+      extraPlaceCount: missionExtraPlaces.length,
+      placesNetCents: placesNetTotalCents,
+      localTransportNetCents,
+    })
+    earningByGuide.set(mission.guideProfileId, earning)
+  }
+
+  if (sameGuideForBothCities) {
+    const earning = earningByGuide.get(makkahGuide!.id)!
+    const intercityNetCents = Math.round(transportPricing.intercityNet * 100)
+    const hotelNetCents = Math.round(transportPricing.guideHotelNet * 100)
+    earning.transportNetCents += intercityNetCents
+    earning.hotelNetCents += hotelNetCents
+    earning.breakdown.intercityNetCents = intercityNetCents
+    earning.breakdown.hotelNetCents = hotelNetCents
+  }
+
+  const earningDrafts = [...earningByGuide.values()].map(earning => ({
+    ...earning,
+    totalNetCents: earning.serviceNetCents + earning.placesNetCents +
+      earning.transportNetCents + earning.hotelNetCents,
+  }))
+  const expectedPriceCents = guideServicesRetailCents + extraPlacesRetailCents + Math.round((
+    transportPricing.intercity + transportPricing.localCar + transportPricing.guideHotel
+  ) * 100)
+  const expectedPrice = centsToEuros(expectedPriceCents)
+  if (Math.abs(body.totalPrice - expectedPrice) > 0.01) {
     console.error(`[SECURITY] Prix client ${body.totalPrice}€ ≠ prix serveur ${expectedPrice}€`)
     return NextResponse.json({ error: 'Le prix a été actualisé. Vérifiez le récapitulatif.' }, { status: 409 })
   }
@@ -273,8 +342,8 @@ export async function POST(req: NextRequest) {
     analyticsSessionHash,
     missions: missions.map(mission => ({ ...mission, dates: undefined })),
     pricing: {
-      base: basePackage.basePrice,
-      places: extraPlacesTotal,
+      base: centsToEuros(guideServicesRetailCents),
+      places: centsToEuros(extraPlacesRetailCents),
       intercityTransport: transportPricing.intercity,
       localTransportMakkah: transportPricing.localCarMakkah,
       localTransportMadinah: transportPricing.localCarMadinah,
@@ -285,6 +354,7 @@ export async function POST(req: NextRequest) {
       guideHotel: transportPricing.guideHotel,
       total: expectedPrice,
     },
+    earnings: earningDrafts,
   }
 
   try {

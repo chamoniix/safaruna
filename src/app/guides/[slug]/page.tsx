@@ -11,8 +11,8 @@ import prisma from '@/lib/prisma';
 // cette fonction avec le même slug — React.cache() évite de dupliquer l'aller-retour DB.
 const getGuideData = cache(async (slug: string) => {
   try {
-    return await prisma.guideProfile.findUnique({
-      where: { slug },
+    return await prisma.guideProfile.findFirst({
+      where: { slug, status: 'ACTIVE' },
       include: { user: true, languages: true, packages: true },
     });
   } catch {
@@ -392,9 +392,7 @@ export default async function GuideProfilePage({
   }
 
   const hardcoded = GUIDES[slug] ?? null;
-  if (!guideData && !hardcoded) notFound();
-  // Masquer les fiches non actives qui n'ont pas de fallback hardcodé
-  if (guideData && (guideData as any).status !== 'ACTIVE' && !hardcoded) notFound();
+  if (!guideData) notFound();
 
   // ── Build packages ────────────────────────────────────────────────────────
   type PackageShape = { name: string; label: string; price: number; days: number; description: string; features: string[] };
@@ -775,6 +773,9 @@ export default async function GuideProfilePage({
           languages={guide.languages}
           activePlaceKeys={activePlaceKeys}
           guideCity={guideCityDerived ?? undefined}
+          acceptingBookings={(guideData as any).acceptingBookings}
+          servesMakkah={(guideData as any).servesMakkah}
+          servesMadinah={(guideData as any).servesMadinah}
         />
       </div>
 

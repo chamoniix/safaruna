@@ -56,6 +56,31 @@ const LIEUX_OPTIONS = [
   'Al-Baqi', 'Train Haramain', 'Bir Uthman', 'Bir Ali (Miqat)', 'Masjid al-Ijabah',
 ];
 
+const LANG_CODES: Record<string, string> = {
+  fr: 'Français', ar: 'Arabe', en: 'English', darija: 'Darija',
+  wolof: 'Wolof', bambara: 'Bambara', algerien: 'Algérien',
+  tunisien: 'Tunisien', urdu: 'Urdu', hindi: 'Hindi',
+  turk: 'Türkçe', russe: 'Russe', mandarin: 'Mandarin',
+  espanol: 'Español', deutsch: 'Deutsch',
+};
+
+type AvailableGuideApi = {
+  slug: string;
+  name?: string;
+  city?: string | null;
+  gender?: string;
+  serviceCities?: string[];
+  experienceYears?: number | null;
+  rating?: number | null;
+  reviewCount?: number;
+  languages?: string[];
+  bio?: string | null;
+  prices?: {
+    makkah?: { upTo6?: number };
+    madinah?: { upTo6?: number };
+  };
+};
+
 const GUIDES_DATA = [
   {
     slug: 'naim-laamari',
@@ -243,6 +268,8 @@ function CalendarPicker({ dateArrivee, setDateArrivee, dateDepart, setDateDepart
 export default function GuideSearchPage() {
   const searchParams = useSearchParams();
   const returnSlug = searchParams.get('returnSlug');
+  const [guideList, setGuideList] = useState<GuideData[]>([]);
+  const [guidesLoading, setGuidesLoading] = useState(true);
 
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedLangue, setSelectedLangue] = useState('');
@@ -272,6 +299,49 @@ export default function GuideSearchPage() {
       setSelectedCity(city);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch('/api/guides/available', { signal: controller.signal })
+      .then(response => response.ok ? response.json() : Promise.reject(new Error('Chargement impossible')))
+      .then(data => {
+        const editorialBySlug = new Map(GUIDES_DATA.filter(item => item.available).map(item => [item.slug, item]));
+        const mapped: GuideData[] = ((data.guides || []) as AvailableGuideApi[]).map(item => {
+          const editorial = editorialBySlug.get(item.slug);
+          const primaryIsMakkah = String(item.city || '').toUpperCase().includes('MAKKAH');
+          const publicPrice = primaryIsMakkah ? item.prices?.makkah?.upTo6 : item.prices?.madinah?.upTo6;
+          return {
+            slug: item.slug,
+            gender: String(item.gender || '').toLowerCase(),
+            zones: (item.serviceCities || []).map((value: string) => value.toLowerCase()),
+            name: item.name || 'Guide SAFARUMA',
+            title: editorial?.title || 'Guide certifié SAFARUMA',
+            initials: (item.name || 'GS').split(' ').map((part: string) => part[0]).slice(0, 2).join('').toUpperCase(),
+            location: item.city || (item.serviceCities || []).join(' · '),
+            experience: item.experienceYears || 0,
+            rating: item.rating || 0,
+            reviews: item.reviewCount || 0,
+            pilgrims: editorial?.pilgrims || '',
+            languages: (item.languages || []).map(code => LANG_CODES[code] || code),
+            services: editorial?.services || [],
+            price: publicPrice || 0,
+            priceSub: primaryIsMakkah ? 'Makkah · par groupe' : 'Médine · par groupe',
+            badge: editorial?.badge || '',
+            badgeColor: editorial?.badgeColor || '#7A6D5A',
+            gradient: editorial?.gradient || 'linear-gradient(135deg, #1A1209, #4A3F30)',
+            avatarGradient: editorial?.avatarGradient || 'linear-gradient(135deg, #F0D897, #C9A84C)',
+            available: true,
+            isOfficial: editorial?.isOfficial || false,
+            specialisteEnfants: editorial?.specialisteEnfants || false,
+            shortBio: item.bio || editorial?.shortBio || '',
+          };
+        });
+        setGuideList(mapped);
+      })
+      .catch(error => { if (error.name !== 'AbortError') setGuideList([]); })
+      .finally(() => setGuidesLoading(false));
+    return () => controller.abort();
+  }, []);
 
   const [selectedNote, setSelectedNote] = useState('');
   const [selectedSpecialites, setSelectedSpecialites] = useState<string[]>([]);
@@ -318,13 +388,6 @@ export default function GuideSearchPage() {
   const calLabel = dateArrivee ? `${fmt(dateArrivee)}${dateDepart ? ' → ' + fmt(dateDepart) : ''}` : 'Dates';
   const voyLabel = nbPersonnes > 1 || pmr ? `${nbPersonnes} pers${pmr ? ' · PMR' : ''}` : 'Voyageurs';
 
-  const langCodes: Record<string, string> = {
-    fr: 'Français', ar: 'Arabe', en: 'English', darija: 'Darija',
-    wolof: 'Wolof', bambara: 'Bambara', algerien: 'Algérien',
-    tunisien: 'Tunisien', urdu: 'Urdu', hindi: 'Hindi',
-    turk: 'Türkçe', russe: 'Russe', mandarin: 'Mandarin',
-    espanol: 'Español', deutsch: 'Deutsch',
-  };
   const langueLabel = selectedLangue === 'fr' ? '🇫🇷 Français'
     : selectedLangue === 'ar' ? '🇸🇦 Arabe'
     : selectedLangue === 'en' ? '🇬🇧 English'
@@ -344,7 +407,7 @@ export default function GuideSearchPage() {
     setDateArrivee(null); setDateDepart(null); setHasSearched(false);
   };
 
-  const filteredGuides = GUIDES_DATA.filter(g => {
+  const filteredGuides = guideList.filter(g => {
     if (g.available === false) return false;
     if (selectedCity === 'MAKKAH' && !g.zones.includes('makkah')) return false;
     if (selectedCity === 'MADINAH' && !g.zones.includes('madinah')) return false;
@@ -352,7 +415,7 @@ export default function GuideSearchPage() {
     if (selectedGender === 'HOMME' && g.gender !== 'homme') return false;
     if (selectedGender === 'FEMME' && g.gender !== 'femme') return false;
     if (selectedLangue) {
-      const match = langCodes[selectedLangue] || selectedLangue;
+      const match = LANG_CODES[selectedLangue] || selectedLangue;
       if (!g.languages.some(l => l.includes(match))) return false;
     }
     if (g.price > selectedBudget) return false;
@@ -926,7 +989,11 @@ export default function GuideSearchPage() {
             </div>
           ))}
 
-          {filteredGuides.length === 0 && (
+          {guidesLoading && (
+            <div style={{ textAlign: 'center', padding: '2rem', color: '#7A6D5A', fontSize: '0.85rem' }}>Chargement des guides disponibles…</div>
+          )}
+
+          {!guidesLoading && filteredGuides.length === 0 && (
             <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#7A6D5A' }}>
               <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>🔍</div>
               <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.3rem', fontWeight: 600, color: '#1A1209', marginBottom: '0.5rem' }}>
@@ -1423,8 +1490,8 @@ function GuideCard({ guide: g, official, onProfile, isLoading, returnSlug }: { g
             <div>
               {official ? (
                 <>
-                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.2 }}>Dès 150€/pers</div>
-                  <div style={{ fontSize: '0.6rem', color: '#7A6D5A', marginTop: '0.2rem' }}>Omra ~5h · Visites incluses</div>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.2 }}>{g.price}€ / groupe</div>
+                  <div style={{ fontSize: '0.6rem', color: '#7A6D5A', marginTop: '0.2rem' }}>Tarif selon la ville et la taille du groupe</div>
                 </>
               ) : (
                 <>

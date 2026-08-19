@@ -13,6 +13,9 @@ type GuideData = {
     slug: string | null;
     city: string | null;
     bio: string | null;
+    acceptingBookings: boolean;
+    servesMakkah: boolean;
+    servesMadinah: boolean;
     languages: { languageCode: string; level: string }[];
   };
   stats: {
@@ -32,7 +35,7 @@ type GuideData = {
     durationDays: number;
     startDate: string;
     nbPeople: number;
-    totalPrice: number;
+    guideRevenue: number;
     status: string;
   }[];
 };
@@ -94,6 +97,7 @@ export default function GuideDashboard() {
   const { guide, stats, recentReservations } = data;
   const sc = STATUS_CONFIG[guide.status] || STATUS_CONFIG.DRAFT;
   const firstName = guide.firstName || guide.name.split(' ')[0] || 'Guide';
+  const visibleForBooking = guide.status === 'ACTIVE' && guide.acceptingBookings && (guide.servesMakkah || guide.servesMadinah);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', fontFamily: 'var(--font-manrope, sans-serif)' }}>
@@ -101,13 +105,15 @@ export default function GuideDashboard() {
       {/* Status banner */}
       <div style={{ ...card, padding: '1rem 1.5rem', border: `1px solid ${sc.border}`, background: sc.bg, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
-          <div style={{ width: 10, height: 10, borderRadius: '50%', background: sc.color, flexShrink: 0, boxShadow: guide.status === 'ACTIVE' ? '0 0 0 4px rgba(29,92,58,0.15)' : 'none' }} />
+          <div style={{ width: 10, height: 10, borderRadius: '50%', background: visibleForBooking ? '#1D5C3A' : guide.status === 'ACTIVE' ? '#D97706' : sc.color, flexShrink: 0, boxShadow: visibleForBooking ? '0 0 0 4px rgba(29,92,58,0.15)' : 'none' }} />
           <div>
             <div style={{ fontSize: '0.82rem', fontWeight: 700, color: sc.color }}>{sc.label}</div>
             <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 1 }}>
               {guide.status === 'DRAFT'     && 'Complétez votre profil pour soumettre votre candidature.'}
               {guide.status === 'REVIEW'    && 'Votre dossier est en cours d\'examen. Vous serez contacté sous 48h insha\'Allah.'}
-              {guide.status === 'ACTIVE'    && `Bonjour ${firstName} ! Votre profil est visible par les pèlerins.`}
+              {guide.status === 'ACTIVE' && !guide.acceptingBookings && `Bonjour ${firstName} ! Votre profil est temporairement en pause.`}
+              {guide.status === 'ACTIVE' && guide.acceptingBookings && !guide.servesMakkah && !guide.servesMadinah && `Bonjour ${firstName} ! Activez au moins une ville pour recevoir des réservations.`}
+              {visibleForBooking && `Bonjour ${firstName} ! Votre profil est visible par les pèlerins.`}
               {guide.status === 'SUSPENDED' && 'Votre profil a été suspendu. Contactez le support pour plus d\'informations.'}
             </div>
           </div>
@@ -174,7 +180,7 @@ export default function GuideDashboard() {
             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 680 }}>
               <thead>
                 <tr style={{ background: '#F5F2EC', borderBottom: '1px solid #E8DFC8' }}>
-                  {['Réf', 'Pèlerin', 'Package', 'Départ', 'Pers.', 'Montant', 'Statut'].map(h => (
+                  {['Réf', 'Pèlerin', 'Mission', 'Départ', 'Pers.', 'Votre revenu', 'Statut'].map(h => (
                     <th key={h} style={{ padding: '0.75rem 0.875rem', textAlign: 'left', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
                 </tr>
@@ -195,7 +201,7 @@ export default function GuideDashboard() {
                       </td>
                       <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.75rem', color: '#4A3F30', whiteSpace: 'nowrap' }}>{r.startDate}</td>
                       <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.82rem', color: '#1A1209', textAlign: 'center' }}>{r.nbPeople}</td>
-                      <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.85rem', fontWeight: 700, color: '#1A1209', whiteSpace: 'nowrap' }}>{r.totalPrice} €</td>
+                      <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.85rem', fontWeight: 700, color: '#1A1209', whiteSpace: 'nowrap' }}>{r.guideRevenue > 0 ? `${r.guideRevenue} €` : 'À calculer'}</td>
                       <td style={{ padding: '0.75rem 0.875rem' }}>
                         <span style={{ display: 'inline-block', background: rs.bg, color: rs.color, fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.06em', padding: '0.25rem 0.6rem', borderRadius: 20, whiteSpace: 'nowrap' }}>{rs.label}</span>
                       </td>

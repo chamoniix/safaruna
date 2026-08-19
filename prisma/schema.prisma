@@ -87,30 +87,37 @@ enum Role {
 // Safaruna Core Models
 
 model GuideProfile {
-  id              String        @id @default(cuid())
-  userId          String        @unique
-  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  slug            String?       @unique
-  bio             String?
-  city            String?
-  gender          String?
-  servesMakkah    Boolean       @default(false)
-  servesMadinah   Boolean       @default(false)
-  nationality     String?
-  experienceYears Int?
-  university      String?
-  diplomaUrl      String?
-  idDocUrl        String?
-  videoUrl        String?
-  ibanEncrypted   String?
-  status          ProfileStatus @default(DRAFT)
-  responseTimeAvg String?
-  completionRate  Int?          @default(0)
-  commissionRate  Float         @default(0.15)
-  interviewScore  Int?
-  interviewNotes  String?
-  interviewDate   DateTime?
-  interviewedBy   String?
+  id                    String        @id @default(cuid())
+  userId                String        @unique
+  user                  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slug                  String?       @unique
+  bio                   String?
+  city                  String?
+  gender                String?
+  servesMakkah          Boolean       @default(false)
+  servesMadinah         Boolean       @default(false)
+  acceptingBookings     Boolean       @default(true)
+  makkahNetUpTo6Cents   Int           @default(10000)
+  makkahNetUpTo15Cents  Int           @default(13000)
+  makkahNetUpTo32Cents  Int           @default(16000)
+  madinahNetUpTo6Cents  Int           @default(10000)
+  madinahNetUpTo15Cents Int           @default(13000)
+  madinahNetUpTo32Cents Int           @default(16000)
+  nationality           String?
+  experienceYears       Int?
+  university            String?
+  diplomaUrl            String?
+  idDocUrl              String?
+  videoUrl              String?
+  ibanEncrypted         String?
+  status                ProfileStatus @default(DRAFT)
+  responseTimeAvg       String?
+  completionRate        Int?          @default(0)
+  commissionRate        Float         @default(0.15)
+  interviewScore        Int?
+  interviewNotes        String?
+  interviewDate         DateTime?
+  interviewedBy         String?
 
   // Relations
   packages             Package[]
@@ -122,6 +129,7 @@ model GuideProfile {
   transfers            Transfer[]
   reservationMissions  ReservationMission[]
   reservationHolds     ReservationHold[]
+  earnings             GuideEarning[]
 }
 
 enum ProfileStatus {
@@ -231,9 +239,10 @@ model Reservation {
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 
-  reviews     Review[]
-  missions    ReservationMission[]
-  bookedDates Availability[]
+  reviews       Review[]
+  missions      ReservationMission[]
+  bookedDates   Availability[]
+  guideEarnings GuideEarning[]
 }
 
 model ReservationMission {
@@ -324,12 +333,43 @@ model Transfer {
   period         String
   status         TransferStatus @default(PENDING)
   createdAt      DateTime       @default(now())
+  earnings       GuideEarning[]
 }
 
 enum TransferStatus {
   PENDING
   PROCESSING
   PAID
+}
+
+model GuideEarning {
+  id                String             @id @default(cuid())
+  reservationId     String
+  reservation       Reservation        @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  guideProfileId    String
+  guideProfile      GuideProfile       @relation(fields: [guideProfileId], references: [id], onDelete: Cascade)
+  serviceNetCents   Int
+  placesNetCents    Int
+  transportNetCents Int
+  hotelNetCents     Int
+  totalNetCents     Int
+  breakdown         Json
+  status            GuideEarningStatus @default(UPCOMING)
+  transferId        String?
+  transfer          Transfer?          @relation(fields: [transferId], references: [id], onDelete: SetNull)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@unique([reservationId, guideProfileId])
+  @@index([guideProfileId, status, createdAt])
+  @@index([transferId])
+}
+
+enum GuideEarningStatus {
+  UPCOMING
+  AVAILABLE
+  PAID
+  CANCELLED
 }
 
 // ---------------------------------------------------------

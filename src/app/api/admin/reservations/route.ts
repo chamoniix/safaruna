@@ -65,6 +65,9 @@ export async function PATCH(req: NextRequest) {
         },
       },
       package: { select: { name: true, durationDays: true } },
+      guideEarnings: {
+        select: { guideProfileId: true, totalNetCents: true },
+      },
     },
   });
 
@@ -78,7 +81,10 @@ export async function PATCH(req: NextRequest) {
     const pelerinName = p.name || `${p.firstName ?? ''} ${p.lastName ?? ''}`.trim() || 'Pèlerin';
     const guideName   = gu.name || `${gu.firstName ?? ''} ${gu.lastName ?? ''}`.trim() || 'Guide';
     const departure   = new Date(reservation.startDate).toLocaleDateString('fr-FR');
-    const netGuide    = Math.round(reservation.totalPrice - reservation.commissionAmount);
+    const primaryEarning = reservation.guideEarnings.find(earning => earning.guideProfileId === reservation.guideProfileId);
+    const netGuide = primaryEarning?.totalNetCents
+      ? primaryEarning.totalNetCents / 100
+      : 0;
 
     // Email au pèlerin
     if (p.email) {

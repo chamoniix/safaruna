@@ -14,7 +14,7 @@ type Mission = {
   startDate: string;
   endDate: string;
   nbPeople: number;
-  totalPrice: number;
+  guideRevenue: number | null;
   status: string;
   review: { rating: number; comment: string } | null;
   createdAt: string;
@@ -141,7 +141,7 @@ export default function GuideMissions() {
             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 820 }}>
               <thead>
                 <tr style={{ background: '#F5F2EC', borderBottom: '1px solid #E8DFC8' }}>
-                  {['Réf', 'Pèlerin', 'Package', 'Dates', 'Pers.', 'Montant', 'Avis', 'Statut', ''].map(h => (
+                  {['Réf', 'Pèlerin', 'Package', 'Dates', 'Pers.', 'Votre revenu', 'Avis', 'Statut', ''].map(h => (
                     <th key={h} style={{ padding: '0.75rem 0.875rem', textAlign: 'left', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
                 </tr>
@@ -165,7 +165,7 @@ export default function GuideMissions() {
                         <span style={{ color: '#7A6D5A' }}>→ {r.endDate}</span>
                       </td>
                       <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.82rem', color: '#1A1209', textAlign: 'center' }}>{r.nbPeople}</td>
-                      <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.85rem', fontWeight: 700, color: '#1A1209', whiteSpace: 'nowrap' }}>{r.totalPrice} €</td>
+                      <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.85rem', fontWeight: 700, color: '#1A1209', whiteSpace: 'nowrap' }}>{r.guideRevenue === null ? '—' : `${r.guideRevenue} €`}</td>
                       <td style={{ padding: '0.75rem 0.875rem' }}>
                         {r.review ? (
                           <span title={r.review.comment} style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1D5C3A' }}>★ {r.review.rating}/5</span>

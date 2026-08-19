@@ -1,12 +1,13 @@
 import { PLACES } from '@/lib/places'
 import type { CityChoice } from '@/lib/packages'
+import { centsToEuros, TRAVEL_MARKUP_BPS, withMarkupCents } from '@/lib/guide-pricing'
 
 export type TransportOption = 'NONE' | 'TRAIN' | 'TAXI_RT' | 'TAXI_ONE'
 export type LocalTransportOption = 'NONE' | 'TAXI' | 'CAR'
 
 const TAXI_ONE_WAY = 120
 
-export const BOOKING_PRICES = {
+export const BOOKING_NET_COSTS = {
   trainPerTrip: 80,
   trainRoundTrip: 160,
   taxiOneWay: TAXI_ONE_WAY,
@@ -15,7 +16,22 @@ export const BOOKING_PRICES = {
   localMinivanPerDay: 120,
   localBusPerDay: 500,
   guideHotelPerNight: 80,
-  defaultPlace: 50,
+} as const
+
+function travelRetail(netEuros: number): number {
+  return centsToEuros(withMarkupCents(netEuros * 100, TRAVEL_MARKUP_BPS))
+}
+
+export const BOOKING_PRICES = {
+  trainPerTrip: travelRetail(BOOKING_NET_COSTS.trainPerTrip),
+  trainRoundTrip: travelRetail(BOOKING_NET_COSTS.trainRoundTrip),
+  taxiOneWay: travelRetail(BOOKING_NET_COSTS.taxiOneWay),
+  taxiRoundTrip: travelRetail(BOOKING_NET_COSTS.taxiRoundTrip),
+  localCarPerDay: travelRetail(BOOKING_NET_COSTS.localCarPerDay),
+  localMinivanPerDay: travelRetail(BOOKING_NET_COSTS.localMinivanPerDay),
+  localBusPerDay: travelRetail(BOOKING_NET_COSTS.localBusPerDay),
+  guideHotelPerNight: travelRetail(BOOKING_NET_COSTS.guideHotelPerNight),
+  defaultPlace: 65,
 } as const
 
 export const TRANSPORT_OPTIONS: readonly TransportOption[] = ['NONE', 'TRAIN', 'TAXI_RT', 'TAXI_ONE']
@@ -72,16 +88,17 @@ export function calculateLocalCarDays(selectedPlaces: string[], city: 'MAKKAH' |
 
 export function getLocalVehiclePricing(nbPeople: number): {
   dailyRate: number
+  netDailyRate: number
   vehicle: 'CAR' | 'MINIVAN' | 'BUS'
   label: string
 } {
   if (nbPeople <= 6) {
-    return { dailyRate: BOOKING_PRICES.localCarPerDay, vehicle: 'CAR', label: 'Voiture privée' }
+    return { dailyRate: BOOKING_PRICES.localCarPerDay, netDailyRate: BOOKING_NET_COSTS.localCarPerDay, vehicle: 'CAR', label: 'Voiture privée' }
   }
   if (nbPeople <= 15) {
-    return { dailyRate: BOOKING_PRICES.localMinivanPerDay, vehicle: 'MINIVAN', label: 'Minivan avec chauffeur' }
+    return { dailyRate: BOOKING_PRICES.localMinivanPerDay, netDailyRate: BOOKING_NET_COSTS.localMinivanPerDay, vehicle: 'MINIVAN', label: 'Minivan avec chauffeur' }
   }
-  return { dailyRate: BOOKING_PRICES.localBusPerDay, vehicle: 'BUS', label: 'Bus avec chauffeur' }
+  return { dailyRate: BOOKING_PRICES.localBusPerDay, netDailyRate: BOOKING_NET_COSTS.localBusPerDay, vehicle: 'BUS', label: 'Bus avec chauffeur' }
 }
 
 export function calculateBookingTransportPrice(input: {
@@ -116,6 +133,15 @@ export function calculateBookingTransportPrice(input: {
           ? BOOKING_PRICES.taxiOneWay
           : 0
     : 0
+  const intercityNet = cityChoice === 'BOTH' && sameGuideForBothCities
+    ? transportOption === 'TRAIN'
+      ? BOOKING_NET_COSTS.trainRoundTrip
+      : transportOption === 'TAXI_RT'
+        ? BOOKING_NET_COSTS.taxiRoundTrip
+        : transportOption === 'TAXI_ONE'
+          ? BOOKING_NET_COSTS.taxiOneWay
+          : 0
+    : 0
 
   const makkahDays = calculateLocalCarDays(selectedPlaces, 'MAKKAH')
   const madinahDays = calculateLocalCarDays(selectedPlaces, 'MADINAH')
@@ -126,21 +152,33 @@ export function calculateBookingTransportPrice(input: {
   const localCarMadinah = cityChoice !== 'MAKKAH' && localTransportMadinah === 'CAR'
     ? madinahDays * localVehicle.dailyRate
     : 0
+  const localCarNetMakkah = cityChoice !== 'MADINAH' && localTransportMakkah === 'CAR'
+    ? makkahDays * localVehicle.netDailyRate
+    : 0
+  const localCarNetMadinah = cityChoice !== 'MAKKAH' && localTransportMadinah === 'CAR'
+    ? madinahDays * localVehicle.netDailyRate
+    : 0
 
   const guideHotelNights = cityChoice === 'BOTH' && sameGuideForBothCities && !guideBedProvided
     ? Math.max(0, (sameGuidePrimaryCity === 'MAKKAH' ? madinahDays : makkahDays) - 1)
     : 0
   const guideHotel = guideHotelNights * BOOKING_PRICES.guideHotelPerNight
+  const guideHotelNet = guideHotelNights * BOOKING_NET_COSTS.guideHotelPerNight
 
   return {
     intercity,
+    intercityNet,
     localCarMakkah,
     localCarMadinah,
     localCar: localCarMakkah + localCarMadinah,
+    localCarNetMakkah,
+    localCarNetMadinah,
+    localCarNet: localCarNetMakkah + localCarNetMadinah,
     makkahDays,
     madinahDays,
     localVehicle,
     guideHotelNights,
     guideHotel,
+    guideHotelNet,
   }
 }

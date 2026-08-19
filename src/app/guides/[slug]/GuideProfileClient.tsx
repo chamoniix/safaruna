@@ -44,6 +44,9 @@ interface GuideProfileClientProps {
   languages: string[];
   activePlaceKeys?: string[];
   guideCity?: 'MAKKAH' | 'MADINAH';
+  acceptingBookings: boolean;
+  servesMakkah: boolean;
+  servesMadinah: boolean;
 }
 
 const COMPANION_GUIDES: Record<'MAKKAH' | 'MADINAH', Array<{ slug: string; name: string; specialty: string; initials: string }>> = {
@@ -73,6 +76,9 @@ export default function GuideProfileClient({
   languages,
   activePlaceKeys,
   guideCity,
+  acceptingBookings,
+  servesMakkah,
+  servesMadinah,
 }: GuideProfileClientProps) {
   const [activeTab, setActiveTab] = useState(0);
   const [companionSlug, setCompanionSlug] = useState<string | null>(null);
@@ -87,6 +93,7 @@ export default function GuideProfileClient({
     null;
   const companionCityLabel = companionCity === 'MAKKAH' ? 'La Mecque' : companionCity === 'MADINAH' ? 'Médine' : null;
   const companions = companionCity ? COMPANION_GUIDES[companionCity] : [];
+  const bookable = acceptingBookings && (servesMakkah || servesMadinah);
   const checkoutHref = companionSlug
     ? `/espace/checkout/${slug}?pair=${companionSlug}`
     : `/espace/checkout/${slug}`;
@@ -520,19 +527,20 @@ export default function GuideProfileClient({
         {/* RIGHT SIDE — Bouton réserver (desktop) */}
         <div className="profile-booking-sticky">
           <div style={{ position: 'sticky', top: '90px', background: 'white', borderRadius: '20px', border: '1px solid #E8DFC8', boxShadow: '0 8px 32px rgba(26,18,9,0.08)', padding: '1.5rem', textAlign: 'center' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#D1FAE5', color: '#1D5C3A', fontSize: '0.75rem', fontWeight: 700, padding: '0.3rem 0.875rem', borderRadius: 50, marginBottom: '1.25rem' }}>
-              <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#1D5C3A', display: 'inline-block' }}/>
-              Disponible
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: bookable ? '#D1FAE5' : '#FEF3C7', color: bookable ? '#1D5C3A' : '#92400E', fontSize: '0.75rem', fontWeight: 700, padding: '0.3rem 0.875rem', borderRadius: 50, marginBottom: '1.25rem' }}>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: bookable ? '#1D5C3A' : '#D97706', display: 'inline-block' }}/>
+              {bookable ? 'Disponible' : 'Temporairement indisponible'}
             </div>
             <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 600, color: '#1A1209', marginBottom: '1.25rem', lineHeight: 1.4 }}>
               Réserver avec<br/>{guideName}
             </div>
 
             <a
-              href={checkoutHref}
+              href={bookable ? checkoutHref : '#'}
+              aria-disabled={!bookable}
               style={{
                 display: 'block', padding: '0.875rem 1.5rem',
-                background: companionSlug
+                background: !bookable ? '#E8DFC8' : companionSlug
                   ? 'linear-gradient(135deg, #10B981 0%, #1D5C3A 100%)'
                   : 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)',
                 color: companionSlug ? 'white' : '#1A1209',
@@ -542,7 +550,7 @@ export default function GuideProfileClient({
                 transition: 'all 0.2s',
               }}
             >
-              {companionSlug ? 'Réserver mon duo 🕋🌿' : 'Réserver ce guide'}
+              {!bookable ? 'Réservations en pause' : companionSlug ? 'Réserver mon duo 🕋🌿' : 'Réserver ce guide'}
             </a>
             <div style={{ marginTop: '1rem', fontSize: '0.72rem', color: '#9CA3AF', lineHeight: 1.6 }}>
               Guide certifié SAFARUMA · Paiement sécurisé
@@ -554,10 +562,11 @@ export default function GuideProfileClient({
       {/* Mobile booking bar (fixed bottom) */}
       <div className="profile-mobile-booking">
         <a
-          href={checkoutHref}
+          href={bookable ? checkoutHref : '#'}
+          aria-disabled={!bookable}
           style={{
             display: 'block', width: '100%', padding: '0.875rem',
-            background: companionSlug
+            background: !bookable ? '#E8DFC8' : companionSlug
               ? 'linear-gradient(135deg, #10B981 0%, #1D5C3A 100%)'
               : 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)',
             color: companionSlug ? 'white' : '#1A1209',
@@ -566,7 +575,7 @@ export default function GuideProfileClient({
             letterSpacing: '0.05em', boxSizing: 'border-box',
           }}
         >
-          {companionSlug ? 'Réserver mon duo 🕋🌿' : 'Réserver ce guide'}
+          {!bookable ? 'Réservations en pause' : companionSlug ? 'Réserver mon duo 🕋🌿' : 'Réserver ce guide'}
         </a>
       </div>
     </div>

@@ -13,6 +13,9 @@ type GuidePlace = { id: string; placeKey: string; isActive: boolean };
 type Guide = {
   id: string; slug: string; bio: string | null; city: string | null;
   gender: 'HOMME' | 'FEMME' | null; servesMakkah: boolean; servesMadinah: boolean;
+  acceptingBookings: boolean;
+  makkahNetUpTo6Cents: number; makkahNetUpTo15Cents: number; makkahNetUpTo32Cents: number;
+  madinahNetUpTo6Cents: number; madinahNetUpTo15Cents: number; madinahNetUpTo32Cents: number;
   nationality: string | null; experienceYears: number | null; status: string;
   responseTimeAvg: string | null; completionRate: number | null;
   ibanMasked: string | null;
@@ -65,6 +68,9 @@ export default function AdminGuideDetailPage() {
   const [gender, setGender]               = useState<'HOMME' | 'FEMME'>('HOMME');
   const [servesMakkah, setServesMakkah]   = useState(false);
   const [servesMadinah, setServesMadinah] = useState(false);
+  const [acceptingBookings, setAcceptingBookings] = useState(true);
+  const [makkahRates, setMakkahRates] = useState({ upTo6: '100', upTo15: '130', upTo32: '160' });
+  const [madinahRates, setMadinahRates] = useState({ upTo6: '100', upTo15: '130', upTo32: '160' });
   const [nationality, setNationality]     = useState('');
   const [expYears, setExpYears]           = useState('');
   const [status, setStatus]               = useState('');
@@ -124,6 +130,9 @@ export default function AdminGuideDetailPage() {
       setGender(g.gender || 'HOMME');
       setServesMakkah(g.servesMakkah);
       setServesMadinah(g.servesMadinah);
+      setAcceptingBookings(g.acceptingBookings);
+      setMakkahRates({ upTo6: String(g.makkahNetUpTo6Cents / 100), upTo15: String(g.makkahNetUpTo15Cents / 100), upTo32: String(g.makkahNetUpTo32Cents / 100) });
+      setMadinahRates({ upTo6: String(g.madinahNetUpTo6Cents / 100), upTo15: String(g.madinahNetUpTo15Cents / 100), upTo32: String(g.madinahNetUpTo32Cents / 100) });
       setNationality(g.nationality || '');
       setExpYears(g.experienceYears?.toString() || '');
       setStatus(g.status);
@@ -148,7 +157,16 @@ export default function AdminGuideDetailPage() {
       const res = await fetch(`/api/admin/guides/${slug}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bio, city, gender, servesMakkah, servesMadinah, nationality, experienceYears: expYears ? Number(expYears) : null, status }),
+        body: JSON.stringify({
+          bio, city, gender, servesMakkah, servesMadinah, acceptingBookings, nationality,
+          experienceYears: expYears ? Number(expYears) : null, status,
+          makkahNetUpTo6Cents: Math.round(Number(makkahRates.upTo6) * 100),
+          makkahNetUpTo15Cents: Math.round(Number(makkahRates.upTo15) * 100),
+          makkahNetUpTo32Cents: Math.round(Number(makkahRates.upTo32) * 100),
+          madinahNetUpTo6Cents: Math.round(Number(madinahRates.upTo6) * 100),
+          madinahNetUpTo15Cents: Math.round(Number(madinahRates.upTo15) * 100),
+          madinahNetUpTo32Cents: Math.round(Number(madinahRates.upTo32) * 100),
+        }),
       });
       if (!res.ok) throw new Error();
       setSaveMsg('✓ Modifications sauvegardées');
@@ -562,6 +580,38 @@ export default function AdminGuideDetailPage() {
               <label style={{ ...inputStyle, width: 'auto', flex: 1 }}><input type="checkbox" checked={servesMadinah} onChange={e => setServesMadinah(e.target.checked)} /> Médine</label>
             </div>
           </div>
+          <div>
+            <label style={labelStyle}>Réservations</label>
+            <label style={{ ...inputStyle, width: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <input type="checkbox" checked={acceptingBookings} onChange={e => setAcceptingBookings(e.target.checked)} /> Accepte actuellement les réservations
+            </label>
+          </div>
+        </div>
+
+        <div style={{ background: '#FAF7F0', border: '1px solid #E8DFC8', borderRadius: 10, padding: '1rem' }}>
+          <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#1A1209', marginBottom: '0.75rem' }}>Tarifs nets reversés au guide — administration uniquement</div>
+          {([
+            { label: 'Makkah', rates: makkahRates, setRates: setMakkahRates },
+            { label: 'Médine', rates: madinahRates, setRates: setMadinahRates },
+          ] as const).map(group => (
+            <div key={group.label} style={{ marginBottom: '0.75rem' }}>
+              <div style={{ ...labelStyle, marginBottom: 6 }}>{group.label}</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
+                {([
+                  ['upTo6', '1–6 clients'], ['upTo15', '7–15 clients'], ['upTo32', '16–32 clients'],
+                ] as const).map(([key, label]) => (
+                  <label key={key} style={{ fontSize: '0.72rem', color: '#7A6D5A' }}>
+                    {label}
+                    <div style={{ position: 'relative', marginTop: 4 }}>
+                      <input type="number" min="0" step="1" value={group.rates[key]} onChange={e => group.setRates(previous => ({ ...previous, [key]: e.target.value }))} style={{ ...inputStyle, paddingRight: 28 }} />
+                      <span style={{ position: 'absolute', right: 10, top: 9, fontSize: '0.8rem', color: '#7A6D5A' }}>€</span>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
+          <div style={{ fontSize: '0.7rem', color: '#7A6D5A' }}>Le prix client est calculé côté serveur avec une majoration SAFARUMA de 30 %. Le guide ne voit que ces montants nets.</div>
         </div>
 
         <div>

@@ -29,6 +29,16 @@ type DraftMission = {
   localTransportDays: number
 }
 
+type DraftEarning = {
+  guideProfileId: string
+  serviceNetCents: number
+  placesNetCents: number
+  transportNetCents: number
+  hotelNetCents: number
+  totalNetCents: number
+  breakdown: Prisma.InputJsonValue
+}
+
 type DraftData = {
   cityChoice: CityChoice
   departDate: string
@@ -64,6 +74,7 @@ type DraftData = {
     guideHotel: number
     total: number
   }
+  earnings: DraftEarning[]
 }
 
 function dateFr(value: Date | string): string {
@@ -109,6 +120,16 @@ function transportLabel(mission: DraftMission, data: DraftData): string {
   }
   if (mission.localTransport === 'CAR') {
     return `${data.pricing.localVehicle.label} — ${mission.localTransportDays} jour(s) à ${data.pricing.localVehicle.dailyRate} €/jour`
+  }
+  return 'Sans transport local réservé'
+}
+
+function guideTransportLabel(mission: DraftMission, data: DraftData): string {
+  if (mission.localTransport === 'TAXI') {
+    return 'Taxi public — vos courses pendant les visites sont prises en charge sur place par le client'
+  }
+  if (mission.localTransport === 'CAR') {
+    return `${data.pricing.localVehicle.label} — ${mission.localTransportDays} jour(s)`
   }
   return 'Sans transport local réservé'
 }
@@ -196,7 +217,7 @@ async function sendConfirmationEmails(opts: {
           ['Profil / langue', `${data.gender} · ${data.langue}`],
           ['Mission(s)', assignedMissions.map(mission => `${cityLabel(mission.city)} · ${dateFr(mission.startDate)} au ${dateFr(mission.endDate)}`).join(' | ')],
           ['Lieux', assignedMissions.map(mission => `${cityLabel(mission.city)} : ${placeNames(mission.selectedPlaces)}`).join(' | ')],
-          ['Transport local', assignedMissions.map(mission => `${cityLabel(mission.city)} : ${transportLabel(mission, data)}`).join(' | ')],
+          ['Transport local', assignedMissions.map(mission => `${cityLabel(mission.city)} : ${guideTransportLabel(mission, data)}`).join(' | ')],
           ['Retour entre les villes', data.sameGuideForBothCities ? `${data.transportOption === 'TRAIN' ? 'Train' : 'Voiture privée'} aller-retour` : 'Non applicable'],
           ['Hébergement hors ville principale', data.guideBedProvided ? 'Lit fourni par le client' : data.pricing.guideHotelNights ? `${data.pricing.guideHotelNights} nuit(s)` : 'Non applicable'],
         ])}
@@ -314,7 +335,7 @@ export async function POST(req: NextRequest) {
         guideProfileId: primaryGuide.id,
         name: basePackage.name,
         durationDays: data.missions.reduce((sum, mission) => sum + mission.localTransportDays, 0),
-        pricePerPerson: basePackage.basePrice,
+        pricePerPerson: data.pricing.base,
         maxPeople: 32,
       },
     })
@@ -330,7 +351,14 @@ export async function POST(req: NextRequest) {
   // courtes de chaque mission servent uniquement à bloquer le calendrier guide.
   const startDate = new Date(data.departDate)
   const endDate = new Date(data.returnDate)
-  const commission = Math.round(confirmedAmount * (primaryGuide.commissionRate ?? 0.15) * 100) / 100
+  if (!Array.isArray(data.earnings) || data.earnings.length !== guideIds.length) {
+    return NextResponse.json({ error: 'Rémunérations guides manquantes' }, { status: 400 })
+  }
+  const totalGuideNetCents = data.earnings.reduce((sum, earning) => sum + earning.totalNetCents, 0)
+  const commission = Math.round(confirmedAmount * 100 - totalGuideNetCents) / 100
+  if (commission < 0) {
+    return NextResponse.json({ error: 'Rémunérations guides incohérentes' }, { status: 400 })
+  }
 
   try {
     await prisma.$transaction(async tx => {
@@ -381,6 +409,20 @@ export async function POST(req: NextRequest) {
             })),
           },
         },
+      })
+
+      await tx.guideEarning.createMany({
+        data: data.earnings.map(earning => ({
+          reservationId: reservation.id,
+          guideProfileId: earning.guideProfileId,
+          serviceNetCents: earning.serviceNetCents,
+          placesNetCents: earning.placesNetCents,
+          transportNetCents: earning.transportNetCents,
+          hotelNetCents: earning.hotelNetCents,
+          totalNetCents: earning.totalNetCents,
+          breakdown: earning.breakdown,
+          status: 'UPCOMING',
+        })),
       })
 
       for (const mission of data.missions) {

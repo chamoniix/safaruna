@@ -7,8 +7,8 @@ export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
 
-  const email = (session.user as any).email as string | undefined;
-  const userId = (session.user as any).id as string | undefined;
+  const email = (session.user as { email?: string }).email;
+  const userId = (session.user as { id?: string }).id;
   if (!email && !userId) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
 
   const user = await prisma.user.findFirst({
@@ -41,6 +41,10 @@ export async function GET(req: NextRequest) {
         where: { guideProfileId: user.guideProfile.id },
         orderBy: { startDate: 'asc' },
       },
+      guideEarnings: {
+        where: { guideProfileId: user.guideProfile.id },
+        select: { totalNetCents: true },
+      },
     },
   });
 
@@ -71,7 +75,7 @@ export async function GET(req: NextRequest) {
         endDate: new Date(r.missions.at(-1)?.endDate ?? r.endDate).toLocaleDateString('fr-FR'),
         missionCities: r.missions.map(mission => mission.city),
         nbPeople: r.nbPeople,
-        totalPrice: r.totalPrice,
+        guideRevenue: r.guideEarnings[0] ? r.guideEarnings[0].totalNetCents / 100 : null,
         status: r.status,
         review: r.reviews[0]
           ? { rating: r.reviews[0].ratingOverall, comment: r.reviews[0].comment }

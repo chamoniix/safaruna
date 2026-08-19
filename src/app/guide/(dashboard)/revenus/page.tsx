@@ -9,19 +9,20 @@ type HistoryRow = {
   packageName: string;
   nbPeople: number;
   startDate: string;
-  totalBrut: number;
-  commission: number;
+  serviceNet: number;
+  placesNet: number;
+  transportNet: number;
+  hotelNet: number;
   net: number;
+  paymentStatus: string;
 };
 
 type Data = {
   stats: {
-    totalBrut: number;
-    totalCommissions: number;
     totalNet: number;
-    revenuesMois: number;
-    commissionsMois: number;
     netMois: number;
+    upcomingNet: number;
+    paidNet: number;
     nbMissions: number;
   };
   prochainVirement: { amount: number; period: string; status: string } | null;
@@ -76,30 +77,30 @@ export default function GuideRevenus() {
       {/* Header */}
       <div>
         <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.75rem', fontWeight: 700, color: '#1A1209', margin: 0 }}>Mes revenus</h1>
-        <p style={{ fontSize: '0.82rem', color: '#7A6D5A', marginTop: 4 }}>{stats.nbMissions} mission{stats.nbMissions > 1 ? 's' : ''} terminée{stats.nbMissions > 1 ? 's' : ''} · Commission SAFARUMA : 15%</p>
+        <p style={{ fontSize: '0.82rem', color: '#7A6D5A', marginTop: 4 }}>{stats.nbMissions} mission{stats.nbMissions > 1 ? 's' : ''} terminée{stats.nbMissions > 1 ? 's' : ''} · Seuls vos revenus nets sont affichés</p>
       </div>
 
       {/* Stat cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
         <div style={{ ...card, padding: '1rem 1.25rem' }}>
-          <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.4rem' }}>Brut total</div>
-          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', fontWeight: 700, color: '#1A1209', lineHeight: 1 }}>{stats.totalBrut} €</div>
-          <div style={{ fontSize: '0.65rem', color: '#7A6D5A', marginTop: 4 }}>Toutes missions</div>
+          <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.4rem' }}>Revenus nets</div>
+          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', fontWeight: 700, color: '#1A1209', lineHeight: 1 }}>{stats.totalNet} €</div>
+          <div style={{ fontSize: '0.65rem', color: '#7A6D5A', marginTop: 4 }}>Missions terminées</div>
         </div>
         <div style={{ ...card, background: '#FEE2E2', padding: '1rem 1.25rem' }}>
-          <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.4rem' }}>Commissions</div>
-          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', fontWeight: 700, color: '#DC2626', lineHeight: 1 }}>{stats.totalCommissions} €</div>
-          <div style={{ fontSize: '0.65rem', color: '#7A6D5A', marginTop: 4 }}>15% SAFARUMA</div>
+          <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.4rem' }}>À venir</div>
+          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', fontWeight: 700, color: '#DC2626', lineHeight: 1 }}>{stats.upcomingNet} €</div>
+          <div style={{ fontSize: '0.65rem', color: '#7A6D5A', marginTop: 4 }}>Missions confirmées</div>
         </div>
         <div style={{ ...card, background: '#D1FAE5', padding: '1rem 1.25rem' }}>
-          <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.4rem' }}>Net perçu</div>
-          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', fontWeight: 700, color: '#1D5C3A', lineHeight: 1 }}>{stats.totalNet} €</div>
-          <div style={{ fontSize: '0.65rem', color: '#7A6D5A', marginTop: 4 }}>Après commission</div>
+          <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.4rem' }}>Déjà versé</div>
+          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', fontWeight: 700, color: '#1D5C3A', lineHeight: 1 }}>{stats.paidNet} €</div>
+          <div style={{ fontSize: '0.65rem', color: '#7A6D5A', marginTop: 4 }}>Virements enregistrés</div>
         </div>
         <div style={{ ...card, background: '#FEF9E7', padding: '1rem 1.25rem' }}>
           <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.4rem' }}>Net ce mois</div>
           <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', fontWeight: 700, color: '#C9A84C', lineHeight: 1 }}>{stats.netMois} €</div>
-          <div style={{ fontSize: '0.65rem', color: '#7A6D5A', marginTop: 4 }}>Brut : {stats.revenuesMois} €</div>
+          <div style={{ fontSize: '0.65rem', color: '#7A6D5A', marginTop: 4 }}>Missions terminées ce mois</div>
         </div>
       </div>
 
@@ -115,11 +116,11 @@ export default function GuideRevenus() {
         </div>
       )}
 
-      {/* Commission info */}
+      {/* Revenue info */}
       <div style={{ ...card, padding: '1rem 1.5rem', background: '#F5F2EC', border: '1px solid #E8DFC8' }}>
-        <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.5rem' }}>Comment fonctionne la commission ?</div>
+        <div style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.5rem' }}>Détail de vos revenus</div>
         <div style={{ fontSize: '0.78rem', color: '#4A3F30', lineHeight: 1.7 }}>
-          SAFARUMA retient <strong>15%</strong> sur chaque réservation confirmée et complétée. Le reste (85%) vous est versé par virement bancaire dans les <strong>7 jours</strong> suivant la fin de la mission. Les virements sont regroupés par période mensuelle.
+          Les montants affichés correspondent uniquement à votre rémunération nette : accompagnement, lieux supplémentaires, transport et hébergement éventuel du guide.
         </div>
       </div>
 
@@ -140,7 +141,7 @@ export default function GuideRevenus() {
             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 700 }}>
               <thead>
                 <tr style={{ background: '#F5F2EC', borderBottom: '1px solid #E8DFC8' }}>
-                  {['Réf', 'Pèlerin', 'Package', 'Date', 'Pers.', 'Brut', 'Commission', 'Net reçu'].map(h => (
+                  {['Réf', 'Pèlerin', 'Package', 'Date', 'Pers.', 'Accompagnement', 'Lieux', 'Transport / hôtel', 'Votre revenu'].map(h => (
                     <th key={h} style={{ padding: '0.75rem 0.875rem', textAlign: 'left', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
                 </tr>
@@ -153,8 +154,9 @@ export default function GuideRevenus() {
                     <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.75rem', color: '#7A6D5A' }}>{r.packageName}</td>
                     <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.75rem', color: '#4A3F30', whiteSpace: 'nowrap' }}>{r.startDate}</td>
                     <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.82rem', color: '#1A1209', textAlign: 'center' }}>{r.nbPeople}</td>
-                    <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.82rem', color: '#1A1209', whiteSpace: 'nowrap' }}>{r.totalBrut} €</td>
-                    <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.82rem', color: '#DC2626', whiteSpace: 'nowrap' }}>−{r.commission} €</td>
+                    <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.82rem', color: '#1A1209', whiteSpace: 'nowrap' }}>{r.serviceNet} €</td>
+                    <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.82rem', color: '#1A1209', whiteSpace: 'nowrap' }}>{r.placesNet} €</td>
+                    <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.82rem', color: '#1A1209', whiteSpace: 'nowrap' }}>{r.transportNet + r.hotelNet} €</td>
                     <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.85rem', fontWeight: 700, color: '#1D5C3A', whiteSpace: 'nowrap' }}>{r.net} €</td>
                   </tr>
                 ))}

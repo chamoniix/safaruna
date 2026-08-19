@@ -13,7 +13,7 @@ async function getGuideProfile() {
     where: { email },
     include: {
       guideProfile: {
-        select: { id: true, servesMakkah: true, servesMadinah: true, city: true },
+        select: { id: true, servesMakkah: true, servesMadinah: true, acceptingBookings: true, city: true },
       },
     },
   })
@@ -60,6 +60,7 @@ export async function GET(req: NextRequest) {
     city,
     serviceEnabled: city === 'MAKKAH' ? guide.servesMakkah : guide.servesMadinah,
     services: { makkah: guide.servesMakkah, madinah: guide.servesMadinah },
+    acceptingBookings: guide.acceptingBookings,
     availabilities: [...byDate.values()].map(record => ({
       id: record.id,
       date: record.date.toISOString().slice(0, 10),

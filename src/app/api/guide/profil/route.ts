@@ -14,6 +14,7 @@ const profilPatchSchema = z.object({
   gender:          z.enum(['HOMME', 'FEMME']).optional(),
   servesMakkah:    z.boolean().optional(),
   servesMadinah:   z.boolean().optional(),
+  acceptingBookings: z.boolean().optional(),
   nationality:     z.string().max(100).optional(),
   experienceYears: z.coerce.number().int().min(0).max(60).optional(),
 });
@@ -59,6 +60,13 @@ export async function GET() {
       gender: gp.gender,
       servesMakkah: gp.servesMakkah,
       servesMadinah: gp.servesMadinah,
+      acceptingBookings: gp.acceptingBookings,
+      makkahNetUpTo6Cents: gp.makkahNetUpTo6Cents,
+      makkahNetUpTo15Cents: gp.makkahNetUpTo15Cents,
+      makkahNetUpTo32Cents: gp.makkahNetUpTo32Cents,
+      madinahNetUpTo6Cents: gp.madinahNetUpTo6Cents,
+      madinahNetUpTo15Cents: gp.madinahNetUpTo15Cents,
+      madinahNetUpTo32Cents: gp.madinahNetUpTo32Cents,
       nationality: gp.nationality,
       experienceYears: gp.experienceYears,
       languages: gp.languages,
@@ -88,7 +96,7 @@ export async function PATCH(req: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Données invalides' }, { status: 400 });
   }
-  const { firstName, lastName, phoneWhatsapp, country, bio, city, gender, servesMakkah, servesMadinah, nationality, experienceYears } = parsed.data;
+  const { firstName, lastName, phoneWhatsapp, country, bio, city, gender, servesMakkah, servesMadinah, acceptingBookings, nationality, experienceYears } = parsed.data;
 
   await Promise.all([
     prisma.user.update({
@@ -109,6 +117,7 @@ export async function PATCH(req: NextRequest) {
         ...(gender !== undefined && { gender }),
         ...(servesMakkah !== undefined && { servesMakkah }),
         ...(servesMadinah !== undefined && { servesMadinah }),
+        ...(acceptingBookings !== undefined && { acceptingBookings }),
         ...(nationality !== undefined && { nationality: nationality.trim() || null }),
         ...(experienceYears !== undefined && { experienceYears: experienceYears || null }),
       },

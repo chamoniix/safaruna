@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
   `);
   const recipients = [
     { email: process.env.GUIDE_APPLICATION_ADMIN_EMAIL || 'admin@safaruma.com', name: 'Admin SAFARUMA' },
-    { email: process.env.GUIDE_APPLICATION_SUPERADMIN_EMAIL || 'superadmin@gmail.com', name: 'Superadmin SAFARUMA' },
+    { email: process.env.GUIDE_APPLICATION_SUPERADMIN_EMAIL || 'superadmin@safaruma.com', name: 'Superadmin SAFARUMA' },
   ];
   await Promise.allSettled([
     sendWelcomeGuide(email, `${firstName} ${lastName}`.trim()),

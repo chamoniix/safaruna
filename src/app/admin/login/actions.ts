@@ -76,7 +76,7 @@ export async function adminLogin(formData: FormData) {
       && await bcrypt.compare(password, account.passwordHash!)
     if (valid) authenticatedAccount = account
   } else {
-    const bootstrap = email === (process.env.SUPERADMIN_ACCOUNT_EMAIL || 'superadmin@gmail.com').trim().toLowerCase()
+    const bootstrap = email === (process.env.SUPERADMIN_ACCOUNT_EMAIL || 'superadmin@safaruma.com').trim().toLowerCase()
       ? { password: process.env.SUPERADMIN_ACCOUNT_PASSWORD, role: 'SUPERADMIN' as const, name: 'Superadmin SAFARUMA' }
       : email === (process.env.ADMIN_ACCOUNT_EMAIL || 'admin@safaruma.com').trim().toLowerCase()
         ? { password: process.env.ADMIN_ACCOUNT_PASSWORD, role: 'ADMIN' as const, name: 'Admin SAFARUMA' }

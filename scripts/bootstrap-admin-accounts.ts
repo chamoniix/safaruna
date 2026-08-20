@@ -11,7 +11,7 @@ type BootstrapAccount = {
 async function main() {
   const accounts: BootstrapAccount[] = [
     {
-      email: (process.env.SUPERADMIN_ACCOUNT_EMAIL || 'superadmin@gmail.com').trim().toLowerCase(),
+      email: (process.env.SUPERADMIN_ACCOUNT_EMAIL || 'superadmin@safaruma.com').trim().toLowerCase(),
       password: process.env.SUPERADMIN_ACCOUNT_PASSWORD,
       role: 'SUPERADMIN',
       name: 'Superadmin SAFARUMA',

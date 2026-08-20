@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { checkAdmin } from '@/lib/check-admin';
+import { getAdminActor } from '@/lib/check-admin';
 import prisma from '@/lib/prisma';
 import { decrypt } from '@/lib/crypto';
 
@@ -7,7 +7,8 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  if (!await checkAdmin(req))
+  const actor = await getAdminActor(req);
+  if (!actor)
     return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
 
   const { slug } = await params;
@@ -88,6 +89,11 @@ export async function GET(
         nationality: guide.nationality,
         experienceYears: guide.experienceYears,
         status: guide.status,
+        createdByType: guide.createdByType,
+        createdByEmail: guide.createdByEmail,
+        createdAt: guide.createdAt,
+        approvedByEmail: guide.approvedByEmail,
+        approvedAt: guide.approvedAt,
         responseTimeAvg: guide.responseTimeAvg,
         completionRate: guide.completionRate,
         commissionRate: (guide as any).commissionRate ?? 0.12,
@@ -163,11 +169,22 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
-  if (!await checkAdmin(req))
+  const actor = await getAdminActor(req);
+  if (!actor)
     return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
 
   const { slug } = await params;
   const body = await req.json();
+  const audit = (action: string, target: string, detail?: unknown) => prisma.auditLog.create({
+    data: {
+      actor: actor.email,
+      actorRole: actor.role,
+      actorAdminId: actor.id,
+      action,
+      target,
+      detail: detail === undefined ? undefined : JSON.stringify(detail),
+    },
+  });
 
   try {
     if (body.packageId && body.pricePerPerson !== undefined) {
@@ -175,6 +192,7 @@ export async function PATCH(
         where: { id: body.packageId },
         data: { pricePerPerson: Number(body.pricePerPerson) },
       });
+      await audit('GUIDE_PACKAGE_PRICE_UPDATED', body.packageId, { pricePerPerson: Number(body.pricePerPerson) });
       return NextResponse.json({ success: true });
     }
 
@@ -184,33 +202,29 @@ export async function PATCH(
 
     if (body.firstName !== undefined || body.lastName !== undefined ||
         body.phoneWhatsapp !== undefined || body.email !== undefined) {
-      await prisma.user.update({
-        where: { id: guide.userId },
-        data: {
-          ...(body.firstName !== undefined && { firstName: body.firstName }),
-          ...(body.lastName !== undefined && { lastName: body.lastName }),
-          ...(body.phoneWhatsapp !== undefined && { phoneWhatsapp: body.phoneWhatsapp }),
-          ...(body.email !== undefined && { email: body.email }),
-        },
-      });
+      const identityData = {
+        ...(body.firstName !== undefined && { firstName: body.firstName }),
+        ...(body.lastName !== undefined && { lastName: body.lastName }),
+        ...(body.phoneWhatsapp !== undefined && { phoneWhatsapp: body.phoneWhatsapp }),
+        ...(body.email !== undefined && { email: String(body.email).toLowerCase() }),
+      };
+      await prisma.$transaction([
+        prisma.user.update({ where: { id: guide.userId }, data: identityData }),
+        ...(guide.guideAccountId ? [prisma.guideAccount.update({
+          where: { id: guide.guideAccountId },
+          data: {
+            ...identityData,
+            ...((body.firstName !== undefined || body.lastName !== undefined) && {
+              displayName: `${body.firstName ?? ''} ${body.lastName ?? ''}`.trim() || undefined,
+            }),
+          },
+        })] : []),
+      ]);
+      await audit('GUIDE_IDENTITY_UPDATED', guide.id, { fields: ['firstName', 'lastName', 'phoneWhatsapp', 'email'].filter(key => body[key] !== undefined) });
       return NextResponse.json({ success: true });
     }
 
     if (body.interviewScore !== undefined || body.interviewNotes !== undefined) {
-      // Extrait l'email de l'admin depuis le token JWT
-      let adminEmail = 'admin@safaruma.com'
-      try {
-        const adminToken = req.cookies.get('admin_session')?.value
-        if (adminToken) {
-          const payloadB64 = adminToken.split('.')[1]
-          if (payloadB64) {
-            const payloadJson = atob(payloadB64.replace(/-/g, '+').replace(/_/g, '/'))
-            const payload = JSON.parse(payloadJson)
-            if (payload.email) adminEmail = payload.email
-          }
-        }
-      } catch { /* garde le fallback */ }
-
       await prisma.guideProfile.update({
         where: { slug },
         data: {
@@ -223,9 +237,10 @@ export async function PATCH(
           ...(body.interviewDate !== undefined && {
             interviewDate: new Date(body.interviewDate),
           }),
-          interviewedBy: adminEmail,
+          interviewedBy: actor.email,
         },
       });
+      await audit('GUIDE_INTERVIEW_UPDATED', guide.id);
       return NextResponse.json({ success: true });
     }
 
@@ -238,6 +253,7 @@ export async function PATCH(
           level: body.addLanguage.level || 'NATIVE',
         }
       })
+      await audit('GUIDE_LANGUAGE_ADDED', guide.id, body.addLanguage)
       return NextResponse.json({ success: true })
     }
 
@@ -246,6 +262,7 @@ export async function PATCH(
       await prisma.guideLanguage.delete({
         where: { id: body.deleteLanguageId }
       })
+      await audit('GUIDE_LANGUAGE_DELETED', guide.id, { languageId: body.deleteLanguageId })
       return NextResponse.json({ success: true })
     }
 
@@ -264,12 +281,18 @@ export async function PATCH(
           data: { guideProfileId: guide.id, placeKey: body.togglePlace, isActive: true },
         })
       }
+      await audit('GUIDE_PLACE_TOGGLED', guide.id, { placeKey: body.togglePlace })
       return NextResponse.json({ success: true })
     }
 
-    await prisma.guideProfile.update({
-      where: { slug },
-      data: {
+    if (body.status !== undefined && !['DRAFT', 'REVIEW', 'ACTIVE', 'SUSPENDED'].includes(body.status)) {
+      return NextResponse.json({ error: 'Statut invalide' }, { status: 400 });
+    }
+
+    await prisma.$transaction([
+      prisma.guideProfile.update({
+        where: { slug },
+        data: {
         ...(body.bio !== undefined && { bio: body.bio }),
         ...(body.city !== undefined && { city: body.city }),
         ...(body.gender !== undefined && { gender: body.gender }),
@@ -287,12 +310,20 @@ export async function PATCH(
           experienceYears: Number(body.experienceYears)
         }),
         ...(body.status !== undefined && { status: body.status }),
-      },
-    });
+        },
+      }),
+      ...(guide.guideAccountId && body.status !== undefined ? [
+        prisma.guideAccount.update({
+          where: { id: guide.guideAccountId },
+          data: { status: body.status === 'ACTIVE' ? 'ACTIVE' : 'SUSPENDED' },
+        }),
+      ] : []),
+    ]);
+    await audit('GUIDE_PROFILE_UPDATED', guide.id, { fields: Object.keys(body) });
 
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('[admin/guides/slug PATCH]', err);
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }

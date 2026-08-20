@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { checkAdmin } from '@/lib/check-admin';
+import { getAdminActor } from '@/lib/check-admin';
 import prisma from '@/lib/prisma';
 import { sendEmail } from '@/lib/email';
 
 export async function POST(req: NextRequest) {
-  if (!await checkAdmin(req))
+  const actor = await getAdminActor(req);
+  if (!actor)
     return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
 
   const { reservationId, newGuideProfileId, motif } = await req.json();
@@ -38,10 +39,20 @@ export async function POST(req: NextRequest) {
     ? `${noteEntry}\n${reservation.notes}`
     : noteEntry;
 
-  await prisma.reservation.update({
-    where: { id: reservationId },
-    data: { guideProfileId: newGuideProfileId, notes: newNotes },
-  });
+  await prisma.$transaction([
+    prisma.reservation.update({ where: { id: reservationId }, data: { guideProfileId: newGuideProfileId, notes: newNotes } }),
+    prisma.auditLog.create({
+      data: {
+        actor: actor.email,
+        actorRole: actor.role,
+        actorAdminId: actor.id,
+        action: 'RESERVATION_GUIDE_TRANSFERRED',
+        target: reservation.refNumber,
+        before: { guideProfileId: reservation.guideProfileId },
+        after: { guideProfileId: newGuideProfileId, motif },
+      },
+    }),
+  ]);
 
   const pelerinEmail = reservation.pelerin.email;
   const pelerinName = reservation.pelerin.name

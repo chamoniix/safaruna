@@ -55,7 +55,7 @@ export default function AdminDashboard() {
           {stats.guidesEnAttente > 0 && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: '#FEF3C7', border: '1px solid #FCD34D', borderRadius: 8, padding: '0.6rem 1rem' }}>
               <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#92400E' }}>{stats.guidesEnAttente} guide{stats.guidesEnAttente > 1 ? 's' : ''} en attente</span>
-              <Link href="/admin/guides" style={{ fontSize: '0.72rem', color: '#D97706', fontWeight: 700, textDecoration: 'none' }}>Valider →</Link>
+              <Link href="/admin/candidatures-guides" style={{ fontSize: '0.72rem', color: '#D97706', fontWeight: 700, textDecoration: 'none' }}>Traiter →</Link>
             </div>
           )}
           {stats.litigesOuverts > 0 && (
@@ -93,7 +93,7 @@ export default function AdminDashboard() {
       <div style={{ background: 'white', borderRadius: 12, padding: '1.25rem', border: '1px solid #E8DFC8' }}>
         <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '1rem' }}>Actions rapides</div>
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <Link href="/admin/guides" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem', background: '#1A1209', color: '#F0D897', borderRadius: 50, fontSize: '0.78rem', fontWeight: 700, textDecoration: 'none' }}>+ Créer un guide</Link>
+          <Link href="/admin/candidatures-guides" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem', background: '#1A1209', color: '#F0D897', borderRadius: 50, fontSize: '0.78rem', fontWeight: 700, textDecoration: 'none' }}>Traiter les candidatures</Link>
           <Link href="/admin/pelerins" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem', background: '#F5F0E8', color: '#1A1209', borderRadius: 50, fontSize: '0.78rem', fontWeight: 600, textDecoration: 'none', border: '1px solid #E8DFC8' }}>Voir les pèlerins</Link>
           <Link href="/admin/reservations" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem', background: '#F5F0E8', color: '#1A1209', borderRadius: 50, fontSize: '0.78rem', fontWeight: 600, textDecoration: 'none', border: '1px solid #E8DFC8' }}>Voir les réservations</Link>
         </div>

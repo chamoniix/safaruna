@@ -28,23 +28,24 @@ export const authOptions: AuthOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null
         try {
-          const user = await prisma.user.findUnique({
-            where: { email: credentials.email },
+          const user = await prisma.guideAccount.findUnique({
+            where: { email: credentials.email.trim().toLowerCase() },
+            include: { guideProfile: { select: { status: true } } },
           })
-          if (!user || user.role !== "GUIDE") return null
+          if (!user || user.status !== 'ACTIVE' || !user.guideProfile || user.guideProfile.status === 'SUSPENDED') return null
           if (!user.emailVerified) return null
           if (!user.passwordHash) return null
           const isValid = await bcrypt.compare(credentials.password, user.passwordHash)
           if (!isValid) return null
-          await prisma.user.update({
+          await prisma.guideAccount.update({
             where: { id: user.id },
-            data: { lastLogin: new Date() },
+            data: { lastLoginAt: new Date() },
           })
-          await recordAnalyticsEvent({ eventName: 'login_success', userId: user.id, path: '/guide/connexion', metadata: { method: 'email', role: 'GUIDE' } })
+          await recordAnalyticsEvent({ eventName: 'login_success', userId: user.legacyUserId, path: '/guide/connexion', metadata: { method: 'email', role: 'GUIDE', guideAccountId: user.id } })
           return {
             id: user.id,
             email: user.email,
-            name: user.name,
+            name: user.displayName,
             firstName: user.firstName,
             role: "GUIDE",
             emailVerified: user.emailVerified,

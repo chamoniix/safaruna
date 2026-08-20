@@ -7,7 +7,7 @@ export async function GET() {
   if (!access.ok) return access.response;
 
   const user = await prisma.user.findUnique({
-    where: { id: access.actor.id },
+    where: { id: access.actor.legacyUserId },
     include: {
       guideProfile: {
         include: {

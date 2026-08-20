@@ -11,6 +11,8 @@ type Guide = {
   langs: string;
   reservations: number;
   joined: string;
+  createdByType: string;
+  createdByEmail: string | null;
   status: string;
   slug: string;
 };
@@ -36,7 +38,7 @@ export default function AdminGuidesPage() {
   const [createLast, setCreateLast]     = useState('');
   const [createEmail, setCreateEmail]   = useState('');
   const [creating, setCreating]         = useState(false);
-  const [createResult, setCreateResult] = useState<{ password: string; slug: string } | null>(null);
+  const [createResult, setCreateResult] = useState<{ slug: string } | null>(null);
   const [createError, setCreateError]   = useState('');
 
   const fetchGuides = async () => {
@@ -68,7 +70,7 @@ export default function AdminGuidesPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erreur');
-      setCreateResult({ password: data.password, slug: data.slug });
+      setCreateResult({ slug: data.slug });
       await fetchGuides();
     } catch (e: any) {
       setCreateError(e.message);
@@ -168,9 +170,8 @@ export default function AdminGuidesPage() {
                   ✓ Guide créé avec succès
                 </div>
                 <div style={{ background: '#FAF3E0', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 8, padding: '0.875rem 1rem' }}>
-                  <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.25rem' }}>Mot de passe temporaire</div>
-                  <div style={{ fontFamily: 'monospace', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209', letterSpacing: '0.08em' }}>{createResult.password}</div>
-                  <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: '0.35rem' }}>Envoyé par email · Profil : /guides/{createResult.slug}</div>
+                  <div style={{ fontSize: '0.78rem', color: '#4A3F30' }}>Les accès temporaires ont été envoyés uniquement par email au guide.</div>
+                  <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: '0.35rem' }}>Profil : /guides/{createResult.slug}</div>
                 </div>
                 <button onClick={() => { setShowCreate(false); setCreateResult(null); setCreateFirst(''); setCreateLast(''); setCreateEmail(''); }} style={{ padding: '0.6rem 1.5rem', borderRadius: 50, border: 'none', background: '#1A1209', color: '#F0D897', cursor: 'pointer', fontSize: '0.83rem', fontWeight: 700, alignSelf: 'flex-end' }}>Fermer</button>
               </div>
@@ -276,7 +277,7 @@ export default function AdminGuidesPage() {
                       <td style={{ padding: '0.875rem 1rem', fontSize: '0.82rem', color: '#4A3F30' }}>{g.city || '—'}</td>
                       <td style={{ padding: '0.875rem 1rem', fontSize: '0.75rem', color: '#7A6D5A', maxWidth: 140 }}>{g.langs || '—'}</td>
                       <td style={{ padding: '0.875rem 1rem', fontSize: '0.9rem', fontWeight: 700, color: '#1A1209', textAlign: 'center' }}>{g.reservations}</td>
-                      <td style={{ padding: '0.875rem 1rem', fontSize: '0.75rem', color: '#7A6D5A', whiteSpace: 'nowrap' }}>{g.joined}</td>
+                      <td style={{ padding: '0.875rem 1rem', fontSize: '0.75rem', color: '#7A6D5A', whiteSpace: 'nowrap' }}><span>{g.joined}</span><small style={{ display: 'block', marginTop: 3 }}>{g.createdByEmail || (g.createdByType === 'LEGACY_UNKNOWN' ? 'Créateur historique inconnu' : g.createdByType)}</small></td>
                       <td style={{ padding: '0.875rem 1rem' }}>
                         <span style={{ display: 'inline-block', background: sc.bg, color: sc.color, fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.06em', padding: '0.28rem 0.65rem', borderRadius: 20, whiteSpace: 'nowrap' }}>
                           {sc.label}

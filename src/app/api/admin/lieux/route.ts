@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { checkAdmin } from '@/lib/check-admin'
+import { getAdminActor } from '@/lib/check-admin'
 import prisma from '@/lib/prisma'
 import { PLACES } from '@/lib/places'
 
 export async function GET(req: NextRequest) {
-  if (!await checkAdmin(req))
+  const actor = await getAdminActor(req)
+  if (!actor)
     return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
   try {
@@ -45,7 +46,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-  if (!await checkAdmin(req))
+  const actor = await getAdminActor(req)
+  if (!actor)
     return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
   try {
@@ -55,11 +57,11 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: 'Prix invalide' }, { status: 400 })
     }
 
-    await prisma.placePrice.upsert({
-      where: { placeKey },
-      update: { price },
-      create: { placeKey, price, isActive: true },
-    })
+    const previous = await prisma.placePrice.findUnique({ where: { placeKey }, select: { price: true } })
+    await prisma.$transaction([
+      prisma.placePrice.upsert({ where: { placeKey }, update: { price }, create: { placeKey, price, isActive: true } }),
+      prisma.auditLog.create({ data: { actor: actor.email, actorRole: actor.role, actorAdminId: actor.id, action: 'PLACE_PRICE_UPDATED', target: placeKey, before: { price: previous?.price ?? null }, after: { price } } }),
+    ])
 
     return NextResponse.json({ success: true })
   } catch (err) {

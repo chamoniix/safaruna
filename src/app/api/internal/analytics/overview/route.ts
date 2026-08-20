@@ -88,10 +88,13 @@ export async function GET(req: NextRequest) {
   const requestedAccountPage = Number(req.nextUrl.searchParams.get('accountPage') ?? '1')
   const accountPage = Number.isInteger(requestedAccountPage) ? Math.max(1, requestedAccountPage) : 1
   const accountPageSize = 10
+  const requestedGuideApplicationPage = Number(req.nextUrl.searchParams.get('guideApplicationPage') ?? '1')
+  const guideApplicationPage = Number.isInteger(requestedGuideApplicationPage) ? Math.max(1, requestedGuideApplicationPage) : 1
+  const guideApplicationPageSize = 10
   const start = new Date(Date.now() - days * 86_400_000)
   const activeSince = new Date(Date.now() - 5 * 60_000)
 
-  const [events, usersTotal, usersNew, usersByRole, recentUsers, reservations, guidesActive, guidesPending, sentry] = await Promise.all([
+  const [events, usersTotal, usersNew, usersByRole, recentUsers, reservations, guidesActive, guidesPending, guideApplicationsNew, guideApplications, guideApplicationsTotal, guideApplicationCounts, adminLoginAttempts, adminSessionsActive, sentry] = await Promise.all([
     prisma.analyticsEvent.findMany({
       where: { createdAt: { gte: start } },
       orderBy: { createdAt: 'desc' },
@@ -118,7 +121,23 @@ export async function GET(req: NextRequest) {
       },
     }),
     prisma.guideProfile.count({ where: { status: 'ACTIVE' } }),
-    prisma.guideProfile.count({ where: { status: 'REVIEW' } }),
+    prisma.guideApplication.count({ where: { status: { in: ['PENDING', 'IN_REVIEW'] } } }),
+    prisma.guideApplication.count({ where: { createdAt: { gte: start } } }),
+    prisma.guideApplication.findMany({
+      orderBy: { createdAt: 'desc' },
+      skip: (guideApplicationPage - 1) * guideApplicationPageSize,
+      take: guideApplicationPageSize,
+      select: {
+        id: true, firstName: true, lastName: true, email: true, whatsapp: true, city: true,
+        gender: true, serviceCities: true, nationality: true, languages: true, experienceYears: true,
+        status: true, reviewedByEmail: true, reviewedAt: true, submittedCountry: true,
+        submittedDevice: true, createdAt: true,
+      },
+    }),
+    prisma.guideApplication.count(),
+    prisma.guideApplication.groupBy({ by: ['status'], _count: { _all: true } }),
+    prisma.adminLoginAttempt.findMany({ orderBy: { createdAt: 'desc' }, take: 100 }),
+    prisma.adminSession.count({ where: { revokedAt: null, expiresAt: { gt: new Date() } } }),
     sentryIssues(days),
   ])
 
@@ -236,7 +255,7 @@ export async function GET(req: NextRequest) {
       conversionRate: visitorSessions.size > 0 ? confirmed.length / visitorSessions.size : 0,
       guidesActive,
       guidesPending,
-      guideApplications: eventCounts.get('guide_application_submitted') ?? 0,
+      guideApplications: guideApplicationsNew,
     },
     funnel,
     breakdowns: {
@@ -262,6 +281,18 @@ export async function GET(req: NextRequest) {
       pageSize: accountPageSize,
       pages: Math.max(1, Math.ceil(usersTotal / accountPageSize)),
       byRole: Object.fromEntries(usersByRole.map(row => [row.role, row._count._all])),
+    },
+    guideApplications: {
+      recent: guideApplications,
+      total: guideApplicationsTotal,
+      page: guideApplicationPage,
+      pageSize: guideApplicationPageSize,
+      pages: Math.max(1, Math.ceil(guideApplicationsTotal / guideApplicationPageSize)),
+      byStatus: Object.fromEntries(guideApplicationCounts.map(row => [row.status, row._count._all])),
+    },
+    adminSecurity: {
+      activeSessions: adminSessionsActive,
+      loginAttempts: adminLoginAttempts,
     },
     performance: [...vitalValues.entries()].map(([metric, values]) => {
       const sorted = [...values].sort((a, b) => a - b)

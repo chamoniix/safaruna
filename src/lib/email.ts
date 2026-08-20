@@ -196,15 +196,18 @@ export function sendGuideAccess(opts: {
   email: string;
   password: string;
   loginUrl: string;
+  profileActive?: boolean;
 }): Promise<void> {
-  const { to, name, email, password, loginUrl } = opts;
+  const { to, name, email, password, loginUrl, profileActive = true } = opts;
   return sendEmail({
     to: { email: to, name },
-    subject: 'Vos accès Guide SAFARUMA — Bienvenue !',
+    subject: profileActive ? 'Vos accès Guide SAFARUMA — Bienvenue !' : 'Vos accès à l’espace Guide SAFARUMA',
     html: baseTemplate(`
       ${heading(`Barak Allahu fik, ${escapeHtml(name)} !`)}
-      ${badge('PROFIL VALIDÉ ✓', '#1D5C3A')}
-      ${p('Votre dossier a été examiné et approuvé par l\'équipe SAFARUMA. Votre profil guide est maintenant actif et visible par les pèlerins.')}
+      ${badge(profileActive ? 'PROFIL ACTIF ✓' : 'CANDIDATURE VALIDÉE ✓', '#1D5C3A')}
+      ${p(profileActive
+        ? 'Votre dossier a été examiné et approuvé par l\'équipe SAFARUMA. Votre profil guide est maintenant actif et visible par les pèlerins.'
+        : 'Votre candidature a été approuvée. Vos accès à l’espace Guide sont prêts ; la publication du profil public reste contrôlée par l’équipe SAFARUMA.')}
       ${divider()}
       <div style="background:#1A1209;border-radius:12px;padding:24px;margin:16px 0;">
         <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:16px;">Vos identifiants de connexion</div>

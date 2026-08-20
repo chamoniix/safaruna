@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     allReservationsMois,
   ] = await Promise.all([
     prisma.guideProfile.count({ where: { status: 'ACTIVE' } }),
-    prisma.guideProfile.count({ where: { status: 'REVIEW' } }),
+    prisma.guideApplication.count({ where: { status: { in: ['PENDING', 'IN_REVIEW'] } } }),
     prisma.user.count({ where: { role: 'PELERIN' } }),
     prisma.reservation.count({
       where: { createdAt: { gte: startOfMonth } }

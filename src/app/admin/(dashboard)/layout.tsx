@@ -1,17 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { adminLogout } from '@/app/admin/login/actions';
 
 const NAV = [
   { href: '/admin/tableau-de-bord', label: 'Tableau de bord' },
+  { href: '/admin/candidatures-guides', label: 'Candidatures guides' },
   { href: '/admin/guides',          label: 'Guides' },
   { href: '/admin/pelerins',        label: 'Pèlerins' },
   { href: '/admin/reservations',    label: 'Réservations' },
   { href: '/admin/messages',        label: 'Messages' },
-  { href: '/admin/litiges',         label: 'Litiges', badge: 2 },
+  { href: '/admin/litiges',         label: 'Litiges' },
   { href: '/admin/contenu',         label: 'Contenu' },
   { href: '/admin/stats',           label: 'Statistiques' },
   { href: '/admin/revenus',         label: 'Revenus' },
@@ -23,8 +24,16 @@ const NAV = [
 
 export default function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [admin, setAdmin] = useState<{ email: string; role: 'SUPERADMIN' | 'ADMIN'; individualAccount: boolean } | null>(null);
   const currentNav = NAV.find(n => pathname ? (pathname === n.href || pathname.startsWith(n.href + '/')) : false);
   const pageTitle = currentNav?.label ?? 'Administration';
+
+  useEffect(() => {
+    fetch('/api/admin/me')
+      .then(res => res.ok ? res.json() : null)
+      .then(data => setAdmin(data?.admin ?? null))
+      .catch(() => setAdmin(null));
+  }, []);
 
   return (
     <div style={{ display: 'flex', height: '100vh', fontFamily: 'var(--font-manrope, sans-serif)', overflow: 'hidden' }}>
@@ -48,7 +57,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
 
         {/* Nav links */}
         <div style={{ flex: 1, padding: '0.75rem' }}>
-          {NAV.map(({ href, label, badge }) => {
+          {NAV.map(({ href, label }) => {
             const active = pathname ? (pathname === href || pathname.startsWith(href + '/')) : false;
             return (
               <Link
@@ -63,11 +72,6 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
                 }}
               >
                 <span>{label}</span>
-                {badge && !active && (
-                  <span style={{ background: '#DC2626', color: 'white', fontSize: '0.6rem', fontWeight: 800, padding: '2px 7px', borderRadius: 10 }}>
-                    {badge}
-                  </span>
-                )}
               </Link>
             );
           })}
@@ -101,11 +105,11 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
           </h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1A1209' }}>Admin</div>
-              <div style={{ fontSize: '0.62rem', color: '#7A6D5A' }}>admin@safaruma.com</div>
+              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1A1209' }}>{admin?.role === 'SUPERADMIN' ? 'Superadmin' : 'Admin'}</div>
+              <div style={{ fontSize: '0.62rem', color: '#7A6D5A' }}>{admin?.email || 'Compte en cours de vérification'}</div>
             </div>
             <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg, #C9A84C, #F0D897)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem', fontWeight: 700, color: '#1A1209' }}>
-              A
+              {(admin?.email?.[0] || 'A').toUpperCase()}
             </div>
           </div>
         </header>

@@ -42,6 +42,24 @@ export type AnalyticsData = {
     recent: Array<{ id: string; name: string | null; email: string | null; role: string; country: string | null; createdAt: string; lastLogin: string | null }>
     total: number; page: number; pageSize: number; pages: number; byRole: Record<string, number>
   }
+  guideApplications: {
+    recent: Array<{
+      id: string; firstName: string; lastName: string; email: string; whatsapp: string | null
+      city: string | null; gender: string; serviceCities: string[]; nationality: string | null
+      languages: string[]; experienceYears: number | null; status: string
+      reviewedByEmail: string | null; reviewedAt: string | null; submittedCountry: string | null
+      submittedDevice: string | null; createdAt: string
+    }>
+    total: number; page: number; pageSize: number; pages: number; byStatus: Record<string, number>
+  }
+  adminSecurity: {
+    activeSessions: number
+    loginAttempts: Array<{
+      id: string; email: string; success: boolean; reason: string; ip: string | null
+      country: string | null; city: string | null; device: string | null; browser: string | null
+      userAgent: string | null; createdAt: string
+    }>
+  }
   performance: Array<{ metric: string; samples: number; average: number; p75: number }>
   journeys: Array<{
     id: string; user: { name: string | null; email: string | null } | null
@@ -495,13 +513,14 @@ export async function getGa4RealtimeData(days: number, view: DashboardView = 'ov
   }
 }
 
-export async function getAnalyticsData(days: number, query: string, accountPage = 1): Promise<AnalyticsData> {
+export async function getAnalyticsData(days: number, query: string, accountPage = 1, guideApplicationPage = 1): Promise<AnalyticsData> {
   const baseUrl = process.env.SAFARUMA_API_BASE?.replace(/\/$/, '')
   const secret = process.env.ANALYTICS_INTERNAL_SECRET
   if (!baseUrl || !secret) throw new Error('Connexion analytics non configurée')
   const params = new URLSearchParams({ days: String(days) })
   if (query) params.set('q', query)
   params.set('accountPage', String(accountPage))
+  params.set('guideApplicationPage', String(guideApplicationPage))
   const response = await fetch(`${baseUrl}/api/internal/analytics/overview?${params}`, {
     headers: { Authorization: `Bearer ${secret}` },
     cache: 'no-store',

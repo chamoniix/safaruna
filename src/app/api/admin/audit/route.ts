@@ -14,18 +14,9 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({ logs })
 }
 
-export async function POST(req: NextRequest) {
-  if (!await checkAdmin(req))
-    return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-
-  const { actor, actorRole, action, target, detail } = await req.json()
-  if (!actor || !actorRole || !action) {
-    return NextResponse.json({ error: 'Champs manquants' }, { status: 400 })
-  }
-
-  const log = await prisma.auditLog.create({
-    data: { actor, actorRole, action, target, detail },
-  })
-
-  return NextResponse.json({ log })
+export async function POST() {
+  return NextResponse.json(
+    { error: 'Le journal d’audit est en écriture serveur uniquement.' },
+    { status: 405, headers: { Allow: 'GET' } },
+  )
 }

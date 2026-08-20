@@ -60,14 +60,15 @@ model User {
   guideProfile GuideProfile?
 
   // As a Pelerin
-  reservations           Reservation[]    @relation("PelerinReservations")
-  conversationsAsPelerin Conversation[]   @relation("PelerinConversations")
+  reservations           Reservation[]      @relation("PelerinReservations")
+  conversationsAsPelerin Conversation[]     @relation("PelerinConversations")
   messages               Message[]
   reviews                Review[]
   savedDuas              SavedDua[]
   courseProgress         CourseProgress[]
   notifications          Notification[]
   analyticsEvents        AnalyticsEvent[]
+  reservationDrafts      ReservationDraft[]
 }
 
 model VerificationToken {
@@ -84,25 +85,92 @@ enum Role {
   ADMIN
 }
 
+enum AdminRole {
+  SUPERADMIN
+  ADMIN
+}
+
+enum AdminAccountStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+model AdminAccount {
+  id           String             @id @default(cuid())
+  email        String             @unique
+  name         String?
+  passwordHash String?
+  role         AdminRole
+  status       AdminAccountStatus @default(ACTIVE)
+  lastLoginAt  DateTime?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  sessions              AdminSession[]
+  createdGuideProfiles  GuideProfile[]     @relation("GuideCreatedByAdmin")
+  approvedGuideProfiles GuideProfile[]     @relation("GuideApprovedByAdmin")
+  reviewedApplications  GuideApplication[] @relation("GuideApplicationReviewedBy")
+  auditLogs             AuditLog[]         @relation("AuditActorAdmin")
+}
+
+model AdminSession {
+  id             String       @id @default(cuid())
+  tokenHash      String       @unique
+  adminAccountId String
+  adminAccount   AdminAccount @relation(fields: [adminAccountId], references: [id], onDelete: Cascade)
+  expiresAt      DateTime
+  lastSeenAt     DateTime     @default(now())
+  revokedAt      DateTime?
+  ip             String?
+  country        String?
+  city           String?
+  device         String?
+  browser        String?
+  userAgent      String?
+  createdAt      DateTime     @default(now())
+
+  @@index([adminAccountId, expiresAt])
+  @@index([expiresAt])
+}
+
+model AdminLoginAttempt {
+  id        String   @id @default(cuid())
+  email     String
+  success   Boolean
+  reason    String
+  ip        String?
+  country   String?
+  city      String?
+  device    String?
+  browser   String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([email, createdAt])
+  @@index([createdAt])
+}
+
 // Safaruna Core Models
 
 model GuideProfile {
-  id                    String        @id @default(cuid())
-  userId                String        @unique
-  user                  User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  slug                  String?       @unique
+  id                    String           @id @default(cuid())
+  userId                String           @unique
+  user                  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guideAccountId        String?          @unique
+  guideAccount          GuideAccount?    @relation(fields: [guideAccountId], references: [id], onDelete: SetNull)
+  slug                  String?          @unique
   bio                   String?
   city                  String?
   gender                String?
-  servesMakkah          Boolean       @default(false)
-  servesMadinah         Boolean       @default(false)
-  acceptingBookings     Boolean       @default(true)
-  makkahNetUpTo6Cents   Int           @default(10000)
-  makkahNetUpTo15Cents  Int           @default(13000)
-  makkahNetUpTo32Cents  Int           @default(16000)
-  madinahNetUpTo6Cents  Int           @default(10000)
-  madinahNetUpTo15Cents Int           @default(13000)
-  madinahNetUpTo32Cents Int           @default(16000)
+  servesMakkah          Boolean          @default(false)
+  servesMadinah         Boolean          @default(false)
+  acceptingBookings     Boolean          @default(true)
+  makkahNetUpTo6Cents   Int              @default(10000)
+  makkahNetUpTo15Cents  Int              @default(13000)
+  makkahNetUpTo32Cents  Int              @default(16000)
+  madinahNetUpTo6Cents  Int              @default(10000)
+  madinahNetUpTo15Cents Int              @default(13000)
+  madinahNetUpTo32Cents Int              @default(16000)
   nationality           String?
   experienceYears       Int?
   university            String?
@@ -110,14 +178,24 @@ model GuideProfile {
   idDocUrl              String?
   videoUrl              String?
   ibanEncrypted         String?
-  status                ProfileStatus @default(DRAFT)
+  status                ProfileStatus    @default(DRAFT)
   responseTimeAvg       String?
-  completionRate        Int?          @default(0)
-  commissionRate        Float         @default(0.15)
+  completionRate        Int?             @default(0)
+  commissionRate        Float            @default(0.15)
   interviewScore        Int?
   interviewNotes        String?
   interviewDate         DateTime?
   interviewedBy         String?
+  createdByType         GuideCreatorType @default(LEGACY_UNKNOWN)
+  createdByAdminId      String?
+  createdByAdmin        AdminAccount?    @relation("GuideCreatedByAdmin", fields: [createdByAdminId], references: [id], onDelete: SetNull)
+  createdByEmail        String?
+  approvedByAdminId     String?
+  approvedByAdmin       AdminAccount?    @relation("GuideApprovedByAdmin", fields: [approvedByAdminId], references: [id], onDelete: SetNull)
+  approvedByEmail       String?
+  approvedAt            DateTime?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @default(now()) @updatedAt
 
   // Relations
   packages             Package[]
@@ -132,11 +210,89 @@ model GuideProfile {
   earnings             GuideEarning[]
 }
 
+enum GuideAccountStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+model GuideAccount {
+  id            String             @id @default(cuid())
+  email         String             @unique
+  passwordHash  String?
+  emailVerified DateTime?
+  displayName   String?
+  firstName     String?
+  lastName      String?
+  phoneWhatsapp String?
+  image         String?
+  legacyUserId  String?            @unique
+  status        GuideAccountStatus @default(ACTIVE)
+  lastLoginAt   DateTime?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  guideProfile  GuideProfile?
+}
+
+enum GuideCreatorType {
+  SUPERADMIN
+  ADMIN
+  SELF_APPLICATION
+  LEGACY_UNKNOWN
+  SYSTEM
+}
+
 enum ProfileStatus {
   DRAFT
   REVIEW
   ACTIVE
   SUSPENDED
+}
+
+enum GuideApplicationStatus {
+  PENDING
+  IN_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum GuideApplicationSource {
+  PUBLIC_FORM
+  ADMIN
+  IMPORT
+}
+
+model GuideApplication {
+  id                    String                 @id @default(cuid())
+  firstName             String
+  lastName              String
+  email                 String
+  whatsapp              String?
+  city                  String?
+  gender                String
+  serviceCities         String[]
+  nationality           String?
+  bio                   String?
+  experienceYears       Int?
+  languages             String[]
+  ibanEncrypted         String?
+  acceptedCharteAt      DateTime
+  submittedIp           String?
+  submittedCountry      String?
+  submittedDevice       String?
+  submittedUserAgent    String?
+  source                GuideApplicationSource @default(PUBLIC_FORM)
+  status                GuideApplicationStatus @default(PENDING)
+  reviewNotes           String?
+  reviewedByAdminId     String?
+  reviewedByAdmin       AdminAccount?          @relation("GuideApplicationReviewedBy", fields: [reviewedByAdminId], references: [id], onDelete: SetNull)
+  reviewedByEmail       String?
+  reviewedAt            DateTime?
+  createdGuideProfileId String?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+
+  @@index([status, createdAt])
+  @@index([email, createdAt])
 }
 
 model GuideLanguage {
@@ -461,7 +617,11 @@ model ReservationDraft {
   expiresAt       DateTime
   createdAt       DateTime          @default(now())
   stripeSessionId String?           @unique
+  pelerinId       String?
+  pelerin         User?             @relation(fields: [pelerinId], references: [id], onDelete: Cascade)
   holds           ReservationHold[]
+
+  @@index([pelerinId, createdAt])
 }
 
 model ReservationHold {
@@ -489,14 +649,23 @@ model EmailVerificationToken {
 }
 
 model AuditLog {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  actor     String // email ou "system" ou "stripe"
-  actorRole String // "ADMIN" | "GUIDE" | "CLIENT" | "SYSTEM"
-  action    String // "RESERVATION_CREATED" | "PAYMENT_CONFIRMED" etc.
-  target    String? // refNumber, placeKey, userId...
-  detail    String? // JSON ou texte libre
-  ip        String?
+  id           String        @id @default(cuid())
+  createdAt    DateTime      @default(now())
+  actor        String // email ou "system" ou "stripe"
+  actorRole    String // "ADMIN" | "GUIDE" | "CLIENT" | "SYSTEM"
+  action       String // "RESERVATION_CREATED" | "PAYMENT_CONFIRMED" etc.
+  target       String? // refNumber, placeKey, userId...
+  detail       String? // JSON ou texte libre
+  ip           String?
+  actorAdminId String?
+  actorAdmin   AdminAccount? @relation("AuditActorAdmin", fields: [actorAdminId], references: [id], onDelete: SetNull)
+  requestId    String?
+  userAgent    String?
+  before       Json?
+  after        Json?
+
+  @@index([actorAdminId, createdAt])
+  @@index([action, createdAt])
 }
 
 // ---------------------------------------------------------

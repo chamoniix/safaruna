@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { checkAdmin } from '@/lib/check-admin';
+import { checkAdmin, getAdminActor } from '@/lib/check-admin';
 import prisma from '@/lib/prisma';
 import { sendReservationConfirmation, sendEmail } from '@/lib/email';
 
@@ -40,7 +40,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-  if (!await checkAdmin(req))
+  const actor = await getAdminActor(req);
+  if (!actor)
     return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
 
   const { reservationId, status, motif } = await req.json();
@@ -49,9 +50,13 @@ export async function PATCH(req: NextRequest) {
   if (!validStatuses.includes(status))
     return NextResponse.json({ error: 'Statut invalide' }, { status: 400 });
 
-  const existing = await prisma.reservation.findUnique({ where: { id: reservationId }, select: { notes: true, status: true } });
+  const existing = await prisma.reservation.findUnique({ where: { id: reservationId }, select: { notes: true, status: true, stripePaymentId: true, refNumber: true } });
+  if (!existing) return NextResponse.json({ error: 'Réservation introuvable' }, { status: 404 });
+  if (status === 'CONFIRMED' && !existing.stripePaymentId) {
+    return NextResponse.json({ error: 'Une réservation sans paiement vérifié ne peut pas être confirmée.' }, { status: 409 });
+  }
   const existingNotes = existing?.notes || '';
-  const noteEntry = `[Admin ${new Date().toLocaleDateString('fr-FR')}] ${motif || 'Modification admin'}`;
+  const noteEntry = `[${actor.email} ${new Date().toLocaleDateString('fr-FR')}] ${motif || 'Modification admin'}`;
   const newNotes = existingNotes ? `${noteEntry}\n${existingNotes}` : noteEntry;
 
   const reservation = await prisma.reservation.update({
@@ -74,6 +79,18 @@ export async function PATCH(req: NextRequest) {
   if (status === 'CANCELLED' && existing?.status !== 'CANCELLED') {
     await prisma.availability.deleteMany({ where: { reservationId } });
   }
+
+  await prisma.auditLog.create({
+    data: {
+      actor: actor.email,
+      actorRole: actor.role,
+      actorAdminId: actor.id,
+      action: 'RESERVATION_STATUS_UPDATED',
+      target: existing.refNumber,
+      before: { status: existing.status },
+      after: { status, motif: motif || null },
+    },
+  });
 
   if (status === 'CONFIRMED' && existing?.status !== 'CONFIRMED') {
     const p = reservation.pelerin;

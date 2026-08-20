@@ -21,10 +21,13 @@ function makeRatelimit(
 
 // 5 requests / 15 minutes for auth endpoints
 export const authRatelimit = makeRatelimit(5, '15 m')
+export const adminAuthRatelimit = makeRatelimit(5, '15 m', 'safaruma:rl:admin-auth')
 // 30 requests / minute for conversation/message endpoints
 export const apiRatelimit = makeRatelimit(30, '1 m')
 // 5 contact form submissions / 15 minutes per IP
 export const contactRatelimit = makeRatelimit(5, '15 m', 'safaruma:rl:contact')
+// 3 candidatures guide / heure par IP
+export const guideApplicationRatelimit = makeRatelimit(3, '1 h', 'safaruma:rl:guide-application')
 
 /**
  * Returns a 429 response if rate-limited, null otherwise.

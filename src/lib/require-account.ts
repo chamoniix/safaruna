@@ -22,6 +22,7 @@ export type GuideActor = {
   role: 'GUIDE'
   guideProfileId: string
   guideStatus: 'DRAFT' | 'REVIEW' | 'ACTIVE'
+  legacyUserId: string
 }
 
 type Allowed<T> = {
@@ -67,29 +68,35 @@ export async function requireGuide(): Promise<Allowed<GuideActor> | Denied> {
   const identity = await currentSessionIdentity()
   if (!identity) return denied(401, 'Non autorisé')
 
-  const user = await prisma.user.findFirst({
-    where: identity.id ? { id: identity.id } : { email: identity.email },
+  const account = await prisma.guideAccount.findFirst({
+    where: {
+      OR: [
+        ...(identity.id ? [{ id: identity.id }] : []),
+        ...(identity.email ? [{ email: identity.email }] : []),
+      ],
+    },
     select: {
       id: true,
       email: true,
-      role: true,
+      status: true,
+      legacyUserId: true,
       guideProfile: { select: { id: true, status: true } },
     },
   })
 
-  if (!user) return denied(401, 'Session invalide')
-  if (user.role !== 'GUIDE') return denied(403, 'Accès réservé aux guides')
-  if (!user.email || !user.guideProfile) return denied(403, 'Profil guide introuvable')
-  if (user.guideProfile.status === 'SUSPENDED') return denied(403, 'Compte guide suspendu')
+  if (!account) return denied(401, 'Session guide invalide')
+  if (account.status !== 'ACTIVE' || account.guideProfile?.status === 'SUSPENDED') return denied(403, 'Compte guide suspendu')
+  if (!account.email || !account.guideProfile || !account.legacyUserId) return denied(403, 'Profil guide introuvable')
 
   return {
     ok: true,
     actor: {
-      id: user.id,
-      email: user.email,
+      id: account.id,
+      email: account.email,
       role: 'GUIDE',
-      guideProfileId: user.guideProfile.id,
-      guideStatus: user.guideProfile.status,
+      guideProfileId: account.guideProfile.id,
+      guideStatus: account.guideProfile.status,
+      legacyUserId: account.legacyUserId,
     },
   }
 }

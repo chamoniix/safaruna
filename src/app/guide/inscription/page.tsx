@@ -101,13 +101,7 @@ export default function GuideOnboarding() {
         }),
       });
       if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Erreur'); }
-      const data = await res.json();
-      // Fire welcome email (best-effort)
-      fetch('/api/email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-internal-key': '' },
-        body: JSON.stringify({ type: 'welcome_guide', email: guideEmail, name: data.name || guideEmail.split('@')[0] }),
-      }).catch(() => {});
+      await res.json();
       setIsSubmitted(true);
     } catch (err: any) {
       setSubmitError(err.message);

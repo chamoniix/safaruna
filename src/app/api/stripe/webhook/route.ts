@@ -315,8 +315,16 @@ export async function POST(req: NextRequest) {
 
   const pelerinEmail = session.customer_details?.email || session.customer_email || session.metadata?.pelerinEmail
   if (!pelerinEmail) return NextResponse.json({ error: 'Email pèlerin manquant' }, { status: 400 })
-  const pelerin = await prisma.user.findUnique({ where: { email: pelerinEmail } })
+  if (draft.pelerinId && session.metadata?.pelerinId !== draft.pelerinId) {
+    return NextResponse.json({ error: 'Identité pèlerin incohérente' }, { status: 400 })
+  }
+  const pelerin = draft.pelerinId
+    ? await prisma.user.findUnique({ where: { id: draft.pelerinId } })
+    : await prisma.user.findUnique({ where: { email: pelerinEmail } })
   if (!pelerin) return NextResponse.json({ error: 'Pèlerin non trouvé' }, { status: 404 })
+  if (pelerin.role !== 'PELERIN' || pelerin.email?.toLowerCase() !== pelerinEmail.toLowerCase()) {
+    return NextResponse.json({ error: 'Compte pèlerin incohérent' }, { status: 400 })
+  }
 
   const guideIds = [...new Set(data.missions.map(mission => mission.guideProfileId))]
   const guides = await prisma.guideProfile.findMany({

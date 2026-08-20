@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
   if (!access.ok) return access.response
   const email = access.actor.email
   const user = await prisma.user.findUnique({
-    where: { id: access.actor.id },
+    where: { id: access.actor.legacyUserId },
     select: { name: true, firstName: true, lastName: true }
   })
   const guideName = user?.name

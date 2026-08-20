@@ -49,7 +49,7 @@ export async function GET(
       id: m.id,
       content: m.content,
       senderId: m.senderId,
-      isFromMe: m.senderId === access.actor.id,
+      isFromMe: m.senderId === access.actor.legacyUserId,
       createdAt: fmt(new Date(m.createdAt)),
       readAt: m.readAt,
     })),
@@ -80,7 +80,7 @@ export async function POST(
 
   const [message] = await Promise.all([
     prisma.message.create({
-      data: { conversationId: id, senderId: access.actor.id, content: content.trim() },
+      data: { conversationId: id, senderId: access.actor.legacyUserId, content: content.trim() },
     }),
     prisma.conversation.update({
       where: { id },

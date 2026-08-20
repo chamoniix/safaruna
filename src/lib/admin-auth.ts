@@ -14,9 +14,22 @@ async function getKey(secret: string): Promise<CryptoKey> {
   return crypto.subtle.importKey('raw', enc.encode(secret), ALG, false, ['sign', 'verify']);
 }
 
-export async function createAdminToken(email: string, secret: string): Promise<string> {
+export type AdminTokenPayload = {
+  email: string
+  iat: number
+  exp: number
+  adminId?: string
+  sessionId?: string
+  role?: 'SUPERADMIN' | 'ADMIN'
+}
+
+export async function createAdminToken(
+  email: string,
+  secret: string,
+  identity?: { adminId: string; sessionId: string; role: 'SUPERADMIN' | 'ADMIN' },
+): Promise<string> {
   const header  = b64url(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-  const payload = b64url(JSON.stringify({ email, iat: Date.now(), exp: Date.now() + 8 * 3600 * 1000 }));
+  const payload = b64url(JSON.stringify({ email, ...identity, iat: Date.now(), exp: Date.now() + 8 * 3600 * 1000 }));
   const data    = `${header}.${payload}`;
   const key     = await getKey(secret);
   const sigBuf  = await crypto.subtle.sign(ALG, key, enc.encode(data));
@@ -36,5 +49,19 @@ export async function verifyAdminToken(token: string, secret: string): Promise<b
     return await crypto.subtle.verify(ALG, key, sigBytes, enc.encode(`${header}.${payload}`));
   } catch {
     return false;
+  }
+}
+
+export async function readVerifiedAdminToken(
+  token: string,
+  secret: string,
+): Promise<AdminTokenPayload | null> {
+  if (!await verifyAdminToken(token, secret)) return null;
+  try {
+    const payload = JSON.parse(fromb64url(token.split('.')[1])) as AdminTokenPayload;
+    if (typeof payload.email !== 'string' || typeof payload.iat !== 'number' || typeof payload.exp !== 'number') return null;
+    return payload;
+  } catch {
+    return null;
   }
 }

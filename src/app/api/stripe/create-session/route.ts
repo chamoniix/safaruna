@@ -375,6 +375,7 @@ export async function POST(req: NextRequest) {
       await tx.reservationDraft.create({
         data: {
           refNumber,
+          pelerinId: access.actor.id,
           data: JSON.stringify(normalizedBody),
           expiresAt,
           holds: {

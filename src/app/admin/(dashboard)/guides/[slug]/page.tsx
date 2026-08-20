@@ -31,6 +31,11 @@ type Guide = {
   interviewNotes: string | null;
   interviewDate: string | null;
   interviewedBy: string | null;
+  createdByType: string;
+  createdByEmail: string | null;
+  createdAt: string;
+  approvedByEmail: string | null;
+  approvedAt: string | null;
 };
 
 const RES_STATUS: Record<string, { label: string; color: string; bg: string }> = {
@@ -88,7 +93,6 @@ export default function AdminGuideDetailPage() {
   const [accessResult, setAccessResult]   = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   // Regenerate password — independent state so it never interferes with other sections
-  const [newPassword, setNewPassword]     = useState('');
   const [loadingAccess, setLoadingAccess] = useState(false);
 
 
@@ -197,7 +201,6 @@ export default function AdminGuideDetailPage() {
 
   const handleRegenPassword = async () => {
     setLoadingAccess(true);
-    setNewPassword('');
     try {
       const res = await fetch(`/api/admin/guides/${slug}/activate`, {
         method: 'POST',
@@ -205,8 +208,11 @@ export default function AdminGuideDetailPage() {
         body: JSON.stringify({ action: 'activate', generatePassword: true }),
       });
       const data = await res.json();
-      if (data.password) setNewPassword(data.password);
-    } catch { /* silent — password card won't show */ }
+      if (!res.ok) throw new Error(data.error || 'Erreur');
+      setAccessResult({ message: data.message || 'Nouveaux accès envoyés par email.', type: 'success' });
+    } catch (error) {
+      setAccessResult({ message: error instanceof Error ? error.message : 'Erreur', type: 'error' });
+    }
     setLoadingAccess(false);
   };
 
@@ -366,6 +372,33 @@ export default function AdminGuideDetailPage() {
         </div>
       </div>
 
+      {/* Traçabilité de création et d'approbation */}
+      <div style={{ ...sectionStyle, gap: '0.75rem' }}>
+        <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Traçabilité du profil</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '1rem' }}>
+          <div>
+            <div style={labelStyle}>Créé par</div>
+            <div style={{ fontSize: '0.85rem', color: '#1A1209', fontWeight: 600 }}>
+              {guide.createdByEmail || 'Créateur historique inconnu'}
+            </div>
+            <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 3 }}>
+              {guide.createdByType === 'SELF_APPLICATION' ? 'Candidature guide validée' : guide.createdByType.replace('_', ' ')} · {new Date(guide.createdAt).toLocaleDateString('fr-FR')}
+            </div>
+          </div>
+          <div>
+            <div style={labelStyle}>Approuvé par</div>
+            <div style={{ fontSize: '0.85rem', color: '#1A1209', fontWeight: 600 }}>
+              {guide.approvedByEmail || 'Pas encore approuvé'}
+            </div>
+            {guide.approvedAt && (
+              <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 3 }}>
+                {new Date(guide.approvedAt).toLocaleDateString('fr-FR')}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Section 1b — Gestion des accès */}
       <div style={{ ...sectionStyle, gap: '0.875rem' }}>
         <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Gestion des accès</div>
@@ -429,13 +462,6 @@ export default function AdminGuideDetailPage() {
           {loadingAccess ? '…' : '↻ Régénérer mot de passe'}
         </button>
 
-        {newPassword && (
-          <div style={{ background: '#D1FAE5', border: '1px solid #6EE7B7', borderRadius: 8, padding: '0.875rem 1rem' }}>
-            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1D5C3A', marginBottom: '0.25rem' }}>✅ Email envoyé — Mot de passe temporaire :</div>
-            <div style={{ fontFamily: 'monospace', fontSize: '1rem', fontWeight: 700, color: '#1A1209', letterSpacing: '0.08em' }}>{newPassword}</div>
-            <div style={{ fontSize: '0.65rem', color: '#7A6D5A', marginTop: '0.25rem' }}>Visible une seule fois — non enregistré</div>
-          </div>
-        )}
       </div>
 
       {/* Section — Entretien & Évaluation */}

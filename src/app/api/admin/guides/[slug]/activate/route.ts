@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdminActor } from '@/lib/check-admin';
+import { adminAuditDetail, adminAuditFields, getAdminActor, getAdminAuditContext } from '@/lib/check-admin';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { sendGuideAccess } from '@/lib/email';
@@ -11,6 +11,7 @@ export async function POST(
 ) {
   const actor = await getAdminActor(req);
   if (!actor) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+  const auditContext = getAdminAuditContext(req);
 
   const { slug } = await params;
   const body = await req.json();
@@ -29,7 +30,19 @@ export async function POST(
     await prisma.$transaction([
       prisma.guideProfile.update({ where: { slug }, data: { status: 'SUSPENDED' } }),
       ...(guide.guideAccountId ? [prisma.guideAccount.update({ where: { id: guide.guideAccountId }, data: { status: 'SUSPENDED' } })] : []),
-      prisma.auditLog.create({ data: { actor: actor.email, actorRole: actor.role, actorAdminId: actor.id, action: 'GUIDE_SUSPENDED', target: guide.id } }),
+      prisma.auditLog.create({
+        data: {
+          actor: actor.email,
+          actorRole: actor.role,
+          actorAdminId: actor.id,
+          action: 'GUIDE_SUSPENDED',
+          target: guide.id,
+          detail: adminAuditDetail(auditContext),
+          before: { status: guide.status },
+          after: { status: 'SUSPENDED' },
+          ...adminAuditFields(auditContext),
+        },
+      }),
     ]);
     return NextResponse.json({ success: true, newStatus: 'SUSPENDED', message: 'Profil suspendu.' });
   }
@@ -79,7 +92,19 @@ export async function POST(
         }
       }
 
-      await prisma.auditLog.create({ data: { actor: actor.email, actorRole: actor.role, actorAdminId: actor.id, action: 'GUIDE_ACTIVATED_WITH_NEW_ACCESS', target: guide.id } });
+      await prisma.auditLog.create({
+        data: {
+          actor: actor.email,
+          actorRole: actor.role,
+          actorAdminId: actor.id,
+          action: 'GUIDE_ACTIVATED_WITH_NEW_ACCESS',
+          target: guide.id,
+          detail: adminAuditDetail(auditContext),
+          before: { status: guide.status },
+          after: { status: 'ACTIVE', accessRegenerated: true },
+          ...adminAuditFields(auditContext),
+        },
+      });
 
       return NextResponse.json({
         success: true,
@@ -88,7 +113,19 @@ export async function POST(
       });
     }
 
-    await prisma.auditLog.create({ data: { actor: actor.email, actorRole: actor.role, actorAdminId: actor.id, action: 'GUIDE_ACTIVATED', target: guide.id } });
+    await prisma.auditLog.create({
+      data: {
+        actor: actor.email,
+        actorRole: actor.role,
+        actorAdminId: actor.id,
+        action: 'GUIDE_ACTIVATED',
+        target: guide.id,
+        detail: adminAuditDetail(auditContext),
+        before: { status: guide.status },
+        after: { status: 'ACTIVE' },
+        ...adminAuditFields(auditContext),
+      },
+    });
     return NextResponse.json({ success: true, newStatus: 'ACTIVE', message: 'Profil activé.' });
   }
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { checkAdmin, getAdminActor } from '@/lib/check-admin';
+import { adminAuditDetail, adminAuditFields, checkAdmin, getAdminActor, getAdminAuditContext } from '@/lib/check-admin';
 import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { sendGuideAccess } from '@/lib/email';
@@ -37,6 +37,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const actor = await getAdminActor(req);
   if (!actor) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+  const auditContext = getAdminAuditContext(req);
 
   const { firstName, lastName, email: rawEmail } = await req.json();
   const email = typeof rawEmail === 'string' ? rawEmail.trim().toLowerCase() : '';
@@ -122,7 +123,9 @@ export async function POST(req: NextRequest) {
       actorAdminId: actor.id,
       action: 'GUIDE_CREATED_BY_ADMIN',
       target: user.id,
-      detail: JSON.stringify({ email, slug }),
+      detail: adminAuditDetail(auditContext, { email, slug }),
+      after: { email, slug, status: 'REVIEW', createdByType: actor.role, createdByEmail: actor.email },
+      ...adminAuditFields(auditContext),
     },
   });
 
@@ -132,6 +135,7 @@ export async function POST(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   const actor = await getAdminActor(req);
   if (!actor) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+  const auditContext = getAdminAuditContext(req);
 
   const { guideId, action } = await req.json();
   if (!guideId || !['activate', 'suspend'].includes(action)) {
@@ -139,7 +143,7 @@ export async function PATCH(req: NextRequest) {
   }
   const status = action === 'activate' ? 'ACTIVE' : 'SUSPENDED';
 
-  const profile = await prisma.guideProfile.findUnique({ where: { id: guideId }, select: { guideAccountId: true } });
+  const profile = await prisma.guideProfile.findUnique({ where: { id: guideId }, select: { guideAccountId: true, status: true } });
   if (!profile) return NextResponse.json({ error: 'Guide introuvable' }, { status: 404 });
   await prisma.$transaction([
     prisma.guideProfile.update({ where: { id: guideId }, data: { status } }),
@@ -151,6 +155,10 @@ export async function PATCH(req: NextRequest) {
         actorAdminId: actor.id,
         action: status === 'ACTIVE' ? 'GUIDE_ACTIVATED' : 'GUIDE_SUSPENDED',
         target: guideId,
+        detail: adminAuditDetail(auditContext),
+        before: { status: profile.status },
+        after: { status },
+        ...adminAuditFields(auditContext),
       },
     }),
   ]);

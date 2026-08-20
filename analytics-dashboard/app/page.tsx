@@ -132,6 +132,24 @@ function MobileMenu({ view, days }: { view: DashboardView; days: number }) {
 function Dashboard({ data, ga4, bigQuery, loginHistory, days, query, view }: { data: AnalyticsData; ga4: Ga4RealtimeData; bigQuery: BigQueryUsage | null; loginHistory: AdminLoginEvent[]; days: number; query: string; view: DashboardView }) {
   const maxFunnel = Math.max(1, ...data.funnel.map(item => item.count))
   const heading = viewTitles[view]
+  const unifiedAccessHistory = [
+    ...(data.accessHistory || []),
+    ...loginHistory.map(item => ({
+      id: `analytics:${item.id}`,
+      createdAt: item.at,
+      dashboard: 'SAFARUMA ANALYTICS',
+      role: 'SUPERADMIN ANALYTICS',
+      email: item.username,
+      success: item.success,
+      reason: item.reason,
+      ip: item.ip,
+      country: item.country,
+      city: item.city,
+      device: item.device,
+      browser: item.browser,
+      userAgent: null,
+    })),
+  ].sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime()).slice(0, 100)
 
   const overview = () => <>
     <section className="metrics kpi-grid">
@@ -173,6 +191,7 @@ function Dashboard({ data, ga4, bigQuery, loginHistory, days, query, view }: { d
   const auth = () => <>
     <section className="metrics four"><Metric icon={<UsersRound />} label="Comptes" value={number(data.accounts.total)} note="tous les rôles" /><Metric icon={<UserRound />} label="Nouveaux" value={number(data.overview.accountsNew)} note={`${days} derniers jours`} tone="green" /><Metric icon={<ShieldCheck />} label="Pèlerins" value={number(data.accounts.byRole.PELERIN || 0)} note="comptes clients" tone="teal" /><Metric icon={<UserRound />} label="Guides" value={number(data.accounts.byRole.GUIDE || 0)} note="comptes guides" tone="gold" /></section>
     <section className="panel"><PanelTitle eyebrow="Utilisateurs" title="Dernières inscriptions" icon={<UserRound />} /><div className="account-list">{data.accounts.recent.map(user => <div key={user.id}><span className="avatar">{(user.name || user.email || '?').charAt(0).toUpperCase()}</span><div><b>{user.name || 'Sans nom'}</b><span>{user.email || 'Sans email'}</span></div><em><span>{user.role}</span><small>Créé {date(user.createdAt)}</small><small>Connexion {date(user.lastLogin)}</small></em></div>)}</div><div className="pagination"><Link aria-disabled={data.accounts.page <= 1} href={{ pathname: '/', query: { view: 'auth', days, accountPage: Math.max(1, data.accounts.page - 1) } }}><ArrowLeft size={16} /> Précédent</Link><span>Page {data.accounts.page} sur {data.accounts.pages}</span><Link aria-disabled={data.accounts.page >= data.accounts.pages} href={{ pathname: '/', query: { view: 'auth', days, accountPage: Math.min(data.accounts.pages, data.accounts.page + 1) } }}>Suivant <ArrowRight size={16} /></Link></div></section>
+    <section className="panel"><PanelTitle eyebrow="Accès centralisés" title="Connexions à tous les dashboards" icon={<ShieldCheck />} />{!unifiedAccessHistory.length ? <div className="empty">Le journal apparaîtra à la prochaine connexion.</div> : <div className="table-wrap"><table><thead><tr><th>Date</th><th>Espace</th><th>Email / identifiant</th><th>Rôle</th><th>Résultat</th><th>Adresse IP</th><th>Localisation</th><th>Appareil</th></tr></thead><tbody>{unifiedAccessHistory.map(item => <tr key={item.id}><td>{date(item.createdAt)}</td><td>{item.dashboard}</td><td>{item.email || '—'}</td><td><span className="pill">{item.role}</span></td><td><span className={`pill ${item.success ? 'confirmed' : 'cancelled'}`}>{item.success ? 'Réussie' : item.reason}</span></td><td><code>{item.ip || '—'}</code></td><td>{item.city || '—'} · {item.country || '—'}</td><td>{item.device || '—'} · {item.browser || '—'}</td></tr>)}</tbody></table></div>}</section>
     <section className="panel"><PanelTitle eyebrow="Sécurité superadmin" title="Historique de connexion au dashboard" icon={<ShieldCheck />} />{!loginHistory.length ? <div className="empty">Le journal commencera à la prochaine tentative de connexion.</div> : <div className="table-wrap"><table><thead><tr><th>Date</th><th>Identifiant</th><th>Résultat</th><th>Adresse IP</th><th>Localisation</th><th>Appareil</th></tr></thead><tbody>{loginHistory.map(item => <tr key={item.id}><td>{date(item.at)}</td><td>{item.username}</td><td><span className={`pill ${item.success ? 'confirmed' : 'cancelled'}`}>{item.success ? 'Réussie' : item.reason === 'rate_limited' ? 'Bloquée' : 'Échouée'}</span></td><td><code>{item.ip}</code></td><td>{item.city} · {item.country}</td><td>{item.device} · {item.browser}</td></tr>)}</tbody></table></div>}</section>
     <section className="panel"><PanelTitle eyebrow="Sécurité administration" title="Connexions à l’espace opérationnel" icon={<ShieldCheck />} /><div className="metric-ribbon"><div><span>Sessions actives</span><b>{number(data.adminSecurity.activeSessions)}</b><small>sessions individuelles non révoquées</small></div><div><span>Tentatives journalisées</span><b>{number(data.adminSecurity.loginAttempts.length)}</b><small>100 dernières au maximum</small></div></div>{!data.adminSecurity.loginAttempts.length ? <div className="empty">Le journal commencera à la prochaine connexion admin.</div> : <div className="table-wrap"><table><thead><tr><th>Date</th><th>Email</th><th>Résultat</th><th>Adresse IP</th><th>Localisation</th><th>Appareil</th></tr></thead><tbody>{data.adminSecurity.loginAttempts.map(item => <tr key={item.id}><td>{date(item.createdAt)}</td><td>{item.email}</td><td><span className={`pill ${item.success ? 'confirmed' : 'cancelled'}`}>{item.success ? 'Réussie' : item.reason}</span></td><td><code>{item.ip || '—'}</code></td><td>{item.city || '—'} · {item.country || '—'}</td><td>{item.device || '—'} · {item.browser || '—'}</td></tr>)}</tbody></table></div>}</section>
   </>

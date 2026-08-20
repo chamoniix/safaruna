@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdminActor } from '@/lib/check-admin';
+import { Prisma } from '@prisma/client';
+import { adminAuditDetail, adminAuditFields, getAdminActor, getAdminAuditContext } from '@/lib/check-admin';
 import prisma from '@/lib/prisma';
 import { decrypt } from '@/lib/crypto';
 
@@ -172,31 +173,58 @@ export async function PATCH(
   const actor = await getAdminActor(req);
   if (!actor)
     return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+  const auditContext = getAdminAuditContext(req);
 
   const { slug } = await params;
   const body = await req.json();
-  const audit = (action: string, target: string, detail?: unknown) => prisma.auditLog.create({
+  const audit = (
+    action: string,
+    target: string,
+    options: {
+      detail?: Record<string, unknown>
+      before?: Prisma.InputJsonValue
+      after?: Prisma.InputJsonValue
+    } = {},
+  ) => prisma.auditLog.create({
     data: {
       actor: actor.email,
       actorRole: actor.role,
       actorAdminId: actor.id,
       action,
       target,
-      detail: detail === undefined ? undefined : JSON.stringify(detail),
+      detail: adminAuditDetail(auditContext, options.detail),
+      before: options.before,
+      after: options.after,
+      ...adminAuditFields(auditContext),
     },
   });
 
   try {
     if (body.packageId && body.pricePerPerson !== undefined) {
+      const previousPackage = await prisma.package.findUnique({
+        where: { id: body.packageId },
+        select: { pricePerPerson: true },
+      });
+      if (!previousPackage) return NextResponse.json({ error: 'Forfait introuvable' }, { status: 404 });
+      const nextPrice = Number(body.pricePerPerson);
       await prisma.package.update({
         where: { id: body.packageId },
-        data: { pricePerPerson: Number(body.pricePerPerson) },
+        data: { pricePerPerson: nextPrice },
       });
-      await audit('GUIDE_PACKAGE_PRICE_UPDATED', body.packageId, { pricePerPerson: Number(body.pricePerPerson) });
+      await audit('GUIDE_PACKAGE_PRICE_UPDATED', body.packageId, {
+        before: { pricePerPerson: previousPackage.pricePerPerson },
+        after: { pricePerPerson: nextPrice },
+      });
       return NextResponse.json({ success: true });
     }
 
-    const guide = await prisma.guideProfile.findUnique({ where: { slug } });
+    const guide = await prisma.guideProfile.findUnique({
+      where: { slug },
+      include: {
+        user: { select: { firstName: true, lastName: true, phoneWhatsapp: true, email: true } },
+        guideAccount: { select: { firstName: true, lastName: true, phoneWhatsapp: true, email: true } },
+      },
+    });
     if (!guide)
       return NextResponse.json({ error: 'Guide introuvable' }, { status: 404 });
 
@@ -220,7 +248,17 @@ export async function PATCH(
           },
         })] : []),
       ]);
-      await audit('GUIDE_IDENTITY_UPDATED', guide.id, { fields: ['firstName', 'lastName', 'phoneWhatsapp', 'email'].filter(key => body[key] !== undefined) });
+      const fields = ['firstName', 'lastName', 'phoneWhatsapp', 'email'].filter(key => body[key] !== undefined);
+      await audit('GUIDE_IDENTITY_UPDATED', guide.id, {
+        detail: { fields },
+        before: {
+          ...(body.firstName !== undefined && { firstName: guide.user.firstName }),
+          ...(body.lastName !== undefined && { lastName: guide.user.lastName }),
+          ...(body.phoneWhatsapp !== undefined && { phoneWhatsapp: guide.user.phoneWhatsapp }),
+          ...(body.email !== undefined && { email: guide.user.email }),
+        },
+        after: identityData,
+      });
       return NextResponse.json({ success: true });
     }
 
@@ -240,7 +278,20 @@ export async function PATCH(
           interviewedBy: actor.email,
         },
       });
-      await audit('GUIDE_INTERVIEW_UPDATED', guide.id);
+      await audit('GUIDE_INTERVIEW_UPDATED', guide.id, {
+        before: {
+          interviewScore: guide.interviewScore,
+          interviewNotes: guide.interviewNotes,
+          interviewDate: guide.interviewDate?.toISOString() || null,
+          interviewedBy: guide.interviewedBy,
+        },
+        after: {
+          ...(body.interviewScore !== undefined && { interviewScore: Number(body.interviewScore) }),
+          ...(body.interviewNotes !== undefined && { interviewNotes: body.interviewNotes }),
+          ...(body.interviewDate !== undefined && { interviewDate: new Date(body.interviewDate).toISOString() }),
+          interviewedBy: actor.email,
+        },
+      });
       return NextResponse.json({ success: true });
     }
 
@@ -253,16 +304,23 @@ export async function PATCH(
           level: body.addLanguage.level || 'NATIVE',
         }
       })
-      await audit('GUIDE_LANGUAGE_ADDED', guide.id, body.addLanguage)
+      await audit('GUIDE_LANGUAGE_ADDED', guide.id, { after: body.addLanguage })
       return NextResponse.json({ success: true })
     }
 
     // Supprimer une langue
     if (body.deleteLanguageId) {
+      const deletedLanguage = await prisma.guideLanguage.findUnique({ where: { id: body.deleteLanguageId } })
+      if (!deletedLanguage || deletedLanguage.guideProfileId !== guide.id) {
+        return NextResponse.json({ error: 'Langue introuvable' }, { status: 404 })
+      }
       await prisma.guideLanguage.delete({
         where: { id: body.deleteLanguageId }
       })
-      await audit('GUIDE_LANGUAGE_DELETED', guide.id, { languageId: body.deleteLanguageId })
+      await audit('GUIDE_LANGUAGE_DELETED', guide.id, {
+        before: { languageCode: deletedLanguage.languageCode, level: deletedLanguage.level },
+        after: { deleted: true },
+      })
       return NextResponse.json({ success: true })
     }
 
@@ -281,13 +339,26 @@ export async function PATCH(
           data: { guideProfileId: guide.id, placeKey: body.togglePlace, isActive: true },
         })
       }
-      await audit('GUIDE_PLACE_TOGGLED', guide.id, { placeKey: body.togglePlace })
+      await audit('GUIDE_PLACE_TOGGLED', guide.id, {
+        detail: { placeKey: body.togglePlace },
+        before: { isActive: existing?.isActive ?? null },
+        after: { isActive: existing ? !existing.isActive : true },
+      })
       return NextResponse.json({ success: true })
     }
 
     if (body.status !== undefined && !['DRAFT', 'REVIEW', 'ACTIVE', 'SUSPENDED'].includes(body.status)) {
       return NextResponse.json({ error: 'Statut invalide' }, { status: 400 });
     }
+
+    const profileFields = [
+      'bio', 'city', 'gender', 'servesMakkah', 'servesMadinah', 'acceptingBookings',
+      'makkahNetUpTo6Cents', 'makkahNetUpTo15Cents', 'makkahNetUpTo32Cents',
+      'madinahNetUpTo6Cents', 'madinahNetUpTo15Cents', 'madinahNetUpTo32Cents',
+      'nationality', 'experienceYears', 'status',
+    ] as const;
+    const changedProfileFields = profileFields.filter(key => body[key] !== undefined);
+    const beforeProfile = Object.fromEntries(changedProfileFields.map(key => [key, guide[key]]));
 
     await prisma.$transaction([
       prisma.guideProfile.update({
@@ -319,7 +390,19 @@ export async function PATCH(
         }),
       ] : []),
     ]);
-    await audit('GUIDE_PROFILE_UPDATED', guide.id, { fields: Object.keys(body) });
+    const afterProfile = Object.fromEntries(changedProfileFields.map(key => {
+      if (key === 'servesMakkah' || key === 'servesMadinah' || key === 'acceptingBookings') {
+        return [key, Boolean(body[key])];
+      }
+      if (key.endsWith('Cents')) return [key, Math.max(0, Math.round(Number(body[key])))];
+      if (key === 'experienceYears') return [key, Number(body[key])];
+      return [key, body[key]];
+    }));
+    await audit('GUIDE_PROFILE_UPDATED', guide.id, {
+      detail: { fields: changedProfileFields },
+      before: beforeProfile,
+      after: afterProfile,
+    });
 
     return NextResponse.json({ success: true });
   } catch (err) {

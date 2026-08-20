@@ -1,9 +1,56 @@
 import { AuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
+import { headers } from 'next/headers'
 import prisma from '@/lib/prisma';
 import bcrypt from "bcryptjs"
-import { recordAnalyticsEvent } from '@/lib/analytics'
+import { analyticsDevice, recordAnalyticsEvent } from '@/lib/analytics'
+
+function loginBrowser(userAgent: string) {
+  if (/Edg\//i.test(userAgent)) return 'Edge'
+  if (/Firefox\//i.test(userAgent)) return 'Firefox'
+  if (/CriOS|Chrome\//i.test(userAgent)) return 'Chrome'
+  if (/Safari\//i.test(userAgent)) return 'Safari'
+  return userAgent ? 'Autre' : 'Inconnu'
+}
+
+function decodedLoginCity(value: string | null) {
+  if (!value) return null
+  try { return decodeURIComponent(value) } catch { return value }
+}
+
+async function recordAuthenticatedLogin(input: {
+  userId?: string | null
+  email: string
+  role: 'GUIDE' | 'PELERIN'
+  path: '/guide/connexion' | '/connexion'
+  method: 'email' | 'google'
+  guideAccountId?: string
+}) {
+  try {
+    const values = await headers()
+    const userAgent = values.get('user-agent') || ''
+    await recordAnalyticsEvent({
+      eventName: 'login_success',
+      userId: input.userId,
+      path: input.path,
+      country: values.get('x-vercel-ip-country'),
+      device: analyticsDevice(userAgent),
+      metadata: {
+        email: input.email.toLowerCase(),
+        role: input.role,
+        method: input.method,
+        ip: values.get('x-forwarded-for')?.split(',')[0]?.trim() || values.get('x-real-ip') || 'unknown',
+        city: decodedLoginCity(values.get('x-vercel-ip-city')),
+        browser: loginBrowser(userAgent),
+        userAgent: userAgent.slice(0, 240),
+        ...(input.guideAccountId && { guideAccountId: input.guideAccountId }),
+      },
+    })
+  } catch (error) {
+    console.error('[auth] login analytics failed', error)
+  }
+}
 
 export const authOptions: AuthOptions = {
   session: {
@@ -41,7 +88,14 @@ export const authOptions: AuthOptions = {
             where: { id: user.id },
             data: { lastLoginAt: new Date() },
           })
-          await recordAnalyticsEvent({ eventName: 'login_success', userId: user.legacyUserId, path: '/guide/connexion', metadata: { method: 'email', role: 'GUIDE', guideAccountId: user.id } })
+          await recordAuthenticatedLogin({
+            userId: user.legacyUserId,
+            email: user.email,
+            role: 'GUIDE',
+            path: '/guide/connexion',
+            method: 'email',
+            guideAccountId: user.id,
+          })
           return {
             id: user.id,
             email: user.email,
@@ -77,7 +131,13 @@ export const authOptions: AuthOptions = {
             where: { id: user.id },
             data: { lastLogin: new Date() },
           })
-          await recordAnalyticsEvent({ eventName: 'login_success', userId: user.id, path: '/connexion', metadata: { method: 'email', role: 'PELERIN' } })
+          await recordAuthenticatedLogin({
+            userId: user.id,
+            email: user.email || credentials.email,
+            role: 'PELERIN',
+            path: '/connexion',
+            method: 'email',
+          })
           return {
             id: user.id,
             email: user.email,
@@ -131,7 +191,13 @@ export const authOptions: AuthOptions = {
           if (accountCreated) {
             await recordAnalyticsEvent({ eventName: 'account_created', userId: user.id, path: '/inscription', metadata: { method: 'google', role: 'PELERIN' } })
           }
-          await recordAnalyticsEvent({ eventName: 'login_success', userId: user.id, path: '/connexion', metadata: { method: 'google', role: 'PELERIN' } })
+          await recordAuthenticatedLogin({
+            userId: user.id,
+            email: user.email,
+            role: 'PELERIN',
+            path: '/connexion',
+            method: 'google',
+          })
         } catch (e) {
           console.error('[auth] Google signIn upsert error', e);
           return false;

@@ -2,7 +2,7 @@ import { randomBytes } from 'node:crypto'
 import bcrypt from 'bcryptjs'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { getAdminActor } from '@/lib/check-admin'
+import { adminAuditDetail, adminAuditFields, getAdminActor, getAdminAuditContext } from '@/lib/check-admin'
 import { sendGuideAccess } from '@/lib/email'
 import prisma from '@/lib/prisma'
 
@@ -104,6 +104,7 @@ export async function GET(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   const actor = await getAdminActor(req)
   if (!actor) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+  const auditContext = getAdminAuditContext(req)
 
   const parsed = updateSchema.safeParse(await req.json())
   if (!parsed.success) return NextResponse.json({ error: 'Paramètres invalides' }, { status: 400 })
@@ -133,7 +134,10 @@ export async function PATCH(req: NextRequest) {
           actorAdminId: actor.id,
           action: `GUIDE_APPLICATION_${status}`,
           target: applicationId,
-          detail: JSON.stringify({ email: application.email, notes: reviewNotes?.trim() || null }),
+          detail: adminAuditDetail(auditContext, { email: application.email }),
+          before: { status: application.status, reviewNotes: application.reviewNotes },
+          after: { status, reviewNotes: reviewNotes?.trim() || null },
+          ...adminAuditFields(auditContext),
         },
       })
       return item
@@ -224,7 +228,15 @@ export async function PATCH(req: NextRequest) {
         actorAdminId: actor.id,
         action: 'GUIDE_APPLICATION_APPROVED',
         target: applicationId,
-        detail: JSON.stringify({ email: application.email, userId: user.id, guideProfileId: user.guideProfile?.id, slug }),
+        detail: adminAuditDetail(auditContext, { email: application.email, userId: user.id, guideProfileId: user.guideProfile?.id, slug }),
+        before: { status: application.status, reviewNotes: application.reviewNotes },
+        after: {
+          status: 'APPROVED',
+          reviewNotes: reviewNotes?.trim() || null,
+          guideProfileId: user.guideProfile?.id,
+          approvedByEmail: actor.email,
+        },
+        ...adminAuditFields(auditContext),
       },
     })
     return user

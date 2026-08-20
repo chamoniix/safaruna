@@ -94,7 +94,7 @@ export async function GET(req: NextRequest) {
   const start = new Date(Date.now() - days * 86_400_000)
   const activeSince = new Date(Date.now() - 5 * 60_000)
 
-  const [events, usersTotal, usersNew, usersByRole, recentUsers, reservations, guidesActive, guidesPending, guideApplicationsNew, guideApplications, guideApplicationsTotal, guideApplicationCounts, adminLoginAttempts, adminSessionsActive, sentry] = await Promise.all([
+  const [events, usersTotal, usersNew, usersByRole, recentUsers, reservations, guidesActive, guidesPending, guideApplicationsNew, guideApplications, guideApplicationsTotal, guideApplicationCounts, adminAccounts, adminLoginAttempts, adminSessionsActive, sentry] = await Promise.all([
     prisma.analyticsEvent.findMany({
       where: { createdAt: { gte: start } },
       orderBy: { createdAt: 'desc' },
@@ -136,6 +136,7 @@ export async function GET(req: NextRequest) {
     }),
     prisma.guideApplication.count(),
     prisma.guideApplication.groupBy({ by: ['status'], _count: { _all: true } }),
+    prisma.adminAccount.findMany({ select: { email: true, role: true } }),
     prisma.adminLoginAttempt.findMany({ orderBy: { createdAt: 'desc' }, take: 100 }),
     prisma.adminSession.count({ where: { revokedAt: null, expiresAt: { gt: new Date() } } }),
     sentryIssues(days),
@@ -177,6 +178,54 @@ export async function GET(req: NextRequest) {
       }
     }
   }
+
+  const adminRoleByEmail = new Map(adminAccounts.map(account => [account.email.toLowerCase(), account.role]))
+  const accountLoginHistory = rows
+    .filter(event => event.eventName === 'login_success')
+    .map(event => {
+      const metadata = metadataObject(event.metadata)
+      const role = metadata.role === 'GUIDE' ? 'GUIDE' : metadata.role === 'PELERIN' ? 'PELERIN' : null
+      if (!role) return null
+      return {
+        id: `account:${event.id}`,
+        createdAt: event.createdAt,
+        dashboard: role,
+        role,
+        email: typeof metadata.email === 'string' ? metadata.email : event.user?.email || null,
+        success: true,
+        reason: 'SUCCESS',
+        ip: typeof metadata.ip === 'string' ? metadata.ip : null,
+        country: event.country,
+        city: typeof metadata.city === 'string' ? metadata.city : null,
+        device: event.device,
+        browser: typeof metadata.browser === 'string' ? metadata.browser : null,
+        userAgent: typeof metadata.userAgent === 'string' ? metadata.userAgent : null,
+      }
+    })
+    .filter((item): item is NonNullable<typeof item> => Boolean(item))
+
+  const adminAccessHistory = adminLoginAttempts.map(attempt => {
+    const role = adminRoleByEmail.get(attempt.email.toLowerCase()) || 'ADMIN'
+    return {
+      id: `admin:${attempt.id}`,
+      createdAt: attempt.createdAt,
+      dashboard: role,
+      role,
+      email: attempt.email,
+      success: attempt.success,
+      reason: attempt.reason,
+      ip: attempt.ip,
+      country: attempt.country,
+      city: attempt.city,
+      device: attempt.device,
+      browser: attempt.browser,
+      userAgent: attempt.userAgent,
+    }
+  })
+
+  const accessHistory = [...adminAccessHistory, ...accountLoginHistory]
+    .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())
+    .slice(0, 100)
 
   const confirmed = reservations.filter(reservation => reservation.status === 'CONFIRMED')
   const revenue = confirmed.reduce((sum, reservation) => sum + reservation.totalPrice, 0)
@@ -294,6 +343,7 @@ export async function GET(req: NextRequest) {
       activeSessions: adminSessionsActive,
       loginAttempts: adminLoginAttempts,
     },
+    accessHistory,
     performance: [...vitalValues.entries()].map(([metric, values]) => {
       const sorted = [...values].sort((a, b) => a - b)
       return {

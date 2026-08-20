@@ -60,6 +60,21 @@ export type AnalyticsData = {
       userAgent: string | null; createdAt: string
     }>
   }
+  accessHistory: Array<{
+    id: string
+    createdAt: string
+    dashboard: 'SUPERADMIN' | 'ADMIN' | 'GUIDE' | 'PELERIN'
+    role: 'SUPERADMIN' | 'ADMIN' | 'GUIDE' | 'PELERIN'
+    email: string | null
+    success: boolean
+    reason: string
+    ip: string | null
+    country: string | null
+    city: string | null
+    device: string | null
+    browser: string | null
+    userAgent: string | null
+  }>
   performance: Array<{ metric: string; samples: number; average: number; p75: number }>
   journeys: Array<{
     id: string; user: { name: string | null; email: string | null } | null

@@ -42,6 +42,12 @@ async function logAttempt(email: string, success: boolean, reason: string, conte
   }).catch(() => {})
 }
 
+function timingSafeMatch(value: string, expected: string) {
+  const valueBuffer = Buffer.from(value)
+  const expectedBuffer = Buffer.from(expected)
+  return valueBuffer.length === expectedBuffer.length && timingSafeEqual(valueBuffer, expectedBuffer)
+}
+
 export async function adminLogin(formData: FormData) {
   const email    = (formData.get('email')    as string)?.trim().toLowerCase();
   const password = (formData.get('password') as string)?.trim();
@@ -71,15 +77,36 @@ export async function adminLogin(formData: FormData) {
     const valid = account.status === 'ACTIVE' && Boolean(account.passwordHash)
       && await bcrypt.compare(password, account.passwordHash!)
     if (valid) authenticatedAccount = account
-  } else if (validEmail && validPassword) {
+  } else {
+    const bootstrap = email === (process.env.SUPERADMIN_ACCOUNT_EMAIL || 'superadmin@gmail.com').trim().toLowerCase()
+      ? { password: process.env.SUPERADMIN_ACCOUNT_PASSWORD, role: 'SUPERADMIN' as const, name: 'Superadmin SAFARUMA' }
+      : email === (process.env.ADMIN_ACCOUNT_EMAIL || 'admin@safaruma.com').trim().toLowerCase()
+        ? { password: process.env.ADMIN_ACCOUNT_PASSWORD, role: 'ADMIN' as const, name: 'Admin SAFARUMA' }
+        : null
+
+    if (bootstrap?.password && timingSafeMatch(password, bootstrap.password)) {
+      const passwordHash = await bcrypt.hash(password, 12)
+      authenticatedAccount = await prisma.$transaction(async tx => {
+        const created = await tx.adminAccount.create({
+          data: { email, name: bootstrap.name, passwordHash, role: bootstrap.role, status: 'ACTIVE' },
+        })
+        await tx.auditLog.create({
+          data: {
+            actor: email,
+            actorRole: bootstrap.role,
+            actorAdminId: created.id,
+            action: 'ADMIN_ACCOUNT_BOOTSTRAPPED',
+            target: created.id,
+          },
+        })
+        return created
+      })
+    }
+  }
+
+  if (!authenticatedAccount && !account && validEmail && validPassword) {
     // Compatibilité temporaire avec le compte partagé pendant la migration.
-    const emailBuf = Buffer.from(email)
-    const validEmailBuf = Buffer.from(validEmail.toLowerCase())
-    const passBuf = Buffer.from(password)
-    const validPassBuf = Buffer.from(validPassword)
-    const emailMatch = emailBuf.length === validEmailBuf.length && timingSafeEqual(emailBuf, validEmailBuf)
-    const passMatch = passBuf.length === validPassBuf.length && timingSafeEqual(passBuf, validPassBuf)
-    if (emailMatch && passMatch) {
+    if (timingSafeMatch(email, validEmail.toLowerCase()) && timingSafeMatch(password, validPassword)) {
       const token = await createAdminToken(email, secret)
       const store = await cookies()
       store.set('admin_session', token, {

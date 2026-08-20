@@ -49,13 +49,13 @@ export default async function AdminLoginPage({
               </div>
             )}
 
-            <form action={adminLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form action={adminLogin} autoComplete="off" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: '0.45rem' }}>
                   Adresse email
                 </label>
                 <input
-                  name="email" type="email" required
+                  name="email" type="email" required autoComplete="off"
                   placeholder="Adresse email"
                   style={{ width: '100%', padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.12)', borderRadius: 10, color: 'white', fontSize: '0.875rem', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
                 />
@@ -65,7 +65,7 @@ export default async function AdminLoginPage({
                   Mot de passe
                 </label>
                 <input
-                  name="password" type="password" required
+                  name="password" type="password" required autoComplete="new-password"
                   placeholder="••••••••••••"
                   style={{ width: '100%', padding: '0.75rem 1rem', background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(255,255,255,0.12)', borderRadius: 10, color: 'white', fontSize: '0.875rem', outline: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
                 />

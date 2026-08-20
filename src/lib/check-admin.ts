@@ -1,4 +1,4 @@
-import { readVerifiedAdminToken } from '@/lib/admin-auth'
+import { isIndividualAdminToken, readVerifiedAdminToken } from '@/lib/admin-auth'
 import type { NextRequest } from 'next/server'
 import prisma from '@/lib/prisma'
 import { createHash } from 'node:crypto'
@@ -29,44 +29,25 @@ export async function getAdminActor(req: NextRequest): Promise<AdminActor | null
   }
 
   const payload = await readVerifiedAdminToken(adminToken, secret)
-  if (!payload) return null
+  if (!isIndividualAdminToken(payload)) return null
 
-  if (payload.adminId && payload.sessionId && payload.role) {
-    const session = await prisma.adminSession.findUnique({
-      where: { id: payload.sessionId },
-      include: { adminAccount: { select: { id: true, email: true, role: true, status: true } } },
-    })
-    const tokenHash = createHash('sha256').update(adminToken).digest('hex')
-    if (
-      !session || session.tokenHash !== tokenHash || session.revokedAt || session.expiresAt <= new Date()
-      || session.adminAccount.id !== payload.adminId || session.adminAccount.email !== payload.email
-      || session.adminAccount.role !== payload.role || session.adminAccount.status !== 'ACTIVE'
-    ) return null
-
-    if (Date.now() - session.lastSeenAt.getTime() > 5 * 60 * 1000) {
-      prisma.adminSession.update({ where: { id: session.id }, data: { lastSeenAt: new Date() } }).catch(() => {})
-    }
-    return {
-      id: session.adminAccount.id,
-      email: session.adminAccount.email,
-      role: session.adminAccount.role,
-    }
-  }
-
-  const account = await prisma.adminAccount.findUnique({
-    where: { email: payload.email },
-    select: { id: true },
+  const session = await prisma.adminSession.findUnique({
+    where: { id: payload.sessionId },
+    include: { adminAccount: { select: { id: true, email: true, role: true, status: true } } },
   })
-  if (account) {
-    // Dès qu'un compte individuel existe, un ancien JWT partagé sans session
-    // révocable ne peut plus être utilisé pour cette adresse.
-    return null
-  }
+  const tokenHash = createHash('sha256').update(adminToken).digest('hex')
+  if (
+    !session || session.tokenHash !== tokenHash || session.revokedAt || session.expiresAt <= new Date()
+    || session.adminAccount.id !== payload.adminId || session.adminAccount.email !== payload.email
+    || session.adminAccount.role !== payload.role || session.adminAccount.status !== 'ACTIVE'
+  ) return null
 
-  // Compatibilité temporaire pendant la migration du compte partagé Vercel.
-  // Cette branche sera retirée après création des comptes individuels.
-  if (payload.email === process.env.ADMIN_EMAIL?.toLowerCase()) {
-    return { id: null, email: payload.email, role: 'ADMIN' }
+  if (Date.now() - session.lastSeenAt.getTime() > 5 * 60 * 1000) {
+    prisma.adminSession.update({ where: { id: session.id }, data: { lastSeenAt: new Date() } }).catch(() => {})
   }
-  return null
+  return {
+    id: session.adminAccount.id,
+    email: session.adminAccount.email,
+    role: session.adminAccount.role,
+  }
 }

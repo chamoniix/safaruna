@@ -53,8 +53,6 @@ export async function adminLogin(formData: FormData) {
   const password = (formData.get('password') as string)?.trim();
   const context = await requestContext();
 
-  const validEmail    = process.env.ADMIN_EMAIL;
-  const validPassword = process.env.ADMIN_PASSWORD;
   const secret        = process.env.ADMIN_JWT_SECRET;
 
   if (!email || !password || !secret) {
@@ -101,19 +99,6 @@ export async function adminLogin(formData: FormData) {
         })
         return created
       })
-    }
-  }
-
-  if (!authenticatedAccount && !account && validEmail && validPassword) {
-    // Compatibilité temporaire avec le compte partagé pendant la migration.
-    if (timingSafeMatch(email, validEmail.toLowerCase()) && timingSafeMatch(password, validPassword)) {
-      const token = await createAdminToken(email, secret)
-      const store = await cookies()
-      store.set('admin_session', token, {
-        httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'strict', maxAge: 8 * 3600, path: '/', priority: 'high',
-      })
-      await logAttempt(email, true, 'LEGACY_SUCCESS', context)
-      redirect('/admin/tableau-de-bord')
     }
   }
 

@@ -23,6 +23,23 @@ export type AdminTokenPayload = {
   role?: 'SUPERADMIN' | 'ADMIN'
 }
 
+export type IndividualAdminTokenPayload = AdminTokenPayload & {
+  adminId: string
+  sessionId: string
+  role: 'SUPERADMIN' | 'ADMIN'
+}
+
+export function isIndividualAdminToken(
+  payload: AdminTokenPayload | null,
+): payload is IndividualAdminTokenPayload {
+  return Boolean(
+    payload
+    && typeof payload.adminId === 'string' && payload.adminId.length > 0
+    && typeof payload.sessionId === 'string' && payload.sessionId.length > 0
+    && (payload.role === 'SUPERADMIN' || payload.role === 'ADMIN'),
+  )
+}
+
 export async function createAdminToken(
   email: string,
   secret: string,

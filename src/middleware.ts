@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
-import { verifyAdminToken } from '@/lib/admin-auth';
+import { isIndividualAdminToken, readVerifiedAdminToken } from '@/lib/admin-auth';
+
+async function hasIndividualAdminSession(req: NextRequest) {
+  const session = req.cookies.get('admin_session')?.value;
+  const secret = process.env.ADMIN_JWT_SECRET;
+  if (!secret || !session) return false;
+  return isIndividualAdminToken(await readVerifiedAdminToken(session, secret));
+}
 
 function buildCspResponse(req: NextRequest): NextResponse {
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
@@ -35,9 +42,7 @@ export async function middleware(req: NextRequest) {
   // ── Admin page routes ─────────────────────────────────
   if (pathname.startsWith('/admin')) {
     if (pathname === '/admin/login') return buildCspResponse(req);
-    const session = req.cookies.get('admin_session')?.value;
-    const secret  = process.env.ADMIN_JWT_SECRET;
-    if (!secret || !session || !(await verifyAdminToken(session, secret))) {
+    if (!await hasIndividualAdminSession(req)) {
       return NextResponse.redirect(new URL('/admin/login', req.url));
     }
     return buildCspResponse(req);
@@ -45,9 +50,7 @@ export async function middleware(req: NextRequest) {
 
   // ── Admin API routes (defense-in-depth) ───────────────
   if (pathname.startsWith('/api/admin')) {
-    const session = req.cookies.get('admin_session')?.value;
-    const secret  = process.env.ADMIN_JWT_SECRET;
-    if (!secret || !session || !(await verifyAdminToken(session, secret))) {
+    if (!await hasIndividualAdminSession(req)) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
     }
     return buildCspResponse(req);

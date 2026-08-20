@@ -64,6 +64,7 @@ export async function middleware(req: NextRequest) {
 
   // ── API guide protégées (contrôle rapide, complété dans chaque route)
   const isPublicGuideApi = pathname === '/api/guide/inscription'
+    || pathname === '/api/guide/inscription/email-availability'
     || pathname.startsWith('/api/guide/public/')
     || pathname.startsWith('/api/guide/auth/');
   if (pathname.startsWith('/api/guide/') && !isPublicGuideApi) {

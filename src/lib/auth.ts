@@ -6,6 +6,9 @@ import prisma from '@/lib/prisma';
 import bcrypt from "bcryptjs"
 import { analyticsDevice, recordAnalyticsEvent } from '@/lib/analytics'
 import { checkRateLimitKey, pelerinAuthRatelimit } from '@/lib/ratelimit'
+import { Prisma } from '@prisma/client'
+
+const EMAIL_ALREADY_USED_REDIRECT = '/inscription?error=email_used'
 
 function loginBrowser(userAgent: string) {
   if (/Edg\//i.test(userAgent)) return 'Edge'
@@ -124,23 +127,31 @@ export const authOptions: AuthOptions = {
         try {
           const normalizedEmail = user.email.trim().toLowerCase()
           user.email = normalizedEmail
-          const [existing, guideAccount] = await Promise.all([
+          const [identity, existing, guideAccount, guideApplication] = await Promise.all([
+            prisma.emailIdentity.findUnique({ where: { email: normalizedEmail }, select: { kind: true } }),
             prisma.user.findUnique({ where: { email: normalizedEmail } }),
             prisma.guideAccount.findUnique({ where: { email: normalizedEmail }, select: { id: true } }),
+            prisma.guideApplication.findFirst({
+              where: { email: normalizedEmail, status: { in: ['PENDING', 'IN_REVIEW', 'APPROVED'] } },
+              select: { id: true },
+            }),
           ])
-          if (guideAccount) {
+          if (identity?.kind === 'GUIDE' || identity?.kind === 'GUIDE_APPLICATION' || guideAccount || guideApplication) {
             console.error('[auth] Google signIn refusé pour une adresse Guide')
-            return false
+            return EMAIL_ALREADY_USED_REDIRECT
           }
           if (!existing) {
-            const created = await prisma.user.create({
-              data: {
-                email: normalizedEmail,
-                name: user.name ?? null,
-                image: user.image ?? null,
-                role: "PELERIN",
-                emailVerified: new Date(),
-              },
+            const created = await prisma.$transaction(async tx => {
+              await tx.emailIdentity.create({ data: { email: normalizedEmail, kind: 'PELERIN' } })
+              return tx.user.create({
+                data: {
+                  email: normalizedEmail,
+                  name: user.name ?? null,
+                  image: user.image ?? null,
+                  role: "PELERIN",
+                  emailVerified: new Date(),
+                },
+              })
             });
             user.id = created.id;
             ;(user as any).role = 'PELERIN'
@@ -150,7 +161,7 @@ export const authOptions: AuthOptions = {
             // via Google avec la même adresse email.
             if (existing.role !== 'PELERIN') {
               console.error('[auth] Google signIn refusé pour un compte non-pèlerin')
-              return false
+              return EMAIL_ALREADY_USED_REDIRECT
             }
             user.id = existing.id;
             ;(user as any).role = existing.role
@@ -173,6 +184,9 @@ export const authOptions: AuthOptions = {
             method: 'google',
           })
         } catch (e) {
+          if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+            return EMAIL_ALREADY_USED_REDIRECT
+          }
           console.error('[auth] Google signIn upsert error', e);
           return false;
         }

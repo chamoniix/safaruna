@@ -85,6 +85,21 @@ enum Role {
   ADMIN
 }
 
+enum EmailIdentityKind {
+  PELERIN
+  GUIDE_APPLICATION
+  GUIDE
+}
+
+// Registre minimal partagé qui garantit qu'une adresse normalisée ne peut
+// appartenir qu'à un seul parcours (pèlerin ou guide).
+model EmailIdentity {
+  email     String            @id
+  kind      EmailIdentityKind
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+}
+
 enum AdminRole {
   SUPERADMIN
   ADMIN
@@ -172,6 +187,7 @@ model GuideProfile {
   madinahNetUpTo15Cents Int              @default(13000)
   madinahNetUpTo32Cents Int              @default(16000)
   nationality           String?
+  dateOfBirth           DateTime?
   experienceYears       Int?
   university            String?
   diplomaUrl            String?
@@ -313,9 +329,12 @@ model GuideApplication {
   gender                String
   serviceCities         String[]
   nationality           String?
+  dateOfBirth           DateTime
   bio                   String?
   experienceYears       Int?
+  education             String
   languages             String[]
+  masteredPlaces        String[]
   ibanEncrypted         String?
   acceptedCharteAt      DateTime
   submittedIp           String?

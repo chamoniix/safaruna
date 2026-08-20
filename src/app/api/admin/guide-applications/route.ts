@@ -75,9 +75,12 @@ export async function GET(req: NextRequest) {
         gender: true,
         serviceCities: true,
         nationality: true,
+        dateOfBirth: true,
         bio: true,
         experienceYears: true,
+        education: true,
         languages: true,
+        masteredPlaces: true,
         acceptedCharteAt: true,
         status: true,
         reviewNotes: true,
@@ -115,7 +118,30 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Cette candidature est déjà validée' }, { status: 409 })
   }
 
-  if (status !== 'APPROVED') {
+  if (status === 'REJECTED') {
+    await prisma.$transaction(async tx => {
+      await tx.auditLog.create({
+        data: {
+          actor: actor.email,
+          actorRole: actor.role,
+          actorAdminId: actor.id,
+          action: 'GUIDE_APPLICATION_REJECTED',
+          target: applicationId,
+          detail: adminAuditDetail(auditContext, { email: application.email }),
+          before: { status: application.status, reviewNotes: application.reviewNotes },
+          after: { status: 'REJECTED', reviewNotes: reviewNotes?.trim() || null, deleted: true },
+          ...adminAuditFields(auditContext),
+        },
+      })
+      await tx.emailIdentity.deleteMany({
+        where: { email: application.email, kind: 'GUIDE_APPLICATION' },
+      })
+      await tx.guideApplication.delete({ where: { id: applicationId } })
+    })
+    return NextResponse.json({ success: true, deleted: true, applicationId })
+  }
+
+  if (status === 'IN_REVIEW') {
     const updated = await prisma.$transaction(async tx => {
       const item = await tx.guideApplication.update({
         where: { id: applicationId },
@@ -145,11 +171,15 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ application: updated })
   }
 
-  const [existing, existingGuideAccount] = await Promise.all([
+  const [identity, existing, existingGuideAccount] = await Promise.all([
+    prisma.emailIdentity.findUnique({ where: { email: application.email }, select: { kind: true } }),
     prisma.user.findUnique({ where: { email: application.email }, select: { id: true } }),
     prisma.guideAccount.findUnique({ where: { email: application.email }, select: { id: true } }),
   ])
   if (existing || existingGuideAccount) return NextResponse.json({ error: 'Un compte existe déjà avec cet email' }, { status: 409 })
+  if (identity?.kind !== 'GUIDE_APPLICATION') {
+    return NextResponse.json({ error: 'La réservation de cette adresse e-mail est invalide' }, { status: 409 })
+  }
 
   const slug = await availableSlug(application.firstName, application.lastName)
   const password = temporaryPassword()
@@ -177,6 +207,7 @@ export async function PATCH(req: NextRequest) {
             servesMakkah: application.serviceCities.includes('MAKKAH'),
             servesMadinah: application.serviceCities.includes('MADINAH'),
             nationality: application.nationality,
+            dateOfBirth: application.dateOfBirth,
             experienceYears: application.experienceYears,
             ibanEncrypted: application.ibanEncrypted,
             status: 'DRAFT',
@@ -209,6 +240,10 @@ export async function PATCH(req: NextRequest) {
     await tx.guideProfile.update({
       where: { id: user.guideProfile!.id },
       data: { guideAccountId: guideAccount.id },
+    })
+    await tx.emailIdentity.update({
+      where: { email: application.email },
+      data: { kind: 'GUIDE' },
     })
     await tx.guideApplication.update({
       where: { id: applicationId },

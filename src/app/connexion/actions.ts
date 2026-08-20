@@ -5,9 +5,12 @@ import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { sendEmail } from '@/lib/email';
 import { recordAnalyticsEvent } from '@/lib/analytics';
+import { Prisma } from '@prisma/client';
 
 type SignupState = { error: string };
 type ResendState = { success: boolean; message: string };
+
+const EMAIL_ALREADY_USED = 'Adresse e-mail déjà utilisée. Veuillez en utiliser une autre.';
 
 function safePelerinRedirect(value: string | null | undefined): string {
   if (!value || value.length > 2048 || !value.startsWith('/') || value.startsWith('//') || value.includes('\\')) {
@@ -69,12 +72,17 @@ export async function signup(_previousState: SignupState, formData: FormData): P
   }
 
   // Vérifier si l'email existe déjà
-  const [existing, existingGuideAccount] = await Promise.all([
+  const [identity, existing, existingGuideAccount, existingGuideApplication] = await Promise.all([
+    prisma.emailIdentity.findUnique({ where: { email }, select: { kind: true } }),
     prisma.user.findUnique({ where: { email }, select: { id: true } }),
     prisma.guideAccount.findUnique({ where: { email }, select: { id: true } }),
+    prisma.guideApplication.findFirst({
+      where: { email, status: { in: ['PENDING', 'IN_REVIEW', 'APPROVED'] } },
+      select: { id: true },
+    }),
   ]);
-  if (existing || existingGuideAccount) {
-    return { error: 'Un compte existe déjà avec cette adresse email.' };
+  if (identity || existing || existingGuideAccount || existingGuideApplication) {
+    return { error: EMAIL_ALREADY_USED };
   }
 
   // Hasher le mot de passe
@@ -83,27 +91,37 @@ export async function signup(_previousState: SignupState, formData: FormData): P
 
   const token = crypto.randomUUID();
 
-  // Créer ensemble l'utilisateur et son token de vérification.
-  const [createdUser] = await prisma.$transaction([
-    prisma.user.create({
-      data: {
-        email,
-        name: fullName,
-        firstName,
-        lastName,
-        passwordHash,
-        phoneWhatsapp: whatsapp,
-        role: 'PELERIN',
-      },
-    }),
-    prisma.emailVerificationToken.create({
-      data: {
-        token,
-        email,
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24h
-      },
-    }),
-  ]);
+  // Réserver l'adresse, créer l'utilisateur et son token dans une seule transaction.
+  let createdUser;
+  try {
+    createdUser = await prisma.$transaction(async tx => {
+      await tx.emailIdentity.create({ data: { email, kind: 'PELERIN' } });
+      const user = await tx.user.create({
+        data: {
+          email,
+          name: fullName,
+          firstName,
+          lastName,
+          passwordHash,
+          phoneWhatsapp: whatsapp,
+          role: 'PELERIN',
+        },
+      });
+      await tx.emailVerificationToken.create({
+        data: {
+          token,
+          email,
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24h
+        },
+      });
+      return user;
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      return { error: EMAIL_ALREADY_USED };
+    }
+    throw error;
+  }
 
   await recordAnalyticsEvent({
     eventName: 'account_created',

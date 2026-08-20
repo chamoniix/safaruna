@@ -4,6 +4,9 @@ import prisma from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 import { sendGuideAccess } from '@/lib/email';
 import { randomBytes } from 'node:crypto';
+import { Prisma } from '@prisma/client';
+
+const EMAIL_ALREADY_USED = 'Adresse e-mail déjà utilisée. Veuillez en utiliser une autre.';
 
 export async function GET(req: NextRequest) {
   if (!await checkAdmin(req)) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
@@ -43,11 +46,18 @@ export async function POST(req: NextRequest) {
   const email = typeof rawEmail === 'string' ? rawEmail.trim().toLowerCase() : '';
   if (!firstName || !email) return NextResponse.json({ error: 'Prénom et email requis' }, { status: 400 });
 
-  const [existing, existingGuideAccount] = await Promise.all([
+  const [identity, existing, existingGuideAccount, existingGuideApplication] = await Promise.all([
+    prisma.emailIdentity.findUnique({ where: { email }, select: { kind: true } }),
     prisma.user.findUnique({ where: { email }, select: { id: true } }),
     prisma.guideAccount.findUnique({ where: { email }, select: { id: true } }),
+    prisma.guideApplication.findFirst({
+      where: { email, status: { in: ['PENDING', 'IN_REVIEW', 'APPROVED'] } },
+      select: { id: true },
+    }),
   ]);
-  if (existing || existingGuideAccount) return NextResponse.json({ error: 'Un compte existe déjà avec cet email.' }, { status: 409 });
+  if (identity || existing || existingGuideAccount || existingGuideApplication) {
+    return NextResponse.json({ error: EMAIL_ALREADY_USED }, { status: 409 });
+  }
 
   // Generate slug
   const base = `${firstName} ${lastName || ''}`
@@ -66,42 +76,51 @@ export async function POST(req: NextRequest) {
   const password = `${randomBytes(12).toString('base64url')}Aa1!`;
   const passwordHash = await bcrypt.hash(password, 12);
 
-  const user = await prisma.$transaction(async tx => {
-    const created = await tx.user.create({
-      data: {
-        email,
-        name: `${firstName} ${lastName || ''}`.trim(),
-        firstName,
-        lastName: lastName || '',
-        passwordHash,
-        role: 'GUIDE',
-        emailVerified: new Date(),
-        guideProfile: {
-          create: {
-            slug,
-            status: 'REVIEW',
-            createdByType: actor.role,
-            createdByAdminId: actor.id,
-            createdByEmail: actor.email,
+  let user;
+  try {
+    user = await prisma.$transaction(async tx => {
+      await tx.emailIdentity.create({ data: { email, kind: 'GUIDE' } });
+      const created = await tx.user.create({
+        data: {
+          email,
+          name: `${firstName} ${lastName || ''}`.trim(),
+          firstName,
+          lastName: lastName || '',
+          passwordHash,
+          role: 'GUIDE',
+          emailVerified: new Date(),
+          guideProfile: {
+            create: {
+              slug,
+              status: 'REVIEW',
+              createdByType: actor.role,
+              createdByAdminId: actor.id,
+              createdByEmail: actor.email,
+            },
           },
         },
-      },
-      include: { guideProfile: { select: { id: true } } },
+        include: { guideProfile: { select: { id: true } } },
+      });
+      const guideAccount = await tx.guideAccount.create({
+        data: {
+          email: email.toLowerCase(),
+          passwordHash,
+          emailVerified: new Date(),
+          displayName: `${firstName} ${lastName || ''}`.trim(),
+          firstName,
+          lastName: lastName || '',
+          legacyUserId: created.id,
+        },
+      });
+      await tx.guideProfile.update({ where: { id: created.guideProfile!.id }, data: { guideAccountId: guideAccount.id } });
+      return created;
     });
-    const guideAccount = await tx.guideAccount.create({
-      data: {
-        email: email.toLowerCase(),
-        passwordHash,
-        emailVerified: new Date(),
-        displayName: `${firstName} ${lastName || ''}`.trim(),
-        firstName,
-        lastName: lastName || '',
-        legacyUserId: created.id,
-      },
-    });
-    await tx.guideProfile.update({ where: { id: created.guideProfile!.id }, data: { guideAccountId: guideAccount.id } });
-    return created;
-  });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      return NextResponse.json({ error: EMAIL_ALREADY_USED }, { status: 409 });
+    }
+    throw error;
+  }
 
   try {
     await sendGuideAccess({

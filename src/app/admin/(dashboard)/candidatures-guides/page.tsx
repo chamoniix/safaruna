@@ -13,9 +13,12 @@ type Application = {
   gender: string
   serviceCities: string[]
   nationality: string | null
+  dateOfBirth: string
   bio: string | null
   experienceYears: number | null
+  education: string
   languages: string[]
+  masteredPlaces: string[]
   acceptedCharteAt: string
   status: Status
   reviewNotes: string | null
@@ -48,6 +51,10 @@ const tones: Record<Status, { color: string; bg: string }> = {
 
 function formatDate(value: string | null) {
   return value ? new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : '—'
+}
+
+function formatBirthDate(value: string) {
+  return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeZone: 'UTC' }).format(new Date(value))
 }
 
 export default function GuideApplicationsPage() {
@@ -83,7 +90,7 @@ export default function GuideApplicationsPage() {
 
   async function update(nextStatus: Exclude<Status, 'PENDING'>) {
     if (!selected) return
-    const action = nextStatus === 'APPROVED' ? 'valider et créer le compte guide' : nextStatus === 'REJECTED' ? 'rejeter' : 'prendre en charge'
+    const action = nextStatus === 'APPROVED' ? 'valider et créer le compte guide' : nextStatus === 'REJECTED' ? 'rejeter et supprimer définitivement' : 'prendre en charge'
     if (!window.confirm(`Confirmer : ${action} cette candidature ?`)) return
     setSaving(true)
     setError('')
@@ -145,8 +152,9 @@ export default function GuideApplicationsPage() {
       <article style={{ width: 'min(760px,100%)', maxHeight: '90vh', overflow: 'auto', background: 'white', borderRadius: 16, padding: 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 20 }}><div><h2 style={{ margin: 0 }}>{selected.firstName} {selected.lastName}</h2><p style={{ color: '#7A6D5A' }}>Candidature {selected.id}</p></div><button onClick={() => setSelected(null)} style={{ border: 0, background: 'transparent', fontSize: 20 }}>×</button></div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(210px,1fr))', gap: 12, background: '#F8F6F2', padding: 16, borderRadius: 12 }}>
-          <div><b>Email</b><p>{selected.email}</p></div><div><b>WhatsApp</b><p>{selected.whatsapp || '—'}</p></div><div><b>Ville principale</b><p>{selected.city || '—'}</p></div><div><b>Villes servies</b><p>{selected.serviceCities.join(', ')}</p></div><div><b>Langues</b><p>{selected.languages.join(', ') || '—'}</p></div><div><b>Expérience</b><p>{selected.experienceYears ?? '—'} an(s)</p></div><div><b>Pays de soumission</b><p>{selected.submittedCountry || '—'}</p></div><div><b>Appareil</b><p>{selected.submittedDevice || '—'}</p></div>
+          <div><b>Email</b><p>{selected.email}</p></div><div><b>WhatsApp</b><p>{selected.whatsapp || '—'}</p></div><div><b>Date de naissance</b><p>{formatBirthDate(selected.dateOfBirth)}</p></div><div><b>Formation</b><p>{selected.education}</p></div><div><b>Ville principale</b><p>{selected.city || '—'}</p></div><div><b>Villes servies</b><p>{selected.serviceCities.join(', ')}</p></div><div><b>Langues</b><p>{selected.languages.join(', ') || '—'}</p></div><div><b>Expérience</b><p>{selected.experienceYears ?? '—'} an(s)</p></div><div><b>Pays de soumission</b><p>{selected.submittedCountry || '—'}</p></div><div><b>Appareil</b><p>{selected.submittedDevice || '—'}</p></div>
         </div>
+        <div style={{ marginTop: 16 }}><b>Lieux maîtrisés</b><p style={{ lineHeight: 1.6 }}>{selected.masteredPlaces.join(', ') || '—'}</p></div>
         <div style={{ marginTop: 16 }}><b>Présentation</b><p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{selected.bio || '—'}</p></div>
         <label style={{ display: 'grid', gap: 7, marginTop: 16 }}><b>Notes internes</b><textarea value={notes} onChange={event => setNotes(event.target.value)} rows={4} maxLength={2000} style={{ padding: 12, border: '1px solid #E8DFC8', borderRadius: 8 }} /></label>
         {selected.reviewedByEmail && <p style={{ color: '#7A6D5A', fontSize: 12 }}>Dernier traitement : {selected.reviewedByEmail} · {formatDate(selected.reviewedAt)}</p>}

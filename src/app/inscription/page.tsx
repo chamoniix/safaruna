@@ -23,6 +23,9 @@ function safePelerinRedirect(value: string | null): string {
 
 function RegisterForm() {
   const searchParams = useSearchParams();
+  const googleEmailError = searchParams.get('error') === 'email_used'
+    ? 'Adresse e-mail déjà utilisée. Veuillez en utiliser une autre.'
+    : '';
   const refCode = searchParams.get('ref') || '';
   const redirectParam = safePelerinRedirect(searchParams.get('redirect'));
   // Préserve le tunnel de réservation en cours si l'utilisateur passe par "Se connecter".
@@ -317,9 +320,9 @@ function RegisterForm() {
             </svg>
             {googlePending ? 'Connexion à Google…' : "S'inscrire via Google"}
           </button>
-          {googleError && (
+          {(googleError || googleEmailError) && (
             <p role="alert" aria-live="polite" style={{ fontSize: '0.8rem', color: '#C0392B', margin: '0.75rem 0 0', textAlign: 'center' }}>
-              {googleError}
+              {googleError || googleEmailError}
             </p>
           )}
 

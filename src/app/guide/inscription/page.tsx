@@ -51,6 +51,8 @@ export default function GuideOnboarding() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
+  const [checkingEmail, setCheckingEmail] = useState(false);
+  const [emailError, setEmailError] = useState('');
 
   // Step 1
   const [prenom, setPrenom]           = useState('');
@@ -61,11 +63,16 @@ export default function GuideOnboarding() {
   const [gender, setGender]           = useState<'HOMME' | 'FEMME' | ''>('');
   const [serviceCities, setServiceCities] = useState<Array<'MAKKAH' | 'MADINAH'>>([]);
   const [nationality, setNationality] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
 
   // Step 2
   const [selectedLangues, setSelectedLangues] = useState<string[]>([]);
   const [experienceYears, setExperienceYears] = useState('');
+  const [education, setEducation] = useState('');
   const [bio, setBio]                         = useState('');
+
+  // Step 3
+  const [masteredPlaces, setMasteredPlaces] = useState<string[]>([]);
 
   // Step 5
   const [iban, setIban] = useState('');
@@ -77,11 +84,39 @@ export default function GuideOnboarding() {
     trackAnalyticsEvent('guide_application_started');
   }, []);
 
-  const handleNext = () => setCurrentStep(p => {
+  const advanceToNextStep = () => setCurrentStep(p => {
     const nextStep = Math.min(p + 1, 6);
     trackAnalyticsEvent('guide_application_step', { step: nextStep });
     return nextStep;
   });
+
+  const handleNext = async () => {
+    setSubmitError('');
+    if (currentStep !== 1) {
+      advanceToNextStep();
+      return;
+    }
+
+    setCheckingEmail(true);
+    setEmailError('');
+    try {
+      const response = await fetch('/api/guide/inscription/email-availability', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstName: prenom, lastName: nom, email: guideEmail, whatsapp }),
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        setEmailError(payload.error || 'Vérifiez les informations saisies.');
+        return;
+      }
+      advanceToNextStep();
+    } catch {
+      setEmailError('Vérification impossible. Réessayez dans quelques instants.');
+    } finally {
+      setCheckingEmail(false);
+    }
+  };
   const handlePrev = () => setCurrentStep(p => Math.max(p - 1, 1));
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -93,20 +128,31 @@ export default function GuideOnboarding() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           firstName: prenom, lastName: nom, email: guideEmail,
-          whatsapp, city, gender, serviceCities, nationality, bio,
+          whatsapp, city, gender, serviceCities, nationality, dateOfBirth, bio,
           experienceYears: experienceYears ? Number(experienceYears) : undefined,
+          education,
           languages: selectedLangues,
+          masteredPlaces,
           iban: iban || undefined,
           acceptedCharte,
         }),
       });
-      if (!res.ok) { const d = await res.json(); throw new Error(d.error || 'Erreur'); }
+      if (!res.ok) {
+        const d = await res.json();
+        if (res.status === 409) {
+          setCurrentStep(1);
+          setEmailError(d.error || 'Adresse e-mail déjà utilisée. Veuillez en utiliser une autre.');
+          return;
+        }
+        throw new Error(d.error || 'Erreur');
+      }
       await res.json();
       setIsSubmitted(true);
-    } catch (err: any) {
-      setSubmitError(err.message);
+    } catch (err: unknown) {
+      setSubmitError(err instanceof Error ? err.message : 'Envoi impossible. Réessayez dans quelques instants.');
+    } finally {
+      setSubmitting(false);
     }
-    setSubmitting(false);
   };
 
   if (isSubmitted) {
@@ -311,7 +357,32 @@ export default function GuideOnboarding() {
                     <input type="tel" className="ins-input" style={inputStyle} placeholder="+966 50 123 4567" required value={whatsapp} onChange={e => setWhatsapp(e.target.value)} />
                   </Field>
                   <Field label="Adresse email">
-                    <input type="email" className="ins-input" style={inputStyle} placeholder="youssouf@exemple.com" required value={guideEmail} onChange={e => setGuideEmail(e.target.value)} />
+                    <input type="email" className="ins-input" style={inputStyle} placeholder="youssouf@exemple.com" required value={guideEmail} onChange={e => { setGuideEmail(e.target.value); setEmailError(''); }} />
+                    {emailError && <p role="alert" aria-live="polite" style={{ color: '#DC2626', fontSize: '0.78rem', margin: '0.5rem 0 0' }}>{emailError}</p>}
+                  </Field>
+                </div>
+              </div>
+            )}
+
+            {/* ── STEP 2 ── */}
+            {currentStep === 2 && (
+              <div>
+                <h2 className="ins-h2" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2.5rem', fontWeight: 300, color: '#1A1209', marginBottom: '0.5rem', lineHeight: 1.1 }}>
+                  {STEPS[currentStep - 1].label}
+                </h2>
+                <p style={{ color: '#7A6D5A', fontSize: '0.875rem', marginBottom: '2rem', lineHeight: 1.7 }}>
+                  Votre maîtrise linguistique est l&apos;atout principal pour les pèlerins. Soyez précis.
+                </p>
+                <div className="ins-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '2rem' }}>
+                  <Field label="Date de naissance">
+                    <input type="date" className="ins-input" style={inputStyle} required value={dateOfBirth} onChange={e => setDateOfBirth(e.target.value)} />
+                  </Field>
+                  <Field label="Genre du guide">
+                    <select className="ins-input" style={inputStyle} required value={gender} onChange={e => setGender(e.target.value as 'HOMME' | 'FEMME' | '')}>
+                      <option value="">Sélectionner</option>
+                      <option value="HOMME">Homme</option>
+                      <option value="FEMME">Femme</option>
+                    </select>
                   </Field>
                   <Field label="Ville de résidence">
                     <select className="ins-input" style={inputStyle} required value={city} onChange={e => setCity(e.target.value)}>
@@ -325,13 +396,6 @@ export default function GuideOnboarding() {
                   <Field label="Nationalité">
                     <input type="text" className="ins-input" style={inputStyle} placeholder="Sénégalaise" value={nationality} onChange={e => setNationality(e.target.value)} />
                   </Field>
-                  <Field label="Genre du guide">
-                    <select className="ins-input" style={inputStyle} required value={gender} onChange={e => setGender(e.target.value as 'HOMME' | 'FEMME' | '')}>
-                      <option value="">Sélectionner</option>
-                      <option value="HOMME">Homme</option>
-                      <option value="FEMME">Femme</option>
-                    </select>
-                  </Field>
                   <Field label="Villes proposées">
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
                       {(['MAKKAH', 'MADINAH'] as const).map(serviceCity => (
@@ -343,28 +407,6 @@ export default function GuideOnboarding() {
                     </div>
                   </Field>
                 </div>
-                <Field label="Photo de profil (JPG/PNG · max 5 Mo)">
-                  <div style={{ border: '2px dashed #E8DFC8', borderRadius: 12, padding: '1.5rem', textAlign: 'center', cursor: 'pointer', background: 'white', transition: 'border-color 0.2s' }}>
-                    <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>📸</div>
-                    <div style={{ fontSize: '0.8rem', color: '#7A6D5A', marginBottom: '0.75rem' }}>Glissez votre photo ou cliquez pour parcourir</div>
-                    <label style={{ display: 'inline-block', background: '#1A1209', color: '#F0D897', padding: '0.5rem 1.25rem', borderRadius: 50, fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}>
-                      Choisir un fichier
-                      <input type="file" style={{ display: 'none' }} accept="image/*" />
-                    </label>
-                  </div>
-                </Field>
-              </div>
-            )}
-
-            {/* ── STEP 2 ── */}
-            {currentStep === 2 && (
-              <div>
-                <h2 className="ins-h2" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2.5rem', fontWeight: 300, color: '#1A1209', marginBottom: '0.5rem', lineHeight: 1.1 }}>
-                  {STEPS[currentStep - 1].label}
-                </h2>
-                <p style={{ color: '#7A6D5A', fontSize: '0.875rem', marginBottom: '2rem', lineHeight: 1.7 }}>
-                  Votre maîtrise linguistique est l&apos;atout principal pour les pèlerins. Soyez précis.
-                </p>
                 <div style={{ marginBottom: '2rem' }}>
                   <label style={labelStyle}>Langues parlées</label>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
@@ -392,7 +434,7 @@ export default function GuideOnboarding() {
                 </div>
                 <div className="ins-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
                   <Field label="Formation islamique">
-                    <select className="ins-input" style={inputStyle} required>
+                    <select className="ins-input" style={inputStyle} required value={education} onChange={e => setEducation(e.target.value)}>
                       <option value="">Niveau d&apos;études</option>
                       <option value="uni">Université Islamique (Madinah / Umm Al-Qura…)</option>
                       <option value="institut">Institut spécialisé</option>
@@ -406,6 +448,18 @@ export default function GuideOnboarding() {
                 <Field label="Biographie (visible par les pèlerins)">
                   <textarea className="ins-input" style={{ ...inputStyle, height: 120, resize: 'vertical' }} placeholder="Présentez-vous, votre approche, votre rapport avec les Lieux Saints…" required value={bio} onChange={e => setBio(e.target.value)} />
                 </Field>
+                <div style={{ marginTop: '1.25rem' }}>
+                  <Field label="Photo de profil (JPG/PNG · max 5 Mo)">
+                    <div style={{ border: '2px dashed #E8DFC8', borderRadius: 12, padding: '1.5rem', textAlign: 'center', cursor: 'pointer', background: 'white', transition: 'border-color 0.2s' }}>
+                      <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>📸</div>
+                      <div style={{ fontSize: '0.8rem', color: '#7A6D5A', marginBottom: '0.75rem' }}>Glissez votre photo ou cliquez pour parcourir</div>
+                      <label style={{ display: 'inline-block', background: '#1A1209', color: '#F0D897', padding: '0.5rem 1.25rem', borderRadius: 50, fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}>
+                        Choisir un fichier
+                        <input type="file" style={{ display: 'none' }} accept="image/*" />
+                      </label>
+                    </div>
+                  </Field>
+                </div>
               </div>
             )}
 
@@ -510,12 +564,17 @@ export default function GuideOnboarding() {
                       {group.lieux.map(l => (
                         <label key={l.name} className="ins-place-label" style={{
                           display: 'flex', alignItems: 'center', gap: '0.6rem',
-                          padding: '0.65rem 0.85rem', border: '1.5px solid #E8DFC8',
+                          padding: '0.65rem 0.85rem', border: masteredPlaces.includes(l.name) ? '1.5px solid #C9A84C' : '1.5px solid #E8DFC8',
                           borderRadius: 8, cursor: 'pointer', background: 'white',
                           fontSize: '0.8rem', fontWeight: 500, color: '#1A1209',
                           transition: 'border-color 0.15s, background 0.15s',
                         }}>
-                          <input type="checkbox" style={{ accentColor: '#C9A84C', width: 14, height: 14, flexShrink: 0 }} />
+                          <input
+                            type="checkbox"
+                            checked={masteredPlaces.includes(l.name)}
+                            onChange={() => setMasteredPlaces(previous => previous.includes(l.name) ? previous.filter(item => item !== l.name) : [...previous, l.name])}
+                            style={{ accentColor: '#C9A84C', width: 14, height: 14, flexShrink: 0 }}
+                          />
                           <span style={{ fontSize: '1rem' }}>{l.icon}</span>
                           {l.name}
                         </label>
@@ -716,10 +775,10 @@ export default function GuideOnboarding() {
 
               {currentStep < 6 ? (
                 <button
-                  type="button" onClick={handleNext}
-                  style={{ padding: '0.85rem 2.25rem', borderRadius: 50, background: '#1A1209', color: '#F0D897', fontWeight: 700, fontSize: '0.875rem', border: 'none', cursor: 'pointer', boxShadow: '0 4px 20px rgba(26,18,9,0.25)', letterSpacing: '0.03em' }}
+                  type="button" onClick={handleNext} disabled={checkingEmail}
+                  style={{ padding: '0.85rem 2.25rem', borderRadius: 50, background: '#1A1209', color: '#F0D897', fontWeight: 700, fontSize: '0.875rem', border: 'none', cursor: checkingEmail ? 'wait' : 'pointer', opacity: checkingEmail ? 0.65 : 1, boxShadow: '0 4px 20px rgba(26,18,9,0.25)', letterSpacing: '0.03em' }}
                 >
-                  Continuer →
+                  {checkingEmail ? 'Vérification…' : 'Suivant →'}
                 </button>
               ) : (
                 <button

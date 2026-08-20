@@ -5,6 +5,7 @@ import { headers } from 'next/headers'
 import prisma from '@/lib/prisma';
 import bcrypt from "bcryptjs"
 import { analyticsDevice, recordAnalyticsEvent } from '@/lib/analytics'
+import { checkRateLimitKey, pelerinAuthRatelimit } from '@/lib/ratelimit'
 
 function loginBrowser(userAgent: string) {
   if (/Edg\//i.test(userAgent)) return 'Edge'
@@ -66,50 +67,6 @@ export const authOptions: AuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
     }),
     CredentialsProvider({
-      id: "guide-credentials",
-      name: "Guide Login",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Mot de passe", type: "password" },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null
-        try {
-          const user = await prisma.guideAccount.findUnique({
-            where: { email: credentials.email.trim().toLowerCase() },
-            include: { guideProfile: { select: { status: true } } },
-          })
-          if (!user || user.status !== 'ACTIVE' || !user.guideProfile || user.guideProfile.status === 'SUSPENDED') return null
-          if (!user.emailVerified) return null
-          if (!user.passwordHash) return null
-          const isValid = await bcrypt.compare(credentials.password, user.passwordHash)
-          if (!isValid) return null
-          await prisma.guideAccount.update({
-            where: { id: user.id },
-            data: { lastLoginAt: new Date() },
-          })
-          await recordAuthenticatedLogin({
-            userId: user.legacyUserId,
-            email: user.email,
-            role: 'GUIDE',
-            path: '/guide/connexion',
-            method: 'email',
-            guideAccountId: user.id,
-          })
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.displayName,
-            firstName: user.firstName,
-            role: "GUIDE",
-            emailVerified: user.emailVerified,
-          }
-        } catch {
-          return null
-        }
-      },
-    }),
-    CredentialsProvider({
       id: "pelerin-credentials",
       name: "Pelerin Login",
       credentials: {
@@ -119,8 +76,16 @@ export const authOptions: AuthOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null
         try {
+          const email = credentials.email.trim().toLowerCase()
+          const values = await headers()
+          const ip = values.get('x-forwarded-for')?.split(',')[0]?.trim()
+            || values.get('x-real-ip')
+            || 'unknown'
+          const limited = await checkRateLimitKey(pelerinAuthRatelimit, `${ip}:${email}`)
+          if (limited) return null
+
           const user = await prisma.user.findUnique({
-            where: { email: credentials.email },
+            where: { email },
           })
           if (!user || user.role !== "PELERIN") return null
           if (!user.emailVerified) return null
@@ -133,7 +98,7 @@ export const authOptions: AuthOptions = {
           })
           await recordAuthenticatedLogin({
             userId: user.id,
-            email: user.email || credentials.email,
+            email: user.email || email,
             role: 'PELERIN',
             path: '/connexion',
             method: 'email',
@@ -157,11 +122,20 @@ export const authOptions: AuthOptions = {
       if (account?.provider === "google" && user.email) {
         let accountCreated = false
         try {
-          const existing = await prisma.user.findUnique({ where: { email: user.email } });
+          const normalizedEmail = user.email.trim().toLowerCase()
+          user.email = normalizedEmail
+          const [existing, guideAccount] = await Promise.all([
+            prisma.user.findUnique({ where: { email: normalizedEmail } }),
+            prisma.guideAccount.findUnique({ where: { email: normalizedEmail }, select: { id: true } }),
+          ])
+          if (guideAccount) {
+            console.error('[auth] Google signIn refusé pour une adresse Guide')
+            return false
+          }
           if (!existing) {
             const created = await prisma.user.create({
               data: {
-                email: user.email,
+                email: normalizedEmail,
                 name: user.name ?? null,
                 image: user.image ?? null,
                 role: "PELERIN",

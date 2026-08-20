@@ -69,8 +69,11 @@ export async function signup(_previousState: SignupState, formData: FormData): P
   }
 
   // Vérifier si l'email existe déjà
-  const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) {
+  const [existing, existingGuideAccount] = await Promise.all([
+    prisma.user.findUnique({ where: { email }, select: { id: true } }),
+    prisma.guideAccount.findUnique({ where: { email }, select: { id: true } }),
+  ]);
+  if (existing || existingGuideAccount) {
     return { error: 'Un compte existe déjà avec cette adresse email.' };
   }
 

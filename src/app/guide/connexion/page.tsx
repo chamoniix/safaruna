@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import { signIn } from 'next-auth/react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -16,16 +15,23 @@ export default function GuideLoginPage() {
     e.preventDefault();
     setLoading(true);
     setError('');
-    const result = await signIn('guide-credentials', {
-      email,
-      password,
-      redirect: false,
-    });
-    setLoading(false);
-    if (result?.ok) {
-      router.push('/guide/tableau-de-bord');
-    } else {
-      setError('Identifiants incorrects. Vérifiez vos accès SAFARUMA.');
+    try {
+      const response = await fetch('/api/guide/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await response.json().catch(() => null) as { error?: string } | null;
+      if (response.ok) {
+        router.push('/guide/tableau-de-bord');
+        router.refresh();
+      } else {
+        setError(data?.error || 'Identifiants incorrects. Vérifiez vos accès SAFARUMA.');
+      }
+    } catch {
+      setError('Connexion momentanément indisponible. Réessayez.');
+    } finally {
+      setLoading(false);
     }
   };
 

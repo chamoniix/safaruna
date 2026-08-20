@@ -60,16 +60,29 @@ export async function middleware(req: NextRequest) {
   if (pathname === '/guide/inscription') return buildCspResponse(req);
   if (pathname === '/guide/connexion') return buildCspResponse(req);
 
+  const hasGuideSession = Boolean(req.cookies.get('guide_session')?.value);
+
+  // ── API guide protégées (contrôle rapide, complété dans chaque route)
+  const isPublicGuideApi = pathname === '/api/guide/inscription'
+    || pathname.startsWith('/api/guide/public/')
+    || pathname.startsWith('/api/guide/auth/');
+  if (pathname.startsWith('/api/guide/') && !isPublicGuideApi) {
+    if (!hasGuideSession) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+  }
+
+  // ── Routes guide protégées : contrôle optimiste du cookie opaque.
+  // Chaque lecture ou mutation sensible revalide ensuite la session en base.
+  if (pathname.startsWith('/guide/')) {
+    if (!hasGuideSession) {
+      const loginUrl = new URL('/guide/connexion', req.url);
+      loginUrl.searchParams.set('redirect', pathname + req.nextUrl.search);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
   const nextAuthSecret = process.env.NEXTAUTH_SECRET;
   const token = nextAuthSecret ? await getToken({ req, secret: nextAuthSecret }) : null;
   const role = (token?.role as string) || '';
-
-  // ── API guide protégées (contrôle rapide, complété dans chaque route)
-  const isPublicGuideApi = pathname === '/api/guide/inscription' || pathname.startsWith('/api/guide/public/');
-  if (pathname.startsWith('/api/guide/') && !isPublicGuideApi) {
-    if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-    if (role !== 'GUIDE') return NextResponse.json({ error: 'Accès réservé aux guides' }, { status: 403 });
-  }
 
   // ── API pèlerin protégées (contrôle rapide, complété dans chaque route)
   if (pathname.startsWith('/api/espace/')) {
@@ -77,21 +90,12 @@ export async function middleware(req: NextRequest) {
     if (role !== 'PELERIN') return NextResponse.json({ error: 'Accès réservé aux pèlerins' }, { status: 403 });
   }
 
-  // ── Routes guide protégées → redirige vers /guide/connexion si pas GUIDE
-  if (pathname.startsWith('/guide/')) {
-    if (!token || (role !== 'GUIDE' && role !== 'ADMIN')) {
-      const loginUrl = new URL('/guide/connexion', req.url);
-      loginUrl.searchParams.set('redirect', pathname + req.nextUrl.search);
-      return NextResponse.redirect(loginUrl);
-    }
-  }
-
   // ── Routes pèlerin → redirige vers /connexion si pas PELERIN
   // On préserve le chemin + les query params (slug, forfait, dates…) pour
   // que l'utilisateur reprenne son tunnel de réservation après connexion,
   // au lieu d'atterrir sur le tableau de bord générique.
   if (pathname.startsWith('/espace/')) {
-    if (!token || (role !== 'PELERIN' && role !== 'ADMIN')) {
+    if (!token || role !== 'PELERIN') {
       const loginUrl = new URL('/connexion', req.url);
       loginUrl.searchParams.set('redirect', pathname + req.nextUrl.search);
       return NextResponse.redirect(loginUrl);

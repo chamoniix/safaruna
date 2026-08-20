@@ -22,6 +22,8 @@ function makeRatelimit(
 // 5 requests / 15 minutes for auth endpoints
 export const authRatelimit = makeRatelimit(5, '15 m')
 export const adminAuthRatelimit = makeRatelimit(5, '15 m', 'safaruma:rl:admin-auth')
+export const guideAuthRatelimit = makeRatelimit(5, '15 m', 'safaruma:rl:guide-auth')
+export const pelerinAuthRatelimit = makeRatelimit(5, '15 m', 'safaruma:rl:pelerin-auth')
 // 30 requests / minute for conversation/message endpoints
 export const apiRatelimit = makeRatelimit(30, '1 m')
 // 5 contact form submissions / 15 minutes per IP
@@ -37,16 +39,23 @@ export async function checkRateLimit(
   req: NextRequest,
   limiter: Ratelimit | null
 ): Promise<NextResponse | null> {
-  if (!limiter) return null
-
   const ip =
     req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     req.headers.get('x-real-ip') ||
     'unknown'
 
+  return checkRateLimitKey(limiter, ip)
+}
+
+export async function checkRateLimitKey(
+  limiter: Ratelimit | null,
+  key: string,
+): Promise<NextResponse | null> {
+  if (!limiter) return null
+
   let result: Awaited<ReturnType<Ratelimit['limit']>>
   try {
-    result = await limiter.limit(ip)
+    result = await limiter.limit(key)
   } catch (error) {
     // Le service Upstash ne doit pas rendre les routes métier indisponibles.
     console.error('[rate-limit] Upstash indisponible, requête autorisée', error)

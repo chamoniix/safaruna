@@ -3,6 +3,7 @@ import 'server-only'
 import { getServerSession } from 'next-auth'
 import { NextResponse } from 'next/server'
 import { authOptions } from '@/lib/auth'
+import { readGuideSessionToken, resolveGuideSession } from '@/lib/guide-auth'
 import prisma from '@/lib/prisma'
 
 type Denied = {
@@ -23,6 +24,9 @@ export type GuideActor = {
   guideProfileId: string
   guideStatus: 'DRAFT' | 'REVIEW' | 'ACTIVE'
   legacyUserId: string
+  displayName: string | null
+  firstName: string | null
+  lastName: string | null
 }
 
 type Allowed<T> = {
@@ -65,26 +69,13 @@ export async function requirePelerin(): Promise<Allowed<PelerinActor> | Denied> 
 }
 
 export async function requireGuide(): Promise<Allowed<GuideActor> | Denied> {
-  const identity = await currentSessionIdentity()
-  if (!identity) return denied(401, 'Non autorisé')
+  const token = await readGuideSessionToken()
+  if (!token) return denied(401, 'Non autorisé')
 
-  const account = await prisma.guideAccount.findFirst({
-    where: {
-      OR: [
-        ...(identity.id ? [{ id: identity.id }] : []),
-        ...(identity.email ? [{ email: identity.email }] : []),
-      ],
-    },
-    select: {
-      id: true,
-      email: true,
-      status: true,
-      legacyUserId: true,
-      guideProfile: { select: { id: true, status: true } },
-    },
-  })
+  const guideSession = await resolveGuideSession(token)
+  if (!guideSession) return denied(401, 'Session guide invalide')
+  const account = guideSession.guideAccount
 
-  if (!account) return denied(401, 'Session guide invalide')
   if (account.status !== 'ACTIVE' || account.guideProfile?.status === 'SUSPENDED') return denied(403, 'Compte guide suspendu')
   if (!account.email || !account.guideProfile || !account.legacyUserId) return denied(403, 'Profil guide introuvable')
 
@@ -97,6 +88,9 @@ export async function requireGuide(): Promise<Allowed<GuideActor> | Denied> {
       guideProfileId: account.guideProfile.id,
       guideStatus: account.guideProfile.status,
       legacyUserId: account.legacyUserId,
+      displayName: account.displayName,
+      firstName: account.firstName,
+      lastName: account.lastName,
     },
   }
 }

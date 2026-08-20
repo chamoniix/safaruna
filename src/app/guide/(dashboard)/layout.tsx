@@ -1,22 +1,23 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useSession, signOut } from 'next-auth/react';
+import { useGuideSession } from '@/components/GuideSessionGuard';
 
 export default function GuideLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [isAvailable, setIsAvailable] = useState<boolean | null>(null);
   const [savingAvailability, setSavingAvailability] = useState(false);
-  const { data: session } = useSession();
+  const guideSession = useGuideSession();
+  const router = useRouter();
   const isActive = (p: string) => pathname === p || pathname.startsWith(p + '/');
 
-  const su = session?.user as any;
+  const su = guideSession;
   const displayName = su?.firstName && su?.lastName
     ? `${su.firstName} ${su.lastName}`
-    : su?.name || su?.email || 'Guide';
+    : su?.displayName || su?.email || 'Guide';
   const initials = displayName.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase() || 'G';
 
   useEffect(() => {
@@ -45,6 +46,12 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
     } finally {
       setSavingAvailability(false);
     }
+  };
+
+  const logout = async () => {
+    await fetch('/api/guide/auth/logout', { method: 'POST' }).catch(() => null);
+    router.replace('/guide/connexion');
+    router.refresh();
   };
 
   return (
@@ -182,7 +189,7 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
 
           {/* Footer */}
           <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
-            <button onClick={() => signOut({ callbackUrl: '/guide/connexion' })} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.72rem', color: 'rgba(255,255,255,0.25)', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>↩ Déconnexion</button>
+            <button onClick={logout} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.72rem', color: 'rgba(255,255,255,0.25)', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>↩ Déconnexion</button>
           </div>
         </aside>
 

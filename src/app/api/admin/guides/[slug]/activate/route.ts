@@ -30,6 +30,10 @@ export async function POST(
     await prisma.$transaction([
       prisma.guideProfile.update({ where: { slug }, data: { status: 'SUSPENDED' } }),
       ...(guide.guideAccountId ? [prisma.guideAccount.update({ where: { id: guide.guideAccountId }, data: { status: 'SUSPENDED' } })] : []),
+      ...(guide.guideAccountId ? [prisma.guideSession.updateMany({
+        where: { guideAccountId: guide.guideAccountId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      })] : []),
       prisma.auditLog.create({
         data: {
           actor: actor.email,
@@ -65,16 +69,22 @@ export async function POST(
       const password = `${randomBytes(12).toString('base64url')}Aa1!`;
       const hash = await bcrypt.hash(password, 12);
 
-      await prisma.user.update({
-        where: { id: guide.user.id },
-        data: { passwordHash: hash, emailVerified: new Date() },
-      });
-      if (guide.guideAccountId) {
-        await prisma.guideAccount.update({
-          where: { id: guide.guideAccountId },
-          data: { passwordHash: hash, emailVerified: new Date(), status: 'ACTIVE' },
-        });
-      }
+      await prisma.$transaction([
+        prisma.user.update({
+          where: { id: guide.user.id },
+          data: { passwordHash: hash, emailVerified: new Date() },
+        }),
+        ...(guide.guideAccountId ? [
+          prisma.guideAccount.update({
+            where: { id: guide.guideAccountId },
+            data: { passwordHash: hash, emailVerified: new Date(), status: 'ACTIVE' },
+          }),
+          prisma.guideSession.updateMany({
+            where: { guideAccountId: guide.guideAccountId, revokedAt: null },
+            data: { revokedAt: new Date() },
+          }),
+        ] : []),
+      ]);
 
       const userEmail = guide.user.email ?? '';
       const userName = guide.user.name || guide.user.firstName || 'Guide';

@@ -216,8 +216,8 @@ enum GuideAccountStatus {
 }
 
 model GuideAccount {
-  id            String             @id @default(cuid())
-  email         String             @unique
+  id            String              @id @default(cuid())
+  email         String              @unique
   passwordHash  String?
   emailVerified DateTime?
   displayName   String?
@@ -225,12 +225,54 @@ model GuideAccount {
   lastName      String?
   phoneWhatsapp String?
   image         String?
-  legacyUserId  String?            @unique
-  status        GuideAccountStatus @default(ACTIVE)
+  legacyUserId  String?             @unique
+  status        GuideAccountStatus  @default(ACTIVE)
   lastLoginAt   DateTime?
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
   guideProfile  GuideProfile?
+  sessions      GuideSession[]
+  loginAttempts GuideLoginAttempt[]
+}
+
+model GuideSession {
+  id             String       @id @default(cuid())
+  tokenHash      String       @unique
+  guideAccountId String
+  guideAccount   GuideAccount @relation(fields: [guideAccountId], references: [id], onDelete: Cascade)
+  expiresAt      DateTime
+  lastSeenAt     DateTime     @default(now())
+  revokedAt      DateTime?
+  ip             String?
+  country        String?
+  city           String?
+  device         String?
+  browser        String?
+  userAgent      String?
+  createdAt      DateTime     @default(now())
+
+  @@index([guideAccountId, expiresAt])
+  @@index([expiresAt])
+}
+
+model GuideLoginAttempt {
+  id             String        @id @default(cuid())
+  email          String
+  guideAccountId String?
+  guideAccount   GuideAccount? @relation(fields: [guideAccountId], references: [id], onDelete: SetNull)
+  success        Boolean
+  reason         String
+  ip             String?
+  country        String?
+  city           String?
+  device         String?
+  browser        String?
+  userAgent      String?
+  createdAt      DateTime      @default(now())
+
+  @@index([email, createdAt])
+  @@index([guideAccountId, createdAt])
+  @@index([createdAt])
 }
 
 enum GuideCreatorType {

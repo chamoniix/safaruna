@@ -1,24 +1,11 @@
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { requireGuide } from '@/lib/require-account'
 
 export async function GET() {
-  const session = await getServerSession(authOptions)
-  if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-
-  const email = (session.user as { email?: string }).email
-  const userId = (session.user as { id?: string }).id
-  if (!email && !userId) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-
-  const user = await prisma.user.findFirst({
-    where: email ? { email } : { id: userId },
-    include: { guideProfile: true },
-  })
-  if (!user) return NextResponse.json({ error: 'Introuvable' }, { status: 404 })
-  if (!user.guideProfile) return NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 })
-
-  const guideProfileId = user.guideProfile.id
+  const access = await requireGuide()
+  if (!access.ok) return access.response
+  const guideProfileId = access.actor.guideProfileId
   const now = new Date()
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
 

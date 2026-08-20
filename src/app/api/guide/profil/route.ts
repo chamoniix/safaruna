@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { z } from 'zod';
+import { requireGuide } from '@/lib/require-account';
 
 const profilPatchSchema = z.object({
   firstName:       z.string().min(1).max(50).optional(),
@@ -20,15 +19,11 @@ const profilPatchSchema = z.object({
 });
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-
-  const email = (session.user as any).email as string | undefined;
-  const userId = (session.user as any).id as string | undefined;
-  if (!email && !userId) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+  const access = await requireGuide();
+  if (!access.ok) return access.response;
 
   const user = await prisma.user.findFirst({
-    where: email ? { email } : { id: userId },
+    where: { id: access.actor.id },
     include: {
       guideProfile: {
         include: {
@@ -76,15 +71,11 @@ export async function GET() {
 }
 
 export async function PATCH(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-
-  const email = (session.user as any).email as string | undefined;
-  const userId = (session.user as any).id as string | undefined;
-  if (!email && !userId) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+  const access = await requireGuide();
+  if (!access.ok) return access.response;
 
   const user = await prisma.user.findFirst({
-    where: email ? { email } : { id: userId },
+    where: { id: access.actor.id },
     include: { guideProfile: true },
   });
 

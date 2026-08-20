@@ -57,8 +57,22 @@ export async function middleware(req: NextRequest) {
   if (pathname === '/guide/inscription') return buildCspResponse(req);
   if (pathname === '/guide/connexion') return buildCspResponse(req);
 
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET ?? 'fallback-dev-only' });
+  const nextAuthSecret = process.env.NEXTAUTH_SECRET;
+  const token = nextAuthSecret ? await getToken({ req, secret: nextAuthSecret }) : null;
   const role = (token?.role as string) || '';
+
+  // ── API guide protégées (contrôle rapide, complété dans chaque route)
+  const isPublicGuideApi = pathname === '/api/guide/inscription' || pathname.startsWith('/api/guide/public/');
+  if (pathname.startsWith('/api/guide/') && !isPublicGuideApi) {
+    if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+    if (role !== 'GUIDE') return NextResponse.json({ error: 'Accès réservé aux guides' }, { status: 403 });
+  }
+
+  // ── API pèlerin protégées (contrôle rapide, complété dans chaque route)
+  if (pathname.startsWith('/api/espace/')) {
+    if (!token) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+    if (role !== 'PELERIN') return NextResponse.json({ error: 'Accès réservé aux pèlerins' }, { status: 403 });
+  }
 
   // ── Routes guide protégées → redirige vers /guide/connexion si pas GUIDE
   if (pathname.startsWith('/guide/')) {
@@ -85,5 +99,12 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/espace/:path*', '/guide/:path*', '/admin/:path*', '/api/admin/:path*'],
+  matcher: [
+    '/espace/:path*',
+    '/guide/:path*',
+    '/admin/:path*',
+    '/api/admin/:path*',
+    '/api/guide/:path*',
+    '/api/espace/:path*',
+  ],
 };

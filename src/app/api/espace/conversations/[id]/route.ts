@@ -1,22 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
 import { apiRatelimit, checkRateLimit } from '@/lib/ratelimit';
+import { requirePelerin } from '@/lib/require-account';
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-
-  const email  = (session.user as any).email as string | undefined;
-  const userId = (session.user as any).id    as string | undefined;
-  if (!email && !userId) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-
-  const user = await prisma.user.findFirst({ where: email ? { email } : { id: userId } });
-  if (!user) return NextResponse.json({ error: 'Utilisateur introuvable' }, { status: 404 });
+  const access = await requirePelerin();
+  if (!access.ok) return access.response;
 
   const { id } = await params;
 
@@ -33,12 +25,12 @@ export async function GET(
   });
 
   if (!conv) return NextResponse.json({ error: 'Conversation introuvable' }, { status: 404 });
-  if (conv.pelerinId !== user.id) return NextResponse.json({ error: 'Non autorisé' }, { status: 403 });
+  if (conv.pelerinId !== access.actor.id) return NextResponse.json({ error: 'Non autorisé' }, { status: 403 });
 
   // Mark guide's messages as read
   const now = new Date();
   await prisma.message.updateMany({
-    where: { conversationId: id, senderId: { not: user.id }, readAt: null },
+    where: { conversationId: id, senderId: { not: access.actor.id }, readAt: null },
     data: { readAt: now },
   });
 
@@ -61,7 +53,7 @@ export async function GET(
       id: m.id,
       content: m.content,
       senderId: m.senderId,
-      isFromMe: m.senderId === user.id,
+      isFromMe: m.senderId === access.actor.id,
       createdAt: fmt(new Date(m.createdAt)),
       readAt: m.readAt,
     })),
@@ -75,21 +67,14 @@ export async function POST(
   const limited = await checkRateLimit(req, apiRatelimit)
   if (limited) return limited
 
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-
-  const email  = (session.user as any).email as string | undefined;
-  const userId = (session.user as any).id    as string | undefined;
-  if (!email && !userId) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-
-  const user = await prisma.user.findFirst({ where: email ? { email } : { id: userId } });
-  if (!user) return NextResponse.json({ error: 'Utilisateur introuvable' }, { status: 404 });
+  const access = await requirePelerin();
+  if (!access.ok) return access.response;
 
   const { id } = await params;
 
   const conv = await prisma.conversation.findUnique({ where: { id } });
   if (!conv) return NextResponse.json({ error: 'Conversation introuvable' }, { status: 404 });
-  if (conv.pelerinId !== user.id) return NextResponse.json({ error: 'Non autorisé' }, { status: 403 });
+  if (conv.pelerinId !== access.actor.id) return NextResponse.json({ error: 'Non autorisé' }, { status: 403 });
 
   const { content } = await req.json();
   if (!content?.trim()) return NextResponse.json({ error: 'Message vide' }, { status: 400 });
@@ -98,7 +83,7 @@ export async function POST(
 
   const [message] = await Promise.all([
     prisma.message.create({
-      data: { conversationId: id, senderId: user.id, content: content.trim() },
+      data: { conversationId: id, senderId: access.actor.id, content: content.trim() },
     }),
     prisma.conversation.update({
       where: { id },

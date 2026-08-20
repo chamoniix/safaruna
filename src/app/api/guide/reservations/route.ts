@@ -1,26 +1,17 @@
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { requireGuide } from '@/lib/require-account'
 
 export async function GET() {
-  const session = await getServerSession(authOptions)
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-  }
-
-  const guideProfile = await prisma.guideProfile.findUnique({
-    where: { userId: session.user.id },
-  })
-  if (!guideProfile) {
-    return NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 })
-  }
+  const access = await requireGuide()
+  if (!access.ok) return access.response
+  const guideProfileId = access.actor.guideProfileId
 
   const reservations = await prisma.reservation.findMany({
     where: {
       OR: [
-        { guideProfileId: guideProfile.id },
-        { missions: { some: { guideProfileId: guideProfile.id } } },
+        { guideProfileId },
+        { missions: { some: { guideProfileId } } },
       ],
     },
     select: {
@@ -43,9 +34,9 @@ export async function GET() {
         select: { name: true, firstName: true, lastName: true, email: true },
       },
       package: { select: { name: true, durationDays: true } },
-      missions: { where: { guideProfileId: guideProfile.id }, orderBy: { startDate: 'asc' } },
+      missions: { where: { guideProfileId }, orderBy: { startDate: 'asc' } },
       guideEarnings: {
-        where: { guideProfileId: guideProfile.id },
+        where: { guideProfileId },
         select: {
           serviceNetCents: true,
           placesNetCents: true,

@@ -1,25 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
-
-async function getGuideProfile(session: any) {
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-    include: { guideProfile: true }
-  })
-  return user?.guideProfile || null
-}
+import { requireGuide } from '@/lib/require-account'
 
 export async function GET() {
-  const session = await getServerSession(authOptions)
-  if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-
-  const guideProfile = await getGuideProfile(session)
-  if (!guideProfile) return NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 })
+  const access = await requireGuide()
+  if (!access.ok) return access.response
 
   const places = await prisma.guidePlace.findMany({
-    where: { guideProfileId: guideProfile.id }
+    where: { guideProfileId: access.actor.guideProfileId }
   })
 
   const placesMap: Record<string, boolean> = {}
@@ -29,16 +17,13 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions)
-  if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-
-  const guideProfile = await getGuideProfile(session)
-  if (!guideProfile) return NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 })
+  const access = await requireGuide()
+  if (!access.ok) return access.response
 
   const { placeKey } = await req.json()
 
   const existing = await prisma.guidePlace.findFirst({
-    where: { guideProfileId: guideProfile.id, placeKey }
+    where: { guideProfileId: access.actor.guideProfileId, placeKey }
   })
 
   if (existing) {
@@ -49,7 +34,7 @@ export async function POST(req: NextRequest) {
   } else {
     await prisma.guidePlace.create({
       data: {
-        guideProfileId: guideProfile.id,
+        guideProfileId: access.actor.guideProfileId,
         placeKey,
         isActive: true,
       }

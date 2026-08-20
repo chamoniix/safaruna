@@ -1,23 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { requireGuide } from '@/lib/require-account'
 
 type ServiceCity = 'MAKKAH' | 'MADINAH'
 
 async function getGuideProfile() {
-  const session = await getServerSession(authOptions)
-  const email = session?.user?.email
-  if (!email) return null
-  const user = await prisma.user.findUnique({
-    where: { email },
-    include: {
-      guideProfile: {
-        select: { id: true, servesMakkah: true, servesMadinah: true, acceptingBookings: true, city: true },
-      },
-    },
+  const access = await requireGuide()
+  if (!access.ok) return access
+  const guideProfile = await prisma.guideProfile.findUnique({
+    where: { id: access.actor.guideProfileId },
+    select: { id: true, servesMakkah: true, servesMadinah: true, acceptingBookings: true, city: true },
   })
-  return user?.guideProfile ?? null
+  if (!guideProfile) return { ok: false as const, response: NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 }) }
+  return { ok: true as const, guideProfile }
 }
 
 function parseCity(value: unknown): ServiceCity | null {
@@ -31,8 +26,9 @@ function parseDate(value: unknown): Date | null {
 }
 
 export async function GET(req: NextRequest) {
-  const guide = await getGuideProfile()
-  if (!guide) return NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 })
+  const result = await getGuideProfile()
+  if (!result.ok) return result.response
+  const guide = result.guideProfile
   const city = parseCity(new URL(req.url).searchParams.get('city')) ?? 'MAKKAH'
   const today = new Date()
   today.setUTCHours(0, 0, 0, 0)
@@ -71,8 +67,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-  const guide = await getGuideProfile()
-  if (!guide) return NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 })
+  const result = await getGuideProfile()
+  if (!result.ok) return result.response
+  const guide = result.guideProfile
   const body = await req.json()
   const city = parseCity(body.city)
   if (!city || typeof body.enabled !== 'boolean') {
@@ -86,8 +83,9 @@ export async function PATCH(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const guide = await getGuideProfile()
-  if (!guide) return NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 })
+  const result = await getGuideProfile()
+  if (!result.ok) return result.response
+  const guide = result.guideProfile
   const body = await req.json()
   const city = parseCity(body.city)
   const date = parseDate(body.date)
@@ -112,8 +110,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
-  const guide = await getGuideProfile()
-  if (!guide) return NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 })
+  const result = await getGuideProfile()
+  if (!result.ok) return result.response
+  const guide = result.guideProfile
   const body = await req.json()
   const city = parseCity(body.city)
   const date = parseDate(body.date)

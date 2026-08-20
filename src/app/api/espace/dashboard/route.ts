@@ -1,21 +1,15 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
+import { requirePelerin } from '@/lib/require-account';
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-
-  const email  = (session.user as any).email  as string | undefined;
-  const userId = (session.user as any).id      as string | undefined;
-
-  if (!email && !userId) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+  const access = await requirePelerin();
+  if (!access.ok) return access.response;
 
   const now = new Date();
 
-  let user = await prisma.user.findFirst({
-    where: email ? { email } : { id: userId },
+  const user = await prisma.user.findUnique({
+    where: { id: access.actor.id },
     include: {
       reservations: {
         orderBy: { createdAt: 'desc' },
@@ -37,38 +31,7 @@ export async function GET() {
     }
   });
 
-  if (!user) {
-    // Google OAuth user exists in session but not yet in DB — upsert
-    const upserted = await prisma.user.upsert({
-      where: { email: email! },
-      update: { lastLogin: now },
-      create: {
-        email: email!,
-        name: session.user.name || '',
-        role: 'PELERIN',
-        lastLogin: now,
-      },
-    });
-
-    return NextResponse.json({
-      user: {
-        id: upserted.id,
-        name: upserted.name || session.user.name || 'Pèlerin',
-        email: upserted.email || '',
-        firstName: null, lastName: null,
-        country: null, phoneWhatsapp: null,
-        createdAt: now.toLocaleDateString('fr-FR'),
-        initials: (upserted.name || session.user.name || 'P')[0].toUpperCase(),
-      },
-      stats: {
-        totalReservations: 0, upcomingReservations: 0,
-        completedReservations: 0, totalSpent: 0,
-      },
-      recentReservations: [],
-      unreadNotifications: 0,
-      notifications: [],
-    });
-  }
+  if (!user) return NextResponse.json({ error: 'Session invalide' }, { status: 401 });
 
   const [totalReservations, upcomingReservations, completedReservations, spentResult] = await Promise.all([
     prisma.reservation.count({ where: { pelerinId: user.id } }),

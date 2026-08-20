@@ -1,23 +1,11 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
+import { requireGuide } from '@/lib/require-account';
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-
-  const email  = (session.user as any).email as string | undefined;
-  const userId = (session.user as any).id    as string | undefined;
-  if (!email && !userId) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-
-  const user = await prisma.user.findFirst({
-    where: email ? { email } : { id: userId },
-    include: { guideProfile: { select: { id: true } } },
-  });
-  if (!user?.guideProfile) return NextResponse.json({ conversations: [] });
-
-  const guideProfileId = user.guideProfile.id;
+  const access = await requireGuide();
+  if (!access.ok) return access.response;
+  const guideProfileId = access.actor.guideProfileId;
 
   const convs = await prisma.conversation.findMany({
     where: { guideProfileId },
@@ -34,7 +22,7 @@ export async function GET() {
   const unreadCounts = await Promise.all(
     convs.map(c =>
       prisma.message.count({
-        where: { conversationId: c.id, senderId: { not: user.id }, readAt: null },
+        where: { conversationId: c.id, senderId: { not: access.actor.id }, readAt: null },
       })
     )
   );

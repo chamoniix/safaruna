@@ -108,9 +108,17 @@ export const authOptions: AuthOptions = {
               },
             });
             user.id = created.id;
+            ;(user as any).role = 'PELERIN'
             accountCreated = true
           } else {
+            // Une identité guide/admin ne peut jamais ouvrir une session pèlerin
+            // via Google avec la même adresse email.
+            if (existing.role !== 'PELERIN') {
+              console.error('[auth] Google signIn refusé pour un compte non-pèlerin')
+              return false
+            }
             user.id = existing.id;
+            ;(user as any).role = existing.role
             // Set emailVerified if missing (first Google login after email/password account)
             if (!existing.emailVerified) {
               await prisma.user.update({
@@ -138,15 +146,15 @@ export const authOptions: AuthOptions = {
         token.emailVerified = (user as any).emailVerified ?? null
       }
       if (account?.provider === "google") {
-        token.role = "PELERIN"
         // Google verifies emails — always mark as verified
         token.emailVerified = new Date()
         // Resolve DB id from email (Google's OAuth id ≠ our DB id)
         if (user?.email) {
-          const dbUser = await prisma.user.findUnique({ where: { email: user.email }, select: { id: true, firstName: true } });
+          const dbUser = await prisma.user.findUnique({ where: { email: user.email }, select: { id: true, firstName: true, role: true } });
           if (dbUser) {
             token.id = dbUser.id;
             token.firstName = dbUser.firstName ?? null;
+            token.role = dbUser.role;
           }
         }
       }

@@ -1,21 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
+import { requirePelerin } from '@/lib/require-account';
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-
-  const email  = (session.user as any).email as string | undefined;
-  const userId = (session.user as any).id    as string | undefined;
-  if (!email && !userId) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-
-  const user = await prisma.user.findFirst({ where: email ? { email } : { id: userId } });
-  if (!user) return NextResponse.json({ conversations: [] });
+  const access = await requirePelerin();
+  if (!access.ok) return access.response;
 
   const convs = await prisma.conversation.findMany({
-    where: { pelerinId: user.id },
+    where: { pelerinId: access.actor.id },
     orderBy: { updatedAt: 'desc' },
     include: {
       guideProfile: {
@@ -34,7 +26,7 @@ export async function GET() {
   const unreadCounts = await Promise.all(
     convs.map(c =>
       prisma.message.count({
-        where: { conversationId: c.id, senderId: { not: user.id }, readAt: null },
+        where: { conversationId: c.id, senderId: { not: access.actor.id }, readAt: null },
       })
     )
   );
@@ -61,26 +53,19 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-
-  const email  = (session.user as any).email as string | undefined;
-  const userId = (session.user as any).id    as string | undefined;
-  if (!email && !userId) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-
-  const user = await prisma.user.findFirst({ where: email ? { email } : { id: userId } });
-  if (!user) return NextResponse.json({ error: 'Utilisateur introuvable' }, { status: 404 });
+  const access = await requirePelerin();
+  if (!access.ok) return access.response;
 
   const { guideProfileId } = await req.json();
   if (!guideProfileId) return NextResponse.json({ error: 'guideProfileId requis' }, { status: 400 });
 
   const existing = await prisma.conversation.findFirst({
-    where: { pelerinId: user.id, guideProfileId },
+    where: { pelerinId: access.actor.id, guideProfileId },
   });
   if (existing) return NextResponse.json({ conversationId: existing.id });
 
   const conv = await prisma.conversation.create({
-    data: { pelerinId: user.id, guideProfileId },
+    data: { pelerinId: access.actor.id, guideProfileId },
   });
 
   return NextResponse.json({ conversationId: conv.id }, { status: 201 });

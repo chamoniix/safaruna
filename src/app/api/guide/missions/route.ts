@@ -1,31 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
+import { requireGuide } from '@/lib/require-account';
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-
-  const email = (session.user as { email?: string }).email;
-  const userId = (session.user as { id?: string }).id;
-  if (!email && !userId) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-
-  const user = await prisma.user.findFirst({
-    where: email ? { email } : { id: userId },
-    include: { guideProfile: true },
-  });
-
-  if (!user) return NextResponse.json({ error: 'Introuvable' }, { status: 404 });
-  if (!user.guideProfile) return NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 });
+  const access = await requireGuide();
+  if (!access.ok) return access.response;
+  const guideProfileId = access.actor.guideProfileId;
 
   const { searchParams } = new URL(req.url);
   const statusFilter = searchParams.get('status'); // PENDING | CONFIRMED | COMPLETED | CANCELLED
 
   const where: Record<string, unknown> = {
     OR: [
-      { guideProfileId: user.guideProfile.id },
-      { missions: { some: { guideProfileId: user.guideProfile.id } } },
+      { guideProfileId },
+      { missions: { some: { guideProfileId } } },
     ],
   };
   if (statusFilter && statusFilter !== 'ALL') where.status = statusFilter;
@@ -38,11 +26,11 @@ export async function GET(req: NextRequest) {
       package: { select: { name: true, durationDays: true } },
       reviews: { select: { ratingOverall: true, comment: true } },
       missions: {
-        where: { guideProfileId: user.guideProfile.id },
+        where: { guideProfileId },
         orderBy: { startDate: 'asc' },
       },
       guideEarnings: {
-        where: { guideProfileId: user.guideProfile.id },
+        where: { guideProfileId },
         select: { totalNetCents: true },
       },
     },

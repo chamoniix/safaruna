@@ -2,9 +2,7 @@ import Stripe from 'stripe'
 import * as Sentry from '@sentry/nextjs'
 import { Prisma } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
 import { z } from 'zod'
-import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { apiRatelimit, checkRateLimit } from '@/lib/ratelimit'
 import { getPackageForCity, type CityChoice } from '@/lib/packages'
@@ -26,6 +24,7 @@ import {
   hashAnalyticsSession,
   recordAnalyticsEvent,
 } from '@/lib/analytics'
+import { requirePelerin } from '@/lib/require-account'
 
 // Stripe exige une expiration située au moins 30 minutes après la création de
 // la session. Une minute technique couvre le temps de transaction et réseau.
@@ -104,10 +103,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Stripe non configuré' }, { status: 500 })
   }
 
-  const userSession = await getServerSession(authOptions)
-  if (!userSession?.user?.email) {
-    return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-  }
+  const access = await requirePelerin()
+  if (!access.ok) return access.response
 
   const parsed = checkoutSchema.safeParse(await req.json())
   if (!parsed.success) {
@@ -425,12 +422,13 @@ export async function POST(req: NextRequest) {
         refNumber,
         guideSlug: makkahGuideSlug,
         guideSlugMadinah: madinahGuideSlug || '',
-        pelerinEmail: userSession.user.email,
+        pelerinEmail: access.actor.email,
+        pelerinId: access.actor.id,
         analyticsSessionHash: analyticsSessionHash || '',
       },
       success_url: `${baseUrl}/espace/checkout/${body.guideSlug}/confirmation?ref=${refNumber}&payment=success`,
       cancel_url: `${baseUrl}/espace/checkout/${body.guideSlug}?cancelled=1`,
-      customer_email: userSession.user.email,
+      customer_email: access.actor.email,
       expires_at: Math.floor(expiresAt.getTime() / 1000),
     })
 
@@ -441,7 +439,7 @@ export async function POST(req: NextRequest) {
     await recordAnalyticsEvent({
       eventName: 'checkout_created',
       sessionHash: analyticsSessionHash,
-      userId: userSession.user.id,
+      userId: access.actor.id,
       path: `/espace/checkout/${body.guideSlug}`,
       country: analyticsCountry(req.headers.get('x-vercel-ip-country')),
       device: analyticsDevice(req.headers.get('user-agent')),

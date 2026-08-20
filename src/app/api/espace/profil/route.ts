@@ -1,21 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
+import { requirePelerin } from '@/lib/require-account';
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+  const access = await requirePelerin();
+  if (!access.ok) return access.response;
 
-  const email = (session.user as any).email as string | undefined;
-  if (!email) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findUnique({ where: { id: access.actor.id } });
   if (!user) return NextResponse.json({ error: 'Introuvable' }, { status: 404 });
 
   return NextResponse.json({
     id: user.id,
-    name: user.name || `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || email,
+    name: user.name || `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || access.actor.email,
     email: user.email || '—',
     firstName: user.firstName,
     lastName: user.lastName,
@@ -26,16 +22,13 @@ export async function GET() {
 }
 
 export async function PATCH(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-
-  const email = (session.user as any).email as string | undefined;
-  if (!email) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+  const access = await requirePelerin();
+  if (!access.ok) return access.response;
 
   const { firstName, lastName, country, phoneWhatsapp } = await req.json();
 
   const user = await prisma.user.update({
-    where: { email },
+    where: { id: access.actor.id },
     data: {
       firstName: firstName ?? undefined,
       lastName:  lastName  ?? undefined,
@@ -46,7 +39,7 @@ export async function PATCH(req: NextRequest) {
 
   return NextResponse.json({
     id: user.id,
-    name: user.name || `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || email,
+    name: user.name || `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || access.actor.email,
     email: user.email || '—',
     firstName: user.firstName,
     lastName: user.lastName,

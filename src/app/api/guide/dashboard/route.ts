@@ -1,17 +1,13 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/prisma';
+import { requireGuide } from '@/lib/require-account';
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-
-  const email = (session.user as { email?: string }).email;
-  if (!email) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+  const access = await requireGuide();
+  if (!access.ok) return access.response;
 
   const user = await prisma.user.findUnique({
-    where: { email },
+    where: { id: access.actor.id },
     include: {
       guideProfile: {
         include: {
@@ -70,7 +66,7 @@ export async function GET() {
 
   const displayName = user.name
     || `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim()
-    || email;
+    || access.actor.email;
 
   return NextResponse.json({
     guide: {

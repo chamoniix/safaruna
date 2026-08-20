@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 import { sendEmail } from '@/lib/email'
+import { requireGuide } from '@/lib/require-account'
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions)
-  if (!session?.user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-
-  const email = (session.user as any).email as string
+  const access = await requireGuide()
+  if (!access.ok) return access.response
+  const email = access.actor.email
   const user = await prisma.user.findUnique({
-    where: { email },
+    where: { id: access.actor.id },
     select: { name: true, firstName: true, lastName: true }
   })
   const guideName = user?.name

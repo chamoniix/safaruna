@@ -26,7 +26,7 @@ export async function GET() {
   const unreadCounts = await Promise.all(
     convs.map(c =>
       prisma.message.count({
-        where: { conversationId: c.id, senderId: { not: access.actor.id }, readAt: null },
+        where: { conversationId: c.id, senderType: 'GUIDE', readAt: null },
       })
     )
   );

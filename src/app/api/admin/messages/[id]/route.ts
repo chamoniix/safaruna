@@ -16,7 +16,10 @@ export async function GET(
       guideProfile: { include: { user: { select: { name: true, firstName: true, email: true } } } },
       messages: {
         orderBy: { createdAt: 'asc' },
-        include: { sender: { select: { name: true, firstName: true, role: true } } },
+        include: {
+          senderPelerin: { select: { name: true, firstName: true } },
+          senderGuideAccount: { select: { displayName: true, firstName: true } },
+        },
       },
     },
   });
@@ -30,14 +33,21 @@ export async function GET(
     id: conv.id,
     pelerin: { name: p.name || p.firstName || '—', email: p.email || '—' },
     guide: { name: gu.name || gu.firstName || '—', email: gu.email || '—' },
-    messages: conv.messages.map(m => ({
-      id: m.id,
-      content: m.content,
-      senderName: m.sender.name || m.sender.firstName || '—',
-      senderRole: m.sender.role,
-      isFromGuide: m.sender.role === 'GUIDE',
-      createdAt: new Date(m.createdAt).toLocaleString('fr-FR'),
-      readAt: m.readAt ? new Date(m.readAt).toLocaleString('fr-FR') : null,
-    })),
+    messages: conv.messages.map(m => {
+      const isFromGuide = m.senderType === 'GUIDE';
+      const senderName = isFromGuide
+        ? m.senderGuideAccount?.displayName || m.senderGuideAccount?.firstName || '—'
+        : m.senderPelerin?.name || m.senderPelerin?.firstName || '—';
+
+      return {
+        id: m.id,
+        content: m.content,
+        senderName,
+        senderRole: m.senderType,
+        isFromGuide,
+        createdAt: new Date(m.createdAt).toLocaleString('fr-FR'),
+        readAt: m.readAt ? new Date(m.readAt).toLocaleString('fr-FR') : null,
+      };
+    }),
   });
 }

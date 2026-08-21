@@ -62,7 +62,8 @@ model User {
   // As a Pelerin
   reservations           Reservation[]      @relation("PelerinReservations")
   conversationsAsPelerin Conversation[]     @relation("PelerinConversations")
-  messages               Message[]
+  messages               Message[]          @relation("PelerinMessages")
+  legacyMessages         Message[]          @relation("LegacyMessageSender")
   reviews                Review[]
   savedDuas              SavedDua[]
   courseProgress         CourseProgress[]
@@ -249,6 +250,7 @@ model GuideAccount {
   guideProfile  GuideProfile?
   sessions      GuideSession[]
   loginAttempts GuideLoginAttempt[]
+  messages      Message[]
 }
 
 model GuideSession {
@@ -510,15 +512,27 @@ model Conversation {
   messages Message[]
 }
 
+enum MessageSenderType {
+  PELERIN
+  GUIDE
+}
+
 model Message {
-  id             String       @id @default(cuid())
-  conversationId String
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  senderId       String
-  sender         User         @relation(fields: [senderId], references: [id])
-  content        String
-  readAt         DateTime?
-  createdAt      DateTime     @default(now())
+  id                   String             @id @default(cuid())
+  conversationId       String
+  conversation         Conversation       @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderType           MessageSenderType?
+  senderPelerinId      String?
+  senderPelerin        User?              @relation("PelerinMessages", fields: [senderPelerinId], references: [id])
+  senderGuideAccountId String?
+  senderGuideAccount   GuideAccount?      @relation(fields: [senderGuideAccountId], references: [id])
+  legacySenderId       String?            @map("senderId")
+  legacySender         User?              @relation("LegacyMessageSender", fields: [legacySenderId], references: [id])
+  content              String
+  readAt               DateTime?
+  createdAt            DateTime           @default(now())
+
+  @@index([conversationId, senderType, readAt])
 }
 
 model Review {

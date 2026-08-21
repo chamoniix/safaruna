@@ -30,7 +30,7 @@ export async function GET(
   // Mark guide's messages as read
   const now = new Date();
   await prisma.message.updateMany({
-    where: { conversationId: id, senderId: { not: access.actor.id }, readAt: null },
+    where: { conversationId: id, senderType: 'GUIDE', readAt: null },
     data: { readAt: now },
   });
 
@@ -52,8 +52,8 @@ export async function GET(
     messages: conv.messages.map(m => ({
       id: m.id,
       content: m.content,
-      senderId: m.senderId,
-      isFromMe: m.senderId === access.actor.id,
+      senderId: m.senderType === 'PELERIN' ? m.senderPelerinId : m.senderGuideAccountId,
+      isFromMe: m.senderType === 'PELERIN' && m.senderPelerinId === access.actor.id,
       createdAt: fmt(new Date(m.createdAt)),
       readAt: m.readAt,
     })),
@@ -83,7 +83,12 @@ export async function POST(
 
   const [message] = await Promise.all([
     prisma.message.create({
-      data: { conversationId: id, senderId: access.actor.id, content: content.trim() },
+      data: {
+        conversationId: id,
+        senderType: 'PELERIN',
+        senderPelerinId: access.actor.id,
+        content: content.trim(),
+      },
     }),
     prisma.conversation.update({
       where: { id },

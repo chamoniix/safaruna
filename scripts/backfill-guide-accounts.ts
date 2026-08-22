@@ -18,8 +18,10 @@ async function main() {
         firstName: guide.firstName,
         lastName: guide.lastName,
         phoneWhatsapp: guide.phoneWhatsapp,
+        country: guide.country,
         image: guide.image,
         legacyUserId: guide.id,
+        registeredAt: guide.createdAt,
         status,
       },
       create: {
@@ -30,8 +32,10 @@ async function main() {
         firstName: guide.firstName,
         lastName: guide.lastName,
         phoneWhatsapp: guide.phoneWhatsapp,
+        country: guide.country,
         image: guide.image,
         legacyUserId: guide.id,
+        registeredAt: guide.createdAt,
         status,
       },
     })

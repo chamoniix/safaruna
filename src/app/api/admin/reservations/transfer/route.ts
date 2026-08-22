@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     where: { id: reservationId },
     include: {
       pelerin: { select: { name: true, firstName: true, lastName: true, email: true } },
-      guideProfile: { include: { user: { select: { name: true, firstName: true, lastName: true } } } },
+      guideProfile: { include: { guideAccount: { select: { displayName: true, firstName: true, lastName: true } } } },
       package: { select: { name: true } },
     },
   });
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
   const newGuide = await prisma.guideProfile.findUnique({
     where: { id: newGuideProfileId },
-    include: { user: { select: { name: true, firstName: true, lastName: true } } },
+    include: { guideAccount: { select: { displayName: true, firstName: true, lastName: true } } },
   });
 
   if (!newGuide)
@@ -58,8 +58,8 @@ export async function POST(req: NextRequest) {
   const pelerinName = reservation.pelerin.name
     || `${reservation.pelerin.firstName ?? ''} ${reservation.pelerin.lastName ?? ''}`.trim()
     || 'Pèlerin';
-  const newGuideName = newGuide.user.name
-    || `${newGuide.user.firstName ?? ''} ${newGuide.user.lastName ?? ''}`.trim()
+  const newGuideName = newGuide.guideAccount?.displayName
+    || `${newGuide.guideAccount?.firstName ?? ''} ${newGuide.guideAccount?.lastName ?? ''}`.trim()
     || 'Guide';
 
   if (pelerinEmail) {

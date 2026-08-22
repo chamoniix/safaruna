@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     orderBy: { createdAt: 'desc' },
     include: {
       pelerin: { select: { name: true, firstName: true, lastName: true, email: true } },
-      guideProfile: { select: { user: { select: { name: true, firstName: true, lastName: true } } } },
+      guideProfile: { select: { guideAccount: { select: { displayName: true, firstName: true, lastName: true } } } },
       package: { select: { name: true, durationDays: true } },
     },
   });
@@ -23,8 +23,8 @@ export async function GET(req: NextRequest) {
       pelerin: r.pelerin.name
         || `${r.pelerin.firstName ?? ''} ${r.pelerin.lastName ?? ''}`.trim()
         || r.pelerin.email || '—',
-      guide: r.guideProfile.user.name
-        || `${r.guideProfile.user.firstName ?? ''} ${r.guideProfile.user.lastName ?? ''}`.trim()
+      guide: r.guideProfile.guideAccount?.displayName
+        || `${r.guideProfile.guideAccount?.firstName ?? ''} ${r.guideProfile.guideAccount?.lastName ?? ''}`.trim()
         || '—',
       packageName: r.package.name,
       durationDays: r.package.durationDays,
@@ -66,7 +66,7 @@ export async function PATCH(req: NextRequest) {
       pelerin: { select: { name: true, firstName: true, lastName: true, email: true } },
       guideProfile: {
         include: {
-          user: { select: { name: true, firstName: true, lastName: true, email: true, phoneWhatsapp: true } },
+          guideAccount: { select: { displayName: true, firstName: true, lastName: true, email: true, phoneWhatsapp: true } },
         },
       },
       package: { select: { name: true, durationDays: true } },
@@ -94,9 +94,9 @@ export async function PATCH(req: NextRequest) {
 
   if (status === 'CONFIRMED' && existing?.status !== 'CONFIRMED') {
     const p = reservation.pelerin;
-    const gu = reservation.guideProfile.user;
+    const gu = reservation.guideProfile.guideAccount;
     const pelerinName = p.name || `${p.firstName ?? ''} ${p.lastName ?? ''}`.trim() || 'Pèlerin';
-    const guideName   = gu.name || `${gu.firstName ?? ''} ${gu.lastName ?? ''}`.trim() || 'Guide';
+    const guideName   = gu?.displayName || `${gu?.firstName ?? ''} ${gu?.lastName ?? ''}`.trim() || 'Guide';
     const departure   = new Date(reservation.startDate).toLocaleDateString('fr-FR');
     const primaryEarning = reservation.guideEarnings.find(earning => earning.guideProfileId === reservation.guideProfileId);
     const netGuide = primaryEarning?.totalNetCents
@@ -117,7 +117,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     // Email au guide
-    if (gu.email) {
+    if (gu?.email) {
       sendEmail({
         to: { email: gu.email, name: guideName },
         subject: `Nouvelle réservation confirmée — ${reservation.refNumber}`,
@@ -174,7 +174,7 @@ export async function PATCH(req: NextRequest) {
     <tr><td colspan="2"><div style="height:1px;background:#E8DFC8;"></div></td></tr>
     <tr><td style="padding:8px 0;font-size:12px;color:#7A6D5A;font-weight:700;text-transform:uppercase;">Pèlerin</td><td style="padding:8px 0;font-size:13px;color:#1A1209;">${pelerinName} (${p.email ?? '—'})</td></tr>
     <tr><td colspan="2"><div style="height:1px;background:#E8DFC8;"></div></td></tr>
-    <tr><td style="padding:8px 0;font-size:12px;color:#7A6D5A;font-weight:700;text-transform:uppercase;">Guide</td><td style="padding:8px 0;font-size:13px;color:#1A1209;">${guideName} (${gu.email ?? '—'})</td></tr>
+    <tr><td style="padding:8px 0;font-size:12px;color:#7A6D5A;font-weight:700;text-transform:uppercase;">Guide</td><td style="padding:8px 0;font-size:13px;color:#1A1209;">${guideName} (${gu?.email ?? '—'})</td></tr>
     <tr><td colspan="2"><div style="height:1px;background:#E8DFC8;"></div></td></tr>
     <tr><td style="padding:8px 0;font-size:12px;color:#7A6D5A;font-weight:700;text-transform:uppercase;">Départ</td><td style="padding:8px 0;font-size:13px;color:#1A1209;">${departure} · ${reservation.package.durationDays}j</td></tr>
     <tr><td colspan="2"><div style="height:1px;background:#E8DFC8;"></div></td></tr>

@@ -234,7 +234,9 @@ export async function PATCH(req: NextRequest) {
         firstName: application.firstName,
         lastName: application.lastName,
         phoneWhatsapp: application.whatsapp,
+        country: application.nationality,
         legacyUserId: user.id,
+        registeredAt: user.createdAt,
       },
     })
     await tx.guideProfile.update({

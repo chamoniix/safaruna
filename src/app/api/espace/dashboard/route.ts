@@ -17,7 +17,7 @@ export async function GET() {
         include: {
           guideProfile: {
             include: {
-              user: { select: { name: true, firstName: true, lastName: true } }
+              guideAccount: { select: { displayName: true, firstName: true, lastName: true } }
             }
           },
           package: { select: { name: true, durationDays: true } },
@@ -71,8 +71,8 @@ export async function GET() {
     recentReservations: user.reservations.map(r => ({
       id: r.id,
       refNumber: r.refNumber,
-      guideName: r.guideProfile.user.name
-        || `${r.guideProfile.user.firstName ?? ''} ${r.guideProfile.user.lastName ?? ''}`.trim()
+      guideName: r.guideProfile.guideAccount?.displayName
+        || `${r.guideProfile.guideAccount?.firstName ?? ''} ${r.guideProfile.guideAccount?.lastName ?? ''}`.trim()
         || '—',
       packageName: r.package.name,
       startDate: new Date(r.startDate).toLocaleDateString('fr-FR'),

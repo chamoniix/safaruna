@@ -18,10 +18,10 @@ export async function GET(
     const guide = await prisma.guideProfile.findUnique({
       where: { slug },
       include: {
-        user: {
+        guideAccount: {
           select: {
-            id: true, name: true, firstName: true,
-            lastName: true, email: true, createdAt: true,
+            id: true, displayName: true, firstName: true,
+            lastName: true, email: true, registeredAt: true,
             phoneWhatsapp: true, image: true
           }
         },
@@ -99,9 +99,14 @@ export async function GET(
         completionRate: guide.completionRate,
         commissionRate: (guide as any).commissionRate ?? 0.12,
         user: {
-          ...guide.user,
-          phoneWhatsapp: guide.user.phoneWhatsapp || null,
-          image: guide.user.image || null,
+          id: guide.guideAccount?.id || guide.id,
+          name: guide.guideAccount?.displayName || null,
+          firstName: guide.guideAccount?.firstName || null,
+          lastName: guide.guideAccount?.lastName || null,
+          email: guide.guideAccount?.email || null,
+          createdAt: guide.guideAccount?.registeredAt || guide.createdAt,
+          phoneWhatsapp: guide.guideAccount?.phoneWhatsapp || null,
+          image: guide.guideAccount?.image || null,
         },
         languages: guide.languages,
         packages: guide.packages,
@@ -221,7 +226,6 @@ export async function PATCH(
     const guide = await prisma.guideProfile.findUnique({
       where: { slug },
       include: {
-        user: { select: { firstName: true, lastName: true, phoneWhatsapp: true, email: true } },
         guideAccount: { select: { firstName: true, lastName: true, phoneWhatsapp: true, email: true } },
       },
     });
@@ -252,10 +256,10 @@ export async function PATCH(
       await audit('GUIDE_IDENTITY_UPDATED', guide.id, {
         detail: { fields },
         before: {
-          ...(body.firstName !== undefined && { firstName: guide.user.firstName }),
-          ...(body.lastName !== undefined && { lastName: guide.user.lastName }),
-          ...(body.phoneWhatsapp !== undefined && { phoneWhatsapp: guide.user.phoneWhatsapp }),
-          ...(body.email !== undefined && { email: guide.user.email }),
+          ...(body.firstName !== undefined && { firstName: guide.guideAccount?.firstName }),
+          ...(body.lastName !== undefined && { lastName: guide.guideAccount?.lastName }),
+          ...(body.phoneWhatsapp !== undefined && { phoneWhatsapp: guide.guideAccount?.phoneWhatsapp }),
+          ...(body.email !== undefined && { email: guide.guideAccount?.email }),
         },
         after: identityData,
       });

@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
 import { sendEmail } from '@/lib/email'
 import { requireGuide } from '@/lib/require-account'
 
@@ -7,12 +6,8 @@ export async function POST(req: NextRequest) {
   const access = await requireGuide()
   if (!access.ok) return access.response
   const email = access.actor.email
-  const user = await prisma.user.findUnique({
-    where: { id: access.actor.legacyUserId },
-    select: { name: true, firstName: true, lastName: true }
-  })
-  const guideName = user?.name
-    || `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim()
+  const guideName = access.actor.displayName
+    || `${access.actor.firstName ?? ''} ${access.actor.lastName ?? ''}`.trim()
     || email
 
   const { suggestion } = await req.json()

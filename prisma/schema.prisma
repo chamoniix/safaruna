@@ -241,10 +241,12 @@ model GuideAccount {
   firstName     String?
   lastName      String?
   phoneWhatsapp String?
+  country       String?
   image         String?
   legacyUserId  String?             @unique
   status        GuideAccountStatus  @default(ACTIVE)
   lastLoginAt   DateTime?
+  registeredAt  DateTime            @default(now())
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
   guideProfile  GuideProfile?

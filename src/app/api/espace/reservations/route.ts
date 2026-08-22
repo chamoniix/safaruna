@@ -17,14 +17,14 @@ export async function GET() {
       include: {
         guideProfile: {
           include: {
-            user: { select: { name: true, firstName: true, lastName: true } }
+            guideAccount: { select: { displayName: true, firstName: true, lastName: true } }
           }
         },
         package: { select: { name: true, durationDays: true } },
         reviews: { select: { ratingOverall: true, comment: true } },
         missions: {
           orderBy: { startDate: 'asc' },
-          include: { guideProfile: { include: { user: { select: { name: true, firstName: true, lastName: true } } } } },
+          include: { guideProfile: { include: { guideAccount: { select: { displayName: true, firstName: true, lastName: true } } } } },
         },
       }
     }),
@@ -48,11 +48,11 @@ export async function GET() {
       id: r.id,
       refNumber: r.refNumber,
       guideName: r.missions.length > 0
-        ? [...new Set(r.missions.map(mission => mission.guideProfile.user.name
-          || `${mission.guideProfile.user.firstName ?? ''} ${mission.guideProfile.user.lastName ?? ''}`.trim()
+        ? [...new Set(r.missions.map(mission => mission.guideProfile.guideAccount?.displayName
+          || `${mission.guideProfile.guideAccount?.firstName ?? ''} ${mission.guideProfile.guideAccount?.lastName ?? ''}`.trim()
           || 'Guide SAFARUMA'))].join(' · ')
-        : r.guideProfile.user.name
-          || `${r.guideProfile.user.firstName ?? ''} ${r.guideProfile.user.lastName ?? ''}`.trim()
+        : r.guideProfile.guideAccount?.displayName
+          || `${r.guideProfile.guideAccount?.firstName ?? ''} ${r.guideProfile.guideAccount?.lastName ?? ''}`.trim()
           || '—',
       missions: r.missions.map(mission => ({
         city: mission.city,

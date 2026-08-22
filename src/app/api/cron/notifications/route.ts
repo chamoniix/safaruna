@@ -34,10 +34,10 @@ export async function GET(req: NextRequest) {
     },
     include: {
       pelerin: { select: { email: true, name: true, firstName: true, lastName: true } },
-      guideProfile: { include: { user: { select: { email: true, name: true, firstName: true, lastName: true } } } },
+      guideProfile: { include: { guideAccount: { select: { email: true, displayName: true, firstName: true, lastName: true } } } },
       missions: {
         orderBy: { startDate: 'asc' },
-        include: { guideProfile: { include: { user: { select: { email: true, name: true, firstName: true, lastName: true } } } } },
+        include: { guideProfile: { include: { guideAccount: { select: { email: true, displayName: true, firstName: true, lastName: true } } } } },
       },
     },
   })
@@ -90,12 +90,15 @@ export async function GET(req: NextRequest) {
       const daysUntil = Math.round((assignment.startDate.getTime() - today.getTime()) / DAY_MS)
       if (daysUntil !== 1 && daysUntil !== 3) continue
       const key = `notifiedGuide_${assignment.id}_J${daysUntil}`
-      if (flags[key] || !assignment.guide.user.email) continue
-      const guideName = personName(assignment.guide.user)
+      const guideAccount = assignment.guide.guideAccount
+      if (flags[key] || !guideAccount?.email) continue
+      const guideName = guideAccount.displayName
+        || `${guideAccount.firstName ?? ''} ${guideAccount.lastName ?? ''}`.trim()
+        || guideAccount.email
       const label = daysUntil === 1 ? 'demain' : 'dans 3 jours'
       try {
         await sendEmail({
-          to: { email: assignment.guide.user.email, name: guideName },
+          to: { email: guideAccount.email, name: guideName },
           subject: `[SAFARUMA] Rappel — Mission ${label} · ${reservation.refNumber}`,
           throwOnError: true,
           html: baseTemplate(`

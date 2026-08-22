@@ -13,7 +13,7 @@ const getGuideData = cache(async (slug: string) => {
   try {
     return await prisma.guideProfile.findFirst({
       where: { slug, status: 'ACTIVE' },
-      include: { user: true, languages: true, packages: true },
+      include: { guideAccount: true, languages: true, packages: true },
     });
   } catch {
     return null;
@@ -33,8 +33,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const guideData = await getGuideData(slug);
   if (guideData) {
-    const name = guideData.user.name
-      || `${guideData.user.firstName ?? ''} ${guideData.user.lastName ?? ''}`.trim()
+    const name = guideData.guideAccount?.displayName
+      || `${guideData.guideAccount?.firstName ?? ''} ${guideData.guideAccount?.lastName ?? ''}`.trim()
       || 'Guide';
     const desc = guideData.bio || `Profil guide — ${name}`;
     return {
@@ -359,7 +359,7 @@ export default async function GuideProfilePage({
 
   // ── Fetch from Neon (mémoïsé — même requête que generateMetadata) ─────────
   const guideData = await getGuideData(slug) as Awaited<ReturnType<typeof getGuideData>> & {
-    user: NonNullable<unknown>;
+    guideAccount: NonNullable<unknown>;
     languages: NonNullable<unknown>[];
     packages: NonNullable<unknown>[];
   } | null;
@@ -417,10 +417,10 @@ export default async function GuideProfilePage({
   const reviews = slug === 'naim-laamari' ? NAIM_REVIEWS : REVIEWS;
 
   // ── Build guide object (Prisma preferred, hardcoded as fallback) ──────────
-  const dbUser = (guideData as any)?.user;
+  const dbUser = (guideData as any)?.guideAccount;
   const dbLangs: any[] = (guideData as any)?.languages ?? [];
   const prismaName = dbUser
-    ? (dbUser.name || `${dbUser.firstName ?? ''} ${dbUser.lastName ?? ''}`.trim()).trim()
+    ? (dbUser.displayName || `${dbUser.firstName ?? ''} ${dbUser.lastName ?? ''}`.trim()).trim()
     : '';
 
   const guide = {

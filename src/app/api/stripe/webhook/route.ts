@@ -142,7 +142,7 @@ async function sendConfirmationEmails(opts: {
   guides: Array<{
     id: string
     slug: string | null
-    user: { email: string | null; name: string | null; firstName: string | null; lastName: string | null }
+    guideAccount: { email: string; displayName: string | null; firstName: string | null; lastName: string | null } | null
   }>
 }) {
   const { refNumber, amount, data, pelerin, guides } = opts
@@ -150,7 +150,7 @@ async function sendConfirmationEmails(opts: {
   const pelerinName = pelerin.name || `${pelerin.firstName ?? ''} ${pelerin.lastName ?? ''}`.trim() || pelerin.email || 'Pèlerin'
   const guideName = (guideId: string) => {
     const guide = guides.find(item => item.id === guideId)
-    return guide?.user.name || `${guide?.user.firstName ?? ''} ${guide?.user.lastName ?? ''}`.trim() || guide?.slug || 'Guide SAFARUMA'
+    return guide?.guideAccount?.displayName || `${guide?.guideAccount?.firstName ?? ''} ${guide?.guideAccount?.lastName ?? ''}`.trim() || guide?.slug || 'Guide SAFARUMA'
   }
   const missionSummary = data.missions.map(mission =>
     `${cityLabel(mission.city)} : ${guideName(mission.guideProfileId)}, du ${dateFr(mission.startDate)} au ${dateFr(mission.endDate)}`
@@ -198,12 +198,12 @@ async function sendConfirmationEmails(opts: {
   }
 
   for (const guide of guides) {
-    if (!guide.user.email) continue
+    if (!guide.guideAccount?.email) continue
     const assignedMissions = data.missions.filter(mission => mission.guideProfileId === guide.id)
     if (assignedMissions.length === 0) continue
     const name = guideName(guide.id)
     await sendEmail({
-      to: { email: guide.user.email, name },
+      to: { email: guide.guideAccount.email, name },
       subject: `[SAFARUMA] Nouvelle mission confirmée — ${refNumber}`,
       html: baseTemplate(`
         ${heading('Nouvelle mission payée et confirmée')}
@@ -329,7 +329,7 @@ export async function POST(req: NextRequest) {
   const guideIds = [...new Set(data.missions.map(mission => mission.guideProfileId))]
   const guides = await prisma.guideProfile.findMany({
     where: { id: { in: guideIds } },
-    include: { user: true, packages: true },
+    include: { guideAccount: true, packages: true },
   })
   if (guides.length !== guideIds.length) {
     return NextResponse.json({ error: 'Guide introuvable' }, { status: 404 })

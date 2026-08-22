@@ -18,7 +18,7 @@ export async function GET(
         orderBy: { createdAt: 'desc' },
         include: {
           guideProfile: {
-            include: { user: { select: { name: true, firstName: true, lastName: true } } }
+            include: { guideAccount: { select: { displayName: true, firstName: true, lastName: true } } }
           },
           package: { select: { name: true, durationDays: true } },
           reviews: { select: { ratingOverall: true, comment: true } },
@@ -36,7 +36,7 @@ export async function GET(
         orderBy: { updatedAt: 'desc' },
         take: 5,
         include: {
-          guideProfile: { include: { user: { select: { name: true, firstName: true } } } },
+          guideProfile: { include: { guideAccount: { select: { displayName: true, firstName: true } } } },
           messages: { orderBy: { createdAt: 'desc' }, take: 1 },
         },
       },
@@ -73,8 +73,8 @@ export async function GET(
     reservations: user.reservations.map(r => ({
       id: r.id,
       refNumber: r.refNumber,
-      guideName: r.guideProfile.user.name ||
-        `${r.guideProfile.user.firstName ?? ''} ${r.guideProfile.user.lastName ?? ''}`.trim() || '—',
+      guideName: r.guideProfile.guideAccount?.displayName ||
+        `${r.guideProfile.guideAccount?.firstName ?? ''} ${r.guideProfile.guideAccount?.lastName ?? ''}`.trim() || '—',
       packageName: r.package.name,
       durationDays: r.package.durationDays,
       startDate: new Date(r.startDate).toLocaleDateString('fr-FR'),
@@ -97,7 +97,7 @@ export async function GET(
     })),
     conversations: user.conversationsAsPelerin.map(c => ({
       id: c.id,
-      guideName: c.guideProfile.user.name || c.guideProfile.user.firstName || '—',
+      guideName: c.guideProfile.guideAccount?.displayName || c.guideProfile.guideAccount?.firstName || '—',
       lastMessage: c.messages[0]?.content?.slice(0, 80) || '',
       lastMessageAt: c.messages[0] ? new Date(c.messages[0].createdAt).toLocaleDateString('fr-FR') : '',
     })),

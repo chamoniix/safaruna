@@ -13,7 +13,7 @@ export async function GET(
     where: { id },
     include: {
       pelerin: { select: { name: true, firstName: true, email: true } },
-      guideProfile: { include: { user: { select: { name: true, firstName: true, email: true } } } },
+      guideProfile: { include: { guideAccount: { select: { displayName: true, firstName: true, email: true } } } },
       messages: {
         orderBy: { createdAt: 'asc' },
         include: {
@@ -27,12 +27,12 @@ export async function GET(
   if (!conv) return NextResponse.json({ error: 'Introuvable' }, { status: 404 });
 
   const p = conv.pelerin;
-  const gu = conv.guideProfile.user;
+  const gu = conv.guideProfile.guideAccount;
 
   return NextResponse.json({
     id: conv.id,
     pelerin: { name: p.name || p.firstName || '—', email: p.email || '—' },
-    guide: { name: gu.name || gu.firstName || '—', email: gu.email || '—' },
+    guide: { name: gu?.displayName || gu?.firstName || '—', email: gu?.email || '—' },
     messages: conv.messages.map(m => {
       const isFromGuide = m.senderType === 'GUIDE';
       const senderName = isFromGuide

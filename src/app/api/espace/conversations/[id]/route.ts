@@ -17,7 +17,7 @@ export async function GET(
     include: {
       guideProfile: {
         include: {
-          user: { select: { name: true, firstName: true, lastName: true } }
+          guideAccount: { select: { displayName: true, firstName: true, lastName: true } }
         }
       },
       messages: { orderBy: { createdAt: 'asc' } },
@@ -34,8 +34,8 @@ export async function GET(
     data: { readAt: now },
   });
 
-  const g = conv.guideProfile.user;
-  const guideName = g.name || `${g.firstName ?? ''} ${g.lastName ?? ''}`.trim() || '—';
+  const g = conv.guideProfile.guideAccount;
+  const guideName = g?.displayName || `${g?.firstName ?? ''} ${g?.lastName ?? ''}`.trim() || '—';
 
   const fmt = (d: Date) => {
     const time = d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });

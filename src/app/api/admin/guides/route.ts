@@ -13,22 +13,22 @@ export async function GET(req: NextRequest) {
 
   const guides = await prisma.guideProfile.findMany({
     include: {
-      user: { select: { id: true, name: true, email: true, createdAt: true } },
+      guideAccount: { select: { id: true, displayName: true, email: true, registeredAt: true } },
       languages: true,
       reservations: { select: { id: true } },
     },
-    orderBy: { user: { createdAt: 'desc' } },
+    orderBy: { guideAccount: { registeredAt: 'desc' } },
   });
 
   return NextResponse.json({
     guides: guides.map(g => ({
       id: g.id,
-      name: g.user.name || '',
-      email: g.user.email || '',
+      name: g.guideAccount?.displayName || '',
+      email: g.guideAccount?.email || '',
       city: g.city || '',
       langs: g.languages.map(l => l.languageCode.toUpperCase()).join(', '),
       reservations: g.reservations.length,
-      joined: new Date(g.user.createdAt).toLocaleDateString('fr-FR'),
+      joined: g.guideAccount ? new Date(g.guideAccount.registeredAt).toLocaleDateString('fr-FR') : '—',
       createdByType: g.createdByType,
       createdByEmail: g.createdByEmail,
       status: g.status,
@@ -110,6 +110,7 @@ export async function POST(req: NextRequest) {
           firstName,
           lastName: lastName || '',
           legacyUserId: created.id,
+          registeredAt: created.createdAt,
         },
       });
       await tx.guideProfile.update({ where: { id: created.guideProfile!.id }, data: { guideAccountId: guideAccount.id } });

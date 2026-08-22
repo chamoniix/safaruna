@@ -20,7 +20,7 @@ export async function POST(
   const guide = await prisma.guideProfile.findUnique({
     where: { slug },
     include: {
-      user: { select: { id: true, email: true, name: true, firstName: true, lastName: true } },
+      guideAccount: { select: { id: true, email: true, displayName: true, firstName: true, lastName: true } },
     },
   });
 
@@ -71,7 +71,7 @@ export async function POST(
 
       await prisma.$transaction([
         prisma.user.update({
-          where: { id: guide.user.id },
+          where: { id: guide.userId },
           data: { passwordHash: hash, emailVerified: new Date() },
         }),
         ...(guide.guideAccountId ? [
@@ -86,8 +86,8 @@ export async function POST(
         ] : []),
       ]);
 
-      const userEmail = guide.user.email ?? '';
-      const userName = guide.user.name || guide.user.firstName || 'Guide';
+      const userEmail = guide.guideAccount?.email ?? '';
+      const userName = guide.guideAccount?.displayName || guide.guideAccount?.firstName || 'Guide';
       if (userEmail) {
         try {
           await sendGuideAccess({

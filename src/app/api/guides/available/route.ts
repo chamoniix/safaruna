@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
         ...(city === 'BOTH' || city === '' ? { OR: [{ servesMakkah: true }, { servesMadinah: true }] } : {}),
       },
       include: {
-        user: { select: { name: true, firstName: true, lastName: true, image: true } },
+        guideAccount: { select: { displayName: true, firstName: true, lastName: true, image: true } },
         languages: true,
         places: { where: { isActive: true }, select: { placeKey: true } },
       },
@@ -71,8 +71,8 @@ export async function GET(req: NextRequest) {
       : [[], []]
 
     const blockedIds = new Set([...conflicts, ...holds].map(item => item.guideProfileId))
-    const result = guides.filter(guide => !blockedIds.has(guide.id)).map(guide => {
-      const name = guide.user.name || `${guide.user.firstName ?? ''} ${guide.user.lastName ?? ''}`.trim()
+    const result = guides.filter(guide => !blockedIds.has(guide.id) && guide.guideAccount).map(guide => {
+      const name = guide.guideAccount!.displayName || `${guide.guideAccount!.firstName ?? ''} ${guide.guideAccount!.lastName ?? ''}`.trim()
       return {
         slug: guide.slug,
         name,
@@ -83,7 +83,7 @@ export async function GET(req: NextRequest) {
           ...(guide.servesMadinah ? ['MADINAH'] : []),
         ],
         bio: guide.bio,
-        image: guide.user.image || null,
+        image: guide.guideAccount!.image || null,
         experienceYears: guide.experienceYears,
         languages: guide.languages.map(language => language.languageCode),
         activePlaces: guide.places.map(place => place.placeKey),

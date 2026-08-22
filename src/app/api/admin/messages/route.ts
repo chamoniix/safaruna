@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     skip,
     include: {
       pelerin: { select: { name: true, firstName: true, lastName: true, email: true } },
-      guideProfile: { include: { user: { select: { name: true, firstName: true } } } },
+      guideProfile: { include: { guideAccount: { select: { displayName: true, firstName: true } } } },
       messages: { orderBy: { createdAt: 'desc' }, take: 1 },
       _count: { select: { messages: true } },
     },
@@ -26,11 +26,11 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     conversations: conversations.map(c => {
       const p = c.pelerin;
-      const gu = c.guideProfile.user;
+      const gu = c.guideProfile.guideAccount;
       return {
         id: c.id,
         pelerinName: p.name || `${p.firstName ?? ''} ${p.lastName ?? ''}`.trim() || p.email || '—',
-        guideName: gu.name || gu.firstName || '—',
+        guideName: gu?.displayName || gu?.firstName || '—',
         lastMessage: c.messages[0]?.content?.slice(0, 100) || '',
         lastMessageAt: c.messages[0]
           ? new Date(c.messages[0].createdAt).toLocaleDateString('fr-FR')

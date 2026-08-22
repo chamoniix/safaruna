@@ -22,8 +22,8 @@ export async function GET() {
   const access = await requireGuide();
   if (!access.ok) return access.response;
 
-  const user = await prisma.user.findFirst({
-    where: { id: access.actor.legacyUserId },
+  const account = await prisma.guideAccount.findUnique({
+    where: { id: access.actor.id },
     include: {
       guideProfile: {
         include: {
@@ -33,21 +33,21 @@ export async function GET() {
     },
   });
 
-  if (!user) return NextResponse.json({ error: 'Introuvable' }, { status: 404 });
-  if (!user.guideProfile) return NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 });
+  if (!account) return NextResponse.json({ error: 'Introuvable' }, { status: 404 });
+  if (!account.guideProfile) return NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 });
 
-  const gp = user.guideProfile;
-  const displayName = user.name || `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || user.email || '—';
+  const gp = account.guideProfile;
+  const displayName = account.displayName || `${account.firstName ?? ''} ${account.lastName ?? ''}`.trim() || account.email || '—';
 
   return NextResponse.json({
     profile: {
-      id: user.id,
+      id: account.id,
       name: displayName,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email || '—',
-      phoneWhatsapp: user.phoneWhatsapp,
-      country: user.country,
+      firstName: account.firstName,
+      lastName: account.lastName,
+      email: account.email || '—',
+      phoneWhatsapp: account.phoneWhatsapp,
+      country: account.country,
       slug: gp.slug,
       status: gp.status,
       bio: gp.bio,
@@ -65,7 +65,7 @@ export async function GET() {
       nationality: gp.nationality,
       experienceYears: gp.experienceYears,
       languages: gp.languages,
-      createdAt: new Date(user.createdAt).toLocaleDateString('fr-FR'),
+      createdAt: new Date(account.registeredAt).toLocaleDateString('fr-FR'),
     },
   });
 }
@@ -74,13 +74,13 @@ export async function PATCH(req: NextRequest) {
   const access = await requireGuide();
   if (!access.ok) return access.response;
 
-  const user = await prisma.user.findFirst({
-    where: { id: access.actor.legacyUserId },
+  const account = await prisma.guideAccount.findUnique({
+    where: { id: access.actor.id },
     include: { guideProfile: true },
   });
 
-  if (!user) return NextResponse.json({ error: 'Introuvable' }, { status: 404 });
-  if (!user.guideProfile) return NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 });
+  if (!account) return NextResponse.json({ error: 'Introuvable' }, { status: 404 });
+  if (!account.guideProfile) return NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 });
 
   const raw = await req.json();
   const parsed = profilPatchSchema.safeParse(raw);
@@ -96,21 +96,22 @@ export async function PATCH(req: NextRequest) {
         ...(firstName !== undefined && { firstName: firstName.trim() || null }),
         ...(lastName !== undefined && { lastName: lastName.trim() || null }),
         ...(phoneWhatsapp !== undefined && { phoneWhatsapp: phoneWhatsapp.trim() || null }),
+        ...(country !== undefined && { country: country.trim() || null }),
         ...(firstName && lastName && { displayName: `${firstName.trim()} ${lastName.trim()}` }),
       },
     }),
     prisma.user.update({
-      where: { id: user.id },
+      where: { id: account.legacyUserId! },
       data: {
         ...(firstName !== undefined && { firstName: firstName.trim() || null }),
         ...(lastName !== undefined && { lastName: lastName.trim() || null }),
         ...(phoneWhatsapp !== undefined && { phoneWhatsapp: phoneWhatsapp.trim() || null }),
         ...(country !== undefined && { country: country.trim() || null }),
-        name: firstName && lastName ? `${firstName.trim()} ${lastName.trim()}` : user.name,
+        name: firstName && lastName ? `${firstName.trim()} ${lastName.trim()}` : account.displayName,
       },
     }),
     prisma.guideProfile.update({
-      where: { id: user.guideProfile.id },
+      where: { id: account.guideProfile.id },
       data: {
         ...(bio !== undefined && { bio: bio.trim() || null }),
         ...(city !== undefined && { city: city.trim() || null }),

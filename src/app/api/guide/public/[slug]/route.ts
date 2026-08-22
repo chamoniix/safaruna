@@ -12,9 +12,9 @@ export async function GET(
     const guide = await prisma.guideProfile.findFirst({
       where: { slug, status: 'ACTIVE' },
       include: {
-        user: {
+        guideAccount: {
           select: {
-            name: true, firstName: true,
+            displayName: true, firstName: true,
             lastName: true, image: true, email: true,
           },
         },
@@ -23,12 +23,12 @@ export async function GET(
       },
     })
 
-    if (!guide)
+    if (!guide || !guide.guideAccount)
       return NextResponse.json({ error: 'Guide introuvable' }, { status: 404 })
 
     const name =
-      guide.user.name ||
-      `${guide.user.firstName ?? ''} ${guide.user.lastName ?? ''}`.trim()
+      guide.guideAccount.displayName ||
+      `${guide.guideAccount.firstName ?? ''} ${guide.guideAccount.lastName ?? ''}`.trim()
 
     return NextResponse.json({
       guide: {
@@ -40,7 +40,7 @@ export async function GET(
         servesMakkah: guide.servesMakkah,
         servesMadinah: guide.servesMadinah,
         bio: guide.bio,
-        image: guide.user.image || null,
+        image: guide.guideAccount.image || null,
         status: guide.status,
         acceptingBookings: guide.acceptingBookings,
         bookable: guide.acceptingBookings && (guide.servesMakkah || guide.servesMadinah),

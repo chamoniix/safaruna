@@ -8,10 +8,10 @@ export async function GET(req: NextRequest) {
 
   const guides = await prisma.guideProfile.findMany({
     include: {
-      user: { select: { name: true, firstName: true, lastName: true } },
+      guideAccount: { select: { displayName: true, firstName: true, lastName: true } },
       _count: { select: { reservations: true } },
     },
-    orderBy: { user: { name: 'asc' } },
+    orderBy: { guideAccount: { displayName: 'asc' } },
   });
 
   const revenueByGuide = await prisma.reservation.groupBy({
@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     guides: guides.map(g => ({
       id: g.id,
       slug: g.slug,
-      name: g.user.name || `${g.user.firstName ?? ''} ${g.user.lastName ?? ''}`.trim() || '—',
+      name: g.guideAccount?.displayName || `${g.guideAccount?.firstName ?? ''} ${g.guideAccount?.lastName ?? ''}`.trim() || '—',
       commissionRate: g.commissionRate,
       totalReservations: g._count.reservations,
       totalRevenue: Math.round(revenueMap.get(g.id)?.totalPrice ?? 0),

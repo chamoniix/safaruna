@@ -12,7 +12,7 @@ export async function GET() {
     include: {
       guideProfile: {
         include: {
-          user: { select: { name: true, firstName: true, lastName: true, email: true } }
+          guideAccount: { select: { displayName: true, firstName: true, lastName: true, email: true } }
         }
       },
       messages: {
@@ -33,10 +33,10 @@ export async function GET() {
 
   return NextResponse.json({
     conversations: convs.map((c, i) => {
-      const g = c.guideProfile.user;
-      const guideName = g.name
-        || `${g.firstName ?? ''} ${g.lastName ?? ''}`.trim()
-        || g.email
+      const g = c.guideProfile.guideAccount;
+      const guideName = g?.displayName
+        || `${g?.firstName ?? ''} ${g?.lastName ?? ''}`.trim()
+        || g?.email
         || '—';
       const last = c.messages[0];
       return {

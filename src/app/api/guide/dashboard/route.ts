@@ -6,8 +6,8 @@ export async function GET() {
   const access = await requireGuide();
   if (!access.ok) return access.response;
 
-  const user = await prisma.user.findUnique({
-    where: { id: access.actor.legacyUserId },
+  const account = await prisma.guideAccount.findUnique({
+    where: { id: access.actor.id },
     include: {
       guideProfile: {
         include: {
@@ -17,10 +17,10 @@ export async function GET() {
     },
   });
 
-  if (!user) return NextResponse.json({ error: 'Introuvable' }, { status: 404 });
-  if (!user.guideProfile) return NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 });
+  if (!account) return NextResponse.json({ error: 'Introuvable' }, { status: 404 });
+  if (!account.guideProfile) return NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 });
 
-  const guideProfile = user.guideProfile;
+  const guideProfile = account.guideProfile;
 
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -64,16 +64,16 @@ export async function GET() {
     ? Math.round((reviewsData.reduce((s, r) => s + r.ratingOverall, 0) / reviewsData.length) * 10) / 10
     : null;
 
-  const displayName = user.name
-    || `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim()
+  const displayName = account.displayName
+    || `${account.firstName ?? ''} ${account.lastName ?? ''}`.trim()
     || access.actor.email;
 
   return NextResponse.json({
     guide: {
-      id: user.id,
+      id: account.id,
       name: displayName,
-      firstName: user.firstName,
-      email: user.email || '—',
+      firstName: account.firstName,
+      email: account.email || '—',
       status: guideProfile.status,
       slug: guideProfile.slug,
       city: guideProfile.city,

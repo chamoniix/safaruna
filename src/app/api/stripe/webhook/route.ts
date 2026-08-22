@@ -274,14 +274,17 @@ export async function POST(req: NextRequest) {
   if (event.type === 'checkout.session.expired') {
     const session = event.data.object as Stripe.Checkout.Session
     const refNumber = session.metadata?.refNumber
-    if (refNumber) {
+    if (refNumber && session.client_reference_id === refNumber) {
+      const deleted = await prisma.reservationDraft.deleteMany({
+        where: { refNumber, stripeSessionId: session.id },
+      })
+      if (deleted.count === 0) return NextResponse.json({ received: true })
       await recordAnalyticsEvent({
         eventName: 'payment_expired',
         sessionHash: session.metadata?.analyticsSessionHash || null,
         path: '/checkout.stripe.com',
         metadata: { refNumber },
       })
-      await prisma.reservationDraft.deleteMany({ where: { refNumber } })
       await createAuditLog({
         actor: 'stripe', actorRole: 'SYSTEM', action: 'PAYMENT_SESSION_EXPIRED', target: refNumber,
       })
@@ -299,13 +302,19 @@ export async function POST(req: NextRequest) {
   }
   const refNumber = session.metadata?.refNumber
   if (!refNumber) return NextResponse.json({ error: 'refNumber manquant' }, { status: 400 })
+  if (session.mode !== 'payment' || session.currency?.toLowerCase() !== 'eur') {
+    return NextResponse.json({ error: 'Paramètres de paiement incohérents' }, { status: 400 })
+  }
+  if (session.client_reference_id !== refNumber) {
+    return NextResponse.json({ error: 'Référence Stripe incohérente' }, { status: 400 })
+  }
 
   const existingReservation = await prisma.reservation.findUnique({ where: { refNumber } })
   if (existingReservation) return NextResponse.json({ received: true })
 
   const draft = await prisma.reservationDraft.findUnique({ where: { refNumber } })
   if (!draft) return NextResponse.json({ error: 'Draft non trouvé' }, { status: 404 })
-  if (draft.stripeSessionId && draft.stripeSessionId !== session.id) {
+  if (draft.stripeSessionId !== session.id) {
     return NextResponse.json({ error: 'Session Stripe incohérente' }, { status: 400 })
   }
   const data = JSON.parse(draft.data) as DraftData
@@ -313,16 +322,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missions manquantes' }, { status: 400 })
   }
 
-  const pelerinEmail = session.customer_details?.email || session.customer_email || session.metadata?.pelerinEmail
+  const pelerinEmail = session.metadata?.pelerinEmail
   if (!pelerinEmail) return NextResponse.json({ error: 'Email pèlerin manquant' }, { status: 400 })
-  if (draft.pelerinId && session.metadata?.pelerinId !== draft.pelerinId) {
+  if (session.metadata?.pelerinId !== draft.pelerinId) {
     return NextResponse.json({ error: 'Identité pèlerin incohérente' }, { status: 400 })
   }
-  const pelerin = draft.pelerinId
-    ? await prisma.user.findUnique({ where: { id: draft.pelerinId } })
-    : await prisma.user.findUnique({ where: { email: pelerinEmail } })
+  const pelerin = await prisma.user.findUnique({ where: { id: draft.pelerinId } })
   if (!pelerin) return NextResponse.json({ error: 'Pèlerin non trouvé' }, { status: 404 })
-  if (pelerin.role !== 'PELERIN' || pelerin.email?.toLowerCase() !== pelerinEmail.toLowerCase()) {
+  if (pelerin.role !== 'PELERIN' || !pelerin.emailVerified || pelerin.email?.toLowerCase() !== pelerinEmail.toLowerCase()) {
     return NextResponse.json({ error: 'Compte pèlerin incohérent' }, { status: 400 })
   }
 
@@ -349,7 +356,10 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  const confirmedAmount = (session.amount_total ?? 0) / 100
+  if (!Number.isInteger(session.amount_total) || (session.amount_total ?? 0) <= 0) {
+    return NextResponse.json({ error: 'Montant Stripe manquant' }, { status: 400 })
+  }
+  const confirmedAmount = session.amount_total! / 100
   if (Math.abs(confirmedAmount - data.totalPrice) > 0.01) {
     console.error(`[SECURITY] Montant Stripe ${confirmedAmount}€ ≠ draft ${data.totalPrice}€ pour ${refNumber}`)
     return NextResponse.json({ error: 'Montant Stripe incohérent' }, { status: 400 })
@@ -369,9 +379,9 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    await prisma.$transaction(async tx => {
+    const reservationCreated = await prisma.$transaction(async tx => {
       const duplicate = await tx.reservation.findUnique({ where: { refNumber } })
-      if (duplicate) return
+      if (duplicate) return false
 
       const reservation = await tx.reservation.create({
         data: {
@@ -462,7 +472,10 @@ export async function POST(req: NextRequest) {
       }
 
       await tx.reservationDraft.delete({ where: { refNumber } })
+      return true
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable })
+
+    if (!reservationCreated) return NextResponse.json({ received: true })
   } catch (error) {
     console.error('[stripe/webhook transaction]', error)
     Sentry.captureException(error, { tags: { area: 'stripe-webhook-reservation' }, extra: { refNumber } })

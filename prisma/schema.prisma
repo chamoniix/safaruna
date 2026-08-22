@@ -439,7 +439,7 @@ model Reservation {
   commissionAmount Float
   totalPrice       Float
   status           ReservationStatus @default(PENDING)
-  stripePaymentId  String?
+  stripePaymentId  String?           @unique
   notes            String?
   selectedPlaces   Json?
   selectedCities   String?
@@ -689,8 +689,8 @@ model ReservationDraft {
   expiresAt       DateTime
   createdAt       DateTime          @default(now())
   stripeSessionId String?           @unique
-  pelerinId       String?
-  pelerin         User?             @relation(fields: [pelerinId], references: [id], onDelete: Cascade)
+  pelerinId       String
+  pelerin         User              @relation(fields: [pelerinId], references: [id], onDelete: Cascade)
   holds           ReservationHold[]
 
   @@index([pelerinId, createdAt])

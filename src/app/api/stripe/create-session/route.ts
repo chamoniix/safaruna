@@ -407,6 +407,7 @@ export async function POST(req: NextRequest) {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || new URL(req.url).origin
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: 'payment',
+      client_reference_id: refNumber,
       line_items: [{
         price_data: {
           currency: 'eur',

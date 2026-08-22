@@ -76,19 +76,18 @@ export async function POST(req: NextRequest) {
   const password = `${randomBytes(12).toString('base64url')}Aa1!`;
   const passwordHash = await bcrypt.hash(password, 12);
 
-  let user;
+  let guideAccount;
   try {
-    user = await prisma.$transaction(async tx => {
+    guideAccount = await prisma.$transaction(async tx => {
       await tx.emailIdentity.create({ data: { email, kind: 'GUIDE' } });
-      const created = await tx.user.create({
+      return tx.guideAccount.create({
         data: {
           email,
-          name: `${firstName} ${lastName || ''}`.trim(),
+          passwordHash,
+          emailVerified: new Date(),
+          displayName: `${firstName} ${lastName || ''}`.trim(),
           firstName,
           lastName: lastName || '',
-          passwordHash,
-          role: 'GUIDE',
-          emailVerified: new Date(),
           guideProfile: {
             create: {
               slug,
@@ -101,20 +100,6 @@ export async function POST(req: NextRequest) {
         },
         include: { guideProfile: { select: { id: true } } },
       });
-      const guideAccount = await tx.guideAccount.create({
-        data: {
-          email: email.toLowerCase(),
-          passwordHash,
-          emailVerified: new Date(),
-          displayName: `${firstName} ${lastName || ''}`.trim(),
-          firstName,
-          lastName: lastName || '',
-          legacyUserId: created.id,
-          registeredAt: created.createdAt,
-        },
-      });
-      await tx.guideProfile.update({ where: { id: created.guideProfile!.id }, data: { guideAccountId: guideAccount.id } });
-      return created;
     });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
@@ -142,14 +127,14 @@ export async function POST(req: NextRequest) {
       actorRole: actor.role,
       actorAdminId: actor.id,
       action: 'GUIDE_CREATED_BY_ADMIN',
-      target: user.id,
-      detail: adminAuditDetail(auditContext, { email, slug }),
+      target: guideAccount.id,
+      detail: adminAuditDetail(auditContext, { email, slug, guideAccountId: guideAccount.id, guideProfileId: guideAccount.guideProfile?.id }),
       after: { email, slug, status: 'REVIEW', createdByType: actor.role, createdByEmail: actor.email },
       ...adminAuditFields(auditContext),
     },
   });
 
-  return NextResponse.json({ success: true, userId: user.id, slug }, { status: 201 });
+  return NextResponse.json({ success: true, guideAccountId: guideAccount.id, guideProfileId: guideAccount.guideProfile?.id, slug }, { status: 201 });
 }
 
 export async function PATCH(req: NextRequest) {

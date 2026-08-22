@@ -70,10 +70,6 @@ export async function POST(
       const hash = await bcrypt.hash(password, 12);
 
       await prisma.$transaction([
-        prisma.user.update({
-          where: { id: guide.userId },
-          data: { passwordHash: hash, emailVerified: new Date() },
-        }),
         ...(guide.guideAccountId ? [
           prisma.guideAccount.update({
             where: { id: guide.guideAccountId },

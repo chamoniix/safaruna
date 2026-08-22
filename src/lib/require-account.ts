@@ -23,7 +23,6 @@ export type GuideActor = {
   role: 'GUIDE'
   guideProfileId: string
   guideStatus: 'DRAFT' | 'REVIEW' | 'ACTIVE'
-  legacyUserId: string
   displayName: string | null
   firstName: string | null
   lastName: string | null
@@ -77,7 +76,7 @@ export async function requireGuide(): Promise<Allowed<GuideActor> | Denied> {
   const account = guideSession.guideAccount
 
   if (account.status !== 'ACTIVE' || account.guideProfile?.status === 'SUSPENDED') return denied(403, 'Compte guide suspendu')
-  if (!account.email || !account.guideProfile || !account.legacyUserId) return denied(403, 'Profil guide introuvable')
+  if (!account.email || !account.guideProfile) return denied(403, 'Profil guide introuvable')
 
   return {
     ok: true,
@@ -87,7 +86,6 @@ export async function requireGuide(): Promise<Allowed<GuideActor> | Denied> {
       role: 'GUIDE',
       guideProfileId: account.guideProfile.id,
       guideStatus: account.guideProfile.status,
-      legacyUserId: account.legacyUserId,
       displayName: account.displayName,
       firstName: account.firstName,
       lastName: account.lastName,

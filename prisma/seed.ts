@@ -23,16 +23,16 @@ async function main() {
     },
   })
 
-  const guideUser = await prisma.user.upsert({
+  const guideUser = await prisma.guideAccount.upsert({
     where: { email: "demo@guide.com" },
     update: {},
     create: {
       email: "demo@guide.com",
-      name: "Rachid Al-Madani",
+      displayName: "Rachid Al-Madani",
       firstName: "Rachid",
       lastName: "Al-Madani",
       passwordHash: guideHash,
-      role: "GUIDE",
+      emailVerified: new Date(),
     },
   })
 
@@ -57,10 +57,10 @@ async function main() {
 
   // --- Guide 1: Rachid Al-Madani (Makkah) ---
   const guide1Profile = await prisma.guideProfile.upsert({
-    where: { userId: guideUser.id },
+    where: { guideAccountId: guideUser.id },
     update: {},
     create: {
-      userId: guideUser.id,
+      guideAccountId: guideUser.id,
       slug: "rachid-al-madani",
       bio: "Né à La Mecque, diplômé de l'Université Islamique de Madinah. 12 ans d'expérience en guidage spirituel pour des familles francophones. Mon approche allie rigueur scientifique et bienveillance humaine.",
       city: "Makkah",
@@ -98,23 +98,22 @@ async function main() {
   })
 
   // --- Guide 2: Fatima Al-Omari ---
-  const fatima = await prisma.user.upsert({
+  const fatima = await prisma.guideAccount.upsert({
     where: { email: "fatima@safaruma.com" },
     update: {},
     create: {
       email: "fatima@safaruma.com",
-      name: "Fatima Al-Omari",
+      displayName: "Fatima Al-Omari",
       firstName: "Fatima",
       lastName: "Al-Omari",
-      role: "GUIDE",
     },
   })
 
   const guide2Profile = await prisma.guideProfile.upsert({
-    where: { userId: fatima.id },
+    where: { guideAccountId: fatima.id },
     update: {},
     create: {
-      userId: fatima.id,
+      guideAccountId: fatima.id,
       slug: "fatima-al-omari",
       bio: "Guide femme agréée, spécialiste de l'accompagnement des familles et groupes féminins. Née à Casablanca, je parle le français et le darija avec le cœur. Votre confort et votre sécurité sont ma priorité.",
       city: "Makkah",
@@ -143,23 +142,22 @@ async function main() {
   })
 
   // --- Guide 3: Youssouf Konaté ---
-  const youssouf = await prisma.user.upsert({
+  const youssouf = await prisma.guideAccount.upsert({
     where: { email: "youssouf@safaruma.com" },
     update: {},
     create: {
       email: "youssouf@safaruma.com",
-      name: "Youssouf Konaté",
+      displayName: "Youssouf Konaté",
       firstName: "Youssouf",
       lastName: "Konaté",
-      role: "GUIDE",
     },
   })
 
   const guide3Profile = await prisma.guideProfile.upsert({
-    where: { userId: youssouf.id },
+    where: { guideAccountId: youssouf.id },
     update: {},
     create: {
-      userId: youssouf.id,
+      guideAccountId: youssouf.id,
       slug: "youssouf-konate",
       bio: "Originaire de Dakar, je suis l'intermédiaire entre les communautés d'Afrique de l'Ouest et les Lieux Saints. Spécialiste de la Sira et de l'histoire islamique en Wolof et en français.",
       city: "Makkah",
@@ -188,23 +186,22 @@ async function main() {
   })
 
   // --- Guide 4: Abdullah Ben Yusuf (Madinah) ---
-  const abdullah = await prisma.user.upsert({
+  const abdullah = await prisma.guideAccount.upsert({
     where: { email: "abdullah@safaruma.com" },
     update: {},
     create: {
       email: "abdullah@safaruma.com",
-      name: "Abdullah Ben Yusuf",
+      displayName: "Abdullah Ben Yusuf",
       firstName: "Abdullah",
       lastName: "Ben Yusuf",
-      role: "GUIDE",
     },
   })
 
   const guide4Profile = await prisma.guideProfile.upsert({
-    where: { userId: abdullah.id },
+    where: { guideAccountId: abdullah.id },
     update: {},
     create: {
-      userId: abdullah.id,
+      guideAccountId: abdullah.id,
       slug: "abdullah-ben-yusuf",
       bio: "Diplômé en Sciences islamiques de l'Université de Madinah, je suis spécialiste de la Sira du Prophète et des lieux historiques de Madinah. Référence pour les visites académiques.",
       city: "Madinah",
@@ -240,23 +237,22 @@ async function main() {
   })
 
   // --- Guide 5: Samira Al-Rashidi (Madinah, PMR) ---
-  const samira = await prisma.user.upsert({
+  const samira = await prisma.guideAccount.upsert({
     where: { email: "samira@safaruma.com" },
     update: {},
     create: {
       email: "samira@safaruma.com",
-      name: "Samira Al-Rashidi",
+      displayName: "Samira Al-Rashidi",
       firstName: "Samira",
       lastName: "Al-Rashidi",
-      role: "GUIDE",
     },
   })
 
   const guide5Profile = await prisma.guideProfile.upsert({
-    where: { userId: samira.id },
+    where: { guideAccountId: samira.id },
     update: {},
     create: {
-      userId: samira.id,
+      guideAccountId: samira.id,
       slug: "samira-al-rashidi",
       bio: "Spécialiste de l'accueil des pèlerins à mobilité réduite (PMR). Fauteuils roulants adaptés, véhicules équipés, accompagnement bienveillant à Madinah. Tunisienne de cœur, au service de vos parents et grands-parents.",
       city: "Madinah",

@@ -234,15 +234,16 @@ export async function PATCH(
 
     if (body.firstName !== undefined || body.lastName !== undefined ||
         body.phoneWhatsapp !== undefined || body.email !== undefined) {
+      if (!guide.guideAccountId) {
+        return NextResponse.json({ error: 'Compte guide introuvable' }, { status: 409 });
+      }
       const identityData = {
         ...(body.firstName !== undefined && { firstName: body.firstName }),
         ...(body.lastName !== undefined && { lastName: body.lastName }),
         ...(body.phoneWhatsapp !== undefined && { phoneWhatsapp: body.phoneWhatsapp }),
         ...(body.email !== undefined && { email: String(body.email).toLowerCase() }),
       };
-      await prisma.$transaction([
-        prisma.user.update({ where: { id: guide.userId }, data: identityData }),
-        ...(guide.guideAccountId ? [prisma.guideAccount.update({
+      await prisma.guideAccount.update({
           where: { id: guide.guideAccountId },
           data: {
             ...identityData,
@@ -250,8 +251,7 @@ export async function PATCH(
               displayName: `${body.firstName ?? ''} ${body.lastName ?? ''}`.trim() || undefined,
             }),
           },
-        })] : []),
-      ]);
+        });
       const fields = ['firstName', 'lastName', 'phoneWhatsapp', 'email'].filter(key => body[key] !== undefined);
       await audit('GUIDE_IDENTITY_UPDATED', guide.id, {
         detail: { fields },

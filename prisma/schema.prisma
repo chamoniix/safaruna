@@ -55,10 +55,8 @@ model User {
   newsletterOptIn Boolean @default(false)
 
   // Relations
-  accounts     Account[]
-  sessions     Session[]
-  guideProfile GuideProfile?
-
+  accounts               Account[]
+  sessions               Session[]
   // As a Pelerin
   reservations           Reservation[]      @relation("PelerinReservations")
   conversationsAsPelerin Conversation[]     @relation("PelerinConversations")
@@ -170,8 +168,6 @@ model AdminLoginAttempt {
 
 model GuideProfile {
   id                    String           @id @default(cuid())
-  userId                String           @unique
-  user                  User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   guideAccountId        String?          @unique
   guideAccount          GuideAccount?    @relation(fields: [guideAccountId], references: [id], onDelete: SetNull)
   slug                  String?          @unique
@@ -243,7 +239,6 @@ model GuideAccount {
   phoneWhatsapp String?
   country       String?
   image         String?
-  legacyUserId  String?             @unique
   status        GuideAccountStatus  @default(ACTIVE)
   lastLoginAt   DateTime?
   registeredAt  DateTime            @default(now())

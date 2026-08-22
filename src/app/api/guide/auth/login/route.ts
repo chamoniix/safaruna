@@ -113,7 +113,6 @@ export async function POST(req: NextRequest) {
 
   recordAnalyticsEvent({
     eventName: 'login_success',
-    userId: account.legacyUserId,
     path: '/guide/connexion',
     country: context.country,
     device: context.device,

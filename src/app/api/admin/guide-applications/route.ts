@@ -187,17 +187,17 @@ export async function PATCH(req: NextRequest) {
   const now = new Date()
 
   const result = await prisma.$transaction(async tx => {
-    const user = await tx.user.create({
+    const guideAccount = await tx.guideAccount.create({
       data: {
         email: application.email,
-        name: `${application.firstName} ${application.lastName}`.trim(),
+        passwordHash,
+        emailVerified: now,
+        displayName: `${application.firstName} ${application.lastName}`.trim(),
         firstName: application.firstName,
         lastName: application.lastName,
         phoneWhatsapp: application.whatsapp,
         country: application.nationality,
-        passwordHash,
-        role: 'GUIDE',
-        emailVerified: now,
+        registeredAt: now,
         guideProfile: {
           create: {
             slug,
@@ -225,24 +225,6 @@ export async function PATCH(req: NextRequest) {
       },
       include: { guideProfile: { select: { id: true } } },
     })
-    const guideAccount = await tx.guideAccount.create({
-      data: {
-        email: application.email.toLowerCase(),
-        passwordHash,
-        emailVerified: now,
-        displayName: `${application.firstName} ${application.lastName}`.trim(),
-        firstName: application.firstName,
-        lastName: application.lastName,
-        phoneWhatsapp: application.whatsapp,
-        country: application.nationality,
-        legacyUserId: user.id,
-        registeredAt: user.createdAt,
-      },
-    })
-    await tx.guideProfile.update({
-      where: { id: user.guideProfile!.id },
-      data: { guideAccountId: guideAccount.id },
-    })
     await tx.emailIdentity.update({
       where: { email: application.email },
       data: { kind: 'GUIDE' },
@@ -255,7 +237,7 @@ export async function PATCH(req: NextRequest) {
         reviewedByAdminId: actor.id,
         reviewedByEmail: actor.email,
         reviewedAt: now,
-        createdGuideProfileId: user.guideProfile?.id,
+        createdGuideProfileId: guideAccount.guideProfile?.id,
       },
     })
     await tx.auditLog.create({
@@ -265,18 +247,18 @@ export async function PATCH(req: NextRequest) {
         actorAdminId: actor.id,
         action: 'GUIDE_APPLICATION_APPROVED',
         target: applicationId,
-        detail: adminAuditDetail(auditContext, { email: application.email, userId: user.id, guideProfileId: user.guideProfile?.id, slug }),
+        detail: adminAuditDetail(auditContext, { email: application.email, guideAccountId: guideAccount.id, guideProfileId: guideAccount.guideProfile?.id, slug }),
         before: { status: application.status, reviewNotes: application.reviewNotes },
         after: {
           status: 'APPROVED',
           reviewNotes: reviewNotes?.trim() || null,
-          guideProfileId: user.guideProfile?.id,
+          guideProfileId: guideAccount.guideProfile?.id,
           approvedByEmail: actor.email,
         },
         ...adminAuditFields(auditContext),
       },
     })
-    return user
+    return guideAccount
   })
 
   try {
@@ -295,7 +277,7 @@ export async function PATCH(req: NextRequest) {
   return NextResponse.json({
     success: true,
     applicationId,
-    userId: result.id,
+    guideAccountId: result.id,
     guideProfileId: result.guideProfile?.id,
     slug,
   })

@@ -89,7 +89,7 @@ export async function PATCH(req: NextRequest) {
   }
   const { firstName, lastName, phoneWhatsapp, country, bio, city, gender, servesMakkah, servesMadinah, acceptingBookings, nationality, experienceYears } = parsed.data;
 
-  await Promise.all([
+  await prisma.$transaction([
     prisma.guideAccount.update({
       where: { id: access.actor.id },
       data: {
@@ -98,16 +98,6 @@ export async function PATCH(req: NextRequest) {
         ...(phoneWhatsapp !== undefined && { phoneWhatsapp: phoneWhatsapp.trim() || null }),
         ...(country !== undefined && { country: country.trim() || null }),
         ...(firstName && lastName && { displayName: `${firstName.trim()} ${lastName.trim()}` }),
-      },
-    }),
-    prisma.user.update({
-      where: { id: account.legacyUserId! },
-      data: {
-        ...(firstName !== undefined && { firstName: firstName.trim() || null }),
-        ...(lastName !== undefined && { lastName: lastName.trim() || null }),
-        ...(phoneWhatsapp !== undefined && { phoneWhatsapp: phoneWhatsapp.trim() || null }),
-        ...(country !== undefined && { country: country.trim() || null }),
-        name: firstName && lastName ? `${firstName.trim()} ${lastName.trim()}` : account.displayName,
       },
     }),
     prisma.guideProfile.update({

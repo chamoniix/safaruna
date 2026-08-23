@@ -9,6 +9,11 @@ type Log = {
   action: string
   target?: string
   detail?: string
+  ip?: string
+  requestId?: string
+  userAgent?: string
+  before?: unknown
+  after?: unknown
 }
 
 const ACTION_COLORS: Record<string, string> = {
@@ -18,6 +23,21 @@ const ACTION_COLORS: Record<string, string> = {
   PLACE_TOGGLED:         '#C9A84C',
   GUIDE_ACTIVATED:       '#2563EB',
   GUIDE_DEACTIVATED:     '#DC2626',
+  GUIDE_SUSPENDED:       '#DC2626',
+  GUIDE_IDENTITY_UPDATED:'#2563EB',
+  GUIDE_PROFILE_UPDATED: '#2563EB',
+  GUIDE_INTERVIEW_UPDATED:'#2563EB',
+  GUIDE_LANGUAGE_ADDED:  '#2563EB',
+  GUIDE_LANGUAGE_DELETED:'#DC2626',
+  GUIDE_PLACE_TOGGLED:   '#C9A84C',
+  GUIDE_APPLICATION_APPROVED: '#1D5C3A',
+  GUIDE_APPLICATION_REJECTED: '#DC2626',
+  GUIDE_ACTIVATED_WITH_NEW_ACCESS: '#1D5C3A',
+  GUIDE_CREATED_BY_ADMIN: '#2563EB',
+  ADMIN_ACCOUNT_BOOTSTRAPPED: '#7C3AED',
+  RESERVATION_STATUS_UPDATED: '#C9A84C',
+  RESERVATION_GUIDE_TRANSFERRED: '#2563EB',
+  PAYMENT_SESSION_EXPIRED: '#DC2626',
   RESERVATION_CANCELLED: '#DC2626',
   CRON_SENT:             '#7A6D5A',
 }
@@ -29,20 +49,55 @@ const ACTION_LABELS: Record<string, string> = {
   PLACE_TOGGLED:         'Lieu activé/désactivé',
   GUIDE_ACTIVATED:       'Guide activé',
   GUIDE_DEACTIVATED:     'Guide désactivé',
+  GUIDE_SUSPENDED:       'Guide suspendu',
+  GUIDE_IDENTITY_UPDATED:'Identité guide modifiée',
+  GUIDE_PROFILE_UPDATED: 'Profil guide modifié',
+  GUIDE_INTERVIEW_UPDATED:'Entretien guide modifié',
+  GUIDE_LANGUAGE_ADDED:  'Langue guide ajoutée',
+  GUIDE_LANGUAGE_DELETED:'Langue guide supprimée',
+  GUIDE_PLACE_TOGGLED:   'Lieu guide activé/désactivé',
+  GUIDE_APPLICATION_APPROVED: 'Candidature guide validée',
+  GUIDE_APPLICATION_REJECTED: 'Candidature guide rejetée',
+  GUIDE_ACTIVATED_WITH_NEW_ACCESS: 'Guide activé avec de nouveaux accès',
+  GUIDE_CREATED_BY_ADMIN: 'Guide créé par un administrateur',
+  ADMIN_ACCOUNT_BOOTSTRAPPED: 'Compte administrateur initialisé',
+  RESERVATION_STATUS_UPDATED: 'Statut réservation modifié',
+  RESERVATION_GUIDE_TRANSFERRED: 'Réservation transférée',
+  PAYMENT_SESSION_EXPIRED: 'Session de paiement expirée',
   RESERVATION_CANCELLED: 'Réservation annulée',
   CRON_SENT:             'Cron notifications',
+}
+
+function formatAuditValue(value: unknown): string {
+  if (value === undefined || value === null) return '—'
+  if (typeof value === 'string') {
+    try {
+      return JSON.stringify(JSON.parse(value), null, 2)
+    } catch {
+      return value
+    }
+  }
+  return JSON.stringify(value, null, 2)
 }
 
 export default function AuditPage() {
   const [logs, setLogs] = useState<Log[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('')
+  const [error, setError] = useState('')
 
   useEffect(() => {
     fetch('/api/admin/audit')
-      .then(r => r.json())
-      .then(d => { setLogs(d.logs || []); setLoading(false) })
+      .then(async response => {
+        const data = await response.json()
+        if (!response.ok) throw new Error(data.error || 'Impossible de charger le journal.')
+        setLogs(data.logs || [])
+      })
+      .catch(err => setError(err instanceof Error ? err.message : 'Impossible de charger le journal.'))
+      .finally(() => setLoading(false))
   }, [])
+
+  const actionOptions = Array.from(new Set(logs.map(log => log.action))).sort()
 
   const filtered = filter
     ? logs.filter(l => l.action === filter || l.actor.includes(filter))
@@ -79,14 +134,18 @@ export default function AuditPage() {
           }}
         >
           <option value="">Tous les événements</option>
-          {Object.entries(ACTION_LABELS).map(([k, v]) => (
-            <option key={k} value={k}>{v}</option>
+          {actionOptions.map(action => (
+            <option key={action} value={action}>{ACTION_LABELS[action] || action}</option>
           ))}
         </select>
       </div>
 
       {/* Table */}
-      {loading ? (
+      {error ? (
+        <div style={{ textAlign: 'center', color: '#DC2626', padding: '3rem', background: '#FEE2E2', border: '1px solid #FCA5A5', borderRadius: 16 }}>
+          {error}
+        </div>
+      ) : loading ? (
         <div style={{ textAlign: 'center', color: '#7A6D5A', padding: '3rem' }}>
           Chargement...
         </div>
@@ -102,71 +161,96 @@ export default function AuditPage() {
       ) : (
         <div style={{
           background: 'white', borderRadius: 16,
-          border: '1px solid #E8DFC8', overflow: 'hidden',
+          border: '1px solid #E8DFC8', overflowX: 'auto',
         }}>
-          {/* Header table */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: '160px 140px 200px 140px 1fr',
-            gap: '1rem', padding: '0.75rem 1.25rem',
-            background: '#FAF7F0', borderBottom: '1px solid #E8DFC8',
-            fontSize: '0.65rem', fontWeight: 700,
-            letterSpacing: '0.1em', textTransform: 'uppercase' as const,
-            color: '#7A6D5A',
-          }}>
-            <span>Date</span>
-            <span>Acteur</span>
-            <span>Action</span>
-            <span>Cible</span>
-            <span>Détail</span>
-          </div>
-
-          {/* Rows */}
-          {filtered.map((log, idx) => (
-            <div
-              key={log.id}
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '160px 140px 200px 140px 1fr',
-                gap: '1rem', padding: '0.875rem 1.25rem',
-                borderBottom: idx < filtered.length - 1
-                  ? '1px solid #F5F0E8' : 'none',
-                fontSize: '0.82rem', alignItems: 'center',
-              }}
-            >
-              <span style={{ color: '#7A6D5A', fontSize: '0.75rem' }}>
-                {new Date(log.createdAt).toLocaleString('fr-FR', {
-                  day: '2-digit', month: '2-digit',
-                  hour: '2-digit', minute: '2-digit',
-                })}
-              </span>
-              <div>
-                <div style={{ fontWeight: 600, color: '#1A1209', fontSize: '0.78rem' }}>
-                  {log.actor}
-                </div>
-                <div style={{ color: '#9CA3AF', fontSize: '0.68rem', marginTop: 2 }}>
-                  {log.actorRole}
-                </div>
-              </div>
-              <div>
-                <span style={{
-                  display: 'inline-block',
-                  background: `${ACTION_COLORS[log.action] || '#7A6D5A'}18`,
-                  color: ACTION_COLORS[log.action] || '#7A6D5A',
-                  fontSize: '0.72rem', fontWeight: 700,
-                  padding: '0.2rem 0.65rem', borderRadius: 50,
-                }}>
-                  {ACTION_LABELS[log.action] || log.action}
-                </span>
-              </div>
-              <span style={{ color: '#4A3F30', fontSize: '0.78rem', fontFamily: 'monospace' }}>
-                {log.target || '—'}
-              </span>
-              <span style={{ color: '#7A6D5A', fontSize: '0.75rem' }}>
-                {log.detail || '—'}
-              </span>
+          <div style={{ minWidth: 1180 }}>
+            {/* Header table */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '150px 190px 210px 150px 140px minmax(300px, 1fr)',
+              gap: '1rem', padding: '0.75rem 1.25rem',
+              background: '#FAF7F0', borderBottom: '1px solid #E8DFC8',
+              fontSize: '0.65rem', fontWeight: 700,
+              letterSpacing: '0.1em', textTransform: 'uppercase' as const,
+              color: '#7A6D5A',
+            }}>
+              <span>Date</span>
+              <span>Auteur</span>
+              <span>Action</span>
+              <span>Cible</span>
+              <span>Réseau</span>
+              <span>Détail et modifications</span>
             </div>
-          ))}
+
+            {/* Rows */}
+            {filtered.map((log, idx) => (
+              <div
+                key={log.id}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '150px 190px 210px 150px 140px minmax(300px, 1fr)',
+                  gap: '1rem', padding: '0.875rem 1.25rem',
+                  borderBottom: idx < filtered.length - 1
+                    ? '1px solid #F5F0E8' : 'none',
+                  fontSize: '0.82rem', alignItems: 'start',
+                }}
+              >
+                <span style={{ color: '#7A6D5A', fontSize: '0.75rem' }}>
+                  {new Date(log.createdAt).toLocaleString('fr-FR', {
+                    day: '2-digit', month: '2-digit', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit',
+                  })}
+                </span>
+                <div>
+                  <div style={{ fontWeight: 600, color: '#1A1209', fontSize: '0.78rem', overflowWrap: 'anywhere' }}>
+                    {log.actor}
+                  </div>
+                  <div style={{ color: '#9CA3AF', fontSize: '0.68rem', marginTop: 2 }}>
+                    {log.actorRole}
+                  </div>
+                </div>
+                <div>
+                  <span style={{
+                    display: 'inline-block',
+                    background: `${ACTION_COLORS[log.action] || '#7A6D5A'}18`,
+                    color: ACTION_COLORS[log.action] || '#7A6D5A',
+                    fontSize: '0.72rem', fontWeight: 700,
+                    padding: '0.2rem 0.65rem', borderRadius: 50,
+                  }}>
+                    {ACTION_LABELS[log.action] || log.action}
+                  </span>
+                </div>
+                <span style={{ color: '#4A3F30', fontSize: '0.72rem', fontFamily: 'monospace', overflowWrap: 'anywhere' }}>
+                  {log.target || '—'}
+                </span>
+                <div style={{ color: '#4A3F30', fontSize: '0.72rem' }}>
+                  <div style={{ fontFamily: 'monospace', overflowWrap: 'anywhere' }}>{log.ip || '—'}</div>
+                  {log.requestId && <div style={{ color: '#9CA3AF', marginTop: 3, overflowWrap: 'anywhere' }}>ID : {log.requestId}</div>}
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', minWidth: 0 }}>
+                  {(log.before != null || log.after != null) && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                      <div style={{ minWidth: 0 }}>
+                        <span style={{ display: 'block', color: '#7A6D5A', fontSize: '0.65rem', fontWeight: 700, marginBottom: 3 }}>Avant</span>
+                        <pre style={{ margin: 0, padding: '0.5rem', borderRadius: 6, background: '#FFF7ED', color: '#9A3412', fontSize: '0.67rem', whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', fontFamily: 'monospace' }}>{formatAuditValue(log.before)}</pre>
+                      </div>
+                      <div style={{ minWidth: 0 }}>
+                        <span style={{ display: 'block', color: '#7A6D5A', fontSize: '0.65rem', fontWeight: 700, marginBottom: 3 }}>Après</span>
+                        <pre style={{ margin: 0, padding: '0.5rem', borderRadius: 6, background: '#ECFDF5', color: '#166534', fontSize: '0.67rem', whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', fontFamily: 'monospace' }}>{formatAuditValue(log.after)}</pre>
+                      </div>
+                    </div>
+                  )}
+                  {log.detail && (
+                    <details>
+                      <summary style={{ color: '#7A6D5A', fontSize: '0.72rem', cursor: 'pointer' }}>Contexte technique</summary>
+                      <pre style={{ margin: '0.4rem 0 0', padding: '0.5rem', borderRadius: 6, background: '#F8F6F2', color: '#4A3F30', fontSize: '0.67rem', whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', fontFamily: 'monospace' }}>{formatAuditValue(log.detail)}</pre>
+                    </details>
+                  )}
+                  {!log.detail && log.before == null && log.after == null && <span style={{ color: '#9CA3AF' }}>—</span>}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

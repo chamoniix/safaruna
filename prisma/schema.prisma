@@ -121,10 +121,24 @@ model AdminAccount {
   updatedAt    DateTime           @updatedAt
 
   sessions              AdminSession[]
+  passwordResetTokens   AdminPasswordResetToken[]
   createdGuideProfiles  GuideProfile[]     @relation("GuideCreatedByAdmin")
   approvedGuideProfiles GuideProfile[]     @relation("GuideApprovedByAdmin")
   reviewedApplications  GuideApplication[] @relation("GuideApplicationReviewedBy")
   auditLogs             AuditLog[]         @relation("AuditActorAdmin")
+}
+
+model AdminPasswordResetToken {
+  id             String       @id @default(cuid())
+  tokenHash      String       @unique
+  adminAccountId String
+  adminAccount   AdminAccount @relation(fields: [adminAccountId], references: [id], onDelete: Cascade)
+  expiresAt      DateTime
+  usedAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([adminAccountId, createdAt])
+  @@index([expiresAt])
 }
 
 model AdminSession {

@@ -332,6 +332,32 @@ export function sendPasswordReset(opts: {
   });
 }
 
+export function sendAdminPasswordReset(opts: {
+  to: string;
+  name: string;
+  resetUrl: string;
+}): Promise<void> {
+  const { to, name, resetUrl } = opts;
+  return sendEmail({
+    to: { email: to, name },
+    subject: 'Réinitialisation de votre accès Administration — SAFARUMA',
+    throwOnError: true,
+    html: baseTemplate(`
+      ${heading('Réinitialiser votre accès Administration')}
+      ${p(`Bonjour${name ? ' ' + escapeHtml(name) : ''},`)}
+      ${p('Une demande de réinitialisation du mot de passe de votre compte Administration SAFARUMA a été effectuée. Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe.')}
+      ${divider()}
+      <div style="text-align:center;padding:16px 0;">
+        <a href="${resetUrl}" style="display:inline-block;background:#C9A84C;color:#1A1209;padding:14px 32px;border-radius:50px;font-size:14px;font-weight:800;text-decoration:none;letter-spacing:0.04em;">
+          Réinitialiser mon accès →
+        </a>
+      </div>
+      ${divider()}
+      ${p('<small style="color:#9A8D7A;">Ce lien est personnel, utilisable une seule fois et expire dans <strong>1 heure</strong>. Si vous n\'avez pas demandé cette réinitialisation, ignorez cet email.</small>')}
+    `),
+  });
+}
+
 // ─── 5. Rappel 7 jours avant départ ─────────────────────────────
 
 export function sendDepartureReminder(opts: {

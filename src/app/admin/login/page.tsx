@@ -1,4 +1,5 @@
 import { adminLogin } from './actions';
+import Link from 'next/link';
 
 export default async function AdminLoginPage({
   searchParams,
@@ -77,6 +78,13 @@ export default async function AdminLoginPage({
               >
                 Se connecter
               </button>
+
+              <Link
+                href="/admin/mot-de-passe-oublie"
+                style={{ color: '#C9A84C', fontSize: '0.76rem', fontWeight: 600, textAlign: 'center', textDecoration: 'none' }}
+              >
+                Mot de passe oublié ?
+              </Link>
             </form>
 
             <p style={{ marginTop: '1.5rem', fontSize: '0.72rem', color: 'rgba(255,255,255,0.2)', textAlign: 'center' }}>

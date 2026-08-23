@@ -39,9 +39,15 @@ function buildCspResponse(req: NextRequest): NextResponse {
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
+  const isPublicAdminPage = pathname === '/admin/login'
+    || pathname === '/admin/mot-de-passe-oublie'
+    || pathname === '/admin/reinitialiser-mot-de-passe';
+  const isPublicAdminApi = pathname === '/api/admin/auth/forgot-password'
+    || pathname === '/api/admin/auth/reset-password';
+
   // ── Admin page routes ─────────────────────────────────
   if (pathname.startsWith('/admin')) {
-    if (pathname === '/admin/login') return buildCspResponse(req);
+    if (isPublicAdminPage) return buildCspResponse(req);
     if (!await hasIndividualAdminSession(req)) {
       return NextResponse.redirect(new URL('/admin/login', req.url));
     }
@@ -50,6 +56,7 @@ export async function middleware(req: NextRequest) {
 
   // ── Admin API routes (defense-in-depth) ───────────────
   if (pathname.startsWith('/api/admin')) {
+    if (isPublicAdminApi) return buildCspResponse(req);
     if (!await hasIndividualAdminSession(req)) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
     }

@@ -96,7 +96,6 @@ export async function GET(
         approvedAt: guide.approvedAt,
         responseTimeAvg: guide.responseTimeAvg,
         completionRate: guide.completionRate,
-        commissionRate: (guide as any).commissionRate ?? 0.12,
         user: {
           id: guide.guideAccount?.id || guide.id,
           name: guide.guideAccount?.displayName || null,

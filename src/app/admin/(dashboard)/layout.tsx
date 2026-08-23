@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { adminLogout } from '@/app/admin/login/actions';
+import styles from './layout.module.css';
 
 const NAV = [
   { href: '/admin/tableau-de-bord', label: 'Tableau de bord' },
@@ -25,6 +26,7 @@ const NAV = [
 export default function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [admin, setAdmin] = useState<{ email: string; role: 'SUPERADMIN' | 'ADMIN'; individualAccount: boolean } | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const currentNav = NAV.find(n => pathname ? (pathname === n.href || pathname.startsWith(n.href + '/')) : false);
   const pageTitle = currentNav?.label ?? 'Administration';
 
@@ -35,15 +37,29 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
       .catch(() => setAdmin(null));
   }, []);
 
+  useEffect(() => {
+    if (!menuOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMenuOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [menuOpen]);
+
   return (
-    <div style={{ display: 'flex', height: '100vh', fontFamily: 'var(--font-manrope, sans-serif)', overflow: 'hidden' }}>
+    <div className={styles.shell}>
+
+      <button
+        type="button"
+        className={`${styles.overlay} ${menuOpen ? styles.overlayVisible : ''}`}
+        aria-label="Fermer le menu d’administration"
+        onClick={() => setMenuOpen(false)}
+      />
 
       {/* SIDEBAR */}
-      <div style={{
-        position: 'fixed', top: 0, left: 0, width: 240, height: '100vh',
+      <aside className={`${styles.sidebar} ${menuOpen ? styles.sidebarOpen : ''}`} style={{
         background: '#0F0A05', display: 'flex', flexDirection: 'column',
-        borderRight: '1px solid rgba(201,168,76,0.15)', zIndex: 9999,
-        overflowY: 'auto',
+        borderRight: '1px solid rgba(201,168,76,0.15)',
       }}>
         {/* Logo */}
         <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(201,168,76,0.12)' }}>
@@ -63,6 +79,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
               <Link
                 key={href}
                 href={href}
+                onClick={() => setMenuOpen(false)}
                 style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   padding: '0.65rem 0.875rem', borderRadius: 8, textDecoration: 'none',
@@ -90,21 +107,34 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
             </button>
           </form>
         </div>
-      </div>
+      </aside>
 
       {/* MAIN */}
-      <div style={{ marginLeft: 240, flex: 1, display: 'flex', flexDirection: 'column', background: '#F8F6F2', height: '100vh', overflow: 'hidden' }}>
-        <header style={{
+      <div className={styles.main} style={{ background: '#F8F6F2' }}>
+        <header className={styles.header} style={{
           position: 'sticky', top: 0, zIndex: 50, background: 'white',
-          borderBottom: '1px solid #E8DFC8', height: 60, padding: '0 2rem',
+          borderBottom: '1px solid #E8DFC8',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
         }}>
-          <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 700, color: '#1A1209', margin: 0 }}>
-            {pageTitle}
-          </h1>
+          <div className={styles.headerTitle}>
+            <button
+              type="button"
+              className={styles.menuButton}
+              aria-label="Ouvrir le menu d’administration"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen(open => !open)}
+            >
+              <span />
+              <span />
+              <span />
+            </button>
+            <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 700, color: '#1A1209', margin: 0 }}>
+              {pageTitle}
+            </h1>
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{ textAlign: 'right' }}>
+            <div className={styles.accountDetails} style={{ textAlign: 'right' }}>
               <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1A1209' }}>{admin?.role === 'SUPERADMIN' ? 'Superadmin' : 'Admin'}</div>
               <div style={{ fontSize: '0.62rem', color: '#7A6D5A' }}>{admin?.email || 'Compte en cours de vérification'}</div>
             </div>
@@ -113,7 +143,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
             </div>
           </div>
         </header>
-        <main style={{ flex: 1, padding: '2rem', overflowY: 'auto', minHeight: 0 }}>
+        <main className={styles.content}>
           {children}
         </main>
       </div>

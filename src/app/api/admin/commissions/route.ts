@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAdminActor } from '@/lib/check-admin';
+import { GUIDE_SERVICE_MARKUP_BPS } from '@/lib/guide-pricing';
 import prisma from '@/lib/prisma';
 
 export async function GET(req: NextRequest) {
@@ -29,28 +30,10 @@ export async function GET(req: NextRequest) {
       id: g.id,
       slug: g.slug,
       name: g.guideAccount?.displayName || `${g.guideAccount?.firstName ?? ''} ${g.guideAccount?.lastName ?? ''}`.trim() || '—',
-      commissionRate: g.commissionRate,
       totalReservations: g._count.reservations,
       totalRevenue: Math.round(revenueMap.get(g.id)?.totalPrice ?? 0),
       totalCommission: Math.round(revenueMap.get(g.id)?.commissionAmount ?? 0),
     })),
+    markupRate: GUIDE_SERVICE_MARKUP_BPS / 100,
   });
-}
-
-export async function PATCH(req: NextRequest) {
-  const actor = await getAdminActor(req);
-  if (!actor) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
-
-  const { guideId, commissionRate } = await req.json();
-  const rate = Number(commissionRate);
-  if (!guideId || isNaN(rate) || rate <= 0 || rate > 0.5)
-    return NextResponse.json({ error: 'Taux invalide (0 < taux ≤ 50%)' }, { status: 400 });
-
-  const previous = await prisma.guideProfile.findUnique({ where: { id: guideId }, select: { commissionRate: true } });
-  if (!previous) return NextResponse.json({ error: 'Guide introuvable' }, { status: 404 });
-  await prisma.$transaction([
-    prisma.guideProfile.update({ where: { id: guideId }, data: { commissionRate: rate } }),
-    prisma.auditLog.create({ data: { actor: actor.email, actorRole: actor.role, actorAdminId: actor.id, action: 'GUIDE_COMMISSION_UPDATED', target: guideId, before: { commissionRate: previous.commissionRate }, after: { commissionRate: rate } } }),
-  ]);
-  return NextResponse.json({ success: true });
 }

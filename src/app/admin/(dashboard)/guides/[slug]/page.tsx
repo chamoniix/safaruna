@@ -7,7 +7,6 @@ import { PLACES } from '@/lib/places';
 import { GUIDE_LANGUAGES, LANG_CODE_TO_LABEL } from '@/lib/languages';
 
 type Language = { id: string; languageCode: string; level: string };
-type Package  = { id: string; name: string; pricePerPerson: number; durationDays: number; maxPeople: number };
 type Reservation = { id: string; refNumber: string; startDate: string; nbPeople: number; totalPrice: number; status: string; createdAt: string };
 type GuidePlace = { id: string; placeKey: string; isActive: boolean };
 type Guide = {
@@ -23,7 +22,6 @@ type Guide = {
   conversations: { id: string; pelerinName: string; lastMessage: string; lastMessageAt: string }[];
   user: { name: string | null; firstName: string | null; lastName: string | null; email: string | null; createdAt: string; phoneWhatsapp: string | null; image: string | null };
   languages: Language[];
-  packages: Package[];
   reservations: Reservation[];
   places: GuidePlace[];
   stats: { totalReservations: number; totalRevenue: number; avgRating: number | null };
@@ -81,11 +79,6 @@ export default function AdminGuideDetailPage() {
   const [status, setStatus]               = useState('');
   const [saving, setSaving]               = useState(false);
   const [saveMsg, setSaveMsg]             = useState('');
-
-  // Package price editing
-  const [editingPkg, setEditingPkg]       = useState<string | null>(null);
-  const [pkgPrice, setPkgPrice]           = useState('');
-  const [savingPkg, setSavingPkg]         = useState(false);
 
   // Access management — validate / suspend / reactivate
   const [genPassword, setGenPassword]     = useState(true);
@@ -214,21 +207,6 @@ export default function AdminGuideDetailPage() {
       setAccessResult({ message: error instanceof Error ? error.message : 'Erreur', type: 'error' });
     }
     setLoadingAccess(false);
-  };
-
-  const handlePkgSave = async (pkgId: string) => {
-    setSavingPkg(true);
-    try {
-      const res = await fetch(`/api/admin/guides/${slug}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ packageId: pkgId, pricePerPerson: Number(pkgPrice) }),
-      });
-      if (!res.ok) throw new Error();
-      setEditingPkg(null);
-      await fetchGuide(true); // silent — no skeleton flash
-    } catch { alert('Erreur lors de la mise à jour du prix.'); }
-    setSavingPkg(false);
   };
 
   const handleTogglePlace = async (placeKey: string) => {
@@ -767,50 +745,6 @@ export default function AdminGuideDetailPage() {
           );
         })}
       </div>
-
-      {/* Section 3 — Packages */}
-      {guide.packages.length > 0 && (
-        <div style={sectionStyle}>
-          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Packages ({guide.packages.length})</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {guide.packages.map(pkg => (
-              <div key={pkg.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.875rem 1rem', background: '#FAFAF8', border: '1px solid #F0EBE0', borderRadius: 8, flexWrap: 'wrap' }}>
-                <div style={{ flex: 1, minWidth: 160 }}>
-                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#1A1209' }}>{pkg.name}</div>
-                  <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>
-                    {pkg.durationDays}j · max {pkg.maxPeople} pers.
-                  </div>
-                </div>
-                {editingPkg === pkg.id ? (
-                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <input
-                      value={pkgPrice}
-                      onChange={e => setPkgPrice(e.target.value)}
-                      type="number" min={0}
-                      style={{ ...inputStyle, width: 100, padding: '0.4rem 0.6rem' }}
-                      placeholder="Prix €"
-                    />
-                    <button onClick={() => handlePkgSave(pkg.id)} disabled={savingPkg} style={{ padding: '0.4rem 0.875rem', background: '#1D5C3A', color: 'white', border: 'none', borderRadius: 50, fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
-                      {savingPkg ? '…' : 'OK'}
-                    </button>
-                    <button onClick={() => setEditingPkg(null)} style={{ padding: '0.4rem 0.875rem', background: 'white', color: '#7A6D5A', border: '1px solid #E8DFC8', borderRadius: 50, fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
-                      Annuler
-                    </button>
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.3rem', fontWeight: 700, color: '#1A1209' }}>{pkg.pricePerPerson} €</span>
-                    <span style={{ fontSize: '0.65rem', color: '#7A6D5A' }}>/pers.</span>
-                    <button onClick={() => { setEditingPkg(pkg.id); setPkgPrice(pkg.pricePerPerson.toString()); }} style={{ padding: '0.35rem 0.875rem', background: 'white', color: '#1A1209', border: '1px solid #E8DFC8', borderRadius: 50, fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
-                      Modifier
-                    </button>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Section — Informations bancaires */}
       <div style={{ background: '#FEF9EC', border: '1px solid #FCD34D', borderRadius: 12, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>

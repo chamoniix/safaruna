@@ -142,7 +142,7 @@ export const PLACES: Place[] = [
     tagline: "Première mosquée de l'Islam · équivaut à une Omra",
     desc: "La toute première mosquée bâtie dans l'Islam, posée de ses propres mains par le Prophète ﷺ à son arrivée à Madinah. Une prière de deux rak'at accomplie ici vaut, selon un hadith authentique, l'équivalent d'une Omra complète. Un privilège spirituel inestimable à quelques minutes du centre.",
     category: 'MADINAH',
-    includedInBase: false,
+    includedInBase: true,
   },
   {
     key: 'qiblatayn',
@@ -162,7 +162,7 @@ export const PLACES: Place[] = [
     tagline: 'Cimetière des Compagnons et de la famille du Prophète ﷺ',
     desc: "Le cimetière où reposent des milliers de Compagnons du Prophète ﷺ, ses épouses, et sa fille Fatima. Le Prophète ﷺ lui-même venait régulièrement y faire du dua. Marcher entre ces tombes simples, rappelant l'humilité face à la mort, touche l'âme avec une force inattendue.",
     category: 'MADINAH',
-    includedInBase: false,
+    includedInBase: true,
   },
   {
     key: 'ohoud',

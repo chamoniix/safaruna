@@ -26,7 +26,6 @@ export async function GET(
           }
         },
         languages: true,
-        packages: true,
         reservations: {
           take: 10,
           orderBy: { createdAt: 'desc' },
@@ -109,7 +108,6 @@ export async function GET(
           image: guide.guideAccount?.image || null,
         },
         languages: guide.languages,
-        packages: guide.packages,
         reservations: guide.reservations.map(r => ({
           id: r.id,
           refNumber: r.refNumber,
@@ -205,24 +203,6 @@ export async function PATCH(
   });
 
   try {
-    if (body.packageId && body.pricePerPerson !== undefined) {
-      const previousPackage = await prisma.package.findUnique({
-        where: { id: body.packageId },
-        select: { pricePerPerson: true },
-      });
-      if (!previousPackage) return NextResponse.json({ error: 'Forfait introuvable' }, { status: 404 });
-      const nextPrice = Number(body.pricePerPerson);
-      await prisma.package.update({
-        where: { id: body.packageId },
-        data: { pricePerPerson: nextPrice },
-      });
-      await audit('GUIDE_PACKAGE_PRICE_UPDATED', body.packageId, {
-        before: { pricePerPerson: previousPackage.pricePerPerson },
-        after: { pricePerPerson: nextPrice },
-      });
-      return NextResponse.json({ success: true });
-    }
-
     const guide = await prisma.guideProfile.findUnique({
       where: { slug },
       include: {

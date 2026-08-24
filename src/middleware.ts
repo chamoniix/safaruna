@@ -66,6 +66,8 @@ export async function middleware(req: NextRequest) {
   // ── Public guide routes ───────────────────────────────
   if (pathname === '/guide/inscription') return buildCspResponse(req);
   if (pathname === '/guide/connexion') return buildCspResponse(req);
+  if (pathname === '/guide/mot-de-passe-oublie') return buildCspResponse(req);
+  if (pathname === '/guide/reinitialiser-mot-de-passe') return buildCspResponse(req);
 
   const hasGuideSession = Boolean(req.cookies.get('guide_session')?.value);
 

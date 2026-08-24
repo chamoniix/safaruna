@@ -85,6 +85,7 @@ export default function AuditPage() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('')
   const [error, setError] = useState('')
+  const [networkVisible, setNetworkVisible] = useState(false)
 
   useEffect(() => {
     fetch('/api/admin/audit')
@@ -92,6 +93,7 @@ export default function AuditPage() {
         const data = await response.json()
         if (!response.ok) throw new Error(data.error || 'Impossible de charger le journal.')
         setLogs(data.logs || [])
+        setNetworkVisible(Boolean(data.networkVisible))
       })
       .catch(err => setError(err instanceof Error ? err.message : 'Impossible de charger le journal.'))
       .finally(() => setLoading(false))
@@ -121,6 +123,9 @@ export default function AuditPage() {
           <p style={{ color: '#7A6D5A', fontSize: '0.85rem', marginTop: 4 }}>
             {logs.length} événements enregistrés
           </p>
+          {!networkVisible && !loading && (
+            <p style={{ color: '#7A6D5A', fontSize: '0.72rem', margin: '3px 0 0' }}>Vue opérationnelle — les données réseau sont réservées au Superadmin.</p>
+          )}
         </div>
         <select
           value={filter}
@@ -163,11 +168,11 @@ export default function AuditPage() {
           background: 'white', borderRadius: 16,
           border: '1px solid #E8DFC8', overflowX: 'auto',
         }}>
-          <div style={{ minWidth: 1180 }}>
+          <div style={{ minWidth: networkVisible ? 1180 : 980 }}>
             {/* Header table */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: '150px 190px 210px 150px 140px minmax(300px, 1fr)',
+              gridTemplateColumns: networkVisible ? '150px 190px 210px 150px 140px minmax(300px, 1fr)' : '150px 190px 210px 150px minmax(300px, 1fr)',
               gap: '1rem', padding: '0.75rem 1.25rem',
               background: '#FAF7F0', borderBottom: '1px solid #E8DFC8',
               fontSize: '0.65rem', fontWeight: 700,
@@ -178,7 +183,7 @@ export default function AuditPage() {
               <span>Auteur</span>
               <span>Action</span>
               <span>Cible</span>
-              <span>Réseau</span>
+              {networkVisible && <span>Réseau</span>}
               <span>Détail et modifications</span>
             </div>
 
@@ -188,7 +193,7 @@ export default function AuditPage() {
                 key={log.id}
                 style={{
                   display: 'grid',
-                  gridTemplateColumns: '150px 190px 210px 150px 140px minmax(300px, 1fr)',
+                  gridTemplateColumns: networkVisible ? '150px 190px 210px 150px 140px minmax(300px, 1fr)' : '150px 190px 210px 150px minmax(300px, 1fr)',
                   gap: '1rem', padding: '0.875rem 1.25rem',
                   borderBottom: idx < filtered.length - 1
                     ? '1px solid #F5F0E8' : 'none',
@@ -223,10 +228,12 @@ export default function AuditPage() {
                 <span style={{ color: '#4A3F30', fontSize: '0.72rem', fontFamily: 'monospace', overflowWrap: 'anywhere' }}>
                   {log.target || '—'}
                 </span>
-                <div style={{ color: '#4A3F30', fontSize: '0.72rem' }}>
-                  <div style={{ fontFamily: 'monospace', overflowWrap: 'anywhere' }}>{log.ip || '—'}</div>
-                  {log.requestId && <div style={{ color: '#9CA3AF', marginTop: 3, overflowWrap: 'anywhere' }}>ID : {log.requestId}</div>}
-                </div>
+                {networkVisible && (
+                  <div style={{ color: '#4A3F30', fontSize: '0.72rem' }}>
+                    <div style={{ fontFamily: 'monospace', overflowWrap: 'anywhere' }}>{log.ip || '—'}</div>
+                    {log.requestId && <div style={{ color: '#9CA3AF', marginTop: 3, overflowWrap: 'anywhere' }}>ID : {log.requestId}</div>}
+                  </div>
+                )}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', minWidth: 0 }}>
                   {(log.before != null || log.after != null) && (
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>

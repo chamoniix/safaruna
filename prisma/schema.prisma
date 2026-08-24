@@ -93,10 +93,14 @@ enum EmailIdentityKind {
 // Registre minimal partagé qui garantit qu'une adresse normalisée ne peut
 // appartenir qu'à un seul parcours (pèlerin ou guide).
 model EmailIdentity {
-  email     String            @id
-  kind      EmailIdentityKind
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
+  email                String            @id
+  kind                 EmailIdentityKind
+  quarantinedUntil     DateTime?
+  sourceGuideAccountId String?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+
+  @@index([quarantinedUntil])
 }
 
 enum AdminRole {
@@ -122,10 +126,10 @@ model AdminAccount {
 
   sessions              AdminSession[]
   passwordResetTokens   AdminPasswordResetToken[]
-  createdGuideProfiles  GuideProfile[]     @relation("GuideCreatedByAdmin")
-  approvedGuideProfiles GuideProfile[]     @relation("GuideApprovedByAdmin")
-  reviewedApplications  GuideApplication[] @relation("GuideApplicationReviewedBy")
-  auditLogs             AuditLog[]         @relation("AuditActorAdmin")
+  createdGuideProfiles  GuideProfile[]            @relation("GuideCreatedByAdmin")
+  approvedGuideProfiles GuideProfile[]            @relation("GuideApprovedByAdmin")
+  reviewedApplications  GuideApplication[]        @relation("GuideApplicationReviewedBy")
+  auditLogs             AuditLog[]                @relation("AuditActorAdmin")
 }
 
 model AdminPasswordResetToken {
@@ -243,25 +247,56 @@ enum GuideAccountStatus {
 }
 
 model GuideAccount {
-  id            String              @id @default(cuid())
-  email         String              @unique
-  passwordHash  String?
-  emailVerified DateTime?
-  displayName   String?
-  firstName     String?
-  lastName      String?
-  phoneWhatsapp String?
-  country       String?
-  image         String?
-  status        GuideAccountStatus  @default(ACTIVE)
-  lastLoginAt   DateTime?
-  registeredAt  DateTime            @default(now())
-  createdAt     DateTime            @default(now())
-  updatedAt     DateTime            @updatedAt
-  guideProfile  GuideProfile?
-  sessions      GuideSession[]
-  loginAttempts GuideLoginAttempt[]
-  messages      Message[]
+  id                  String                    @id @default(cuid())
+  email               String                    @unique
+  passwordHash        String?
+  emailVerified       DateTime?
+  displayName         String?
+  firstName           String?
+  lastName            String?
+  phoneWhatsapp       String?
+  country             String?
+  image               String?
+  status              GuideAccountStatus        @default(ACTIVE)
+  lastLoginAt         DateTime?
+  registeredAt        DateTime                  @default(now())
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
+  guideProfile        GuideProfile?
+  sessions            GuideSession[]
+  loginAttempts       GuideLoginAttempt[]
+  messages            Message[]
+  passwordResetTokens GuidePasswordResetToken[]
+  emailChangeRequests GuideEmailChangeRequest[]
+}
+
+model GuidePasswordResetToken {
+  id             String       @id @default(cuid())
+  tokenHash      String       @unique
+  guideAccountId String
+  guideAccount   GuideAccount @relation(fields: [guideAccountId], references: [id], onDelete: Cascade)
+  expiresAt      DateTime
+  usedAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([guideAccountId, createdAt])
+  @@index([expiresAt])
+}
+
+model GuideEmailChangeRequest {
+  id             String       @id @default(cuid())
+  guideAccountId String
+  guideAccount   GuideAccount @relation(fields: [guideAccountId], references: [id], onDelete: Cascade)
+  newEmail       String
+  codeHash       String
+  expiresAt      DateTime
+  attempts       Int          @default(0)
+  usedAt         DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([guideAccountId, createdAt])
+  @@index([newEmail, createdAt])
+  @@index([expiresAt])
 }
 
 model GuideSession {

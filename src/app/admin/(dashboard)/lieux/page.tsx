@@ -30,11 +30,12 @@ export default function AdminLieuxPage() {
   const [editPrice, setEditPrice] = useState('')
   const [saving, setSaving] = useState<string | null>(null)
   const [savedKey, setSavedKey] = useState<string | null>(null)
+  const [canEdit, setCanEdit] = useState(false)
 
   useEffect(() => {
     fetch('/api/admin/lieux')
       .then(r => r.json())
-      .then(d => { setPlaces(d.places || []); setLoading(false) })
+      .then(d => { setPlaces(d.places || []); setCanEdit(Boolean(d.canEdit)); setLoading(false) })
       .catch(() => setLoading(false))
   }, [])
 
@@ -123,6 +124,8 @@ export default function AdminLieuxPage() {
                 <td style={tdStyle}>
                   {place.includedInBase ? (
                     <span style={{ color: '#D1D5DB', fontSize: '0.72rem' }}>Non applicable</span>
+                  ) : !canEdit ? (
+                    <span style={{ color: '#7A6D5A', fontSize: '0.72rem' }}>Lecture seule</span>
                   ) : editingKey === place.key ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                       <input
@@ -175,7 +178,7 @@ export default function AdminLieuxPage() {
           Lieux &amp; Tarifs
         </h1>
         <p style={{ fontSize: '0.82rem', color: '#7A6D5A', margin: 0 }}>
-          Gérez les tarifs des visites supplémentaires pour tous les guides.
+          {canEdit ? 'Gérez les tarifs des visites supplémentaires pour tous les guides.' : 'Consultez les tarifs des visites supplémentaires.'}
         </p>
       </div>
 

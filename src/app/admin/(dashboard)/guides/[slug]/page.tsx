@@ -43,8 +43,6 @@ const RES_STATUS: Record<string, { label: string; color: string; bg: string }> =
   CANCELLED: { label: 'Annulée',    color: '#DC2626', bg: '#FEE2E2' },
 };
 
-const PROFILE_STATUSES = ['DRAFT', 'REVIEW', 'ACTIVE', 'SUSPENDED'];
-
 const sectionStyle: React.CSSProperties = {
   background: 'white', border: '1px solid #E8DFC8', borderRadius: 12,
   padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem',
@@ -79,20 +77,16 @@ export default function AdminGuideDetailPage() {
   const [status, setStatus]               = useState('');
   const [saving, setSaving]               = useState(false);
   const [saveMsg, setSaveMsg]             = useState('');
+  const [canManagePricing, setCanManagePricing] = useState(false);
 
   // Access management — validate / suspend / reactivate
-  const [genPassword, setGenPassword]     = useState(true);
   const [activating, setActivating]       = useState(false);
   const [accessResult, setAccessResult]   = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-
-  // Regenerate password — independent state so it never interferes with other sections
-  const [loadingAccess, setLoadingAccess] = useState(false);
 
 
   // Identity editing
   const [firstName, setFirstName]           = useState('');
   const [lastName, setLastName]             = useState('');
-  const [email, setEmail]                   = useState('');
   const [phoneWhatsapp, setPhoneWhatsapp]   = useState('');
   const [savingIdentity, setSavingIdentity] = useState(false);
   const [identityMsg, setIdentityMsg]       = useState('');
@@ -121,6 +115,7 @@ export default function AdminGuideDetailPage() {
       if (!res.ok) throw new Error('Erreur ' + res.status);
       const data = await res.json();
       const g: Guide = data.guide;
+      setCanManagePricing(Boolean(data.permissions?.canManagePricing));
       setGuide(g);
       setBio(g.bio || '');
       setCity(g.city || '');
@@ -135,7 +130,6 @@ export default function AdminGuideDetailPage() {
       setStatus(g.status);
       setFirstName(g.user.firstName || '');
       setLastName(g.user.lastName || '');
-      setEmail(g.user.email || '');
       setPhoneWhatsapp(g.user.phoneWhatsapp || '');
       setInterviewScore(g.interviewScore?.toString() || '');
       setInterviewNotes(g.interviewNotes || '');
@@ -156,13 +150,15 @@ export default function AdminGuideDetailPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           bio, city, gender, servesMakkah, servesMadinah, acceptingBookings, nationality,
-          experienceYears: expYears ? Number(expYears) : null, status,
-          makkahNetUpTo6Cents: Math.round(Number(makkahRates.upTo6) * 100),
-          makkahNetUpTo15Cents: Math.round(Number(makkahRates.upTo15) * 100),
-          makkahNetUpTo32Cents: Math.round(Number(makkahRates.upTo32) * 100),
-          madinahNetUpTo6Cents: Math.round(Number(madinahRates.upTo6) * 100),
-          madinahNetUpTo15Cents: Math.round(Number(madinahRates.upTo15) * 100),
-          madinahNetUpTo32Cents: Math.round(Number(madinahRates.upTo32) * 100),
+          experienceYears: expYears ? Number(expYears) : null,
+          ...(canManagePricing && {
+            makkahNetUpTo6Cents: Math.round(Number(makkahRates.upTo6) * 100),
+            makkahNetUpTo15Cents: Math.round(Number(makkahRates.upTo15) * 100),
+            makkahNetUpTo32Cents: Math.round(Number(makkahRates.upTo32) * 100),
+            madinahNetUpTo6Cents: Math.round(Number(madinahRates.upTo6) * 100),
+            madinahNetUpTo15Cents: Math.round(Number(madinahRates.upTo15) * 100),
+            madinahNetUpTo32Cents: Math.round(Number(madinahRates.upTo32) * 100),
+          }),
         }),
       });
       if (!res.ok) throw new Error();
@@ -173,14 +169,14 @@ export default function AdminGuideDetailPage() {
     setTimeout(() => setSaveMsg(''), 3000);
   };
 
-  const handleAccess = async (action: 'activate' | 'suspend', generatePassword: boolean) => {
+  const handleAccess = async (action: 'activate' | 'suspend') => {
     setActivating(true);
     setAccessResult(null);
     try {
       const res = await fetch(`/api/admin/guides/${slug}/activate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, generatePassword }),
+        body: JSON.stringify({ action }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erreur');
@@ -190,23 +186,6 @@ export default function AdminGuideDetailPage() {
       setAccessResult({ message: e.message, type: 'error' });
     }
     setActivating(false);
-  };
-
-  const handleRegenPassword = async () => {
-    setLoadingAccess(true);
-    try {
-      const res = await fetch(`/api/admin/guides/${slug}/activate`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'activate', generatePassword: true }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Erreur');
-      setAccessResult({ message: data.message || 'Nouveaux accès envoyés par email.', type: 'success' });
-    } catch (error) {
-      setAccessResult({ message: error instanceof Error ? error.message : 'Erreur', type: 'error' });
-    }
-    setLoadingAccess(false);
   };
 
   const handleTogglePlace = async (placeKey: string) => {
@@ -314,7 +293,8 @@ export default function AdminGuideDetailPage() {
           </div>
           <div>
             <label style={labelStyle}>Email</label>
-            <input value={email} onChange={e => setEmail(e.target.value)} type="email" style={inputStyle} placeholder="email@exemple.com" />
+            <div style={{ ...inputStyle, background: '#F5F2EC', color: '#7A6D5A' }}>{guide.user.email || '—'}</div>
+            <div style={{ fontSize: '0.68rem', color: '#7A6D5A', marginTop: 4 }}>Modification et vérification par le guide uniquement.</div>
           </div>
           <div>
             <label style={labelStyle}>WhatsApp</label>
@@ -330,7 +310,7 @@ export default function AdminGuideDetailPage() {
                 const res = await fetch(`/api/admin/guides/${slug}`, {
                   method: 'PATCH',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ firstName, lastName, email, phoneWhatsapp }),
+                  body: JSON.stringify({ firstName, lastName, phoneWhatsapp }),
                 });
                 if (!res.ok) throw new Error();
                 setIdentityMsg('✓ Identité sauvegardée');
@@ -383,27 +363,19 @@ export default function AdminGuideDetailPage() {
 
         {/* REVIEW or DRAFT → activate */}
         {(guide.status === 'REVIEW' || guide.status === 'DRAFT') && (
-          <>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer' }} onClick={() => setGenPassword(v => !v)}>
-              <div style={{ width: 18, height: 18, border: '2px solid #C9A84C', borderRadius: 4, background: genPassword ? '#C9A84C' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                {genPassword && <span style={{ color: '#1A1209', fontSize: '0.7rem', fontWeight: 900 }}>✓</span>}
-              </div>
-              <span style={{ fontSize: '0.82rem', color: '#4A3F30' }}>Générer un nouveau mot de passe et envoyer par email</span>
-            </div>
             <button
-              onClick={() => handleAccess('activate', genPassword)}
+              onClick={() => handleAccess('activate')}
               disabled={activating}
               style={{ padding: '0.7rem 1.75rem', background: activating ? '#9CA3AF' : '#1D5C3A', color: 'white', border: 'none', borderRadius: 50, fontWeight: 700, fontSize: '0.85rem', cursor: activating ? 'not-allowed' : 'pointer', fontFamily: 'inherit', alignSelf: 'flex-start' }}
             >
               {activating ? 'Validation…' : '✓ Valider le profil guide'}
             </button>
-          </>
         )}
 
         {/* ACTIVE → suspend */}
         {guide.status === 'ACTIVE' && (
           <button
-            onClick={() => { if (confirm('Suspendre ce guide ?')) handleAccess('suspend', false); }}
+            onClick={() => { if (confirm('Suspendre ce guide ?')) handleAccess('suspend'); }}
             disabled={activating}
             style={{ padding: '0.7rem 1.75rem', background: activating ? '#9CA3AF' : '#DC2626', color: 'white', border: 'none', borderRadius: 50, fontWeight: 700, fontSize: '0.85rem', cursor: activating ? 'not-allowed' : 'pointer', fontFamily: 'inherit', alignSelf: 'flex-start' }}
           >
@@ -414,7 +386,7 @@ export default function AdminGuideDetailPage() {
         {/* SUSPENDED → reactivate */}
         {guide.status === 'SUSPENDED' && (
           <button
-            onClick={() => handleAccess('activate', false)}
+            onClick={() => handleAccess('activate')}
             disabled={activating}
             style={{ padding: '0.7rem 1.75rem', background: activating ? '#9CA3AF' : '#1D5C3A', color: 'white', border: 'none', borderRadius: 50, fontWeight: 700, fontSize: '0.85rem', cursor: activating ? 'not-allowed' : 'pointer', fontFamily: 'inherit', alignSelf: 'flex-start' }}
           >
@@ -429,16 +401,7 @@ export default function AdminGuideDetailPage() {
           </div>
         )}
 
-        <div style={{ height: 1, background: '#F0EBE0' }} />
-
-        {/* Regenerate password — independent state */}
-        <button
-          onClick={handleRegenPassword}
-          disabled={loadingAccess}
-          style={{ padding: '0.5rem 1.25rem', background: 'white', color: '#7A6D5A', border: '1px solid #E8DFC8', borderRadius: 50, fontWeight: 600, fontSize: '0.78rem', cursor: loadingAccess ? 'not-allowed' : 'pointer', fontFamily: 'inherit', alignSelf: 'flex-start' }}
-        >
-          {loadingAccess ? '…' : '↻ Régénérer mot de passe'}
-        </button>
+        <div style={{ fontSize: '0.75rem', color: '#7A6D5A' }}>Le mot de passe et l’adresse e-mail sont gérés et vérifiés par le guide.</div>
 
       </div>
 
@@ -566,9 +529,7 @@ export default function AdminGuideDetailPage() {
           </div>
           <div>
             <label style={labelStyle}>Statut</label>
-            <select value={status} onChange={e => setStatus(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-              {PROFILE_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
+            <div style={{ ...inputStyle, background: '#F5F2EC', color: '#7A6D5A' }}>{status}</div>
           </div>
           <div>
             <label style={labelStyle}>Genre du guide</label>
@@ -607,7 +568,7 @@ export default function AdminGuideDetailPage() {
                   <label key={key} style={{ fontSize: '0.72rem', color: '#7A6D5A' }}>
                     {label}
                     <div style={{ position: 'relative', marginTop: 4 }}>
-                      <input type="number" min="0" step="1" value={group.rates[key]} onChange={e => group.setRates(previous => ({ ...previous, [key]: e.target.value }))} style={{ ...inputStyle, paddingRight: 28 }} />
+                      <input type="number" min="0" step="1" value={group.rates[key]} disabled={!canManagePricing} onChange={e => group.setRates(previous => ({ ...previous, [key]: e.target.value }))} style={{ ...inputStyle, paddingRight: 28, background: canManagePricing ? 'white' : '#F5F2EC', color: canManagePricing ? '#1A1209' : '#7A6D5A' }} />
                       <span style={{ position: 'absolute', right: 10, top: 9, fontSize: '0.8rem', color: '#7A6D5A' }}>€</span>
                     </div>
                   </label>
@@ -615,7 +576,7 @@ export default function AdminGuideDetailPage() {
               </div>
             </div>
           ))}
-          <div style={{ fontSize: '0.7rem', color: '#7A6D5A' }}>Le prix client est calculé côté serveur avec une majoration SAFARUMA de 30 %. Le guide ne voit que ces montants nets.</div>
+          <div style={{ fontSize: '0.7rem', color: '#7A6D5A' }}>{canManagePricing ? 'Le prix client est calculé côté serveur avec une majoration SAFARUMA de 30 %. Le guide ne voit que ces montants nets.' : 'Lecture seule : seul le Superadmin peut modifier ces tarifs.'}</div>
         </div>
 
         <div>

@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
   }
 
   const { email } = parsed.data
+  await prisma.emailIdentity.deleteMany({ where: { email, quarantinedUntil: { lte: new Date() } } })
   const [identity, user, guideAccount, activeApplication] = await Promise.all([
     prisma.emailIdentity.findUnique({ where: { email }, select: { kind: true } }),
     prisma.user.findUnique({ where: { email }, select: { id: true } }),

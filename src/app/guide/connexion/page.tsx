@@ -78,6 +78,11 @@ export default function GuideLoginPage() {
                 placeholder="votre@email.com"
                 style={{ width: '100%', padding: '11px 14px', borderRadius: 10, border: '1.5px solid rgba(201,168,76,0.25)', background: 'rgba(255,255,255,0.05)', fontSize: '0.88rem', color: 'white', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
               />
+              <div style={{ textAlign: 'right', marginTop: '0.45rem' }}>
+                <Link href="/guide/mot-de-passe-oublie" style={{ color: 'rgba(201,168,76,0.8)', fontSize: '0.72rem', textDecoration: 'none' }}>
+                  Mot de passe oublié ?
+                </Link>
+              </div>
             </div>
             <div>
               <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.4rem' }}>

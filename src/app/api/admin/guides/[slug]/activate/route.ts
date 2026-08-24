@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuditDetail, adminAuditFields, getAdminActor, getAdminAuditContext } from '@/lib/check-admin';
 import prisma from '@/lib/prisma';
-import bcrypt from 'bcryptjs';
-import { sendGuideAccess } from '@/lib/email';
-import { randomBytes } from 'node:crypto';
 
 export async function POST(
   req: NextRequest,
@@ -16,6 +13,12 @@ export async function POST(
   const { slug } = await params;
   const body = await req.json();
   const { action, generatePassword } = body as { action: 'activate' | 'suspend'; generatePassword?: boolean };
+  if (generatePassword) {
+    return NextResponse.json(
+      { error: 'Le mot de passe doit être réinitialisé par le guide.' },
+      { status: 403 },
+    );
+  }
 
   const guide = await prisma.guideProfile.findUnique({
     where: { slug },
@@ -63,60 +66,6 @@ export async function POST(
     });
     if (guide.guideAccountId) {
       await prisma.guideAccount.update({ where: { id: guide.guideAccountId }, data: { status: 'ACTIVE' } });
-    }
-
-    if (generatePassword) {
-      const password = `${randomBytes(12).toString('base64url')}Aa1!`;
-      const hash = await bcrypt.hash(password, 12);
-
-      await prisma.$transaction([
-        ...(guide.guideAccountId ? [
-          prisma.guideAccount.update({
-            where: { id: guide.guideAccountId },
-            data: { passwordHash: hash, emailVerified: new Date(), status: 'ACTIVE' },
-          }),
-          prisma.guideSession.updateMany({
-            where: { guideAccountId: guide.guideAccountId, revokedAt: null },
-            data: { revokedAt: new Date() },
-          }),
-        ] : []),
-      ]);
-
-      const userEmail = guide.guideAccount?.email ?? '';
-      const userName = guide.guideAccount?.displayName || guide.guideAccount?.firstName || 'Guide';
-      if (userEmail) {
-        try {
-          await sendGuideAccess({
-            to: userEmail,
-            name: userName,
-            email: userEmail,
-            password,
-            loginUrl: 'https://safaruma.com/guide/connexion',
-          });
-        } catch (e) {
-          console.error('[activate] email error', e);
-        }
-      }
-
-      await prisma.auditLog.create({
-        data: {
-          actor: actor.email,
-          actorRole: actor.role,
-          actorAdminId: actor.id,
-          action: 'GUIDE_ACTIVATED_WITH_NEW_ACCESS',
-          target: guide.id,
-          detail: adminAuditDetail(auditContext),
-          before: { status: guide.status },
-          after: { status: 'ACTIVE', accessRegenerated: true },
-          ...adminAuditFields(auditContext),
-        },
-      });
-
-      return NextResponse.json({
-        success: true,
-        newStatus: 'ACTIVE',
-        message: 'Profil activé et identifiants envoyés par email.',
-      });
     }
 
     await prisma.auditLog.create({

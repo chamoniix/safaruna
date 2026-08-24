@@ -70,6 +70,20 @@ export default function GuideProfil() {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState('');
   const [saveError, setSaveError] = useState('');
+  const [emailChangeOpen, setEmailChangeOpen] = useState(false);
+  const [newEmail, setNewEmail] = useState('');
+  const [emailCurrentPassword, setEmailCurrentPassword] = useState('');
+  const [emailRequestId, setEmailRequestId] = useState('');
+  const [emailCode, setEmailCode] = useState('');
+  const [emailSecurityMessage, setEmailSecurityMessage] = useState('');
+  const [emailSecurityError, setEmailSecurityError] = useState('');
+  const [emailSecurityLoading, setEmailSecurityLoading] = useState(false);
+  const [passwordCurrent, setPasswordCurrent] = useState('');
+  const [passwordNew, setPasswordNew] = useState('');
+  const [passwordConfirmation, setPasswordConfirmation] = useState('');
+  const [passwordMessage, setPasswordMessage] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
   // Editable fields
   const [firstName, setFirstName] = useState('');
@@ -165,6 +179,72 @@ export default function GuideProfil() {
     }
   }
 
+  async function requestEmailChange(event: React.FormEvent) {
+    event.preventDefault();
+    setEmailSecurityLoading(true);
+    setEmailSecurityError('');
+    setEmailSecurityMessage('');
+    try {
+      const response = await fetch('/api/guide/security/email-change/request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newEmail, currentPassword: emailCurrentPassword }),
+      });
+      const data = await response.json() as { requestId?: string; error?: string };
+      if (!response.ok || !data.requestId) throw new Error(data.error || 'Envoi impossible.');
+      setEmailRequestId(data.requestId);
+      setEmailSecurityMessage('Code envoyé à votre nouvelle adresse.');
+    } catch (cause) {
+      setEmailSecurityError(cause instanceof Error ? cause.message : 'Envoi impossible.');
+    } finally {
+      setEmailSecurityLoading(false);
+    }
+  }
+
+  async function confirmEmailChange(event: React.FormEvent) {
+    event.preventDefault();
+    setEmailSecurityLoading(true);
+    setEmailSecurityError('');
+    try {
+      const response = await fetch('/api/guide/security/email-change/confirm', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId: emailRequestId, code: emailCode }),
+      });
+      const data = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(data.error || 'Confirmation impossible.');
+      window.location.assign('/guide/connexion');
+    } catch (cause) {
+      setEmailSecurityError(cause instanceof Error ? cause.message : 'Confirmation impossible.');
+      setEmailSecurityLoading(false);
+    }
+  }
+
+  async function changePassword(event: React.FormEvent) {
+    event.preventDefault();
+    setPasswordError('');
+    setPasswordMessage('');
+    if (passwordNew !== passwordConfirmation) {
+      setPasswordError('Les mots de passe ne correspondent pas.');
+      return;
+    }
+    setPasswordLoading(true);
+    try {
+      const response = await fetch('/api/guide/security/password/change', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword: passwordCurrent, newPassword: passwordNew }),
+      });
+      const data = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(data.error || 'Modification impossible.');
+      setPasswordMessage('Mot de passe modifié. Reconnexion en cours…');
+      window.setTimeout(() => window.location.assign('/guide/connexion'), 800);
+    } catch (cause) {
+      setPasswordError(cause instanceof Error ? cause.message : 'Modification impossible.');
+      setPasswordLoading(false);
+    }
+  }
+
   if (loading) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -196,7 +276,12 @@ export default function GuideProfil() {
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.5rem', fontWeight: 700, color: '#1A1209' }}>{displayName}</div>
-          <div style={{ fontSize: '0.8rem', color: '#7A6D5A', marginTop: 2 }}>{profile.email}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap', marginTop: 2 }}>
+            <span style={{ fontSize: '0.8rem', color: '#7A6D5A' }}>{profile.email}</span>
+            <button type="button" onClick={() => { setEmailChangeOpen(true); window.setTimeout(() => document.getElementById('guide-email-security')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 0); }} style={{ border: 0, background: 'none', color: '#C9A84C', fontSize: '0.72rem', fontWeight: 700, padding: 0, cursor: 'pointer' }}>
+              Changer mon adresse e-mail
+            </button>
+          </div>
           <div style={{ fontSize: '0.72rem', color: '#9CA3AF', marginTop: 2 }}>Guide depuis {profile.createdAt}</div>
         </div>
         {profile.slug && (
@@ -377,12 +462,42 @@ export default function GuideProfil() {
       </div>
 
       {/* Security */}
-      <div style={{ ...card, padding: '1rem 1.25rem', background: '#F5F2EC' }}>
-        <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209', marginBottom: '0.5rem' }}>Sécurité</div>
-        <div style={{ fontSize: '0.8rem', color: '#7A6D5A', marginBottom: '0.75rem' }}>Pour changer votre mot de passe, utilisez la page de connexion.</div>
-        <Link href="/guide/connexion" style={{ fontSize: '0.78rem', fontWeight: 700, color: '#C9A84C', textDecoration: 'none', border: '1px solid #E8DFC8', padding: '0.4rem 1rem', borderRadius: 20, background: 'white', display: 'inline-block' }}>
-          Modifier le mot de passe →
-        </Link>
+      <div id="guide-email-security" style={{ ...card, padding: '1.25rem', background: '#F5F2EC', display: 'grid', gap: '1.25rem' }}>
+        <div>
+          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209', marginBottom: '0.25rem' }}>Sécurité</div>
+          <div style={{ fontSize: '0.75rem', color: '#7A6D5A' }}>Une modification d’adresse ou de mot de passe déconnecte toutes les sessions.</div>
+        </div>
+
+        <div style={{ background: 'white', border: '1px solid #E8DFC8', borderRadius: 10, padding: '1rem' }}>
+          <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#1A1209' }}>Adresse e-mail</div>
+          <div style={{ fontSize: '0.75rem', color: '#7A6D5A', marginTop: 3 }}>{profile.email}</div>
+          {!emailChangeOpen ? (
+            <button type="button" onClick={() => setEmailChangeOpen(true)} style={{ marginTop: '0.75rem', fontSize: '0.76rem', fontWeight: 700, color: '#C9A84C', border: '1px solid #E8DFC8', padding: '0.45rem 1rem', borderRadius: 20, background: 'white', cursor: 'pointer' }}>Changer mon adresse e-mail</button>
+          ) : !emailRequestId ? (
+            <form onSubmit={requestEmailChange} style={{ display: 'grid', gap: '0.75rem', marginTop: '0.9rem' }}>
+              <input style={input} type="email" required value={newEmail} onChange={event => setNewEmail(event.target.value)} placeholder="Nouvelle adresse e-mail" />
+              <input style={input} type="password" required value={emailCurrentPassword} onChange={event => setEmailCurrentPassword(event.target.value)} placeholder="Mot de passe actuel" />
+              <button disabled={emailSecurityLoading} style={{ justifySelf: 'start', padding: '0.5rem 1.2rem', border: 0, borderRadius: 20, background: '#1A1209', color: '#F0D897', fontWeight: 700 }}>{emailSecurityLoading ? 'Envoi…' : 'Envoyer le code'}</button>
+            </form>
+          ) : (
+            <form onSubmit={confirmEmailChange} style={{ display: 'grid', gap: '0.75rem', marginTop: '0.9rem' }}>
+              <input style={input} inputMode="numeric" pattern="[0-9]{6}" maxLength={6} required value={emailCode} onChange={event => setEmailCode(event.target.value.replace(/\D/g, '').slice(0, 6))} placeholder="Code à 6 chiffres" />
+              <button disabled={emailSecurityLoading} style={{ justifySelf: 'start', padding: '0.5rem 1.2rem', border: 0, borderRadius: 20, background: '#1A1209', color: '#F0D897', fontWeight: 700 }}>{emailSecurityLoading ? 'Vérification…' : 'Confirmer la nouvelle adresse'}</button>
+            </form>
+          )}
+          {emailSecurityMessage && <div style={{ color: '#1D5C3A', fontSize: '0.75rem', marginTop: '0.75rem' }}>{emailSecurityMessage}</div>}
+          {emailSecurityError && <div style={{ color: '#DC2626', fontSize: '0.75rem', marginTop: '0.75rem' }}>{emailSecurityError}</div>}
+        </div>
+
+        <form onSubmit={changePassword} style={{ background: 'white', border: '1px solid #E8DFC8', borderRadius: 10, padding: '1rem', display: 'grid', gap: '0.75rem' }}>
+          <div style={{ fontSize: '0.86rem', fontWeight: 800, color: '#1A1209' }}>Mot de passe</div>
+          <input style={input} type="password" required value={passwordCurrent} onChange={event => setPasswordCurrent(event.target.value)} placeholder="Mot de passe actuel" />
+          <input style={input} type="password" required minLength={8} value={passwordNew} onChange={event => setPasswordNew(event.target.value)} placeholder="Nouveau mot de passe (8 caractères minimum)" />
+          <input style={input} type="password" required minLength={8} value={passwordConfirmation} onChange={event => setPasswordConfirmation(event.target.value)} placeholder="Confirmer le nouveau mot de passe" />
+          <button disabled={passwordLoading} style={{ justifySelf: 'start', padding: '0.5rem 1.2rem', border: 0, borderRadius: 20, background: '#1A1209', color: '#F0D897', fontWeight: 700 }}>{passwordLoading ? 'Modification…' : 'Modifier mon mot de passe'}</button>
+          {passwordMessage && <div style={{ color: '#1D5C3A', fontSize: '0.75rem' }}>{passwordMessage}</div>}
+          {passwordError && <div style={{ color: '#DC2626', fontSize: '0.75rem' }}>{passwordError}</div>}
+        </form>
       </div>
 
     </div>

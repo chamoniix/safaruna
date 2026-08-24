@@ -71,6 +71,9 @@ export async function GET(
     });
 
     return NextResponse.json({
+      permissions: {
+        canManagePricing: actor.role === 'SUPERADMIN',
+      },
       guide: {
         id: guide.id,
         slug: guide.slug,
@@ -179,6 +182,28 @@ export async function PATCH(
 
   const { slug } = await params;
   const body = await req.json();
+  if (body.email !== undefined) {
+    return NextResponse.json(
+      { error: 'L’adresse e-mail doit être modifiée et vérifiée par le guide.' },
+      { status: 403 },
+    );
+  }
+  if (body.status !== undefined) {
+    return NextResponse.json(
+      { error: 'Utilisez l’action dédiée pour activer ou suspendre le guide.' },
+      { status: 400 },
+    );
+  }
+  const pricingFields = [
+    'makkahNetUpTo6Cents', 'makkahNetUpTo15Cents', 'makkahNetUpTo32Cents',
+    'madinahNetUpTo6Cents', 'madinahNetUpTo15Cents', 'madinahNetUpTo32Cents',
+  ];
+  if (actor.role !== 'SUPERADMIN' && pricingFields.some(key => body[key] !== undefined)) {
+    return NextResponse.json(
+      { error: 'Seul le Superadmin peut modifier les tarifs.' },
+      { status: 403 },
+    );
+  }
   const audit = (
     action: string,
     target: string,
@@ -212,7 +237,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Guide introuvable' }, { status: 404 });
 
     if (body.firstName !== undefined || body.lastName !== undefined ||
-        body.phoneWhatsapp !== undefined || body.email !== undefined) {
+        body.phoneWhatsapp !== undefined) {
       if (!guide.guideAccountId) {
         return NextResponse.json({ error: 'Compte guide introuvable' }, { status: 409 });
       }
@@ -220,7 +245,6 @@ export async function PATCH(
         ...(body.firstName !== undefined && { firstName: body.firstName }),
         ...(body.lastName !== undefined && { lastName: body.lastName }),
         ...(body.phoneWhatsapp !== undefined && { phoneWhatsapp: body.phoneWhatsapp }),
-        ...(body.email !== undefined && { email: String(body.email).toLowerCase() }),
       };
       await prisma.guideAccount.update({
           where: { id: guide.guideAccountId },
@@ -231,14 +255,13 @@ export async function PATCH(
             }),
           },
         });
-      const fields = ['firstName', 'lastName', 'phoneWhatsapp', 'email'].filter(key => body[key] !== undefined);
+      const fields = ['firstName', 'lastName', 'phoneWhatsapp'].filter(key => body[key] !== undefined);
       await audit('GUIDE_IDENTITY_UPDATED', guide.id, {
         detail: { fields },
         before: {
           ...(body.firstName !== undefined && { firstName: guide.guideAccount?.firstName }),
           ...(body.lastName !== undefined && { lastName: guide.guideAccount?.lastName }),
           ...(body.phoneWhatsapp !== undefined && { phoneWhatsapp: guide.guideAccount?.phoneWhatsapp }),
-          ...(body.email !== undefined && { email: guide.guideAccount?.email }),
         },
         after: identityData,
       });
@@ -330,15 +353,11 @@ export async function PATCH(
       return NextResponse.json({ success: true })
     }
 
-    if (body.status !== undefined && !['DRAFT', 'REVIEW', 'ACTIVE', 'SUSPENDED'].includes(body.status)) {
-      return NextResponse.json({ error: 'Statut invalide' }, { status: 400 });
-    }
-
     const profileFields = [
       'bio', 'city', 'gender', 'servesMakkah', 'servesMadinah', 'acceptingBookings',
       'makkahNetUpTo6Cents', 'makkahNetUpTo15Cents', 'makkahNetUpTo32Cents',
       'madinahNetUpTo6Cents', 'madinahNetUpTo15Cents', 'madinahNetUpTo32Cents',
-      'nationality', 'experienceYears', 'status',
+      'nationality', 'experienceYears',
     ] as const;
     const changedProfileFields = profileFields.filter(key => body[key] !== undefined);
     const beforeProfile = Object.fromEntries(changedProfileFields.map(key => [key, guide[key]]));
@@ -363,15 +382,8 @@ export async function PATCH(
         ...(body.experienceYears !== undefined && {
           experienceYears: Number(body.experienceYears)
         }),
-        ...(body.status !== undefined && { status: body.status }),
         },
       }),
-      ...(guide.guideAccountId && body.status !== undefined ? [
-        prisma.guideAccount.update({
-          where: { id: guide.guideAccountId },
-          data: { status: body.status === 'ACTIVE' ? 'ACTIVE' : 'SUSPENDED' },
-        }),
-      ] : []),
     ]);
     const afterProfile = Object.fromEntries(changedProfileFields.map(key => {
       if (key === 'servesMakkah' || key === 'servesMadinah' || key === 'acceptingBookings') {

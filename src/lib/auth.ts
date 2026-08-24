@@ -127,6 +127,7 @@ export const authOptions: AuthOptions = {
         try {
           const normalizedEmail = user.email.trim().toLowerCase()
           user.email = normalizedEmail
+          await prisma.emailIdentity.deleteMany({ where: { email: normalizedEmail, quarantinedUntil: { lte: new Date() } } })
           const [identity, existing, guideAccount, guideApplication] = await Promise.all([
             prisma.emailIdentity.findUnique({ where: { email: normalizedEmail }, select: { kind: true } }),
             prisma.user.findUnique({ where: { email: normalizedEmail } }),

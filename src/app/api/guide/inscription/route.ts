@@ -52,6 +52,7 @@ export async function POST(req: NextRequest) {
   const { firstName, lastName, email, whatsapp, city, gender, serviceCities, nationality, dateOfBirth, bio, experienceYears, education, languages, masteredPlaces, iban } = parsed.data;
   const educationLabel = EDUCATION_LABELS[education];
 
+  await prisma.emailIdentity.deleteMany({ where: { email, quarantinedUntil: { lte: new Date() } } });
   const [identity, existing, existingGuideAccount, existingApplication] = await Promise.all([
     prisma.emailIdentity.findUnique({ where: { email }, select: { kind: true } }),
     prisma.user.findUnique({ where: { email }, select: { id: true } }),

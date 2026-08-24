@@ -46,6 +46,7 @@ export async function POST(req: NextRequest) {
   const email = typeof rawEmail === 'string' ? rawEmail.trim().toLowerCase() : '';
   if (!firstName || !email) return NextResponse.json({ error: 'Prénom et email requis' }, { status: 400 });
 
+  await prisma.emailIdentity.deleteMany({ where: { email, quarantinedUntil: { lte: new Date() } } });
   const [identity, existing, existingGuideAccount, existingGuideApplication] = await Promise.all([
     prisma.emailIdentity.findUnique({ where: { email }, select: { kind: true } }),
     prisma.user.findUnique({ where: { email }, select: { id: true } }),

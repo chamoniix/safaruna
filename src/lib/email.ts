@@ -358,6 +358,110 @@ export function sendAdminPasswordReset(opts: {
   });
 }
 
+type GuideSecurityContext = {
+  date: string;
+  ip: string;
+  country?: string | null;
+  city?: string | null;
+  device?: string | null;
+  browser?: string | null;
+};
+
+function guideSecurityContext(context: GuideSecurityContext): string {
+  const location = [context.city, context.country].filter(Boolean).join(', ') || 'Non déterminée';
+  return `
+    <table cellpadding="0" cellspacing="0" width="100%" style="background:#FAF7F0;border:1px solid #E8DFC8;border-radius:12px;padding:12px 18px;margin:16px 0;">
+      <tr><td style="padding:5px 0;font-size:12px;color:#7A6D5A;">Date</td><td style="padding:5px 0;font-size:12px;color:#1A1209;font-weight:600;">${escapeHtml(context.date)}</td></tr>
+      <tr><td style="padding:5px 0;font-size:12px;color:#7A6D5A;">Adresse IP</td><td style="padding:5px 0;font-size:12px;color:#1A1209;font-weight:600;">${escapeHtml(context.ip)}</td></tr>
+      <tr><td style="padding:5px 0;font-size:12px;color:#7A6D5A;">Localisation</td><td style="padding:5px 0;font-size:12px;color:#1A1209;font-weight:600;">${escapeHtml(location)}</td></tr>
+      <tr><td style="padding:5px 0;font-size:12px;color:#7A6D5A;">Appareil</td><td style="padding:5px 0;font-size:12px;color:#1A1209;font-weight:600;">${escapeHtml([context.device, context.browser].filter(Boolean).join(' · ') || 'Non déterminé')}</td></tr>
+    </table>`;
+}
+
+export function sendGuidePasswordReset(opts: {
+  to: string;
+  name: string;
+  resetUrl: string;
+}): Promise<void> {
+  const { to, name, resetUrl } = opts;
+  return sendEmail({
+    to: { email: to, name },
+    subject: 'Réinitialisation de votre accès Guide — SAFARUMA',
+    throwOnError: true,
+    html: baseTemplate(`
+      ${heading('Réinitialiser votre accès Guide')}
+      ${p(`Bonjour${name ? ' ' + escapeHtml(name) : ''},`)}
+      ${p('Une demande de réinitialisation du mot de passe de votre espace Guide SAFARUMA a été effectuée.')}
+      ${divider()}
+      <div style="text-align:center;padding:16px 0;">${btn('Choisir un nouveau mot de passe', resetUrl)}</div>
+      ${divider()}
+      ${p('<small style="color:#9A8D7A;">Ce lien est personnel, utilisable une seule fois et expire dans <strong>1 heure</strong>. Si vous n\'avez pas demandé cette réinitialisation, ignorez cet email.</small>')}
+    `),
+  });
+}
+
+export function sendGuideEmailChangeCode(opts: {
+  to: string;
+  name: string;
+  code: string;
+}): Promise<void> {
+  const { to, name, code } = opts;
+  return sendEmail({
+    to: { email: to, name },
+    subject: 'Code de confirmation de votre nouvelle adresse — SAFARUMA',
+    throwOnError: true,
+    html: baseTemplate(`
+      ${heading('Confirmer votre nouvelle adresse')}
+      ${p(`Bonjour${name ? ' ' + escapeHtml(name) : ''},`)}
+      ${p('Saisissez ce code dans votre espace Guide pour confirmer votre nouvelle adresse e-mail :')}
+      <div style="margin:24px 0;text-align:center;font-size:30px;font-weight:800;letter-spacing:0.3em;color:#1A1209;">${escapeHtml(code)}</div>
+      ${p('<small style="color:#9A8D7A;">Ce code expire dans <strong>1 heure</strong>. Ne le communiquez à personne.</small>')}
+    `),
+  });
+}
+
+export function sendGuideEmailChanged(opts: {
+  to: string;
+  name: string;
+  oldEmail: string;
+  newEmail: string;
+  context: GuideSecurityContext;
+}): Promise<void> {
+  const { to, name, oldEmail, newEmail, context } = opts;
+  return sendEmail({
+    to: { email: to, name },
+    subject: 'Votre adresse e-mail Guide a été modifiée — SAFARUMA',
+    throwOnError: true,
+    html: baseTemplate(`
+      ${heading('Adresse e-mail modifiée')}
+      ${p(`Bonjour${name ? ' ' + escapeHtml(name) : ''},`)}
+      ${p(`L’adresse de connexion de votre espace Guide est passée de <strong>${escapeHtml(oldEmail)}</strong> à <strong>${escapeHtml(newEmail)}</strong>. Toutes les sessions ont été déconnectées.`)}
+      ${guideSecurityContext(context)}
+      ${p('<small style="color:#9A8D7A;">Si vous n’êtes pas à l’origine de cette action, contactez immédiatement SAFARUMA.</small>')}
+    `),
+  });
+}
+
+export function sendGuidePasswordChanged(opts: {
+  to: string;
+  name: string;
+  context: GuideSecurityContext;
+}): Promise<void> {
+  const { to, name, context } = opts;
+  return sendEmail({
+    to: { email: to, name },
+    subject: 'Votre mot de passe Guide a été modifié — SAFARUMA',
+    throwOnError: true,
+    html: baseTemplate(`
+      ${heading('Mot de passe modifié')}
+      ${p(`Bonjour${name ? ' ' + escapeHtml(name) : ''},`)}
+      ${p('Le mot de passe de votre espace Guide SAFARUMA vient d’être modifié. Toutes les sessions ont été déconnectées.')}
+      ${guideSecurityContext(context)}
+      ${p('<small style="color:#9A8D7A;">Si vous n’êtes pas à l’origine de cette action, utilisez immédiatement « Mot de passe oublié » puis contactez SAFARUMA.</small>')}
+    `),
+  });
+}
+
 // ─── 5. Rappel 7 jours avant départ ─────────────────────────────
 
 export function sendDepartureReminder(opts: {

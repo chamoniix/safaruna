@@ -72,6 +72,7 @@ export async function signup(_previousState: SignupState, formData: FormData): P
   }
 
   // Vérifier si l'email existe déjà
+  await prisma.emailIdentity.deleteMany({ where: { email, quarantinedUntil: { lte: new Date() } } });
   const [identity, existing, existingGuideAccount, existingGuideApplication] = await Promise.all([
     prisma.emailIdentity.findUnique({ where: { email }, select: { kind: true } }),
     prisma.user.findUnique({ where: { email }, select: { id: true } }),

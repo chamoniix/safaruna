@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     const existing = await prisma.placePrice.findMany()
     const existingKeys = new Set(existing.map(p => p.placeKey))
     const missing = PLACES.filter(p => !existingKeys.has(p.key))
-    if (missing.length > 0) {
+    if (missing.length > 0 && actor.role === 'SUPERADMIN') {
       await prisma.placePrice.createMany({
         data: missing.map(p => ({
           placeKey: p.key,
@@ -29,6 +29,7 @@ export async function GET(req: NextRequest) {
     allPrices.forEach(p => { priceMap[p.placeKey] = p.price })
 
     return NextResponse.json({
+      canEdit: actor.role === 'SUPERADMIN',
       places: PLACES.map(p => ({
         key: p.key,
         emoji: p.emoji,
@@ -49,6 +50,9 @@ export async function PATCH(req: NextRequest) {
   const actor = await getAdminActor(req)
   if (!actor)
     return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+  if (actor.role !== 'SUPERADMIN') {
+    return NextResponse.json({ error: 'Seul le Superadmin peut modifier les tarifs.' }, { status: 403 })
+  }
 
   try {
     const { placeKey, price } = await req.json()

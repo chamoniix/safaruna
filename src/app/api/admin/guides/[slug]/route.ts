@@ -246,7 +246,9 @@ export async function PATCH(
         ...(body.lastName !== undefined && { lastName: body.lastName }),
         ...(body.phoneWhatsapp !== undefined && { phoneWhatsapp: body.phoneWhatsapp }),
       };
-      await prisma.guideAccount.update({
+      const fields = ['firstName', 'lastName', 'phoneWhatsapp'].filter(key => body[key] !== undefined);
+      await prisma.$transaction([
+        prisma.guideAccount.update({
           where: { id: guide.guideAccountId },
           data: {
             ...identityData,
@@ -254,63 +256,67 @@ export async function PATCH(
               displayName: `${body.firstName ?? ''} ${body.lastName ?? ''}`.trim() || undefined,
             }),
           },
-        });
-      const fields = ['firstName', 'lastName', 'phoneWhatsapp'].filter(key => body[key] !== undefined);
-      await audit('GUIDE_IDENTITY_UPDATED', guide.id, {
-        detail: { fields },
-        before: {
-          ...(body.firstName !== undefined && { firstName: guide.guideAccount?.firstName }),
-          ...(body.lastName !== undefined && { lastName: guide.guideAccount?.lastName }),
-          ...(body.phoneWhatsapp !== undefined && { phoneWhatsapp: guide.guideAccount?.phoneWhatsapp }),
-        },
-        after: identityData,
-      });
+        }),
+        audit('GUIDE_IDENTITY_UPDATED', guide.id, {
+          detail: { fields },
+          before: {
+            ...(body.firstName !== undefined && { firstName: guide.guideAccount?.firstName }),
+            ...(body.lastName !== undefined && { lastName: guide.guideAccount?.lastName }),
+            ...(body.phoneWhatsapp !== undefined && { phoneWhatsapp: guide.guideAccount?.phoneWhatsapp }),
+          },
+          after: identityData,
+        }),
+      ]);
       return NextResponse.json({ success: true });
     }
 
     if (body.interviewScore !== undefined || body.interviewNotes !== undefined) {
-      await prisma.guideProfile.update({
-        where: { slug },
-        data: {
-          ...(body.interviewScore !== undefined && {
-            interviewScore: Number(body.interviewScore),
-          }),
-          ...(body.interviewNotes !== undefined && {
-            interviewNotes: body.interviewNotes,
-          }),
-          ...(body.interviewDate !== undefined && {
-            interviewDate: new Date(body.interviewDate),
-          }),
-          interviewedBy: actor.email,
-        },
-      });
-      await audit('GUIDE_INTERVIEW_UPDATED', guide.id, {
-        before: {
-          interviewScore: guide.interviewScore,
-          interviewNotes: guide.interviewNotes,
-          interviewDate: guide.interviewDate?.toISOString() || null,
-          interviewedBy: guide.interviewedBy,
-        },
-        after: {
-          ...(body.interviewScore !== undefined && { interviewScore: Number(body.interviewScore) }),
-          ...(body.interviewNotes !== undefined && { interviewNotes: body.interviewNotes }),
-          ...(body.interviewDate !== undefined && { interviewDate: new Date(body.interviewDate).toISOString() }),
-          interviewedBy: actor.email,
-        },
-      });
+      await prisma.$transaction([
+        prisma.guideProfile.update({
+          where: { slug },
+          data: {
+            ...(body.interviewScore !== undefined && {
+              interviewScore: Number(body.interviewScore),
+            }),
+            ...(body.interviewNotes !== undefined && {
+              interviewNotes: body.interviewNotes,
+            }),
+            ...(body.interviewDate !== undefined && {
+              interviewDate: new Date(body.interviewDate),
+            }),
+            interviewedBy: actor.email,
+          },
+        }),
+        audit('GUIDE_INTERVIEW_UPDATED', guide.id, {
+          before: {
+            interviewScore: guide.interviewScore,
+            interviewNotes: guide.interviewNotes,
+            interviewDate: guide.interviewDate?.toISOString() || null,
+            interviewedBy: guide.interviewedBy,
+          },
+          after: {
+            ...(body.interviewScore !== undefined && { interviewScore: Number(body.interviewScore) }),
+            ...(body.interviewNotes !== undefined && { interviewNotes: body.interviewNotes }),
+            ...(body.interviewDate !== undefined && { interviewDate: new Date(body.interviewDate).toISOString() }),
+            interviewedBy: actor.email,
+          },
+        }),
+      ]);
       return NextResponse.json({ success: true });
     }
 
     // Ajouter une langue
     if (body.addLanguage) {
-      await prisma.guideLanguage.create({
-        data: {
-          guideProfileId: guide.id,
-          languageCode: body.addLanguage.code,
-          level: body.addLanguage.level || 'NATIVE',
-        }
-      })
-      await audit('GUIDE_LANGUAGE_ADDED', guide.id, { after: body.addLanguage })
+      await prisma.$transaction([
+        prisma.guideLanguage.create({
+          data: {
+            guideProfileId: guide.id,
+            languageCode: body.addLanguage.code,
+            level: body.addLanguage.level || 'NATIVE',
+          }
+        }),
+        audit('GUIDE_LANGUAGE_ADDED', guide.id, { after: body.addLanguage }),
+      ])
       return NextResponse.json({ success: true })
     }
 
@@ -320,13 +326,15 @@ export async function PATCH(
       if (!deletedLanguage || deletedLanguage.guideProfileId !== guide.id) {
         return NextResponse.json({ error: 'Langue introuvable' }, { status: 404 })
       }
-      await prisma.guideLanguage.delete({
-        where: { id: body.deleteLanguageId }
-      })
-      await audit('GUIDE_LANGUAGE_DELETED', guide.id, {
-        before: { languageCode: deletedLanguage.languageCode, level: deletedLanguage.level },
-        after: { deleted: true },
-      })
+      await prisma.$transaction([
+        prisma.guideLanguage.delete({
+          where: { id: body.deleteLanguageId }
+        }),
+        audit('GUIDE_LANGUAGE_DELETED', guide.id, {
+          before: { languageCode: deletedLanguage.languageCode, level: deletedLanguage.level },
+          after: { deleted: true },
+        }),
+      ])
       return NextResponse.json({ success: true })
     }
 
@@ -335,21 +343,22 @@ export async function PATCH(
       const existing = await prisma.guidePlace.findFirst({
         where: { guideProfileId: guide.id, placeKey: body.togglePlace },
       })
-      if (existing) {
-        await prisma.guidePlace.update({
+      const placeMutation = existing
+        ? prisma.guidePlace.update({
           where: { id: existing.id },
           data: { isActive: !existing.isActive },
         })
-      } else {
-        await prisma.guidePlace.create({
+        : prisma.guidePlace.create({
           data: { guideProfileId: guide.id, placeKey: body.togglePlace, isActive: true },
         })
-      }
-      await audit('GUIDE_PLACE_TOGGLED', guide.id, {
-        detail: { placeKey: body.togglePlace },
-        before: { isActive: existing?.isActive ?? null },
-        after: { isActive: existing ? !existing.isActive : true },
-      })
+      await prisma.$transaction([
+        placeMutation,
+        audit('GUIDE_PLACE_TOGGLED', guide.id, {
+          detail: { placeKey: body.togglePlace },
+          before: { isActive: existing?.isActive ?? null },
+          after: { isActive: existing ? !existing.isActive : true },
+        }),
+      ])
       return NextResponse.json({ success: true })
     }
 
@@ -384,20 +393,19 @@ export async function PATCH(
         }),
         },
       }),
+      audit('GUIDE_PROFILE_UPDATED', guide.id, {
+        detail: { fields: changedProfileFields },
+        before: beforeProfile,
+        after: Object.fromEntries(changedProfileFields.map(key => {
+          if (key === 'servesMakkah' || key === 'servesMadinah' || key === 'acceptingBookings') {
+            return [key, Boolean(body[key])];
+          }
+          if (key.endsWith('Cents')) return [key, Math.max(0, Math.round(Number(body[key])))];
+          if (key === 'experienceYears') return [key, Number(body[key])];
+          return [key, body[key]];
+        })),
+      }),
     ]);
-    const afterProfile = Object.fromEntries(changedProfileFields.map(key => {
-      if (key === 'servesMakkah' || key === 'servesMadinah' || key === 'acceptingBookings') {
-        return [key, Boolean(body[key])];
-      }
-      if (key.endsWith('Cents')) return [key, Math.max(0, Math.round(Number(body[key])))];
-      if (key === 'experienceYears') return [key, Number(body[key])];
-      return [key, body[key]];
-    }));
-    await audit('GUIDE_PROFILE_UPDATED', guide.id, {
-      detail: { fields: changedProfileFields },
-      before: beforeProfile,
-      after: afterProfile,
-    });
 
     return NextResponse.json({ success: true });
   } catch (err) {

@@ -55,32 +55,34 @@ export async function POST(
   }
 
   if (action === 'activate') {
-    await prisma.guideProfile.update({
-      where: { slug },
-      data: {
-        status: 'ACTIVE',
-        approvedByAdminId: actor.id,
-        approvedByEmail: actor.email,
-        approvedAt: guide.approvedAt || new Date(),
-      },
-    });
-    if (guide.guideAccountId) {
-      await prisma.guideAccount.update({ where: { id: guide.guideAccountId }, data: { status: 'ACTIVE' } });
-    }
-
-    await prisma.auditLog.create({
-      data: {
-        actor: actor.email,
-        actorRole: actor.role,
-        actorAdminId: actor.id,
-        action: 'GUIDE_ACTIVATED',
-        target: guide.id,
-        detail: adminAuditDetail(auditContext),
-        before: { status: guide.status },
-        after: { status: 'ACTIVE' },
-        ...adminAuditFields(auditContext),
-      },
-    });
+    await prisma.$transaction([
+      prisma.guideProfile.update({
+        where: { slug },
+        data: {
+          status: 'ACTIVE',
+          approvedByAdminId: actor.id,
+          approvedByEmail: actor.email,
+          approvedAt: guide.approvedAt || new Date(),
+        },
+      }),
+      ...(guide.guideAccountId ? [prisma.guideAccount.update({
+        where: { id: guide.guideAccountId },
+        data: { status: 'ACTIVE' },
+      })] : []),
+      prisma.auditLog.create({
+        data: {
+          actor: actor.email,
+          actorRole: actor.role,
+          actorAdminId: actor.id,
+          action: 'GUIDE_ACTIVATED',
+          target: guide.id,
+          detail: adminAuditDetail(auditContext),
+          before: { status: guide.status },
+          after: { status: 'ACTIVE' },
+          ...adminAuditFields(auditContext),
+        },
+      }),
+    ]);
     return NextResponse.json({ success: true, newStatus: 'ACTIVE', message: 'Profil activé.' });
   }
 

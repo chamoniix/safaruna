@@ -60,39 +60,43 @@ export async function PATCH(req: NextRequest) {
   const noteEntry = `[${actor.email} ${new Date().toLocaleDateString('fr-FR')}] ${motif || 'Modification admin'}`;
   const newNotes = existingNotes ? `${noteEntry}\n${existingNotes}` : noteEntry;
 
-  const reservation = await prisma.reservation.update({
-    where: { id: reservationId },
-    data: { status, notes: newNotes },
-    include: {
-      pelerin: { select: { name: true, firstName: true, lastName: true, email: true } },
-      guideProfile: {
-        include: {
-          guideAccount: { select: { displayName: true, firstName: true, lastName: true, email: true, phoneWhatsapp: true } },
+  const reservation = await prisma.$transaction(async tx => {
+    const updated = await tx.reservation.update({
+      where: { id: reservationId },
+      data: { status, notes: newNotes },
+      include: {
+        pelerin: { select: { name: true, firstName: true, lastName: true, email: true } },
+        guideProfile: {
+          include: {
+            guideAccount: { select: { displayName: true, firstName: true, lastName: true, email: true, phoneWhatsapp: true } },
+          },
+        },
+        package: { select: { name: true, durationDays: true } },
+        guideEarnings: {
+          select: { guideProfileId: true, totalNetCents: true },
         },
       },
-      package: { select: { name: true, durationDays: true } },
-      guideEarnings: {
-        select: { guideProfileId: true, totalNetCents: true },
+    });
+
+    if (status === 'CANCELLED' && existing.status !== 'CANCELLED') {
+      await tx.availability.deleteMany({ where: { reservationId } });
+    }
+
+    await tx.auditLog.create({
+      data: {
+        actor: actor.email,
+        actorRole: actor.role,
+        actorAdminId: actor.id,
+        action: 'RESERVATION_STATUS_UPDATED',
+        target: existing.refNumber,
+        detail: adminAuditDetail(auditContext),
+        before: { status: existing.status },
+        after: { status, motif: motif || null },
+        ...adminAuditFields(auditContext),
       },
-    },
-  });
+    });
 
-  if (status === 'CANCELLED' && existing?.status !== 'CANCELLED') {
-    await prisma.availability.deleteMany({ where: { reservationId } });
-  }
-
-  await prisma.auditLog.create({
-    data: {
-      actor: actor.email,
-      actorRole: actor.role,
-      actorAdminId: actor.id,
-      action: 'RESERVATION_STATUS_UPDATED',
-      target: existing.refNumber,
-      detail: adminAuditDetail(auditContext),
-      before: { status: existing.status },
-      after: { status, motif: motif || null },
-      ...adminAuditFields(auditContext),
-    },
+    return updated;
   });
 
   if (status === 'CONFIRMED' && existing?.status !== 'CONFIRMED') {

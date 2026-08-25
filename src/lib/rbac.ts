@@ -1,4 +1,4 @@
-export type Role = 'PELERIN' | 'GUIDE' | 'ADMIN'
+export type Role = 'PELERIN' | 'GUIDE' | 'ADMIN' | 'SUPERADMIN'
 
 export type Permission =
   | 'viewAllUsers'
@@ -15,11 +15,24 @@ export type Permission =
   | 'writeMessages'
 
 const PERMISSIONS: Record<Role, Permission[]> = {
-  ADMIN: [
+  SUPERADMIN: [
     'viewAllUsers',
     'viewPrivateMessages',
     'overrideReservations',
     'setCommissionRates',
+    'manageGuideKYC',
+    'sendAdminEmails',
+    'manageOwnCalendar',
+    'manageOwnTours',
+    'viewOwnEarnings',
+    'createReservation',
+    'viewOwnReservations',
+    'writeMessages',
+  ],
+  ADMIN: [
+    'viewAllUsers',
+    'viewPrivateMessages',
+    'overrideReservations',
     'manageGuideKYC',
     'sendAdminEmails',
     'manageOwnCalendar',

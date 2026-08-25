@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
   try {
     guideAccount = await prisma.$transaction(async tx => {
       await tx.emailIdentity.create({ data: { email, kind: 'GUIDE' } });
-      return tx.guideAccount.create({
+      const account = await tx.guideAccount.create({
         data: {
           email,
           passwordHash,
@@ -101,6 +101,19 @@ export async function POST(req: NextRequest) {
         },
         include: { guideProfile: { select: { id: true } } },
       });
+      await tx.auditLog.create({
+        data: {
+          actor: actor.email,
+          actorRole: actor.role,
+          actorAdminId: actor.id,
+          action: 'GUIDE_CREATED_BY_ADMIN',
+          target: account.id,
+          detail: adminAuditDetail(auditContext, { email, slug, guideAccountId: account.id, guideProfileId: account.guideProfile?.id }),
+          after: { email, slug, status: 'REVIEW', createdByType: actor.role, createdByEmail: actor.email },
+          ...adminAuditFields(auditContext),
+        },
+      });
+      return account;
     });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
@@ -121,19 +134,6 @@ export async function POST(req: NextRequest) {
   } catch (e) {
     console.error('[admin/guides POST] email error', e);
   }
-
-  await prisma.auditLog.create({
-    data: {
-      actor: actor.email,
-      actorRole: actor.role,
-      actorAdminId: actor.id,
-      action: 'GUIDE_CREATED_BY_ADMIN',
-      target: guideAccount.id,
-      detail: adminAuditDetail(auditContext, { email, slug, guideAccountId: guideAccount.id, guideProfileId: guideAccount.guideProfile?.id }),
-      after: { email, slug, status: 'REVIEW', createdByType: actor.role, createdByEmail: actor.email },
-      ...adminAuditFields(auditContext),
-    },
-  });
 
   return NextResponse.json({ success: true, guideAccountId: guideAccount.id, guideProfileId: guideAccount.guideProfile?.id, slug }, { status: 201 });
 }

@@ -30,7 +30,7 @@ function KpiCard({ label, value, sub, color = '#1A1209', bg = 'white' }: { label
   );
 }
 
-function PipelineCard({ label, value, total, color, bg }: { label: string; value: number; total: number; color: string; bg: string }) {
+function PipelineCard({ label, value, total, color }: { label: string; value: number; total: number; color: string }) {
   const pct = total > 0 ? Math.round((value / total) * 100) : 0;
   return (
     <div style={{ ...card, padding: '1rem 1.25rem' }}>
@@ -55,7 +55,9 @@ export default function AdminStatsPage() {
       const res = await fetch('/api/admin/stats');
       if (!res.ok) throw new Error('Erreur ' + res.status);
       setData(await res.json());
-    } catch (e: any) { setError(e.message || 'Erreur réseau'); }
+    } catch (error: unknown) {
+      setError(error instanceof Error ? error.message : 'Erreur réseau');
+    }
     setLoading(false);
   };
 
@@ -76,7 +78,7 @@ export default function AdminStatsPage() {
       {/* Bloc 1 — KPIs principaux */}
       <section>
         <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.875rem' }}>Revenus & activité</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '1rem' }}>
           {loading ? (
             Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} />)
           ) : data ? (
@@ -93,7 +95,7 @@ export default function AdminStatsPage() {
       {/* Bloc 2 — Guides & Pèlerins */}
       <section>
         <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.875rem' }}>Communauté</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 220px), 1fr))', gap: '1rem' }}>
           {loading ? (
             Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} h={100} />)
           ) : data ? (
@@ -109,16 +111,16 @@ export default function AdminStatsPage() {
       {/* Bloc 3 — Pipeline réservations */}
       <section>
         <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.875rem' }}>Pipeline réservations</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 170px), 1fr))', gap: '1rem' }}>
           {loading ? (
             Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} h={100} />)
           ) : data ? (
             <>
-              <PipelineCard label="En attente"  value={data.reservations.pending}   total={data.reservations.total} color="#D97706" bg="#FEF3C7" />
-              <PipelineCard label="Confirmées"  value={data.reservations.confirmed} total={data.reservations.total} color="#1D4ED8" bg="#DBEAFE" />
-              <PipelineCard label="Terminées"   value={data.reservations.completed} total={data.reservations.total} color="#1D5C3A" bg="#D1FAE5" />
-              <PipelineCard label="Annulées"    value={data.reservations.cancelled} total={data.reservations.total} color="#DC2626" bg="#FEE2E2" />
-              <PipelineCard label="Ce mois"     value={data.reservations.thisMonth} total={data.reservations.total} color="#7C3AED" bg="#EDE9FE" />
+              <PipelineCard label="En attente"  value={data.reservations.pending}   total={data.reservations.total} color="#D97706" />
+              <PipelineCard label="Confirmées"  value={data.reservations.confirmed} total={data.reservations.total} color="#1D4ED8" />
+              <PipelineCard label="Terminées"   value={data.reservations.completed} total={data.reservations.total} color="#1D5C3A" />
+              <PipelineCard label="Annulées"    value={data.reservations.cancelled} total={data.reservations.total} color="#DC2626" />
+              <PipelineCard label="Ce mois"     value={data.reservations.thisMonth} total={data.reservations.total} color="#7C3AED" />
             </>
           ) : null}
         </div>

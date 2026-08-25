@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAdminActor } from '@/lib/check-admin'
+import { adminAuditDetail, adminAuditFields, getAdminActor, getAdminAuditContext } from '@/lib/check-admin'
 import prisma from '@/lib/prisma'
 import { PLACES } from '@/lib/places'
 
@@ -7,6 +7,7 @@ export async function GET(req: NextRequest) {
   const actor = await getAdminActor(req)
   if (!actor)
     return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+  const auditContext = getAdminAuditContext(req)
 
   try {
     // Seed automatique : crée les PlacePrice manquants
@@ -14,14 +15,29 @@ export async function GET(req: NextRequest) {
     const existingKeys = new Set(existing.map(p => p.placeKey))
     const missing = PLACES.filter(p => !existingKeys.has(p.key))
     if (missing.length > 0 && actor.role === 'SUPERADMIN') {
-      await prisma.placePrice.createMany({
-        data: missing.map(p => ({
-          placeKey: p.key,
-          price: 50,
-          isActive: true,
-        })),
-        skipDuplicates: true,
-      })
+      await prisma.$transaction([
+        prisma.placePrice.createMany({
+          data: missing.map(p => ({
+            placeKey: p.key,
+            price: 50,
+            isActive: true,
+          })),
+          skipDuplicates: true,
+        }),
+        prisma.auditLog.create({
+          data: {
+            actor: actor.email,
+            actorRole: actor.role,
+            actorAdminId: actor.id,
+            action: 'PLACE_PRICES_INITIALIZED',
+            target: 'place-prices',
+            detail: adminAuditDetail(auditContext, { placeKeys: missing.map(place => place.key) }),
+            before: { missing: missing.map(place => place.key) },
+            after: { defaultPrice: 50, initialized: missing.map(place => place.key) },
+            ...adminAuditFields(auditContext),
+          },
+        }),
+      ])
     }
 
     const allPrices = await prisma.placePrice.findMany()
@@ -53,6 +69,7 @@ export async function PATCH(req: NextRequest) {
   if (actor.role !== 'SUPERADMIN') {
     return NextResponse.json({ error: 'Seul le Superadmin peut modifier les tarifs.' }, { status: 403 })
   }
+  const auditContext = getAdminAuditContext(req)
 
   try {
     const { placeKey, price } = await req.json()
@@ -64,7 +81,17 @@ export async function PATCH(req: NextRequest) {
     const previous = await prisma.placePrice.findUnique({ where: { placeKey }, select: { price: true } })
     await prisma.$transaction([
       prisma.placePrice.upsert({ where: { placeKey }, update: { price }, create: { placeKey, price, isActive: true } }),
-      prisma.auditLog.create({ data: { actor: actor.email, actorRole: actor.role, actorAdminId: actor.id, action: 'PLACE_PRICE_UPDATED', target: placeKey, before: { price: previous?.price ?? null }, after: { price } } }),
+      prisma.auditLog.create({ data: {
+        actor: actor.email,
+        actorRole: actor.role,
+        actorAdminId: actor.id,
+        action: 'PLACE_PRICE_UPDATED',
+        target: placeKey,
+        detail: adminAuditDetail(auditContext),
+        before: { price: previous?.price ?? null },
+        after: { price },
+        ...adminAuditFields(auditContext),
+      } }),
     ])
 
     return NextResponse.json({ success: true })

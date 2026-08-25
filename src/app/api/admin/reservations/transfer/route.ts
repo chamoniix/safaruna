@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAdminActor } from '@/lib/check-admin';
+import { adminAuditDetail, adminAuditFields, getAdminActor, getAdminAuditContext } from '@/lib/check-admin';
 import prisma from '@/lib/prisma';
 import { sendEmail } from '@/lib/email';
 
@@ -7,6 +7,7 @@ export async function POST(req: NextRequest) {
   const actor = await getAdminActor(req);
   if (!actor)
     return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+  const auditContext = getAdminAuditContext(req);
 
   const { reservationId, newGuideProfileId, motif } = await req.json();
 
@@ -48,8 +49,10 @@ export async function POST(req: NextRequest) {
         actorAdminId: actor.id,
         action: 'RESERVATION_GUIDE_TRANSFERRED',
         target: reservation.refNumber,
+        detail: adminAuditDetail(auditContext),
         before: { guideProfileId: reservation.guideProfileId },
         after: { guideProfileId: newGuideProfileId, motif },
+        ...adminAuditFields(auditContext),
       },
     }),
   ]);

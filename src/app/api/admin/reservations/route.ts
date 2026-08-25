@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { checkAdmin, getAdminActor } from '@/lib/check-admin';
+import { adminAuditDetail, adminAuditFields, checkAdmin, getAdminActor, getAdminAuditContext } from '@/lib/check-admin';
 import prisma from '@/lib/prisma';
 import { sendReservationConfirmation, sendEmail } from '@/lib/email';
 
@@ -43,6 +43,7 @@ export async function PATCH(req: NextRequest) {
   const actor = await getAdminActor(req);
   if (!actor)
     return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
+  const auditContext = getAdminAuditContext(req);
 
   const { reservationId, status, motif } = await req.json();
 
@@ -87,8 +88,10 @@ export async function PATCH(req: NextRequest) {
       actorAdminId: actor.id,
       action: 'RESERVATION_STATUS_UPDATED',
       target: existing.refNumber,
+      detail: adminAuditDetail(auditContext),
       before: { status: existing.status },
       after: { status, motif: motif || null },
+      ...adminAuditFields(auditContext),
     },
   });
 

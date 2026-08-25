@@ -6,7 +6,10 @@ import Link from 'next/link';
 import { adminLogout } from '@/app/admin/login/actions';
 import styles from './layout.module.css';
 
-const NAV_SECTIONS = [
+type NavItem = { href: string; label: string };
+type NavSection = { label: string; items: NavItem[] };
+
+const NAV_SECTIONS: NavSection[] = [
   {
     label: 'Pilotage',
     items: [
@@ -39,7 +42,7 @@ const NAV_SECTIONS = [
       { href: '/admin/parametres', label: 'Paramètres' },
     ],
   },
-] as const;
+];
 
 const NAV_ITEMS = NAV_SECTIONS.flatMap(section => section.items);
 

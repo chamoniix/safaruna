@@ -86,6 +86,5 @@ export async function GET(req: NextRequest) {
     pelerinsInscrits: pelerinsInscrits,
     reservationsMois: reservationsMois,
     commissionsMois: commissionsMois,
-    litigesOuverts: 0,
   });
 }

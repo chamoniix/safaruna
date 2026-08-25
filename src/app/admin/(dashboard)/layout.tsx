@@ -13,8 +13,6 @@ const NAV = [
   { href: '/admin/pelerins',        label: 'Pèlerins' },
   { href: '/admin/reservations',    label: 'Réservations' },
   { href: '/admin/messages',        label: 'Messages' },
-  { href: '/admin/litiges',         label: 'Litiges' },
-  { href: '/admin/contenu',         label: 'Contenu' },
   { href: '/admin/stats',           label: 'Statistiques' },
   { href: '/admin/revenus',         label: 'Revenus' },
   { href: '/admin/commissions',     label: 'Commissions' },

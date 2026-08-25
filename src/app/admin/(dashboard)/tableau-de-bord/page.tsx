@@ -9,7 +9,6 @@ type Stats = {
   reservationsMois: number;
   commissionsMois: number;
   guidesEnAttente: number;
-  litigesOuverts: number;
 };
 
 export default function AdminDashboard() {
@@ -50,18 +49,12 @@ export default function AdminDashboard() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
       {/* Alertes */}
-      {stats && (stats.guidesEnAttente > 0 || stats.litigesOuverts > 0) && (
+      {stats && stats.guidesEnAttente > 0 && (
         <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
           {stats.guidesEnAttente > 0 && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: '#FEF3C7', border: '1px solid #FCD34D', borderRadius: 8, padding: '0.6rem 1rem' }}>
               <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#92400E' }}>{stats.guidesEnAttente} guide{stats.guidesEnAttente > 1 ? 's' : ''} en attente</span>
               <Link href="/admin/candidatures-guides" style={{ fontSize: '0.72rem', color: '#D97706', fontWeight: 700, textDecoration: 'none' }}>Traiter →</Link>
-            </div>
-          )}
-          {stats.litigesOuverts > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: '#FEE2E2', border: '1px solid #FCA5A5', borderRadius: 8, padding: '0.6rem 1rem' }}>
-              <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#991B1B' }}>{stats.litigesOuverts} litige{stats.litigesOuverts > 1 ? 's' : ''} ouvert{stats.litigesOuverts > 1 ? 's' : ''}</span>
-              <Link href="/admin/litiges" style={{ fontSize: '0.72rem', color: '#DC2626', fontWeight: 700, textDecoration: 'none' }}>Voir →</Link>
             </div>
           )}
         </div>

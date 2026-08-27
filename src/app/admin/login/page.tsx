@@ -1,5 +1,6 @@
 import { adminLogin } from './actions';
 import Link from 'next/link';
+import AdminLoginSubmitButton from './SubmitButton';
 
 export default async function AdminLoginPage({
   searchParams,
@@ -72,12 +73,7 @@ export default async function AdminLoginPage({
                 />
               </div>
 
-              <button
-                type="submit"
-                style={{ marginTop: '0.5rem', width: '100%', padding: '0.9rem', borderRadius: 50, border: 'none', background: '#C9A84C', color: '#1A1209', fontSize: '0.875rem', fontWeight: 700, letterSpacing: '0.05em', cursor: 'pointer', fontFamily: 'inherit' }}
-              >
-                Se connecter
-              </button>
+              <AdminLoginSubmitButton />
 
               <Link
                 href="/admin/mot-de-passe-oublie"

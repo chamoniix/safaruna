@@ -1,0 +1,66 @@
+.submitButton {
+  display: inline-flex;
+  width: 100%;
+  min-height: 46px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  margin-top: 0.5rem;
+  padding: 0.9rem;
+  border: none;
+  border-radius: 50px;
+  background: #c9a84c;
+  color: #1a1209;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  transition: transform 120ms ease, background-color 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+}
+
+.submitButton:hover:not(:disabled) {
+  background: #dfc16a;
+  box-shadow: 0 8px 22px rgba(201, 168, 76, 0.22);
+}
+
+.submitButton:active:not(:disabled) {
+  transform: scale(0.975);
+  background: #b8953e;
+  box-shadow: 0 3px 10px rgba(201, 168, 76, 0.16);
+}
+
+.submitButton:disabled {
+  cursor: wait;
+  opacity: 0.78;
+}
+
+.buttonSpinner {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+  border: 2px solid rgba(26, 18, 9, 0.28);
+  border-top-color: #1a1209;
+  border-radius: 50%;
+  animation: login-spin 700ms linear infinite;
+}
+
+@keyframes login-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .submitButton {
+    transition: background-color 160ms ease, opacity 160ms ease;
+  }
+
+  .submitButton:active:not(:disabled) {
+    transform: none;
+  }
+
+  .buttonSpinner {
+    animation-duration: 1.4s;
+  }
+}

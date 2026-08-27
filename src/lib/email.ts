@@ -1,6 +1,287 @@
+import { createHash, randomUUID } from 'node:crypto';
+import { Prisma } from '@prisma/client';
+import { decrypt, encrypt } from '@/lib/crypto';
+import prisma from '@/lib/prisma';
+
 // Brevo Transactional Email — HTTP API (no external dependency)
 
 const BREVO_URL = 'https://api.brevo.com/v3/smtp/email';
+const EMAIL_PROVIDER = 'BREVO' as const;
+
+export type EmailCategory =
+  | 'ADMIN_LOGIN_ALERT'
+  | 'ADMIN_PASSWORD_CHANGED'
+  | 'ADMIN_PASSWORD_RESET'
+  | 'CONTACT_REQUEST'
+  | 'DEPARTURE_REMINDER_GUIDE'
+  | 'DEPARTURE_REMINDER_PELERIN'
+  | 'GUIDE_ACCESS_INVITATION'
+  | 'GUIDE_APPLICATION_ADMIN_NOTICE'
+  | 'GUIDE_APPLICATION_RECEIVED'
+  | 'GUIDE_EMAIL_CHANGED'
+  | 'GUIDE_EMAIL_CHANGE_CODE'
+  | 'GUIDE_MESSAGE_NOTIFICATION'
+  | 'GUIDE_PASSWORD_CHANGED'
+  | 'GUIDE_PASSWORD_RESET'
+  | 'GUIDE_PLACE_SUGGESTION'
+  | 'PELERIN_EMAIL_VERIFICATION'
+  | 'PELERIN_EMAIL_VERIFIED'
+  | 'PELERIN_MESSAGE_NOTIFICATION'
+  | 'PELERIN_PASSWORD_CHANGED'
+  | 'PELERIN_PASSWORD_RESET'
+  | 'PELERIN_WELCOME'
+  | 'RESERVATION_CONFIRMATION_ADMIN'
+  | 'RESERVATION_CONFIRMATION_GUIDE'
+  | 'RESERVATION_CONFIRMATION_PELERIN'
+  | 'RESERVATION_GUIDE_TRANSFER';
+
+export type EmailSendResult = {
+  provider: typeof EMAIL_PROVIDER;
+  deliveryId: string | null;
+  messageId: string | null;
+  status: 'ACCEPTED' | 'FAILED' | 'RETRY_PENDING' | 'IN_PROGRESS';
+};
+
+type EmailRecipient = { email: string; name?: string };
+
+interface EmailPayload {
+  to: EmailRecipient;
+  subject: string;
+  html: string;
+  category: EmailCategory;
+  replyTo?: EmailRecipient;
+  throwOnError?: boolean;
+  retryable?: boolean;
+  idempotencyKey?: string;
+  reference?: { type: string; id: string };
+}
+
+type StoredEmailPayload = Pick<EmailPayload, 'to' | 'subject' | 'html' | 'category' | 'replyTo' | 'reference'> & {
+  providerIdempotencyKey: string;
+};
+
+class EmailProviderError extends Error {
+  constructor(message: string, readonly retryable: boolean) {
+    super(message);
+  }
+}
+
+function errorMessage(error: unknown): string {
+  return (error instanceof Error ? error.message : 'Erreur fournisseur inconnue').slice(0, 500);
+}
+
+function retryAt(attempts: number): Date {
+  const delays = [15 * 60_000, 6 * 60 * 60_000, 24 * 60 * 60_000];
+  return new Date(Date.now() + delays[Math.min(delays.length - 1, Math.max(0, attempts - 1))]);
+}
+
+function providerIdempotencyKey(idempotencyKey: string): string {
+  const hash = createHash('sha256').update(idempotencyKey).digest('hex');
+  return `${hash.slice(0, 8)}-${hash.slice(8, 12)}-5${hash.slice(13, 16)}-a${hash.slice(17, 20)}-${hash.slice(20, 32)}`;
+}
+
+async function sendViaBrevo(payload: StoredEmailPayload): Promise<string> {
+  const apiKey = process.env.BREVO_API_KEY;
+  if (!apiKey) throw new EmailProviderError('BREVO_API_KEY not set', false);
+
+  const response = await fetch(BREVO_URL, {
+    method: 'POST',
+    headers: {
+      'api-key': apiKey,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify({
+      sender: {
+        name: process.env.SMTP_FROM_NAME ?? 'SAFARUMA',
+        email: process.env.SMTP_FROM ?? 'noreply@safaruma.com',
+      },
+      to: [{ email: payload.to.email, name: payload.to.name ?? payload.to.email }],
+      ...(payload.replyTo && { replyTo: { email: payload.replyTo.email, name: payload.replyTo.name ?? payload.replyTo.email } }),
+      subject: payload.subject,
+      htmlContent: payload.html,
+      tags: ['safaruma', payload.category.toLowerCase()],
+      headers: { 'Idempotency-Key': payload.providerIdempotencyKey },
+    }),
+  });
+
+  if (!response.ok) {
+    await response.text().catch(() => '');
+    throw new EmailProviderError(`Brevo error ${response.status}`, response.status === 429 || response.status >= 500);
+  }
+
+  const body = await response.json() as { messageId?: string };
+  if (!body.messageId) throw new EmailProviderError('Brevo response missing messageId', true);
+  return body.messageId;
+}
+
+async function createDelivery(payload: EmailPayload, storedPayload: StoredEmailPayload, idempotencyKey: string) {
+  try {
+    return await prisma.emailDelivery.create({
+      data: {
+        idempotencyKey,
+        provider: EMAIL_PROVIDER,
+        category: payload.category,
+        recipientEmail: payload.to.email.toLowerCase(),
+        referenceType: payload.reference?.type,
+        referenceId: payload.reference?.id,
+        maxAttempts: payload.retryable ? 3 : 1,
+        payloadEncrypted: payload.retryable ? encrypt(JSON.stringify(storedPayload)) : null,
+      },
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      return prisma.emailDelivery.findUnique({ where: { idempotencyKey } });
+    }
+    console.error('[email-ledger] create failed', error);
+    return null;
+  }
+}
+
+export async function sendEmail(payload: EmailPayload): Promise<EmailSendResult> {
+  const { throwOnError = false, retryable = false } = payload;
+  const idempotencyKey = payload.idempotencyKey || randomUUID();
+  const storedPayload: StoredEmailPayload = {
+    to: payload.to,
+    subject: payload.subject,
+    html: payload.html,
+    category: payload.category,
+    replyTo: payload.replyTo,
+    reference: payload.reference,
+    providerIdempotencyKey: providerIdempotencyKey(idempotencyKey),
+  };
+  const delivery = await createDelivery(payload, storedPayload, idempotencyKey);
+
+  if (delivery && delivery.status !== 'QUEUED') {
+    return {
+      provider: EMAIL_PROVIDER,
+      deliveryId: delivery.id,
+      messageId: delivery.providerMessageId,
+      status: delivery.status === 'RETRY_PENDING'
+        ? 'RETRY_PENDING'
+        : delivery.status === 'FAILED'
+          ? 'FAILED'
+          : ['SENDING'].includes(delivery.status)
+            ? 'IN_PROGRESS'
+            : 'ACCEPTED',
+    };
+  }
+
+  if (delivery) {
+    const claimed = await prisma.emailDelivery.updateMany({
+      where: { id: delivery.id, status: 'QUEUED' },
+      data: { status: 'SENDING' },
+    }).catch(error => {
+      console.error('[email-ledger] initial claim failed', error);
+      return null;
+    });
+    if (claimed && claimed.count !== 1) {
+      const current = await prisma.emailDelivery.findUnique({ where: { id: delivery.id } });
+      return {
+        provider: EMAIL_PROVIDER,
+        deliveryId: delivery.id,
+        messageId: current?.providerMessageId ?? null,
+        status: current?.status === 'RETRY_PENDING' ? 'RETRY_PENDING' : current?.status === 'FAILED' ? 'FAILED' : 'IN_PROGRESS',
+      };
+    }
+  }
+
+  try {
+    const messageId = await sendViaBrevo(storedPayload);
+    if (delivery) {
+      await prisma.emailDelivery.update({
+        where: { id: delivery.id },
+        data: {
+          providerMessageId: messageId,
+          status: 'ACCEPTED',
+          attempts: { increment: 1 },
+          acceptedAt: new Date(),
+          payloadEncrypted: null,
+          nextAttemptAt: null,
+          lastError: null,
+        },
+      }).catch(error => console.error('[email-ledger] accept update failed', error));
+    }
+    return { provider: EMAIL_PROVIDER, deliveryId: delivery?.id ?? null, messageId, status: 'ACCEPTED' };
+  } catch (error) {
+    const canRetry = retryable && (!(error instanceof EmailProviderError) || error.retryable);
+    const status = canRetry ? 'RETRY_PENDING' : 'FAILED';
+    console.error('[email] send failed', error);
+    if (delivery) {
+      await prisma.emailDelivery.update({
+        where: { id: delivery.id },
+        data: {
+          status,
+          attempts: { increment: 1 },
+          nextAttemptAt: canRetry ? retryAt(1) : null,
+          payloadEncrypted: canRetry ? delivery.payloadEncrypted : null,
+          lastError: errorMessage(error),
+        },
+      }).catch(ledgerError => console.error('[email-ledger] failure update failed', ledgerError));
+    }
+    if (throwOnError) throw error;
+    return { provider: EMAIL_PROVIDER, deliveryId: delivery?.id ?? null, messageId: null, status };
+  }
+}
+
+export async function retryPendingEmails(limit = 20) {
+  const now = new Date();
+  const staleSendingBefore = new Date(now.getTime() - 15 * 60_000);
+  const candidates = await prisma.emailDelivery.findMany({
+    where: {
+      payloadEncrypted: { not: null },
+      attempts: { lt: 3 },
+      OR: [
+        { status: 'RETRY_PENDING', nextAttemptAt: { lte: now } },
+        { status: 'SENDING', updatedAt: { lte: staleSendingBefore } },
+      ],
+    },
+    orderBy: { nextAttemptAt: 'asc' },
+    take: Math.min(50, Math.max(1, limit)),
+  });
+  let accepted = 0;
+  let failed = 0;
+
+  for (const candidate of candidates) {
+    const claimed = await prisma.emailDelivery.updateMany({
+      where: { id: candidate.id, status: candidate.status, attempts: candidate.attempts },
+      data: { status: 'SENDING', attempts: { increment: 1 } },
+    });
+    if (claimed.count !== 1 || !candidate.payloadEncrypted) continue;
+
+    try {
+      const payload = JSON.parse(decrypt(candidate.payloadEncrypted)) as StoredEmailPayload;
+      const messageId = await sendViaBrevo(payload);
+      await prisma.emailDelivery.update({
+        where: { id: candidate.id },
+        data: {
+          providerMessageId: messageId,
+          status: 'ACCEPTED',
+          acceptedAt: new Date(),
+          payloadEncrypted: null,
+          nextAttemptAt: null,
+          lastError: null,
+        },
+      });
+      accepted++;
+    } catch (error) {
+      const attempts = candidate.attempts + 1;
+      const canRetry = attempts < candidate.maxAttempts && (!(error instanceof EmailProviderError) || error.retryable);
+      await prisma.emailDelivery.update({
+        where: { id: candidate.id },
+        data: {
+          status: canRetry ? 'RETRY_PENDING' : 'FAILED',
+          nextAttemptAt: canRetry ? retryAt(attempts) : null,
+          payloadEncrypted: canRetry ? candidate.payloadEncrypted : null,
+          lastError: errorMessage(error),
+        },
+      });
+      failed++;
+    }
+  }
+
+  return { checked: candidates.length, accepted, failed };
+}
 
 // ─── Sécurité : échappement HTML ────────────────────────────────
 // Toutes les données dynamiques (noms, messages, etc.) passent par
@@ -12,55 +293,6 @@ export function escapeHtml(str: unknown): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
-}
-
-interface EmailPayload {
-  to: { email: string; name?: string };
-  subject: string;
-  html: string;
-  replyTo?: { email: string; name?: string };
-  throwOnError?: boolean;
-}
-
-export async function sendEmail({ to, subject, html, replyTo, throwOnError = false }: EmailPayload): Promise<void> {
-  const apiKey = process.env.BREVO_API_KEY;
-  if (!apiKey) {
-    console.warn('[email] BREVO_API_KEY not set — skipping send');
-    if (throwOnError) throw new Error('BREVO_API_KEY not set');
-    return;
-  }
-
-  const body = {
-    sender: {
-      name: process.env.SMTP_FROM_NAME ?? 'SAFARUMA',
-      email: process.env.SMTP_FROM ?? 'noreply@safaruma.com',
-    },
-    to: [{ email: to.email, name: to.name ?? to.email }],
-    ...(replyTo && { replyTo: { email: replyTo.email, name: replyTo.name ?? replyTo.email } }),
-    subject,
-    htmlContent: html,
-  };
-
-  try {
-    const res = await fetch(BREVO_URL, {
-      method: 'POST',
-      headers: {
-        'api-key': apiKey,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (!res.ok) {
-      const err = await res.text();
-      console.error('[email] Brevo error', res.status, err);
-      if (throwOnError) throw new Error(`Brevo error ${res.status}`);
-    }
-  } catch (err) {
-    console.error('[email] fetch failed', err);
-    if (throwOnError) throw err;
-  }
 }
 
 // ─── Template helpers ───────────────────────────────────────────
@@ -132,8 +364,9 @@ export function badge(text: string, color = '#C9A84C'): string {
 
 // ─── 1. Bienvenue pèlerin ────────────────────────────────────────
 
-export function sendWelcomePelerin(to: string, name: string): Promise<void> {
+export function sendWelcomePelerin(to: string, name: string): Promise<EmailSendResult> {
   return sendEmail({
+    category: 'PELERIN_WELCOME',
     to: { email: to, name },
     subject: 'Bienvenue sur SAFARUMA — Votre compte est créé',
     html: baseTemplate(`
@@ -165,8 +398,9 @@ export function sendWelcomePelerin(to: string, name: string): Promise<void> {
 
 // ─── 2. Bienvenue guide ──────────────────────────────────────────
 
-export function sendWelcomeGuide(to: string, name: string): Promise<void> {
+export function sendWelcomeGuide(to: string, name: string): Promise<EmailSendResult> {
   return sendEmail({
+    category: 'GUIDE_APPLICATION_RECEIVED',
     to: { email: to, name },
     subject: 'Candidature reçue — SAFARUMA Guide',
     html: baseTemplate(`
@@ -196,9 +430,10 @@ export function sendGuideAccess(opts: {
   email: string;
   setupUrl: string;
   profileActive?: boolean;
-}): Promise<void> {
+}): Promise<EmailSendResult> {
   const { to, name, email, setupUrl, profileActive = true } = opts;
   return sendEmail({
+    category: 'GUIDE_ACCESS_INVITATION',
     to: { email: to, name },
     subject: profileActive ? 'Activez votre accès Guide SAFARUMA — Bienvenue !' : 'Définissez votre accès Guide SAFARUMA',
     throwOnError: true,
@@ -238,9 +473,13 @@ export function sendReservationConfirmation(opts: {
   nights: number;
   amount: number;
   reservationId: string;
-}): Promise<void> {
+}): Promise<EmailSendResult> {
   const { to, pelerinName, guideName, departureDate, nights, amount, reservationId } = opts;
   return sendEmail({
+    category: 'RESERVATION_CONFIRMATION_PELERIN',
+    retryable: true,
+    idempotencyKey: `reservation-confirmation:pelerin:${reservationId}:${to.toLowerCase()}`,
+    reference: { type: 'RESERVATION', id: reservationId },
     to: { email: to, name: pelerinName },
     subject: `Réservation confirmée — ${reservationId}`,
     html: baseTemplate(`
@@ -279,9 +518,10 @@ export function sendMessageNotification(opts: {
   senderName: string;
   preview: string;
   conversationId: string;
-}): Promise<void> {
+}): Promise<EmailSendResult> {
   const { to, recipientName, senderName, preview, conversationId } = opts;
   return sendEmail({
+    category: 'PELERIN_MESSAGE_NOTIFICATION',
     to: { email: to, name: recipientName },
     subject: `Nouveau message de ${senderName}`,
     html: baseTemplate(`
@@ -306,9 +546,10 @@ export function sendPasswordReset(opts: {
   to: string;
   name: string;
   resetUrl: string;
-}): Promise<void> {
+}): Promise<EmailSendResult> {
   const { to, name, resetUrl } = opts;
   return sendEmail({
+    category: 'PELERIN_PASSWORD_RESET',
     to: { email: to, name },
     subject: 'Réinitialisation de votre mot de passe — SAFARUMA',
     throwOnError: true,
@@ -333,9 +574,10 @@ export function sendPelerinPasswordChanged(opts: {
   to: string;
   name: string;
   context: GuideSecurityContext;
-}): Promise<void> {
+}): Promise<EmailSendResult> {
   const { to, name, context } = opts;
   return sendEmail({
+    category: 'PELERIN_PASSWORD_CHANGED',
     to: { email: to, name },
     subject: 'Votre mot de passe Pèlerin a été modifié — SAFARUMA',
     throwOnError: true,
@@ -353,9 +595,10 @@ export function sendAdminPasswordReset(opts: {
   to: string;
   name: string;
   resetUrl: string;
-}): Promise<void> {
+}): Promise<EmailSendResult> {
   const { to, name, resetUrl } = opts;
   return sendEmail({
+    category: 'ADMIN_PASSWORD_RESET',
     to: { email: to, name },
     subject: 'Réinitialisation de votre accès Administration — SAFARUMA',
     throwOnError: true,
@@ -400,10 +643,11 @@ export function sendAdminLoginAlert(opts: {
   name: string;
   role: 'ADMIN' | 'SUPERADMIN';
   context: AdminSecurityEmailContext;
-}): Promise<void> {
+}): Promise<EmailSendResult> {
   const { to, name, role, context } = opts;
   const roleLabel = role === 'SUPERADMIN' ? 'Superadmin' : 'Admin';
   return sendEmail({
+    category: 'ADMIN_LOGIN_ALERT',
     to: { email: to, name },
     subject: `Nouvelle connexion à votre compte ${roleLabel} — SAFARUMA`,
     throwOnError: true,
@@ -425,10 +669,11 @@ export function sendAdminPasswordChanged(opts: {
   name: string;
   role: 'ADMIN' | 'SUPERADMIN';
   context: AdminSecurityEmailContext;
-}): Promise<void> {
+}): Promise<EmailSendResult> {
   const { to, name, role, context } = opts;
   const roleLabel = role === 'SUPERADMIN' ? 'Superadmin' : 'Admin';
   return sendEmail({
+    category: 'ADMIN_PASSWORD_CHANGED',
     to: { email: to, name },
     subject: `Mot de passe ${roleLabel} modifié — SAFARUMA`,
     throwOnError: true,
@@ -469,9 +714,10 @@ export function sendGuidePasswordReset(opts: {
   to: string;
   name: string;
   resetUrl: string;
-}): Promise<void> {
+}): Promise<EmailSendResult> {
   const { to, name, resetUrl } = opts;
   return sendEmail({
+    category: 'GUIDE_PASSWORD_RESET',
     to: { email: to, name },
     subject: 'Réinitialisation de votre accès Guide — SAFARUMA',
     throwOnError: true,
@@ -491,9 +737,10 @@ export function sendGuideEmailChangeCode(opts: {
   to: string;
   name: string;
   code: string;
-}): Promise<void> {
+}): Promise<EmailSendResult> {
   const { to, name, code } = opts;
   return sendEmail({
+    category: 'GUIDE_EMAIL_CHANGE_CODE',
     to: { email: to, name },
     subject: 'Code de confirmation de votre nouvelle adresse — SAFARUMA',
     throwOnError: true,
@@ -513,9 +760,10 @@ export function sendGuideEmailChanged(opts: {
   oldEmail: string;
   newEmail: string;
   context: GuideSecurityContext;
-}): Promise<void> {
+}): Promise<EmailSendResult> {
   const { to, name, oldEmail, newEmail, context } = opts;
   return sendEmail({
+    category: 'GUIDE_EMAIL_CHANGED',
     to: { email: to, name },
     subject: 'Votre adresse e-mail Guide a été modifiée — SAFARUMA',
     throwOnError: true,
@@ -533,9 +781,10 @@ export function sendGuidePasswordChanged(opts: {
   to: string;
   name: string;
   context: GuideSecurityContext;
-}): Promise<void> {
+}): Promise<EmailSendResult> {
   const { to, name, context } = opts;
   return sendEmail({
+    category: 'GUIDE_PASSWORD_CHANGED',
     to: { email: to, name },
     subject: 'Votre mot de passe Guide a été modifié — SAFARUMA',
     throwOnError: true,
@@ -558,9 +807,10 @@ export function sendDepartureReminder(opts: {
   guidePhone: string;
   departureDate: string;
   reservationId: string;
-}): Promise<void> {
+}): Promise<EmailSendResult> {
   const { to, pelerinName, guideName, guidePhone, departureDate, reservationId } = opts;
   return sendEmail({
+    category: 'DEPARTURE_REMINDER_PELERIN',
     to: { email: to, name: pelerinName },
     subject: `Votre Omra dans 7 jours — Rappel SAFARUMA`,
     html: baseTemplate(`

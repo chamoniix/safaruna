@@ -67,6 +67,10 @@ export async function POST(req: NextRequest) {
 
   if (pelerinEmail) {
     sendEmail({
+      category: 'RESERVATION_GUIDE_TRANSFER',
+      retryable: true,
+      idempotencyKey: `reservation-guide-transfer:${reservation.id}:${newGuideProfileId}:${pelerinEmail.toLowerCase()}`,
+      reference: { type: 'RESERVATION', id: reservation.id },
       to: { email: pelerinEmail, name: pelerinName },
       subject: `Votre guide a été modifié — Réservation ${reservation.refNumber}`,
       html: `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"></head>

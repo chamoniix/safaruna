@@ -169,6 +169,10 @@ async function sendConfirmationEmails(opts: {
 
   if (pelerin.email) {
     await sendEmail({
+      category: 'RESERVATION_CONFIRMATION_PELERIN',
+      retryable: true,
+      idempotencyKey: `payment-confirmation:pelerin:${refNumber}:${pelerin.email.toLowerCase()}`,
+      reference: { type: 'RESERVATION', id: refNumber },
       to: { email: pelerin.email, name: pelerinName },
       subject: `Réservation confirmée — ${refNumber}`,
       html: baseTemplate(`
@@ -203,6 +207,10 @@ async function sendConfirmationEmails(opts: {
     if (assignedMissions.length === 0) continue
     const name = guideName(guide.id)
     await sendEmail({
+      category: 'RESERVATION_CONFIRMATION_GUIDE',
+      retryable: true,
+      idempotencyKey: `payment-confirmation:guide:${refNumber}:${guide.id}`,
+      reference: { type: 'RESERVATION', id: refNumber },
       to: { email: guide.guideAccount.email, name },
       subject: `[SAFARUMA] Nouvelle mission confirmée — ${refNumber}`,
       html: baseTemplate(`
@@ -229,6 +237,10 @@ async function sendConfirmationEmails(opts: {
   }
 
   await sendEmail({
+    category: 'RESERVATION_CONFIRMATION_ADMIN',
+    retryable: true,
+    idempotencyKey: `payment-confirmation:admin:${refNumber}`,
+    reference: { type: 'RESERVATION', id: refNumber },
     to: { email: 'admin@safaruma.com', name: 'Admin SAFARUMA' },
     subject: `[Admin] Paiement reçu — ${refNumber} — ${amount} €`,
     html: baseTemplate(`

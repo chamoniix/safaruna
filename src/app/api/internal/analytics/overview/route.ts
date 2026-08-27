@@ -94,7 +94,7 @@ export async function GET(req: NextRequest) {
   const start = new Date(Date.now() - days * 86_400_000)
   const activeSince = new Date(Date.now() - 5 * 60_000)
 
-  const [events, usersTotal, usersNew, usersByRole, recentUsers, reservations, guidesActive, guidesPending, guideApplicationsNew, guideApplications, guideApplicationsTotal, guideApplicationCounts, adminAccounts, adminLoginAttempts, adminSessionsActive, sentry] = await Promise.all([
+  const [events, usersTotal, usersNew, usersByRole, recentUsers, reservations, guidesActive, guidesPending, guideApplicationsNew, guideApplications, guideApplicationsTotal, guideApplicationCounts, adminAccounts, adminLoginAttempts, adminSessionsActive, emailDeliveries, sentry] = await Promise.all([
     prisma.analyticsEvent.findMany({
       where: { createdAt: { gte: start } },
       orderBy: { createdAt: 'desc' },
@@ -139,6 +139,15 @@ export async function GET(req: NextRequest) {
     prisma.adminAccount.findMany({ select: { email: true, role: true } }),
     prisma.adminLoginAttempt.findMany({ orderBy: { createdAt: 'desc' }, take: 100 }),
     prisma.adminSession.count({ where: { revokedAt: null, expiresAt: { gt: new Date() } } }),
+    prisma.emailDelivery.findMany({
+      where: { createdAt: { gte: start } },
+      orderBy: { createdAt: 'desc' },
+      take: 20_000,
+      select: {
+        id: true, category: true, status: true, attempts: true, lastError: true,
+        acceptedAt: true, deliveredAt: true, createdAt: true,
+      },
+    }),
     sentryIssues(days),
   ])
 
@@ -254,6 +263,18 @@ export async function GET(req: NextRequest) {
     })),
   }))
 
+  const emailStatuses = new Map<string, number>()
+  const emailCategories = new Map<string, number>()
+  for (const delivery of emailDeliveries) {
+    addCount(emailStatuses, delivery.status)
+    addCount(emailCategories, delivery.category)
+  }
+  const deliveredEmailStatuses = new Set(['DELIVERED', 'OPENED', 'CLICKED'])
+  const pendingEmailStatuses = new Set(['QUEUED', 'SENDING', 'RETRY_PENDING'])
+  const failedEmailStatuses = new Set(['FAILED', 'HARD_BOUNCE', 'BLOCKED', 'INVALID', 'SPAM', 'ERROR'])
+  const emailAccepted = emailDeliveries.filter(item => item.acceptedAt !== null).length
+  const emailDelivered = emailDeliveries.filter(item => deliveredEmailStatuses.has(item.status)).length
+
   let lookup: { users: unknown[]; reservations: unknown[]; events: unknown[] } | null = null
   if (query.length >= 2) {
     const [matchingUsers, matchingReservations] = await Promise.all([
@@ -342,6 +363,27 @@ export async function GET(req: NextRequest) {
     adminSecurity: {
       activeSessions: adminSessionsActive,
       loginAttempts: adminLoginAttempts,
+    },
+    emailDelivery: {
+      total: emailDeliveries.length,
+      accepted: emailAccepted,
+      delivered: emailDelivered,
+      pending: emailDeliveries.filter(item => pendingEmailStatuses.has(item.status)).length,
+      failed: emailDeliveries.filter(item => failedEmailStatuses.has(item.status)).length,
+      deliveryRate: emailAccepted > 0 ? emailDelivered / emailAccepted : 0,
+      byStatus: ranked(emailStatuses, 30),
+      byCategory: ranked(emailCategories, 40),
+      recentFailures: emailDeliveries
+        .filter(item => failedEmailStatuses.has(item.status))
+        .slice(0, 20)
+        .map(item => ({
+          id: item.id,
+          category: item.category,
+          status: item.status,
+          attempts: item.attempts,
+          error: item.lastError,
+          createdAt: item.createdAt,
+        })),
     },
     accessHistory,
     performance: [...vitalValues.entries()].map(([metric, values]) => {

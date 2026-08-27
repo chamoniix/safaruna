@@ -34,6 +34,7 @@ export async function POST(req: NextRequest) {
   })
 
   sendEmail({
+    category: 'PELERIN_EMAIL_VERIFIED',
     to: {
       email: record.email,
       name: user?.firstName

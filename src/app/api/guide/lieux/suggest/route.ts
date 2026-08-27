@@ -14,6 +14,8 @@ export async function POST(req: NextRequest) {
   if (!suggestion?.trim()) return NextResponse.json({ error: 'Suggestion vide' }, { status: 400 })
 
   await sendEmail({
+    category: 'GUIDE_PLACE_SUGGESTION',
+    retryable: true,
     to: { email: 'admin@safaruma.com', name: 'Admin SAFARUMA' },
     subject: `[Suggestion lieu] ${guideName}`,
     html: `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"></head>

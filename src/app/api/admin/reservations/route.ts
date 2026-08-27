@@ -126,6 +126,10 @@ export async function PATCH(req: NextRequest) {
     // Email au guide
     if (gu?.email) {
       sendEmail({
+        category: 'RESERVATION_CONFIRMATION_GUIDE',
+        retryable: true,
+        idempotencyKey: `reservation-confirmation:guide:${reservation.id}:${gu.email.toLowerCase()}`,
+        reference: { type: 'RESERVATION', id: reservation.id },
         to: { email: gu.email, name: guideName },
         subject: `Nouvelle réservation confirmée — ${reservation.refNumber}`,
         html: `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>SAFARUMA</title></head>
@@ -165,6 +169,10 @@ export async function PATCH(req: NextRequest) {
 
     // Email à l'admin
     sendEmail({
+      category: 'RESERVATION_CONFIRMATION_ADMIN',
+      retryable: true,
+      idempotencyKey: `reservation-confirmation:admin:${reservation.id}`,
+      reference: { type: 'RESERVATION', id: reservation.id },
       to: { email: 'admin@safaruma.com', name: 'Admin SAFARUMA' },
       subject: `[Admin] Nouvelle réservation ${reservation.refNumber}`,
       html: `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>SAFARUMA Admin</title></head>

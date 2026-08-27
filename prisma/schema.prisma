@@ -742,6 +742,54 @@ model PasswordResetToken {
   createdAt DateTime  @default(now())
 }
 
+// Registre transactionnel indépendant du métier. Le contenu n'est conservé
+// que chiffré et temporairement lorsqu'une reprise est explicitement permise.
+model EmailDelivery {
+  id                String               @id @default(cuid())
+  idempotencyKey    String               @unique
+  provider          String               @default("BREVO")
+  providerMessageId String?              @unique
+  category          String
+  recipientEmail    String
+  referenceType     String?
+  referenceId       String?
+  status            String               @default("QUEUED")
+  attempts          Int                  @default(0)
+  maxAttempts       Int                  @default(3)
+  nextAttemptAt     DateTime?
+  payloadEncrypted  String?
+  lastError         String?
+  acceptedAt        DateTime?
+  deliveredAt       DateTime?
+  lastEventAt       DateTime?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  events            EmailDeliveryEvent[]
+
+  @@index([status, nextAttemptAt])
+  @@index([category, createdAt])
+  @@index([referenceType, referenceId])
+  @@index([createdAt])
+}
+
+model EmailDeliveryEvent {
+  id                String         @id @default(cuid())
+  providerEventKey  String         @unique
+  deliveryId        String?
+  delivery          EmailDelivery? @relation(fields: [deliveryId], references: [id], onDelete: SetNull)
+  provider          String         @default("BREVO")
+  providerMessageId String?
+  event             String
+  recipientEmail    String?
+  reason            String?
+  occurredAt        DateTime
+  createdAt         DateTime       @default(now())
+
+  @@index([deliveryId, occurredAt])
+  @@index([providerMessageId])
+  @@index([event, occurredAt])
+}
+
 model ReservationDraft {
   id              String            @id @default(cuid())
   refNumber       String            @unique

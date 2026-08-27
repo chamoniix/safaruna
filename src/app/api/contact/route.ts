@@ -35,6 +35,8 @@ export async function POST(req: NextRequest) {
     const fullName = `${prenom} ${nom}`;
 
     await sendEmail({
+      category: 'CONTACT_REQUEST',
+      retryable: true,
       to: { email: 'contact@safaruma.com', name: 'SAFARUMA — Contact' },
       replyTo: { email, name: fullName },
       subject: `[Contact SAFARUMA] ${sujet} — ${fullName}`,

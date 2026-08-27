@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Prisma } from '@prisma/client'
 import prisma from '@/lib/prisma'
-import { baseTemplate, btn, divider, escapeHtml, heading, p, sendEmail } from '@/lib/email'
+import { baseTemplate, btn, divider, escapeHtml, heading, p, retryPendingEmails, sendEmail } from '@/lib/email'
 import { archiveExpiredAnalyticsEvents } from '@/lib/analytics-retention'
 
 const DAY_MS = 86_400_000
@@ -41,6 +41,10 @@ export async function GET(req: NextRequest) {
       },
     },
   })
+  const emailRetries = await retryPendingEmails(20).catch(error => {
+    console.error('[cron] reprises email', error)
+    return { checked: 0, accepted: 0, failed: 0 }
+  })
 
   let sent = 0
   for (const reservation of reservations) {
@@ -58,6 +62,7 @@ export async function GET(req: NextRequest) {
           : dateFr(reservation.startDate)
         try {
           await sendEmail({
+            category: 'DEPARTURE_REMINDER_PELERIN',
             to: { email: reservation.pelerin.email, name: pelerinName },
             subject: `Rappel — Votre voyage commence ${label} · ${reservation.refNumber}`,
             throwOnError: true,
@@ -98,6 +103,7 @@ export async function GET(req: NextRequest) {
       const label = daysUntil === 1 ? 'demain' : 'dans 3 jours'
       try {
         await sendEmail({
+          category: 'DEPARTURE_REMINDER_GUIDE',
           to: { email: guideAccount.email, name: guideName },
           subject: `[SAFARUMA] Rappel — Mission ${label} · ${reservation.refNumber}`,
           throwOnError: true,
@@ -122,5 +128,5 @@ export async function GET(req: NextRequest) {
 
   const deletedDrafts = await prisma.reservationDraft.deleteMany({ where: { expiresAt: { lt: new Date() } } })
   const analyticsEventsArchived = await archiveExpiredAnalyticsEvents()
-  return NextResponse.json({ success: true, reservationsChecked: reservations.length, emailsSent: sent, draftsReleased: deletedDrafts.count, analyticsEventsArchived, checkedAt: new Date().toISOString() })
+  return NextResponse.json({ success: true, reservationsChecked: reservations.length, emailsSent: sent, emailRetries, draftsReleased: deletedDrafts.count, analyticsEventsArchived, checkedAt: new Date().toISOString() })
 }

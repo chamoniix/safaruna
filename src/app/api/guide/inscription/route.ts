@@ -130,6 +130,9 @@ export async function POST(req: NextRequest) {
   await Promise.allSettled([
     sendWelcomeGuide(email, `${firstName} ${lastName}`.trim()),
     ...recipients.map(to => sendEmail({
+      category: 'GUIDE_APPLICATION_ADMIN_NOTICE',
+      retryable: true,
+      reference: { type: 'GUIDE_APPLICATION', id: application.id },
       to,
       replyTo: { email, name: `${firstName} ${lastName}`.trim() },
       subject: `Nouvelle candidature guide — ${firstName} ${lastName}`,

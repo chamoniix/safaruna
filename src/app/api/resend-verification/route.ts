@@ -36,6 +36,7 @@ export async function POST() {
 
   const name = session.user.name || email
   await sendEmail({
+    category: 'PELERIN_EMAIL_VERIFICATION',
     to: { email, name },
     subject: 'Confirmez votre adresse email — SAFARUMA',
     html: `

@@ -3,7 +3,7 @@ import 'server-only'
 import { createSign } from 'node:crypto'
 import { Redis } from '@upstash/redis'
 
-export type DashboardView = 'overview' | 'realtime' | 'audience' | 'acquisition' | 'content' | 'auth' | 'guides' | 'payments' | 'errors' | 'search' | 'infrastructure'
+export type DashboardView = 'overview' | 'realtime' | 'audience' | 'acquisition' | 'content' | 'auth' | 'guides' | 'payments' | 'emails' | 'errors' | 'search' | 'infrastructure'
 
 export type BigQueryUsage = {
   available: boolean
@@ -58,6 +58,24 @@ export type AnalyticsData = {
       id: string; email: string; success: boolean; reason: string; ip: string | null
       country: string | null; city: string | null; device: string | null; browser: string | null
       userAgent: string | null; createdAt: string
+    }>
+  }
+  emailDelivery: {
+    total: number
+    accepted: number
+    delivered: number
+    pending: number
+    failed: number
+    deliveryRate: number
+    byStatus: Array<{ label: string; count: number }>
+    byCategory: Array<{ label: string; count: number }>
+    recentFailures: Array<{
+      id: string
+      category: string
+      status: string
+      attempts: number
+      error: string | null
+      createdAt: string
     }>
   }
   accessHistory: Array<{

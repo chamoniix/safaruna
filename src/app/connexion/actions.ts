@@ -140,6 +140,7 @@ export async function signup(_previousState: SignupState, formData: FormData): P
   let emailError = false;
   try {
     await sendEmail({
+      category: 'PELERIN_EMAIL_VERIFICATION',
       to: { email, name: fullName },
       subject: 'Confirmez votre adresse email — SAFARUMA',
       html: verificationEmailHtml(verificationUrl(token, redirectTo)),
@@ -191,6 +192,7 @@ export async function resendVerificationEmail(formData: FormData): Promise<Resen
 
   try {
     await sendEmail({
+      category: 'PELERIN_EMAIL_VERIFICATION',
       to: { email, name: user.name || email },
       subject: 'Confirmez votre adresse email — SAFARUMA',
       html: verificationEmailHtml(verificationUrl(token, redirectTo)),

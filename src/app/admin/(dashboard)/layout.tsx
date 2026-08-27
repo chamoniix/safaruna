@@ -82,7 +82,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
   }, [menuOpen]);
 
   return (
-    <div className={`${styles.shell} ${sidebarCollapsed ? styles.shellCollapsed : ''}`}>
+    <div id="admin-shell" className={`${styles.shell} ${sidebarCollapsed ? styles.shellCollapsed : ''}`}>
 
       <button
         type="button"

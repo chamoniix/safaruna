@@ -5,6 +5,13 @@
   font-family: var(--font-manrope, sans-serif);
 }
 
+:global(#admin-shell) section {
+  max-width: none;
+  margin-right: 0;
+  margin-left: 0;
+  padding: 0;
+}
+
 .sidebar {
   position: fixed;
   z-index: 9999;

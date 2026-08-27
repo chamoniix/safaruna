@@ -34,17 +34,19 @@ async function requestContext() {
     try { city = decodeURIComponent(encodedCity) } catch { city = encodedCity }
   }
   return {
-    ip: (values.get('x-forwarded-for')?.split(',')[0]?.trim() || values.get('x-real-ip') || 'unknown').slice(0, 64),
-    country: values.get('x-vercel-ip-country')?.slice(0, 32) || null,
-    city: city?.slice(0, 100) || null,
-    device: device(userAgent),
-    browser: browser(userAgent),
-    userAgent: userAgent.slice(0, 500),
+    context: {
+      ip: (values.get('x-forwarded-for')?.split(',')[0]?.trim() || values.get('x-real-ip') || 'unknown').slice(0, 64),
+      country: values.get('x-vercel-ip-country')?.slice(0, 32) || null,
+      city: city?.slice(0, 100) || null,
+      device: device(userAgent),
+      browser: browser(userAgent),
+      userAgent: userAgent.slice(0, 500),
+    },
     requestId: (values.get('x-request-id') || values.get('x-vercel-id') || randomUUID()).slice(0, 160),
   }
 }
 
-async function logAttempt(email: string, success: boolean, reason: string, context: Awaited<ReturnType<typeof requestContext>>) {
+async function logAttempt(email: string, success: boolean, reason: string, context: Awaited<ReturnType<typeof requestContext>>['context']) {
   await prisma.adminLoginAttempt.create({
     data: { email: email.slice(0, 254), success, reason, ...context },
   }).catch(() => {})
@@ -59,7 +61,7 @@ function timingSafeMatch(value: string, expected: string) {
 export async function adminLogin(formData: FormData) {
   const email    = (formData.get('email')    as string)?.trim().toLowerCase();
   const password = (formData.get('password') as string)?.trim();
-  const context = await requestContext();
+  const { context, requestId } = await requestContext();
 
   const secret        = process.env.ADMIN_JWT_SECRET;
 
@@ -184,7 +186,7 @@ export async function adminLogin(formData: FormData) {
         }),
         ip: context.ip,
         userAgent: context.userAgent,
-        requestId: context.requestId,
+        requestId,
       },
     }).catch(error => console.error('[admin-login-alert-audit]', error))
   })

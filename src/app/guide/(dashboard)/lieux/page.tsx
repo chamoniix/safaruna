@@ -1,21 +1,28 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { PLACES, getPlacesByCategory } from '@/lib/places'
+import { PLACES, type Place } from '@/lib/places'
+
+type CatalogPlace = Place & {
+  isActive: boolean
+}
 
 export default function GuideLieuxPage() {
   const [placesMap, setPlacesMap] = useState<Record<string, boolean>>({})
+  const [catalog, setCatalog] = useState<CatalogPlace[]>(PLACES.map(place => ({ ...place, isActive: true })))
   const [loading, setLoading] = useState(true)
   const [toggling, setToggling] = useState<string | null>(null)
   const [suggestion, setSuggestion] = useState('')
   const [suggestionSent, setSuggestionSent] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     fetch('/api/guide/lieux')
       .then(r => r.json())
       .then(data => {
         setPlacesMap(data.places || {})
+        if (Array.isArray(data.catalog)) setCatalog(data.catalog)
         setLoading(false)
       })
       .catch(() => setLoading(false))
@@ -24,12 +31,20 @@ export default function GuideLieuxPage() {
   const handleToggle = async (placeKey: string, isBase: boolean) => {
     if (isBase) return
     setToggling(placeKey)
+    setError('')
     setPlacesMap(prev => ({ ...prev, [placeKey]: !prev[placeKey] }))
-    await fetch('/api/guide/lieux', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ placeKey }),
-    }).catch(() => {})
+    try {
+      const response = await fetch('/api/guide/lieux', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ placeKey }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Impossible de modifier ce lieu.')
+    } catch (toggleError) {
+      setPlacesMap(prev => ({ ...prev, [placeKey]: !prev[placeKey] }))
+      setError(toggleError instanceof Error ? toggleError.message : 'Impossible de modifier ce lieu.')
+    }
     setToggling(null)
   }
 
@@ -54,9 +69,9 @@ export default function GuideLieuxPage() {
     { key: 'HISTORIQUE', label: 'Sites historiques', emoji: '⚔️' },
   ] as const
 
-  const activeCount = PLACES.filter(p => p.includedInBase || placesMap[p.key]).length
-  const makkahActive = PLACES.filter(p => p.category === 'MAKKAH' && (p.includedInBase || placesMap[p.key])).length
-  const madinahActive = PLACES.filter(p => p.category === 'MADINAH' && (p.includedInBase || placesMap[p.key])).length
+  const activeCount = catalog.filter(p => p.includedInBase || placesMap[p.key]).length
+  const makkahActive = catalog.filter(p => p.category === 'MAKKAH' && (p.includedInBase || placesMap[p.key])).length
+  const madinahActive = catalog.filter(p => p.category === 'MADINAH' && (p.includedInBase || placesMap[p.key])).length
 
   const labelStyle: React.CSSProperties = {
     fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em',
@@ -78,6 +93,7 @@ export default function GuideLieuxPage() {
       <div style={{ background: '#FEF9EC', border: '1px solid #FCD34D', borderRadius: 12, padding: '1rem 1.5rem', fontSize: '0.83rem', color: '#92400E', lineHeight: 1.7 }}>
         Activez les lieux que vous maîtrisez. Les lieux inactifs apparaîtront grisés sur votre profil public. Les pèlerins pourront les voir mais ne pourront pas les sélectionner pour leur réservation.
       </div>
+      {error && <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10, padding: '0.8rem 1rem', color: '#B91C1C', fontSize: '0.78rem' }}>{error}</div>}
 
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
@@ -95,7 +111,7 @@ export default function GuideLieuxPage() {
 
       {/* Sections par catégorie */}
       {categories.map(cat => {
-        const catPlaces = getPlacesByCategory(cat.key)
+        const catPlaces = catalog.filter(place => place.category === cat.key)
         const catActive = catPlaces.filter(p => p.includedInBase || placesMap[p.key]).length
         return (
           <div key={cat.key} style={{ background: 'white', border: '1px solid #E8DFC8', borderRadius: 12, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>

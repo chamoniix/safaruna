@@ -15,8 +15,6 @@ import {
   centsToEuros,
   guideServiceNetCents,
   guideServiceRetailCents,
-  placeNetCents,
-  placeRetailCents,
 } from '@/lib/guide-pricing'
 import {
   analyticsCountry,
@@ -25,6 +23,13 @@ import {
   recordAnalyticsEvent,
 } from '@/lib/analytics'
 import { requirePelerin } from '@/lib/require-account'
+import { getPlatformPricing } from '@/lib/platform-pricing'
+import {
+  getEffectivePlaceCatalog,
+  includedPlaceKeysForCity,
+  placeNetCentsForGroup,
+  placeRetailCentsForGroup,
+} from '@/lib/place-catalog'
 
 // Stripe exige une expiration située au moins 30 minutes après la création de
 // la session. Une minute technique couvre le temps de transaction et réseau.
@@ -128,11 +133,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Accompagnement invalide' }, { status: 400 })
   }
 
-  const knownPlaceKeys = new Set(PLACES.map(place => place.key))
+  const [pricingSettings, placeCatalog] = await Promise.all([
+    getPlatformPricing(),
+    getEffectivePlaceCatalog(),
+  ])
+  const knownPlaceKeys = new Set(placeCatalog.filter(place => place.isActive).map(place => place.key))
   const selectedPlaceKeys = [...new Set(body.selectedPlaces)]
   if (selectedPlaceKeys.some(key => !knownPlaceKeys.has(key))) {
-    return NextResponse.json({ error: 'Un lieu sélectionné est invalide' }, { status: 400 })
+    return NextResponse.json({ error: 'Un lieu sélectionné est invalide ou n’est plus actif' }, { status: 409 })
   }
+  const includedPlaceKeys = includedPlaceKeysForCity(placeCatalog, cityChoice)
+  const placeByKey = new Map(placeCatalog.map(place => [place.key, place]))
 
   const makkahGuideSlug = body.selectedGuideSlug || body.guideSlug
   const madinahGuideSlug = cityChoice === 'BOTH'
@@ -178,7 +189,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Le profil du guide ne correspond pas au genre demandé' }, { status: 409 })
     }
     const activePlaceKeys = new Set(guide.places.map(place => place.placeKey))
-    const selectedForCity = selectedPlaceKeys.filter(key => placeCity(key) === city)
+    const selectedForCity = selectedPlaceKeys.filter(key => placeCity(key) === city && !includedPlaceKeys.includes(key))
     if (activePlaceKeys.size > 0 && selectedForCity.some(key => !activePlaceKeys.has(key))) {
       return NextResponse.json({ error: 'Une visite sélectionnée n’est pas proposée par ce guide' }, { status: 409 })
     }
@@ -196,7 +207,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Le transport du guide ne s’applique que si le même guide accompagne les deux villes' }, { status: 400 })
   }
 
-  const allVisitPlaces = [...new Set([...basePackage.includedPlaces, ...selectedPlaceKeys])]
+  const allVisitPlaces = [...new Set([...includedPlaceKeys, ...selectedPlaceKeys])]
   const makkahDays = cityChoice === 'MADINAH' ? 0 : calculateLocalCarDays(allVisitPlaces, 'MAKKAH')
   const madinahDays = cityChoice === 'MAKKAH' ? 0 : calculateLocalCarDays(allVisitPlaces, 'MADINAH')
   const cityOrder: MissionCity[] = cityChoice === 'BOTH'
@@ -231,8 +242,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'La durée du séjour est trop courte pour les visites sélectionnées' }, { status: 409 })
   }
 
-  const extraPlaceKeys = selectedPlaceKeys.filter(key => !basePackage.includedPlaces.includes(key))
-  const extraPlacesRetailCents = extraPlaceKeys.length * placeRetailCents(body.nbPersonnes)
+  const extraPlaceKeys = selectedPlaceKeys.filter(key => !includedPlaceKeys.includes(key))
+  const extraPlacesRetailCents = extraPlaceKeys.reduce((sum, key) => {
+    const place = placeByKey.get(key)!
+    return sum + placeRetailCentsForGroup(place, body.nbPersonnes, pricingSettings.guideServiceMarkupBps)
+  }, 0)
 
   const transportPricing = calculateBookingTransportPrice({
     cityChoice,
@@ -244,6 +258,7 @@ export async function POST(req: NextRequest) {
     sameGuideForBothCities,
     sameGuidePrimaryCity,
     guideBedProvided: body.guideBedProvided,
+    travelMarkupBps: pricingSettings.travelMarkupBps,
   })
   type EarningDraft = {
     guideProfileId: string
@@ -270,9 +285,12 @@ export async function POST(req: NextRequest) {
   for (const mission of missions) {
     const missionGuide = guides.find(item => item.id === mission.guideProfileId)!
     const serviceNetCents = guideServiceNetCents(missionGuide, mission.city, body.nbPersonnes)
-    guideServicesRetailCents += guideServiceRetailCents(missionGuide, mission.city, body.nbPersonnes)
+    guideServicesRetailCents += guideServiceRetailCents(missionGuide, mission.city, body.nbPersonnes, pricingSettings.guideServiceMarkupBps)
     const missionExtraPlaces = mission.selectedPlaces.filter(key => extraPlaceKeys.includes(key))
-    const placesNetTotalCents = missionExtraPlaces.length * placeNetCents(body.nbPersonnes)
+    const placesNetTotalCents = missionExtraPlaces.reduce((sum, key) => {
+      const place = placeByKey.get(key)!
+      return sum + placeNetCentsForGroup(place, body.nbPersonnes)
+    }, 0)
     const localTransportNetCents = Math.round((mission.city === 'MAKKAH'
       ? transportPricing.localCarNetMakkah
       : transportPricing.localCarNetMadinah) * 100)
@@ -339,6 +357,8 @@ export async function POST(req: NextRequest) {
     analyticsSessionHash,
     missions: missions.map(mission => ({ ...mission, dates: undefined })),
     pricing: {
+      guideServiceMarkupBps: pricingSettings.guideServiceMarkupBps,
+      travelMarkupBps: pricingSettings.travelMarkupBps,
       base: centsToEuros(guideServicesRetailCents),
       places: centsToEuros(extraPlacesRetailCents),
       intercityTransport: transportPricing.intercity,

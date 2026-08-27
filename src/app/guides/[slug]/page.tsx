@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 import GuideProfileClient from './GuideProfileClient';
 import type { Metadata } from 'next';
 import prisma from '@/lib/prisma';
+import { getEffectivePlaceCatalog } from '@/lib/place-catalog';
 
 // Mémoïsé par requête : generateMetadata() et la page appellent tous les deux
 // cette fonction avec le même slug — React.cache() évite de dupliquer l'aller-retour DB.
@@ -356,6 +357,7 @@ export default async function GuideProfilePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const placeCatalog = await getEffectivePlaceCatalog();
 
   // ── Fetch from Neon (mémoïsé — même requête que generateMetadata) ─────────
   const guideData = await getGuideData(slug) as Awaited<ReturnType<typeof getGuideData>> & {
@@ -765,13 +767,14 @@ export default async function GuideProfilePage({
           isOfficial={guide.isOfficial ?? false}
           rating={guide.rating}
           packages={packages}
-          places={PLACES}
+          places={PLACES.filter(place => placeCatalog.some(item => item.isActive && item.nameFr === place.nameFr))}
           reviews={reviews}
           certifications={guide.certifications}
           services={guide.services}
           bioFull={guide.bioFull}
           languages={guide.languages}
           activePlaceKeys={activePlaceKeys}
+          includedPlaceKeys={placeCatalog.filter(place => place.isActive && place.includedInBase).map(place => place.key)}
           guideCity={guideCityDerived ?? undefined}
           acceptingBookings={(guideData as any).acceptingBookings}
           servesMakkah={(guideData as any).servesMakkah}

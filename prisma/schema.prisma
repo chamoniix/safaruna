@@ -536,10 +536,21 @@ enum ReservationStatus {
 }
 
 model PlacePrice {
-  id       String  @id @default(cuid())
-  placeKey String  @unique
-  price    Float   @default(50)
-  isActive Boolean @default(true)
+  id             String   @id @default(cuid())
+  placeKey       String   @unique
+  price          Float    @default(50)
+  isActive       Boolean  @default(true)
+  includedInBase Boolean?
+  netUpTo6Cents  Int?
+  netUpTo15Cents Int?
+  netUpTo32Cents Int?
+}
+
+model PlatformPricingSettings {
+  id                    String   @id @default("global")
+  guideServiceMarkupBps Int      @default(3000)
+  travelMarkupBps       Int      @default(2000)
+  updatedAt             DateTime @updatedAt
 }
 
 // ---------------------------------------------------------

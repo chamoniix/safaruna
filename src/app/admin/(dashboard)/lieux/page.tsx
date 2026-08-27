@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 type PlaceRow = {
   key: string
@@ -9,17 +9,29 @@ type PlaceRow = {
   nameAr: string
   category: string
   includedInBase: boolean
-  price: number
+  isActive: boolean
+  netUpTo6: number
+  netUpTo15: number
+  netUpTo32: number
 }
 
-function Skeleton() {
+function Toggle({ checked, disabled, label, onChange }: { checked: boolean; disabled: boolean; label: string; onChange: () => void }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-      {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} style={{ height: 48, background: '#F0EBE0', borderRadius: 8, animation: 'pulse 1.5s ease-in-out infinite', opacity: 0.7 - i * 0.05 }} />
-      ))}
-      <style>{`@keyframes pulse { 0%,100%{opacity:.7}50%{opacity:.4} }`}</style>
-    </div>
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label={label}
+      disabled={disabled}
+      onClick={onChange}
+      style={{
+        width: 38, height: 22, borderRadius: 999, padding: 2, border: 0,
+        background: checked ? '#0F766E' : '#CBD5E1', cursor: disabled ? 'wait' : 'pointer',
+        opacity: disabled ? 0.55 : 1, transition: 'background 150ms ease',
+      }}
+    >
+      <span style={{ display: 'block', width: 18, height: 18, borderRadius: '50%', background: 'white', transform: checked ? 'translateX(16px)' : 'translateX(0)', transition: 'transform 150ms ease', boxShadow: '0 1px 3px rgba(15,23,42,.25)' }} />
+    </button>
   )
 }
 
@@ -27,191 +39,120 @@ export default function AdminLieuxPage() {
   const [places, setPlaces] = useState<PlaceRow[]>([])
   const [loading, setLoading] = useState(true)
   const [editingKey, setEditingKey] = useState<string | null>(null)
-  const [editPrice, setEditPrice] = useState('')
+  const [editPrices, setEditPrices] = useState({ netUpTo6: '', netUpTo15: '', netUpTo32: '' })
   const [saving, setSaving] = useState<string | null>(null)
-  const [savedKey, setSavedKey] = useState<string | null>(null)
   const [canEdit, setCanEdit] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    fetch('/api/admin/lieux')
-      .then(r => r.json())
-      .then(d => { setPlaces(d.places || []); setCanEdit(Boolean(d.canEdit)); setLoading(false) })
-      .catch(() => setLoading(false))
+    fetch('/api/admin/lieux', { cache: 'no-store' })
+      .then(async response => {
+        const data = await response.json()
+        if (!response.ok) throw new Error(data.error || 'Impossible de charger les lieux.')
+        setPlaces(data.places || [])
+        setCanEdit(Boolean(data.canEdit))
+      })
+      .catch(fetchError => setError(fetchError instanceof Error ? fetchError.message : 'Impossible de charger les lieux.'))
+      .finally(() => setLoading(false))
   }, [])
 
-  const handleSave = async (placeKey: string) => {
+  const updatePlace = async (placeKey: string, change: Partial<Pick<PlaceRow, 'netUpTo6' | 'netUpTo15' | 'netUpTo32' | 'includedInBase' | 'isActive'>>) => {
     setSaving(placeKey)
-    const price = Number(editPrice)
-    await fetch('/api/admin/lieux', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ placeKey, price }),
-    })
-    setPlaces(prev => prev.map(p => p.key === placeKey ? { ...p, price } : p))
-    setEditingKey(null)
-    setSaving(null)
-    setSavedKey(placeKey)
-    setTimeout(() => setSavedKey(null), 2000)
+    setError('')
+    try {
+      const response = await fetch('/api/admin/lieux', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ placeKey, ...change }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Impossible d’enregistrer ce lieu.')
+      setPlaces(current => current.map(place => place.key === placeKey ? { ...place, ...data.place } : place))
+      setEditingKey(null)
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : 'Impossible d’enregistrer ce lieu.')
+    } finally {
+      setSaving(null)
+    }
   }
 
-  const makkah    = places.filter(p => p.category === 'MAKKAH')
-  const madinah   = places.filter(p => p.category === 'MADINAH')
-  const historique = places.filter(p => p.category === 'HISTORIQUE')
+  const categories = [
+    { key: 'MAKKAH', label: 'Makkah', color: '#7C3AED' },
+    { key: 'MADINAH', label: 'Médine', color: '#0284C7' },
+    { key: 'HISTORIQUE', label: 'Sites historiques', color: '#D97706' },
+  ]
+  const activeCount = places.filter(place => place.isActive).length
+  const baseCount = places.filter(place => place.isActive && place.includedInBase).length
 
-  const avgPrice = places.filter(p => !p.includedInBase).length > 0
-    ? Math.round(places.filter(p => !p.includedInBase).reduce((s, p) => s + p.price, 0) / places.filter(p => !p.includedInBase).length)
-    : 0
-  const baseCount = places.filter(p => p.includedInBase).length
-
-  const thStyle: React.CSSProperties = {
-    padding: '0.5rem 0.875rem', fontSize: '0.65rem', fontWeight: 700,
-    letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A',
-    textAlign: 'left', borderBottom: '1px solid #E8DFC8', whiteSpace: 'nowrap',
-  }
-  const tdStyle: React.CSSProperties = {
-    padding: '0.7rem 0.875rem', fontSize: '0.82rem', color: '#1A1209',
-    borderBottom: '1px solid #F0EBE0', verticalAlign: 'middle',
-  }
-
-  const renderSection = (label: string, rows: PlaceRow[], color: string) => (
-    <div style={{ background: 'white', border: '1px solid #E8DFC8', borderRadius: 12, overflow: 'hidden', marginBottom: '1.5rem' }}>
-      <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid #F0EBE0', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-        <div style={{ width: 4, height: 20, background: color, borderRadius: 2 }} />
-        <span style={{ fontFamily: 'Georgia, serif', fontSize: '1.1rem', fontWeight: 600, color: '#1A1209' }}>{label}</span>
-        <span style={{ fontSize: '0.72rem', color: '#9CA3AF', marginLeft: 2 }}>{rows.length} lieux</span>
-      </div>
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ background: '#FAFAF8' }}>
-              <th style={thStyle}>Lieu</th>
-              <th style={{ ...thStyle, display: 'none' }}>Arabe</th>
-              <th style={thStyle}>Statut</th>
-              <th style={thStyle}>Prix</th>
-              <th style={thStyle}>Modifier</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map(place => (
-              <tr key={place.key} style={{ background: 'white' }}>
-                <td style={tdStyle}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ fontSize: '1.1rem' }}>{place.emoji}</span>
-                    <div>
-                      <div style={{ fontWeight: 600, fontSize: '0.82rem' }}>{place.nameFr}</div>
-                      <div style={{ fontSize: '0.65rem', color: '#9CA3AF', direction: 'rtl' }}>{place.nameAr}</div>
-                    </div>
-                  </div>
-                </td>
-                <td style={tdStyle}>
-                  {place.includedInBase ? (
-                    <span style={{ background: '#FEF9EC', color: '#8B6914', border: '1px solid #FCD34D', borderRadius: 20, fontSize: '0.65rem', fontWeight: 700, padding: '0.2rem 0.65rem' }}>
-                      ★ Inclus de base
-                    </span>
-                  ) : (
-                    <span style={{ background: '#F0F9FF', color: '#0369A1', border: '1px solid #BAE6FD', borderRadius: 20, fontSize: '0.65rem', fontWeight: 700, padding: '0.2rem 0.65rem' }}>
-                      + Visite supp.
-                    </span>
-                  )}
-                </td>
-                <td style={tdStyle}>
-                  {place.includedInBase ? (
-                    <span style={{ color: '#9CA3AF', fontSize: '0.82rem' }}>—</span>
-                  ) : (
-                    <span style={{ fontWeight: 700, fontSize: '0.88rem', color: '#1A1209' }}>{place.price} €</span>
-                  )}
-                </td>
-                <td style={tdStyle}>
-                  {place.includedInBase ? (
-                    <span style={{ color: '#D1D5DB', fontSize: '0.72rem' }}>Non applicable</span>
-                  ) : !canEdit ? (
-                    <span style={{ color: '#7A6D5A', fontSize: '0.72rem' }}>Lecture seule</span>
-                  ) : editingKey === place.key ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <input
-                        type="number"
-                        value={editPrice}
-                        min={0} max={999} step={5}
-                        onChange={e => setEditPrice(e.target.value)}
-                        style={{ width: 80, padding: '0.35rem 0.5rem', border: '1.5px solid #C9A84C', borderRadius: 6, fontSize: '0.82rem', outline: 'none', textAlign: 'center' }}
-                        autoFocus
-                        onKeyDown={e => { if (e.key === 'Enter') handleSave(place.key); if (e.key === 'Escape') setEditingKey(null) }}
-                      />
-                      <button
-                        onClick={() => handleSave(place.key)}
-                        disabled={saving === place.key}
-                        style={{ padding: '0.35rem 0.75rem', background: '#1D5C3A', color: 'white', border: 'none', borderRadius: 20, fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}
-                      >
-                        {saving === place.key ? '…' : '✓ OK'}
-                      </button>
-                      <button
-                        onClick={() => setEditingKey(null)}
-                        style={{ padding: '0.35rem 0.6rem', background: 'white', color: '#7A6D5A', border: '1px solid #E8DFC8', borderRadius: 20, fontSize: '0.72rem', cursor: 'pointer' }}
-                      >
-                        Annuler
-                      </button>
-                    </div>
-                  ) : savedKey === place.key ? (
-                    <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#1D5C3A' }}>✓ Sauvegardé</span>
-                  ) : (
-                    <button
-                      onClick={() => { setEditingKey(place.key); setEditPrice(String(place.price)) }}
-                      style={{ padding: '0.3rem 0.75rem', background: 'white', color: '#1A1209', border: '1px solid #E8DFC8', borderRadius: 20, fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer' }}
-                    >
-                      Modifier
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  )
+  const renderRows = (rows: PlaceRow[]) => rows.map(place => (
+    <tr key={place.key} style={{ borderBottom: '1px solid #F1F5F9', opacity: place.isActive ? 1 : 0.58 }}>
+      <td style={{ padding: '0.65rem 0.75rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+          <span style={{ fontSize: '1rem' }}>{place.emoji}</span>
+          <div><div style={{ fontSize: '0.78rem', fontWeight: 750, color: '#0F172A' }}>{place.nameFr}</div><div style={{ fontSize: '0.62rem', color: '#94A3B8' }}>{place.nameAr}</div></div>
+        </div>
+      </td>
+      <td style={{ padding: '0.65rem 0.75rem' }}>
+        <Toggle checked={place.isActive} disabled={!canEdit || saving === place.key} label={`${place.isActive ? 'Désactiver' : 'Activer'} ${place.nameFr} dans le catalogue`} onChange={() => updatePlace(place.key, { isActive: !place.isActive })} />
+      </td>
+      <td style={{ padding: '0.65rem 0.75rem' }}>
+        <Toggle checked={place.includedInBase} disabled={!canEdit || saving === place.key} label={`${place.includedInBase ? 'Retirer' : 'Ajouter'} ${place.nameFr} du socle inclus`} onChange={() => updatePlace(place.key, { includedInBase: !place.includedInBase })} />
+      </td>
+      <td style={{ padding: '0.65rem 0.75rem' }}>
+        <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+          {[
+            ['1–6', place.netUpTo6], ['7–15', place.netUpTo15], ['16–32', place.netUpTo32],
+          ].map(([label, value]) => <span key={String(label)} style={{ padding: '0.2rem 0.4rem', borderRadius: 6, background: '#F1F5F9', color: '#334155', fontSize: '0.64rem', fontWeight: 750 }}>{label}: {value} €</span>)}
+        </div>
+      </td>
+      <td style={{ padding: '0.65rem 0.75rem' }}>
+        {!canEdit ? <span style={{ color: '#94A3B8', fontSize: '0.68rem' }}>Lecture seule</span> : editingKey === place.key ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }}>
+            {[
+              ['netUpTo6', '1–6'], ['netUpTo15', '7–15'], ['netUpTo32', '16–32'],
+            ].map(([key, label]) => <label key={key} style={{ display: 'flex', alignItems: 'center', gap: 3, color: '#64748B', fontSize: '0.58rem' }}>{label}<input type="number" min="0" max="999" step="1" value={editPrices[key as keyof typeof editPrices]} onChange={event => setEditPrices(current => ({ ...current, [key]: event.target.value }))} style={{ width: 58, padding: '0.36rem 0.4rem', border: '1px solid #7DD3FC', borderRadius: 7 }} /></label>)}
+            <button type="button" disabled={saving === place.key} onClick={() => updatePlace(place.key, { netUpTo6: Number(editPrices.netUpTo6), netUpTo15: Number(editPrices.netUpTo15), netUpTo32: Number(editPrices.netUpTo32) })} style={{ padding: '0.4rem 0.6rem', border: 0, borderRadius: 7, background: '#0F766E', color: 'white', fontWeight: 800, cursor: 'pointer' }}>OK</button>
+            <button type="button" onClick={() => setEditingKey(null)} style={{ padding: '0.4rem', border: 0, background: 'transparent', color: '#64748B', cursor: 'pointer' }}>×</button>
+          </div>
+        ) : (
+          <button type="button" onClick={() => { setEditingKey(place.key); setEditPrices({ netUpTo6: String(place.netUpTo6), netUpTo15: String(place.netUpTo15), netUpTo32: String(place.netUpTo32) }) }} style={{ padding: '0.35rem 0.65rem', border: '1px solid #CBD5E1', borderRadius: 7, background: 'white', color: '#334155', fontSize: '0.7rem', fontWeight: 750, cursor: 'pointer' }}>Modifier</button>
+        )}
+      </td>
+    </tr>
+  ))
 
   return (
-    <div style={{ maxWidth: 860 }}>
-      {/* Header */}
-      <div style={{ marginBottom: '1.75rem' }}>
-        <h1 style={{ fontFamily: 'Georgia, serif', fontSize: '1.75rem', fontWeight: 700, color: '#1A1209', margin: 0, marginBottom: '0.25rem' }}>
-          Lieux &amp; Tarifs
-        </h1>
-        <p style={{ fontSize: '0.82rem', color: '#7A6D5A', margin: 0 }}>
-          {canEdit ? 'Gérez les tarifs des visites supplémentaires pour tous les guides.' : 'Consultez les tarifs des visites supplémentaires.'}
-        </p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+        <div>
+          <h1 style={{ margin: 0, color: '#0F172A', fontSize: '1.45rem', fontWeight: 800 }}>Lieux & catalogue</h1>
+          <p style={{ margin: '0.25rem 0 0', color: '#64748B', fontSize: '0.76rem' }}>Deux commandes indépendantes : visibilité publique et inclusion dans l’accompagnement de base.</p>
+        </div>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <span style={{ padding: '0.4rem 0.65rem', borderRadius: 8, background: '#ECFDF5', color: '#047857', fontSize: '0.7rem', fontWeight: 800 }}>{activeCount} actifs</span>
+          <span style={{ padding: '0.4rem 0.65rem', borderRadius: 8, background: '#EFF6FF', color: '#1D4ED8', fontSize: '0.7rem', fontWeight: 800 }}>{baseCount} inclus</span>
+        </div>
       </div>
 
-      {/* Info card */}
-      <div style={{ background: '#FEF9EC', border: '1px solid #FCD34D', borderRadius: 10, padding: '0.875rem 1.25rem', marginBottom: '1.75rem', fontSize: '0.82rem', color: '#92400E', lineHeight: 1.6 }}>
-        💡 Ces tarifs s&apos;appliquent à tous les guides. Les lieux inclus dans un package de base (★) sont toujours gratuits pour le client — le prix affiché ici est le surcoût pour les visites supplémentaires.
+      <div style={{ padding: '0.7rem 0.85rem', borderRadius: 9, background: '#FFF7ED', border: '1px solid #FED7AA', color: '#9A3412', fontSize: '0.7rem', lineHeight: 1.5 }}>
+        Les trois tarifs sont les montants nets reversés au guide par groupe. La majoration « Guides & visites » est ajoutée côté serveur. Un lieu inclus reste configurable, mais aucun supplément n’est facturé tant qu’il est inclus.
       </div>
+      {error && <div style={{ padding: '0.7rem 0.85rem', borderRadius: 9, background: '#FEF2F2', border: '1px solid #FECACA', color: '#B91C1C', fontSize: '0.72rem' }}>{error}</div>}
 
-      {/* Stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.75rem' }}>
-        {[
-          { label: 'Total lieux', value: '23', sub: 'dans le catalogue' },
-          { label: 'Prix moyen', value: loading ? '—' : `${avgPrice} €`, sub: 'visites supplémentaires' },
-          { label: 'Inclus de base', value: loading ? '—' : String(baseCount), sub: 'lieux toujours inclus' },
-        ].map(stat => (
-          <div key={stat.label} style={{ background: 'white', border: '1px solid #E8DFC8', borderRadius: 10, padding: '1rem 1.25rem' }}>
-            <div style={{ fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.35rem' }}>{stat.label}</div>
-            <div style={{ fontFamily: 'Georgia, serif', fontSize: '1.75rem', fontWeight: 700, color: '#1A1209', lineHeight: 1 }}>{stat.value}</div>
-            <div style={{ fontSize: '0.65rem', color: '#9CA3AF', marginTop: '0.25rem' }}>{stat.sub}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* Tables */}
-      {loading ? (
-        <Skeleton />
-      ) : (
-        <>
-          {renderSection('Makkah Al-Mukarramah', makkah, '#C9A84C')}
-          {renderSection('Al-Madinah Al-Munawwarah', madinah, '#1A1209')}
-          {renderSection('Sites Historiques', historique, '#9CA3AF')}
-        </>
-      )}
+      {loading ? <div style={{ height: 220, borderRadius: 12, background: '#E2E8F0' }} /> : categories.map(category => {
+        const rows = places.filter(place => place.category === category.key)
+        return (
+          <section key={category.key} style={{ background: 'white', border: '1px solid #DCE6F0', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(15,23,42,.04)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', padding: '0.65rem 0.8rem', borderBottom: '1px solid #E2E8F0' }}><span style={{ width: 4, height: 16, borderRadius: 4, background: category.color }} /><strong style={{ color: '#0F172A', fontSize: '0.82rem' }}>{category.label}</strong><span style={{ color: '#94A3B8', fontSize: '0.66rem' }}>{rows.length}</span></div>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', minWidth: 680, borderCollapse: 'collapse' }}>
+                <thead><tr style={{ background: '#F8FAFC' }}>{['Lieu', 'Catalogue', 'Inclus de base', 'Tarifs nets par groupe', 'Action'].map(label => <th key={label} style={{ padding: '0.5rem 0.75rem', textAlign: 'left', color: '#64748B', fontSize: '0.58rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</th>)}</tr></thead>
+                <tbody>{renderRows(rows)}</tbody>
+              </table>
+            </div>
+          </section>
+        )
+      })}
     </div>
   )
 }

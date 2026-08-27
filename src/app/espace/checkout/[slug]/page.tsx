@@ -13,6 +13,7 @@ import {
   BOOKING_PRICES,
   calculateBookingTransportPrice,
   calculateLocalCarDays,
+  getBookingPrices,
   type LocalTransportOption,
   type TransportOption,
 } from '@/lib/booking-pricing'
@@ -20,7 +21,8 @@ import {
   centsToEuros,
   DEFAULT_GUIDE_NET_RATES,
   guideServiceRetailCents,
-  placeRetailCents,
+  GUIDE_SERVICE_MARKUP_BPS,
+  TRAVEL_MARKUP_BPS,
 } from '@/lib/guide-pricing'
 import { getAnalyticsSessionId, trackAnalyticsEvent } from '@/lib/analytics-client'
 
@@ -45,10 +47,10 @@ type PublicGuide = {
 
 const STEPS_SINGLE = ['Destination', 'Dates & Profil', 'Visites', 'Votre guide', 'Récap']
 const STEPS_BOTH   = ['Destination', 'Vos guides', 'Dates & Profil', 'Visites', 'Récap']
-const DEFAULT_GUIDE_PRICE = {
-  MAKKAH: centsToEuros(guideServiceRetailCents(DEFAULT_GUIDE_NET_RATES, 'MAKKAH', 6)),
-  MADINAH: centsToEuros(guideServiceRetailCents(DEFAULT_GUIDE_NET_RATES, 'MADINAH', 6)),
-} as const
+type CheckoutPlace = Place & {
+  isActive: boolean
+  retailCents: { upTo6: number; upTo15: number; upTo32: number }
+}
 
 // ── Composant PlaceSelector ───────────────────────
 function PlaceSelector({
@@ -208,6 +210,12 @@ function guideRetailPrice(guideData: PublicGuide | null, city: 'MAKKAH' | 'MADIN
 const MAKKAH_HISTORIQUE = ['hunayn']
 const MADINAH_HISTORIQUE = ['badr', 'khandaq', 'bir-aris', 'masjid-ghamamah']
 
+function placeBelongsToCity(place: Place, city: 'MAKKAH' | 'MADINAH'): boolean {
+  if (place.category === city) return true
+  if (place.category !== 'HISTORIQUE') return false
+  return (city === 'MAKKAH' ? MAKKAH_HISTORIQUE : MADINAH_HISTORIQUE).includes(place.key)
+}
+
 // ── Page principale ───────────────────────────────
 export default function CheckoutPage() {
   const params = useParams<{ slug: string }>()
@@ -219,6 +227,15 @@ export default function CheckoutPage() {
   const [step, setStep] = useState(1)
   const [guide, setGuide] = useState<PublicGuide | null>(null)
   const [activePlaces, setActivePlaces] = useState<string[]>([])
+  const [placeCatalog, setPlaceCatalog] = useState<CheckoutPlace[]>(PLACES.map(place => ({
+    ...place,
+    isActive: true,
+    retailCents: { upTo6: 6_500, upTo15: 9_100, upTo32: 11_700 },
+  })))
+  const [pricingSettings, setPricingSettings] = useState({
+    guideServiceMarkupBps: GUIDE_SERVICE_MARKUP_BPS,
+    travelMarkupBps: TRAVEL_MARKUP_BPS,
+  })
   const [loadingGuide, setLoadingGuide] = useState(true)
   const [guideDataMadinah, setGuideDataMadinah] = useState<PublicGuide | null>(null)
 
@@ -387,6 +404,8 @@ export default function CheckoutPage() {
       .then(data => {
         setGuide(data.guide)
         setActivePlaces(data.activePlaces || [])
+        if (Array.isArray(data.placeCatalog)) setPlaceCatalog(data.placeCatalog)
+        if (data.pricing) setPricingSettings(data.pricing)
       })
       .catch(e => { if (e.name !== 'AbortError') { setGuide(null) } })
       .finally(() => setLoadingGuide(false))
@@ -422,8 +441,8 @@ export default function CheckoutPage() {
       gender,
     })
     if (cityChoice && cityChoice !== 'BOTH' && range?.from) {
-      const packageForCity = getPackageForCity(cityChoice)
-      const visitPlaces = [...new Set([...packageForCity.includedPlaces, ...selectedPlaces])]
+      const includedPlaces = placeCatalog.filter(place => place.isActive && place.includedInBase && placeBelongsToCity(place, cityChoice)).map(place => place.key)
+      const visitPlaces = [...new Set([...includedPlaces, ...selectedPlaces])]
       const days = calculateLocalCarDays(visitPlaces, cityChoice)
       query.set('startDate', format(range.from, 'yyyy-MM-dd'))
       query.set('endDate', format(addDays(range.from, days - 1), 'yyyy-MM-dd'))
@@ -432,7 +451,7 @@ export default function CheckoutPage() {
       .then(r => r.json())
       .then(d => setAvailableGuides(d.guides || []))
       .finally(() => setLoadingGuides(false))
-  }, [step, cityChoice, langue, gender, range, selectedPlaces])
+  }, [step, cityChoice, langue, gender, range, selectedPlaces, placeCatalog])
 
   // Auto-switch vers onglet Madinah dès que Makkah local transport est choisi
   useEffect(() => {
@@ -457,6 +476,16 @@ export default function CheckoutPage() {
 
   // Package de base
   const basePackage = cityChoice ? getPackageForCity(cityChoice) : null
+  const baseIncludedPlaces = cityChoice
+    ? placeCatalog.filter(place => place.isActive && place.includedInBase && (
+        cityChoice === 'BOTH' ? placeBelongsToCity(place, 'MAKKAH') || placeBelongsToCity(place, 'MADINAH') : placeBelongsToCity(place, cityChoice)
+      )).map(place => place.key)
+    : []
+  const bookingPrices = getBookingPrices(pricingSettings.travelMarkupBps)
+  const defaultGuidePrice = {
+    MAKKAH: centsToEuros(guideServiceRetailCents(DEFAULT_GUIDE_NET_RATES, 'MAKKAH', 6, pricingSettings.guideServiceMarkupBps)),
+    MADINAH: centsToEuros(guideServiceRetailCents(DEFAULT_GUIDE_NET_RATES, 'MADINAH', 6, pricingSettings.guideServiceMarkupBps)),
+  }
 
   // Calcul prix — tarif du ou des guides selon la taille du groupe.
   const prixGuideMakkah = cityChoice !== 'MADINAH'
@@ -466,14 +495,14 @@ export default function CheckoutPage() {
     ? guideRetailPrice(cityChoice === 'BOTH' ? guideDataMadinah : guide, 'MADINAH', nbPersonnes)
     : 0
   const prixBase = prixGuideMakkah + prixGuideMadinah || (
-    cityChoice === 'BOTH' ? DEFAULT_GUIDE_PRICE.MAKKAH + DEFAULT_GUIDE_PRICE.MADINAH
-      : cityChoice ? DEFAULT_GUIDE_PRICE[cityChoice] : 0
+    cityChoice === 'BOTH' ? defaultGuidePrice.MAKKAH + defaultGuidePrice.MADINAH
+      : cityChoice ? defaultGuidePrice[cityChoice] : 0
   )
-  const extraPlaces = selectedPlaces.filter(pk => !basePackage?.includedPlaces.includes(pk))
-  const placeRetailPrice = centsToEuros(placeRetailCents(nbPersonnes))
-  const displayPlacePrices = Object.fromEntries(PLACES.map(place => [place.key, placeRetailPrice]))
-  const prixLieux = extraPlaces.length * placeRetailPrice
-  const allVisitPlaces = [...new Set([...(basePackage?.includedPlaces ?? []), ...selectedPlaces])]
+  const extraPlaces = selectedPlaces.filter(pk => !baseIncludedPlaces.includes(pk))
+  const placeTier = nbPersonnes <= 6 ? 'upTo6' : nbPersonnes <= 15 ? 'upTo15' : 'upTo32'
+  const displayPlacePrices = Object.fromEntries(placeCatalog.map(place => [place.key, centsToEuros(place.retailCents[placeTier])]))
+  const prixLieux = extraPlaces.reduce((sum, key) => sum + (displayPlacePrices[key] ?? 0), 0)
+  const allVisitPlaces = [...new Set([...baseIncludedPlaces, ...selectedPlaces])]
   const sameGuideForBothCities = cityChoice === 'BOTH' && !!selectedGuideSlug && selectedGuideSlug === selectedGuideSlugMadinah
   const primaryCityRaw = sameGuideForBothCities ? String(guide?.city || '').toUpperCase() : ''
   const sameGuidePrimaryCity = primaryCityRaw.includes('MADINAH') || primaryCityRaw.includes('MEDINE') || primaryCityRaw.includes('MÉDINE')
@@ -492,6 +521,7 @@ export default function CheckoutPage() {
         sameGuideForBothCities,
         sameGuidePrimaryCity,
         guideBedProvided,
+        travelMarkupBps: pricingSettings.travelMarkupBps,
       })
     : {
         intercity: 0,
@@ -504,7 +534,7 @@ export default function CheckoutPage() {
         localCarNet: 0,
         makkahDays: calculateLocalCarDays(allVisitPlaces, 'MAKKAH'),
         madinahDays: calculateLocalCarDays(allVisitPlaces, 'MADINAH'),
-        localVehicle: { dailyRate: BOOKING_PRICES.localCarPerDay, netDailyRate: 45, vehicle: 'CAR' as const, label: 'Voiture privée' },
+        localVehicle: { dailyRate: bookingPrices.localCarPerDay, netDailyRate: 45, vehicle: 'CAR' as const, label: 'Voiture privée' },
         guideHotelNights: 0,
         guideHotel: 0,
         guideHotelNet: 0,
@@ -520,13 +550,11 @@ export default function CheckoutPage() {
 
   // Lieux supplémentaires par ville — historiques fusionnés dans la bonne ville
   const getAvailablePlacesByCity = (city: 'MAKKAH' | 'MADINAH'): Place[] => {
-    const historique = city === 'MAKKAH' ? MAKKAH_HISTORIQUE : MADINAH_HISTORIQUE
-    return PLACES.filter(p => {
+    return placeCatalog.filter(p => {
+      if (!p.isActive) return false
       if (p.includedInBase) return false
       if (activePlaces.length > 0 && !activePlaces.includes(p.key)) return false
-      if (p.category === city) return true
-      if (p.category === 'HISTORIQUE' && historique.includes(p.key)) return true
-      return false
+      return placeBelongsToCity(p, city)
     })
   }
 
@@ -838,7 +866,7 @@ export default function CheckoutPage() {
                 </div>
                 {/* Price + radio */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.35rem', flexShrink: 0 }}>
-                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#C9A84C' }}>{DEFAULT_GUIDE_PRICE.MAKKAH}€</div>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#C9A84C' }}>{defaultGuidePrice.MAKKAH}€</div>
                   <div style={{ width: 18, height: 18, borderRadius: '50%', border: `2px solid ${cityChoice === 'MAKKAH' ? '#C9A84C' : '#D4C5A5'}`, background: cityChoice === 'MAKKAH' ? '#C9A84C' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {cityChoice === 'MAKKAH' && <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'white' }} />}
                   </div>
@@ -870,7 +898,7 @@ export default function CheckoutPage() {
                   </div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.35rem', flexShrink: 0 }}>
-                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#27AE60' }}>{DEFAULT_GUIDE_PRICE.MADINAH}€</div>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#27AE60' }}>{defaultGuidePrice.MADINAH}€</div>
                   <div style={{ width: 18, height: 18, borderRadius: '50%', border: `2px solid ${cityChoice === 'MADINAH' ? '#27AE60' : '#D4C5A5'}`, background: cityChoice === 'MADINAH' ? '#27AE60' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {cityChoice === 'MADINAH' && <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'white' }} />}
                   </div>
@@ -925,7 +953,7 @@ export default function CheckoutPage() {
 
                 {/* Price + radio */}
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.35rem', flexShrink: 0 }}>
-                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#8B6914', lineHeight: 1 }}>{DEFAULT_GUIDE_PRICE.MAKKAH + DEFAULT_GUIDE_PRICE.MADINAH}€</div>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#8B6914', lineHeight: 1 }}>{defaultGuidePrice.MAKKAH + defaultGuidePrice.MADINAH}€</div>
                   <div style={{ width: 18, height: 18, borderRadius: '50%', border: `2px solid ${cityChoice === 'BOTH' ? '#C9A84C' : '#D4C5A5'}`, background: cityChoice === 'BOTH' ? '#C9A84C' : 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     {cityChoice === 'BOTH' && <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'white' }} />}
                   </div>
@@ -1207,8 +1235,8 @@ export default function CheckoutPage() {
                   <div style={{ background: 'linear-gradient(135deg, rgba(255,251,235,0.95), rgba(255,248,220,0.9))', border: '1.5px solid rgba(201,168,76,0.35)', borderRadius: 14, padding: '1rem 1.25rem', marginBottom: '1.5rem', boxShadow: '0 2px 12px rgba(201,168,76,0.1)' }}>
                     <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#8B6914', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>✓ Inclus dans votre package</div>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-                      {basePackage?.includedPlaces.filter(pk => PLACES.find(p => p.key === pk && p.category === 'MAKKAH')).map(pk => {
-                        const place = PLACES.find(p => p.key === pk)
+                      {baseIncludedPlaces.filter(pk => placeCatalog.find(p => p.key === pk && placeBelongsToCity(p, 'MAKKAH'))).map(pk => {
+                        const place = placeCatalog.find(p => p.key === pk)
                         return place ? <span key={pk} style={{ background: 'rgba(201,168,76,0.12)', color: '#8B6914', fontSize: '0.75rem', fontWeight: 600, padding: '0.3rem 0.75rem', borderRadius: 50, border: '1px solid rgba(201,168,76,0.25)' }}>{place.emoji} {place.nameFr}</span> : null
                       })}
                     </div>
@@ -1246,12 +1274,12 @@ export default function CheckoutPage() {
                   </p>
 
                   {/* Inclus (si MADINAH ou BOTH) */}
-                  {basePackage?.includedPlaces.some(pk => PLACES.find(p => p.key === pk && p.category === 'MADINAH')) && (
+                  {baseIncludedPlaces.some(pk => placeCatalog.find(p => p.key === pk && placeBelongsToCity(p, 'MADINAH'))) && (
                     <div style={{ background: 'linear-gradient(135deg, rgba(236,253,245,0.95), rgba(220,252,231,0.9))', border: '1.5px solid rgba(29,92,58,0.25)', borderRadius: 14, padding: '1rem 1.25rem', marginBottom: '1.5rem', boxShadow: '0 2px 12px rgba(29,92,58,0.08)' }}>
                       <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#1D5C3A', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>✓ Inclus dans votre package</div>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
-                        {basePackage.includedPlaces.filter(pk => PLACES.find(p => p.key === pk && p.category === 'MADINAH')).map(pk => {
-                          const place = PLACES.find(p => p.key === pk)
+                        {baseIncludedPlaces.filter(pk => placeCatalog.find(p => p.key === pk && placeBelongsToCity(p, 'MADINAH'))).map(pk => {
+                          const place = placeCatalog.find(p => p.key === pk)
                           return place ? <span key={pk} style={{ background: 'rgba(29,92,58,0.1)', color: '#1D5C3A', fontSize: '0.75rem', fontWeight: 600, padding: '0.3rem 0.75rem', borderRadius: 50, border: '1px solid rgba(29,92,58,0.2)' }}>{place.emoji} {place.nameFr}</span> : null
                         })}
                       </div>
@@ -1304,7 +1332,7 @@ export default function CheckoutPage() {
                       Vous avez choisi un guide différent dans chaque ville : aucun transport ni hôtel de guide supplémentaire n’est facturé.
                     </div>
                   ) : ([
-                    { key: 'TRAIN' as TransportOption, title: '🚄 Train Haramayn', desc: 'Billet aller-retour du guide uniquement · Vous prenez vos propres billets sur place', price: `+${BOOKING_PRICES.trainRoundTrip}€` },
+                    { key: 'TRAIN' as TransportOption, title: '🚄 Train Haramayn', desc: 'Billet aller-retour du guide uniquement · Vous prenez vos propres billets sur place', price: `+${bookingPrices.trainRoundTrip}€` },
                     { key: 'TAXI_RT' as TransportOption, title: '🚗 Voiture privée', desc: 'Aller-retour obligatoire du guide entre Makkah et Médine', price: '', perPerson: '' },
                   ] as { key: TransportOption; title: string; desc: string; price: string; perPerson?: string }[]).map(opt => {
                     const isTaxi = opt.key === 'TAXI_RT'
@@ -1346,7 +1374,7 @@ export default function CheckoutPage() {
                                 <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#1A1209' }}>Aller-retour</div>
                                 <div style={{ fontSize: '0.68rem', color: '#7A6D5A' }}>Makkah ↔ Madinah · forfait groupe</div>
                               </div>
-                              <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#C9A84C' }}>+{BOOKING_PRICES.taxiRoundTrip}€</div>
+                              <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#C9A84C' }}>+{bookingPrices.taxiRoundTrip}€</div>
                             </div>
 
                           </div>
@@ -1359,7 +1387,7 @@ export default function CheckoutPage() {
                     <div style={{ marginTop: '1rem', background: '#FAF8F0', border: '1px solid #E8DFC8', borderRadius: 12, padding: '1rem 1.25rem' }}>
                       <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#1A1209' }}>Hébergement du guide hors de sa ville principale</div>
                       <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 3 }}>
-                        {transportPricing.guideHotelNights} nuit(s) estimée(s) · {BOOKING_PRICES.guideHotelPerNight} €/nuit
+                        {transportPricing.guideHotelNights} nuit(s) estimée(s) · {bookingPrices.guideHotelPerNight} €/nuit
                       </div>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginTop: '0.8rem', cursor: 'pointer', fontSize: '0.78rem', color: '#4A3F30' }}>
                         <input type="checkbox" checked={guideBedProvided} onChange={event => setGuideBedProvided(event.target.checked)} />
@@ -1459,7 +1487,7 @@ export default function CheckoutPage() {
 
               {/* Drawer détail lieu */}
               {detailPlace && (() => {
-                const place = PLACES.find(p => p.key === detailPlace)
+                const place = placeCatalog.find(p => p.key === detailPlace)
                 const isSelected = selectedPlaces.includes(detailPlace)
                 const prix = place ? displayPlacePrices[place.key] : 0
                 // Couleur de fond illustrative selon catégorie
@@ -1927,7 +1955,7 @@ export default function CheckoutPage() {
 
               {/* Visites supp */}
               {extraPlaces.map(pk => {
-                const place = PLACES.find(p => p.key === pk)
+                const place = placeCatalog.find(p => p.key === pk)
                 const prix = displayPlacePrices[pk]
                 return place ? (
                   <div key={pk} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 1.25rem', borderBottom: '1px solid #F5F0E8' }}>

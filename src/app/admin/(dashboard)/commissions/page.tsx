@@ -1,96 +1,158 @@
-'use client';
-import { useState, useEffect } from 'react';
+'use client'
 
-type GuideRow = { id: string; slug: string | null; name: string; totalReservations: number; totalRevenue: number; totalCommission: number };
+import { useEffect, useState } from 'react'
+
+type GuideRow = {
+  id: string
+  slug: string | null
+  name: string
+  totalReservations: number
+  totalRevenue: number
+  totalCommission: number
+}
 
 export default function AdminCommissions() {
-  const [guides, setGuides]         = useState<GuideRow[]>([]);
-  const [loading, setLoading]       = useState(true);
-  const [markupRate, setMarkupRate] = useState(30);
-  const [error, setError]           = useState('');
+  const [guides, setGuides] = useState<GuideRow[]>([])
+  const [guideMarkup, setGuideMarkup] = useState('30')
+  const [travelMarkup, setTravelMarkup] = useState('20')
+  const [canEdit, setCanEdit] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [confirming, setConfirming] = useState(false)
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    let active = true;
+    let active = true
     fetch('/api/admin/commissions', { cache: 'no-store' })
-      .then(async res => {
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Impossible de charger les commissions.');
-        if (!active) return;
-        setGuides(data.guides || []);
-        setMarkupRate(data.markupRate ?? 30);
+      .then(async response => {
+        const data = await response.json()
+        if (!response.ok) throw new Error(data.error || 'Impossible de charger les commissions.')
+        if (!active) return
+        setGuides(data.guides || [])
+        setGuideMarkup(String(data.guideServiceMarkupPercent ?? 30))
+        setTravelMarkup(String(data.travelMarkupPercent ?? 20))
+        setCanEdit(Boolean(data.canEdit))
       })
       .catch(fetchError => {
-        if (active) setError(fetchError instanceof Error ? fetchError.message : 'Impossible de charger les commissions.');
+        if (active) setError(fetchError instanceof Error ? fetchError.message : 'Impossible de charger les commissions.')
       })
       .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => { active = false; };
-  }, []);
+        if (active) setLoading(false)
+      })
+    return () => { active = false }
+  }, [])
 
-  const card: React.CSSProperties = { background: 'white', border: '1px solid #E8DFC8', borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.06)' };
+  const saveMarkups = async () => {
+    setSaving(true)
+    setError('')
+    setMessage('')
+    try {
+      const response = await fetch('/api/admin/commissions', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          guideServiceMarkupPercent: Number(guideMarkup),
+          travelMarkupPercent: Number(travelMarkup),
+        }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Impossible d’enregistrer les majorations.')
+      setGuideMarkup(String(data.guideServiceMarkupPercent))
+      setTravelMarkup(String(data.travelMarkupPercent))
+      setConfirming(false)
+      setMessage('Majorations enregistrées et appliquées au calcul serveur.')
+    } catch (saveError) {
+      setError(saveError instanceof Error ? saveError.message : 'Impossible d’enregistrer les majorations.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const card: React.CSSProperties = {
+    background: 'white', border: '1px solid #D9E4F0', borderRadius: 12,
+    boxShadow: '0 1px 3px rgba(15,23,42,0.05)',
+  }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', fontFamily: 'var(--font-manrope, sans-serif)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontFamily: 'var(--font-manrope, sans-serif)' }}>
       <div>
-        <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.75rem', fontWeight: 700, color: '#1A1209', margin: 0 }}>Gestion des commissions</h1>
+        <h1 style={{ fontSize: '1.45rem', fontWeight: 800, color: '#0F172A', margin: 0 }}>Commissions & majorations</h1>
+        <p style={{ margin: '0.25rem 0 0', color: '#64748B', fontSize: '0.78rem' }}>
+          Source unique utilisée par le checkout et recalculée côté serveur avant paiement.
+        </p>
       </div>
 
-      {/* Info card */}
-      <div style={{ ...card, padding: '1rem 1.5rem', background: '#FEF9E7', border: '1px solid #FCD34D' }}>
-        <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#92400E', marginBottom: 4 }}>Majoration serveur : {markupRate} % du tarif net guide</div>
-        <div style={{ fontSize: '0.78rem', color: '#78350F', lineHeight: 1.6 }}>
-          Source unique utilisée par le checkout. La commission réalisée correspond au montant payé par le client moins les rémunérations nettes des guides.
+      <section style={{ ...card, padding: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0.75rem' }}>
+          {[
+            { label: 'Guides & visites', value: guideMarkup, setter: setGuideMarkup, help: 'Appliquée aux rémunérations nettes des guides et aux visites supplémentaires.' },
+            { label: 'Transport & hôtel', value: travelMarkup, setter: setTravelMarkup, help: 'Appliquée au train, véhicule local, trajet interville et nuitées du guide.' },
+          ].map(field => (
+            <label key={field.label} style={{ display: 'block', padding: '0.875rem', border: '1px solid #E2E8F0', borderRadius: 10, background: '#F8FAFC' }}>
+              <span style={{ display: 'block', fontSize: '0.72rem', fontWeight: 800, color: '#334155', marginBottom: '0.4rem' }}>{field.label}</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  value={field.value}
+                  disabled={!canEdit || saving}
+                  onChange={event => { field.setter(event.target.value); setConfirming(false); setMessage('') }}
+                  style={{ width: 100, padding: '0.55rem 0.65rem', border: '1px solid #CBD5E1', borderRadius: 8, fontSize: '1rem', fontWeight: 800, color: '#0F172A', background: canEdit ? 'white' : '#F1F5F9' }}
+                />
+                <span style={{ fontWeight: 800, color: '#475569' }}>%</span>
+              </span>
+              <span style={{ display: 'block', marginTop: '0.45rem', color: '#64748B', fontSize: '0.68rem', lineHeight: 1.45 }}>{field.help}</span>
+            </label>
+          ))}
         </div>
-      </div>
 
-      {error && (
-        <div style={{ background: '#FEE2E2', border: '1px solid #FCA5A5', borderRadius: 8, padding: '0.75rem 1rem', fontSize: '0.83rem', color: '#DC2626' }}>
-          {error}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', flexWrap: 'wrap', gap: '0.65rem', marginTop: '0.8rem' }}>
+          {!canEdit ? (
+            <span style={{ color: '#64748B', fontSize: '0.72rem' }}>Lecture seule — modification réservée au Superadmin.</span>
+          ) : confirming ? (
+            <>
+              <span style={{ color: '#9A3412', fontSize: '0.72rem', fontWeight: 700 }}>Confirmer l’application immédiate aux prochains checkouts ?</span>
+              <button type="button" onClick={() => setConfirming(false)} style={{ padding: '0.5rem 0.8rem', border: '1px solid #CBD5E1', borderRadius: 8, background: 'white', color: '#475569', fontWeight: 700, cursor: 'pointer' }}>Annuler</button>
+              <button type="button" disabled={saving} onClick={saveMarkups} style={{ padding: '0.5rem 0.9rem', border: 0, borderRadius: 8, background: '#0F766E', color: 'white', fontWeight: 800, cursor: saving ? 'wait' : 'pointer' }}>{saving ? 'Enregistrement…' : 'Confirmer'}</button>
+            </>
+          ) : (
+            <button type="button" onClick={() => setConfirming(true)} style={{ padding: '0.55rem 0.95rem', border: 0, borderRadius: 8, background: '#0369A1', color: 'white', fontWeight: 800, cursor: 'pointer' }}>Enregistrer les majorations</button>
+          )}
         </div>
-      )}
+      </section>
 
-      {/* Table */}
+      {message && <div style={{ background: '#ECFDF5', border: '1px solid #A7F3D0', borderRadius: 8, padding: '0.7rem 0.9rem', fontSize: '0.76rem', color: '#047857' }}>{message}</div>}
+      {error && <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 8, padding: '0.7rem 0.9rem', fontSize: '0.76rem', color: '#B91C1C' }}>{error}</div>}
+
       <div style={{ ...card, overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 640 }}>
-            <thead>
-              <tr style={{ background: '#F5F2EC', borderBottom: '1px solid #E8DFC8' }}>
-                {['Guide', 'Majoration', 'Réservations', 'Revenus générés', 'Commission réalisée'].map(h => (
-                  <th key={h} style={{ padding: '0.75rem 0.875rem', textAlign: 'left', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', whiteSpace: 'nowrap' }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
+            <thead><tr style={{ background: '#F8FAFC', borderBottom: '1px solid #E2E8F0' }}>
+              {['Guide', 'Majoration services', 'Réservations', 'Revenus générés', 'Commission réalisée'].map(header => (
+                <th key={header} style={{ padding: '0.65rem 0.8rem', textAlign: 'left', fontSize: '0.6rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#64748B', whiteSpace: 'nowrap' }}>{header}</th>
+              ))}
+            </tr></thead>
             <tbody>
-              {loading ? (
-                Array.from({ length: 4 }).map((_, i) => (
-                  <tr key={i} style={{ borderBottom: '1px solid #F0EBE0' }}>
-                    {Array.from({ length: 5 }).map((_, j) => (
-                      <td key={j} style={{ padding: '0.875rem' }}><div style={{ height: 12, background: '#F0EDE8', borderRadius: 4 }} /></td>
-                    ))}
-                  </tr>
-                ))
-              ) : guides.length === 0 ? (
-                <tr><td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: '#7A6D5A', fontSize: '0.85rem' }}>Aucun guide</td></tr>
-              ) : (
-                guides.map((g, i) => (
-                  <tr key={g.id} style={{ borderBottom: '1px solid #F0EBE0', background: i % 2 === 0 ? 'white' : '#FAFAF8' }}>
-                    <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.85rem', fontWeight: 700, color: '#1A1209' }}>{g.name}</td>
-                    <td style={{ padding: '0.75rem 0.875rem' }}>
-                      <span style={{ background: '#FEF3C7', color: '#92400E', fontSize: '0.8rem', fontWeight: 700, padding: '0.2rem 0.6rem', borderRadius: 20 }}>
-                        {markupRate}%
-                      </span>
-                    </td>
-                    <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.82rem', color: '#4A3F30', textAlign: 'center' }}>{g.totalReservations}</td>
-                    <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.85rem', fontWeight: 600, color: '#1A1209', whiteSpace: 'nowrap' }}>{g.totalRevenue} €</td>
-                    <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.85rem', fontWeight: 700, color: '#1D5C3A', whiteSpace: 'nowrap' }}>{g.totalCommission} €</td>
-                  </tr>
-                ))
-              )}
+              {loading ? Array.from({ length: 3 }).map((_, index) => (
+                <tr key={index}>{Array.from({ length: 5 }).map((__, cell) => <td key={cell} style={{ padding: '0.8rem' }}><div style={{ height: 11, background: '#E2E8F0', borderRadius: 4 }} /></td>)}</tr>
+              )) : guides.length === 0 ? (
+                <tr><td colSpan={5} style={{ padding: '1.5rem', textAlign: 'center', color: '#64748B', fontSize: '0.8rem' }}>Aucun guide</td></tr>
+              ) : guides.map(guide => (
+                <tr key={guide.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
+                  <td style={{ padding: '0.7rem 0.8rem', fontSize: '0.8rem', fontWeight: 700, color: '#0F172A' }}>{guide.name}</td>
+                  <td style={{ padding: '0.7rem 0.8rem' }}><span style={{ background: '#E0F2FE', color: '#0369A1', fontSize: '0.74rem', fontWeight: 800, padding: '0.2rem 0.55rem', borderRadius: 20 }}>{guideMarkup}%</span></td>
+                  <td style={{ padding: '0.7rem 0.8rem', fontSize: '0.78rem', color: '#475569' }}>{guide.totalReservations}</td>
+                  <td style={{ padding: '0.7rem 0.8rem', fontSize: '0.8rem', fontWeight: 700, color: '#0F172A' }}>{guide.totalRevenue} €</td>
+                  <td style={{ padding: '0.7rem 0.8rem', fontSize: '0.8rem', fontWeight: 800, color: '#0F766E' }}>{guide.totalCommission} €</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
       </div>
     </div>
-  );
+  )
 }

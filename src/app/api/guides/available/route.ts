@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { centsToEuros, guideServiceRetailCents } from '@/lib/guide-pricing'
+import { getPlatformPricing } from '@/lib/platform-pricing'
 
 type ServiceCity = 'MAKKAH' | 'MADINAH' | 'BOTH'
 
@@ -27,7 +28,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const guides = await prisma.guideProfile.findMany({
+    const [guides, pricing] = await Promise.all([prisma.guideProfile.findMany({
       where: {
         status: 'ACTIVE',
         acceptingBookings: true,
@@ -42,7 +43,7 @@ export async function GET(req: NextRequest) {
         languages: true,
         places: { where: { isActive: true }, select: { placeKey: true } },
       },
-    })
+    }), getPlatformPricing()])
 
     const guideIds = guides.map(guide => guide.id)
     const conflictCity = city === 'MAKKAH' || city === 'MADINAH' ? city : null
@@ -89,14 +90,14 @@ export async function GET(req: NextRequest) {
         activePlaces: guide.places.map(place => place.placeKey),
         prices: {
           makkah: {
-            upTo6: centsToEuros(guideServiceRetailCents(guide, 'MAKKAH', 6)),
-            upTo15: centsToEuros(guideServiceRetailCents(guide, 'MAKKAH', 15)),
-            upTo32: centsToEuros(guideServiceRetailCents(guide, 'MAKKAH', 32)),
+            upTo6: centsToEuros(guideServiceRetailCents(guide, 'MAKKAH', 6, pricing.guideServiceMarkupBps)),
+            upTo15: centsToEuros(guideServiceRetailCents(guide, 'MAKKAH', 15, pricing.guideServiceMarkupBps)),
+            upTo32: centsToEuros(guideServiceRetailCents(guide, 'MAKKAH', 32, pricing.guideServiceMarkupBps)),
           },
           madinah: {
-            upTo6: centsToEuros(guideServiceRetailCents(guide, 'MADINAH', 6)),
-            upTo15: centsToEuros(guideServiceRetailCents(guide, 'MADINAH', 15)),
-            upTo32: centsToEuros(guideServiceRetailCents(guide, 'MADINAH', 32)),
+            upTo6: centsToEuros(guideServiceRetailCents(guide, 'MADINAH', 6, pricing.guideServiceMarkupBps)),
+            upTo15: centsToEuros(guideServiceRetailCents(guide, 'MADINAH', 15, pricing.guideServiceMarkupBps)),
+            upTo32: centsToEuros(guideServiceRetailCents(guide, 'MADINAH', 32, pricing.guideServiceMarkupBps)),
           },
         },
         rating: null,

@@ -7,6 +7,8 @@ export const viewport: Viewport = { themeColor: '#FAF7F0' };
 import Link from 'next/link';
 import { IconShield, IconCar, IconAccessibility, IconBuilding, IconDocument, IconGraduationCap } from '@/components/Icons';
 import { BOOKING_PRICES } from '@/lib/booking-pricing';
+import { getBookingPrices } from '@/lib/booking-pricing';
+import { getPlatformPricing } from '@/lib/platform-pricing';
 
 const WHATSAPP = 'https://wa.me/message/3LAXCIZV7FFEK1';
 
@@ -95,7 +97,12 @@ const SERVICES: Service[] = [
   },
 ];
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const pricing = await getPlatformPricing();
+  const bookingPrices = getBookingPrices(pricing.travelMarkupBps);
+  const services = SERVICES.map(service => service.href === '/services/transfert'
+    ? { ...service, price: `À partir de ${bookingPrices.localCarPerDay}€/jour` }
+    : service)
   return (
     <>
       <Navbar />
@@ -122,7 +129,7 @@ export default function ServicesPage() {
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-            {SERVICES.map((s) => (
+            {services.map((s) => (
               <div key={s.title} style={{ background: 'white', border: '1px solid #EDE8DC', borderRadius: 20, overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 4px 24px rgba(26,18,9,0.06)' }}>
 
                 {/* Card header */}

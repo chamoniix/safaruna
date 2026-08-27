@@ -57,17 +57,18 @@ export function guideServiceNetCents(
 export function guideServiceRetailCents(
   rates: GuideNetRates,
   city: GuideServiceCity,
-  nbPeople: number
+  nbPeople: number,
+  markupBps = GUIDE_SERVICE_MARKUP_BPS
 ): number {
-  return withMarkupCents(guideServiceNetCents(rates, city, nbPeople), GUIDE_SERVICE_MARKUP_BPS)
+  return withMarkupCents(guideServiceNetCents(rates, city, nbPeople), markupBps)
 }
 
 export function placeNetCents(nbPeople: number): number {
   return PLACE_NET_BY_TIER_CENTS[guideGroupTier(nbPeople)]
 }
 
-export function placeRetailCents(nbPeople: number): number {
-  return withMarkupCents(placeNetCents(nbPeople), GUIDE_SERVICE_MARKUP_BPS)
+export function placeRetailCents(nbPeople: number, markupBps = GUIDE_SERVICE_MARKUP_BPS): number {
+  return withMarkupCents(placeNetCents(nbPeople), markupBps)
 }
 
 export function centsToEuros(cents: number): number {

@@ -43,6 +43,7 @@ interface GuideProfileClientProps {
   bioFull: string[];
   languages: string[];
   activePlaceKeys?: string[];
+  includedPlaceKeys?: string[];
   guideCity?: 'MAKKAH' | 'MADINAH';
   acceptingBookings: boolean;
   servesMakkah: boolean;
@@ -75,6 +76,7 @@ export default function GuideProfileClient({
   bioFull,
   languages,
   activePlaceKeys,
+  includedPlaceKeys,
   guideCity,
   acceptingBookings,
   servesMakkah,
@@ -407,7 +409,7 @@ export default function GuideProfileClient({
                     Makkah Al-Mukarramah
                   </h3>
                 </div>
-                <PlaceGrid places={makkahPlaces} activePlaceKeys={activePlaceKeys} />
+                <PlaceGrid places={makkahPlaces} activePlaceKeys={activePlaceKeys} includedPlaceKeys={includedPlaceKeys} />
               </div>
 
               <div style={{ marginBottom: '2rem' }}>
@@ -417,7 +419,7 @@ export default function GuideProfileClient({
                     Al-Madinah Al-Munawwarah
                   </h3>
                 </div>
-                <PlaceGrid places={madinahPlaces} activePlaceKeys={activePlaceKeys} />
+                <PlaceGrid places={madinahPlaces} activePlaceKeys={activePlaceKeys} includedPlaceKeys={includedPlaceKeys} />
               </div>
 
               <div>
@@ -427,7 +429,7 @@ export default function GuideProfileClient({
                     Sites Historiques
                   </h3>
                 </div>
-                <PlaceGrid places={historiquePlaces} activePlaceKeys={activePlaceKeys} />
+                <PlaceGrid places={historiquePlaces} activePlaceKeys={activePlaceKeys} includedPlaceKeys={includedPlaceKeys} />
               </div>
             </div>
           )}
@@ -582,7 +584,7 @@ export default function GuideProfileClient({
   );
 }
 
-function PlaceGrid({ places, activePlaceKeys }: { places: Place[]; activePlaceKeys?: string[] }) {
+function PlaceGrid({ places, activePlaceKeys, includedPlaceKeys }: { places: Place[]; activePlaceKeys?: string[]; includedPlaceKeys?: string[] }) {
   // Build a nameFr -> key map from the lib places for availability lookup
   const nameFrToKey: Record<string, string> = {}
   LIB_PLACES.forEach(p => { nameFrToKey[p.nameFr] = p.key })
@@ -593,9 +595,7 @@ function PlaceGrid({ places, activePlaceKeys }: { places: Place[]; activePlaceKe
     <div className="profile-places-grid">
       {places.map((place, i) => {
         const placeKey = nameFrToKey[place.nameFr]
-        const libPlace = LIB_PLACES.find(p => p.nameFr === place.nameFr)
-        // If includedInBase, always active
-        const isBase = libPlace?.includedInBase ?? false
+        const isBase = Boolean(placeKey && includedPlaceKeys?.includes(placeKey))
         const isUnavailable = hasConfig && placeKey && !isBase && !activePlaceKeys!.includes(placeKey)
 
         return (

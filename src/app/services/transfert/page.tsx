@@ -2,7 +2,8 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollReveal from "@/components/ScrollReveal";
-import { BOOKING_PRICES } from "@/lib/booking-pricing";
+import { BOOKING_PRICES, getBookingPrices } from "@/lib/booking-pricing";
+import { getPlatformPricing } from "@/lib/platform-pricing";
 
 export const metadata = {
   title: "Transferts Omra : voiture privée, van & Train Haramayn | SAFARUMA",
@@ -64,7 +65,12 @@ const ROUTES = [
   { from: '🌙 Makkah', to: '🏕️ Mina / Muzdalifah', time: '30 min', note: 'période Hajj' },
 ];
 
-export default function TransfertPage() {
+export default async function TransfertPage() {
+  const pricing = await getPlatformPricing();
+  const bookingPrices = getBookingPrices(pricing.travelMarkupBps);
+  const options = OPTIONS.map(option => option.title === 'Voiture privée 4–5 places'
+    ? { ...option, price: `${bookingPrices.localCarPerDay}€/jour` }
+    : option)
   return (
     <>
       <Navbar />
@@ -103,7 +109,7 @@ export default function TransfertPage() {
             Transport adapté à <em>votre groupe</em>
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '1.5rem' }}>
-            {OPTIONS.map((opt, i) => (
+            {options.map((opt, i) => (
               <div key={opt.title} className={`reveal reveal-d${i + 1}`} style={{
                 background: 'white', borderRadius: 20, padding: '2rem',
                 border: opt.recommended ? '2px solid var(--gold)' : '1px solid var(--sand)',
@@ -164,7 +170,7 @@ export default function TransfertPage() {
           Votre transport, <em style={{ color: 'var(--gold)' }}>adapté à vos besoins.</em>
         </h2>
         <p className="reveal reveal-d1" style={{ color: 'rgba(255,255,255,0.5)', maxWidth: 440, margin: '1rem auto 2.5rem', lineHeight: 1.8 }}>
-          La voiture privée pour les visites locales est disponible à {BOOKING_PRICES.localCarPerDay}€/jour. Les vans et minibus sont proposés sur devis selon la taille du groupe.
+          La voiture privée pour les visites locales est disponible à {bookingPrices.localCarPerDay}€/jour. Les vans et minibus sont proposés sur devis selon la taille du groupe.
         </p>
         <div className="reveal reveal-d2">
           <Link href="/guides" className="btn-primary" style={{ background: 'var(--gold)', color: 'var(--deep)', fontWeight: 700 }}>

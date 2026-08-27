@@ -18,21 +18,25 @@ export const BOOKING_NET_COSTS = {
   guideHotelPerNight: 80,
 } as const
 
-function travelRetail(netEuros: number): number {
-  return centsToEuros(withMarkupCents(netEuros * 100, TRAVEL_MARKUP_BPS))
+function travelRetail(netEuros: number, markupBps = TRAVEL_MARKUP_BPS): number {
+  return centsToEuros(withMarkupCents(netEuros * 100, markupBps))
 }
 
-export const BOOKING_PRICES = {
-  trainPerTrip: travelRetail(BOOKING_NET_COSTS.trainPerTrip),
-  trainRoundTrip: travelRetail(BOOKING_NET_COSTS.trainRoundTrip),
-  taxiOneWay: travelRetail(BOOKING_NET_COSTS.taxiOneWay),
-  taxiRoundTrip: travelRetail(BOOKING_NET_COSTS.taxiRoundTrip),
-  localCarPerDay: travelRetail(BOOKING_NET_COSTS.localCarPerDay),
-  localMinivanPerDay: travelRetail(BOOKING_NET_COSTS.localMinivanPerDay),
-  localBusPerDay: travelRetail(BOOKING_NET_COSTS.localBusPerDay),
-  guideHotelPerNight: travelRetail(BOOKING_NET_COSTS.guideHotelPerNight),
-  defaultPlace: 65,
-} as const
+export function getBookingPrices(markupBps = TRAVEL_MARKUP_BPS) {
+  return {
+    trainPerTrip: travelRetail(BOOKING_NET_COSTS.trainPerTrip, markupBps),
+    trainRoundTrip: travelRetail(BOOKING_NET_COSTS.trainRoundTrip, markupBps),
+    taxiOneWay: travelRetail(BOOKING_NET_COSTS.taxiOneWay, markupBps),
+    taxiRoundTrip: travelRetail(BOOKING_NET_COSTS.taxiRoundTrip, markupBps),
+    localCarPerDay: travelRetail(BOOKING_NET_COSTS.localCarPerDay, markupBps),
+    localMinivanPerDay: travelRetail(BOOKING_NET_COSTS.localMinivanPerDay, markupBps),
+    localBusPerDay: travelRetail(BOOKING_NET_COSTS.localBusPerDay, markupBps),
+    guideHotelPerNight: travelRetail(BOOKING_NET_COSTS.guideHotelPerNight, markupBps),
+    defaultPlace: 65,
+  } as const
+}
+
+export const BOOKING_PRICES = getBookingPrices()
 
 export const TRANSPORT_OPTIONS: readonly TransportOption[] = ['NONE', 'TRAIN', 'TAXI_RT', 'TAXI_ONE']
 export const LOCAL_TRANSPORT_OPTIONS: readonly LocalTransportOption[] = ['NONE', 'TAXI', 'CAR']
@@ -86,19 +90,19 @@ export function calculateLocalCarDays(selectedPlaces: string[], city: 'MAKKAH' |
   return Math.max(1, Math.ceil(hours / HOURS_PER_LOCAL_CAR_DAY))
 }
 
-export function getLocalVehiclePricing(nbPeople: number): {
+export function getLocalVehiclePricing(nbPeople: number, markupBps = TRAVEL_MARKUP_BPS): {
   dailyRate: number
   netDailyRate: number
   vehicle: 'CAR' | 'MINIVAN' | 'BUS'
   label: string
 } {
   if (nbPeople <= 6) {
-    return { dailyRate: BOOKING_PRICES.localCarPerDay, netDailyRate: BOOKING_NET_COSTS.localCarPerDay, vehicle: 'CAR', label: 'Voiture privée' }
+    return { dailyRate: getBookingPrices(markupBps).localCarPerDay, netDailyRate: BOOKING_NET_COSTS.localCarPerDay, vehicle: 'CAR', label: 'Voiture privée' }
   }
   if (nbPeople <= 15) {
-    return { dailyRate: BOOKING_PRICES.localMinivanPerDay, netDailyRate: BOOKING_NET_COSTS.localMinivanPerDay, vehicle: 'MINIVAN', label: 'Minivan avec chauffeur' }
+    return { dailyRate: getBookingPrices(markupBps).localMinivanPerDay, netDailyRate: BOOKING_NET_COSTS.localMinivanPerDay, vehicle: 'MINIVAN', label: 'Minivan avec chauffeur' }
   }
-  return { dailyRate: BOOKING_PRICES.localBusPerDay, netDailyRate: BOOKING_NET_COSTS.localBusPerDay, vehicle: 'BUS', label: 'Bus avec chauffeur' }
+  return { dailyRate: getBookingPrices(markupBps).localBusPerDay, netDailyRate: BOOKING_NET_COSTS.localBusPerDay, vehicle: 'BUS', label: 'Bus avec chauffeur' }
 }
 
 export function calculateBookingTransportPrice(input: {
@@ -111,6 +115,7 @@ export function calculateBookingTransportPrice(input: {
   sameGuideForBothCities?: boolean
   sameGuidePrimaryCity?: 'MAKKAH' | 'MADINAH' | null
   guideBedProvided?: boolean
+  travelMarkupBps?: number
 }) {
   const {
     cityChoice,
@@ -122,15 +127,17 @@ export function calculateBookingTransportPrice(input: {
     sameGuideForBothCities = false,
     sameGuidePrimaryCity = null,
     guideBedProvided = false,
+    travelMarkupBps = TRAVEL_MARKUP_BPS,
   } = input
+  const bookingPrices = getBookingPrices(travelMarkupBps)
 
   const intercity = cityChoice === 'BOTH' && sameGuideForBothCities
     ? transportOption === 'TRAIN'
-      ? BOOKING_PRICES.trainRoundTrip
+      ? bookingPrices.trainRoundTrip
       : transportOption === 'TAXI_RT'
-        ? BOOKING_PRICES.taxiRoundTrip
+        ? bookingPrices.taxiRoundTrip
         : transportOption === 'TAXI_ONE'
-          ? BOOKING_PRICES.taxiOneWay
+          ? bookingPrices.taxiOneWay
           : 0
     : 0
   const intercityNet = cityChoice === 'BOTH' && sameGuideForBothCities
@@ -145,7 +152,7 @@ export function calculateBookingTransportPrice(input: {
 
   const makkahDays = calculateLocalCarDays(selectedPlaces, 'MAKKAH')
   const madinahDays = calculateLocalCarDays(selectedPlaces, 'MADINAH')
-  const localVehicle = getLocalVehiclePricing(nbPeople)
+  const localVehicle = getLocalVehiclePricing(nbPeople, travelMarkupBps)
   const localCarMakkah = cityChoice !== 'MADINAH' && localTransportMakkah === 'CAR'
     ? makkahDays * localVehicle.dailyRate
     : 0
@@ -162,7 +169,7 @@ export function calculateBookingTransportPrice(input: {
   const guideHotelNights = cityChoice === 'BOTH' && sameGuideForBothCities && !guideBedProvided
     ? Math.max(0, (sameGuidePrimaryCity === 'MAKKAH' ? madinahDays : makkahDays) - 1)
     : 0
-  const guideHotel = guideHotelNights * BOOKING_PRICES.guideHotelPerNight
+  const guideHotel = guideHotelNights * bookingPrices.guideHotelPerNight
   const guideHotelNet = guideHotelNights * BOOKING_NET_COSTS.guideHotelPerNight
 
   return {

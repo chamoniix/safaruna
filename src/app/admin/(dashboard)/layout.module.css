@@ -87,6 +87,20 @@
   cursor: pointer;
 }
 
+.navLink {
+  transition: transform 120ms ease, opacity 140ms ease, filter 140ms ease;
+}
+
+.navLink:hover {
+  transform: translateX(2px);
+  filter: brightness(1.08);
+}
+
+.navLink:active {
+  transform: translateX(2px) scale(0.97);
+  opacity: 0.82;
+}
+
 .navSection {
   max-width: none !important;
   margin-right: 0 !important;
@@ -114,6 +128,18 @@
 .logoutButton {
   display: flex;
   align-items: center;
+}
+
+.shell button:not(:disabled),
+.content :global(a) {
+  transition: transform 120ms ease, filter 140ms ease, opacity 140ms ease;
+}
+
+.shell button:not(:disabled):active,
+.content :global(a):active {
+  transform: scale(0.97);
+  filter: brightness(0.94);
+  opacity: 0.86;
 }
 
 .sidebarCollapsed .brand {
@@ -228,5 +254,22 @@
 
   .accountDetails {
     display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar,
+  .main,
+  .navLink,
+  .shell button:not(:disabled),
+  .content :global(a) {
+    transition: none;
+  }
+
+  .navLink:hover,
+  .navLink:active,
+  .shell button:not(:disabled):active,
+  .content :global(a):active {
+    transform: none;
   }
 }

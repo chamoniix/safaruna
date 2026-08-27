@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { adminLogout } from '@/app/admin/login/actions';
@@ -64,6 +64,10 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
   const sidebarBackground = isSuperadmin
     ? 'linear-gradient(180deg, #071827 0%, #10143A 55%, #241043 100%)'
     : '#0F0A05';
+  const mainStyle = {
+    background: isSuperadmin ? '#F3F7FC' : '#F8F6F2',
+    '--admin-accent': accent,
+  } as CSSProperties;
 
   useEffect(() => {
     fetch('/api/admin/me')
@@ -120,6 +124,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
                   <Link
                     key={href}
                     href={href}
+                    className={styles.navLink}
                     onClick={() => setMenuOpen(false)}
                     style={{
                       display: 'flex', alignItems: 'center',
@@ -155,7 +160,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
       </aside>
 
       {/* MAIN */}
-      <div className={styles.main} style={{ background: isSuperadmin ? '#F3F7FC' : '#F8F6F2' }}>
+      <div className={styles.main} style={mainStyle}>
         <header className={styles.header} style={{
           position: 'sticky', top: 0, zIndex: 50, background: isSuperadmin ? 'rgba(255,255,255,0.96)' : 'white',
           borderBottom: `1px solid ${isSuperadmin ? '#C7D8EA' : '#E8DFC8'}`,

@@ -4,39 +4,78 @@ import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
+const MAX_VERIFICATION_ATTEMPTS = 8
+const VERIFICATION_RETRY_MS = 1500
+type VerificationState = 'pending' | 'confirmed' | 'failed' | 'delayed'
+
 function ConfirmationContent() {
   const params = useSearchParams()
   const ref = params.get('ref') || 'SAF-XXX'
   const payment = params.get('payment')
+  const validReturn = ref !== 'SAF-XXX' && payment === 'success'
 
-  const [verified, setVerified] = useState<'pending' | 'confirmed' | 'failed'>('pending')
+  const [verification, setVerification] = useState<{ refNumber: string; state: VerificationState }>({
+    refNumber: '',
+    state: 'pending',
+  })
+  const verified: VerificationState = !validReturn
+    ? 'failed'
+    : verification.refNumber === ref
+      ? verification.state
+      : 'pending'
 
   useEffect(() => {
-    if (!ref || ref === 'SAF-XXX' || payment !== 'success') {
-      setVerified('failed')
-      return
+    if (!validReturn) return
+    let cancelled = false
+    let retryTimer: ReturnType<typeof setTimeout> | undefined
+
+    const retryOrDelay = (attempt: number) => {
+      if (cancelled) return
+      if (attempt >= MAX_VERIFICATION_ATTEMPTS) {
+        setVerification({ refNumber: ref, state: 'delayed' })
+        return
+      }
+      retryTimer = setTimeout(() => checkReservation(attempt + 1), VERIFICATION_RETRY_MS)
     }
-    const checkReservation = async () => {
+
+    const checkReservation = async (attempt: number) => {
       try {
-        const res = await fetch(`/api/espace/reservations?ref=${encodeURIComponent(ref)}`)
-        if (res.ok) {
-          const data = await res.json()
-          const reservations = data.reservations || data
-          const found = Array.isArray(reservations)
-            ? reservations.some((r: { refNumber?: string; status?: string }) => r.refNumber === ref)
-            : data.refNumber === ref
-          setVerified(found ? 'confirmed' : 'pending')
-        } else {
-          // API indisponible — on affiche quand même la confirmation si payment=success
-          setVerified('confirmed')
+        const res = await fetch(`/api/espace/reservations?ref=${encodeURIComponent(ref)}`, {
+          cache: 'no-store',
+        })
+        if (!res.ok) {
+          if ([400, 401, 403, 404].includes(res.status)) {
+            if (!cancelled) setVerification({ refNumber: ref, state: 'failed' })
+            return
+          }
+          retryOrDelay(attempt)
+          return
         }
+
+        const data = await res.json() as {
+          verification?: { refNumber?: string; state?: 'confirmed' | 'pending' | 'failed' }
+        }
+        const verification = data.verification
+        if (verification?.refNumber !== ref) {
+          if (!cancelled) setVerification({ refNumber: ref, state: 'failed' })
+          return
+        }
+        if (verification.state === 'confirmed' || verification.state === 'failed') {
+          if (!cancelled) setVerification({ refNumber: ref, state: verification.state })
+          return
+        }
+        retryOrDelay(attempt)
       } catch {
-        // Erreur réseau — on ne casse pas le flow
-        setVerified('confirmed')
+        retryOrDelay(attempt)
       }
     }
-    checkReservation()
-  }, [ref, payment])
+
+    checkReservation(1)
+    return () => {
+      cancelled = true
+      if (retryTimer) clearTimeout(retryTimer)
+    }
+  }, [ref, validReturn])
 
   if (verified === 'pending') {
     return (
@@ -54,6 +93,17 @@ function ConfirmationContent() {
       <div style={{ minHeight: '100vh', background: '#FAF7F0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', fontFamily: 'Arial, sans-serif', gap: '1rem' }}>
         <p style={{ color: '#7A6D5A', fontSize: '1rem' }}>Nous n&apos;avons pas pu confirmer votre réservation.</p>
         <p style={{ color: '#9CA3AF', fontSize: '0.85rem' }}>Si vous avez effectué un paiement, contactez-nous avec votre référence : <strong>{ref}</strong></p>
+        <Link href="/espace/reservations" style={{ color: '#C9A84C', fontWeight: 700, textDecoration: 'underline' }}>Voir mes réservations</Link>
+      </div>
+    )
+  }
+
+  if (verified === 'delayed') {
+    return (
+      <div style={{ minHeight: '100vh', background: '#FAF7F0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', fontFamily: 'Arial, sans-serif', gap: '1rem', textAlign: 'center' }}>
+        <p style={{ color: '#7A6D5A', fontSize: '1rem' }}>La vérification prend plus de temps que prévu.</p>
+        <p style={{ color: '#9CA3AF', fontSize: '0.85rem', maxWidth: 480 }}>Aucun succès ne sera affiché avant la confirmation sécurisée du serveur. Référence : <strong>{ref}</strong></p>
+        <button type="button" onClick={() => window.location.reload()} style={{ border: 0, borderRadius: 10, background: '#1A1209', color: '#F0D897', padding: '0.8rem 1.2rem', fontWeight: 700, cursor: 'pointer' }}>Réessayer</button>
         <Link href="/espace/reservations" style={{ color: '#C9A84C', fontWeight: 700, textDecoration: 'underline' }}>Voir mes réservations</Link>
       </div>
     )

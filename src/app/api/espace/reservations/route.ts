@@ -1,14 +1,58 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { requirePelerin } from '@/lib/require-account';
 
-export async function GET() {
+const noStoreHeaders = { 'Cache-Control': 'no-store' }
+
+export async function GET(req: NextRequest) {
   const access = await requirePelerin();
   if (!access.ok) return access.response;
 
   const now = new Date();
-
   const userId = access.actor.id;
+  const refNumber = req.nextUrl.searchParams.get('ref')?.trim()
+
+  if (refNumber) {
+    if (!/^SAF-[A-Z0-9-]{6,40}$/.test(refNumber)) {
+      return NextResponse.json(
+        { error: 'Référence invalide' },
+        { status: 400, headers: noStoreHeaders },
+      )
+    }
+
+    const reservation = await prisma.reservation.findFirst({
+      where: { refNumber, pelerinId: userId },
+      select: { refNumber: true, status: true, stripePaymentId: true },
+    })
+
+    if (reservation) {
+      const confirmed = Boolean(reservation.stripePaymentId)
+        && ['CONFIRMED', 'COMPLETED'].includes(reservation.status)
+
+      return NextResponse.json({
+        verification: {
+          refNumber: reservation.refNumber,
+          state: confirmed ? 'confirmed' : 'failed',
+        },
+      }, { headers: noStoreHeaders })
+    }
+
+    const draft = await prisma.reservationDraft.findFirst({
+      where: { refNumber, pelerinId: userId },
+      select: { stripeSessionId: true, expiresAt: true },
+    })
+
+    if (draft?.stripeSessionId && draft.expiresAt > now) {
+      return NextResponse.json({
+        verification: { refNumber, state: 'pending' },
+      }, { headers: noStoreHeaders })
+    }
+
+    return NextResponse.json(
+      { error: 'Réservation introuvable' },
+      { status: 404, headers: noStoreHeaders },
+    )
+  }
 
   const [reservations, totalSpentResult] = await Promise.all([
     prisma.reservation.findMany({

@@ -1,7 +1,8 @@
 import { createHash } from 'node:crypto'
 import bcrypt from 'bcryptjs'
-import { NextRequest, NextResponse } from 'next/server'
+import { after, NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
+import { sendAdminPasswordChanged } from '@/lib/email'
 import { adminAuthRatelimit, checkRateLimitKey } from '@/lib/ratelimit'
 import { adminAuditDetail, adminAuditFields, getAdminAuditContext } from '@/lib/check-admin'
 
@@ -63,6 +64,41 @@ export async function POST(req: NextRequest) {
           ...adminAuditFields(context),
         },
       })
+    })
+
+    const emailContext = {
+      date: now.toLocaleString('fr-FR', { timeZone: 'Asia/Riyadh' }),
+      ip: context.ip,
+      country: context.country,
+      city: context.city,
+      device: context.device,
+      browser: context.browser,
+    }
+    after(async () => {
+      let action = 'ADMIN_PASSWORD_CHANGED_EMAIL_SENT'
+      try {
+        await sendAdminPasswordChanged({
+          to: resetToken.adminAccount.email,
+          name: resetToken.adminAccount.name || '',
+          role: resetToken.adminAccount.role,
+          context: emailContext,
+        })
+      } catch (error) {
+        action = 'ADMIN_PASSWORD_CHANGED_EMAIL_FAILED'
+        console.error('[admin-password-changed-email]', error)
+      }
+
+      await prisma.auditLog.create({
+        data: {
+          actor: resetToken.adminAccount.email,
+          actorRole: resetToken.adminAccount.role,
+          actorAdminId: resetToken.adminAccount.id,
+          action,
+          target: resetToken.adminAccount.id,
+          detail: adminAuditDetail(context),
+          ...adminAuditFields(context),
+        },
+      }).catch(error => console.error('[admin-password-changed-email-audit]', error))
     })
 
     return NextResponse.json({ success: true })

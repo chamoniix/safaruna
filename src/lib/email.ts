@@ -358,6 +358,76 @@ export function sendAdminPasswordReset(opts: {
   });
 }
 
+type AdminSecurityEmailContext = {
+  date: string;
+  ip: string;
+  country?: string | null;
+  city?: string | null;
+  device?: string | null;
+  browser?: string | null;
+};
+
+function adminSecurityContext(context: AdminSecurityEmailContext): string {
+  const location = [context.city, context.country].filter(Boolean).join(', ') || 'Non déterminée';
+  return `
+    <table cellpadding="0" cellspacing="0" width="100%" style="background:#FAF7F0;border:1px solid #E8DFC8;border-radius:12px;padding:12px 18px;margin:16px 0;">
+      <tr><td style="padding:5px 0;font-size:12px;color:#7A6D5A;">Date</td><td style="padding:5px 0;font-size:12px;color:#1A1209;font-weight:600;">${escapeHtml(context.date)}</td></tr>
+      <tr><td style="padding:5px 0;font-size:12px;color:#7A6D5A;">Adresse IP</td><td style="padding:5px 0;font-size:12px;color:#1A1209;font-weight:600;">${escapeHtml(context.ip)}</td></tr>
+      <tr><td style="padding:5px 0;font-size:12px;color:#7A6D5A;">Localisation</td><td style="padding:5px 0;font-size:12px;color:#1A1209;font-weight:600;">${escapeHtml(location)}</td></tr>
+      <tr><td style="padding:5px 0;font-size:12px;color:#7A6D5A;">Appareil</td><td style="padding:5px 0;font-size:12px;color:#1A1209;font-weight:600;">${escapeHtml([context.device, context.browser].filter(Boolean).join(' · ') || 'Non déterminé')}</td></tr>
+    </table>`;
+}
+
+export function sendAdminLoginAlert(opts: {
+  to: string;
+  name: string;
+  role: 'ADMIN' | 'SUPERADMIN';
+  context: AdminSecurityEmailContext;
+}): Promise<void> {
+  const { to, name, role, context } = opts;
+  const roleLabel = role === 'SUPERADMIN' ? 'Superadmin' : 'Admin';
+  return sendEmail({
+    to: { email: to, name },
+    subject: `Nouvelle connexion à votre compte ${roleLabel} — SAFARUMA`,
+    throwOnError: true,
+    html: baseTemplate(`
+      ${heading('Nouvelle connexion détectée')}
+      ${badge(roleLabel.toUpperCase(), role === 'SUPERADMIN' ? '#2563EB' : '#C9A84C')}
+      ${p(`Bonjour${name ? ' ' + escapeHtml(name) : ''},`)}
+      ${p(`Une connexion réussie à votre compte <strong>${roleLabel} SAFARUMA</strong> vient d’être enregistrée.`)}
+      ${adminSecurityContext(context)}
+      ${p('<small style="color:#9A8D7A;">Si vous n’êtes pas à l’origine de cette connexion, réinitialisez immédiatement votre mot de passe et contactez SAFARUMA.</small>')}
+      ${divider()}
+      <div style="text-align:center;padding:8px 0;">${btn('Sécuriser mon compte', 'https://safaruma.com/admin/mot-de-passe-oublie')}</div>
+    `),
+  });
+}
+
+export function sendAdminPasswordChanged(opts: {
+  to: string;
+  name: string;
+  role: 'ADMIN' | 'SUPERADMIN';
+  context: AdminSecurityEmailContext;
+}): Promise<void> {
+  const { to, name, role, context } = opts;
+  const roleLabel = role === 'SUPERADMIN' ? 'Superadmin' : 'Admin';
+  return sendEmail({
+    to: { email: to, name },
+    subject: `Mot de passe ${roleLabel} modifié — SAFARUMA`,
+    throwOnError: true,
+    html: baseTemplate(`
+      ${heading('Mot de passe modifié')}
+      ${badge(roleLabel.toUpperCase(), role === 'SUPERADMIN' ? '#2563EB' : '#C9A84C')}
+      ${p(`Bonjour${name ? ' ' + escapeHtml(name) : ''},`)}
+      ${p(`Le mot de passe de votre compte <strong>${roleLabel} SAFARUMA</strong> vient d’être modifié. Toutes les sessions précédentes ont été déconnectées.`)}
+      ${adminSecurityContext(context)}
+      ${p('<small style="color:#9A8D7A;">Si vous n’êtes pas à l’origine de cette action, utilisez immédiatement « Mot de passe oublié » puis contactez SAFARUMA.</small>')}
+      ${divider()}
+      <div style="text-align:center;padding:8px 0;">${btn('Sécuriser mon compte', 'https://safaruma.com/admin/mot-de-passe-oublie')}</div>
+    `),
+  });
+}
+
 type GuideSecurityContext = {
   date: string;
   ip: string;

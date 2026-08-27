@@ -3,7 +3,9 @@
 import { cookies } from 'next/headers';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { after } from 'next/server';
 import { createAdminToken, readVerifiedAdminToken } from '@/lib/admin-auth';
+import { sendAdminLoginAlert } from '@/lib/email';
 import { createHash, randomUUID, timingSafeEqual } from 'crypto';
 import bcrypt from 'bcryptjs';
 import prisma from '@/lib/prisma';
@@ -26,13 +28,19 @@ function browser(userAgent: string) {
 async function requestContext() {
   const values = await headers()
   const userAgent = values.get('user-agent') || ''
+  const encodedCity = values.get('x-vercel-ip-city')
+  let city = encodedCity
+  if (encodedCity) {
+    try { city = decodeURIComponent(encodedCity) } catch { city = encodedCity }
+  }
   return {
-    ip: values.get('x-forwarded-for')?.split(',')[0]?.trim() || values.get('x-real-ip') || 'unknown',
-    country: values.get('x-vercel-ip-country'),
-    city: values.get('x-vercel-ip-city'),
+    ip: (values.get('x-forwarded-for')?.split(',')[0]?.trim() || values.get('x-real-ip') || 'unknown').slice(0, 64),
+    country: values.get('x-vercel-ip-country')?.slice(0, 32) || null,
+    city: city?.slice(0, 100) || null,
     device: device(userAgent),
     browser: browser(userAgent),
     userAgent: userAgent.slice(0, 500),
+    requestId: (values.get('x-request-id') || values.get('x-vercel-id') || randomUUID()).slice(0, 160),
   }
 }
 
@@ -136,6 +144,50 @@ export async function adminLogin(formData: FormData) {
     path:     '/',
     priority: 'high',
   });
+
+  const loginDate = new Date().toLocaleString('fr-FR', { timeZone: 'Asia/Riyadh' })
+  after(async () => {
+    let action = 'ADMIN_LOGIN_ALERT_EMAIL_SENT'
+    try {
+      await sendAdminLoginAlert({
+        to: authenticatedAccount.email,
+        name: authenticatedAccount.name || '',
+        role: authenticatedAccount.role,
+        context: {
+          date: loginDate,
+          ip: context.ip,
+          country: context.country,
+          city: context.city,
+          device: context.device,
+          browser: context.browser,
+        },
+      })
+    } catch (error) {
+      action = 'ADMIN_LOGIN_ALERT_EMAIL_FAILED'
+      console.error('[admin-login-alert-email]', error)
+    }
+
+    await prisma.auditLog.create({
+      data: {
+        actor: authenticatedAccount.email,
+        actorRole: authenticatedAccount.role,
+        actorAdminId: authenticatedAccount.id,
+        action,
+        target: authenticatedAccount.id,
+        detail: JSON.stringify({
+          request: {
+            country: context.country,
+            city: context.city,
+            device: context.device,
+            browser: context.browser,
+          },
+        }),
+        ip: context.ip,
+        userAgent: context.userAgent,
+        requestId: context.requestId,
+      },
+    }).catch(error => console.error('[admin-login-alert-audit]', error))
+  })
 
   redirect('/admin/tableau-de-bord');
 }

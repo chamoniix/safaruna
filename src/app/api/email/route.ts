@@ -39,9 +39,9 @@ export async function POST(req: NextRequest) {
         break;
       }
       case 'guide_access': {
-        const { email: to, name, email: guideEmail, password, loginUrl } = body;
-        if (!to || !name || !password) return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
-        await sendGuideAccess({ to, name, email: guideEmail, password, loginUrl: loginUrl ?? 'https://safaruma.com/guide/connexion' });
+        const { email: to, name, email: guideEmail, setupUrl } = body;
+        if (!to || !name || !setupUrl) return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+        await sendGuideAccess({ to, name, email: guideEmail, setupUrl });
         break;
       }
       case 'reservation_confirmation': {

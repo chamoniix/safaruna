@@ -194,14 +194,14 @@ export function sendGuideAccess(opts: {
   to: string;
   name: string;
   email: string;
-  password: string;
-  loginUrl: string;
+  setupUrl: string;
   profileActive?: boolean;
 }): Promise<void> {
-  const { to, name, email, password, loginUrl, profileActive = true } = opts;
+  const { to, name, email, setupUrl, profileActive = true } = opts;
   return sendEmail({
     to: { email: to, name },
-    subject: profileActive ? 'Vos accès Guide SAFARUMA — Bienvenue !' : 'Vos accès à l’espace Guide SAFARUMA',
+    subject: profileActive ? 'Activez votre accès Guide SAFARUMA — Bienvenue !' : 'Définissez votre accès Guide SAFARUMA',
+    throwOnError: true,
     html: baseTemplate(`
       ${heading(`Barak Allahu fik, ${escapeHtml(name)} !`)}
       ${badge(profileActive ? 'PROFIL ACTIF ✓' : 'CANDIDATURE VALIDÉE ✓', '#1D5C3A')}
@@ -210,24 +210,20 @@ export function sendGuideAccess(opts: {
         : 'Votre candidature a été approuvée. Vos accès à l’espace Guide sont prêts ; la publication du profil public reste contrôlée par l’équipe SAFARUMA.')}
       ${divider()}
       <div style="background:#1A1209;border-radius:12px;padding:24px;margin:16px 0;">
-        <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:16px;">Vos identifiants de connexion</div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:16px;">Votre adresse de connexion</div>
         <table cellpadding="0" cellspacing="0" width="100%">
           <tr>
             <td style="font-size:12px;color:rgba(255,255,255,0.5);padding:6px 0;width:40%;">Email</td>
             <td style="font-size:13px;color:#F0D897;font-weight:700;font-family:monospace;">${escapeHtml(email)}</td>
           </tr>
-          <tr>
-            <td style="font-size:12px;color:rgba(255,255,255,0.5);padding:6px 0;">Mot de passe</td>
-            <td style="font-size:13px;color:#C9A84C;font-weight:700;font-family:monospace;">${escapeHtml(password)}</td>
-          </tr>
         </table>
-        <div style="margin-top:12px;font-size:11px;color:rgba(255,255,255,0.3);">Changez votre mot de passe dès votre première connexion.</div>
+        <div style="margin-top:12px;font-size:11px;color:rgba(255,255,255,0.4);">Définissez vous-même votre mot de passe avec le lien personnel ci-dessous.</div>
       </div>
       ${divider()}
       <div style="text-align:center;padding:8px 0;">
-        ${btn('Accéder à mon espace guide', loginUrl)}
+        ${btn('Définir mon mot de passe', setupUrl)}
       </div>
-      ${p('<small style="color:#9A8D7A;">Conservez ces identifiants en lieu sûr. En cas de problème : <a href="mailto:contact@safaruma.com" style="color:#C9A84C;">contact@safaruma.com</a></small>')}
+      ${p('<small style="color:#9A8D7A;">Ce lien est personnel, utilisable une seule fois et expire dans <strong>1 heure</strong>. En cas de problème : <a href="mailto:contact@safaruma.com" style="color:#C9A84C;">contact@safaruma.com</a></small>')}
     `),
   });
 }
@@ -315,6 +311,7 @@ export function sendPasswordReset(opts: {
   return sendEmail({
     to: { email: to, name },
     subject: 'Réinitialisation de votre mot de passe — SAFARUMA',
+    throwOnError: true,
     html: baseTemplate(`
       ${heading('Réinitialiser votre mot de passe')}
       ${p(`Bonjour${name ? ' ' + escapeHtml(name) : ''},`)}
@@ -328,6 +325,26 @@ export function sendPasswordReset(opts: {
       ${divider()}
       ${p('<small style="color:#9A8D7A;">Ce lien expire dans <strong>1 heure</strong>. Si vous n\'avez pas demandé cette réinitialisation, ignorez cet email — votre compte reste sécurisé.</small>')}
       ${p('<small style="color:#9A8D7A;">Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :<br><span style="color:#C9A84C;">' + resetUrl + '</span></small>')}
+    `),
+  });
+}
+
+export function sendPelerinPasswordChanged(opts: {
+  to: string;
+  name: string;
+  context: GuideSecurityContext;
+}): Promise<void> {
+  const { to, name, context } = opts;
+  return sendEmail({
+    to: { email: to, name },
+    subject: 'Votre mot de passe Pèlerin a été modifié — SAFARUMA',
+    throwOnError: true,
+    html: baseTemplate(`
+      ${heading('Mot de passe modifié')}
+      ${p(`Bonjour${name ? ' ' + escapeHtml(name) : ''},`)}
+      ${p('Le mot de passe de votre espace Pèlerin SAFARUMA vient d’être modifié.')}
+      ${guideSecurityContext(context)}
+      ${p('<small style="color:#9A8D7A;">Si vous n’êtes pas à l’origine de cette action, utilisez immédiatement « Mot de passe oublié » puis contactez SAFARUMA.</small>')}
     `),
   });
 }

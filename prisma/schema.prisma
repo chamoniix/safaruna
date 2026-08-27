@@ -736,7 +736,7 @@ model NewsletterSubscription {
 model PasswordResetToken {
   id        String    @id @default(cuid())
   email     String
-  token     String    @unique
+  token     String    @unique // Hash SHA-256 du jeton ; la valeur brute reste uniquement dans l'email.
   expiresAt DateTime
   usedAt    DateTime?
   createdAt DateTime  @default(now())

@@ -105,6 +105,9 @@ export default function GuideApplicationsPage() {
       setSelected(null)
       setNotes('')
       await load()
+      if (nextStatus === 'APPROVED' && payload.accessEmailSent !== true) {
+        setError('Candidature validée et compte créé, mais l’invitation n’a pas pu être envoyée. Le guide peut utiliser « Mot de passe oublié ».')
+      }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Mise à jour impossible')
     } finally {

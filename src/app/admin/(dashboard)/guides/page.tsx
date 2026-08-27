@@ -38,7 +38,7 @@ export default function AdminGuidesPage() {
   const [createLast, setCreateLast]     = useState('');
   const [createEmail, setCreateEmail]   = useState('');
   const [creating, setCreating]         = useState(false);
-  const [createResult, setCreateResult] = useState<{ slug: string } | null>(null);
+  const [createResult, setCreateResult] = useState<{ slug: string; accessEmailSent: boolean } | null>(null);
   const [createError, setCreateError]   = useState('');
 
   const fetchGuides = async () => {
@@ -70,7 +70,7 @@ export default function AdminGuidesPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Erreur');
-      setCreateResult({ slug: data.slug });
+      setCreateResult({ slug: data.slug, accessEmailSent: data.accessEmailSent === true });
       await fetchGuides();
     } catch (e: any) {
       setCreateError(e.message);
@@ -169,8 +169,12 @@ export default function AdminGuidesPage() {
                 <div style={{ background: '#D1FAE5', border: '1px solid #6EE7B7', borderRadius: 8, padding: '0.75rem 1rem', fontSize: '0.83rem', color: '#1D5C3A', fontWeight: 600 }}>
                   ✓ Guide créé avec succès
                 </div>
-                <div style={{ background: '#FAF3E0', border: '1px solid rgba(201,168,76,0.3)', borderRadius: 8, padding: '0.875rem 1rem' }}>
-                  <div style={{ fontSize: '0.78rem', color: '#4A3F30' }}>Les accès temporaires ont été envoyés uniquement par email au guide.</div>
+                <div style={{ background: createResult.accessEmailSent ? '#FAF3E0' : '#FEE2E2', border: `1px solid ${createResult.accessEmailSent ? 'rgba(201,168,76,0.3)' : '#FCA5A5'}`, borderRadius: 8, padding: '0.875rem 1rem' }}>
+                  <div style={{ fontSize: '0.78rem', color: createResult.accessEmailSent ? '#4A3F30' : '#991B1B' }}>
+                    {createResult.accessEmailSent
+                      ? 'Le lien personnel pour définir le mot de passe a été envoyé au guide.'
+                      : 'Le compte a été créé, mais l’invitation n’a pas pu être envoyée. Le guide peut utiliser « Mot de passe oublié ».'}
+                  </div>
                   <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: '0.35rem' }}>Profil : /guides/{createResult.slug}</div>
                 </div>
                 <button onClick={() => { setShowCreate(false); setCreateResult(null); setCreateFirst(''); setCreateLast(''); setCreateEmail(''); }} style={{ padding: '0.6rem 1.5rem', borderRadius: 50, border: 'none', background: '#1A1209', color: '#F0D897', cursor: 'pointer', fontSize: '0.83rem', fontWeight: 700, alignSelf: 'flex-end' }}>Fermer</button>

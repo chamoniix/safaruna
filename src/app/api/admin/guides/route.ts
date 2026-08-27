@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuditDetail, adminAuditFields, checkAdmin, getAdminActor, getAdminAuditContext } from '@/lib/check-admin';
 import prisma from '@/lib/prisma';
-import bcrypt from 'bcryptjs';
 import { sendGuideAccess } from '@/lib/email';
-import { randomBytes } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import { Prisma } from '@prisma/client';
 
 const EMAIL_ALREADY_USED = 'Adresse e-mail déjà utilisée. Veuillez en utiliser une autre.';
@@ -73,9 +72,11 @@ export async function POST(req: NextRequest) {
     slug = `${base}-${attempt++}`;
   }
 
-  // Generate temp password
-  const password = `${randomBytes(12).toString('base64url')}Aa1!`;
-  const passwordHash = await bcrypt.hash(password, 12);
+  const invitationToken = randomBytes(32).toString('hex');
+  const invitationTokenHash = createHash('sha256').update(invitationToken).digest('hex');
+  const invitationExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXTAUTH_URL || 'https://safaruma.com';
+  const setupUrl = `${baseUrl}/guide/reinitialiser-mot-de-passe?token=${invitationToken}`;
 
   let guideAccount;
   try {
@@ -84,7 +85,6 @@ export async function POST(req: NextRequest) {
       const account = await tx.guideAccount.create({
         data: {
           email,
-          passwordHash,
           emailVerified: new Date(),
           displayName: `${firstName} ${lastName || ''}`.trim(),
           firstName,
@@ -100,6 +100,13 @@ export async function POST(req: NextRequest) {
           },
         },
         include: { guideProfile: { select: { id: true } } },
+      });
+      await tx.guidePasswordResetToken.create({
+        data: {
+          guideAccountId: account.id,
+          tokenHash: invitationTokenHash,
+          expiresAt: invitationExpiresAt,
+        },
       });
       await tx.auditLog.create({
         data: {
@@ -122,20 +129,36 @@ export async function POST(req: NextRequest) {
     throw error;
   }
 
+  let accessEmailSent = true;
   try {
     await sendGuideAccess({
       to: email,
       name: `${firstName} ${lastName || ''}`.trim(),
       email,
-      password,
-      loginUrl: 'https://safaruma.com/guide/connexion',
+      setupUrl,
       profileActive: false,
     });
   } catch (e) {
+    accessEmailSent = false;
     console.error('[admin/guides POST] email error', e);
+    await prisma.guidePasswordResetToken.updateMany({
+      where: { tokenHash: invitationTokenHash, usedAt: null },
+      data: { usedAt: new Date() },
+    }).catch(() => {});
   }
+  await prisma.auditLog.create({
+    data: {
+      actor: actor.email,
+      actorRole: actor.role,
+      actorAdminId: actor.id,
+      action: accessEmailSent ? 'GUIDE_ACCESS_EMAIL_SENT' : 'GUIDE_ACCESS_EMAIL_FAILED',
+      target: guideAccount.id,
+      detail: adminAuditDetail(auditContext, { email, guideAccountId: guideAccount.id }),
+      ...adminAuditFields(auditContext),
+    },
+  }).catch(error => console.error('[admin/guides POST] email audit error', error));
 
-  return NextResponse.json({ success: true, guideAccountId: guideAccount.id, guideProfileId: guideAccount.guideProfile?.id, slug }, { status: 201 });
+  return NextResponse.json({ success: true, accessEmailSent, guideAccountId: guideAccount.id, guideProfileId: guideAccount.guideProfile?.id, slug }, { status: 201 });
 }
 
 export async function PATCH(req: NextRequest) {

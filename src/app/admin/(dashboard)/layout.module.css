@@ -81,7 +81,11 @@
 }
 
 .navSection {
+  max-width: none !important;
+  margin-right: 0 !important;
   margin-bottom: 0.7rem;
+  margin-left: 0 !important;
+  padding: 0 !important;
 }
 
 .sectionLabel {

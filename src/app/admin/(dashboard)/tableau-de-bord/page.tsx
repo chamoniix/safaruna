@@ -53,7 +53,7 @@ export default function AdminDashboard() {
 
       {error && <div style={{ padding: '0.7rem 0.9rem', borderRadius: 9, background: '#FEF2F2', border: '1px solid #FECACA', color: '#B91C1C', fontSize: '0.75rem' }}>{error}</div>}
 
-      <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 210px), 1fr))', gap: '0.75rem' }}>
+      <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 210px), 1fr))', gap: '0.75rem', maxWidth: 'none', margin: 0, padding: 0 }}>
         {kpis.map(item => {
           const Icon = item.icon
           return <Link key={item.label} href={item.href} style={{ ...card, display: 'block', padding: '0.9rem', textDecoration: 'none', minHeight: 92 }}>
@@ -66,7 +66,7 @@ export default function AdminDashboard() {
         })}
       </section>
 
-      <section style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, .78fr) minmax(360px, 1.22fr)', gap: '0.75rem' }} className="admin-command-grid">
+      <section style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, .78fr) minmax(360px, 1.22fr)', gap: '0.75rem', maxWidth: 'none', margin: 0, padding: 0 }} className="admin-command-grid">
         <div style={{ ...card, padding: '0.9rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}><strong style={{ color: '#0F172A', fontSize: '0.78rem' }}>Pipeline des réservations</strong><Link href="/admin/reservations" aria-label="Voir les réservations" style={{ color: '#64748B' }}><ArrowUpRight size={17} /></Link></div>
           <div style={{ display: 'grid', gap: '0.55rem' }}>
@@ -89,7 +89,7 @@ export default function AdminDashboard() {
         </div>
       </section>
 
-      <section style={{ ...card, padding: '0.8rem 0.9rem', display: 'flex', alignItems: 'center', gap: '0.55rem', flexWrap: 'wrap' }}>
+      <section style={{ ...card, maxWidth: 'none', margin: 0, padding: '0.8rem 0.9rem', display: 'flex', alignItems: 'center', gap: '0.55rem', flexWrap: 'wrap' }}>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', marginRight: '0.25rem', color: '#475569', fontSize: '0.68rem', fontWeight: 800 }}><ClipboardList size={15} /> Actions rapides</span>
         {[
           ['/admin/candidatures-guides', 'Traiter les candidatures'], ['/admin/commissions', 'Régler les marges'], ['/admin/lieux', 'Gérer les lieux'], ['/admin/audit', 'Contrôler l’audit'],

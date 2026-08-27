@@ -1,106 +1,102 @@
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { ArrowUpRight, CalendarCheck2, CircleDollarSign, ClipboardList, UserRoundCheck, Users } from 'lucide-react'
 
 type Stats = {
-  guidesActifs: number;
-  pelerinsInscrits: number;
-  reservationsMois: number;
-  commissionsMois: number;
-  guidesEnAttente: number;
-};
+  guides: { total: number; active: number; pending: number }
+  pelerins: { total: number }
+  reservations: { total: number; thisMonth: number; pending: number; confirmed: number; completed: number; cancelled: number }
+  revenue: { total: number; thisMonth: number; thisYear: number; commission: number; byMonth: number[] }
+}
+
+const MONTHS = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc']
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<Stats | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    fetch('/api/admin/stats')
-      .then(r => r.json())
-      .then(d => { setStats(d); setLoading(false); })
-      .catch(() => setLoading(false));
-  }, []);
+    fetch('/api/admin/stats', { cache: 'no-store' })
+      .then(async response => {
+        const data = await response.json()
+        if (!response.ok) throw new Error(data.error || 'Impossible de charger le pilotage.')
+        setStats(data)
+      })
+      .catch(fetchError => setError(fetchError instanceof Error ? fetchError.message : 'Impossible de charger le pilotage.'))
+      .finally(() => setLoading(false))
+  }, [])
 
-  const KPIS = [
-    {
-      label: 'Guides actifs', value: stats?.guidesActifs ?? 0, color: '#16A34A', bg: '#DCFCE7',
-      icon: <svg width="20" height="20" fill="none" stroke="#16A34A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>,
-      href: '/admin/guides',
-    },
-    {
-      label: 'Pèlerins inscrits', value: stats?.pelerinsInscrits ?? 0, color: '#2563EB', bg: '#DBEAFE',
-      icon: <svg width="20" height="20" fill="none" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
-      href: '/admin/pelerins',
-    },
-    {
-      label: 'Réservations ce mois', value: stats?.reservationsMois ?? 0, color: '#D97706', bg: '#FEF3C7',
-      icon: <svg width="20" height="20" fill="none" stroke="#D97706" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>,
-      href: '/admin/reservations',
-    },
-    {
-      label: 'Commissions (€)', value: `${stats?.commissionsMois ?? 0} €`, color: '#16A34A', bg: '#DCFCE7',
-      icon: <svg width="20" height="20" fill="none" stroke="#16A34A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
-      href: '/admin/revenus',
-    },
-  ];
+  const kpis = [
+    { label: 'Guides actifs', value: stats?.guides.active ?? 0, detail: `${stats?.guides.pending ?? 0} candidature(s) à traiter`, color: '#059669', tint: '#ECFDF5', icon: UserRoundCheck, href: '/admin/guides' },
+    { label: 'Pèlerins', value: stats?.pelerins.total ?? 0, detail: 'comptes inscrits', color: '#2563EB', tint: '#EFF6FF', icon: Users, href: '/admin/pelerins' },
+    { label: 'Réservations', value: stats?.reservations.thisMonth ?? 0, detail: `${stats?.reservations.total ?? 0} au total`, color: '#D97706', tint: '#FFF7ED', icon: CalendarCheck2, href: '/admin/reservations' },
+    { label: 'Commission', value: `${stats?.revenue.commission ?? 0} €`, detail: `${stats?.revenue.thisMonth ?? 0} € de CA ce mois`, color: '#7C3AED', tint: '#F5F3FF', icon: CircleDollarSign, href: '/admin/revenus' },
+  ]
+  const pipeline = [
+    { label: 'En attente', value: stats?.reservations.pending ?? 0, color: '#D97706' },
+    { label: 'Confirmées', value: stats?.reservations.confirmed ?? 0, color: '#2563EB' },
+    { label: 'Terminées', value: stats?.reservations.completed ?? 0, color: '#059669' },
+    { label: 'Annulées', value: stats?.reservations.cancelled ?? 0, color: '#DC2626' },
+  ]
+  const maxRevenue = Math.max(...(stats?.revenue.byMonth ?? [0]), 1)
+  const card: React.CSSProperties = { background: 'white', border: '1px solid #DCE6F0', borderRadius: 12, boxShadow: '0 1px 3px rgba(15,23,42,.04)' }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: '1rem', flexWrap: 'wrap' }}>
+        <div><h1 style={{ margin: 0, fontSize: '1.45rem', fontWeight: 850, color: '#0F172A' }}>Centre de commande</h1><p style={{ margin: '0.25rem 0 0', fontSize: '0.75rem', color: '#64748B' }}>Vue opérationnelle issue des données SAFARUMA.</p></div>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 0.65rem', borderRadius: 8, background: '#ECFDF5', color: '#047857', fontSize: '0.68rem', fontWeight: 800 }}><span style={{ width: 7, height: 7, borderRadius: '50%', background: '#10B981' }} /> Données live</span>
+      </div>
 
-      {/* Alertes */}
-      {stats && stats.guidesEnAttente > 0 && (
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-          {stats.guidesEnAttente > 0 && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', background: '#FEF3C7', border: '1px solid #FCD34D', borderRadius: 8, padding: '0.6rem 1rem' }}>
-              <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#92400E' }}>{stats.guidesEnAttente} guide{stats.guidesEnAttente > 1 ? 's' : ''} en attente</span>
-              <Link href="/admin/candidatures-guides" style={{ fontSize: '0.72rem', color: '#D97706', fontWeight: 700, textDecoration: 'none' }}>Traiter →</Link>
+      {error && <div style={{ padding: '0.7rem 0.9rem', borderRadius: 9, background: '#FEF2F2', border: '1px solid #FECACA', color: '#B91C1C', fontSize: '0.75rem' }}>{error}</div>}
+
+      <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 210px), 1fr))', gap: '0.75rem' }}>
+        {kpis.map(item => {
+          const Icon = item.icon
+          return <Link key={item.label} href={item.href} style={{ ...card, display: 'block', padding: '0.9rem', textDecoration: 'none', minHeight: 92 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.6rem' }}>
+              <div><div style={{ color: '#64748B', fontSize: '0.62rem', fontWeight: 800, letterSpacing: '0.07em', textTransform: 'uppercase' }}>{item.label}</div><div style={{ marginTop: '0.5rem', color: '#0F172A', fontSize: '1.65rem', lineHeight: 1, fontWeight: 850 }}>{loading ? '—' : item.value}</div></div>
+              <span style={{ display: 'inline-flex', width: 32, height: 32, alignItems: 'center', justifyContent: 'center', borderRadius: 9, background: item.tint, color: item.color }}><Icon size={18} /></span>
             </div>
-          )}
+            <div style={{ marginTop: '0.5rem', color: item.color, fontSize: '0.64rem', fontWeight: 700 }}>{item.detail}</div>
+          </Link>
+        })}
+      </section>
+
+      <section style={{ display: 'grid', gridTemplateColumns: 'minmax(280px, .78fr) minmax(360px, 1.22fr)', gap: '0.75rem' }} className="admin-command-grid">
+        <div style={{ ...card, padding: '0.9rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}><strong style={{ color: '#0F172A', fontSize: '0.78rem' }}>Pipeline des réservations</strong><Link href="/admin/reservations" aria-label="Voir les réservations" style={{ color: '#64748B' }}><ArrowUpRight size={17} /></Link></div>
+          <div style={{ display: 'grid', gap: '0.55rem' }}>
+            {pipeline.map(item => {
+              const total = stats?.reservations.total ?? 0
+              const percent = total ? Math.round(item.value / total * 100) : 0
+              return <div key={item.label}><div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', marginBottom: '0.3rem' }}><span style={{ color: '#475569', fontWeight: 700 }}>{item.label}</span><span style={{ color: '#0F172A', fontWeight: 850 }}>{item.value}</span></div><div style={{ height: 5, background: '#F1F5F9', borderRadius: 99, overflow: 'hidden' }}><div style={{ height: '100%', width: `${percent}%`, background: item.color, borderRadius: 99 }} /></div></div>
+            })}
+          </div>
         </div>
-      )}
 
-      {/* KPIs */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-        {loading
-          ? Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} style={{ background: '#F0EDE8', borderRadius: 12, height: 110, border: '1px solid #E8DFC8' }} />
-            ))
-          : KPIS.map(k => (
-              <Link key={k.label} href={k.href} style={{ textDecoration: 'none', display: 'block', background: 'white', borderRadius: 12, padding: '1.25rem', border: '1px solid #E8DFC8', boxShadow: '0 1px 3px rgba(0,0,0,0.06)', transition: 'border-color 0.15s, transform 0.15s', cursor: 'pointer' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = '#C9A84C'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = '#E8DFC8'; (e.currentTarget as HTMLElement).style.transform = ''; }}
-              >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.875rem' }}>
-                  <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7A6D5A' }}>{k.label}</div>
-                  <div style={{ width: 34, height: 34, borderRadius: 8, background: k.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{k.icon}</div>
-                </div>
-                <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2rem', fontWeight: 700, color: '#1A1209', lineHeight: 1, marginBottom: '0.3rem' }}>{k.value}</div>
-                <div style={{ fontSize: '0.62rem', color: k.color, fontWeight: 600 }}>● Temps réel</div>
-              </Link>
-            ))
-        }
-      </div>
-
-      {/* Actions rapides */}
-      <div style={{ background: 'white', borderRadius: 12, padding: '1.25rem', border: '1px solid #E8DFC8' }}>
-        <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '1rem' }}>Actions rapides</div>
-        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-          <Link href="/admin/candidatures-guides" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem', background: '#1A1209', color: '#F0D897', borderRadius: 50, fontSize: '0.78rem', fontWeight: 700, textDecoration: 'none' }}>Traiter les candidatures</Link>
-          <Link href="/admin/pelerins" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem', background: '#F5F0E8', color: '#1A1209', borderRadius: 50, fontSize: '0.78rem', fontWeight: 600, textDecoration: 'none', border: '1px solid #E8DFC8' }}>Voir les pèlerins</Link>
-          <Link href="/admin/reservations" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1rem', background: '#F5F0E8', color: '#1A1209', borderRadius: 50, fontSize: '0.78rem', fontWeight: 600, textDecoration: 'none', border: '1px solid #E8DFC8' }}>Voir les réservations</Link>
+        <div style={{ ...card, padding: '0.9rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}><div><strong style={{ color: '#0F172A', fontSize: '0.78rem' }}>Revenus {new Date().getFullYear()}</strong><div style={{ color: '#64748B', fontSize: '0.62rem', marginTop: 2 }}>{stats?.revenue.thisYear ?? 0} € cumulés</div></div><Link href="/admin/stats" aria-label="Voir les statistiques" style={{ color: '#64748B' }}><ArrowUpRight size={17} /></Link></div>
+          <div style={{ height: 130, display: 'grid', gridTemplateColumns: 'repeat(12, minmax(18px, 1fr))', alignItems: 'end', gap: '0.35rem' }}>
+            {(stats?.revenue.byMonth ?? Array(12).fill(0)).map((value, index) => {
+              const height = value ? Math.max(8, Math.round(value / maxRevenue * 100)) : 3
+              return <div key={MONTHS[index]} title={`${MONTHS[index]} : ${value} €`} style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center', gap: 5 }}><div style={{ width: '100%', maxWidth: 28, height: `${height}%`, borderRadius: '5px 5px 2px 2px', background: index === new Date().getMonth() ? 'linear-gradient(180deg,#38BDF8,#7C3AED)' : value ? '#0F766E' : '#E2E8F0' }} /><span style={{ color: '#94A3B8', fontSize: '0.52rem' }}>{MONTHS[index]}</span></div>
+            })}
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* Message base vide */}
-      {!loading && stats && stats.guidesActifs === 0 && stats.pelerinsInscrits === 0 && (
-        <div style={{ background: 'white', borderRadius: 12, padding: '2.5rem', border: '1px solid #E8DFC8', textAlign: 'center' }}>
-          <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>🌱</div>
-          <div style={{ fontSize: '0.9rem', fontWeight: 600, color: '#1A1209', marginBottom: '0.4rem' }}>Base initialisée — en attente de données</div>
-          <div style={{ fontSize: '0.78rem', color: '#7A6D5A', lineHeight: 1.6 }}>Les statistiques apparaîtront ici au fur et à mesure des inscriptions.</div>
-        </div>
-      )}
+      <section style={{ ...card, padding: '0.8rem 0.9rem', display: 'flex', alignItems: 'center', gap: '0.55rem', flexWrap: 'wrap' }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', marginRight: '0.25rem', color: '#475569', fontSize: '0.68rem', fontWeight: 800 }}><ClipboardList size={15} /> Actions rapides</span>
+        {[
+          ['/admin/candidatures-guides', 'Traiter les candidatures'], ['/admin/commissions', 'Régler les marges'], ['/admin/lieux', 'Gérer les lieux'], ['/admin/audit', 'Contrôler l’audit'],
+        ].map(([href, label]) => <Link key={href} href={href} style={{ padding: '0.42rem 0.65rem', borderRadius: 7, background: '#F8FAFC', border: '1px solid #E2E8F0', color: '#334155', fontSize: '0.66rem', fontWeight: 750, textDecoration: 'none' }}>{label}</Link>)}
+      </section>
 
+      <style>{`@media(max-width:900px){.admin-command-grid{grid-template-columns:1fr!important}}`}</style>
     </div>
-  );
+  )
 }

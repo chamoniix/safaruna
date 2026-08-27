@@ -10,7 +10,7 @@
   z-index: 9999;
   top: 0;
   left: 0;
-  width: 240px;
+  width: 220px;
   height: 100vh;
   overflow-y: auto;
 }
@@ -20,13 +20,13 @@
   flex: 1;
   flex-direction: column;
   height: 100vh;
-  margin-left: 240px;
+  margin-left: 220px;
   overflow: hidden;
 }
 
 .header {
-  height: 60px;
-  padding: 0 2rem;
+  height: 56px;
+  padding: 0 1.25rem;
 }
 
 .headerTitle {
@@ -39,8 +39,90 @@
 .content {
   flex: 1;
   min-height: 0;
-  padding: 2rem;
+  padding: 1.25rem;
   overflow-y: auto;
+}
+
+.sidebar,
+.main {
+  transition: width 180ms ease, margin-left 180ms ease;
+}
+
+.sidebarCollapsed {
+  width: 68px;
+}
+
+.shellCollapsed .main {
+  margin-left: 68px;
+}
+
+.brand {
+  display: flex;
+  min-height: 64px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.8rem;
+}
+
+.collapseButton {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 7px;
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.72);
+  cursor: pointer;
+}
+
+.navSection {
+  margin-bottom: 0.7rem;
+}
+
+.sectionLabel {
+  padding: 0 0.7rem 0.3rem;
+  overflow: hidden;
+  font-size: 0.52rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.navLabel {
+  margin-left: 0.6rem;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+}
+
+.sidebarCollapsed .brand {
+  justify-content: center;
+}
+
+.sidebarCollapsed .brandText,
+.sidebarCollapsed .sectionLabel,
+.sidebarCollapsed .navLabel {
+  display: none;
+}
+
+.sidebarCollapsed nav,
+.sidebarCollapsed section {
+  width: 100%;
+}
+
+.sidebarCollapsed a,
+.sidebarCollapsed .logoutButton {
+  justify-content: center;
 }
 
 .menuButton,
@@ -53,6 +135,24 @@
     width: min(280px, 84vw);
     transform: translateX(-100%);
     transition: transform 180ms ease;
+  }
+
+  .sidebarCollapsed {
+    width: min(280px, 84vw);
+  }
+
+  .sidebarCollapsed .brand {
+    justify-content: space-between;
+  }
+
+  .sidebarCollapsed .brandText,
+  .sidebarCollapsed .sectionLabel,
+  .sidebarCollapsed .navLabel {
+    display: block;
+  }
+
+  .collapseButton {
+    display: none;
   }
 
   .sidebarOpen {

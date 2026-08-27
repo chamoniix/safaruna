@@ -5,41 +5,47 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { adminLogout } from '@/app/admin/login/actions';
 import styles from './layout.module.css';
+import {
+  BarChart3, CalendarCheck2, ChevronLeft, ChevronRight,
+  CircleDollarSign, ClipboardList, Gauge, Landmark, LogOut, MapPinned,
+  MessageSquare, Settings, ShieldCheck, Users, UserRoundCheck,
+  type LucideIcon,
+} from 'lucide-react';
 
-type NavItem = { href: string; label: string };
+type NavItem = { href: string; label: string; icon: LucideIcon };
 type NavSection = { label: string; items: NavItem[] };
 
 const NAV_SECTIONS: NavSection[] = [
   {
     label: 'Pilotage',
     items: [
-      { href: '/admin/tableau-de-bord', label: 'Tableau de bord' },
-      { href: '/admin/stats', label: 'Statistiques' },
+      { href: '/admin/tableau-de-bord', label: 'Tableau de bord', icon: Gauge },
+      { href: '/admin/stats', label: 'Statistiques', icon: BarChart3 },
     ],
   },
   {
     label: 'Opérations',
     items: [
-      { href: '/admin/candidatures-guides', label: 'Candidatures guides' },
-      { href: '/admin/guides', label: 'Guides' },
-      { href: '/admin/pelerins', label: 'Pèlerins' },
-      { href: '/admin/reservations', label: 'Réservations' },
-      { href: '/admin/messages', label: 'Messages' },
+      { href: '/admin/candidatures-guides', label: 'Candidatures guides', icon: ClipboardList },
+      { href: '/admin/guides', label: 'Guides', icon: UserRoundCheck },
+      { href: '/admin/pelerins', label: 'Pèlerins', icon: Users },
+      { href: '/admin/reservations', label: 'Réservations', icon: CalendarCheck2 },
+      { href: '/admin/messages', label: 'Messages', icon: MessageSquare },
     ],
   },
   {
     label: 'Finance',
     items: [
-      { href: '/admin/revenus', label: 'Revenus' },
-      { href: '/admin/commissions', label: 'Commissions' },
-      { href: '/admin/lieux', label: 'Lieux & Tarifs' },
+      { href: '/admin/revenus', label: 'Revenus', icon: CircleDollarSign },
+      { href: '/admin/commissions', label: 'Commissions', icon: Landmark },
+      { href: '/admin/lieux', label: 'Lieux & Tarifs', icon: MapPinned },
     ],
   },
   {
     label: 'Gouvernance',
     items: [
-      { href: '/admin/audit', label: 'Audit & sécurité' },
-      { href: '/admin/parametres', label: 'Paramètres' },
+      { href: '/admin/audit', label: 'Audit & sécurité', icon: ShieldCheck },
+      { href: '/admin/parametres', label: 'Paramètres', icon: Settings },
     ],
   },
 ];
@@ -50,6 +56,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
   const pathname = usePathname();
   const [admin, setAdmin] = useState<{ email: string; role: 'SUPERADMIN' | 'ADMIN'; individualAccount: boolean } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const currentNav = NAV_ITEMS.find(n => pathname ? (pathname === n.href || pathname.startsWith(n.href + '/')) : false);
   const pageTitle = currentNav?.label ?? 'Administration';
   const isSuperadmin = admin?.role === 'SUPERADMIN';
@@ -75,7 +82,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
   }, [menuOpen]);
 
   return (
-    <div className={styles.shell}>
+    <div className={`${styles.shell} ${sidebarCollapsed ? styles.shellCollapsed : ''}`}>
 
       <button
         type="button"
@@ -85,28 +92,29 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
       />
 
       {/* SIDEBAR */}
-      <aside className={`${styles.sidebar} ${menuOpen ? styles.sidebarOpen : ''}`} style={{
+      <aside className={`${styles.sidebar} ${sidebarCollapsed ? styles.sidebarCollapsed : ''} ${menuOpen ? styles.sidebarOpen : ''}`} style={{
         background: sidebarBackground, display: 'flex', flexDirection: 'column',
         borderRight: `1px solid ${isSuperadmin ? 'rgba(125,211,252,0.24)' : 'rgba(201,168,76,0.15)'}`,
       }}>
         {/* Logo */}
-        <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(201,168,76,0.12)' }}>
-          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.5rem', fontWeight: 700, color: 'white', letterSpacing: '0.04em' }}>
-            SAFAR<span style={{ color: accent }}>U</span>MA
+        <div className={styles.brand} style={{ borderBottom: '1px solid rgba(201,168,76,0.12)' }}>
+          <div className={styles.brandText}>
+            <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.3rem', fontWeight: 700, color: 'white', letterSpacing: '0.04em' }}>SAFAR<span style={{ color: accent }}>U</span>MA</div>
+            <div style={{ fontSize: '0.48rem', fontWeight: 700, letterSpacing: '0.16em', textTransform: 'uppercase', color: isSuperadmin ? '#A5F3FC' : 'rgba(255,255,255,0.35)', marginTop: 2 }}>{isSuperadmin ? 'Superadmin' : 'Administration'}</div>
           </div>
-          <div style={{ fontSize: '0.52rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: isSuperadmin ? '#A5F3FC' : 'rgba(255,255,255,0.35)', marginTop: 4 }}>
-            {isSuperadmin ? 'Superadmin · Gouvernance' : 'Administration · Opérations'}
-          </div>
+          <button type="button" className={styles.collapseButton} aria-label={sidebarCollapsed ? 'Déployer le menu' : 'Réduire le menu'} onClick={() => setSidebarCollapsed(value => !value)}>
+            {sidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          </button>
         </div>
 
         {/* Nav links */}
         <div style={{ flex: 1, padding: '0.75rem' }}>
           {NAV_SECTIONS.map(section => (
-            <section key={section.label} style={{ marginBottom: '1rem' }}>
-              <div style={{ padding: '0 0.875rem 0.4rem', fontSize: '0.56rem', fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: isSuperadmin ? 'rgba(165,243,252,0.62)' : 'rgba(255,255,255,0.26)' }}>
+            <section key={section.label} className={styles.navSection}>
+              <div className={styles.sectionLabel} style={{ color: isSuperadmin ? 'rgba(165,243,252,0.62)' : 'rgba(255,255,255,0.26)' }}>
                 {section.label}
               </div>
-              {section.items.map(({ href, label }) => {
+              {section.items.map(({ href, label, icon: Icon }) => {
                 const active = pathname ? (pathname === href || pathname.startsWith(href + '/')) : false;
                 return (
                   <Link
@@ -114,15 +122,16 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
                     href={href}
                     onClick={() => setMenuOpen(false)}
                     style={{
-                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: '0.65rem 0.875rem', borderRadius: 8, textDecoration: 'none',
-                      marginBottom: 4, fontSize: '0.83rem', fontWeight: active ? 700 : 500,
+                      display: 'flex', alignItems: 'center',
+                      padding: '0.58rem 0.7rem', borderRadius: 8, textDecoration: 'none',
+                      marginBottom: 3, fontSize: '0.78rem', fontWeight: active ? 700 : 500,
                       color: active ? (isSuperadmin ? '#071827' : '#0F0A05') : 'rgba(255,255,255,0.66)',
                       background: active ? accent : 'transparent',
                       boxShadow: active && isSuperadmin ? '0 8px 24px rgba(56,189,248,0.18)' : 'none',
                     }}
                   >
-                    <span>{label}</span>
+                    <Icon size={17} strokeWidth={active ? 2.25 : 1.8} style={{ flex: '0 0 17px' }} />
+                    <span className={styles.navLabel}>{label}</span>
                   </Link>
                 );
               })}
@@ -133,13 +142,13 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
         {/* Logout */}
         <div style={{ padding: '0.75rem', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
           <form action={adminLogout}>
-            <button type="submit" style={{
-              width: '100%', padding: '0.65rem 0.875rem', borderRadius: 8,
+            <button type="submit" className={styles.logoutButton} style={{
+              width: '100%', padding: '0.6rem 0.7rem', borderRadius: 8,
               border: 'none', background: 'rgba(220,38,38,0.1)', color: '#F87171',
               fontSize: '0.83rem', fontWeight: 600, cursor: 'pointer',
               fontFamily: 'inherit', textAlign: 'left',
             }}>
-              Déconnexion
+              <LogOut size={17} /><span className={styles.navLabel}>Déconnexion</span>
             </button>
           </form>
         </div>

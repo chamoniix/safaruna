@@ -106,11 +106,11 @@ export default function AuditPage() {
     : logs
 
   return (
-    <div style={{ padding: '2rem', fontFamily: 'inherit' }}>
+    <div className="admin-audit-page" style={{ padding: 0, fontFamily: 'inherit' }}>
       {/* Header */}
-      <div style={{
+      <div className="admin-audit-header" style={{
         display: 'flex', justifyContent: 'space-between',
-        alignItems: 'center', marginBottom: '2rem',
+        alignItems: 'center', marginBottom: '1rem', gap: '1rem',
       }}>
         <div>
           <h1 style={{
@@ -128,6 +128,7 @@ export default function AuditPage() {
           )}
         </div>
         <select
+          className="admin-audit-filter"
           value={filter}
           onChange={e => setFilter(e.target.value)}
           style={{
@@ -164,13 +165,13 @@ export default function AuditPage() {
           Les actions s&apos;enregistreront automatiquement.
         </div>
       ) : (
-        <div style={{
+        <div className="admin-audit-table" style={{
           background: 'white', borderRadius: 16,
           border: '1px solid #E8DFC8', overflowX: 'auto',
         }}>
-          <div style={{ minWidth: networkVisible ? 1180 : 980 }}>
+          <div className="admin-audit-table-inner" style={{ minWidth: networkVisible ? 1180 : 980 }}>
             {/* Header table */}
-            <div style={{
+            <div className="admin-audit-table-header" style={{
               display: 'grid',
               gridTemplateColumns: networkVisible ? '150px 190px 210px 150px 140px minmax(300px, 1fr)' : '150px 190px 210px 150px minmax(300px, 1fr)',
               gap: '1rem', padding: '0.75rem 1.25rem',
@@ -191,6 +192,7 @@ export default function AuditPage() {
             {filtered.map((log, idx) => (
               <div
                 key={log.id}
+                className="admin-audit-row"
                 style={{
                   display: 'grid',
                   gridTemplateColumns: networkVisible ? '150px 190px 210px 150px 140px minmax(300px, 1fr)' : '150px 190px 210px 150px minmax(300px, 1fr)',
@@ -200,13 +202,13 @@ export default function AuditPage() {
                   fontSize: '0.82rem', alignItems: 'start',
                 }}
               >
-                <span style={{ color: '#7A6D5A', fontSize: '0.75rem' }}>
+                <span className="admin-audit-cell" data-label="Date" style={{ color: '#7A6D5A', fontSize: '0.75rem' }}>
                   {new Date(log.createdAt).toLocaleString('fr-FR', {
                     day: '2-digit', month: '2-digit', year: 'numeric',
                     hour: '2-digit', minute: '2-digit', second: '2-digit',
                   })}
                 </span>
-                <div>
+                <div className="admin-audit-cell" data-label="Auteur">
                   <div style={{ fontWeight: 600, color: '#1A1209', fontSize: '0.78rem', overflowWrap: 'anywhere' }}>
                     {log.actor}
                   </div>
@@ -214,7 +216,7 @@ export default function AuditPage() {
                     {log.actorRole}
                   </div>
                 </div>
-                <div>
+                <div className="admin-audit-cell" data-label="Action">
                   <span style={{
                     display: 'inline-block',
                     background: `${ACTION_COLORS[log.action] || '#7A6D5A'}18`,
@@ -225,18 +227,18 @@ export default function AuditPage() {
                     {ACTION_LABELS[log.action] || log.action}
                   </span>
                 </div>
-                <span style={{ color: '#4A3F30', fontSize: '0.72rem', fontFamily: 'monospace', overflowWrap: 'anywhere' }}>
+                <span className="admin-audit-cell" data-label="Cible" style={{ color: '#4A3F30', fontSize: '0.72rem', fontFamily: 'monospace', overflowWrap: 'anywhere' }}>
                   {log.target || '—'}
                 </span>
                 {networkVisible && (
-                  <div style={{ color: '#4A3F30', fontSize: '0.72rem' }}>
+                  <div className="admin-audit-cell" data-label="Réseau" style={{ color: '#4A3F30', fontSize: '0.72rem' }}>
                     <div style={{ fontFamily: 'monospace', overflowWrap: 'anywhere' }}>{log.ip || '—'}</div>
                     {log.requestId && <div style={{ color: '#9CA3AF', marginTop: 3, overflowWrap: 'anywhere' }}>ID : {log.requestId}</div>}
                   </div>
                 )}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', minWidth: 0 }}>
+                <div className="admin-audit-cell admin-audit-detail" data-label="Détail et modifications" style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', minWidth: 0 }}>
                   {(log.before != null || log.after != null) && (
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                    <div className="admin-audit-changes" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                       <div style={{ minWidth: 0 }}>
                         <span style={{ display: 'block', color: '#7A6D5A', fontSize: '0.65rem', fontWeight: 700, marginBottom: 3 }}>Avant</span>
                         <pre style={{ margin: 0, padding: '0.5rem', borderRadius: 6, background: '#FFF7ED', color: '#9A3412', fontSize: '0.67rem', whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', fontFamily: 'monospace' }}>{formatAuditValue(log.before)}</pre>
@@ -260,6 +262,52 @@ export default function AuditPage() {
           </div>
         </div>
       )}
+      <style>{`
+        @media (max-width: 700px) {
+          .admin-audit-header {
+            align-items: stretch !important;
+            flex-direction: column;
+          }
+          .admin-audit-filter {
+            width: 100%;
+            min-height: 44px;
+          }
+          .admin-audit-table {
+            overflow: visible !important;
+            border: 0 !important;
+            background: transparent !important;
+          }
+          .admin-audit-table-inner {
+            min-width: 0 !important;
+          }
+          .admin-audit-table-header {
+            display: none !important;
+          }
+          .admin-audit-row {
+            display: grid !important;
+            grid-template-columns: 1fr !important;
+            gap: 0.75rem !important;
+            margin-bottom: 0.75rem;
+            padding: 1rem !important;
+            border: 1px solid #E8DFC8 !important;
+            border-radius: 12px;
+            background: white;
+          }
+          .admin-audit-cell::before {
+            display: block;
+            margin-bottom: 0.2rem;
+            color: #7A6D5A;
+            content: attr(data-label);
+            font-size: 0.6rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+          }
+          .admin-audit-changes {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </div>
   )
 }

@@ -22,11 +22,20 @@ export async function GET(req: NextRequest) {
 
     const reservation = await prisma.reservation.findFirst({
       where: { refNumber, pelerinId: userId },
-      select: { refNumber: true, status: true, stripePaymentId: true },
+      select: {
+        refNumber: true,
+        status: true,
+        stripePaymentId: true,
+        paymentAttempts: {
+          where: { status: 'SUCCEEDED' },
+          select: { id: true },
+          take: 1,
+        },
+      },
     })
 
     if (reservation) {
-      const confirmed = Boolean(reservation.stripePaymentId)
+      const confirmed = (reservation.paymentAttempts.length > 0 || Boolean(reservation.stripePaymentId))
         && ['CONFIRMED', 'COMPLETED'].includes(reservation.status)
 
       return NextResponse.json({
@@ -37,12 +46,20 @@ export async function GET(req: NextRequest) {
       }, { headers: noStoreHeaders })
     }
 
-    const draft = await prisma.reservationDraft.findFirst({
-      where: { refNumber, pelerinId: userId },
-      select: { stripeSessionId: true, expiresAt: true },
-    })
+    const [draft, pendingAttempt] = await Promise.all([
+      prisma.reservationDraft.findFirst({
+        where: { refNumber, pelerinId: userId },
+        select: { stripeSessionId: true, expiresAt: true },
+      }),
+      prisma.paymentAttempt.findFirst({
+        where: { bookingRef: refNumber, status: { in: ['CREATED', 'PENDING'] } },
+        select: { id: true, checkoutExpiresAt: true },
+        orderBy: { createdAt: 'desc' },
+      }),
+    ])
 
-    if (draft?.stripeSessionId && draft.expiresAt > now) {
+    const checkoutExpiresAt = pendingAttempt?.checkoutExpiresAt ?? draft?.expiresAt
+    if (draft && (pendingAttempt || draft.stripeSessionId) && checkoutExpiresAt && checkoutExpiresAt > now) {
       return NextResponse.json({
         verification: { refNumber, state: 'pending' },
       }, { headers: noStoreHeaders })

@@ -621,7 +621,7 @@ export default function CheckoutPage() {
     }
   }
 
-  // Soumission — redirige vers Stripe Checkout
+  // Soumission — redirige vers le checkout hébergé du processeur actif
   const handleSubmit = async () => {
     setSubmitting(true)
     setError('')
@@ -631,7 +631,7 @@ export default function CheckoutPage() {
       amountCents: Math.round(total * 100),
     })
     try {
-      const res = await fetch('/api/stripe/create-session', {
+      const res = await fetch('/api/payments/create-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -504,10 +504,12 @@ model Reservation {
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
 
-  reviews       Review[]
-  missions      ReservationMission[]
-  bookedDates   Availability[]
-  guideEarnings GuideEarning[]
+  reviews             Review[]
+  missions            ReservationMission[]
+  bookedDates         Availability[]
+  guideEarnings       GuideEarning[]
+  paymentAttempts     PaymentAttempt[]
+  paymentTransactions PaymentTransaction[]
 }
 
 model ReservationMission {
@@ -802,6 +804,109 @@ model ReservationDraft {
   holds           ReservationHold[]
 
   @@index([pelerinId, createdAt])
+}
+
+enum PaymentAttemptStatus {
+  CREATED
+  PENDING
+  SUCCEEDED
+  EXPIRED
+  FAILED
+  CANCELLED
+}
+
+enum PaymentEventStatus {
+  PROCESSING
+  PROCESSED
+  FAILED
+  IGNORED
+}
+
+enum PaymentTransactionType {
+  CHARGE
+  REFUND
+  CHARGEBACK
+}
+
+enum PaymentTransactionStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REVERSED
+}
+
+model PaymentAttempt {
+  id                 String               @id @default(cuid())
+  bookingRef         String
+  reservationId      String?
+  reservation        Reservation?         @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  provider           String
+  providerCheckoutId String?
+  providerPaymentId  String?
+  status             PaymentAttemptStatus @default(CREATED)
+  amountCents        Int
+  currency           String               @default("EUR")
+  checkoutExpiresAt  DateTime?
+  paidAt             DateTime?
+  failureCode        String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  events             PaymentEvent[]
+  transactions       PaymentTransaction[]
+
+  @@unique([provider, providerCheckoutId])
+  @@unique([provider, providerPaymentId])
+  @@index([bookingRef, createdAt])
+  @@index([reservationId])
+  @@index([status, createdAt])
+}
+
+model PaymentEvent {
+  id                  String             @id @default(cuid())
+  attemptId           String?
+  attempt             PaymentAttempt?    @relation(fields: [attemptId], references: [id], onDelete: SetNull)
+  provider            String
+  providerEventId     String
+  providerEventType   String
+  providerObjectId    String?
+  status              PaymentEventStatus @default(PROCESSING)
+  processingAttempts  Int                @default(1)
+  occurredAt          DateTime
+  processingStartedAt DateTime           @default(now())
+  processedAt         DateTime?
+  lastError           String?
+  metadata            Json?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  @@unique([provider, providerEventId])
+  @@index([attemptId, occurredAt])
+  @@index([status, processingStartedAt])
+  @@index([providerObjectId])
+}
+
+model PaymentTransaction {
+  id                    String                   @id @default(cuid())
+  bookingRef            String
+  reservationId         String?
+  reservation           Reservation?             @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  attemptId             String?
+  attempt               PaymentAttempt?          @relation(fields: [attemptId], references: [id], onDelete: SetNull)
+  provider              String
+  providerTransactionId String
+  type                  PaymentTransactionType
+  status                PaymentTransactionStatus
+  amountCents           Int
+  currency              String
+  occurredAt            DateTime
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+
+  @@unique([provider, type, providerTransactionId])
+  @@index([bookingRef, occurredAt])
+  @@index([reservationId])
+  @@index([attemptId])
+  @@index([status, occurredAt])
 }
 
 model ReservationHold {

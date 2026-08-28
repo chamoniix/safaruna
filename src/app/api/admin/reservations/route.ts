@@ -51,9 +51,22 @@ export async function PATCH(req: NextRequest) {
   if (!validStatuses.includes(status))
     return NextResponse.json({ error: 'Statut invalide' }, { status: 400 });
 
-  const existing = await prisma.reservation.findUnique({ where: { id: reservationId }, select: { notes: true, status: true, stripePaymentId: true, refNumber: true } });
+  const existing = await prisma.reservation.findUnique({
+    where: { id: reservationId },
+    select: {
+      notes: true,
+      status: true,
+      stripePaymentId: true,
+      refNumber: true,
+      paymentAttempts: {
+        where: { status: 'SUCCEEDED' },
+        select: { id: true },
+        take: 1,
+      },
+    },
+  });
   if (!existing) return NextResponse.json({ error: 'Réservation introuvable' }, { status: 404 });
-  if (status === 'CONFIRMED' && !existing.stripePaymentId) {
+  if (status === 'CONFIRMED' && existing.paymentAttempts.length === 0 && !existing.stripePaymentId) {
     return NextResponse.json({ error: 'Une réservation sans paiement vérifié ne peut pas être confirmée.' }, { status: 409 });
   }
   const existingNotes = existing?.notes || '';

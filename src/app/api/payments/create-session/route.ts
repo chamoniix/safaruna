@@ -1,10 +1,6 @@
 import type { NextRequest } from 'next/server'
 import { handleCreatePaymentSession } from '@/lib/payments/create-session'
 
-/**
- * Compatibilité temporaire : les clients déjà ouverts peuvent encore appeler
- * l’ancienne URL pendant que le checkout public bascule vers /api/payments.
- */
 export async function POST(req: NextRequest) {
   return handleCreatePaymentSession(req)
 }

@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client'
 import prisma from '@/lib/prisma'
 import { baseTemplate, btn, divider, escapeHtml, heading, p, retryPendingEmails, sendEmail } from '@/lib/email'
 import { archiveExpiredAnalyticsEvents } from '@/lib/analytics-retention'
+import { confirmationDeadlines, reviewOpensAt } from '@/lib/guide-workflow'
 
 const DAY_MS = 86_400_000
 
@@ -45,6 +46,128 @@ export async function GET(req: NextRequest) {
     console.error('[cron] reprises email', error)
     return { checked: 0, accepted: 0, failed: 0 }
   })
+
+  const pendingConfirmations = await prisma.reservation.findMany({
+    where: {
+      status: 'CONFIRMED',
+      missions: { some: { guideConfirmationStatus: 'PENDING' } },
+    },
+    select: {
+      id: true,
+      refNumber: true,
+      nbPeople: true,
+      missions: {
+        where: { guideConfirmationStatus: 'PENDING' },
+        select: {
+          city: true,
+          startDate: true,
+          guideConfirmationRequestedAt: true,
+          createdAt: true,
+          guideProfileId: true,
+          guideProfile: {
+            select: { guideAccount: { select: { email: true, displayName: true, firstName: true, lastName: true } } },
+          },
+        },
+      },
+    },
+  })
+  const activeAdmins = await prisma.adminAccount.findMany({
+    where: { status: 'ACTIVE' },
+    select: { email: true, name: true, role: true },
+  })
+  let confirmationReminders = 0
+  let confirmationEscalations = 0
+  for (const reservation of pendingConfirmations) {
+    const grouped = new Map<string, typeof reservation.missions>()
+    for (const mission of reservation.missions) {
+      grouped.set(mission.guideProfileId, [...(grouped.get(mission.guideProfileId) ?? []), mission])
+    }
+    for (const [guideProfileId, missions] of grouped) {
+      const account = missions[0]?.guideProfile.guideAccount
+      if (!account?.email) continue
+      const requestedAt = new Date(Math.min(...missions.map(mission => (mission.guideConfirmationRequestedAt ?? mission.createdAt).getTime())))
+      const departureAt = new Date(Math.min(...missions.map(mission => mission.startDate.getTime())))
+      const deadlines = confirmationDeadlines(requestedAt, departureAt)
+      const guideName = account.displayName || `${account.firstName ?? ''} ${account.lastName ?? ''}`.trim() || account.email
+      const cityNames = missions.map(mission => mission.city === 'MAKKAH' ? 'Makkah' : 'Médine').join(' · ')
+
+      if (new Date() >= deadlines.reminderAt) {
+        const result = await sendEmail({
+          category: 'GUIDE_CONFIRMATION_REMINDER',
+          retryable: true,
+          idempotencyKey: `guide-confirmation-reminder:${reservation.id}:${guideProfileId}`,
+          reference: { type: 'RESERVATION', id: reservation.id },
+          to: { email: account.email, name: guideName },
+          subject: `[SAFARUMA] Rappel : réservation à confirmer — ${reservation.refNumber}`,
+          html: baseTemplate(`
+            ${heading('Votre confirmation est attendue')}
+            ${p(`La réservation <strong>${escapeHtml(reservation.refNumber)}</strong> est payée. Confirmez votre disponibilité pour ${escapeHtml(cityNames)}.`)}
+            ${p(`Départ : ${escapeHtml(dateFr(departureAt))} · Voyageurs : ${reservation.nbPeople}`)}
+            ${divider()}
+            ${btn('Confirmer maintenant', `${process.env.NEXT_PUBLIC_BASE_URL || 'https://safaruma.com'}/guide/demandes?reservation=${encodeURIComponent(reservation.refNumber)}`)}
+          `),
+        })
+        if (result.status === 'ACCEPTED' || result.status === 'RETRY_PENDING') confirmationReminders++
+      }
+
+      if (new Date() >= deadlines.escalationAt) {
+        for (const admin of activeAdmins) {
+          const result = await sendEmail({
+            category: 'GUIDE_CONFIRMATION_ESCALATION',
+            retryable: true,
+            idempotencyKey: `guide-confirmation-escalation:${reservation.id}:${guideProfileId}:${admin.email.toLowerCase()}`,
+            reference: { type: 'RESERVATION', id: reservation.id },
+            to: { email: admin.email, name: admin.name || admin.role },
+            subject: `[${admin.role}] Guide sans réponse — ${reservation.refNumber}`,
+            html: baseTemplate(`
+              ${heading('Confirmation Guide en retard')}
+              ${p(`<strong>${escapeHtml(guideName)}</strong> n’a pas encore confirmé la réservation <strong>${escapeHtml(reservation.refNumber)}</strong>.`)}
+              ${p(`Ville(s) : ${escapeHtml(cityNames)} · Départ : ${escapeHtml(dateFr(departureAt))}`)}
+              ${divider()}
+              ${btn('Ouvrir les réservations', `${process.env.NEXT_PUBLIC_BASE_URL || 'https://safaruma.com'}/admin/reservations`)}
+            `),
+          })
+          if (result.status === 'ACCEPTED' || result.status === 'RETRY_PENDING') confirmationEscalations++
+        }
+      }
+    }
+  }
+
+  const reviewCandidates = await prisma.reservation.findMany({
+    where: {
+      status: { in: ['CONFIRMED', 'COMPLETED'] },
+      reviewRequestSentAt: null,
+      endDate: { lte: new Date() },
+    },
+    select: {
+      id: true,
+      refNumber: true,
+      endDate: true,
+      pelerin: { select: { email: true, name: true, firstName: true, lastName: true } },
+    },
+  })
+  let reviewRequests = 0
+  for (const reservation of reviewCandidates) {
+    if (new Date() < reviewOpensAt(reservation.endDate) || !reservation.pelerin.email) continue
+    const result = await sendEmail({
+      category: 'REVIEW_REQUEST',
+      retryable: true,
+      idempotencyKey: `review-request:${reservation.id}:${reservation.pelerin.email.toLowerCase()}`,
+      reference: { type: 'RESERVATION', id: reservation.id },
+      to: { email: reservation.pelerin.email, name: personName(reservation.pelerin) },
+      subject: `Mabrouk pour votre Omra — partagez votre expérience ${reservation.refNumber}`,
+      html: baseTemplate(`
+        ${heading('Mabrouk pour votre Omra')}
+        ${p('Merci d’avoir choisi SAFARUMA. Pour améliorer la qualité de nos guides, partagez un retour sincère sur votre accompagnement et votre séjour.')}
+        ${divider()}
+        ${btn('Donner mon avis', `${process.env.NEXT_PUBLIC_BASE_URL || 'https://safaruma.com'}/espace/avis/${reservation.id}`)}
+      `),
+    })
+    if (result.status === 'ACCEPTED' || result.status === 'RETRY_PENDING') {
+      await prisma.reservation.update({ where: { id: reservation.id }, data: { reviewRequestSentAt: new Date() } })
+      reviewRequests++
+    }
+  }
 
   let sent = 0
   for (const reservation of reservations) {
@@ -128,5 +251,5 @@ export async function GET(req: NextRequest) {
 
   const deletedDrafts = await prisma.reservationDraft.deleteMany({ where: { expiresAt: { lt: new Date() } } })
   const analyticsEventsArchived = await archiveExpiredAnalyticsEvents()
-  return NextResponse.json({ success: true, reservationsChecked: reservations.length, emailsSent: sent, emailRetries, draftsReleased: deletedDrafts.count, analyticsEventsArchived, checkedAt: new Date().toISOString() })
+  return NextResponse.json({ success: true, reservationsChecked: reservations.length, emailsSent: sent, confirmationReminders, confirmationEscalations, reviewRequests, emailRetries, draftsReleased: deletedDrafts.count, analyticsEventsArchived, checkedAt: new Date().toISOString() })
 }

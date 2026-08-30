@@ -24,7 +24,10 @@ export async function GET(req: NextRequest) {
     include: {
       pelerin: { select: { name: true, firstName: true, lastName: true, country: true, email: true } },
       package: { select: { name: true, durationDays: true } },
-      reviews: { select: { ratingOverall: true, comment: true } },
+      reviews: {
+        where: { guideProfileId, status: 'APPROVED' },
+        select: { ratingOverall: true, comment: true },
+      },
       missions: {
         where: { guideProfileId },
         orderBy: { startDate: 'asc' },
@@ -62,6 +65,8 @@ export async function GET(req: NextRequest) {
         startDate: new Date(r.missions[0]?.startDate ?? r.startDate).toLocaleDateString('fr-FR'),
         endDate: new Date(r.missions.at(-1)?.endDate ?? r.endDate).toLocaleDateString('fr-FR'),
         missionCities: r.missions.map(mission => mission.city),
+        guideConfirmationStatus: r.missions.every(mission => mission.guideConfirmationStatus === 'CONFIRMED') ? 'CONFIRMED' : 'PENDING',
+        guideConfirmedAt: r.missions.find(mission => mission.guideConfirmedAt)?.guideConfirmedAt ?? null,
         nbPeople: r.nbPeople,
         guideRevenue: r.guideEarnings[0] ? r.guideEarnings[0].totalNetCents / 100 : null,
         status: r.status,

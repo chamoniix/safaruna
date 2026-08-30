@@ -135,7 +135,6 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
             </div>
             <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'white', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayName}</div>
-              <div style={{ fontSize: '0.65rem', color: '#C9A84C', marginBottom: 6 }}>★★★★★ 4.97</div>
               {/* Toggle */}
               <div role="button" aria-disabled={isAvailable === null || savingAvailability} style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: isAvailable === null || savingAvailability ? 'wait' : 'pointer', opacity: savingAvailability ? 0.65 : 1 }} onClick={toggleAvailability}>
                 <div style={{ width: 30, height: 16, borderRadius: 50, background: isAvailable === true ? '#27AE60' : 'rgba(255,255,255,0.15)', position: 'relative', transition: 'background 0.2s', flexShrink: 0 }}>

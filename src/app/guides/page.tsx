@@ -305,9 +305,7 @@ export default function GuideSearchPage() {
     fetch('/api/guides/available', { signal: controller.signal })
       .then(response => response.ok ? response.json() : Promise.reject(new Error('Chargement impossible')))
       .then(data => {
-        const editorialBySlug = new Map(GUIDES_DATA.filter(item => item.available).map(item => [item.slug, item]));
         const mapped: GuideData[] = ((data.guides || []) as AvailableGuideApi[]).map(item => {
-          const editorial = editorialBySlug.get(item.slug);
           const primaryIsMakkah = String(item.city || '').toUpperCase().includes('MAKKAH');
           const publicPrice = primaryIsMakkah ? item.prices?.makkah?.upTo6 : item.prices?.madinah?.upTo6;
           return {
@@ -315,25 +313,25 @@ export default function GuideSearchPage() {
             gender: String(item.gender || '').toLowerCase(),
             zones: (item.serviceCities || []).map((value: string) => value.toLowerCase()),
             name: item.name || 'Guide SAFARUMA',
-            title: editorial?.title || 'Guide certifié SAFARUMA',
+            title: 'Guide SAFARUMA',
             initials: (item.name || 'GS').split(' ').map((part: string) => part[0]).slice(0, 2).join('').toUpperCase(),
             location: item.city || (item.serviceCities || []).join(' · '),
             experience: item.experienceYears || 0,
             rating: item.rating || 0,
             reviews: item.reviewCount || 0,
-            pilgrims: editorial?.pilgrims || '',
+            pilgrims: '',
             languages: (item.languages || []).map(code => LANG_CODES[code] || code),
-            services: editorial?.services || [],
+            services: [],
             price: publicPrice || 0,
             priceSub: primaryIsMakkah ? 'Makkah · par groupe' : 'Médine · par groupe',
-            badge: editorial?.badge || '',
-            badgeColor: editorial?.badgeColor || '#7A6D5A',
-            gradient: editorial?.gradient || 'linear-gradient(135deg, #1A1209, #4A3F30)',
-            avatarGradient: editorial?.avatarGradient || 'linear-gradient(135deg, #F0D897, #C9A84C)',
+            badge: '',
+            badgeColor: '#7A6D5A',
+            gradient: 'linear-gradient(135deg, #1A1209, #4A3F30)',
+            avatarGradient: 'linear-gradient(135deg, #F0D897, #C9A84C)',
             available: true,
-            isOfficial: editorial?.isOfficial || false,
-            specialisteEnfants: editorial?.specialisteEnfants || false,
-            shortBio: item.bio || editorial?.shortBio || '',
+            isOfficial: false,
+            specialisteEnfants: false,
+            shortBio: item.bio || '',
           };
         });
         setGuideList(mapped);
@@ -427,7 +425,7 @@ export default function GuideSearchPage() {
     if (selectedSpecialites.includes('enfants') && !(g.specialisteEnfants || g.services.some(s => s.toLowerCase().includes('enfant') || s.toLowerCase().includes('famille')))) return false;
     return true;
   });
-  const comingSoonGuides = GUIDES_DATA.filter(g => g.available === false);
+  const comingSoonGuides: GuideData[] = [];
   const filteredOfficial = filteredGuides.filter(g => g.isOfficial);
   const filteredNonOfficial = filteredGuides.filter(g => !g.isOfficial);
 
@@ -909,8 +907,8 @@ export default function GuideSearchPage() {
             </svg>
           </span>
           <div>
-            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.15 }}>★★★★★ 4.96</div>
-            <div style={{ fontSize: '0.65rem', color: '#7A6D5A', lineHeight: 1.15 }}>709 avis vérifiés</div>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.15 }}>Avis vérifiés</div>
+            <div style={{ fontSize: '0.65rem', color: '#7A6D5A', lineHeight: 1.15 }}>Données réelles validées</div>
           </div>
         </div>
       </div>
@@ -1373,7 +1371,7 @@ function GuideDrawer({ guide: g, visible, onClose, returnSlug }: { guide: GuideD
             <div style={{ fontSize: '0.72rem', color: 'rgba(240,216,151,0.75)', fontStyle: 'italic', marginTop: '0.2rem' }}>{g.title}</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.5rem' }}>
               <span style={{ fontSize: '0.62rem', color: '#C9A84C', fontWeight: 800 }}>★</span>
-              <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>{g.rating} · {g.experience} ans d&apos;expérience</span>
+              <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>{g.reviews > 0 ? `★ ${g.rating} · ` : 'Nouveau guide · '}{g.experience} ans d&apos;expérience</span>
             </div>
           </div>
         </div>
@@ -1465,8 +1463,7 @@ function GuideCard({ guide: g, official, onProfile, isLoading, returnSlug }: { g
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.2rem', paddingTop: '0.25rem' }}>
             <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.2 }}>{g.name}</div>
             <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1A1209', whiteSpace: 'nowrap', flexShrink: 0 }}>
-              <span style={{ color: '#C9A84C' }}>★</span> {g.rating}
-              <span style={{ fontWeight: 400, color: '#7A6D5A', fontSize: '0.7rem' }}> ({g.reviews})</span>
+              {g.reviews > 0 ? <><span style={{ color: '#C9A84C' }}>★</span> {g.rating}<span style={{ fontWeight: 400, color: '#7A6D5A', fontSize: '0.7rem' }}> ({g.reviews})</span></> : <span style={{ fontWeight: 500, color: '#7A6D5A', fontSize: '0.68rem' }}>Nouveau guide</span>}
             </div>
           </div>
           <div style={{ fontSize: '0.72rem', color: '#7A6D5A', fontStyle: 'italic', marginBottom: '0.6rem' }}>{g.title}</div>

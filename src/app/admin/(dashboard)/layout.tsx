@@ -9,6 +9,7 @@ import {
   BarChart3, CalendarCheck2, ChevronLeft, ChevronRight,
   CircleDollarSign, ClipboardList, Gauge, Landmark, LogOut, MapPinned,
   MessageSquare, Settings, ShieldCheck, Users, UserRoundCheck,
+  Star,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -30,6 +31,7 @@ const NAV_SECTIONS: NavSection[] = [
       { href: '/admin/guides', label: 'Guides', icon: UserRoundCheck },
       { href: '/admin/pelerins', label: 'Pèlerins', icon: Users },
       { href: '/admin/reservations', label: 'Réservations', icon: CalendarCheck2 },
+      { href: '/admin/avis', label: 'Avis', icon: Star },
       { href: '/admin/messages', label: 'Messages', icon: MessageSquare },
     ],
   },

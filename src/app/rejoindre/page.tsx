@@ -42,7 +42,7 @@ function RejoindreContent() {
 
         {/* Trust */}
         <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
-          {['✓ Guides certifiés', '🛡️ Paiement sécurisé', '★ 4.96 · 709 avis'].map(t => (
+          {['✓ Guides certifiés', '🛡️ Paiement sécurisé', '★ Avis vérifiés après validation'].map(t => (
             <span key={t} style={{ fontSize: '0.72rem', color: '#7A6D5A', fontWeight: 600 }}>{t}</span>
           ))}
         </div>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { requirePelerin } from '@/lib/require-account';
+import { reviewOpensAt } from '@/lib/guide-workflow';
 
 const noStoreHeaders = { 'Cache-Control': 'no-store' }
 
@@ -82,7 +83,7 @@ export async function GET(req: NextRequest) {
           }
         },
         package: { select: { name: true, durationDays: true } },
-        reviews: { select: { ratingOverall: true, comment: true } },
+        reviews: { select: { ratingOverall: true, comment: true, status: true } },
         missions: {
           orderBy: { startDate: 'asc' },
           include: { guideProfile: { include: { guideAccount: { select: { displayName: true, firstName: true, lastName: true } } } } },
@@ -127,8 +128,10 @@ export async function GET(req: NextRequest) {
       nbPeople: r.nbPeople,
       totalPrice: r.totalPrice,
       status: r.status,
+      canReview: ['CONFIRMED', 'COMPLETED'].includes(r.status) && now >= reviewOpensAt(r.endDate),
+      feedbackSubmittedAt: r.feedbackSubmittedAt,
       createdAt: new Date(r.createdAt).toLocaleDateString('fr-FR'),
-      review: r.reviews[0] ? { rating: r.reviews[0].ratingOverall, comment: r.reviews[0].comment } : null,
+      review: r.reviews[0] ? { rating: r.reviews[0].ratingOverall, comment: r.reviews[0].comment, status: r.reviews[0].status } : null,
     })),
   });
 }

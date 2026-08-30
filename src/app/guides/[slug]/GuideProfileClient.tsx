@@ -34,7 +34,8 @@ interface GuideProfileClientProps {
   slug: string;
   guideName: string;
   isOfficial: boolean;
-  rating: number;
+  rating: number | null;
+  reviewCount: number;
   packages: Package[];
   places: Place[];
   reviews: Review[];
@@ -50,17 +51,6 @@ interface GuideProfileClientProps {
   servesMadinah: boolean;
 }
 
-const COMPANION_GUIDES: Record<'MAKKAH' | 'MADINAH', Array<{ slug: string; name: string; specialty: string; initials: string }>> = {
-  MAKKAH: [
-    { slug: 'naim-laamari', name: 'Naïm LAAMARI', specialty: 'Guide Officiel · Responsable Terrain', initials: 'NL' },
-  ],
-  MADINAH: [
-    { slug: 'rachid-al-madani', name: 'Rachid Al-Madani', specialty: 'Cheikh · Spécialiste Sîra', initials: 'RA' },
-    { slug: 'fatima-al-omari', name: 'Fatima Al-Omari', specialty: 'Guide femme · Familles', initials: 'FA' },
-    { slug: 'abdullah-ben-yusuf', name: 'Abdullah Ben Yusuf', specialty: 'Diplômé · Univ. Madinah', initials: 'AB' },
-  ],
-};
-
 const TAB_LABELS = ['Présentation', 'Lieux Saints', 'Avis'];
 
 export default function GuideProfileClient({
@@ -68,7 +58,7 @@ export default function GuideProfileClient({
   guideName,
   isOfficial,
   rating,
-  packages,
+  reviewCount,
   places,
   reviews,
   certifications,
@@ -77,28 +67,18 @@ export default function GuideProfileClient({
   languages,
   activePlaceKeys,
   includedPlaceKeys,
-  guideCity,
   acceptingBookings,
   servesMakkah,
   servesMadinah,
 }: GuideProfileClientProps) {
   const [activeTab, setActiveTab] = useState(0);
-  const [companionSlug, setCompanionSlug] = useState<string | null>(null);
 
   useEffect(() => {
     trackAnalyticsEvent('guide_viewed', { guideSlug: slug, guideName });
   }, [slug, guideName]);
 
-  const companionCity: 'MAKKAH' | 'MADINAH' | null =
-    guideCity === 'MAKKAH' ? 'MADINAH' :
-    guideCity === 'MADINAH' ? 'MAKKAH' :
-    null;
-  const companionCityLabel = companionCity === 'MAKKAH' ? 'La Mecque' : companionCity === 'MADINAH' ? 'Médine' : null;
-  const companions = companionCity ? COMPANION_GUIDES[companionCity] : [];
   const bookable = acceptingBookings && (servesMakkah || servesMadinah);
-  const checkoutHref = companionSlug
-    ? `/espace/checkout/${slug}?pair=${companionSlug}`
-    : `/espace/checkout/${slug}`;
+  const checkoutHref = `/espace/checkout/${slug}`;
 
   const makkahPlaces = places.filter(p => p.category === 'MAKKAH');
   const madinahPlaces = places.filter(p => p.category === 'MADINAH');
@@ -310,7 +290,7 @@ export default function GuideProfileClient({
                 ))}
               </div>
 
-              <div style={{ marginBottom: '2.5rem' }}>
+              {certifications.length > 0 && <div style={{ marginBottom: '2.5rem' }}>
                 <h2 style={{
                   fontFamily: 'var(--font-cormorant), serif',
                   fontSize: '1.4rem',
@@ -336,9 +316,9 @@ export default function GuideProfileClient({
                     </li>
                   ))}
                 </ul>
-              </div>
+              </div>}
 
-              <div>
+              {services.length > 0 && <div>
                 <h2 style={{
                   fontFamily: 'var(--font-cormorant), serif',
                   fontSize: '1.4rem',
@@ -366,7 +346,7 @@ export default function GuideProfileClient({
                     </div>
                   ))}
                 </div>
-              </div>
+              </div>}
 
               {languages.length > 0 && (
                 <div style={{ marginTop: '2rem' }}>
@@ -437,7 +417,7 @@ export default function GuideProfileClient({
           {/* TAB: AVIS */}
           {activeTab === 2 && (
             <div style={{ minHeight: '50vh' }}>
-              <div style={{
+              {rating !== null && reviews.length > 0 && <div style={{
                 background: 'white',
                 border: '1px solid #E8DFC8',
                 borderRadius: '16px',
@@ -457,10 +437,10 @@ export default function GuideProfileClient({
                     lineHeight: 1,
                     marginBottom: '0.25rem',
                   }}>
-                    {rating.toFixed(1)}
+                    {rating?.toFixed(1) ?? '—'}
                   </div>
                   <div style={{ color: '#C9A84C', fontSize: '1.1rem', letterSpacing: '2px', marginBottom: '0.25rem' }}>★★★★★</div>
-                  <div style={{ fontSize: '0.75rem', color: '#7A6D5A' }}>{reviews.length} avis vérifiés</div>
+                  <div style={{ fontSize: '0.75rem', color: '#7A6D5A' }}>{reviewCount} avis vérifiés</div>
                 </div>
                 <div style={{ flex: 1, minWidth: '180px' }}>
                   {[5, 4, 3, 2, 1].map(star => {
@@ -478,15 +458,17 @@ export default function GuideProfileClient({
                     );
                   })}
                 </div>
-              </div>
+              </div>}
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {reviews.length === 0 ? <div style={{ padding: '2rem', borderRadius: 14, background: 'white', border: '1px solid #E8DFC8', textAlign: 'center', color: '#7A6D5A' }}>Nouveau guide — aucun avis pour le moment</div> : <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', scrollSnapType: 'x mandatory', paddingBottom: 8 }}>
                 {reviews.map((rev, i) => (
                   <div key={i} style={{
                     background: 'white',
                     border: '1px solid #E8DFC8',
                     borderRadius: '14px',
                     padding: '1.25rem',
+                    minWidth: 'min(360px, 82vw)',
+                    scrollSnapAlign: 'start',
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.75rem', gap: '0.75rem' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -521,7 +503,7 @@ export default function GuideProfileClient({
                     </p>
                   </div>
                 ))}
-              </div>
+              </div>}
             </div>
           )}
         </div>
@@ -542,17 +524,15 @@ export default function GuideProfileClient({
               aria-disabled={!bookable}
               style={{
                 display: 'block', padding: '0.875rem 1.5rem',
-                background: !bookable ? '#E8DFC8' : companionSlug
-                  ? 'linear-gradient(135deg, #10B981 0%, #1D5C3A 100%)'
-                  : 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)',
-                color: companionSlug ? 'white' : '#1A1209',
+                background: !bookable ? '#E8DFC8' : 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)',
+                color: '#1A1209',
                 borderRadius: 12, fontFamily: 'var(--font-manrope, sans-serif)', fontWeight: 800,
                 fontSize: '0.88rem', letterSpacing: '0.05em', textDecoration: 'none',
-                boxShadow: companionSlug ? '0 4px 16px rgba(16,185,129,0.3)' : '0 4px 16px rgba(201,168,76,0.3)',
+                boxShadow: '0 4px 16px rgba(201,168,76,0.3)',
                 transition: 'all 0.2s',
               }}
             >
-              {!bookable ? 'Réservations en pause' : companionSlug ? 'Réserver mon duo 🕋🌿' : 'Réserver ce guide'}
+              {!bookable ? 'Réservations en pause' : 'Réserver ce guide'}
             </a>
             <div style={{ marginTop: '1rem', fontSize: '0.72rem', color: '#9CA3AF', lineHeight: 1.6 }}>
               Guide certifié SAFARUMA · Paiement sécurisé
@@ -568,16 +548,14 @@ export default function GuideProfileClient({
           aria-disabled={!bookable}
           style={{
             display: 'block', width: '100%', padding: '0.875rem',
-            background: !bookable ? '#E8DFC8' : companionSlug
-              ? 'linear-gradient(135deg, #10B981 0%, #1D5C3A 100%)'
-              : 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)',
-            color: companionSlug ? 'white' : '#1A1209',
+            background: !bookable ? '#E8DFC8' : 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)',
+            color: '#1A1209',
             borderRadius: 50, fontFamily: 'var(--font-manrope, sans-serif)', fontWeight: 800,
             fontSize: '0.88rem', textDecoration: 'none', textAlign: 'center',
             letterSpacing: '0.05em', boxSizing: 'border-box',
           }}
         >
-          {!bookable ? 'Réservations en pause' : companionSlug ? 'Réserver mon duo 🕋🌿' : 'Réserver ce guide'}
+          {!bookable ? 'Réservations en pause' : 'Réserver ce guide'}
         </a>
       </div>
     </div>

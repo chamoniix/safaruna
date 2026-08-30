@@ -1,788 +1,135 @@
-import { cache } from 'react';
-import { notFound } from 'next/navigation';
-import Image from 'next/image';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import GuideProfileClient from './GuideProfileClient';
-import type { Metadata } from 'next';
-import prisma from '@/lib/prisma';
-import { getEffectivePlaceCatalog } from '@/lib/place-catalog';
+import { cache } from 'react'
+import type { Metadata } from 'next'
+import Image from 'next/image'
+import { notFound } from 'next/navigation'
+import Footer from '@/components/Footer'
+import Navbar from '@/components/Navbar'
+import prisma from '@/lib/prisma'
+import { getEffectivePlaceCatalog } from '@/lib/place-catalog'
+import { publicReviewerName } from '@/lib/guide-workflow'
+import GuideProfileClient from './GuideProfileClient'
 
-// Mémoïsé par requête : generateMetadata() et la page appellent tous les deux
-// cette fonction avec le même slug — React.cache() évite de dupliquer l'aller-retour DB.
-const getGuideData = cache(async (slug: string) => {
-  try {
-    return await prisma.guideProfile.findFirst({
-      where: { slug, status: 'ACTIVE' },
-      include: { guideAccount: true, languages: true, packages: true },
-    });
-  } catch {
-    return null;
-  }
-});
-
-const GUIDE_META: Record<string, { name: string; title: string; desc: string }> = {
-  'naim-laamari':       { name: 'Naïm LAAMARI',       title: 'Guide Officiel SAFARUMA',          desc: "Responsable Terrain SAFARUMA à Madinah. 8 ans d'expérience, guide certifié." },
-  'rachid-al-madani':   { name: 'Rachid Al-Madani',   title: 'Cheikh · Spécialiste Sîra',        desc: 'Spécialiste de la Sîra du Prophète ﷺ. 14 ans d\'expérience, 2400+ pèlerins accompagnés.' },
-  'fatima-al-omari':    { name: 'Fatima Al-Omari',    title: 'Guide femme · Familles',           desc: 'Guide femme certifiée, spécialisée dans l\'accompagnement des femmes et familles.' },
-  'youssouf-konate':    { name: 'Youssouf Konaté',    title: "Spécialiste Afrique de l'Ouest",   desc: "Guide francophone spécialisé pour les communautés d'Afrique de l'Ouest." },
-  'abdullah-ben-yusuf': { name: 'Abdullah Ben Yusuf', title: 'Diplômé · Université de Madinah',  desc: "Diplômé de l'Université Islamique de Madinah. Expert des ziyarat de Madinah." },
-  'samira-al-rashidi':  { name: 'Samira Al-Rashidi',  title: 'Spécialiste PMR · Madinah',        desc: 'Spécialisée dans l\'accompagnement des personnes à mobilité réduite à Madinah.' },
-};
+const getGuideData = cache(async (slug: string) => prisma.guideProfile.findFirst({
+  where: { slug, status: 'ACTIVE' },
+  include: {
+    guideAccount: true,
+    languages: { orderBy: { languageCode: 'asc' } },
+    places: { where: { isActive: true }, select: { placeKey: true } },
+    reviews: {
+      where: { status: 'APPROVED' },
+      orderBy: { createdAt: 'desc' },
+      take: 3,
+      include: { pelerin: { select: { firstName: true, lastName: true, country: true } } },
+    },
+  },
+}))
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const { slug } = await params;
-  const guideData = await getGuideData(slug);
-  if (guideData) {
-    const name = guideData.guideAccount?.displayName
-      || `${guideData.guideAccount?.firstName ?? ''} ${guideData.guideAccount?.lastName ?? ''}`.trim()
-      || 'Guide';
-    const desc = guideData.bio || `Profil guide — ${name}`;
-    return {
-      title: `${name} — Guide privé Omra certifié | SAFARUMA`,
-      description: desc,
-      alternates: { canonical: `https://safaruma.com/guides/${slug}` },
-      openGraph: {
-        title: `${name} — SAFARUMA`,
-        description: desc,
-        url: `https://safaruma.com/guides/${slug}`,
-      },
-    };
-  }
-  const g = GUIDE_META[slug];
-  if (!g) return { title: 'Guide — SAFARUMA' };
+  const { slug } = await params
+  const guide = await getGuideData(slug)
+  if (!guide) return { title: 'Guide — SAFARUMA' }
+  const name = guide.guideAccount?.displayName || `${guide.guideAccount?.firstName ?? ''} ${guide.guideAccount?.lastName ?? ''}`.trim() || 'Guide SAFARUMA'
+  const description = guide.bio || `Profil guide — ${name}`
   return {
-    title: `${g.name} — Guide privé Omra certifié | SAFARUMA`,
-    description: g.desc,
+    title: `${name} — Guide privé Omra | SAFARUMA`,
+    description,
     alternates: { canonical: `https://safaruma.com/guides/${slug}` },
-    openGraph: {
-      title: `${g.name} — Guide privé Omra | SAFARUMA`,
-      description: g.desc,
-      url: `https://safaruma.com/guides/${slug}`,
-    },
-  };
+    openGraph: { title: `${name} — SAFARUMA`, description, url: `https://safaruma.com/guides/${slug}` },
+  }
 }
 
-// Pre-render all guide pages at build time
 export async function generateStaticParams() {
   try {
-    const guides = await prisma.guideProfile.findMany({
-      where: { slug: { not: null }, status: 'ACTIVE' },
-      select: { slug: true },
-    });
-    const dbSlugs = guides.filter(g => g.slug).map(g => ({ slug: g.slug! }));
-    // Merge with hardcoded slugs (deduped) so removed-from-DB guides don't 404
-    return dbSlugs;
+    const guides = await prisma.guideProfile.findMany({ where: { slug: { not: null }, status: 'ACTIVE' }, select: { slug: true } })
+    return guides.filter(guide => guide.slug).map(guide => ({ slug: guide.slug! }))
   } catch {
-    return [{ slug: 'naim-laamari' }];
+    return []
   }
 }
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
+export default async function GuideProfilePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const guide = await getGuideData(slug)
+  if (!guide || !guide.guideAccount) notFound()
 
-const PACKAGES = [
-  {
-    name: 'Omra Essentielle',
-    label: 'Essentielle',
-    price: 280,
-    days: 3,
-    description:
-      "Le parcours fondamental de la Omra avec accompagnement complet du guide lors des rituels obligatoires. Idéal pour les pèlerins avec un budget maîtrisé.",
-    features: [
-      "Accueil à l'aéroport et transfert",
-      "Guide personnel pour tous les rituels (tawaf, sa'i)",
-      "Livret de du'a et supplications illustré",
-      'Orientation Masjid Al-Haram et Zamzam',
-      'Disponibilité téléphonique 24h/24',
-      'Certificat de pèlerinage personnalisé',
-    ],
-  },
-  {
-    name: 'Omra & Histoire',
-    label: 'Histoire',
-    price: 450,
-    days: 5,
-    description:
-      "L'immersion spirituelle et historique complète : rituels + visites des lieux de la Sîra prophétique. Inclut Jabal Nour, Jabal Thawr et le train Haramayn.",
-    features: [
-      'Tout ce qui est inclus dans Essentielle',
-      'Voiture privée 7 places pour les visites',
-      'Train Haramayn Makkah ↔ Madinah',
-      'Ascension Jabal Nour (Grotte de Hira)',
-      'Visite Jabal Thawr et sites de la Sîra',
-      'Conférence "Histoire des Lieux Saints" (1h)',
-    ],
-  },
-  {
-    name: 'Grand Voyage Spirituel',
-    label: 'Grand Voyage',
-    price: 780,
-    days: 10,
-    description:
-      'Le voyage complet : Makkah, Madinah, Badr, Ohoud et tous les sites historiques majeurs. Adapté PMR. Confort premium tout inclus.',
-    features: [
-      'Tout ce qui est inclus dans Omra & Histoire',
-      'Makkah + Madinah + Badr + Ohoud',
-      'Adapté PMR (fauteuil roulant disponible)',
-      'Hôtel 5★ sélectionné à proximité du Haram',
-      'Repas du soir inclus (cuisine orientale)',
-      'Album photo souvenir du voyage',
-    ],
-  },
-];
+  const [placeCatalog, ratingAggregate] = await Promise.all([
+    getEffectivePlaceCatalog(),
+    prisma.review.aggregate({
+      where: { guideProfileId: guide.id, status: 'APPROVED' },
+      _avg: { ratingOverall: true },
+      _count: { ratingOverall: true },
+    }),
+  ])
 
-const PLACES = [
-  // MAKKAH
-  { emoji: '🕋', nameAr: 'المسجد الحرام', nameFr: 'Masjid Al-Haram', desc: 'La plus grande mosquée du monde', category: 'MAKKAH' as const },
-  { emoji: '⬛', nameAr: 'الكعبة المشرفة', nameFr: 'La Kaaba', desc: 'Le sanctuaire sacré vers lequel prient les musulmans', category: 'MAKKAH' as const },
-  { emoji: '💧', nameAr: 'بئر زمزم', nameFr: 'Puits de Zamzam', desc: "Source d'eau bénite depuis Hagar", category: 'MAKKAH' as const },
-  { emoji: '⛰️', nameAr: 'جبل النور', nameFr: 'Jabal Nour', desc: 'La montagne de la Lumière', category: 'MAKKAH' as const },
-  { emoji: '🌙', nameAr: 'غار حراء', nameFr: 'Grotte de Hira', desc: 'Lieu de la première révélation coranique', category: 'MAKKAH' as const },
-  { emoji: '🏔️', nameAr: 'جبل ثور', nameFr: 'Jabal Thawr', desc: "Refuge lors de l'Hégire du Prophète ﷺ", category: 'MAKKAH' as const },
-  { emoji: '🌄', nameAr: 'عرفات', nameFr: 'Arafat', desc: 'Lieu du pilier central du Hajj', category: 'MAKKAH' as const },
-  { emoji: '🌠', nameAr: 'مزدلفة', nameFr: 'Muzdalifah', desc: 'Halte sacrée entre Arafat et Mina', category: 'MAKKAH' as const },
-  { emoji: '🏕️', nameAr: 'منى', nameFr: 'Mina', desc: 'La "Cité des Tentes" du Hajj', category: 'MAKKAH' as const },
-  { emoji: '🚶‍♀️', nameAr: 'المروة', nameFr: 'Al-Marwa', desc: "Une des deux collines du Sa'i", category: 'MAKKAH' as const },
-  { emoji: '🚶', nameAr: 'الصفا', nameFr: 'Al-Safa', desc: "Point de départ du Sa'i", category: 'MAKKAH' as const },
-  { emoji: '🕌', nameAr: 'مسجد الجن', nameFr: 'Masjid Al-Jinn', desc: 'Lieu où les djinns écoutèrent le Coran', category: 'MAKKAH' as const },
-  // MADINAH
-  { emoji: '🌿', nameAr: 'المسجد النبوي', nameFr: 'Masjid An-Nabawi', desc: 'La mosquée du Prophète ﷺ', category: 'MADINAH' as const },
-  { emoji: '💚', nameAr: 'الروضة الشريفة', nameFr: 'La Rawdah', desc: 'Le jardin du Paradis entre le minbar et la tombe', category: 'MADINAH' as const },
-  { emoji: '🏛️', nameAr: 'مسجد قباء', nameFr: 'Masjid Quba', desc: "La première mosquée de l'Islam", category: 'MADINAH' as const },
-  { emoji: '🧭', nameAr: 'مسجد القبلتين', nameFr: 'Masjid Al-Qiblatayn', desc: 'Mosquée des deux Qiblas', category: 'MADINAH' as const },
-  { emoji: '⚰️', nameAr: 'البقيع', nameFr: 'Cimetière Al-Baqi', desc: 'Cimetière des Compagnons du Prophète', category: 'MADINAH' as const },
-  { emoji: '⛰️', nameAr: 'أحد', nameFr: 'Mont Ohoud', desc: "Site de la bataille d'Ohoud", category: 'MADINAH' as const },
-  { emoji: '🕌', nameAr: 'مسجد الفتح', nameFr: 'Masjid Al-Fateh', desc: 'Mosquée de la Victoire', category: 'MADINAH' as const },
-  { emoji: '🌴', nameAr: 'سوق التمور', nameFr: 'Marché aux dattes', desc: 'Variétés rares de dattes de Madinah', category: 'MADINAH' as const },
-  // HISTORIQUE
-  { emoji: '⚔️', nameAr: 'بدر', nameFr: 'Badr', desc: "Site de la première grande bataille de l'Islam", category: 'HISTORIQUE' as const },
-  { emoji: '🛡️', nameAr: 'الخندق', nameFr: 'Al-Khandaq', desc: 'La Bataille du Fossé', category: 'HISTORIQUE' as const },
-  { emoji: '🌅', nameAr: 'حنين', nameFr: 'Hunayn', desc: 'Vallée de la bataille de Hunayn', category: 'HISTORIQUE' as const },
-  { emoji: '🌊', nameAr: 'بئر أريس', nameFr: 'Bir Aris', desc: 'Puits où le Prophète ﷺ pria', category: 'HISTORIQUE' as const },
-  { emoji: '🕌', nameAr: 'مسجد الغمامة', nameFr: 'Masjid Al-Ghamamah', desc: "Lieu de la prière de l'Aïd du Prophète ﷺ", category: 'HISTORIQUE' as const },
-];
+  const account = guide.guideAccount
+  const name = account.displayName || `${account.firstName ?? ''} ${account.lastName ?? ''}`.trim() || 'Guide SAFARUMA'
+  const initials = `${account.firstName?.[0] ?? name[0] ?? 'G'}${account.lastName?.[0] ?? name[1] ?? 'S'}`.toUpperCase()
+  const rating = ratingAggregate._count.ratingOverall > 0 ? Math.round((ratingAggregate._avg.ratingOverall ?? 0) * 10) / 10 : null
+  const languages = guide.languages.map(language => language.languageCode)
+  const serviceCities = [guide.servesMakkah ? 'Makkah' : null, guide.servesMadinah ? 'Médine' : null].filter(Boolean) as string[]
+  const reviews = guide.reviews.map(review => ({
+    name: publicReviewerName(review.pelerin.firstName, review.pelerin.lastName),
+    country: review.pelerin.country || 'Pays non renseigné',
+    flag: '',
+    date: review.createdAt.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric', timeZone: 'UTC' }),
+    rating: review.ratingOverall,
+    text: review.comment,
+  }))
+  const profilePlaces = placeCatalog
+    .filter(place => place.isActive)
+    .map(place => ({ emoji: place.emoji, nameAr: place.nameAr, nameFr: place.nameFr, desc: place.desc, category: place.category }))
+  const realStats = [
+    ratingAggregate._count.ratingOverall > 0 ? { value: String(ratingAggregate._count.ratingOverall), label: 'Avis vérifiés' } : null,
+    guide.experienceYears !== null ? { value: `${guide.experienceYears} ans`, label: 'Expérience' } : null,
+  ].filter(Boolean) as Array<{ value: string; label: string }>
 
-const REVIEWS = [
-  {
-    name: 'Mohammed A.',
-    country: 'France',
-    flag: '🇫🇷',
-    date: 'Mars 2026',
-    rating: 5,
-    text: "Rachid est bien plus qu'un guide — c'est un véritable compagnon de voyage spirituel. Sa connaissance de la Sîra est encyclopédique et sa pédagogie rend chaque lieu vivant. Je n'aurais jamais autant ressenti la profondeur de ces lieux sans lui.",
-  },
-  {
-    name: 'Khadija M.',
-    country: 'Belgique',
-    flag: '🇧🇪',
-    date: 'Janvier 2026',
-    rating: 5,
-    text: "Voyage en famille avec 4 enfants — Rachid a su adapter le rythme et le discours à chacun. Les enfants ont adoré les anecdotes historiques qu'il racontait en marchant. Disponible à toute heure, discret et bienveillant. Je recommande vivement.",
-  },
-  {
-    name: 'Youssef K.',
-    country: 'Suisse',
-    flag: '🇨🇭',
-    date: 'Novembre 2025',
-    rating: 5,
-    text: "La montée de Jabal Nour avec Rachid reste le moment le plus fort de ma vie. Il nous a récité les premiers versets de la sourate Al-Alaq au sommet. Un frisson que je n'oublierai jamais. Organisation parfaite, ponctualité impeccable.",
-  },
-  {
-    name: 'Amina B.',
-    country: 'Canada',
-    flag: '🇨🇦',
-    date: 'Octobre 2025',
-    rating: 5,
-    text: "Premier voyage à La Mecque, beaucoup d'appréhension. Rachid m'a tout de suite mise à l'aise avec son calme et sa bienveillance. Il a géré la foule au Haram avec une maîtrise remarquable. Le forfait \"Omra & Histoire\" valait vraiment l'investissement.",
-  },
-  {
-    name: 'Ibrahim D.',
-    country: 'Sénégal',
-    flag: '🇸🇳',
-    date: 'Ramadan 2025',
-    rating: 4,
-    text: "Excellente expérience dans l'ensemble. Rachid parle français avec un niveau académique impressionnant. La visite de Badr m'a particulièrement touché — il connaît le nom de chaque Compagnon enterré là-bas. Petite suggestion : prévoir plus de temps à la Rawdah.",
-  },
-];
-
-// ─── Guide Data ────────────────────────────────────────────────────────────────
-
-const NAIM_PACKAGES = [
-  {
-    name: 'Forfait Découverte',
-    label: 'Découverte',
-    price: 150,
-    days: 1,
-    description: 'Visite guidée 4h des lieux essentiels de Makkah avec Naïm LAAMARI, Responsable Terrain SAFARUMA.',
-    features: [
-      'Visite guidée 4h des lieux essentiels',
-      'Masjid Al-Haram et la Kaaba',
-      'Puits de Zamzam et Safa & Marwa',
-      'Explications historiques et spirituelles',
-      'Disponibilité téléphonique après la visite',
-    ],
-  },
-  {
-    name: 'Forfait Omra Complète',
-    label: 'Omra Complète',
-    price: 350,
-    days: 3,
-    description: 'Accompagnement complet des rituels de la Omra + histoire des lieux saints de Makkah.',
-    features: [
-      "Accompagnement complet des rituels (tawaf, sa'i, ihram)",
-      'Tous les sites de Makkah : Hira, Thawr, Mina, Arafat',
-      'Gestion de toute situation imprévue sur place',
-      'Voiture privée incluse pour les déplacements',
-      'Disponibilité 24h/24 pendant toute la durée',
-      "Livret de du'a et supplications SAFARUMA",
-      'Certificat de pèlerinage personnalisé',
-    ],
-  },
-  {
-    name: 'Forfait VIP SAFARUMA',
-    label: 'VIP SAFARUMA',
-    price: 600,
-    days: 5,
-    description: 'Service premium exclusif, groupe max 4 personnes. Disponibilité totale de Naïm sur toute la durée.',
-    features: [
-      'Tout ce qui est inclus dans Omra Complète',
-      'Groupe limité à 4 personnes maximum',
-      'Véhicule de prestige avec chauffeur',
-      'Hôtel 5★ sélectionné à proximité du Haram',
-      'Repas du soir inclus chaque jour',
-      'Accès prioritaire à certains espaces du Haram',
-      'Album photo souvenir du voyage',
-      'Suivi WhatsApp personnel post-voyage',
-    ],
-  },
-];
-
-const NAIM_REVIEWS = [
-  {
-    name: 'Yasmine B.',
-    country: 'Paris, France',
-    flag: '🇫🇷',
-    date: 'Mars 2026',
-    rating: 5,
-    text: "Naïm nous a accompagnés pendant toute notre Omra. Sa connaissance des lieux saints est impressionnante. Il a géré un problème de dernière minute avec un calme et une efficacité remarquables. Barakallahu fik.",
-  },
-  {
-    name: 'Omar K.',
-    country: 'Lyon, France',
-    flag: '🇫🇷',
-    date: 'Février 2026',
-    rating: 5,
-    text: "Guide exceptionnel. Il nous a expliqué l'histoire de chaque lieu avec une précision et une passion rares. Ma famille et moi garderons ce voyage toute notre vie.",
-  },
-  {
-    name: 'Fatou D.',
-    country: 'Dakar, Sénégal',
-    flag: '🇸🇳',
-    date: 'Janvier 2026',
-    rating: 5,
-    text: "Guide officiel SAFARUMA et ça se voit ! Professionnel, ponctuel, bienveillant. Il parle un français parfait et connaît Médine comme sa poche.",
-  },
-];
-
-const GUIDES: Record<string, {
-  name: string;
-  initials: string;
-  location: string;
-  experience: number;
-  rating: number;
-  reviewCount: number;
-  pilgrimsCount: string;
-  returnRate: number;
-  speciality: string;
-  isWoman?: boolean;
-  isOfficial?: boolean;
-  languages: string[];
-  shortBio: string;
-  bioFull: string[];
-  certifications: string[];
-  services: string[];
-  gradient: string;
-}> = {
-  'naim-laamari': {
-    name: 'Naïm LAAMARI',
-    initials: 'NL',
-    location: 'Madinah Al-Munawwarah',
-    experience: 8,
-    rating: 5.0,
-    reviewCount: 0,
-    pilgrimsCount: 'OFFICIEL',
-    returnRate: 100,
-    speciality: 'Guide Officiel SAFARUMA · Responsable Terrain',
-    isOfficial: true,
-    languages: ['🇫🇷 Français', '🇸🇦 Arabe', '🇩🇿 Algérien'],
-    shortBio:
-      "Responsable Terrain officiel de SAFARUMA à Madinah. Guide certifié depuis 8 ans, étudiant en sciences islamiques, formateur et référent de tous les guides SAFARUMA présents à Madinah.",
-    bioFull: [
-      "Naïm LAAMARI est le Responsable Terrain officiel de SAFARUMA à Médine. Guide certifié depuis 8 ans et étudiant en sciences islamiques, il accompagne les voyageurs SAFARUMA qui souhaitent vivre leur Omra dans les meilleures conditions spirituelles et logistiques.",
-      "En tant que Responsable Terrain, Naïm est disponible pour intervenir en cas d'imprévu et assurer le remplacement d'un guide si besoin. Il forme aussi les guides SAFARUMA présents à Médine.",
-      "Étudiant depuis plus de 6 ans à l'université de Médine, passionné par l'histoire, il est spécialisé dans la branche histoire de l'islam.",
-      "Naïm parle couramment le français académique, l'arabe classique et le darija marocain, ainsi que l'anglais. Sa maîtrise du français lui permet d'accompagner des pèlerins issus de toutes les communautés francophones : France métropolitaine, Belgique, Suisse, Maghreb, Afrique subsaharienne, Canada. Sa maîtrise de l'arabe lui permet d'expliquer la signification exacte des du'as et textes coraniques directement dans leur langue originale, une richesse rare.",
-      "La Omra est son domaine d'excellence absolu. Naïm connaît chaque rituel dans ses moindres détails : les étapes et conditions de l'Ihram, les du'as du Tawaf tour par tour, les conditions de validité du Sa'i, les règles du Tahallul pour les hommes et les femmes. Il adapte son accompagnement selon l'expérience du pèlerin : que vous soyez primo-arrivant ou que vous reveniez pour la dixième fois, Naïm saura enrichir votre compréhension et approfondir votre vécu spirituel.",
-      "Naïm est également formé à l'accompagnement des personnes à mobilité réduite (PMR). Il adapte systématiquement le rythme de la visite à l'état physique et l'âge du pèlerin, prenant toutes les précautions nécessaires pour que la Omra soit accomplie dans la dignité, le confort et la sérénité.",
-      "En tant que Responsable Terrain, Naïm gère les situations d'urgence avec calme et efficacité. Pèlerin égaré, guide défaillant à la dernière minute, problème médical, conflit de réservation : rien ne le déstabilise. Il dispose d'un réseau solide sur place — équipes médicales du Haram, services consulaires, prestataires de transport — qui lui permet d'intervenir rapidement dans toute situation imprévue, 24h/24 pendant toute la durée de votre séjour.",
-      "Les pèlerins qui ont voyagé avec Naïm témoignent unanimement : sa présence transforme la Omra. Au-delà de la logistique et de la connaissance, c'est sa chaleur humaine, sa sincérité et sa foi communicative qui rendent chaque voyage inoubliable. Yasmine B. (Paris) : « Un frère, pas un guide. » Omar K. (Lyon) : « Il nous a fait aimer encore plus ces lieux bénis. » Fatou D. (Dakar) : « Professionnel, ponctuel, bienveillant — il connaît Médine comme sa poche. »",
-    ],
-    certifications: [
-      'Formation en Sciences Islamiques — Université de Médine',
-      'Licence officielle de Guide — Ministère du Hajj et de la Omra',
-      'Responsable Terrain Certifié — SAFARUMA',
-      'Formateur et Certificateur des Guides SAFARUMA à Médine',
-      'Certification Gestion de Crise — Autorité du Haram',
-    ],
-    services: [
-      'Intervention 7j/7 en cas d\'imprévu',
-      'Remplacement guide garanti',
-      'Rituels Omra complets',
-      'Histoire islamique approfondie',
-      'Accompagnement PMR',
-      'Formation et certification guides',
-      'Gestion de crise sur terrain',
-      'Lieux spirituels rares de Médine',
-    ],
-    gradient: 'linear-gradient(135deg, #F0D897, #C9A84C)',
-  },
-
-};
-
-// ─── Page ──────────────────────────────────────────────────────────────────────
-
-export default async function GuideProfilePage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
-  const placeCatalog = await getEffectivePlaceCatalog();
-
-  // ── Fetch from Neon (mémoïsé — même requête que generateMetadata) ─────────
-  const guideData = await getGuideData(slug) as Awaited<ReturnType<typeof getGuideData>> & {
-    guideAccount: NonNullable<unknown>;
-    languages: NonNullable<unknown>[];
-    packages: NonNullable<unknown>[];
-  } | null;
-
-  // ── Places actives + note réelle : indépendantes, lancées en parallèle ────
-  let activePlaceKeys: string[] = []
-  let realRating: number | null = null
-  let realReviewCount = 0
-
-  if (guideData) {
-    const guideProfileId = (guideData as any).id;
-    const [placesResult, ratingResult] = await Promise.allSettled([
-      prisma.guidePlace.findMany({ where: { guideProfileId } }),
-      prisma.review.aggregate({
-        where: { reservation: { guideProfileId } },
-        _avg: { ratingOverall: true },
-        _count: { ratingOverall: true },
-      }),
-    ]);
-
-    if (placesResult.status === 'fulfilled') {
-      activePlaceKeys = placesResult.value
-        .filter(p => p.isActive)
-        .map(p => p.placeKey);
-    }
-    if (ratingResult.status === 'fulfilled' && ratingResult.value._count.ratingOverall > 0) {
-      realRating = Math.round((ratingResult.value._avg.ratingOverall ?? 0) * 10) / 10;
-      realReviewCount = ratingResult.value._count.ratingOverall;
-    }
+  const schema = {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name,
+    description: guide.bio || undefined,
+    url: `https://safaruma.com/guides/${slug}`,
+    knowsLanguage: languages,
+    ...(rating !== null ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: rating, reviewCount: ratingAggregate._count.ratingOverall, bestRating: 5, worstRating: 1 } } : {}),
   }
 
-  const hardcoded = GUIDES[slug] ?? null;
-  if (!guideData) notFound();
-
-  // ── Build packages ────────────────────────────────────────────────────────
-  type PackageShape = { name: string; label: string; price: number; days: number; description: string; features: string[] };
-  let packages: PackageShape[];
-  const dbPackages = (guideData as any)?.packages ?? [];
-  if (dbPackages.length > 0) {
-    packages = dbPackages.map((p: any) => ({
-      name: p.name,
-      label: p.name,
-      price: p.pricePerPerson,
-      days: p.durationDays,
-      description: p.cancellationPolicy || '',
-      features: [],
-    }));
-  } else if (slug === 'naim-laamari') {
-    packages = NAIM_PACKAGES;
-  } else {
-    packages = PACKAGES;
-  }
-
-  // ── Build reviews ─────────────────────────────────────────────────────────
-  const reviews = slug === 'naim-laamari' ? NAIM_REVIEWS : REVIEWS;
-
-  // ── Build guide object (Prisma preferred, hardcoded as fallback) ──────────
-  const dbUser = (guideData as any)?.guideAccount;
-  const dbLangs: any[] = (guideData as any)?.languages ?? [];
-  const prismaName = dbUser
-    ? (dbUser.displayName || `${dbUser.firstName ?? ''} ${dbUser.lastName ?? ''}`.trim()).trim()
-    : '';
-
-  const guide = {
-    name:         prismaName || hardcoded?.name || 'Guide SAFARUMA',
-    initials:     (prismaName || hardcoded?.name || 'GS').slice(0, 2).toUpperCase(),
-    location:     (guideData as any)?.city || hardcoded?.location || 'Arabie Saoudite',
-    experience:   (guideData as any)?.experienceYears ?? hardcoded?.experience ?? 0,
-    rating:       realRating ?? hardcoded?.rating ?? 5.0,
-    reviewCount:  realReviewCount || (hardcoded?.reviewCount ?? 0),
-    pilgrimsCount: hardcoded?.pilgrimsCount ?? '0',
-    returnRate:   hardcoded?.returnRate ?? 0,
-    speciality:   hardcoded?.speciality || (guideData as any)?.bio?.slice(0, 60) || '',
-    isOfficial:   slug === 'naim-laamari',
-    isWoman:      hardcoded?.isWoman ?? false,
-    languages:    dbLangs.length > 0
-                    ? dbLangs.map((l: any) => l.languageCode)
-                    : (hardcoded?.languages ?? []),
-    shortBio:     (guideData as any)?.bio || hardcoded?.shortBio || '',
-    bioFull:      hardcoded?.bioFull?.length
-                    ? hardcoded.bioFull
-                    : ((guideData as any)?.bio ? [(guideData as any).bio] : []),
-    certifications: hardcoded?.certifications?.length
-                    ? hardcoded.certifications
-                    : ((guideData as any)?.university ? [`Diplômé — ${(guideData as any).university}`] : []),
-    services:     hardcoded?.services ?? [],
-    gradient:     hardcoded?.gradient ?? 'linear-gradient(135deg, #F0D897, #C9A84C)',
-  };
-
-  const locUp = guide.location.toUpperCase();
-  const guideCityDerived: 'MAKKAH' | 'MADINAH' | null =
-    locUp.includes('MAKKAH') ? 'MAKKAH' :
-    locUp.includes('MADINAH') ? 'MADINAH' :
-    null;
-
-  const guideSchema = {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Person",
-        "@id": `https://safaruma.com/guides/${slug}#person`,
-        "name": guide.name,
-        "jobTitle": "Guide privé Omra certifié",
-        "description": guide.shortBio || `Guide privé certifié Omra à La Mecque et Médine — ${guide.name}`,
-        "worksFor": { "@id": "https://safaruma.com/#organization" },
-        ...(guide.languages.length > 0 && {
-          "knowsLanguage": guide.languages.map(l =>
-            l.replace(/[\u{1F1E0}-\u{1F1FF}]{2}\s*/gu, '').trim()
-          ),
-        }),
-        ...(guide.experience > 0 && {
-          "description": `${guide.shortBio || ''} ${guide.experience} ans d'expérience.`.trim(),
-        }),
-      },
-      {
-        "@type": "Service",
-        "@id": `https://safaruma.com/guides/${slug}#service`,
-        "name": `Guide privé Omra — ${guide.name}`,
-        "provider": { "@id": `https://safaruma.com/guides/${slug}#person` },
-        "serviceType": "Guide touristique et religieux",
-        "areaServed": { "@type": "Place", "name": "La Mecque & Médine, Arabie Saoudite" },
-        "url": `https://safaruma.com/guides/${slug}`,
-        ...(guide.reviewCount > 0 && {
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": String(guide.rating),
-            "reviewCount": String(guide.reviewCount),
-            "bestRating": "5",
-            "worstRating": "1",
-          },
-        }),
-        ...(packages.length > 0 && {
-          "offers": packages.map(p => ({
-            "@type": "Offer",
-            "name": p.name,
-            "price": String(p.price),
-            "priceCurrency": "EUR",
-          })),
-        }),
-      },
-    ],
-  };
-
-  return (
-    <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(guideSchema) }} />
-      <Navbar />
-
-      {/* HERO */}
-      <section style={{
-        background: 'var(--deep)',
-        paddingTop: '8rem',
-        paddingBottom: '4rem',
-        paddingLeft: '2rem',
-        paddingRight: '2rem',
-        textAlign: 'center',
-        position: 'relative',
-        overflow: 'hidden',
-      }}>
-        {/* Ambient glow */}
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'radial-gradient(ellipse 60% 80% at 50% 0%, rgba(201,168,76,0.12) 0%, transparent 65%)',
-          pointerEvents: 'none',
-        }}></div>
-
-        {/* Avatar */}
-        <div style={{ position: 'relative', zIndex: 1, display: 'inline-block', margin: '0 auto 0.75rem' }}>
-          {guide.isOfficial ? (
-            <div style={{
-              width: '120px',
-              height: '120px',
-              borderRadius: '50%',
-              border: '3px solid #C9A84C',
-              boxShadow: '0 0 20px rgba(201,168,76,0.3), 0 16px 48px rgba(0,0,0,0.3)',
-              overflow: 'hidden',
-              position: 'relative',
-              margin: '0 auto',
-            }}>
-              <Image
-                src="/guide-avatar.png"
-                alt="Naïm LAAMARI — Guide Officiel SAFARUMA"
-                fill
-                style={{ objectFit: 'cover', objectPosition: 'center top' }}
-                priority
-              />
-            </div>
-          ) : (
-            <div style={{
-              width: '110px',
-              height: '110px',
-              borderRadius: '50%',
-              background: guide.gradient,
-              margin: '0 auto',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontFamily: 'var(--font-cormorant), serif',
-              fontSize: '2.5rem',
-              fontWeight: 700,
-              color: 'var(--deep)',
-              boxShadow: '0 0 0 4px rgba(201,168,76,0.25), 0 16px 48px rgba(0,0,0,0.3)',
-            }}>
-              {guide.initials}
-            </div>
-          )}
-          {guide.isOfficial && (
-            <div style={{ position: 'absolute', bottom: -16, left: '50%', transform: 'translateX(-50%)' }}>
-              <svg width="32" height="40" viewBox="0 0 32 40" fill="none">
-                <circle cx="16" cy="10" r="7" fill="#C9A84C" opacity="0.9"/>
-                <rect x="11" y="17" width="10" height="14" rx="2" fill="#C9A84C" opacity="0.85"/>
-                <rect x="8" y="24" width="16" height="10" rx="3" fill="#C9A84C" opacity="0.7"/>
-                <line x1="16" y1="31" x2="16" y2="39" stroke="#C9A84C" strokeWidth="1.5" strokeLinecap="round"/>
-                <line x1="8" y1="34" x2="24" y2="34" stroke="#C9A84C" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-            </div>
-          )}
-        </div>
-
-        {/* Name */}
-        <h1 style={{
-          fontFamily: 'var(--font-cormorant), serif',
-          fontSize: guide.isOfficial ? 'clamp(2rem, 5vw, 3rem)' : 'clamp(2rem, 4vw, 3rem)',
-          fontWeight: guide.isOfficial ? 700 : 400,
-          color: 'white',
-          marginBottom: '0.4rem',
-          marginTop: guide.isOfficial ? '1.5rem' : '0',
-          position: 'relative',
-          zIndex: 1,
-          lineHeight: 1.15,
-        }}>
-          {guide.name}
-        </h1>
-
-        {/* Speciality */}
-        <div style={{
-          fontSize: '0.78rem',
-          fontWeight: 700,
-          letterSpacing: '0.15em',
-          textTransform: 'uppercase',
-          color: 'var(--gold)',
-          marginBottom: guide.isOfficial ? '1rem' : '0.6rem',
-          position: 'relative',
-          zIndex: 1,
-        }}>
-          {guide.speciality}
-        </div>
-
-        {/* Official badges */}
-        {guide.isOfficial && (
-          <div style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            justifyContent: 'center',
-            gap: '8px',
-            marginBottom: '1.25rem',
-            position: 'relative',
-            zIndex: 1,
-          }}>
-            {[
-              { bg: '#1A1209', color: '#F0D897', border: '1px solid #C9A84C', icon: '🛡️', label: 'OFFICIEL SAFARUMA' },
-              { bg: '#065F46', color: 'white', border: 'none', icon: '✓', label: 'GUIDE VÉRIFIÉ' },
-              { bg: '#C9A84C', color: '#1A1209', border: 'none', icon: '📍', label: 'RESPONSABLE TERRAIN' },
-              { bg: '#1E3A5F', color: 'white', border: 'none', icon: '🎓', label: 'FORMATEUR CERTIFIÉ' },
-            ].map(b => (
-              <span key={b.label} style={{
-                background: b.bg,
-                color: b.color,
-                border: b.border ?? 'none',
-                borderRadius: '50px',
-                fontSize: '11px',
-                fontWeight: 700,
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                padding: '6px 14px',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '5px',
-              }}>
-                <span>{b.icon}</span> {b.label}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Rating */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0.5rem',
-          marginBottom: '1.25rem',
-          position: 'relative',
-          zIndex: 1,
-          flexWrap: 'wrap',
-        }}>
-          <span style={{ color: 'var(--gold)', letterSpacing: '2px', fontSize: '1rem' }}>★★★★★</span>
-          <span style={{ color: 'white', fontWeight: 700, fontSize: '0.9rem' }}>{guide.rating}</span>
-          {guide.isOfficial ? (
-            <span style={{ background: '#C9A84C', color: '#1A1209', fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.1em', padding: '3px 10px', borderRadius: 50 }}>NOTE PARFAITE</span>
-          ) : (
-            <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.82rem' }}>({guide.reviewCount} avis)</span>
-          )}
-        </div>
-
-        {/* Short bio */}
-        <p style={{
-          color: 'rgba(255,255,255,0.65)',
-          fontSize: '0.95rem',
-          maxWidth: '580px',
-          margin: '0 auto 2rem',
-          lineHeight: 1.85,
-          position: 'relative',
-          zIndex: 1,
-        }}>
-          {guide.shortBio}
-        </p>
-
-        {/* Stats row */}
-        <div style={{
-          display: 'flex',
-          gap: '1rem',
-          justifyContent: 'center',
-          flexWrap: 'wrap',
-          marginBottom: '2rem',
-          position: 'relative',
-          zIndex: 1,
-        }}>
-          {[
-            { value: String(guide.reviewCount), label: 'Avis vérifiés' },
-            { value: guide.pilgrimsCount, label: 'Pèlerins accompagnés' },
-            { value: `${guide.experience} ans`, label: 'Expérience' },
-            { value: `${guide.returnRate}%`, label: 'Taux de retour' },
-          ].map((stat, i) => (
-            <div key={i} style={{
-              background: 'rgba(255,255,255,0.05)',
-              border: '1px solid rgba(201,168,76,0.2)',
-              borderRadius: '14px',
-              padding: '1rem 1.5rem',
-              textAlign: 'center',
-              minWidth: '110px',
-            }}>
-              <div style={{
-                fontFamily: 'var(--font-cormorant), serif',
-                fontSize: '1.6rem',
-                fontWeight: 700,
-                color: 'var(--gold-light)',
-                lineHeight: 1,
-                marginBottom: '0.25rem',
-              }}>
-                {stat.value}
-              </div>
-              <div style={{ fontSize: '0.68rem', color: 'rgba(255,255,255,0.45)', fontWeight: 600, letterSpacing: '0.05em' }}>
-                {stat.label}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Language chips */}
-        <div style={{
-          display: 'flex',
-          gap: '0.5rem',
-          justifyContent: 'center',
-          flexWrap: 'wrap',
-          position: 'relative',
-          zIndex: 1,
-        }}>
-          {guide.languages.map((lang, i) => (
-            <span key={i} style={{
-              padding: '0.3rem 0.9rem',
-              borderRadius: '50px',
-              background: i === 0 ? 'var(--gold)' : 'rgba(255,255,255,0.08)',
-              color: i === 0 ? 'var(--deep)' : 'rgba(255,255,255,0.75)',
-              fontWeight: i === 0 ? 700 : 500,
-              fontSize: '0.78rem',
-              border: i === 0 ? 'none' : '1px solid rgba(255,255,255,0.15)',
-            }}>
-              {lang}
-            </span>
-          ))}
-          {guide.location && (
-            <span style={{
-              padding: '0.3rem 0.9rem',
-              borderRadius: '50px',
-              background: 'rgba(255,255,255,0.08)',
-              color: 'rgba(255,255,255,0.75)',
-              fontSize: '0.78rem',
-              border: '1px solid rgba(255,255,255,0.15)',
-            }}>
-              📍 {guide.location}
-            </span>
-          )}
-        </div>
-      </section>
-
-      {/* MAIN CONTENT — client component handles tabs + booking widget */}
-      <div style={{ background: 'var(--cream)', minHeight: '80vh' }}>
-        <GuideProfileClient
-          slug={slug}
-          guideName={guide.name}
-          isOfficial={guide.isOfficial ?? false}
-          rating={guide.rating}
-          packages={packages}
-          places={PLACES.filter(place => placeCatalog.some(item => item.isActive && item.nameFr === place.nameFr))}
-          reviews={reviews}
-          certifications={guide.certifications}
-          services={guide.services}
-          bioFull={guide.bioFull}
-          languages={guide.languages}
-          activePlaceKeys={activePlaceKeys}
-          includedPlaceKeys={placeCatalog.filter(place => place.isActive && place.includedInBase).map(place => place.key)}
-          guideCity={guideCityDerived ?? undefined}
-          acceptingBookings={(guideData as any).acceptingBookings}
-          servesMakkah={(guideData as any).servesMakkah}
-          servesMadinah={(guideData as any).servesMadinah}
-        />
+  return <>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+    <Navbar />
+    <section style={{ background: '#1A1209', padding: '8rem 2rem 4rem', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 60% 80% at 50% 0%, rgba(201,168,76,.15), transparent 65%)' }} />
+      <div style={{ position: 'relative', zIndex: 1 }}>
+        {account.image ? <div style={{ position: 'relative', width: 112, height: 112, margin: '0 auto 16px', borderRadius: '50%', overflow: 'hidden', border: '3px solid #C9A84C' }}><Image src={account.image} alt={name} fill sizes="112px" unoptimized style={{ objectFit: 'cover' }} /></div> : <div style={{ width: 112, height: 112, margin: '0 auto 16px', borderRadius: '50%', display: 'grid', placeItems: 'center', background: 'linear-gradient(135deg,#F0D897,#C9A84C)', color: '#1A1209', fontSize: 35, fontWeight: 800, border: '3px solid #C9A84C' }}>{initials}</div>}
+        <h1 style={{ color: 'white', margin: '0 0 8px', fontSize: 'clamp(2rem,5vw,3rem)' }}>{name}</h1>
+        {serviceCities.length > 0 && <div style={{ color: '#C9A84C', fontWeight: 800, fontSize: 13, letterSpacing: '.12em', textTransform: 'uppercase' }}>{serviceCities.join(' · ')}</div>}
+        {rating === null ? <div style={{ margin: '18px auto', color: '#F0D897', fontWeight: 700 }}>Nouveau guide — aucun avis pour le moment</div> : <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, margin: '18px 0', color: 'white' }}><span style={{ color: '#C9A84C', letterSpacing: 2 }}>★★★★★</span><strong>{rating.toFixed(1)}</strong><span style={{ color: 'rgba(255,255,255,.55)' }}>({ratingAggregate._count.ratingOverall} avis)</span></div>}
+        {guide.bio && <p style={{ color: 'rgba(255,255,255,.7)', maxWidth: 650, lineHeight: 1.8, margin: '18px auto' }}>{guide.bio}</p>}
+        {realStats.length > 0 && <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap', margin: '24px 0' }}>{realStats.map(stat => <div key={stat.label} style={{ minWidth: 130, padding: 15, borderRadius: 13, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(201,168,76,.25)' }}><div style={{ color: '#F0D897', fontSize: 24, fontWeight: 800 }}>{stat.value}</div><div style={{ color: 'rgba(255,255,255,.5)', fontSize: 11 }}>{stat.label}</div></div>)}</div>}
+        {languages.length > 0 && <div style={{ display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>{languages.map(language => <span key={language} style={{ padding: '6px 12px', borderRadius: 999, background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.15)', color: 'rgba(255,255,255,.8)', fontSize: 12 }}>{language}</span>)}</div>}
       </div>
-
-      <Footer />
-    </>
-  );
+    </section>
+    <div style={{ background: '#FAF7F0', minHeight: '70vh' }}>
+      <GuideProfileClient
+        slug={slug}
+        guideName={name}
+        isOfficial={false}
+        rating={rating}
+        reviewCount={ratingAggregate._count.ratingOverall}
+        packages={[]}
+        places={profilePlaces}
+        reviews={reviews}
+        certifications={guide.university ? [`Études déclarées : ${guide.university}`] : []}
+        services={[]}
+        bioFull={guide.bio ? [guide.bio] : []}
+        languages={languages}
+        activePlaceKeys={guide.places.map(place => place.placeKey)}
+        includedPlaceKeys={placeCatalog.filter(place => place.isActive && place.includedInBase).map(place => place.key)}
+        guideCity={guide.city === 'MAKKAH' || guide.city === 'MADINAH' ? guide.city : undefined}
+        acceptingBookings={guide.acceptingBookings}
+        servesMakkah={guide.servesMakkah}
+        servesMadinah={guide.servesMadinah}
+      />
+    </div>
+    <Footer />
+  </>
 }

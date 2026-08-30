@@ -370,6 +370,7 @@ export async function processPaidCheckout(event: NormalizedCheckoutPaidEvent): P
               selectedPlaces: mission.selectedPlaces,
               localTransport: mission.localTransport,
               localTransportDays: mission.localTransportDays,
+              guideConfirmationRequestedAt: event.occurredAt,
             })),
           },
         },

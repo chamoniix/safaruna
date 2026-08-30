@@ -49,7 +49,13 @@ export async function POST(req: NextRequest) {
       })
       if (claimed.count !== 1) throw new Error('RESET_TOKEN_ALREADY_USED')
 
-      await tx.guideAccount.update({ where: { id: resetToken.guideAccountId }, data: { passwordHash } })
+      await tx.guideAccount.update({
+        where: { id: resetToken.guideAccountId },
+        data: {
+          passwordHash,
+          emailVerified: resetToken.guideAccount.emailVerified ?? now,
+        },
+      })
       await tx.guideSession.updateMany({
         where: { guideAccountId: resetToken.guideAccountId, revokedAt: null },
         data: { revokedAt: now },
@@ -67,6 +73,8 @@ export async function POST(req: NextRequest) {
           detail: JSON.stringify({ request: { country: context.country, city: context.city, device: context.device, browser: context.browser } }),
           ip: context.ip,
           userAgent: context.userAgent,
+          before: { emailVerified: resetToken.guideAccount.emailVerified },
+          after: { emailVerified: resetToken.guideAccount.emailVerified ?? now },
         },
       })
     })

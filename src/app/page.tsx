@@ -163,7 +163,7 @@ const guides: CarouselItem[] = [
     meta: 'Français · Arabe · English · Darija',
     cta: 'Voir le profil complet',
     badges: ['OFFICIEL SAFARUMA', 'GUIDE VÉRIFIÉ', 'RESPONSABLE TERRAIN', 'FORMATEUR CERTIFIÉ'],
-    highlights: ['5.0 · avis vérifiés', 'Makkah', '8 ans d’expérience terrain', 'Français, Arabe, English, Darija'],
+    highlights: ['Nouveau guide · aucun avis pour le moment', 'Makkah', '8 ans d’expérience terrain', 'Français, Arabe, English, Darija'],
     price: 'À partir de 150€ / pers.',
   },
   {
@@ -370,62 +370,7 @@ const steps: CarouselItem[] = [
   },
 ];
 
-const reviews: CarouselItem[] = [
-  {
-    id: 'karim-live',
-    title: 'Karim L.',
-    text: "Rachid nous a fait vivre l'histoire à chaque pas. La montée de Jabal Nour avec ses explications était le moment le plus fort de notre vie.",
-    href: '#avis',
-    meta: '★★★★★',
-    image: '/images/reviews/review-kaaba-regard.jpg',
-    cta: 'Voir les avis',
-  },
-  {
-    id: 'safia-live',
-    title: 'Safia M.',
-    text: 'En tant que groupe de femmes, nous avions des appréhensions. Fatima a tout géré avec une douceur et une compétence incroyables.',
-    href: '#avis',
-    meta: '★★★★★',
-    image: '/images/reviews/review-nabawi-esplanade.jpg',
-    cta: 'Voir les avis',
-  },
-  {
-    id: 'ibrahima-live',
-    title: 'Ibrahima D.',
-    text: "Youssouf parle Wolof, connaît les histoires que nos anciens nous ont transmises, et les relie aux lieux saints. Toute la famille est repartie transformée.",
-    href: '#avis',
-    meta: '★★★★★',
-    image: '/images/reviews/review-tawaf-foule.jpg',
-    cta: 'Voir les avis',
-  },
-  {
-    id: 'meryem',
-    title: 'Meryem B.',
-    text: 'Une expérience incroyable. Notre guide a pris le temps d’expliquer chaque étape, de répondre aux questions de mes parents et de rendre la Omra plus profonde.',
-    href: '#avis',
-    meta: '★★★★★',
-    image: '/images/reviews/review-nabawi-parasols.jpg',
-    cta: 'Voir les avis',
-  },
-  {
-    id: 'converti',
-    title: 'Nadir C.',
-    text: "Tout juste converti, j'ai découvert la Omra sans me sentir perdu. Le guide expliquait chaque étape avec patience et respect.",
-    href: '#avis',
-    meta: '★★★★★',
-    image: '/images/reviews/review-kaaba-nuit.jpg',
-    cta: 'Voir les avis',
-  },
-  {
-    id: 'hesitation',
-    title: 'Samira H.',
-    text: "J'ai hésité longtemps, je pensais que ce n'était pas le bon moment. L'accompagnement m'a rassurée dès la préparation.",
-    href: '#avis',
-    meta: '★★★★★',
-    image: '/images/reviews/review-mecque-vue.jpg',
-    cta: 'Voir les avis',
-  },
-];
+const reviews: CarouselItem[] = [];
 
 function Reveal({
   children,
@@ -1110,10 +1055,7 @@ function ReviewsSection({ openModal }: { openModal: (item: ModalContent) => void
             <br />
             notre plus belle récompense.
           </h2>
-          <p className="sfr-rating-line">★★★★★ 4.9 · 709 avis vérifiés</p>
-          <Link href="#avis" className="sfr-btn sfr-btn-outline sfr-title-action sfr-review-link">
-            Voir tous les avis →
-          </Link>
+          <p className="sfr-rating-line">Les avis vérifiés apparaîtront ici après validation.</p>
         </Reveal>
         <Carousel label="Avis clients">
           {reviews.map((review) => (

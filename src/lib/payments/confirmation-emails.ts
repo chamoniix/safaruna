@@ -138,11 +138,11 @@ export async function sendPaymentConfirmationEmails(opts: {
       idempotencyKey: `payment-confirmation:guide:${refNumber}:${guide.id}`,
       reference: { type: 'RESERVATION', id: refNumber },
       to: { email: guide.guideAccount.email, name },
-      subject: `[SAFARUMA] Nouvelle mission confirmée — ${refNumber}`,
+      subject: `[SAFARUMA] Nouvelle réservation à confirmer — ${refNumber}`,
       html: baseTemplate(`
-        ${heading('Nouvelle mission payée et confirmée')}
-        ${badge('MISSION CONFIRMÉE', '#1D5C3A')}
-        ${p(`<strong>${escapeHtml(pelerinName)}</strong> a finalisé sa réservation.`)}
+        ${heading('Nouvelle réservation à confirmer')}
+        ${badge('ACTION REQUISE', '#D97706')}
+        ${p(`<strong>${escapeHtml(pelerinName)}</strong> a finalisé et payé sa réservation. Confirmez maintenant votre disponibilité dans votre espace Guide.`)}
         ${divider()}
         ${tableRows([
           ['Référence', refNumber],
@@ -157,7 +157,7 @@ export async function sendPaymentConfirmationEmails(opts: {
         ])}
         ${data.ihramAlert ? `<div style="background:#FEE2E2;border:1px solid #DC2626;border-radius:8px;padding:12px 16px;margin:18px 0;color:#991B1B;font-size:13px;font-weight:700">Alerte Ihram active pour ce séjour.</div>` : ''}
         ${divider()}
-        ${btn('Voir dans mon espace guide', `${baseUrl}/guide/missions`)}
+        ${btn('Confirmer la réservation', `${baseUrl}/guide/demandes?reservation=${encodeURIComponent(refNumber)}`)}
       `),
     })
   }

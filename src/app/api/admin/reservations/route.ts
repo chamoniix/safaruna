@@ -13,11 +13,29 @@ export async function GET(req: NextRequest) {
       pelerin: { select: { name: true, firstName: true, lastName: true, email: true } },
       guideProfile: { select: { guideAccount: { select: { displayName: true, firstName: true, lastName: true } } } },
       package: { select: { name: true, durationDays: true } },
+      missions: {
+        orderBy: { startDate: 'asc' },
+        select: {
+          id: true,
+          city: true,
+          guideConfirmationStatus: true,
+          guideConfirmationRequestedAt: true,
+          guideConfirmedAt: true,
+          guideProfile: { select: { guideAccount: { select: { displayName: true, firstName: true, lastName: true } } } },
+        },
+      },
     },
   });
 
   return NextResponse.json({
-    reservations: reservations.map(r => ({
+    reservations: reservations.map(r => {
+      const confirmedMissions = r.missions.filter(mission => mission.guideConfirmationStatus === 'CONFIRMED').length;
+      const guideConfirmationStatus = r.missions.length === 0
+        ? 'NONE'
+        : confirmedMissions === r.missions.length
+          ? 'CONFIRMED'
+          : confirmedMissions > 0 ? 'PARTIAL' : 'PENDING';
+      return {
       id: r.id,
       refNumber: r.refNumber,
       pelerin: r.pelerin.name
@@ -34,8 +52,21 @@ export async function GET(req: NextRequest) {
       commissionAmount: r.commissionAmount,
       totalPrice: r.totalPrice,
       status: r.status,
+      guideConfirmationStatus,
+      missions: r.missions.map(mission => {
+        const account = mission.guideProfile.guideAccount;
+        return {
+          id: mission.id,
+          city: mission.city,
+          guide: account?.displayName || `${account?.firstName ?? ''} ${account?.lastName ?? ''}`.trim() || '—',
+          status: mission.guideConfirmationStatus,
+          requestedAt: mission.guideConfirmationRequestedAt,
+          confirmedAt: mission.guideConfirmedAt,
+        };
+      }),
       createdAt: new Date(r.createdAt).toLocaleDateString('fr-FR'),
-    })),
+      };
+    }),
   });
 }
 

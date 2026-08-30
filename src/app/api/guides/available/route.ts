@@ -46,6 +46,15 @@ export async function GET(req: NextRequest) {
     }), getPlatformPricing()])
 
     const guideIds = guides.map(guide => guide.id)
+    const reviewStats = guideIds.length > 0
+      ? await prisma.review.groupBy({
+          by: ['guideProfileId'],
+          where: { guideProfileId: { in: guideIds }, status: 'APPROVED' },
+          _avg: { ratingOverall: true },
+          _count: { ratingOverall: true },
+        })
+      : []
+    const reviewStatsByGuide = new Map(reviewStats.map(stat => [stat.guideProfileId, stat]))
     const conflictCity = city === 'MAKKAH' || city === 'MADINAH' ? city : null
     const [conflicts, holds] = startDate && endDate && conflictCity && guideIds.length > 0
       ? await Promise.all([
@@ -74,6 +83,7 @@ export async function GET(req: NextRequest) {
     const blockedIds = new Set([...conflicts, ...holds].map(item => item.guideProfileId))
     const result = guides.filter(guide => !blockedIds.has(guide.id) && guide.guideAccount).map(guide => {
       const name = guide.guideAccount!.displayName || `${guide.guideAccount!.firstName ?? ''} ${guide.guideAccount!.lastName ?? ''}`.trim()
+      const stats = reviewStatsByGuide.get(guide.id)
       return {
         slug: guide.slug,
         name,
@@ -100,8 +110,8 @@ export async function GET(req: NextRequest) {
             upTo32: centsToEuros(guideServiceRetailCents(guide, 'MADINAH', 32, pricing.guideServiceMarkupBps)),
           },
         },
-        rating: null,
-        reviewCount: 0,
+        rating: stats?._count.ratingOverall ? Math.round((stats._avg.ratingOverall ?? 0) * 10) / 10 : null,
+        reviewCount: stats?._count.ratingOverall ?? 0,
       }
     })
 

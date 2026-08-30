@@ -44,7 +44,7 @@ export async function GET() {
       where: { ...guideReservationWhere, status: 'COMPLETED' },
     }),
     prisma.review.findMany({
-      where: { reservation: guideReservationWhere },
+      where: { guideProfileId: guideProfile.id, status: 'APPROVED' },
       select: { ratingOverall: true },
     }),
     prisma.reservation.findMany({

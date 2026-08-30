@@ -8,8 +8,9 @@ type Reservation = {
   packageName: string; durationDays: number;
   startDate: string; startDateRaw: string;
   nbPeople: number; totalPrice: number; status: string;
+  canReview: boolean; feedbackSubmittedAt: string | null;
   createdAt: string;
-  review: { rating: number; comment: string } | null;
+  review: { rating: number; comment: string; status: string } | null;
 };
 
 type ReservationsData = {
@@ -227,14 +228,14 @@ export default function EspaceReservations() {
                         <span style={{ display: 'inline-block', background: sc.bg, color: sc.color, fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.06em', padding: '0.25rem 0.6rem', borderRadius: 20, whiteSpace: 'nowrap' }}>{sc.label}</span>
                       </td>
                       <td style={{ padding: '0.75rem 0.875rem', whiteSpace: 'nowrap' }}>
-                        {r.status !== 'COMPLETED' ? (
+                        {!r.canReview ? (
                           <span style={{ color: '#9A8A7A', fontSize: '0.78rem' }}>—</span>
-                        ) : r.review !== null ? (
-                          <span style={{ fontSize: '0.82rem', color: '#1D5C3A', fontWeight: 700 }}>★ {r.review.rating}/5</span>
+                        ) : r.feedbackSubmittedAt ? (
+                          <Link href={`/espace/avis/${r.id}`} style={{ fontSize: '0.78rem', color: '#1D5C3A', fontWeight: 700 }}>Voir mon avis</Link>
                         ) : (
-                          <button onClick={() => setReviewTarget(r)} style={{ padding: '0.3rem 0.65rem', borderRadius: 50, border: '1px solid rgba(201,168,76,0.4)', background: '#FAF3E0', color: '#8B6914', fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+                          <Link href={`/espace/avis/${r.id}`} style={{ display: 'inline-block', padding: '0.3rem 0.65rem', borderRadius: 50, border: '1px solid rgba(201,168,76,0.4)', background: '#FAF3E0', color: '#8B6914', fontSize: '0.7rem', fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' }}>
                             Laisser un avis
-                          </button>
+                          </Link>
                         )}
                       </td>
                     </tr>

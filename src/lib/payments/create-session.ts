@@ -201,7 +201,7 @@ export async function handleCreatePaymentSession(req: NextRequest) {
     }
     const activePlaceKeys = new Set(guide.places.map(place => place.placeKey))
     const selectedForCity = selectedPlaceKeys.filter(key => placeCity(key) === city && !includedPlaceKeys.includes(key))
-    if (activePlaceKeys.size > 0 && selectedForCity.some(key => !activePlaceKeys.has(key))) {
+    if (selectedForCity.some(key => !activePlaceKeys.has(key))) {
       return NextResponse.json({ error: 'Une visite sélectionnée n’est pas proposée par ce guide' }, { status: 409 })
     }
   }

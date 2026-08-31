@@ -75,8 +75,9 @@ export default async function GuideProfilePage({ params }: { params: Promise<{ s
     rating: review.ratingOverall,
     text: review.comment,
   }))
+  const guideActivePlaceKeys = new Set(guide.places.map(place => place.placeKey))
   const profilePlaces = placeCatalog
-    .filter(place => place.isActive)
+    .filter(place => place.isActive && (place.includedInBase || guideActivePlaceKeys.has(place.key)))
     .map(place => ({ emoji: place.emoji, nameAr: place.nameAr, nameFr: place.nameFr, desc: place.desc, category: place.category }))
   const realStats = [
     ratingAggregate._count.ratingOverall > 0 ? { value: String(ratingAggregate._count.ratingOverall), label: 'Avis vérifiés' } : null,

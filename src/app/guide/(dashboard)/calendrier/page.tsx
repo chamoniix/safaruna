@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 type ServiceCity = 'MAKKAH' | 'MADINAH'
-type Avail = { id: string; date: string; status: 'AVAILABLE' | 'BOOKED' | 'UNAVAILABLE'; city: string }
+type Avail = { id: string; date: string; status: 'AVAILABLE' | 'BOOKED' | 'UNAVAILABLE' | 'HELD'; city: string }
 
 const DAYS_FR = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 const MONTHS_FR = ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre']
@@ -19,33 +19,62 @@ export default function GuideCalendrierPage() {
   const [city, setCity] = useState<ServiceCity>('MAKKAH')
   const [availabilities, setAvailabilities] = useState<Avail[]>([])
   const [services, setServices] = useState({ makkah: false, madinah: false })
+  const [acceptingBookings, setAcceptingBookings] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [currentMonth, setCurrentMonth] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1))
 
+  const year = currentMonth.getFullYear()
+  const month = currentMonth.getMonth()
+  const rangeFrom = toYMD(new Date(year, month, 1))
+  const rangeTo = toYMD(new Date(year, month + 1, 0))
+
   const fetchAvails = useCallback(async () => {
     setLoading(true)
     setError('')
     try {
-      const response = await fetch(`/api/guide/calendrier?city=${city}`)
+      const params = new URLSearchParams({ city, from: rangeFrom, to: rangeTo })
+      const response = await fetch(`/api/guide/calendrier?${params}`)
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Chargement impossible')
       setAvailabilities(data.availabilities || [])
       setServices(data.services || { makkah: false, madinah: false })
+      setAcceptingBookings(Boolean(data.acceptingBookings))
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Chargement impossible')
     }
     setLoading(false)
-  }, [city])
+  }, [city, rangeFrom, rangeTo])
 
   useEffect(() => { fetchAvails() }, [fetchAvails])
 
   const availMap = useMemo(() => Object.fromEntries(availabilities.map(item => [item.date, item])), [availabilities])
   const serviceEnabled = city === 'MAKKAH' ? services.makkah : services.madinah
 
+  const toggleAcceptingBookings = async () => {
+    const enabled = !acceptingBookings
+    if (!enabled && !window.confirm('Mettre toutes les nouvelles réservations en pause ? Vos réservations déjà payées restent inchangées.')) return
+    setSaving('global')
+    setError('')
+    try {
+      const response = await fetch('/api/guide/calendrier', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ acceptingBookings: enabled }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Modification impossible')
+      setAcceptingBookings(enabled)
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Modification impossible')
+    }
+    setSaving(null)
+  }
+
   const toggleService = async () => {
     const enabled = !serviceEnabled
+    if (!enabled && !window.confirm(`Désactiver ${city === 'MAKKAH' ? 'Makkah' : 'Médine'} pour les nouvelles réservations ? Vos réservations déjà payées restent inchangées.`)) return
     setSaving('service')
     setError('')
     try {
@@ -65,9 +94,9 @@ export default function GuideCalendrierPage() {
 
   const handleDayClick = async (date: string) => {
     const current = availMap[date]
-    if (current?.status === 'BOOKED' || !serviceEnabled) return
+    if (current?.status === 'BOOKED' || current?.status === 'HELD' || !serviceEnabled) return
     const previous = availabilities
-    const remove = current?.status === 'UNAVAILABLE' || current?.status === 'AVAILABLE'
+    const remove = current?.status === 'UNAVAILABLE'
     setAvailabilities(remove
       ? previous.filter(item => item.date !== date)
       : [...previous, { id: `optimistic-${date}`, date, city, status: 'UNAVAILABLE' }])
@@ -89,8 +118,6 @@ export default function GuideCalendrierPage() {
     setSaving(null)
   }
 
-  const year = currentMonth.getFullYear()
-  const month = currentMonth.getMonth()
   const firstDay = new Date(year, month, 1)
   const startOffset = (firstDay.getDay() + 6) % 7
   const daysInMonth = new Date(year, month + 1, 0).getDate()
@@ -101,10 +128,9 @@ export default function GuideCalendrierPage() {
   while (cells.length % 7 !== 0) cells.push({ date: null, day: cells.length % 7, inMonth: false })
 
   const today = toYMD(new Date())
-  const monthPrefix = `${year}-${String(month + 1).padStart(2, '0')}`
-  const monthRecords = availabilities.filter(item => item.date.startsWith(monthPrefix))
-  const unavailableCount = monthRecords.filter(item => item.status === 'UNAVAILABLE').length
-  const bookedCount = monthRecords.filter(item => item.status === 'BOOKED').length
+  const unavailableCount = availabilities.filter(item => item.status === 'UNAVAILABLE').length
+  const bookedCount = availabilities.filter(item => item.status === 'BOOKED').length
+  const heldCount = availabilities.filter(item => item.status === 'HELD').length
   const buttonStyle: React.CSSProperties = {
     padding: '0.5rem 1.25rem', background: '#1A1209', color: '#F0D897', border: 'none', borderRadius: 50,
     fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer', fontFamily: 'inherit',
@@ -112,6 +138,16 @@ export default function GuideCalendrierPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', fontFamily: 'var(--font-manrope, sans-serif)' }}>
+      <div style={{ background: acceptingBookings ? '#ECFDF5' : '#FEF2F2', border: `1px solid ${acceptingBookings ? '#6EE7B7' : '#FCA5A5'}`, borderRadius: 12, padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+        <div>
+          <div style={{ fontWeight: 700, color: acceptingBookings ? '#166534' : '#991B1B' }}>Nouvelles réservations : {acceptingBookings ? 'activées' : 'en pause'}</div>
+          <div style={{ fontSize: '0.78rem', color: '#7A6D5A', marginTop: 3 }}>{acceptingBookings ? 'Votre profil peut apparaître dans les recherches.' : 'Votre fiche publique reste accessible, mais la réservation est désactivée.'}</div>
+        </div>
+        <button onClick={toggleAcceptingBookings} disabled={saving !== null} style={{ ...buttonStyle, background: acceptingBookings ? '#991B1B' : '#166534', opacity: saving === 'global' ? 0.6 : 1 }}>
+          {saving === 'global' ? 'Enregistrement…' : acceptingBookings ? 'Mettre en pause' : 'Réactiver les réservations'}
+        </button>
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
         {(['MAKKAH', 'MADINAH'] as ServiceCity[]).map(item => (
           <button key={item} onClick={() => setCity(item)} style={{
@@ -121,13 +157,13 @@ export default function GuideCalendrierPage() {
         ))}
       </div>
 
-      <div style={{ background: serviceEnabled ? '#ECFDF5' : '#FEF2F2', border: `1px solid ${serviceEnabled ? '#6EE7B7' : '#FCA5A5'}`, borderRadius: 12, padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+      <div style={{ background: serviceEnabled ? '#ECFDF5' : '#FEF2F2', border: `1px solid ${serviceEnabled ? '#6EE7B7' : '#FCA5A5'}`, borderRadius: 12, padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
         <div>
           <div style={{ fontWeight: 700, color: serviceEnabled ? '#166534' : '#991B1B' }}>{city === 'MAKKAH' ? 'Service Makkah' : 'Service Médine'} : {serviceEnabled ? 'activé' : 'désactivé'}</div>
           <div style={{ fontSize: '0.78rem', color: '#7A6D5A', marginTop: 3 }}>{serviceEnabled ? 'Vous pouvez être choisi pour cette ville.' : 'Votre profil n’apparaît pas pour cette ville.'}</div>
         </div>
-        <button onClick={toggleService} disabled={saving === 'service'} style={{ ...buttonStyle, background: serviceEnabled ? '#991B1B' : '#166534' }}>
-          {serviceEnabled ? 'Désactiver cette ville' : 'Activer cette ville'}
+        <button onClick={toggleService} disabled={saving !== null} style={{ ...buttonStyle, background: serviceEnabled ? '#991B1B' : '#166534', opacity: saving === 'service' ? 0.6 : 1 }}>
+          {saving === 'service' ? 'Enregistrement…' : serviceEnabled ? 'Désactiver cette ville' : 'Activer cette ville'}
         </button>
       </div>
 
@@ -139,8 +175,8 @@ export default function GuideCalendrierPage() {
 
       {error && <div style={{ background: '#FEE2E2', border: '1px solid #FCA5A5', borderRadius: 8, padding: '0.75rem 1rem', color: '#991B1B', fontSize: '0.82rem' }}>{error}</div>}
 
-      <div style={{ display: 'flex', gap: '1rem', fontSize: '0.78rem', color: '#4A3F30' }}>
-        <span>□ Sans marque : disponible</span><span style={{ color: '#DC2626' }}>✕ Rouge : indisponible</span><span style={{ color: '#1D4ED8' }}>● Bleu : réservé</span>
+      <div style={{ display: 'flex', gap: '1rem', fontSize: '0.78rem', color: '#4A3F30', flexWrap: 'wrap' }}>
+        <span>□ Sans marque : disponible</span><span style={{ color: '#DC2626' }}>✕ Rouge : indisponible</span><span style={{ color: '#1D4ED8' }}>● Bleu : réservé</span><span style={{ color: '#B45309' }}>● Orange : paiement en cours</span>
       </div>
 
       <div style={{ background: 'white', border: '1px solid #E8DFC8', borderRadius: 12, overflow: 'hidden', opacity: loading ? 0.6 : 1 }}>
@@ -153,17 +189,21 @@ export default function GuideCalendrierPage() {
             const record = availMap[cell.date]
             const isPast = cell.date < today
             const isBooked = record?.status === 'BOOKED'
+            const isHeld = record?.status === 'HELD'
             const isUnavailable = record?.status === 'UNAVAILABLE'
-            const disabled = isPast || isBooked || !serviceEnabled
+            const disabled = isPast || isBooked || isHeld || !serviceEnabled
+            const borderColor = isBooked ? '#93C5FD' : isHeld ? '#FCD34D' : isUnavailable ? '#FCA5A5' : '#F0EBE0'
+            const background = isPast || !serviceEnabled ? '#F5F5F5' : isBooked ? '#DBEAFE' : isHeld ? '#FEF3C7' : isUnavailable ? '#FEE2E2' : 'white'
+            const color = isBooked ? '#1D4ED8' : isHeld ? '#B45309' : isUnavailable ? '#DC2626' : '#1A1209'
             return (
               <button key={cell.date} onClick={() => handleDayClick(cell.date!)} disabled={disabled} style={{
-                minHeight: 80, padding: '0.5rem', border: `1px solid ${isBooked ? '#93C5FD' : isUnavailable ? '#FCA5A5' : '#F0EBE0'}`,
-                background: isPast || !serviceEnabled ? '#F5F5F5' : isBooked ? '#DBEAFE' : isUnavailable ? '#FEE2E2' : 'white',
-                color: isBooked ? '#1D4ED8' : isUnavailable ? '#DC2626' : '#1A1209', cursor: disabled ? 'not-allowed' : 'pointer',
-                display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.3rem', fontFamily: 'inherit', opacity: saving === cell.date ? 0.5 : 1,
+                minHeight: 80, padding: '0.5rem', border: `1px solid ${borderColor}`, background, color,
+                cursor: disabled ? 'not-allowed' : 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
+                gap: '0.3rem', fontFamily: 'inherit', opacity: saving === cell.date ? 0.5 : 1,
               }}>
                 <span style={{ fontWeight: 700 }}>{cell.day}</span>
                 {isBooked && <span style={{ fontSize: '0.65rem', fontWeight: 700 }}>● Réservé</span>}
+                {isHeld && <span style={{ fontSize: '0.65rem', fontWeight: 700 }}>● Paiement en cours</span>}
                 {isUnavailable && <span style={{ fontSize: '0.65rem', fontWeight: 700 }}>✕ Indisponible</span>}
               </button>
             )
@@ -171,13 +211,14 @@ export default function GuideCalendrierPage() {
         </div>
       </div>
 
-      <div style={{ background: 'white', border: '1px solid #E8DFC8', borderRadius: 12, padding: '1rem 1.5rem', display: 'flex', gap: '2rem' }}>
+      <div style={{ background: 'white', border: '1px solid #E8DFC8', borderRadius: 12, padding: '1rem 1.5rem', display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
         <span style={{ color: '#DC2626', fontWeight: 700 }}>{unavailableCount} indisponible(s)</span>
         <span style={{ color: '#1D4ED8', fontWeight: 700 }}>{bookedCount} réservé(s)</span>
+        <span style={{ color: '#B45309', fontWeight: 700 }}>{heldCount} paiement(s) en cours</span>
       </div>
 
       <div style={{ background: '#FEF9EC', border: '1px solid #FCD34D', borderRadius: 12, padding: '1rem 1.5rem', fontSize: '0.82rem', color: '#92400E', lineHeight: 1.7 }}>
-        Cliquez uniquement sur les dates où vous n’êtes pas disponible. Toutes les dates sans croix rouge sont considérées comme disponibles. Une date réservée ne peut pas être modifiée.
+        Cliquez uniquement sur les dates où vous n’êtes pas disponible. Toutes les dates sans croix rouge sont considérées comme disponibles. Une date réservée ou en cours de paiement ne peut pas être modifiée.
       </div>
     </div>
   )

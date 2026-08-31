@@ -18,7 +18,7 @@ type Guide = {
   nationality: string | null; experienceYears: number | null; status: string;
   responseTimeAvg: string | null; completionRate: number | null;
   ibanMasked: string | null;
-  availabilities: { id: string; date: string; status: string }[];
+  availabilities: { id: string; date: string; city: string; status: string; reference: string | null; source: string }[];
   conversations: { id: string; pelerinName: string; lastMessage: string; lastMessageAt: string }[];
   user: { name: string | null; firstName: string | null; lastName: string | null; email: string | null; createdAt: string; phoneWhatsapp: string | null; image: string | null };
   languages: Language[];
@@ -722,29 +722,31 @@ export default function AdminGuideDetailPage() {
         )}
       </div>
 
-      {/* Section — Disponibilités (30 prochains jours) */}
+      {/* Section — Disponibilités futures */}
       <div style={sectionStyle}>
-        <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Disponibilités (30 prochains jours)</div>
+        <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Calendrier futur</div>
+        <div style={{ fontSize: '0.72rem', color: '#7A6D5A' }}>Les dates sans exception sont disponibles. Les réservations et paiements en cours indiquent leur référence.</div>
         {guide.availabilities.length === 0 ? (
-          <div style={{ color: '#9CA3AF', fontSize: '0.85rem' }}>Aucune disponibilité renseignée</div>
+          <div style={{ color: '#1D5C3A', fontSize: '0.85rem' }}>Aucune exception future : toutes les dates sont disponibles.</div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {guide.availabilities.map(a => {
-              const dayNum = new Date(a.date).getDate();
               const colors: Record<string, { bg: string; color: string }> = {
                 AVAILABLE:   { bg: '#D1FAE5', color: '#1D5C3A' },
-                BOOKED:      { bg: '#FEE2E2', color: '#DC2626' },
-                UNAVAILABLE: { bg: '#F3F4F6', color: '#9CA3AF' },
+                BOOKED:      { bg: '#DBEAFE', color: '#1D4ED8' },
+                HELD:        { bg: '#FEF3C7', color: '#B45309' },
+                UNAVAILABLE: { bg: '#FEE2E2', color: '#DC2626' },
               };
               const c = colors[a.status] || colors.UNAVAILABLE;
               const fullDate = new Date(a.date).toLocaleDateString('fr-FR');
               return (
                 <div
                   key={a.id}
-                  title={fullDate}
-                  style={{ width: 40, height: 40, borderRadius: 6, background: c.bg, color: c.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.78rem', fontWeight: 700, cursor: 'default' }}
+                  style={{ borderRadius: 8, background: c.bg, color: c.color, display: 'grid', gridTemplateColumns: '110px 90px 1fr', gap: '0.75rem', alignItems: 'center', padding: '0.65rem 0.8rem', fontSize: '0.75rem' }}
                 >
-                  {dayNum}
+                  <strong>{fullDate}</strong>
+                  <span>{a.city === 'MAKKAH' ? 'Makkah' : a.city === 'MADINAH' ? 'Médine' : a.city}</span>
+                  <span><strong>{a.status === 'BOOKED' ? 'Réservé' : a.status === 'HELD' ? 'Paiement en cours' : a.status === 'UNAVAILABLE' ? 'Indisponible' : 'Disponible'}</strong> · {a.source}{a.reference ? ` · ${a.reference}` : ''}</span>
                 </div>
               );
             })}

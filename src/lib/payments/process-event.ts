@@ -7,6 +7,7 @@ import type {
   PaymentDraftData,
   PaymentProviderId,
 } from '@/lib/payments/types'
+import { assertMissionsAvailable, GuideAvailabilityConflictError } from '@/lib/guide-availability'
 
 const EVENT_PROCESSING_LEASE_MS = 5 * 60 * 1000
 
@@ -329,6 +330,16 @@ export async function processPaidCheckout(event: NormalizedCheckoutPaidEvent): P
         return false
       }
 
+      const availabilityMissions = data.missions.map(mission => ({
+        guideProfileId: mission.guideProfileId,
+        city: mission.city,
+        dates: eachDate(new Date(mission.startDate), new Date(mission.endDate)),
+      }))
+      await assertMissionsAvailable(tx, availabilityMissions, {
+        excludeDraftRefNumber: event.bookingRef,
+        requireDraftRefNumber: event.bookingRef,
+      })
+
       const reservation = await tx.reservation.create({
         data: {
           refNumber: event.bookingRef,
@@ -392,22 +403,8 @@ export async function processPaidCheckout(event: NormalizedCheckoutPaidEvent): P
 
       for (const mission of data.missions) {
         for (const date of eachDate(new Date(mission.startDate), new Date(mission.endDate))) {
-          const otherBooking = await tx.availability.findFirst({
-            where: { guideProfileId: mission.guideProfileId, date, status: 'BOOKED' },
-          })
-          if (otherBooking && otherBooking.reservationId !== reservation.id) {
-            throw new PaymentProcessingError('Guide déjà réservé', 409)
-          }
-          await tx.availability.upsert({
-            where: {
-              guideProfileId_date_city: {
-                guideProfileId: mission.guideProfileId,
-                date,
-                city: mission.city,
-              },
-            },
-            update: { status: 'BOOKED', reservationId: reservation.id },
-            create: {
+          await tx.availability.create({
+            data: {
               guideProfileId: mission.guideProfileId,
               date,
               city: mission.city,
@@ -476,6 +473,23 @@ export async function processPaidCheckout(event: NormalizedCheckoutPaidEvent): P
     }
   } catch (error) {
     await markEventFailed(claimed.id, error)
+    if (error instanceof GuideAvailabilityConflictError) {
+      await prisma.auditLog.create({
+        data: {
+          actor: event.provider.toLowerCase(),
+          actorRole: 'SYSTEM',
+          action: 'PAYMENT_AVAILABILITY_CONFLICT',
+          target: event.bookingRef,
+          detail: JSON.stringify({
+            provider: event.provider,
+            providerEventId: event.providerEventId,
+            reason: error.reason,
+            manualReviewRequired: true,
+            automaticRefund: false,
+          }),
+        },
+      }).catch(auditError => console.error('[payment-event] availability conflict audit failed', auditError))
+    }
     throw error
   }
 }

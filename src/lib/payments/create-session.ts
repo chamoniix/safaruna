@@ -30,17 +30,21 @@ import {
   placeRetailCentsForGroup,
 } from '@/lib/place-catalog'
 import { getActivePaymentProvider, type PaymentProvider } from '@/lib/payments/provider'
+import { assertMissionsAvailable, GuideAvailabilityConflictError, parseBookingDate } from '@/lib/guide-availability'
 
 // Stripe exige une expiration située au moins 30 minutes après la création de
 // la session. Une minute technique couvre le temps de transaction et réseau.
 const HOLD_DURATION_MS = 31 * 60 * 1000
 const ALLOWED_GENDERS = ['HOMME', 'FEMME', 'MIXTE'] as const
+const bookingDateSchema = z.string()
+  .refine(value => parseBookingDate(value) !== null, 'Date invalide')
+  .transform(value => parseBookingDate(value)!)
 
 const checkoutSchema = z.object({
   guideSlug: z.string().min(1).max(120),
   cityChoice: z.enum(['MAKKAH', 'MADINAH', 'BOTH']),
-  departDate: z.coerce.date(),
-  returnDate: z.coerce.date(),
+  departDate: bookingDateSchema,
+  returnDate: bookingDateSchema,
   nbPersonnes: z.coerce.number().int().min(1).max(32),
   gender: z.enum(ALLOWED_GENDERS),
   langue: z.string().min(1).max(20),
@@ -398,19 +402,23 @@ export async function handleCreatePaymentSession(req: NextRequest) {
       }
       await tx.reservationDraft.deleteMany({ where: { expiresAt: { lte: new Date() } } })
 
+      const currentGuides = await tx.guideProfile.findMany({
+        where: { id: { in: [...new Set(missions.map(mission => mission.guideProfileId))] } },
+        select: { id: true, status: true, acceptingBookings: true, servesMakkah: true, servesMadinah: true },
+      })
+      const currentGuideById = new Map(currentGuides.map(guide => [guide.id, guide]))
       for (const mission of missions) {
-        const conflict = await tx.availability.findFirst({
-          where: {
-            guideProfileId: mission.guideProfileId,
-            date: { in: mission.dates },
-            OR: [
-              { status: 'BOOKED' },
-              { status: 'UNAVAILABLE', city: { in: [mission.city, 'BOTH'] } },
-            ],
-          },
-        })
-        if (conflict) throw new Error('GUIDE_UNAVAILABLE')
+        const currentGuide = currentGuideById.get(mission.guideProfileId)
+        if (
+          !currentGuide
+          || currentGuide.status !== 'ACTIVE'
+          || !currentGuide.acceptingBookings
+          || !servesCity(currentGuide, mission.city)
+        ) {
+          throw new GuideAvailabilityConflictError('UNAVAILABLE')
+        }
       }
+      await assertMissionsAvailable(tx, missions)
 
       await tx.reservationDraft.create({
         data: {
@@ -440,7 +448,7 @@ export async function handleCreatePaymentSession(req: NextRequest) {
       })
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable })
   } catch (error) {
-    if (error instanceof Error && error.message === 'GUIDE_UNAVAILABLE') {
+    if (error instanceof GuideAvailabilityConflictError) {
       return NextResponse.json({ error: 'Ce guide n’est plus disponible sur les dates choisies' }, { status: 409 })
     }
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {

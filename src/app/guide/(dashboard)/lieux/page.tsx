@@ -30,19 +30,22 @@ export default function GuideLieuxPage() {
 
   const handleToggle = async (placeKey: string, isBase: boolean) => {
     if (isBase) return
+    const previousEnabled = placesMap[placeKey] === true
+    const enabled = !previousEnabled
     setToggling(placeKey)
     setError('')
-    setPlacesMap(prev => ({ ...prev, [placeKey]: !prev[placeKey] }))
+    setPlacesMap(prev => ({ ...prev, [placeKey]: enabled }))
     try {
       const response = await fetch('/api/guide/lieux', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ placeKey }),
+        body: JSON.stringify({ placeKey, enabled }),
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Impossible de modifier ce lieu.')
+      setPlacesMap(prev => ({ ...prev, [placeKey]: data.enabled === true }))
     } catch (toggleError) {
-      setPlacesMap(prev => ({ ...prev, [placeKey]: !prev[placeKey] }))
+      setPlacesMap(prev => ({ ...prev, [placeKey]: previousEnabled }))
       setError(toggleError instanceof Error ? toggleError.message : 'Impossible de modifier ce lieu.')
     }
     setToggling(null)
@@ -91,7 +94,7 @@ export default function GuideLieuxPage() {
 
       {/* Header info */}
       <div style={{ background: '#FEF9EC', border: '1px solid #FCD34D', borderRadius: 12, padding: '1rem 1.5rem', fontSize: '0.83rem', color: '#92400E', lineHeight: 1.7 }}>
-        Activez les lieux que vous maîtrisez. Les lieux inactifs apparaîtront grisés sur votre profil public. Les pèlerins pourront les voir mais ne pourront pas les sélectionner pour leur réservation.
+        Activez uniquement les lieux que vous maîtrisez. Un lieu désactivé n’est plus proposé sur votre profil ni dans la réservation. Les lieux inclus dans la visite de base sont obligatoires et ne peuvent pas être désactivés.
       </div>
       {error && <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10, padding: '0.8rem 1rem', color: '#B91C1C', fontSize: '0.78rem' }}>{error}</div>}
 
@@ -144,7 +147,7 @@ export default function GuideLieuxPage() {
                       <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2, lineHeight: 1.4 }}>{place.desc}</div>
                       {place.includedInBase && (
                         <span style={{ display: 'inline-block', marginTop: 4, fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.06em', background: '#FEF9EC', color: '#8B6914', border: '1px solid #FCD34D', padding: '0.15rem 0.5rem', borderRadius: 20 }}>
-                          Inclus dans le package
+                          Inclus dans la visite de base · obligatoire
                         </span>
                       )}
                     </div>

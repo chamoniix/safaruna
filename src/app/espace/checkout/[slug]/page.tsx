@@ -37,6 +37,7 @@ type PublicGuide = {
   rating?: number | null
   languages?: string[]
   serviceCities?: string[]
+  activePlaces?: string[]
   servesMakkah?: boolean
   servesMadinah?: boolean
   prices?: {
@@ -227,6 +228,7 @@ export default function CheckoutPage() {
   const [step, setStep] = useState(1)
   const [guide, setGuide] = useState<PublicGuide | null>(null)
   const [activePlaces, setActivePlaces] = useState<string[]>([])
+  const [activePlacesMadinah, setActivePlacesMadinah] = useState<string[]>([])
   const [placeCatalog, setPlaceCatalog] = useState<CheckoutPlace[]>(PLACES.map(place => ({
     ...place,
     isActive: true,
@@ -414,10 +416,17 @@ export default function CheckoutPage() {
 
   // Fetch données du guide Madinah quand sélectionné
   useEffect(() => {
-    if (!selectedGuideSlugMadinah) return
+    if (!selectedGuideSlugMadinah) {
+      setGuideDataMadinah(null)
+      setActivePlacesMadinah([])
+      return
+    }
     fetch(`/api/guide/public/${selectedGuideSlugMadinah}`)
       .then(r => r.json())
-      .then(data => setGuideDataMadinah(data.guide ?? null))
+      .then(data => {
+        setGuideDataMadinah(data.guide ?? null)
+        setActivePlacesMadinah(data.activePlaces || [])
+      })
   }, [selectedGuideSlugMadinah])
 
   // Fetch guides disponibles à l'entrée de l'étape guide (2 pour BOTH, 4 pour single)
@@ -550,10 +559,11 @@ export default function CheckoutPage() {
 
   // Lieux supplémentaires par ville — historiques fusionnés dans la bonne ville
   const getAvailablePlacesByCity = (city: 'MAKKAH' | 'MADINAH'): Place[] => {
+    const guidePlaces = cityChoice === 'BOTH' && city === 'MADINAH' ? activePlacesMadinah : activePlaces
     return placeCatalog.filter(p => {
       if (!p.isActive) return false
       if (p.includedInBase) return false
-      if (activePlaces.length > 0 && !activePlaces.includes(p.key)) return false
+      if (!guidePlaces.includes(p.key)) return false
       return placeBelongsToCity(p, city)
     })
   }
@@ -1570,10 +1580,33 @@ export default function CheckoutPage() {
             : !selectedGuideSlugMadinah ? 'MADINAH'
             : null
 
+          const guideSupportsPlaces = (candidate: PublicGuide, serviceCity: 'MAKKAH' | 'MADINAH') => {
+            const requiredPlaces = selectedPlaces.filter(key => {
+              const place = placeCatalog.find(item => item.key === key)
+              return place && !place.includedInBase && placeBelongsToCity(place, serviceCity)
+            })
+            const candidatePlaces = candidate.activePlaces || []
+            return requiredPlaces.every(key => candidatePlaces.includes(key))
+          }
+          const selectionCity = cityChoice === 'BOTH'
+            ? nextSlot
+            : cityChoice === 'MAKKAH' || cityChoice === 'MADINAH' ? cityChoice : null
+          const selectableGuides = selectionCity
+            ? availableGuides.filter(candidate =>
+                candidate.serviceCities?.includes(selectionCity)
+                && guideSupportsPlaces(candidate, selectionCity)
+              )
+            : availableGuides
+
           const handleChoose = (slug: string) => {
             const candidate = availableGuides.find(item => item.slug === slug)
-            if (nextSlot && !candidate?.serviceCities?.includes(nextSlot)) return
-            if (cityChoice !== 'BOTH') { setSelectedGuideSlug(slug); return }
+            if (!candidate) return
+            if (nextSlot && (!candidate.serviceCities?.includes(nextSlot) || !guideSupportsPlaces(candidate, nextSlot))) return
+            if (cityChoice !== 'BOTH') {
+              if ((cityChoice === 'MAKKAH' || cityChoice === 'MADINAH') && !guideSupportsPlaces(candidate, cityChoice)) return
+              setSelectedGuideSlug(slug)
+              return
+            }
             if (!selectedGuideSlug) { setSelectedGuideSlug(slug); return }
             if (!selectedGuideSlugMadinah) { setSelectedGuideSlugMadinah(slug); return }
             // Les deux sont remplis — remplace Madinah par défaut
@@ -1582,13 +1615,21 @@ export default function CheckoutPage() {
 
           const drawerGuide = guideDetailSlug ? availableGuides.find(g => g.slug === guideDetailSlug) : null
           const makkahGuideValid = !!selectedGuideSlug && availableGuides.some(item =>
-            item.slug === selectedGuideSlug && item.serviceCities?.includes('MAKKAH')
+            item.slug === selectedGuideSlug
+            && item.serviceCities?.includes('MAKKAH')
+            && guideSupportsPlaces(item, 'MAKKAH')
           )
           const madinahGuideValid = !!selectedGuideSlugMadinah && availableGuides.some(item =>
-            item.slug === selectedGuideSlugMadinah && item.serviceCities?.includes('MADINAH')
+            item.slug === selectedGuideSlugMadinah
+            && item.serviceCities?.includes('MADINAH')
+            && guideSupportsPlaces(item, 'MADINAH')
           )
           const bothDone = cityChoice === 'BOTH' && makkahGuideValid && madinahGuideValid
-          const singleGuideValid = !!selectedGuideSlug && availableGuides.some(item => item.slug === selectedGuideSlug)
+          const singleGuideValid = !!selectedGuideSlug && availableGuides.some(item =>
+            item.slug === selectedGuideSlug
+            && (cityChoice === 'MAKKAH' || cityChoice === 'MADINAH')
+            && guideSupportsPlaces(item, cityChoice)
+          )
           const canContinue = cityChoice === 'BOTH' ? bothDone : singleGuideValid
           const continueFromGuideStep = () => {
             if (cityChoice !== 'BOTH' && range?.from && range.to) {
@@ -1756,7 +1797,7 @@ export default function CheckoutPage() {
                   ))}
                   <style>{`@keyframes pulse { 0%,100%{opacity:0.5} 50%{opacity:0.8} }`}</style>
                 </div>
-              ) : availableGuides.length === 0 ? (
+              ) : selectableGuides.length === 0 ? (
                 <div style={{ background: '#FAF8F0', border: '1px solid #E8DFC8', borderRadius: 16, padding: '2rem 1.5rem', textAlign: 'center' }}>
                   <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>🕌</div>
                   <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209', marginBottom: '0.5rem' }}>Votre guide sera confirmé</div>
@@ -1770,11 +1811,14 @@ export default function CheckoutPage() {
                 </div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  {availableGuides.map(g => {
+                  {selectableGuides.map(g => {
                     const isMakkah = selectedGuideSlug === g.slug
                     const isMadinah = selectedGuideSlugMadinah === g.slug
                     const hasBadge = isMakkah || isMadinah
-                    const canServeNext = !nextSlot || g.serviceCities?.includes(nextSlot)
+                    const canServeNext = !nextSlot || (
+                      g.serviceCities?.includes(nextSlot)
+                      && guideSupportsPlaces(g, nextSlot)
+                    )
 
                     return (
                       <div key={g.slug} style={{

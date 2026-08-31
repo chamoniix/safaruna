@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Prisma } from '@prisma/client';
 import { adminAuditDetail, adminAuditFields, checkAdmin, getAdminActor, getAdminAuditContext } from '@/lib/check-admin';
+import { assertMissionsAvailable, eachBookingDate, GuideAvailabilityConflictError } from '@/lib/guide-availability';
 import prisma from '@/lib/prisma';
 import { sendReservationConfirmation, sendEmail } from '@/lib/email';
 
@@ -94,6 +96,9 @@ export async function PATCH(req: NextRequest) {
         select: { id: true },
         take: 1,
       },
+      missions: {
+        select: { guideProfileId: true, city: true, startDate: true, endDate: true },
+      },
     },
   });
   if (!existing) return NextResponse.json({ error: 'Réservation introuvable' }, { status: 404 });
@@ -104,7 +109,29 @@ export async function PATCH(req: NextRequest) {
   const noteEntry = `[${actor.email} ${new Date().toLocaleDateString('fr-FR')}] ${motif || 'Modification admin'}`;
   const newNotes = existingNotes ? `${noteEntry}\n${existingNotes}` : noteEntry;
 
-  const reservation = await prisma.$transaction(async tx => {
+  let reservation;
+  try {
+    reservation = await prisma.$transaction(async tx => {
+    if (status === 'CONFIRMED' && existing.status === 'CANCELLED') {
+      const missions = existing.missions.map(mission => ({
+        guideProfileId: mission.guideProfileId,
+        city: mission.city as 'MAKKAH' | 'MADINAH',
+        dates: eachBookingDate(mission.startDate, mission.endDate),
+      }));
+      await assertMissionsAvailable(tx, missions);
+      for (const mission of missions) {
+        await tx.availability.createMany({
+          data: mission.dates.map(date => ({
+            guideProfileId: mission.guideProfileId,
+            date,
+            city: mission.city,
+            status: 'BOOKED' as const,
+            reservationId,
+          })),
+        });
+      }
+    }
+
     const updated = await tx.reservation.update({
       where: { id: reservationId },
       data: { status, notes: newNotes },
@@ -141,7 +168,19 @@ export async function PATCH(req: NextRequest) {
     });
 
     return updated;
-  });
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+  } catch (error) {
+    if (
+      error instanceof GuideAvailabilityConflictError
+      || (error instanceof Prisma.PrismaClientKnownRequestError && ['P2002', 'P2034'].includes(error.code))
+    ) {
+      return NextResponse.json(
+        { error: 'Le guide n’est plus disponible sur toutes les dates de cette réservation.' },
+        { status: 409 },
+      );
+    }
+    throw error;
+  }
 
   if (status === 'CONFIRMED' && existing?.status !== 'CONFIRMED') {
     const p = reservation.pelerin;

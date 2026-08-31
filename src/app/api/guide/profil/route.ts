@@ -11,12 +11,9 @@ const profilPatchSchema = z.object({
   bio:             z.string().max(2000).optional(),
   city:            z.string().max(100).optional(),
   gender:          z.enum(['HOMME', 'FEMME']).optional(),
-  servesMakkah:    z.boolean().optional(),
-  servesMadinah:   z.boolean().optional(),
-  acceptingBookings: z.boolean().optional(),
   nationality:     z.string().max(100).optional(),
   experienceYears: z.coerce.number().int().min(0).max(60).optional(),
-});
+}).strict();
 
 export async function GET() {
   const access = await requireGuide();
@@ -87,7 +84,7 @@ export async function PATCH(req: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Données invalides' }, { status: 400 });
   }
-  const { firstName, lastName, phoneWhatsapp, country, bio, city, gender, servesMakkah, servesMadinah, acceptingBookings, nationality, experienceYears } = parsed.data;
+  const { firstName, lastName, phoneWhatsapp, country, bio, city, gender, nationality, experienceYears } = parsed.data;
 
   await prisma.$transaction([
     prisma.guideAccount.update({
@@ -106,9 +103,6 @@ export async function PATCH(req: NextRequest) {
         ...(bio !== undefined && { bio: bio.trim() || null }),
         ...(city !== undefined && { city: city.trim() || null }),
         ...(gender !== undefined && { gender }),
-        ...(servesMakkah !== undefined && { servesMakkah }),
-        ...(servesMadinah !== undefined && { servesMadinah }),
-        ...(acceptingBookings !== undefined && { acceptingBookings }),
         ...(nationality !== undefined && { nationality: nationality.trim() || null }),
         ...(experienceYears !== undefined && { experienceYears: experienceYears || null }),
       },

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { centsToEuros, guideServiceRetailCents } from '@/lib/guide-pricing'
 import { getPlatformPricing } from '@/lib/platform-pricing'
+import { parseBookingDate } from '@/lib/guide-availability'
 
 type ServiceCity = 'MAKKAH' | 'MADINAH' | 'BOTH'
 
@@ -9,21 +10,23 @@ function parseCity(value: string | null): ServiceCity | '' {
   return value === 'MAKKAH' || value === 'MADINAH' || value === 'BOTH' ? value : ''
 }
 
-function parseDate(value: string | null): Date | null {
-  if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null
-  const date = new Date(`${value}T12:00:00.000Z`)
-  return Number.isNaN(date.getTime()) ? null : date
-}
-
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const city = parseCity(searchParams.get('city'))
   const langue = searchParams.get('langue') || ''
   const gender = searchParams.get('gender') || ''
-  const startDate = parseDate(searchParams.get('startDate'))
-  const endDate = parseDate(searchParams.get('endDate'))
+  const startDateValue = searchParams.get('startDate')
+  const endDateValue = searchParams.get('endDate')
+  const startDate = parseBookingDate(startDateValue)
+  const endDate = parseBookingDate(endDateValue)
 
-  if ((startDate && !endDate) || (!startDate && endDate) || (startDate && endDate && endDate < startDate)) {
+  if (
+    (startDateValue !== null && !startDate)
+    || (endDateValue !== null && !endDate)
+    || (startDate && !endDate)
+    || (!startDate && endDate)
+    || (startDate && endDate && endDate < startDate)
+  ) {
     return NextResponse.json({ error: 'Période invalide' }, { status: 400 })
   }
 

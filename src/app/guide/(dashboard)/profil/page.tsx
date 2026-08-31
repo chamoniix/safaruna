@@ -93,8 +93,6 @@ export default function GuideProfil() {
   const [bio, setBio] = useState('');
   const [city, setCity] = useState('');
   const [gender, setGender] = useState<'HOMME' | 'FEMME'>('HOMME');
-  const [servesMakkah, setServesMakkah] = useState(false);
-  const [servesMadinah, setServesMadinah] = useState(false);
   const [nationality, setNationality] = useState('');
   const [experienceYears, setExperienceYears] = useState('');
 
@@ -117,8 +115,6 @@ export default function GuideProfil() {
         setBio(p.bio || '');
         setCity(p.city || '');
         setGender(p.gender || 'HOMME');
-        setServesMakkah(p.servesMakkah);
-        setServesMadinah(p.servesMadinah);
         setNationality(p.nationality || '');
         setExperienceYears(p.experienceYears?.toString() || '');
         setLanguages(p.languages);
@@ -136,11 +132,11 @@ export default function GuideProfil() {
       const res = await fetch('/api/guide/profil', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ firstName, lastName, phoneWhatsapp, country, bio, city, gender, servesMakkah, servesMadinah, nationality, experienceYears }),
+        body: JSON.stringify({ firstName, lastName, phoneWhatsapp, country, bio, city, gender, nationality, experienceYears }),
       });
       if (!res.ok) throw new Error('Erreur lors de la sauvegarde');
       setSuccess('Profil mis à jour avec succès.');
-      setProfile(p => p ? { ...p, firstName, lastName, name: `${firstName} ${lastName}`.trim() || p.name, phoneWhatsapp, country, bio, city, gender, servesMakkah, servesMadinah, nationality, experienceYears: parseInt(experienceYears) || null } : p);
+      setProfile(p => p ? { ...p, firstName, lastName, name: `${firstName} ${lastName}`.trim() || p.name, phoneWhatsapp, country, bio, city, gender, nationality, experienceYears: parseInt(experienceYears) || null } : p);
     } catch (e: unknown) {
       setSaveError(e instanceof Error ? e.message : 'Erreur inconnue');
     } finally {
@@ -364,10 +360,10 @@ export default function GuideProfil() {
               </div>
               <div>
                 <span style={label}>Villes proposées</span>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <label style={{ ...input, width: 'auto', flex: 1 }}><input type="checkbox" checked={servesMakkah} onChange={e => setServesMakkah(e.target.checked)} /> Makkah</label>
-                  <label style={{ ...input, width: 'auto', flex: 1 }}><input type="checkbox" checked={servesMadinah} onChange={e => setServesMadinah(e.target.checked)} /> Médine</label>
-                </div>
+                <Link href="/guide/calendrier" style={{ ...input, display: 'flex', alignItems: 'center', justifyContent: 'space-between', textDecoration: 'none', fontWeight: 700 }}>
+                  <span>{profile.servesMakkah ? 'Makkah' : null}{profile.servesMakkah && profile.servesMadinah ? ' · ' : ''}{profile.servesMadinah ? 'Médine' : null}{!profile.servesMakkah && !profile.servesMadinah ? 'Aucune ville activée' : ''}</span>
+                  <span style={{ color: '#C9A84C' }}>Gérer dans le calendrier →</span>
+                </Link>
               </div>
             </div>
 

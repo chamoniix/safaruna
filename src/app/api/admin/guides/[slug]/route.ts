@@ -15,6 +15,8 @@ export async function GET(
   const { slug } = await params;
 
   try {
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
     const guide = await prisma.guideProfile.findUnique({
       where: { slug },
       include: {
@@ -31,8 +33,9 @@ export async function GET(
           orderBy: { createdAt: 'desc' },
         },
         availabilities: {
+          where: { date: { gte: today } },
           orderBy: { date: 'asc' },
-          take: 30,
+          include: { reservation: { select: { refNumber: true } } },
         },
         places: true,
       },
@@ -40,6 +43,12 @@ export async function GET(
 
     if (!guide)
       return NextResponse.json({ error: 'Guide introuvable' }, { status: 404 });
+
+    const activeHolds = await prisma.reservationHold.findMany({
+      where: { guideProfileId: guide.id, expiresAt: { gt: new Date() } },
+      orderBy: { date: 'asc' },
+      select: { id: true, date: true, city: true, draftRefNumber: true },
+    });
 
     // Stats séparées — sans filtres imbriqués
     const totalReservations = await prisma.reservation.count({
@@ -129,11 +138,24 @@ export async function GET(
             return '••••' + guide.ibanEncrypted.slice(-4)
           }
         })(),
-        availabilities: guide.availabilities.map(a => ({
-          id: a.id,
-          date: a.date.toISOString().split('T')[0],
-          status: a.status,
-        })),
+        availabilities: [
+          ...guide.availabilities.map(a => ({
+            id: a.id,
+            date: a.date.toISOString().split('T')[0],
+            city: a.city,
+            status: a.status,
+            reference: a.reservation?.refNumber || null,
+            source: a.status === 'BOOKED' ? 'Réservation' : 'Guide',
+          })),
+          ...activeHolds.map(hold => ({
+            id: `hold-${hold.id}`,
+            date: hold.date.toISOString().split('T')[0],
+            city: hold.city,
+            status: 'HELD',
+            reference: hold.draftRefNumber,
+            source: 'Paiement en cours',
+          })),
+        ].sort((a, b) => a.date.localeCompare(b.date)),
         conversations: conversations.map(c => ({
           id: c.id,
           pelerinName: c.pelerin.name

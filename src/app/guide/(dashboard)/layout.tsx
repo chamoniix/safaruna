@@ -60,6 +60,7 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
         }
         .guide-hamburger { display: none !important; }
         @media (max-width: 1023px) { .guide-hamburger { display: flex !important; } }
+        @media (max-width: 1023px) { .guide-center-brand { display: none !important; } }
         .guide-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 49; backdrop-filter: blur(2px); }
         @media (max-width: 1023px) { .guide-overlay.is-open { display: block; } }
         .guide-sb-close { display: none !important; }
@@ -128,7 +129,6 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
               ]},
               { section: 'Mon profil', items: [
                 { href: '/guide/profil',   icon: '◎', label: 'Modifier profil' },
-                { href: '/guide/forfaits', icon: '▤', label: 'Mes forfaits' },
               ]},
               { section: 'Ressources', items: [
                 { href: '/guide/formation',    icon: '🎓', label: 'Formation SAFARUMA' },
@@ -173,7 +173,7 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
               </button>
               <span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 600, color: '#1A1209' }}>Espace Guide</span>
             </div>
-            <Link href="/" style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', fontFamily: 'var(--font-cormorant, Georgia, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209', letterSpacing: '0.08em', whiteSpace: 'nowrap', textDecoration: 'none' }}>
+            <Link href="/" className="guide-center-brand" style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', fontFamily: 'var(--font-cormorant, Georgia, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209', letterSpacing: '0.08em', whiteSpace: 'nowrap', textDecoration: 'none' }}>
               SAFAR<span style={{ color: '#C9A84C' }}>U</span>MA
             </Link>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>

@@ -43,6 +43,17 @@ function RegisterForm() {
     setGoogleError('');
     setGooglePending(true);
     try {
+      if (refCode) {
+        const intent = await fetch('/api/referral/google-intent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ref: refCode }),
+        });
+        if (!intent.ok) {
+          setGoogleError('Ce lien de parrainage n’est plus valide.');
+          return;
+        }
+      }
       const result = await signIn('google', {
         callbackUrl: redirectParam || '/espace/tableau-de-bord',
       });

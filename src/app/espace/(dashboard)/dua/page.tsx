@@ -23,7 +23,7 @@ const DUAS = [
     phonetic: "Bismillahi was-salatu was-salamu 'ala rasulillahi, Allahumma-ftah li abwaba rahmatik.",
     translation: "Au nom d'Allah, que la prière et le salut soient sur le Messager d'Allah. Ô Allah, ouvre-moi les portes de Ta miséricorde.",
     duration: '0:15',
-    learned: true,
+    learned: false,
   },
   {
     id: 3,
@@ -57,7 +57,7 @@ const DUAS = [
     phonetic: "Alhamdu lillahi-lladhi ahyana ba'da ma amatana wa ilayhin-nushur.",
     translation: "Louange à Allah qui nous a redonné vie après nous avoir fait mourir, et c'est vers Lui que sera la résurrection.",
     duration: '0:10',
-    learned: true,
+    learned: false,
   },
   {
     id: 6,
@@ -80,8 +80,6 @@ const TABS = [
 ];
 
 function DuaCard({ dua, onToggleLearned }: { dua: typeof DUAS[0]; onToggleLearned: (id: number) => void }) {
-  const [playing, setPlaying] = useState(false);
-
   return (
     <div style={{
       background: 'white',
@@ -103,17 +101,18 @@ function DuaCard({ dua, onToggleLearned }: { dua: typeof DUAS[0]; onToggleLearne
         </div>
         <button
           onClick={() => onToggleLearned(dua.id)}
+          aria-pressed={dua.learned}
           style={{
-            width: 34, height: 34, borderRadius: '50%', flexShrink: 0,
+            minHeight: 34, borderRadius: 999, flexShrink: 0,
             background: dua.learned ? '#E8F5EE' : 'white',
-            border: `1.5px solid ${dua.learned ? '#1D5C3A' : '#EDE8DC'}`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', fontSize: '0.75rem', color: dua.learned ? '#1D5C3A' : '#7A6D5A',
-            fontWeight: 700, transition: 'all 0.15s',
+            border: `1.5px solid ${dua.learned ? '#1D5C3A' : '#C9A84C'}`,
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', padding: '0.35rem 0.65rem',
+            cursor: 'pointer', fontSize: '0.7rem', color: dua.learned ? '#1D5C3A' : '#8B6914',
+            fontWeight: 800, transition: 'all 0.15s', whiteSpace: 'nowrap',
           }}
           title={dua.learned ? 'Mémorisée' : 'Marquer mémorisée'}
         >
-          {dua.learned ? '✓' : '○'}
+          {dua.learned ? '✓ Mémorisée' : '+ Mémoriser'}
         </button>
       </div>
 
@@ -136,23 +135,9 @@ function DuaCard({ dua, onToggleLearned }: { dua: typeof DUAS[0]; onToggleLearne
         </div>
       </div>
 
-      {/* Audio player */}
-      <div style={{ margin: '0 1.25rem 1.25rem', background: '#1A1209', borderRadius: 12, padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
-        <button
-          onClick={() => setPlaying(p => !p)}
-          style={{ width: 36, height: 36, borderRadius: '50%', background: playing ? '#C9A84C' : 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, color: playing ? '#1A1209' : '#C9A84C', fontSize: '0.82rem', transition: 'all 0.15s' }}
-        >
-          {playing ? '⏸' : '▶'}
-        </button>
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontSize: '0.62rem', color: 'rgba(240,216,151,0.4)', fontFamily: 'monospace', flexShrink: 0 }}>0:00</span>
-          <div style={{ flex: 1, height: 28, display: 'flex', alignItems: 'center', gap: '2px' }}>
-            {Array.from({ length: 32 }).map((_, i) => (
-              <div key={i} style={{ width: 3, borderRadius: 2, height: `${Math.max(20, (Math.sin(i * 0.5) + 1) * 40 + 10)}%`, background: playing && i < 12 ? '#C9A84C' : 'rgba(201,168,76,0.18)', transition: 'background 0.3s' }} />
-            ))}
-          </div>
-          <span style={{ fontSize: '0.62rem', color: 'rgba(240,216,151,0.4)', fontFamily: 'monospace', flexShrink: 0 }}>{dua.duration}</span>
-        </div>
+      <div style={{ margin: '0 1.25rem 1.25rem', background: '#F3F0EA', borderRadius: 12, padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
+        <span aria-hidden style={{ width: 36, height: 36, borderRadius: '50%', background: '#E5E0D7', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#786F62', fontSize: '0.82rem' }}>♪</span>
+        <div style={{ flex: 1, fontSize: '0.72rem', color: '#756B5D', fontWeight: 700 }}>Audio bientôt disponible</div>
       </div>
     </div>
   );
@@ -196,7 +181,7 @@ export default function DuaTracker() {
         <div style={{ display: 'flex', gap: '1rem', background: 'white', border: '1px solid #EDE8DC', borderRadius: 14, padding: '0.875rem 1.25rem', boxShadow: '0 2px 8px rgba(26,18,9,0.04)', flexShrink: 0 }}>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C0392B', marginBottom: '0.2rem' }}>Série</div>
-            <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.5rem', fontWeight: 700, color: '#1A1209', lineHeight: 1 }}>🔥 12j</div>
+            <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.5rem', fontWeight: 700, color: '#1A1209', lineHeight: 1 }}>0 j</div>
           </div>
           <div style={{ width: 1, background: '#F0EBD8' }} />
           <div style={{ textAlign: 'center' }}>

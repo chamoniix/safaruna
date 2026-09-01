@@ -2180,6 +2180,15 @@ footer div::-webkit-scrollbar { display: none; }
   font-size: 1.2rem;
 }
 
+.sfr-problem-points svg {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+  stroke-width: 1.55;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .sfr-problem-points p {
   margin: 0;
   color: rgba(255, 250, 240, 0.86);

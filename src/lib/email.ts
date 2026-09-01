@@ -33,6 +33,7 @@ export type EmailCategory =
   | 'PELERIN_PASSWORD_CHANGED'
   | 'PELERIN_PASSWORD_RESET'
   | 'PELERIN_WELCOME'
+  | 'REFERRAL_PROMO_CODE'
   | 'RESERVATION_CONFIRMATION_ADMIN'
   | 'RESERVATION_CONFIRMATION_GUIDE'
   | 'RESERVATION_CONFIRMATION_PELERIN'
@@ -365,6 +366,42 @@ export function divider(): string {
 
 export function badge(text: string, color = '#C9A84C'): string {
   return `<span style="display:inline-block;background:${color}22;color:${color};font-size:11px;font-weight:700;letter-spacing:0.08em;padding:4px 12px;border-radius:20px;">${text}</span>`;
+}
+
+export function sendReferralPromoCode(opts: {
+  to: string;
+  name: string;
+  code: string;
+  expiresAt: Date;
+  purpose: 'REFERRED_SIGNUP' | 'SPONSOR_REWARD';
+  referralId: string;
+}): Promise<EmailSendResult> {
+  const expiry = opts.expiresAt.toLocaleDateString('fr-FR', {
+    day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC',
+  });
+  const intro = opts.purpose === 'REFERRED_SIGNUP'
+    ? 'Votre code promotionnel de parrainage est prêt. Saisissez-le volontairement dans votre checkout SAFARUMA avant le paiement.'
+    : 'Un filleul a finalisé un paiement avec votre lien de parrainage. Votre code promotionnel personnel est prêt.';
+  return sendEmail({
+    category: 'REFERRAL_PROMO_CODE',
+    retryable: true,
+    idempotencyKey: `referral-promo:${opts.referralId}:${opts.purpose}:${opts.to.toLowerCase()}`,
+    reference: { type: 'REFERRAL', id: opts.referralId },
+    to: { email: opts.to, name: opts.name },
+    subject: 'Votre code promotionnel SAFARUMA — 10 %',
+    html: baseTemplate(`
+      ${heading(`Bonjour ${escapeHtml(opts.name || 'Pèlerin')},`)}
+      ${badge('CODE PROMOTIONNEL · 10 %', '#1D5C3A')}
+      ${p(intro)}
+      <div style="background:#1A1209;border-radius:12px;padding:20px;margin:20px 0;text-align:center;">
+        <div style="font-size:11px;letter-spacing:.1em;color:rgba(255,255,255,.55);font-weight:700;text-transform:uppercase;margin-bottom:8px;">Votre code à usage unique</div>
+        <div style="font-family:monospace;font-size:22px;letter-spacing:.08em;font-weight:800;color:#F0D897;">${escapeHtml(opts.code)}</div>
+      </div>
+      ${p(`Valable jusqu’au <strong>${escapeHtml(expiry)}</strong>. Il est utilisable une seule fois et ne se cumule avec aucun autre code.`)}
+      ${divider()}
+      <div style="text-align:center">${btn('Préparer ma réservation', 'https://safaruma.com/guides')}</div>
+    `),
+  });
 }
 
 // ─── 1. Bienvenue pèlerin ────────────────────────────────────────

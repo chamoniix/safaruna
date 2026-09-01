@@ -91,6 +91,7 @@ export async function sendPaymentConfirmationEmails(opts: {
     data.pricing.localTransportMakkah ? `Transport local Makkah ${data.pricing.localTransportMakkah} €` : null,
     data.pricing.localTransportMadinah ? `Transport local Médine ${data.pricing.localTransportMadinah} €` : null,
     data.pricing.guideHotel ? `Hôtel du guide ${data.pricing.guideHotel} €` : null,
+    data.pricing.promoDiscount ? `Code promotionnel −${data.pricing.promoDiscount} €` : null,
   ].filter(Boolean).join(' · ')
 
   if (pelerin.email) {
@@ -118,6 +119,7 @@ export async function sendPaymentConfirmationEmails(opts: {
           ['Transport du guide entre les villes', data.pricing.intercityTransport ? `${data.transportOption === 'TRAIN' ? 'Train A/R' : 'Voiture privée A/R'} — ${data.pricing.intercityTransport} €` : 'Non applicable'],
           ['Hébergement du guide', data.guideBedProvided ? 'Lit fourni par le client' : data.pricing.guideHotelNights ? `${data.pricing.guideHotelNights} nuit(s) — ${data.pricing.guideHotel} €` : 'Non applicable'],
           ['Détail du prix', priceSummary],
+          ...(data.promoCode ? [['Code promotionnel', `${data.promoCode.code} · −${data.pricing.promoDiscount} €`] as [string, string]] : []),
           ['Montant payé', `${amount.toLocaleString('fr-FR')} €`],
         ])}
         ${data.ihramAlert ? `<div style="background:#FEE2E2;border:1px solid #DC2626;border-radius:8px;padding:12px 16px;margin:18px 0;color:#991B1B;font-size:13px;font-weight:700">Attention : mettez votre Ihram dans l’avion ou rendez-vous au Miqat le plus proche avant la Omra.</div>` : ''}
@@ -180,6 +182,7 @@ export async function sendPaymentConfirmationEmails(opts: {
         ['Arrivée / ordre', `${arrivalLabel(data.arrivalPoint)} · ${data.cityOrder.map(cityLabel).join(' → ')}`],
         ['Transport local', data.missions.map(mission => `${cityLabel(mission.city)} : ${transportLabel(mission, data)}`).join(' | ')],
         ['Prix', priceSummary],
+        ...(data.promoCode ? [['Code promotionnel', `${data.promoCode.code} · −${data.pricing.promoDiscount} €`] as [string, string]] : []),
         ['Total payé', `${amount.toLocaleString('fr-FR')} €`],
         ['Alerte Ihram', data.ihramAlert ? 'Oui' : 'Non'],
       ])}

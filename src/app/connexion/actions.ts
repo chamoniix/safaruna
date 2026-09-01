@@ -6,6 +6,8 @@ import bcrypt from 'bcryptjs';
 import { sendEmail } from '@/lib/email';
 import { recordAnalyticsEvent } from '@/lib/analytics';
 import { Prisma } from '@prisma/client';
+import { claimReferralForNewPelerin } from '@/lib/referral';
+import { sendReferralPromoCode } from '@/lib/email';
 
 type SignupState = { error: string };
 type ResendState = { success: boolean; message: string };
@@ -93,9 +95,9 @@ export async function signup(_previousState: SignupState, formData: FormData): P
   const token = crypto.randomUUID();
 
   // Réserver l'adresse, créer l'utilisateur et son token dans une seule transaction.
-  let createdUser;
+  let createdRegistration;
   try {
-    createdUser = await prisma.$transaction(async tx => {
+    createdRegistration = await prisma.$transaction(async tx => {
       await tx.emailIdentity.create({ data: { email, kind: 'PELERIN' } });
       const user = await tx.user.create({
         data: {
@@ -115,7 +117,21 @@ export async function signup(_previousState: SignupState, formData: FormData): P
           expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24h
         },
       });
-      return user;
+      const referralPromo = refCode
+        ? await claimReferralForNewPelerin(tx, { referralCode: refCode, referredUserId: user.id })
+        : null;
+      if (referralPromo) {
+        await tx.auditLog.create({
+          data: {
+            actor: email,
+            actorRole: 'CLIENT',
+            action: 'REFERRAL_REGISTERED',
+            target: user.id,
+            detail: JSON.stringify({ promoCode: referralPromo.promo.code, expiresAt: referralPromo.promo.expiresAt }),
+          },
+        });
+      }
+      return { user, referralPromo };
     });
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
@@ -126,14 +142,20 @@ export async function signup(_previousState: SignupState, formData: FormData): P
 
   await recordAnalyticsEvent({
     eventName: 'account_created',
-    userId: createdUser.id,
+    userId: createdRegistration.user.id,
     path: '/inscription',
     metadata: { method: 'email', role: 'PELERIN' },
   });
 
-  if (refCode) {
-    console.log(`[parrainage] Nouvel inscrit ${email} parrainé par code ${refCode}`);
-    // TODO: créer une entrée Referral en base quand Stripe est actif
+  if (createdRegistration.referralPromo) {
+    await sendReferralPromoCode({
+      to: email,
+      name: fullName,
+      code: createdRegistration.referralPromo.promo.code,
+      expiresAt: createdRegistration.referralPromo.promo.expiresAt,
+      purpose: 'REFERRED_SIGNUP',
+      referralId: createdRegistration.referralPromo.referralId,
+    }).catch(error => console.error('[referral] signup promo email failed', error));
   }
 
   // Attendre l'envoi : en cas d'échec, la page de connexion permet le renvoi.

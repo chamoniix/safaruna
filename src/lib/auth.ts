@@ -7,6 +7,9 @@ import bcrypt from "bcryptjs"
 import { analyticsDevice, recordAnalyticsEvent } from '@/lib/analytics'
 import { checkRateLimitKey, pelerinAuthRatelimit } from '@/lib/ratelimit'
 import { Prisma } from '@prisma/client'
+import { claimReferralFromOAuthIntent } from '@/lib/referral'
+import { readReferralIntentCookie } from '@/lib/referral-oauth'
+import { sendReferralPromoCode } from '@/lib/email'
 
 const EMAIL_ALREADY_USED_REDIRECT = '/inscription?error=email_used'
 
@@ -124,6 +127,7 @@ export const authOptions: AuthOptions = {
     async signIn({ user, account }) {
       if (account?.provider === "google" && user.email) {
         let accountCreated = false
+        let referralPromo: Awaited<ReturnType<typeof claimReferralFromOAuthIntent>> = null
         try {
           const normalizedEmail = user.email.trim().toLowerCase()
           user.email = normalizedEmail
@@ -142,9 +146,10 @@ export const authOptions: AuthOptions = {
             return EMAIL_ALREADY_USED_REDIRECT
           }
           if (!existing) {
+            const referralIntentId = readReferralIntentCookie((await headers()).get('cookie'))
             const created = await prisma.$transaction(async tx => {
               await tx.emailIdentity.create({ data: { email: normalizedEmail, kind: 'PELERIN' } })
-              return tx.user.create({
+              const createdUser = await tx.user.create({
                 data: {
                   email: normalizedEmail,
                   name: user.name ?? null,
@@ -153,8 +158,24 @@ export const authOptions: AuthOptions = {
                   emailVerified: new Date(),
                 },
               })
+              const promo = referralIntentId
+                ? await claimReferralFromOAuthIntent(tx, { intentId: referralIntentId, referredUserId: createdUser.id })
+                : null
+              if (promo) {
+                await tx.auditLog.create({
+                  data: {
+                    actor: normalizedEmail,
+                    actorRole: 'CLIENT',
+                    action: 'REFERRAL_REGISTERED',
+                    target: createdUser.id,
+                    detail: JSON.stringify({ promoCode: promo.promo.code, expiresAt: promo.promo.expiresAt, method: 'google' }),
+                  },
+                })
+              }
+              return { user: createdUser, promo }
             });
-            user.id = created.id;
+            user.id = created.user.id;
+            referralPromo = created.promo
             ;(user as any).role = 'PELERIN'
             accountCreated = true
           } else {
@@ -176,6 +197,16 @@ export const authOptions: AuthOptions = {
           }
           if (accountCreated) {
             await recordAnalyticsEvent({ eventName: 'account_created', userId: user.id, path: '/inscription', metadata: { method: 'google', role: 'PELERIN' } })
+            if (referralPromo) {
+              await sendReferralPromoCode({
+                to: normalizedEmail,
+                name: user.name || normalizedEmail,
+                code: referralPromo.promo.code,
+                expiresAt: referralPromo.promo.expiresAt,
+                purpose: 'REFERRED_SIGNUP',
+                referralId: referralPromo.referralId,
+              }).catch(error => console.error('[referral] Google signup promo email failed', error))
+            }
           }
           await recordAuthenticatedLogin({
             userId: user.id,

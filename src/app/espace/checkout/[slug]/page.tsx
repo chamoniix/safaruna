@@ -280,6 +280,10 @@ export default function CheckoutPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
   const [checkingAvailability, setCheckingAvailability] = useState(false)
+  const [promoInput, setPromoInput] = useState('')
+  const [appliedPromo, setAppliedPromo] = useState<{ code: string; discountPercent: number } | null>(null)
+  const [promoError, setPromoError] = useState('')
+  const [checkingPromo, setCheckingPromo] = useState(false)
 
   // Redirect si non connecté — on préserve l'URL complète (forfait, dates, pair…)
   // pour que le retour post-connexion reprenne exactement où l'utilisateur était.
@@ -556,6 +560,8 @@ export default function CheckoutPage() {
   const prixVoiture = transportPricing.localCar
   const prixHotelGuide = transportPricing.guideHotel
   const total = prixBase + prixLieux + prixTransport + prixVoiture + prixHotelGuide
+  const promoDiscountEstimate = appliedPromo ? Math.round(total * appliedPromo.discountPercent) / 100 : 0
+  const totalAfterPromo = total - promoDiscountEstimate
 
   // Lieux supplémentaires par ville — historiques fusionnés dans la bonne ville
   const getAvailablePlacesByCity = (city: 'MAKKAH' | 'MADINAH'): Place[] => {
@@ -660,6 +666,7 @@ export default function CheckoutPage() {
           localTransportMadinah,
           guideBedProvided,
           totalPrice: total,
+          promoCode: appliedPromo?.code || '',
           packageName: basePackage?.name,
           selectedGuideSlug,
           selectedGuideSlugMadinah,
@@ -678,6 +685,25 @@ export default function CheckoutPage() {
       })
       setError(message)
       setSubmitting(false)
+    }
+  }
+
+  const applyPromo = async () => {
+    setCheckingPromo(true)
+    setPromoError('')
+    try {
+      const response = await fetch('/api/espace/promo/validate', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: promoInput }),
+      })
+      const body = await response.json()
+      if (!response.ok) throw new Error(body.error || 'Code promotionnel invalide.')
+      setAppliedPromo({ code: body.code, discountPercent: body.discountPercent })
+      setPromoInput(body.code)
+    } catch (reason) {
+      setAppliedPromo(null)
+      setPromoError(reason instanceof Error ? reason.message : 'Code promotionnel invalide.')
+    } finally {
+      setCheckingPromo(false)
     }
   }
 
@@ -2054,6 +2080,23 @@ export default function CheckoutPage() {
                 </div>
               )}
 
+              <div style={{ padding: '.85rem 1.25rem', borderBottom: '1px solid #F5F0E8' }}>
+                <div style={{ fontSize: '.76rem', fontWeight: 800, color: '#1A1209', marginBottom: '.5rem' }}>Code promotionnel</div>
+                <div style={{ display: 'flex', gap: '.45rem', flexWrap: 'wrap' }}>
+                  <input value={promoInput} onChange={event => { setPromoInput(event.target.value.toUpperCase()); setPromoError(''); if (appliedPromo?.code !== event.target.value.toUpperCase()) setAppliedPromo(null) }} placeholder="Ex. SAF-…" aria-label="Code promotionnel" style={{ flex: '1 1 150px', minWidth: 0, border: '1px solid #E8DFC8', borderRadius: 8, padding: '.55rem .65rem', fontFamily: 'monospace', fontSize: '.78rem', color: '#1A1209' }} />
+                  <button type="button" onClick={applyPromo} disabled={checkingPromo || !promoInput.trim()} style={{ border: 'none', borderRadius: 8, padding: '.55rem .75rem', background: checkingPromo || !promoInput.trim() ? '#D6D3D1' : '#1A1209', color: '#F0D897', cursor: checkingPromo || !promoInput.trim() ? 'not-allowed' : 'pointer', fontFamily: 'inherit', fontWeight: 800, fontSize: '.72rem' }}>{checkingPromo ? 'Vérification…' : 'Appliquer'}</button>
+                </div>
+                {promoError && <div style={{ color: '#C0392B', fontSize: '.68rem', marginTop: '.4rem', fontWeight: 700 }}>{promoError}</div>}
+                {appliedPromo && <div style={{ color: '#1D5C3A', fontSize: '.7rem', marginTop: '.45rem', fontWeight: 800 }}>✓ Code {appliedPromo.code} appliqué · −{appliedPromo.discountPercent} %</div>}
+              </div>
+
+              {appliedPromo && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '.75rem 1.25rem', borderBottom: '1px solid #F5F0E8', color: '#1D5C3A' }}>
+                  <div style={{ fontSize: '.85rem', fontWeight: 700 }}>Réduction promotionnelle ({appliedPromo.discountPercent} %)</div>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700 }}>−{promoDiscountEstimate.toLocaleString('fr-FR')}€</div>
+                </div>
+              )}
+
               {/* Total */}
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 1.25rem', background: '#FAF7F0' }}>
                 <div>
@@ -2061,7 +2104,7 @@ export default function CheckoutPage() {
                   <div style={{ fontSize: '0.7rem', color: '#7A6D5A' }}>Pour {nbPersonnes} personne{nbPersonnes > 1 ? 's' : ''}</div>
                 </div>
                 <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.75rem', fontWeight: 700, color: '#C9A84C' }}>
-                  {total.toLocaleString('fr-FR')}€
+                  {totalAfterPromo.toLocaleString('fr-FR')}€
                 </div>
               </div>
             </div>
@@ -2112,7 +2155,7 @@ export default function CheckoutPage() {
               disabled={submitting}
               style={{ width: '100%', padding: '1.1rem', background: submitting ? '#7A6D5A' : 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)', color: '#FAF7F0', border: 'none', borderRadius: 50, fontFamily: 'var(--font-cormorant, serif)', fontWeight: 700, fontSize: '1.1rem', cursor: submitting ? 'not-allowed' : 'pointer', letterSpacing: '0.06em', boxShadow: submitting ? 'none' : '0 4px 20px rgba(201,168,76,0.4)' }}
             >
-              {submitting ? 'Envoi en cours…' : `Payer ${total.toLocaleString('fr-FR')}€`}
+              {submitting ? 'Envoi en cours…' : `Payer ${totalAfterPromo.toLocaleString('fr-FR')}€`}
             </button>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '0.75rem', fontSize: '0.72rem', color: '#7A6D5A' }}>

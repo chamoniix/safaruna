@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
@@ -9,6 +9,25 @@ import Footer from '@/components/Footer';
 function RejoindreContent() {
   const searchParams = useSearchParams();
   const ref = searchParams.get('ref') || '';
+  const [referralValid, setReferralValid] = useState(false);
+  const [checkingReferral, setCheckingReferral] = useState(Boolean(ref));
+
+  useEffect(() => {
+    if (!ref) {
+      setReferralValid(false);
+      setCheckingReferral(false);
+      return;
+    }
+    let active = true;
+    fetch(`/api/referral/preview?ref=${encodeURIComponent(ref)}`, { cache: 'no-store' })
+      .then(response => response.ok ? response.json() : { valid: false })
+      .then(data => { if (active) setReferralValid(data.valid === true); })
+      .catch(() => { if (active) setReferralValid(false); })
+      .finally(() => { if (active) setCheckingReferral(false); });
+    return () => { active = false; };
+  }, [ref]);
+
+  const hasReferral = Boolean(ref) && referralValid;
 
   return (
     <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1rem' }}>
@@ -16,24 +35,25 @@ function RejoindreContent() {
 
         {/* Badge parrainage */}
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: '#FAF3E0', border: '1px solid rgba(201,168,76,0.3)', color: '#8B6914', fontSize: '0.72rem', fontWeight: 700, padding: '0.4rem 1rem', borderRadius: 50, marginBottom: '1.5rem' }}>
-          🎁 {ref ? <>Offre de parrainage — Code <strong style={{ color: '#C9A84C' }}>{ref}</strong></> : 'Offre de bienvenue SAFARUMA'}
+          {checkingReferral ? 'Vérification du lien de parrainage…' : hasReferral ? <>🎁 Offre de parrainage</> : 'SAFARUMA'}
         </div>
 
-        {/* Amount */}
-        <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(3rem, 8vw, 5rem)', fontWeight: 700, color: '#1A1209', lineHeight: 1, marginBottom: '0.5rem' }}>
-          80<span style={{ color: '#C9A84C' }}>€</span>
-        </div>
-        <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1A1209', marginBottom: '0.5rem' }}>offerts sur votre première réservation</div>
+        {hasReferral && <>
+          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: 'clamp(3rem, 8vw, 5rem)', fontWeight: 700, color: '#1A1209', lineHeight: 1, marginBottom: '0.5rem' }}>
+            10<span style={{ color: '#C9A84C' }}>%</span>
+          </div>
+          <div style={{ fontSize: '1rem', fontWeight: 700, color: '#1A1209', marginBottom: '0.5rem' }}>avec votre code promotionnel personnel</div>
+        </>}
         <p style={{ fontSize: '0.85rem', color: '#7A6D5A', lineHeight: 1.7, marginBottom: '2rem', maxWidth: 380, margin: '0 auto 2rem' }}>
-          {ref
-            ? "Un ami vous a invité à découvrir l'Arabie Saoudite avec SAFARUMA. Créez votre compte et bénéficiez de 80€ de réduction automatiquement appliquée."
+          {hasReferral
+            ? "Un ami vous a invité à découvrir l'Arabie Saoudite avec SAFARUMA. Après votre inscription, vous recevrez par email un code de 10 % à saisir au checkout."
             : "Rejoignez SAFARUMA et réservez votre guide privé pour la Omra. Des centaines de pèlerins nous font confiance chaque année."}
         </p>
 
         {/* CTA */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
-          <Link href={`/inscription?ref=${ref}`} style={{ display: 'block', width: '100%', maxWidth: 340, padding: '0.9rem', background: '#1A1209', color: '#F0D897', borderRadius: 50, fontWeight: 800, fontSize: '0.95rem', textDecoration: 'none', textAlign: 'center', letterSpacing: '0.04em' }}>
-            Créer mon compte et économiser 80€ →
+          <Link href={hasReferral ? `/inscription?ref=${encodeURIComponent(ref)}` : '/inscription'} style={{ display: 'block', width: '100%', maxWidth: 340, padding: '0.9rem', background: '#1A1209', color: '#F0D897', borderRadius: 50, fontWeight: 800, fontSize: '0.95rem', textDecoration: 'none', textAlign: 'center', letterSpacing: '0.04em' }}>
+            {hasReferral ? 'Créer mon compte et recevoir mon code →' : 'Créer mon compte →'}
           </Link>
           <Link href="/guides" style={{ fontSize: '0.8rem', color: '#7A6D5A', textDecoration: 'none', fontWeight: 500 }}>
             Découvrir les guides d&apos;abord →

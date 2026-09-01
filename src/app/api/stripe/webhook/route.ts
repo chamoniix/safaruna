@@ -3,6 +3,7 @@ import * as Sentry from '@sentry/nextjs'
 import { after, type NextRequest, NextResponse } from 'next/server'
 import { recordAnalyticsEvent } from '@/lib/analytics'
 import { sendPaymentConfirmationEmails } from '@/lib/payments/confirmation-emails'
+import { sendReferralPromoCode } from '@/lib/email'
 import {
   PaymentProcessingError,
   processExpiredCheckout,
@@ -158,6 +159,16 @@ export async function POST(req: NextRequest) {
             pelerin: result.pelerin!,
             guides: result.guides!,
           }),
+          ...(result.sponsorPromo ? [
+            sendReferralPromoCode({
+              to: result.sponsorPromo.email,
+              name: result.sponsorPromo.name,
+              code: result.sponsorPromo.code,
+              expiresAt: result.sponsorPromo.expiresAt,
+              purpose: 'SPONSOR_REWARD',
+              referralId: result.sponsorPromo.referralId,
+            }),
+          ] : []),
         ])
 
         for (const sideEffect of sideEffects) {

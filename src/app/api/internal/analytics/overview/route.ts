@@ -94,7 +94,7 @@ export async function GET(req: NextRequest) {
   const start = new Date(Date.now() - days * 86_400_000)
   const activeSince = new Date(Date.now() - 5 * 60_000)
 
-  const [events, usersTotal, usersNew, usersByRole, recentUsers, reservations, guidesActive, guidesPending, guideApplicationsNew, guideApplications, guideApplicationsTotal, guideApplicationCounts, adminAccounts, adminLoginAttempts, adminSessionsActive, emailDeliveries, sentry] = await Promise.all([
+  const [events, usersTotal, usersNew, usersByRole, recentUsers, reservations, guidesActive, guidesPending, guideApplicationsNew, guideApplications, guideApplicationsTotal, guideApplicationCounts, adminAccounts, adminLoginAttempts, adminSessionsActive, emailDeliveries, sentry, referrals] = await Promise.all([
     prisma.analyticsEvent.findMany({
       where: { createdAt: { gte: start } },
       orderBy: { createdAt: 'desc' },
@@ -149,6 +149,18 @@ export async function GET(req: NextRequest) {
       },
     }),
     sentryIssues(days),
+    prisma.referral.findMany({
+      where: { createdAt: { gte: start } },
+      orderBy: { createdAt: 'desc' },
+      take: 200,
+      select: {
+        id: true, status: true, createdAt: true, qualifiedAt: true,
+        sponsor: { select: { name: true, firstName: true, lastName: true, email: true } },
+        referredUser: { select: { name: true, firstName: true, lastName: true, email: true } },
+        qualifiedReservation: { select: { refNumber: true, totalPrice: true, createdAt: true } },
+        promoCodes: { select: { code: true, kind: true, status: true, discountBps: true, expiresAt: true, redeemedAt: true } },
+      },
+    }),
   ])
 
   const rows = events as EventRow[]
@@ -343,6 +355,21 @@ export async function GET(req: NextRequest) {
       cancelled: eventCounts.get('payment_cancelled') ?? 0,
       expired: eventCounts.get('payment_expired') ?? 0,
       reservations: reservations.slice(0, 50),
+    },
+    referrals: {
+      total: referrals.length,
+      qualified: referrals.filter(referral => referral.status === 'QUALIFIED').length,
+      pending: referrals.filter(referral => referral.status === 'REGISTERED').length,
+      rows: referrals.map(referral => ({
+        id: referral.id,
+        status: referral.status,
+        createdAt: referral.createdAt,
+        qualifiedAt: referral.qualifiedAt,
+        sponsor: referral.sponsor,
+        referred: referral.referredUser,
+        payment: referral.qualifiedReservation,
+        promoCodes: referral.promoCodes.map(code => ({ ...code, discountPercent: code.discountBps / 100 })),
+      })),
     },
     accounts: {
       recent: recentUsers,

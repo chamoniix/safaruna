@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client'
+import { randomBytes } from 'node:crypto'
 import prisma from '@/lib/prisma'
 import { getPackageForCity } from '@/lib/packages'
 import type {
@@ -8,6 +9,7 @@ import type {
   PaymentProviderId,
 } from '@/lib/payments/types'
 import { assertMissionsAvailable, GuideAvailabilityConflictError } from '@/lib/guide-availability'
+import { promoExpiry } from '@/lib/referral'
 
 const EVENT_PROCESSING_LEASE_MS = 5 * 60 * 1000
 
@@ -203,6 +205,13 @@ export type PaidPaymentResult = {
       lastName: string | null
     } | null
   }>
+  sponsorPromo?: {
+    referralId: string
+    email: string
+    name: string
+    code: string
+    expiresAt: Date
+  } | null
 }
 
 export async function processPaidCheckout(event: NormalizedCheckoutPaidEvent): Promise<PaidPaymentResult> {
@@ -327,7 +336,7 @@ export async function processPaidCheckout(event: NormalizedCheckoutPaidEvent): P
           where: { id: claimed.id },
           data: { status: 'PROCESSED', processedAt: new Date() },
         })
-        return false
+        return { created: false, sponsorPromo: null }
       }
 
       const availabilityMissions = data.missions.map(mission => ({
@@ -386,6 +395,63 @@ export async function processPaidCheckout(event: NormalizedCheckoutPaidEvent): P
           },
         },
       })
+
+      let sponsorPromo: PaidPaymentResult['sponsorPromo'] = null
+      if (data.promoCode) {
+        const promo = await tx.promoCode.findUnique({
+          where: { id: data.promoCode.id },
+          include: {
+            referral: {
+              include: {
+                sponsor: { select: { id: true, email: true, name: true, firstName: true, lastName: true } },
+              },
+            },
+          },
+        })
+        if (
+          !promo
+          || promo.code !== data.promoCode.code
+          || promo.ownerId !== pelerin.id
+          || promo.status !== 'HELD'
+          || promo.reservedDraftId !== draft.id
+          || promo.discountBps !== data.promoCode.discountBps
+          || promo.expiresAt <= event.occurredAt
+        ) {
+          throw new PaymentProcessingError('Code promotionnel incohérent', 400)
+        }
+        const redeemed = await tx.promoCode.updateMany({
+          where: { id: promo.id, status: 'HELD', reservedDraftId: draft.id },
+          data: { status: 'REDEEMED', redeemedAt: event.occurredAt, reservedDraftId: null, reservationId: reservation.id },
+        })
+        if (redeemed.count !== 1) throw new PaymentProcessingError('Code promotionnel déjà traité', 409)
+
+        if (promo.kind === 'REFERRED_SIGNUP') {
+          const qualified = await tx.referral.updateMany({
+            where: { id: promo.referralId, status: 'REGISTERED', qualifiedReservationId: null },
+            data: { status: 'QUALIFIED', qualifiedAt: event.occurredAt, qualifiedReservationId: reservation.id },
+          })
+          if (qualified.count === 1 && promo.referral.sponsor.email) {
+            const rewardCode = `SAF-${randomBytes(6).toString('hex').toUpperCase()}`
+            const reward = await tx.promoCode.create({
+              data: {
+                code: rewardCode,
+                kind: 'SPONSOR_REWARD',
+                ownerId: promo.referral.sponsor.id,
+                referralId: promo.referralId,
+                discountBps: promo.discountBps,
+                expiresAt: promoExpiry(event.occurredAt),
+              },
+            })
+            sponsorPromo = {
+              referralId: promo.referralId,
+              email: promo.referral.sponsor.email,
+              name: promo.referral.sponsor.name || `${promo.referral.sponsor.firstName ?? ''} ${promo.referral.sponsor.lastName ?? ''}`.trim() || promo.referral.sponsor.email,
+              code: reward.code,
+              expiresAt: reward.expiresAt,
+            }
+          }
+        }
+      }
 
       await tx.guideEarning.createMany({
         data: data.earnings.map(earning => ({
@@ -458,18 +524,19 @@ export async function processPaidCheckout(event: NormalizedCheckoutPaidEvent): P
             amountCents: event.amountCents,
             cityChoice: data.cityChoice,
             missions: data.missions.length,
+            promoCode: data.promoCode?.code || null,
           }),
         },
       })
       await tx.reservationDraft.delete({ where: { refNumber: event.bookingRef } })
-      return true
+      return { created: true, sponsorPromo }
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable })
 
     return {
-      duplicate: !reservationCreated,
+      duplicate: !reservationCreated.created,
       refNumber: event.bookingRef,
       amount: event.amountCents / 100,
-      ...(reservationCreated ? { data, pelerin, guides } : {}),
+      ...(reservationCreated.created ? { data, pelerin, guides, sponsorPromo: reservationCreated.sponsorPromo } : {}),
     }
   } catch (error) {
     await markEventFailed(claimed.id, error)
@@ -523,8 +590,8 @@ export async function processExpiredCheckout(event: NormalizedCheckoutExpiredEve
       throw new PaymentProcessingError('Session de paiement incohérente', 400)
     }
 
-    const [, deleted] = await prisma.$transaction([
-      prisma.paymentAttempt.updateMany({
+    const deleted = await prisma.$transaction(async tx => {
+      await tx.paymentAttempt.updateMany({
         where: {
           bookingRef: event.bookingRef,
           provider: event.provider,
@@ -532,22 +599,29 @@ export async function processExpiredCheckout(event: NormalizedCheckoutExpiredEve
           status: { in: ['CREATED', 'PENDING'] },
         },
         data: { status: 'EXPIRED' },
-      }),
-      prisma.reservationDraft.deleteMany({ where: { refNumber: event.bookingRef } }),
-      prisma.paymentEvent.update({
+      })
+      if (draft) {
+        await tx.promoCode.updateMany({
+          where: { reservedDraftId: draft.id, status: 'HELD' },
+          data: { status: 'ACTIVE', reservedDraftId: null },
+        })
+      }
+      const removed = await tx.reservationDraft.deleteMany({ where: { refNumber: event.bookingRef } })
+      await tx.paymentEvent.update({
         where: { id: claimed.id },
         data: { status: 'PROCESSED', processedAt: new Date() },
-      }),
-      prisma.auditLog.create({
+      })
+      await tx.auditLog.create({
         data: {
           actor: event.provider.toLowerCase(),
           actorRole: 'SYSTEM',
           action: 'PAYMENT_SESSION_EXPIRED',
           target: event.bookingRef,
-          detail: JSON.stringify({ provider: event.provider }),
+          detail: JSON.stringify({ provider: event.provider, promoCodeReleased: Boolean(draft) }),
         },
-      }),
-    ])
+      })
+      return removed
+    })
     return { duplicate: false, expired: deleted.count > 0 }
   } catch (error) {
     await markEventFailed(claimed.id, error)

@@ -3,7 +3,7 @@ import 'server-only'
 import { createSign } from 'node:crypto'
 import { Redis } from '@upstash/redis'
 
-export type DashboardView = 'overview' | 'realtime' | 'audience' | 'acquisition' | 'content' | 'auth' | 'guides' | 'payments' | 'emails' | 'errors' | 'search' | 'infrastructure'
+export type DashboardView = 'overview' | 'realtime' | 'audience' | 'acquisition' | 'content' | 'auth' | 'guides' | 'payments' | 'referrals' | 'emails' | 'errors' | 'search' | 'infrastructure'
 
 export type BigQueryUsage = {
   available: boolean
@@ -36,6 +36,16 @@ export type AnalyticsData = {
       refNumber: string; status: string; totalPrice: number; createdAt: string
       selectedCities: string | null; nbPeople: number
       pelerin: { id: string; name: string | null; email: string | null }
+    }>
+  }
+  referrals: {
+    total: number; qualified: number; pending: number
+    rows: Array<{
+      id: string; status: string; createdAt: string; qualifiedAt: string | null
+      sponsor: { name: string | null; firstName: string | null; lastName: string | null; email: string | null }
+      referred: { name: string | null; firstName: string | null; lastName: string | null; email: string | null }
+      payment: { refNumber: string; totalPrice: number; createdAt: string } | null
+      promoCodes: Array<{ code: string; kind: string; status: string; discountPercent: number; expiresAt: string; redeemedAt: string | null }>
     }>
   }
   accounts: {

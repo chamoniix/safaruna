@@ -45,6 +45,7 @@ export type PaymentDraftData = {
   sameGuideForBothCities: boolean
   cityOrder: Array<'MAKKAH' | 'MADINAH'>
   ihramAlert: boolean
+  promoCode: { id: string; code: string; discountBps: number } | null
   missions: DraftMission[]
   pricing: {
     base: number
@@ -57,6 +58,8 @@ export type PaymentDraftData = {
     localVehicle: { dailyRate: number; vehicle: string; label: string }
     guideHotelNights: number
     guideHotel: number
+    promoDiscount: number
+    grossTotal: number
     total: number
   }
   earnings: DraftEarning[]

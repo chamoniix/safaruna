@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { adminLogout } from '@/app/admin/login/actions';
 import styles from './layout.module.css';
 import {
-  BarChart3, CalendarCheck2, ChevronLeft, ChevronRight,
+  BarChart3, CalendarCheck2, ChevronLeft, ChevronRight, Gift,
   CircleDollarSign, ClipboardList, Gauge, Landmark, LogOut, MapPinned,
   MessageSquare, Settings, ShieldCheck, Users, UserRoundCheck,
   Star,
@@ -30,6 +30,7 @@ const NAV_SECTIONS: NavSection[] = [
       { href: '/admin/candidatures-guides', label: 'Candidatures guides', icon: ClipboardList },
       { href: '/admin/guides', label: 'Guides', icon: UserRoundCheck },
       { href: '/admin/pelerins', label: 'Pèlerins', icon: Users },
+      { href: '/admin/parrainages', label: 'Parrainages', icon: Gift },
       { href: '/admin/reservations', label: 'Réservations', icon: CalendarCheck2 },
       { href: '/admin/avis', label: 'Avis', icon: Star },
       { href: '/admin/messages', label: 'Messages', icon: MessageSquare },

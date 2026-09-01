@@ -80,7 +80,7 @@ const NAV: { section: string; items: NavItem[] }[] = [
   ]},
   { section: 'Mon compte', items: [
     { href: '/espace/profil',     Icon: IcoUser, label: 'Mon profil' },
-    { href: '/espace/parrainage', Icon: IcoGift, label: 'Parrainage', badge: '80€', badgeColor: '#1D5C3A' },
+    { href: '/espace/parrainage', Icon: IcoGift, label: 'Parrainage', badge: '-10 %', badgeColor: '#1D5C3A' },
     { href: '/espace/parametres', Icon: IcoCog,  label: 'Paramètres' },
   ]},
 ];

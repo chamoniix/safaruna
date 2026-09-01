@@ -31,6 +31,7 @@ import {
 } from '@/lib/place-catalog'
 import { getActivePaymentProvider, type PaymentProvider } from '@/lib/payments/provider'
 import { assertMissionsAvailable, GuideAvailabilityConflictError, parseBookingDate } from '@/lib/guide-availability'
+import { expirePromoCodes, normalizePromoCode, promoDiscountCents } from '@/lib/referral'
 
 // Stripe exige une expiration située au moins 30 minutes après la création de
 // la session. Une minute technique couvre le temps de transaction et réseau.
@@ -59,6 +60,7 @@ const checkoutSchema = z.object({
   selectedGuideSlugMadinah: z.string().min(1).max(120).nullable().optional(),
   arrivalPoint: z.enum(['JEDDAH', 'MADINAH', 'MAKKAH']),
   guideBedProvided: z.boolean().default(false),
+  promoCode: z.string().max(64).optional().default(''),
   analyticsSessionId: z.string().min(20).max(100).nullable().optional(),
 })
 
@@ -106,6 +108,8 @@ function primaryCity(city: string | null): MissionCity | null {
 function paymentFailureCode(error: unknown): string {
   return (error instanceof Error ? error.message : 'PAYMENT_PROVIDER_ERROR').slice(0, 160)
 }
+
+class PromoCodeUnavailableError extends Error {}
 
 export async function handleCreatePaymentSession(req: NextRequest) {
   const limited = await checkRateLimit(req, apiRatelimit)
@@ -351,6 +355,28 @@ export async function handleCreatePaymentSession(req: NextRequest) {
     return NextResponse.json({ error: 'Le prix a été actualisé. Vérifiez le récapitulatif.' }, { status: 409 })
   }
 
+  const requestedPromoCode = normalizePromoCode(body.promoCode)
+  let selectedPromo: { id: string; code: string; discountBps: number } | null = null
+  if (requestedPromoCode) {
+    const promo = await prisma.promoCode.findUnique({
+      where: { code: requestedPromoCode },
+      select: { id: true, code: true, ownerId: true, status: true, expiresAt: true, reservedDraftId: true, discountBps: true },
+    })
+    if (
+      !promo
+      || promo.ownerId !== access.actor.id
+      || promo.status !== 'ACTIVE'
+      || promo.expiresAt <= new Date()
+      || promo.reservedDraftId
+    ) {
+      return NextResponse.json({ error: 'Ce code promotionnel est invalide, expiré ou déjà utilisé.' }, { status: 409 })
+    }
+    selectedPromo = { id: promo.id, code: promo.code, discountBps: promo.discountBps }
+  }
+  const promoDiscount = selectedPromo ? promoDiscountCents(expectedPriceCents, selectedPromo.discountBps) : 0
+  const chargedPriceCents = expectedPriceCents - promoDiscount
+  const chargedPrice = centsToEuros(chargedPriceCents)
+
   const refNumber = 'SAF-' + Date.now().toString(36).toUpperCase() +
     Math.random().toString(36).slice(2, 5).toUpperCase()
   const expiresAt = new Date(Date.now() + HOLD_DURATION_MS)
@@ -359,7 +385,7 @@ export async function handleCreatePaymentSession(req: NextRequest) {
     ...body,
     selectedPlaces: selectedPlaceKeys,
     allVisitPlaces,
-    totalPrice: expectedPrice,
+    totalPrice: chargedPrice,
     selectedGuideSlug: makkahGuideSlug,
     selectedGuideSlugMadinah: madinahGuideSlug,
     sameGuideForBothCities,
@@ -380,8 +406,11 @@ export async function handleCreatePaymentSession(req: NextRequest) {
       localVehicle: transportPricing.localVehicle,
       guideHotelNights: transportPricing.guideHotelNights,
       guideHotel: transportPricing.guideHotel,
-      total: expectedPrice,
+      promoDiscount: centsToEuros(promoDiscount),
+      grossTotal: expectedPrice,
+      total: chargedPrice,
     },
+    promoCode: selectedPromo,
     earnings: earningDrafts,
   }
 
@@ -389,7 +418,7 @@ export async function handleCreatePaymentSession(req: NextRequest) {
     await prisma.$transaction(async tx => {
       const expiredDrafts = await tx.reservationDraft.findMany({
         where: { expiresAt: { lte: new Date() } },
-        select: { refNumber: true },
+        select: { id: true, refNumber: true },
       })
       if (expiredDrafts.length > 0) {
         await tx.paymentAttempt.updateMany({
@@ -399,8 +428,13 @@ export async function handleCreatePaymentSession(req: NextRequest) {
           },
           data: { status: 'EXPIRED' },
         })
+        await tx.promoCode.updateMany({
+          where: { reservedDraftId: { in: expiredDrafts.map(draft => draft.id) }, status: 'HELD' },
+          data: { status: 'ACTIVE', reservedDraftId: null },
+        })
       }
       await tx.reservationDraft.deleteMany({ where: { expiresAt: { lte: new Date() } } })
+      await expirePromoCodes(tx)
 
       const currentGuides = await tx.guideProfile.findMany({
         where: { id: { in: [...new Set(missions.map(mission => mission.guideProfileId))] } },
@@ -420,7 +454,7 @@ export async function handleCreatePaymentSession(req: NextRequest) {
       }
       await assertMissionsAvailable(tx, missions)
 
-      await tx.reservationDraft.create({
+      const draft = await tx.reservationDraft.create({
         data: {
           refNumber,
           pelerinId: access.actor.id,
@@ -436,12 +470,25 @@ export async function handleCreatePaymentSession(req: NextRequest) {
           },
         },
       })
+      if (selectedPromo) {
+        const reserved = await tx.promoCode.updateMany({
+          where: {
+            id: selectedPromo.id,
+            ownerId: access.actor.id,
+            status: 'ACTIVE',
+            expiresAt: { gt: new Date() },
+            reservedDraftId: null,
+          },
+          data: { status: 'HELD', reservedDraftId: draft.id },
+        })
+        if (reserved.count !== 1) throw new PromoCodeUnavailableError('PROMO_CODE_UNAVAILABLE')
+      }
       await tx.paymentAttempt.create({
         data: {
           bookingRef: refNumber,
           provider: paymentProvider.name,
           status: 'CREATED',
-          amountCents: expectedPriceCents,
+          amountCents: chargedPriceCents,
           currency: 'EUR',
           checkoutExpiresAt: expiresAt,
         },
@@ -450,6 +497,9 @@ export async function handleCreatePaymentSession(req: NextRequest) {
   } catch (error) {
     if (error instanceof GuideAvailabilityConflictError) {
       return NextResponse.json({ error: 'Ce guide n’est plus disponible sur les dates choisies' }, { status: 409 })
+    }
+    if (error instanceof PromoCodeUnavailableError) {
+      return NextResponse.json({ error: 'Ce code promotionnel vient d’être utilisé ou a expiré.' }, { status: 409 })
     }
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
       return NextResponse.json({ error: 'Ces dates viennent d’être réservées. Choisissez d’autres dates.' }, { status: 409 })
@@ -466,7 +516,7 @@ export async function handleCreatePaymentSession(req: NextRequest) {
     hostedCheckout = await paymentProvider.createHostedCheckout({
       bookingRef: refNumber,
       idempotencyKey: `checkout:${refNumber}`,
-      amountCents: expectedPriceCents,
+      amountCents: chargedPriceCents,
       currency: 'EUR',
       productName: `SAFARUMA — ${basePackage.name}`,
       description: `Accompagnement · ${destLabel} · ${body.nbPersonnes} personne(s)`,
@@ -478,6 +528,7 @@ export async function handleCreatePaymentSession(req: NextRequest) {
         pelerinEmail: access.actor.email,
         pelerinId: access.actor.id,
         analyticsSessionHash: analyticsSessionHash || '',
+        promoCodeId: selectedPromo?.id || '',
       },
       successUrl: `${baseUrl}/espace/checkout/${body.guideSlug}/confirmation?ref=${refNumber}&payment=success`,
       cancelUrl: `${baseUrl}/espace/checkout/${body.guideSlug}?cancelled=1`,
@@ -518,7 +569,8 @@ export async function handleCreatePaymentSession(req: NextRequest) {
         refNumber,
         guideSlug: makkahGuideSlug,
         cityChoice,
-        amountCents: Math.round(expectedPrice * 100),
+        amountCents: chargedPriceCents,
+        promoApplied: Boolean(selectedPromo),
       },
     }).catch(error => {
       console.error('[payments/create-session analytics]', error)
@@ -533,6 +585,10 @@ export async function handleCreatePaymentSession(req: NextRequest) {
       })
     }
     await prisma.$transaction([
+      prisma.promoCode.updateMany({
+        where: { reservedDraft: { is: { refNumber } }, status: 'HELD' },
+        data: { status: 'ACTIVE', reservedDraftId: null },
+      }),
       prisma.reservationDraft.deleteMany({ where: { refNumber } }),
       prisma.paymentAttempt.updateMany({
         where: { bookingRef: refNumber, provider: paymentProvider.name },

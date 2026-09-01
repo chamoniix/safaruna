@@ -814,7 +814,16 @@ function ProblemSection() {
             </div>
           </div>
           <div className="sfr-problem-promise">
-            <span aria-hidden="true">⌂</span>
+            <span aria-hidden="true">
+              <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13.5 11.5c0 4.9-5.5 10.5-5.5 10.5S2.5 16.4 2.5 11.5a5.5 5.5 0 1 1 11 0Z" />
+                <circle cx="8" cy="11.5" r="1.75" />
+                <path d="M45.5 31.5C45.5 37.1 39 44 39 44s-6.5-6.9-6.5-12.5a6.5 6.5 0 1 1 13 0Z" />
+                <circle cx="39" cy="31.5" r="2" />
+                <path d="M12 25.5c3.25-3.75 7.1-5.6 11.5-5.5 5.4.12 8.25 2.8 7.1 6.35-1.05 3.25-5.7 3.4-8.6 5.65-2.25 1.75-2.65 4.65-.5 7" />
+                <path d="m18 36 3.5 3 3.5-3" />
+              </svg>
+            </span>
             <p>
               Construis ton programme avec ton guide,
               <em> à ton rythme, en toute liberté.</em>

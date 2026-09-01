@@ -2229,6 +2229,15 @@ footer div::-webkit-scrollbar { display: none; }
   font-size: clamp(2.2rem, 4vw, 3.5rem);
 }
 
+.sfr-problem-promise svg {
+  width: 56%;
+  height: 56%;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .sfr-problem-promise p {
   margin: 0;
   max-width: 760px;

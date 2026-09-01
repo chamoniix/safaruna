@@ -779,15 +779,37 @@ function ProblemSection() {
           <div className="sfr-problem-rule" aria-hidden="true" />
           <div className="sfr-problem-points">
             <div>
-              <span aria-hidden="true">?</span>
+              <span aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="9" cy="7" r="3" />
+                  <path d="M3.75 18.25c.42-3.18 2.27-5 5.25-5 1.02 0 1.91.21 2.65.61" />
+                  <circle cx="17" cy="16.75" r="4.25" />
+                  <path d="M17 14.5v2.5l1.65 1" />
+                </svg>
+              </span>
               <p>Un guide moins<br />disponible pour toi.</p>
             </div>
             <div>
-              <span aria-hidden="true">∅</span>
+              <span aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="7" r="2.6" />
+                  <circle cx="5.5" cy="9" r="2" />
+                  <circle cx="18.5" cy="9" r="2" />
+                  <path d="M7.25 18c.35-3.4 1.96-5.15 4.75-5.15S16.4 14.6 16.75 18" />
+                  <path d="M2.25 18c.2-2.65 1.35-4.1 3.4-4.1.72 0 1.35.18 1.87.52M21.75 18c-.2-2.65-1.35-4.1-3.4-4.1-.72 0-1.35.18-1.87.52" />
+                </svg>
+              </span>
               <p>Toujours lié au<br />rythme du groupe.</p>
             </div>
             <div>
-              <span aria-hidden="true">▧</span>
+              <span aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M5.25 4.75h13.5c.83 0 1.5.67 1.5 1.5v12.5c0 .83-.67 1.5-1.5 1.5H5.25c-.83 0-1.5-.67-1.5-1.5V6.25c0-.83.67-1.5 1.5-1.5Z" />
+                  <path d="M7.5 2.75v4M16.5 2.75v4M3.75 9h16.5" />
+                  <rect x="9" y="13.25" width="6" height="4.75" rx="1" />
+                  <path d="M10.5 13.25V12a1.5 1.5 0 0 1 3 0v1.25" />
+                </svg>
+              </span>
               <p>Un programme<br />figé, imposé.</p>
             </div>
           </div>

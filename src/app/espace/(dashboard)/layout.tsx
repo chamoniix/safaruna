@@ -140,6 +140,16 @@ export default function PelerinLayout({ children }: { children: React.ReactNode 
         @media (max-width: 1023px) { .pelerin-overlay.is-open { display: block; } }
         .sb-nav-link { transition: background 0.15s, color 0.15s; }
         .sb-nav-link:hover { background: #FAF7F0 !important; }
+        .pelerin-sidebar button, .pelerin-main button, .pelerin-sidebar a, .pelerin-main a {
+          transition: transform .14s ease, opacity .14s ease, box-shadow .14s ease, background .14s ease, color .14s ease;
+        }
+        .pelerin-sidebar button:active, .pelerin-main button:active, .pelerin-sidebar a:active, .pelerin-main a:active {
+          transform: scale(.98) translateY(1px);
+        }
+        .pelerin-sidebar button:focus-visible, .pelerin-main button:focus-visible, .pelerin-sidebar a:focus-visible, .pelerin-main a:focus-visible {
+          outline: 3px solid rgba(201,168,76,.42);
+          outline-offset: 3px;
+        }
         .sb-logout-btn { transition: color 0.15s; }
         .sb-logout-btn:hover { opacity: 0.8; }
         .sb-close-btn { display: none !important; }

@@ -166,11 +166,12 @@ export function calculateBookingTransportPrice(input: {
     ? madinahDays * localVehicle.netDailyRate
     : 0
 
-  const guideHotelNights = cityChoice === 'BOTH' && sameGuideForBothCities && !guideBedProvided
-    ? Math.max(0, (sameGuidePrimaryCity === 'MAKKAH' ? madinahDays : makkahDays) - 1)
+  const guideHotelNights = cityChoice === 'BOTH' && sameGuideForBothCities
+    ? Math.max(1, (sameGuidePrimaryCity === 'MAKKAH' ? madinahDays : makkahDays) - 1)
     : 0
-  const guideHotel = guideHotelNights * bookingPrices.guideHotelPerNight
-  const guideHotelNet = guideHotelNights * BOOKING_NET_COSTS.guideHotelPerNight
+  const billableGuideHotelNights = guideBedProvided ? 0 : guideHotelNights
+  const guideHotel = billableGuideHotelNights * bookingPrices.guideHotelPerNight
+  const guideHotelNet = billableGuideHotelNights * BOOKING_NET_COSTS.guideHotelPerNight
 
   return {
     intercity,

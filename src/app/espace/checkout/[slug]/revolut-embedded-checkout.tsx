@@ -107,10 +107,10 @@ export default function RevolutEmbeddedCheckout({
 
   useEffect(() => {
     let disposed = false
+    const target = targetRef.current
 
     const mountCheckout = async () => {
       const publicKey = process.env.NEXT_PUBLIC_REVOLUT_MERCHANT_PUBLIC_KEY?.trim()
-      const target = targetRef.current
       if (!publicKey || !target) {
         reportFallback('sdk_error', new Error('Revolut Checkout public configuration is unavailable'))
         return
@@ -120,13 +120,13 @@ export default function RevolutEmbeddedCheckout({
 
       try {
         const { default: RevolutCheckout } = await import('@revolut/checkout')
-        if (disposed || !targetRef.current) return
+        if (disposed || !target.isConnected) return
 
         const instance = await RevolutCheckout.embeddedCheckout({
           publicToken: publicKey,
           mode: 'prod',
           locale: 'fr',
-          target: targetRef.current,
+          target,
           createOrder: async () => ({ publicId: checkoutToken }),
           onSuccess: () => {
             restorePageScroll()
@@ -162,7 +162,7 @@ export default function RevolutEmbeddedCheckout({
       restoreTimersRef.current.forEach(timer => window.clearTimeout(timer))
       restoreTimersRef.current = []
       const snapshot = scrollSnapshotRef.current
-      const ownerDocument = target.ownerDocument
+      const ownerDocument = target?.ownerDocument
       if (snapshot && ownerDocument) restoreCheckoutScrollState(snapshot, ownerDocument)
     }
     // The callbacks are intentionally fixed for this payment order.

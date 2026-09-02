@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
+import Link from 'next/link'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { DayPicker, DateRange } from 'react-day-picker'
@@ -231,7 +232,7 @@ export default function CheckoutPage() {
   const slug = params.slug
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { status } = useSession()
+  const { data: session, status } = useSession()
 
   const [step, setStep] = useState(1)
   const [guide, setGuide] = useState<PublicGuide | null>(null)
@@ -259,6 +260,7 @@ export default function CheckoutPage() {
   const [guidePickerMode, setGuidePickerMode] = useState(false)
   const guideFetchKey = useRef('')
   const bookingStartedSlug = useRef<string | null>(null)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   // Étape 1
   const [cityChoice, setCityChoice] = useState<CityChoice | null>(null)
@@ -742,6 +744,13 @@ export default function CheckoutPage() {
 
   // ── Barre de progression ──────────────────────
   const STEPS = cityChoice === 'BOTH' ? STEPS_BOTH : STEPS_SINGLE
+  const accountEmail = session?.user?.email || 'Compte connecté'
+  const accountInitial = (session?.user?.name || accountEmail).trim().charAt(0).toUpperCase() || 'P'
+
+  const goToGuideSelection = () => {
+    setStep(cityChoice === 'BOTH' ? 2 : 4)
+    scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+  }
   const ProgressBar = () => {
     const items: React.ReactNode[] = []
     STEPS.forEach((s, i) => {
@@ -880,9 +889,67 @@ export default function CheckoutPage() {
   // ── Rendu ─────────────────────────────────────
   return (
     <div style={{ height: '100vh', background: '#FAF7F0', fontFamily: 'var(--font-manrope, sans-serif)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <style>{`
+        .checkout-account-bar {
+          min-height: 58px; padding: .6rem 1rem; background: #1A1209; color: white;
+          display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 1rem;
+          border-bottom: 1px solid rgba(240,216,151,.22); box-sizing: border-box;
+        }
+        .checkout-account-logo {
+          color: white; text-decoration: none; font-family: var(--font-cormorant, serif);
+          font-size: 1.2rem; font-weight: 700; letter-spacing: .08em; white-space: nowrap;
+        }
+        .checkout-account-actions { display: flex; justify-content: center; align-items: center; gap: .45rem; }
+        .checkout-account-link, .checkout-account-action {
+          min-height: 34px; display: inline-flex; align-items: center; justify-content: center;
+          padding: .4rem .75rem; border: 1px solid rgba(240,216,151,.28); border-radius: 999px;
+          background: transparent; color: rgba(255,255,255,.84); text-decoration: none;
+          font: 700 .7rem var(--font-manrope, sans-serif); cursor: pointer; white-space: nowrap;
+          transition: transform .14s ease, border-color .14s ease, background .14s ease, color .14s ease;
+        }
+        .checkout-account-link:hover, .checkout-account-action:hover {
+          border-color: #C9A84C; background: rgba(201,168,76,.1); color: #F0D897;
+        }
+        .checkout-account-link:active, .checkout-account-action:active { transform: scale(.97); }
+        .checkout-account-chip {
+          min-width: 0; max-width: 220px; display: flex; align-items: center; gap: .55rem;
+          padding: .3rem .7rem .3rem .35rem; border-radius: 999px; color: white;
+          background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.13); text-decoration: none;
+        }
+        .checkout-account-avatar {
+          width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+          display: grid; place-items: center; background: linear-gradient(135deg, #F0D897, #C9A84C);
+          color: #1A1209; font-weight: 800; font-size: .75rem;
+        }
+        .checkout-account-email { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .7rem; font-weight: 700; }
+        @media (max-width: 700px) {
+          .checkout-account-bar { grid-template-columns: minmax(0, 1fr) auto; gap: .55rem; padding: .55rem .75rem; }
+          .checkout-account-logo { font-size: 1.05rem; }
+          .checkout-account-actions { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; gap: .4rem; }
+          .checkout-account-link, .checkout-account-action { width: 100%; padding-inline: .35rem; font-size: .64rem; }
+          .checkout-account-chip { max-width: 155px; }
+          .checkout-account-email { font-size: .64rem; }
+        }
+      `}</style>
+      <header className="checkout-account-bar">
+        <Link href="/" className="checkout-account-logo" aria-label="Accueil SAFARUMA">
+          SAFAR<span style={{ color: '#C9A84C' }}>U</span>MA
+        </Link>
+        <nav className="checkout-account-actions" aria-label="Navigation de la réservation">
+          <Link href="/guides" className="checkout-account-link">← Retour aux guides</Link>
+          <button type="button" className="checkout-account-action" onClick={goToGuideSelection} disabled={!cityChoice || Boolean(paymentSession)} style={{ opacity: !cityChoice || paymentSession ? .45 : 1, cursor: !cityChoice || paymentSession ? 'not-allowed' : 'pointer' }}>
+            Changer de guide
+          </button>
+          <Link href="/espace/tableau-de-bord" className="checkout-account-link">Mon espace</Link>
+        </nav>
+        <Link href="/espace/profil" className="checkout-account-chip" aria-label={`Compte connecté : ${accountEmail}`}>
+          <span className="checkout-account-avatar" aria-hidden="true">{accountInitial}</span>
+          <span className="checkout-account-email">{accountEmail}</span>
+        </Link>
+      </header>
       <ProgressBar />
 
-      <div data-checkout-scroll-container style={{ flex: 1, overflowY: 'auto' }}>
+      <div ref={scrollContainerRef} data-checkout-scroll-container style={{ flex: 1, overflowY: 'auto' }}>
       <div style={{ maxWidth: 680, margin: '0 auto', padding: '2rem 1.5rem 6rem' }}>
 
         {/* ── ÉTAPE 1 — DESTINATION ── */}

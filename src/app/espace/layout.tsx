@@ -4,6 +4,10 @@ import { useSession } from 'next-auth/react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
+export function buildPelerinLoginUrl(pathname: string, search: string): string {
+  return '/connexion?redirect=' + encodeURIComponent(`${pathname}${search}`);
+}
+
 export default function EspaceLayout({ children }: { children: React.ReactNode }) {
   const { status } = useSession();
   const pathname   = usePathname();
@@ -11,7 +15,7 @@ export default function EspaceLayout({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.push('/connexion?redirect=' + encodeURIComponent(pathname));
+      router.push(buildPelerinLoginUrl(pathname, window.location.search));
     }
   }, [status, pathname, router]);
 

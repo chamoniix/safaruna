@@ -6,7 +6,6 @@ import Footer from '@/components/Footer'
 import Navbar from '@/components/Navbar'
 import prisma from '@/lib/prisma'
 import { getEffectivePlaceCatalog } from '@/lib/place-catalog'
-import { publicReviewerName } from '@/lib/guide-workflow'
 import GuideProfileClient from './GuideProfileClient'
 
 const NAIM_LANGUAGE_LABELS: Record<string, string> = {
@@ -26,7 +25,10 @@ const getGuideData = cache(async (slug: string) => prisma.guideProfile.findFirst
       where: { status: 'APPROVED' },
       orderBy: { createdAt: 'desc' },
       take: 3,
-      include: { pelerin: { select: { firstName: true, lastName: true, country: true } } },
+      include: {
+        pelerin: { select: { firstName: true, country: true } },
+        reservation: { select: { experienceReview: { select: { firstName: true, city: true, country: true } } } },
+      },
     },
   },
 }))
@@ -86,8 +88,10 @@ export default async function GuideProfilePage({ params }: { params: Promise<{ s
     : [guide.servesMakkah ? 'Makkah' : null, guide.servesMadinah ? 'Médine' : null]
   ).filter(Boolean) as string[]
   const reviews = guide.reviews.map(review => ({
-    name: publicReviewerName(review.pelerin.firstName, review.pelerin.lastName),
-    country: review.pelerin.country || 'Pays non renseigné',
+    name: review.reservation.experienceReview?.firstName || review.pelerin.firstName?.trim() || 'Pèlerin',
+    country: review.reservation.experienceReview
+      ? [review.reservation.experienceReview.city, review.reservation.experienceReview.country].filter(Boolean).join(', ')
+      : review.pelerin.country || 'Pays non renseigné',
     flag: '',
     date: review.createdAt.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric', timeZone: 'UTC' }),
     rating: review.ratingOverall,

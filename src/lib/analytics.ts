@@ -23,6 +23,8 @@ export const ANALYTICS_EVENT_NAMES = [
   'payment_cancelled',
   'purchase',
   'payment_expired',
+  'review_submitted',
+  'review_moderated',
   'web_vital',
   'client_error',
 ] as const

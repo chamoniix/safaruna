@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import PublicReviewCard from '@/components/PublicReviewCard';
+import type { PublicReviewItem } from '@/lib/public-reviews';
 
 const EASE_LUXURY = [0.16, 1, 0.3, 1] as const;
 // Deux tours : noms français d'abord, puis écritures natives.
@@ -369,8 +371,6 @@ const steps: CarouselItem[] = [
     cta: 'Voir plus',
   },
 ];
-
-const reviews: CarouselItem[] = [];
 
 function Reveal({
   children,
@@ -1075,7 +1075,40 @@ function StepsSection({ openModal }: { openModal: (item: ModalContent) => void }
   );
 }
 
-function ReviewsSection({ openModal }: { openModal: (item: ModalContent) => void }) {
+function ReviewsSection() {
+  const [reviews, setReviews] = useState<PublicReviewItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    async function loadApprovedReviews() {
+      const collected: PublicReviewItem[] = [];
+      let page = 1;
+      let hasNextPage = true;
+      try {
+        while (active && hasNextPage) {
+          const response = await fetch(`/api/reviews/public?page=${page}&limit=24`);
+          if (!response.ok) {
+            setLoadError(true);
+            break;
+          }
+          const data = await response.json();
+          collected.push(...(data.reviews || []));
+          if (active) setReviews([...collected]);
+          hasNextPage = Boolean(data.pagination?.hasNextPage);
+          page += 1;
+        }
+      } catch {
+        if (active) setLoadError(true);
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+    loadApprovedReviews();
+    return () => { active = false; };
+  }, []);
+
   return (
     <section id="avis" className="sfr-section sfr-section-beige">
       <div className="sfr-section-layout">
@@ -1086,42 +1119,19 @@ function ReviewsSection({ openModal }: { openModal: (item: ModalContent) => void
             <br />
             notre plus belle récompense.
           </h2>
-          <p className="sfr-rating-line">Les avis vérifiés apparaîtront ici après validation.</p>
+          <p className="sfr-rating-line">Uniquement des avis réels, publiés après validation.</p>
+          <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
+            <Link className="sfr-title-action" href="/avis">Voir tous les avis</Link>
+            <Link className="sfr-title-action" href="/avis/deposer">Donner mon avis</Link>
+          </div>
         </Reveal>
-        <Carousel label="Avis clients">
-          {reviews.map((review) => (
-            <motion.button
-              type="button"
-              key={review.id}
-              className="sfr-review-card"
-              whileHover={{ y: -5 }}
-              onClick={() =>
-                openModal({
-                  eyebrow: 'Avis client',
-                  title: review.title,
-                  text: review.text,
-                  href: review.href,
-                  cta: review.cta ?? 'Voir les avis',
-                  meta: review.meta,
-                  image: review.image,
-                })
-              }
-            >
-              <div className="sfr-review-photo">
-                <SmartImage src={review.image} alt={`Avis de ${review.title}`} />
-              </div>
-              <div className="sfr-review-overlay">
-                <p>{review.text}</p>
-                <div className="sfr-review-head">
-                  <div>
-                    <h3>{review.title}</h3>
-                    <p>{review.meta}</p>
-                  </div>
-                </div>
-              </div>
-            </motion.button>
-          ))}
-        </Carousel>
+        {reviews.length > 0 ? (
+          <Carousel label="Avis clients">
+            {reviews.map(review => <PublicReviewCard key={review.id} review={review} compact />)}
+          </Carousel>
+        ) : (
+          <div className="sfr-reviews-empty">{loading ? 'Chargement des avis…' : loadError ? 'Les avis sont temporairement indisponibles.' : 'Les premiers avis approuvés apparaîtront ici.'}</div>
+        )}
       </div>
     </section>
   );
@@ -1176,7 +1186,7 @@ export default function Home() {
       <GuidesSection openModal={setModalContent} />
       <ExperiencesSection openModal={setModalContent} />
       <StepsSection openModal={setModalContent} />
-      <ReviewsSection openModal={setModalContent} />
+      <ReviewsSection />
       <FinalCtaSection />
       <Footer />
       <Modal content={modalContent} onClose={() => setModalContent(null)} />

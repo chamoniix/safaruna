@@ -46,7 +46,8 @@ const eventLabels: Record<string, string> = {
   guide_application_submitted: 'Candidature envoyée', account_created: 'Compte créé', login_success: 'Connexion réussie',
   booking_started: 'Réservation commencée', booking_step: 'Étape réservation', begin_checkout: 'Checkout demandé',
   checkout_created: 'Session de paiement', checkout_error: 'Erreur checkout', payment_cancelled: 'Paiement annulé',
-  purchase: 'Paiement confirmé', payment_expired: 'Session expirée', web_vital: 'Performance web', client_error: 'Erreur navigateur',
+  purchase: 'Paiement confirmé', payment_expired: 'Session expirée', review_submitted: 'Avis envoyé',
+  review_moderated: 'Avis modéré', web_vital: 'Performance web', client_error: 'Erreur navigateur',
 }
 
 const viewTitles: Record<DashboardView, { eyebrow: string; title: string; description: string }> = {

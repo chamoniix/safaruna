@@ -2303,6 +2303,33 @@ footer div::-webkit-scrollbar { display: none; }
   font-weight: 800;
 }
 
+.public-review-card {
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  border: 1px solid rgba(21, 17, 12, 0.11);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.82);
+  color: #1a1209;
+  box-shadow: 0 16px 42px rgba(45, 31, 10, 0.07);
+}
+.sfr-carousel-track .public-review-card { width: 300px; }
+.sfr-reviews-empty { min-height: 180px; display: grid; place-items: center; padding: 24px; border: 1px solid rgba(21, 17, 12, 0.1); border-radius: 14px; background: rgba(255, 255, 255, 0.58); color: #7a6d5a; text-align: center; }
+.public-review-card-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.public-review-badge { padding: 5px 9px; border-radius: 999px; background: #f3ead7; color: #805d15; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.04em; }
+.public-review-badge--verified { background: #e8f5ee; color: #1d5c3a; }
+.public-review-badge--guide { background: #ede9fe; color: #5b21b6; }
+.public-review-rating { display: inline-flex; align-items: center; gap: 4px; color: #9a6c14; font-size: 0.75rem; font-weight: 800; }
+.public-review-stars { display: flex; gap: 3px; margin: 18px 0 14px; color: #d5a14a; }
+.public-review-card blockquote { flex: 1; margin: 0; color: #44392b; font-family: var(--font-cormorant), Georgia, serif; font-size: 1.16rem; line-height: 1.5; }
+.public-review-card--compact { height: 300px; min-height: 300px; overflow: hidden; }
+.public-review-card--compact blockquote { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 6; }
+.public-review-card footer { display: grid; gap: 2px; margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(21, 17, 12, 0.08); }
+.public-review-card footer strong { color: #1a1209; font-size: 0.84rem; }
+.public-review-card footer span { color: #7a6d5a; font-size: 0.72rem; }
+.public-review-card footer a { margin-top: 4px; color: #8a6419; font-size: 0.72rem; font-weight: 800; text-decoration: none; }
+
 .sfr-title-action {
   margin-top: 1.15rem;
   color: #15110c;

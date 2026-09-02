@@ -39,6 +39,12 @@ const ACTION_COLORS: Record<string, string> = {
   RESERVATION_GUIDE_TRANSFERRED: '#2563EB',
   PAYMENT_SESSION_EXPIRED: '#DC2626',
   RESERVATION_CANCELLED: '#DC2626',
+  MEMBER_REVIEW_SUBMITTED: '#7C3AED',
+  MEMBER_REVIEW_UPDATED: '#C9A84C',
+  EXPERIENCE_REVIEW_MODERATED: '#1D5C3A',
+  REVIEW_SUBMITTED: '#7C3AED',
+  REVIEW_UPDATED_PENDING: '#C9A84C',
+  REVIEW_MODERATED: '#1D5C3A',
   CRON_SENT:             '#7A6D5A',
 }
 
@@ -65,6 +71,12 @@ const ACTION_LABELS: Record<string, string> = {
   RESERVATION_GUIDE_TRANSFERRED: 'Réservation transférée',
   PAYMENT_SESSION_EXPIRED: 'Session de paiement expirée',
   RESERVATION_CANCELLED: 'Réservation annulée',
+  MEMBER_REVIEW_SUBMITTED: 'Avis membre envoyé',
+  MEMBER_REVIEW_UPDATED: 'Avis membre modifié',
+  EXPERIENCE_REVIEW_MODERATED: 'Avis SAFARUMA modéré',
+  REVIEW_SUBMITTED: 'Avis Guide envoyé',
+  REVIEW_UPDATED_PENDING: 'Avis Guide modifié',
+  REVIEW_MODERATED: 'Avis Guide modéré',
   CRON_SENT:             'Cron notifications',
 }
 

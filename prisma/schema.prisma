@@ -63,6 +63,7 @@ model User {
   messages               Message[]          @relation("PelerinMessages")
   legacyMessages         Message[]          @relation("LegacyMessageSender")
   reviews                Review[]
+  experienceReviews      ExperienceReview[]
   savedDuas              SavedDua[]
   courseProgress         CourseProgress[]
   notifications          Notification[]
@@ -128,13 +129,14 @@ model AdminAccount {
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
 
-  sessions              AdminSession[]
-  passwordResetTokens   AdminPasswordResetToken[]
-  createdGuideProfiles  GuideProfile[]            @relation("GuideCreatedByAdmin")
-  approvedGuideProfiles GuideProfile[]            @relation("GuideApprovedByAdmin")
-  reviewedApplications  GuideApplication[]        @relation("GuideApplicationReviewedBy")
-  moderatedReviews      Review[]                  @relation("ReviewModeratedBy")
-  auditLogs             AuditLog[]                @relation("AuditActorAdmin")
+  sessions                   AdminSession[]
+  passwordResetTokens        AdminPasswordResetToken[]
+  createdGuideProfiles       GuideProfile[]            @relation("GuideCreatedByAdmin")
+  approvedGuideProfiles      GuideProfile[]            @relation("GuideApprovedByAdmin")
+  reviewedApplications       GuideApplication[]        @relation("GuideApplicationReviewedBy")
+  moderatedReviews           Review[]                  @relation("ReviewModeratedBy")
+  moderatedExperienceReviews ExperienceReview[]        @relation("ExperienceReviewModeratedBy")
+  auditLogs                  AuditLog[]                @relation("AuditActorAdmin")
 }
 
 model AdminPasswordResetToken {
@@ -600,6 +602,7 @@ model Reservation {
   updatedAt           DateTime          @updatedAt
 
   reviews             Review[]
+  experienceReview    ExperienceReview?
   missions            ReservationMission[]
   bookedDates         Availability[]
   guideEarnings       GuideEarning[]
@@ -726,6 +729,31 @@ model Review {
   @@unique([reservationId, guideProfileId])
   @@index([guideProfileId, status, createdAt])
   @@index([status, createdAt])
+}
+
+model ExperienceReview {
+  id                 String                 @id @default(cuid())
+  userId             String
+  user               User                   @relation(fields: [userId], references: [id], onDelete: Restrict)
+  reservationId      String?                @unique
+  reservation        Reservation?           @relation(fields: [reservationId], references: [id], onDelete: Restrict)
+  generalReviewKey   String?                @unique
+  firstName          String
+  city               String
+  country            String
+  rating             Int
+  comment            String
+  status             ReviewModerationStatus @default(PENDING)
+  moderatedByAdminId String?
+  moderatedByAdmin   AdminAccount?          @relation("ExperienceReviewModeratedBy", fields: [moderatedByAdminId], references: [id], onDelete: SetNull)
+  moderatedByEmail   String?
+  moderatedAt        DateTime?
+  moderationNote     String?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+
+  @@index([userId, status, createdAt])
+  @@index([status, moderatedAt, createdAt])
 }
 
 enum ReviewModerationStatus {

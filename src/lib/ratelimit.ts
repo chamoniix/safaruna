@@ -30,6 +30,8 @@ export const apiRatelimit = makeRatelimit(30, '1 m')
 export const contactRatelimit = makeRatelimit(5, '15 m', 'safaruma:rl:contact')
 // 3 candidatures guide / heure par IP
 export const guideApplicationRatelimit = makeRatelimit(3, '1 h', 'safaruma:rl:guide-application')
+// 5 créations ou modifications d'avis / 15 minutes par compte et IP
+export const reviewRatelimit = makeRatelimit(5, '15 m', 'safaruma:rl:review')
 
 /**
  * Returns a 429 response if rate-limited, null otherwise.

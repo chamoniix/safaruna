@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import prisma from '@/lib/prisma'
+import { analyticsCountry, analyticsDevice, recordAnalyticsEvent } from '@/lib/analytics'
 import { reviewOpensAt } from '@/lib/guide-workflow'
 import { requirePelerin } from '@/lib/require-account'
+import { checkRateLimitKey, reviewRatelimit } from '@/lib/ratelimit'
 
 const guideReviewSchema = z.object({
   guideProfileId: z.string().min(1),
@@ -15,6 +17,9 @@ const guideReviewSchema = z.object({
 
 const feedbackSchema = z.object({
   reservationId: z.string().min(1),
+  firstName: z.string().trim().min(2).max(80),
+  city: z.string().trim().min(2).max(120),
+  country: z.string().trim().min(2).max(120),
   stayRating: z.number().int().min(1).max(5),
   stayComment: z.string().trim().min(1).max(2000),
   guideReviews: z.array(guideReviewSchema).min(1),
@@ -24,6 +29,7 @@ async function ownedReservation(reservationId: string, pelerinId: string) {
   return prisma.reservation.findFirst({
     where: { id: reservationId, pelerinId },
     include: {
+      pelerin: { select: { firstName: true, country: true } },
       missions: {
         select: {
           guideProfileId: true,
@@ -46,6 +52,9 @@ async function ownedReservation(reservationId: string, pelerinId: string) {
           ratingKnowledge: true,
           comment: true,
         },
+      },
+      experienceReview: {
+        select: { firstName: true, city: true, country: true, rating: true, comment: true, status: true },
       },
     },
   })
@@ -77,6 +86,12 @@ export async function GET(req: NextRequest) {
       stayRating: reservation.stayRating,
       stayComment: reservation.stayComment,
       feedbackSubmittedAt: reservation.feedbackSubmittedAt,
+      author: {
+        firstName: reservation.experienceReview?.firstName || reservation.pelerin.firstName || '',
+        city: reservation.experienceReview?.city || '',
+        country: reservation.experienceReview?.country || reservation.pelerin.country || '',
+      },
+      experienceReviewStatus: reservation.experienceReview?.status || null,
       guides,
       reviews: reservation.reviews,
       editable,
@@ -89,6 +104,9 @@ async function saveFeedback(req: NextRequest) {
   if (origin && origin !== req.nextUrl.origin) return NextResponse.json({ error: 'Origine non autorisée' }, { status: 403 })
   const access = await requirePelerin()
   if (!access.ok) return access.response
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || req.headers.get('x-real-ip') || 'unknown'
+  const limited = await checkRateLimitKey(reviewRatelimit, `${ip}:${access.actor.id}:reservation-review`)
+  if (limited) return limited
 
   const parsed = feedbackSchema.safeParse(await req.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ error: 'Données invalides' }, { status: 400 })
@@ -116,6 +134,30 @@ async function saveFeedback(req: NextRequest) {
     await tx.reservation.update({
       where: { id: reservation.id },
       data: { stayRating: input.stayRating, stayComment: input.stayComment, feedbackSubmittedAt: now },
+    })
+    await tx.experienceReview.upsert({
+      where: { reservationId: reservation.id },
+      create: {
+        userId: access.actor.id,
+        reservationId: reservation.id,
+        firstName: input.firstName,
+        city: input.city,
+        country: input.country,
+        rating: input.stayRating,
+        comment: input.stayComment,
+      },
+      update: {
+        firstName: input.firstName,
+        city: input.city,
+        country: input.country,
+        rating: input.stayRating,
+        comment: input.stayComment,
+        status: 'PENDING',
+        moderatedByAdminId: null,
+        moderatedByEmail: null,
+        moderatedAt: null,
+        moderationNote: null,
+      },
     })
     for (const review of input.guideReviews) {
       await tx.review.upsert({
@@ -147,7 +189,7 @@ async function saveFeedback(req: NextRequest) {
         target: reservation.refNumber,
         ip: (req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || req.headers.get('x-real-ip') || 'unknown').slice(0, 64),
         userAgent: (req.headers.get('user-agent') || '').slice(0, 500),
-        after: { guideProfileIds: assignedGuideIds, stayRating: input.stayRating },
+        after: { guideProfileIds: assignedGuideIds, stayRating: input.stayRating, firstName: input.firstName, city: input.city, country: input.country },
       },
     })
   })
@@ -163,6 +205,15 @@ async function saveFeedback(req: NextRequest) {
     subject: `[${admin.role}] Nouvel avis à modérer — ${reservation.refNumber}`,
     html: baseTemplate(`${heading('Un avis attend votre validation')}${p(`Réservation : <strong>${escapeHtml(reservation.refNumber)}</strong>`)}${divider()}${btn('Modérer les avis', `${process.env.NEXT_PUBLIC_BASE_URL || 'https://safaruma.com'}/admin/avis`)}`),
   })))
+
+  await recordAnalyticsEvent({
+    eventName: 'review_submitted',
+    userId: access.actor.id,
+    path: `/espace/avis/${reservation.id}`,
+    country: analyticsCountry(req.headers.get('x-vercel-ip-country')),
+    device: analyticsDevice(req.headers.get('user-agent')),
+    metadata: { kind: 'VERIFIED', operation: reservation.reviews.length ? 'update' : 'create' },
+  })
 
   return NextResponse.json({ success: true, status: 'PENDING' })
 }

@@ -1217,7 +1217,8 @@ export default function GuideSearchPage() {
           align-items: flex-start;
         }
         @media (max-width: 1023px) {
-          .guides-main { flex-direction: column; padding: 1.25rem 1rem 5rem; }
+          .guides-main { flex-direction: column; align-items: stretch; padding: 1.25rem 1rem 5rem; }
+          .guides-main > div { width: 100%; }
         }
 
         /* Sidebar */

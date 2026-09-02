@@ -15,15 +15,15 @@ function buildCspResponse(req: NextRequest): NextResponse {
 
   const csp = [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ''} https://js.stripe.com https://*.sentry.io`,
-    "frame-src https://js.stripe.com https://checkout.stripe.com",
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ''} https://js.stripe.com https://merchant.revolut.com https://pay.google.com https://applepay.cdn-apple.com https://*.sentry.io`,
+    "frame-src https://js.stripe.com https://checkout.stripe.com https://merchant.revolut.com https://checkout.revolut.com https://pay.google.com",
     "img-src 'self' data: https:",
-    "connect-src 'self' https://api.stripe.com https://*.sentry.io https://*.ingest.de.sentry.io https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://www.google.com https://*.clarity.ms",
+    "connect-src 'self' https://api.stripe.com https://merchant.revolut.com https://merchant-mgmt.revolut.com https://pay.google.com https://*.sentry.io https://*.ingest.de.sentry.io https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://www.google.com https://*.clarity.ms",
     "font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "object-src 'none'",
     "base-uri 'self'",
-    "form-action 'self' https://checkout.stripe.com",
+    "form-action 'self' https://checkout.stripe.com https://checkout.revolut.com",
     "upgrade-insecure-requests",
   ].join('; ');
 

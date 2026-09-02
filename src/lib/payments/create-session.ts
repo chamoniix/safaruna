@@ -33,8 +33,7 @@ import { getActivePaymentProvider, type PaymentProvider } from '@/lib/payments/p
 import { assertMissionsAvailable, GuideAvailabilityConflictError, parseBookingDate } from '@/lib/guide-availability'
 import { expirePromoCodes, normalizePromoCode, promoDiscountCents } from '@/lib/referral'
 
-// Stripe exige une expiration située au moins 30 minutes après la création de
-// la session. Une minute technique couvre le temps de transaction et réseau.
+// Les disponibilités et le paiement expirent ensemble après 31 minutes.
 const HOLD_DURATION_MS = 31 * 60 * 1000
 const ALLOWED_GENDERS = ['HOMME', 'FEMME', 'MIXTE'] as const
 const bookingDateSchema = z.string()
@@ -107,6 +106,15 @@ function primaryCity(city: string | null): MissionCity | null {
 
 function paymentFailureCode(error: unknown): string {
   return (error instanceof Error ? error.message : 'PAYMENT_PROVIDER_ERROR').slice(0, 160)
+}
+
+function isAmbiguousProviderFailure(error: unknown): boolean {
+  return Boolean(
+    error
+    && typeof error === 'object'
+    && 'ambiguous' in error
+    && error.ambiguous === true,
+  )
 }
 
 class PromoCodeUnavailableError extends Error {}
@@ -513,7 +521,7 @@ export async function handleCreatePaymentSession(req: NextRequest) {
   try {
     const destLabel = cityChoice === 'BOTH' ? 'Makkah + Médine' : cityChoice === 'MAKKAH' ? 'Makkah' : 'Médine'
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || new URL(req.url).origin
-    hostedCheckout = await paymentProvider.createHostedCheckout({
+    const checkout = await paymentProvider.createHostedCheckout({
       bookingRef: refNumber,
       idempotencyKey: `checkout:${refNumber}`,
       amountCents: chargedPriceCents,
@@ -521,42 +529,46 @@ export async function handleCreatePaymentSession(req: NextRequest) {
       productName: `SAFARUMA — ${basePackage.name}`,
       description: `Accompagnement · ${destLabel} · ${body.nbPersonnes} personne(s)`,
       imageUrl: 'https://safaruma.com/og-image.jpg',
-      metadata: {
-        refNumber,
-        guideSlug: makkahGuideSlug,
-        guideSlugMadinah: madinahGuideSlug || '',
-        pelerinEmail: access.actor.email,
-        pelerinId: access.actor.id,
-        analyticsSessionHash: analyticsSessionHash || '',
-        promoCodeId: selectedPromo?.id || '',
-      },
+      metadata: paymentProvider.name === 'REVOLUT'
+        ? { refNumber }
+        : {
+            refNumber,
+            guideSlug: makkahGuideSlug,
+            guideSlugMadinah: madinahGuideSlug || '',
+            pelerinEmail: access.actor.email,
+            pelerinId: access.actor.id,
+            analyticsSessionHash: analyticsSessionHash || '',
+            promoCodeId: selectedPromo?.id || '',
+          },
       successUrl: `${baseUrl}/espace/checkout/${body.guideSlug}/confirmation?ref=${refNumber}&payment=success`,
       cancelUrl: `${baseUrl}/espace/checkout/${body.guideSlug}?cancelled=1`,
       customerEmail: access.actor.email,
       expiresAt,
     })
+    hostedCheckout = checkout
 
-    await prisma.$transaction([
-      prisma.reservationDraft.update({
+    await prisma.$transaction(async tx => {
+      await tx.reservationDraft.update({
         where: { refNumber },
         data: {
-          stripeSessionId: hostedCheckout.provider === 'STRIPE'
-            ? hostedCheckout.checkoutId
+          stripeSessionId: checkout.provider === 'STRIPE'
+            ? checkout.checkoutId
             : undefined,
         },
-      }),
-      prisma.paymentAttempt.updateMany({
+      })
+      const mappedAttempt = await tx.paymentAttempt.updateMany({
         where: {
           bookingRef: refNumber,
-          provider: hostedCheckout.provider,
+          provider: checkout.provider,
           status: 'CREATED',
         },
         data: {
-          providerCheckoutId: hostedCheckout.checkoutId,
+          providerCheckoutId: checkout.checkoutId,
           status: 'PENDING',
         },
-      }),
-    ])
+      })
+      if (mappedAttempt.count !== 1) throw new Error('PAYMENT_ATTEMPT_MAPPING_FAILED')
+    })
 
     await recordAnalyticsEvent({
       eventName: 'checkout_created',
@@ -567,6 +579,7 @@ export async function handleCreatePaymentSession(req: NextRequest) {
       device: analyticsDevice(req.headers.get('user-agent')),
       metadata: {
         refNumber,
+        provider: checkout.provider,
         guideSlug: makkahGuideSlug,
         cityChoice,
         amountCents: chargedPriceCents,
@@ -576,14 +589,68 @@ export async function handleCreatePaymentSession(req: NextRequest) {
       console.error('[payments/create-session analytics]', error)
       Sentry.captureException(error, { tags: { area: 'payment-checkout-analytics' } })
     })
-    return NextResponse.json({ sessionUrl: hostedCheckout.checkoutUrl, refNumber })
+    return NextResponse.json({
+      provider: checkout.provider,
+      sessionUrl: checkout.checkoutUrl,
+      checkoutToken: checkout.publicToken,
+      refNumber,
+    })
   } catch (error) {
+    let providerCancellationConfirmed = false
     if (hostedCheckout) {
-      await paymentProvider.expireHostedCheckout(hostedCheckout.checkoutId).catch(expireError => {
+      try {
+        await paymentProvider.expireHostedCheckout(hostedCheckout.checkoutId)
+        providerCancellationConfirmed = true
+      } catch (expireError) {
         console.error('[payments/create-session expire orphan]', expireError)
         Sentry.captureException(expireError, { tags: { area: 'payment-checkout-cleanup' } })
-      })
+      }
     }
+
+    const cleanupConfirmed = hostedCheckout
+      ? providerCancellationConfirmed
+      : !isAmbiguousProviderFailure(error)
+
+    if (!cleanupConfirmed) {
+      await prisma.$transaction(async tx => {
+        if (hostedCheckout?.provider === 'STRIPE') {
+          await tx.reservationDraft.updateMany({
+            where: { refNumber },
+            data: { stripeSessionId: hostedCheckout.checkoutId },
+          })
+        }
+        await tx.paymentAttempt.updateMany({
+          where: {
+            bookingRef: refNumber,
+            provider: paymentProvider.name,
+            status: { in: ['CREATED', 'PENDING'] },
+          },
+          data: {
+            ...(hostedCheckout ? {
+              providerCheckoutId: hostedCheckout.checkoutId,
+              status: 'PENDING' as const,
+            } : {}),
+            failureCode: 'PAYMENT_PROVIDER_OUTCOME_UNKNOWN',
+          },
+        })
+      }).catch(preserveError => {
+        console.error('[payments/create-session preserve reconciliation]', preserveError)
+        Sentry.captureException(preserveError, {
+          tags: { area: 'payment-checkout-reconciliation' },
+          extra: { refNumber, provider: paymentProvider.name },
+        })
+      })
+      Sentry.captureMessage('Payment checkout requires provider reconciliation', {
+        level: 'error',
+        tags: { area: 'payment-checkout-reconciliation', provider: paymentProvider.name },
+        extra: { refNumber, providerCheckoutId: hostedCheckout?.checkoutId ?? null },
+      })
+      return NextResponse.json(
+        { error: 'Le statut du paiement est en cours de vérification', refNumber },
+        { status: 503 },
+      )
+    }
+
     await prisma.$transaction([
       prisma.promoCode.updateMany({
         where: { reservedDraft: { is: { refNumber } }, status: 'HELD' },

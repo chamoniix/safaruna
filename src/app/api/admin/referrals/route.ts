@@ -10,7 +10,17 @@ export async function GET(req: NextRequest) {
     include: {
       sponsor: { select: { name: true, firstName: true, lastName: true, email: true } },
       referredUser: { select: { name: true, firstName: true, lastName: true, email: true } },
-      qualifiedReservation: { select: { refNumber: true, totalPrice: true, createdAt: true } },
+      qualifiedReservation: {
+        select: {
+          refNumber: true, totalPrice: true, createdAt: true,
+          paymentAttempts: {
+            where: { status: 'SUCCEEDED' },
+            orderBy: { paidAt: 'desc' },
+            take: 1,
+            select: { provider: true },
+          },
+        },
+      },
       promoCodes: { select: { code: true, kind: true, status: true, discountBps: true, expiresAt: true, redeemedAt: true } },
     },
   })
@@ -26,6 +36,7 @@ export async function GET(req: NextRequest) {
         refNumber: referral.qualifiedReservation.refNumber,
         totalPrice: referral.qualifiedReservation.totalPrice,
         createdAt: referral.qualifiedReservation.createdAt.toISOString(),
+        provider: referral.qualifiedReservation.paymentAttempts[0]?.provider ?? null,
       } : null,
       promoCodes: referral.promoCodes.map(code => ({ ...code, discountPercent: code.discountBps / 100, expiresAt: code.expiresAt.toISOString(), redeemedAt: code.redeemedAt?.toISOString() || null })),
     })),

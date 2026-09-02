@@ -25,6 +25,7 @@ import {
   TRAVEL_MARKUP_BPS,
 } from '@/lib/guide-pricing'
 import { getAnalyticsSessionId, trackAnalyticsEvent } from '@/lib/analytics-client'
+import RevolutEmbeddedCheckout from './revolut-embedded-checkout'
 
 // ── Types ─────────────────────────────────────────
 type Gender = 'HOMME' | 'FEMME' | 'MIXTE'
@@ -51,6 +52,13 @@ const STEPS_BOTH   = ['Destination', 'Vos guides', 'Dates & Profil', 'Visites', 
 type CheckoutPlace = Place & {
   isActive: boolean
   retailCents: { upTo6: number; upTo15: number; upTo32: number }
+}
+
+type PaymentSession = {
+  provider: 'REVOLUT'
+  checkoutToken: string
+  sessionUrl: string
+  refNumber: string
 }
 
 // ── Composant PlaceSelector ───────────────────────
@@ -278,6 +286,7 @@ export default function CheckoutPage() {
 
   // Étape 4
   const [submitting, setSubmitting] = useState(false)
+  const [paymentSession, setPaymentSession] = useState<PaymentSession | null>(null)
   const [error, setError] = useState('')
   const [checkingAvailability, setCheckingAvailability] = useState(false)
   const [promoInput, setPromoInput] = useState('')
@@ -637,7 +646,11 @@ export default function CheckoutPage() {
     }
   }
 
-  // Soumission — redirige vers le checkout hébergé du processeur actif
+  const clearSavedCheckout = () => {
+    try { localStorage.removeItem(`safaruna_checkout_${slug}`) } catch { /* ignore */ }
+  }
+
+  // Soumission — Stripe redirige comme auparavant ; Revolut s'intègre dans la page.
   const handleSubmit = async () => {
     setSubmitting(true)
     setError('')
@@ -673,10 +686,30 @@ export default function CheckoutPage() {
           analyticsSessionId: getAnalyticsSessionId(),
         }),
       })
-      const data = await res.json()
+      const data = await res.json() as {
+        provider?: string
+        checkoutToken?: string
+        sessionUrl?: string
+        refNumber?: string
+        error?: string
+      }
       if (!res.ok) throw new Error(data.error || 'Erreur')
-      try { localStorage.removeItem(`safaruna_checkout_${slug}`) } catch { /* ignore */ }
-      window.location.href = data.sessionUrl
+      if (data.provider === 'STRIPE') {
+        if (!data.sessionUrl) throw new Error('Lien de paiement indisponible')
+        clearSavedCheckout()
+        window.location.href = data.sessionUrl
+        return
+      }
+      if (data.provider !== 'REVOLUT' || !data.checkoutToken || !data.sessionUrl || !data.refNumber) {
+        throw new Error('Session de paiement invalide')
+      }
+      setPaymentSession({
+        provider: 'REVOLUT',
+        checkoutToken: data.checkoutToken,
+        sessionUrl: data.sessionUrl,
+        refNumber: data.refNumber,
+      })
+      setSubmitting(false)
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : 'Erreur lors de la préparation du paiement'
       trackAnalyticsEvent('checkout_error', {
@@ -1926,7 +1959,7 @@ export default function CheckoutPage() {
         {/* ── ÉTAPE 5 — RÉCAP & PAIEMENT ── */}
         {step === 5 && (
           <div>
-            {backBtn(4)}
+            {!paymentSession && backBtn(4)}
             <h2 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', fontWeight: 400, color: '#1A1209', marginBottom: '2rem' }}>
               Récapitulatif de votre voyage
             </h2>
@@ -2083,8 +2116,8 @@ export default function CheckoutPage() {
               <div style={{ padding: '.85rem 1.25rem', borderBottom: '1px solid #F5F0E8' }}>
                 <div style={{ fontSize: '.76rem', fontWeight: 800, color: '#1A1209', marginBottom: '.5rem' }}>Code promotionnel</div>
                 <div style={{ display: 'flex', gap: '.45rem', flexWrap: 'wrap' }}>
-                  <input value={promoInput} onChange={event => { setPromoInput(event.target.value.toUpperCase()); setPromoError(''); if (appliedPromo?.code !== event.target.value.toUpperCase()) setAppliedPromo(null) }} placeholder="Ex. SAF-…" aria-label="Code promotionnel" style={{ flex: '1 1 150px', minWidth: 0, border: '1px solid #E8DFC8', borderRadius: 8, padding: '.55rem .65rem', fontFamily: 'monospace', fontSize: '.78rem', color: '#1A1209' }} />
-                  <button type="button" onClick={applyPromo} disabled={checkingPromo || !promoInput.trim()} style={{ border: 'none', borderRadius: 8, padding: '.55rem .75rem', background: checkingPromo || !promoInput.trim() ? '#D6D3D1' : '#1A1209', color: '#F0D897', cursor: checkingPromo || !promoInput.trim() ? 'not-allowed' : 'pointer', fontFamily: 'inherit', fontWeight: 800, fontSize: '.72rem' }}>{checkingPromo ? 'Vérification…' : 'Appliquer'}</button>
+                  <input value={promoInput} disabled={Boolean(paymentSession)} onChange={event => { setPromoInput(event.target.value.toUpperCase()); setPromoError(''); if (appliedPromo?.code !== event.target.value.toUpperCase()) setAppliedPromo(null) }} placeholder="Ex. SAF-…" aria-label="Code promotionnel" style={{ flex: '1 1 150px', minWidth: 0, border: '1px solid #E8DFC8', borderRadius: 8, padding: '.55rem .65rem', fontFamily: 'monospace', fontSize: '.78rem', color: '#1A1209' }} />
+                  <button type="button" onClick={applyPromo} disabled={Boolean(paymentSession) || checkingPromo || !promoInput.trim()} style={{ border: 'none', borderRadius: 8, padding: '.55rem .75rem', background: paymentSession || checkingPromo || !promoInput.trim() ? '#D6D3D1' : '#1A1209', color: '#F0D897', cursor: paymentSession || checkingPromo || !promoInput.trim() ? 'not-allowed' : 'pointer', fontFamily: 'inherit', fontWeight: 800, fontSize: '.72rem' }}>{checkingPromo ? 'Vérification…' : 'Appliquer'}</button>
                 </div>
                 {promoError && <div style={{ color: '#C0392B', fontSize: '.68rem', marginTop: '.4rem', fontWeight: 700 }}>{promoError}</div>}
                 {appliedPromo && <div style={{ color: '#1D5C3A', fontSize: '.7rem', marginTop: '.45rem', fontWeight: 800 }}>✓ Code {appliedPromo.code} appliqué · −{appliedPromo.discountPercent} %</div>}
@@ -2150,20 +2183,33 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            <button
-              onClick={handleSubmit}
-              disabled={submitting}
-              style={{ width: '100%', padding: '1.1rem', background: submitting ? '#7A6D5A' : 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)', color: '#FAF7F0', border: 'none', borderRadius: 50, fontFamily: 'var(--font-cormorant, serif)', fontWeight: 700, fontSize: '1.1rem', cursor: submitting ? 'not-allowed' : 'pointer', letterSpacing: '0.06em', boxShadow: submitting ? 'none' : '0 4px 20px rgba(201,168,76,0.4)' }}
-            >
-              {submitting ? 'Envoi en cours…' : `Payer ${totalAfterPromo.toLocaleString('fr-FR')}€`}
-            </button>
+            {!paymentSession ? (
+              <button
+                onClick={handleSubmit}
+                disabled={submitting}
+                style={{ width: '100%', padding: '1.1rem', background: submitting ? '#7A6D5A' : 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)', color: '#FAF7F0', border: 'none', borderRadius: 50, fontFamily: 'var(--font-cormorant, serif)', fontWeight: 700, fontSize: '1.1rem', cursor: submitting ? 'not-allowed' : 'pointer', letterSpacing: '0.06em', boxShadow: submitting ? 'none' : '0 4px 20px rgba(201,168,76,0.4)' }}
+              >
+                {submitting ? 'Envoi en cours…' : `Payer ${totalAfterPromo.toLocaleString('fr-FR')}€`}
+              </button>
+            ) : (
+              <RevolutEmbeddedCheckout
+                checkoutToken={paymentSession.checkoutToken}
+                hostedCheckoutUrl={paymentSession.sessionUrl}
+                confirmationUrl={`/espace/checkout/${slug}/confirmation?ref=${encodeURIComponent(paymentSession.refNumber)}&payment=success`}
+                onLeaveForPayment={clearSavedCheckout}
+                onFallback={reason => trackAnalyticsEvent('checkout_error', {
+                  guideSlug: selectedGuideSlug || slug,
+                  message: `revolut_fallback:${reason}`,
+                })}
+              />
+            )}
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '0.75rem', fontSize: '0.72rem', color: '#7A6D5A' }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7A6D5A" strokeWidth="2">
                 <rect x="3" y="11" width="18" height="11" rx="2"/>
                 <path d="M7 11V7a5 5 0 0110 0v4"/>
               </svg>
-              Paiement 100% sécurisé · Powered by Stripe
+              Paiement 100% sécurisé{paymentSession ? ' · Powered by Revolut' : ''}
             </div>
           </div>
         )}

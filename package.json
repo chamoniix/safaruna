@@ -22,6 +22,7 @@
     "@neondatabase/serverless": "^1.0.2",
     "@next/third-parties": "^16.2.6",
     "@prisma/client": "^6.19.2",
+    "@revolut/checkout": "1.1.25",
     "@sentry/nextjs": "^10.48.0",
     "@stripe/stripe-js": "^9.1.0",
     "@supabase/ssr": "^0.9.0",

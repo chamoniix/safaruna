@@ -15,6 +15,26 @@ type Reservation = {
   commissionAmount: number;
   totalPrice: number;
   status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
+  payment: {
+    provider: string;
+    status: 'CREATED' | 'PENDING' | 'SUCCEEDED' | 'EXPIRED' | 'FAILED' | 'CANCELLED';
+    amountCents: number;
+    currency: string;
+    providerCheckoutId: string | null;
+    providerPaymentId: string | null;
+    checkoutExpiresAt: string | null;
+    paidAt: string | null;
+    failureCode: string | null;
+    createdAt: string;
+    transaction: {
+      provider: string;
+      providerTransactionId: string;
+      status: string;
+      amountCents: number;
+      currency: string;
+      occurredAt: string;
+    } | null;
+  } | null;
   guideConfirmationStatus: 'NONE' | 'PENDING' | 'PARTIAL' | 'CONFIRMED';
   missions: Array<{ id: string; city: string; guide: string; status: 'PENDING' | 'CONFIRMED'; requestedAt: string | null; confirmedAt: string | null }>;
   createdAt: string;
@@ -41,6 +61,15 @@ const GUIDE_CONFIRMATION_CONFIG = {
   PARTIAL: { label: 'Partielle', color: '#1D4ED8', bg: '#DBEAFE' },
   CONFIRMED: { label: 'Guide confirmé', color: '#047857', bg: '#D1FAE5' },
 } as const;
+
+const PAYMENT_STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+  CREATED: { label: 'Créé', color: '#475569', bg: '#F1F5F9' },
+  PENDING: { label: 'En cours', color: '#B45309', bg: '#FEF3C7' },
+  SUCCEEDED: { label: 'Payé', color: '#047857', bg: '#D1FAE5' },
+  EXPIRED: { label: 'Expiré', color: '#9A3412', bg: '#FFEDD5' },
+  FAILED: { label: 'Échec', color: '#B91C1C', bg: '#FEE2E2' },
+  CANCELLED: { label: 'Annulé', color: '#B91C1C', bg: '#FEE2E2' },
+};
 
 export default function AdminReservations() {
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -227,7 +256,7 @@ export default function AdminReservations() {
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 900 }}>
             <thead>
               <tr style={{ background: '#F5F2EC', borderBottom: '1px solid #E8DFC8' }}>
-                {['Réf', 'Pèlerin', 'Guide', 'Package', 'Départ', 'Pers.', 'Prix total', 'Commission', 'Confirmation guide', 'Statut', 'Action'].map(h => (
+                {['Réf', 'Pèlerin', 'Guide', 'Package', 'Départ', 'Pers.', 'Prix total', 'Commission', 'Confirmation guide', 'Statut', 'Paiement', 'Action'].map(h => (
                   <th key={h} style={{ padding: '0.75rem 0.875rem', textAlign: 'left', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
@@ -236,7 +265,7 @@ export default function AdminReservations() {
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} style={{ borderBottom: '1px solid #F0EBE0' }}>
-                    {Array.from({ length: 11 }).map((_, j) => (
+                    {Array.from({ length: 12 }).map((_, j) => (
                       <td key={j} style={{ padding: '0.875rem' }}>
                         <div style={{ height: 13, background: '#F0EDE8', borderRadius: 4, width: j === 0 ? 80 : j < 3 ? 100 : 55 }} />
                       </td>
@@ -244,11 +273,12 @@ export default function AdminReservations() {
                   </tr>
                 ))
               ) : visible.length === 0 ? (
-                <tr><td colSpan={11} style={{ padding: '3rem', textAlign: 'center', color: '#7A6D5A', fontSize: '0.85rem' }}>Aucune réservation trouvée</td></tr>
+                <tr><td colSpan={12} style={{ padding: '3rem', textAlign: 'center', color: '#7A6D5A', fontSize: '0.85rem' }}>Aucune réservation trouvée</td></tr>
               ) : (
                 visible.map((r, i) => {
                   const sc = STATUS_CONFIG[r.status] || { label: r.status, color: '#6B7280', bg: '#F3F4F6' };
                   const gc = GUIDE_CONFIRMATION_CONFIG[r.guideConfirmationStatus] || GUIDE_CONFIRMATION_CONFIG.NONE;
+                  const pc = r.payment ? PAYMENT_STATUS_CONFIG[r.payment.status] || { label: r.payment.status, color: '#475569', bg: '#F1F5F9' } : null;
                   return (
                     <tr key={r.id} style={{ background: i % 2 === 0 ? 'white' : '#FAFAF8', borderBottom: '1px solid #F0EBE0' }}>
                       <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.75rem', fontWeight: 700, color: '#1A1209', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{r.refNumber}</td>
@@ -264,6 +294,13 @@ export default function AdminReservations() {
                       </td>
                       <td style={{ padding: '0.75rem 0.875rem' }}>
                         <span style={{ display: 'inline-block', background: sc.bg, color: sc.color, fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.06em', padding: '0.25rem 0.6rem', borderRadius: 20, whiteSpace: 'nowrap' }}>{sc.label}</span>
+                      </td>
+                      <td style={{ padding: '0.75rem 0.875rem', whiteSpace: 'nowrap' }}>
+                        {r.payment && pc ? <div title={`Checkout : ${r.payment.providerCheckoutId || '—'}\nPaiement : ${r.payment.providerPaymentId || '—'}\nTransaction : ${r.payment.transaction?.providerTransactionId || '—'}${r.payment.failureCode ? `\nErreur : ${r.payment.failureCode}` : ''}`}>
+                          <b style={{ display: 'block', color: '#1A1209', fontSize: '.68rem' }}>{r.payment.provider}</b>
+                          <span style={{ display: 'inline-block', marginTop: 3, background: pc.bg, color: pc.color, fontSize: '0.58rem', fontWeight: 800, padding: '0.2rem 0.5rem', borderRadius: 20 }}>{pc.label}</span>
+                          <small style={{ display: 'block', marginTop: 3, color: '#7A6D5A' }}>{(r.payment.amountCents / 100).toLocaleString('fr-FR', { style: 'currency', currency: r.payment.currency })}</small>
+                        </div> : <span style={{ color: '#9A8A7A', fontSize: '.7rem' }}>Aucun</span>}
                       </td>
                       <td style={{ padding: '0.75rem 0.875rem' }}>
                         <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'nowrap', alignItems: 'center' }}>
@@ -301,7 +338,7 @@ export default function AdminReservations() {
                   </td>
                   <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.9rem', fontWeight: 700, color: '#1A1209', whiteSpace: 'nowrap' }}>{totalRevenu} €</td>
                   <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.9rem', fontWeight: 700, color: '#1D5C3A', whiteSpace: 'nowrap' }}>{totalCommission} €</td>
-                  <td colSpan={3} />
+                  <td colSpan={4} />
                 </tr>
               </tfoot>
             )}

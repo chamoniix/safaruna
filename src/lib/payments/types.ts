@@ -1,7 +1,7 @@
 import type { Prisma } from '@prisma/client'
 import type { CityChoice } from '@/lib/packages'
 
-export type PaymentProviderId = 'STRIPE'
+export type PaymentProviderId = 'STRIPE' | 'REVOLUT'
 
 export type DraftMission = {
   city: 'MAKKAH' | 'MADINAH'

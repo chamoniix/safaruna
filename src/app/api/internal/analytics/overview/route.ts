@@ -94,7 +94,7 @@ export async function GET(req: NextRequest) {
   const start = new Date(Date.now() - days * 86_400_000)
   const activeSince = new Date(Date.now() - 5 * 60_000)
 
-  const [events, usersTotal, usersNew, usersByRole, recentUsers, reservations, guidesActive, guidesPending, guideApplicationsNew, guideApplications, guideApplicationsTotal, guideApplicationCounts, adminAccounts, adminLoginAttempts, adminSessionsActive, emailDeliveries, sentry, referrals] = await Promise.all([
+  const [events, usersTotal, usersNew, usersByRole, recentUsers, reservations, guidesActive, guidesPending, guideApplicationsNew, guideApplications, guideApplicationsTotal, guideApplicationCounts, adminAccounts, adminLoginAttempts, adminSessionsActive, emailDeliveries, paymentAttempts, paymentAttemptCounts, failedPaymentEvents, paymentTransactions, capturedPaymentsByProvider, sentry, referrals] = await Promise.all([
     prisma.analyticsEvent.findMany({
       where: { createdAt: { gte: start } },
       orderBy: { createdAt: 'desc' },
@@ -113,11 +113,20 @@ export async function GET(req: NextRequest) {
     prisma.reservation.findMany({
       where: { createdAt: { gte: start } },
       orderBy: { createdAt: 'desc' },
-      take: 500,
+      take: 50,
       select: {
         refNumber: true, status: true, totalPrice: true, createdAt: true,
         selectedCities: true, nbPeople: true,
         pelerin: { select: { id: true, name: true, email: true } },
+        paymentAttempts: {
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          select: {
+            provider: true, status: true, amountCents: true, currency: true,
+            providerCheckoutId: true, providerPaymentId: true,
+            checkoutExpiresAt: true, paidAt: true, failureCode: true, createdAt: true,
+          },
+        },
       },
     }),
     prisma.guideProfile.count({ where: { status: 'ACTIVE' } }),
@@ -148,6 +157,47 @@ export async function GET(req: NextRequest) {
         acceptedAt: true, deliveredAt: true, createdAt: true,
       },
     }),
+    prisma.paymentAttempt.findMany({
+      where: { createdAt: { gte: start } },
+      orderBy: { createdAt: 'desc' },
+      take: 500,
+      select: {
+        id: true, bookingRef: true, provider: true, status: true,
+        amountCents: true, currency: true, providerCheckoutId: true,
+        providerPaymentId: true, checkoutExpiresAt: true, paidAt: true,
+        failureCode: true, createdAt: true, updatedAt: true,
+      },
+    }),
+    prisma.paymentAttempt.groupBy({
+      by: ['provider', 'status'],
+      where: { createdAt: { gte: start } },
+      _count: { _all: true },
+    }),
+    prisma.paymentEvent.findMany({
+      where: { status: 'FAILED', occurredAt: { gte: start } },
+      orderBy: { occurredAt: 'desc' },
+      take: 50,
+      select: {
+        id: true, provider: true, providerEventId: true, providerEventType: true,
+        providerObjectId: true, status: true, processingAttempts: true,
+        occurredAt: true, processedAt: true, lastError: true,
+        attempt: { select: { bookingRef: true } },
+      },
+    }),
+    prisma.paymentTransaction.findMany({
+      where: { occurredAt: { gte: start } },
+      orderBy: { occurredAt: 'desc' },
+      take: 50,
+      select: {
+        id: true, bookingRef: true, provider: true, providerTransactionId: true,
+        type: true, status: true, amountCents: true, currency: true, occurredAt: true,
+      },
+    }),
+    prisma.paymentTransaction.groupBy({
+      by: ['provider'],
+      where: { type: 'CHARGE', status: 'SUCCEEDED', occurredAt: { gte: start } },
+      _sum: { amountCents: true },
+    }),
     sentryIssues(days),
     prisma.referral.findMany({
       where: { createdAt: { gte: start } },
@@ -157,7 +207,17 @@ export async function GET(req: NextRequest) {
         id: true, status: true, createdAt: true, qualifiedAt: true,
         sponsor: { select: { name: true, firstName: true, lastName: true, email: true } },
         referredUser: { select: { name: true, firstName: true, lastName: true, email: true } },
-        qualifiedReservation: { select: { refNumber: true, totalPrice: true, createdAt: true } },
+        qualifiedReservation: {
+          select: {
+            refNumber: true, totalPrice: true, createdAt: true,
+            paymentAttempts: {
+              where: { status: 'SUCCEEDED' },
+              orderBy: { paidAt: 'desc' },
+              take: 1,
+              select: { provider: true },
+            },
+          },
+        },
         promoCodes: { select: { code: true, kind: true, status: true, discountBps: true, expiresAt: true, redeemedAt: true } },
       },
     }),
@@ -250,6 +310,37 @@ export async function GET(req: NextRequest) {
 
   const confirmed = reservations.filter(reservation => reservation.status === 'CONFIRMED')
   const revenue = confirmed.reduce((sum, reservation) => sum + reservation.totalPrice, 0)
+  const paymentProviders = new Map<string, {
+    attempts: number
+    succeeded: number
+    pending: number
+    failed: number
+    cancelled: number
+    expired: number
+    capturedCents: number
+  }>()
+  for (const row of paymentAttemptCounts) {
+    const current = paymentProviders.get(row.provider) ?? {
+      attempts: 0, succeeded: 0, pending: 0, failed: 0,
+      cancelled: 0, expired: 0, capturedCents: 0,
+    }
+    const count = row._count._all
+    current.attempts += count
+    if (row.status === 'SUCCEEDED') current.succeeded += count
+    else if (row.status === 'PENDING' || row.status === 'CREATED') current.pending += count
+    else if (row.status === 'FAILED') current.failed += count
+    else if (row.status === 'CANCELLED') current.cancelled += count
+    else if (row.status === 'EXPIRED') current.expired += count
+    paymentProviders.set(row.provider, current)
+  }
+  for (const row of capturedPaymentsByProvider) {
+    const current = paymentProviders.get(row.provider) ?? {
+      attempts: 0, succeeded: 0, pending: 0, failed: 0,
+      cancelled: 0, expired: 0, capturedCents: 0,
+    }
+    current.capturedCents = row._sum.amountCents ?? 0
+    paymentProviders.set(row.provider, current)
+  }
   const funnelNames = ['guide_viewed', 'booking_started', 'booking_step', 'begin_checkout', 'checkout_created', 'purchase']
   const funnel = funnelNames.map(name => ({ name, count: eventCounts.get(name) ?? 0 }))
 
@@ -354,7 +445,22 @@ export async function GET(req: NextRequest) {
       errors: eventCounts.get('checkout_error') ?? 0,
       cancelled: eventCounts.get('payment_cancelled') ?? 0,
       expired: eventCounts.get('payment_expired') ?? 0,
-      reservations: reservations.slice(0, 50),
+      providers: [...paymentProviders.entries()]
+        .map(([provider, values]) => ({ provider, ...values }))
+        .sort((left, right) => right.attempts - left.attempts),
+      attempts: paymentAttempts.slice(0, 50),
+      failedEvents: failedPaymentEvents.map(event => ({
+        ...event,
+        bookingRef: event.attempt?.bookingRef ?? null,
+        attempt: undefined,
+        lastError: event.lastError?.slice(0, 500) ?? null,
+      })),
+      transactions: paymentTransactions.slice(0, 50),
+      reservations: reservations.slice(0, 50).map(reservation => ({
+        ...reservation,
+        payment: reservation.paymentAttempts[0] ?? null,
+        paymentAttempts: undefined,
+      })),
     },
     referrals: {
       total: referrals.length,
@@ -367,7 +473,12 @@ export async function GET(req: NextRequest) {
         qualifiedAt: referral.qualifiedAt,
         sponsor: referral.sponsor,
         referred: referral.referredUser,
-        payment: referral.qualifiedReservation,
+        payment: referral.qualifiedReservation ? {
+          refNumber: referral.qualifiedReservation.refNumber,
+          totalPrice: referral.qualifiedReservation.totalPrice,
+          createdAt: referral.qualifiedReservation.createdAt,
+          provider: referral.qualifiedReservation.paymentAttempts[0]?.provider ?? null,
+        } : null,
         promoCodes: referral.promoCodes.map(code => ({ ...code, discountPercent: code.discountBps / 100 })),
       })),
     },

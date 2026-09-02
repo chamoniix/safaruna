@@ -26,6 +26,24 @@ export async function GET(req: NextRequest) {
           guideProfile: { select: { guideAccount: { select: { displayName: true, firstName: true, lastName: true } } } },
         },
       },
+      paymentAttempts: {
+        orderBy: { createdAt: 'desc' },
+        take: 1,
+        select: {
+          provider: true, status: true, amountCents: true, currency: true,
+          providerCheckoutId: true, providerPaymentId: true,
+          checkoutExpiresAt: true, paidAt: true, failureCode: true, createdAt: true,
+        },
+      },
+      paymentTransactions: {
+        where: { type: 'CHARGE' },
+        orderBy: { occurredAt: 'desc' },
+        take: 1,
+        select: {
+          provider: true, providerTransactionId: true, status: true,
+          amountCents: true, currency: true, occurredAt: true,
+        },
+      },
     },
   });
 
@@ -54,6 +72,22 @@ export async function GET(req: NextRequest) {
       commissionAmount: r.commissionAmount,
       totalPrice: r.totalPrice,
       status: r.status,
+      payment: r.paymentAttempts[0] ? {
+        ...r.paymentAttempts[0],
+        transaction: r.paymentTransactions[0] ?? null,
+      } : r.stripePaymentId ? {
+        provider: 'STRIPE',
+        status: 'SUCCEEDED',
+        amountCents: Math.round(r.totalPrice * 100),
+        currency: 'EUR',
+        providerCheckoutId: null,
+        providerPaymentId: r.stripePaymentId,
+        checkoutExpiresAt: null,
+        paidAt: null,
+        failureCode: null,
+        createdAt: r.createdAt,
+        transaction: null,
+      } : null,
       guideConfirmationStatus,
       missions: r.missions.map(mission => {
         const account = mission.guideProfile.guideAccount;

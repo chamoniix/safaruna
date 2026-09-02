@@ -6,6 +6,7 @@ import { sendPaymentConfirmationEmails } from '@/lib/payments/confirmation-email
 import { sendReferralPromoCode } from '@/lib/email'
 import {
   PaymentProcessingError,
+  PaymentEventInFlightError,
   processExpiredCheckout,
   processPaidCheckout,
   recordIgnoredPaymentEvent,
@@ -185,6 +186,12 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ received: true })
   } catch (error) {
+    if (error instanceof PaymentEventInFlightError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: 503, headers: { 'Retry-After': '1' } },
+      )
+    }
     const failedObject = event.data.object as { id?: string }
     await recordRejectedPaymentEvent({
       provider: 'STRIPE',

@@ -10,12 +10,20 @@ import type {
 } from '@/lib/payments/types'
 import { assertMissionsAvailable, GuideAvailabilityConflictError } from '@/lib/guide-availability'
 import { promoExpiry } from '@/lib/referral'
-
-const EVENT_PROCESSING_LEASE_MS = 5 * 60 * 1000
+import {
+  PAYMENT_EVENT_PROCESSING_LEASE_MS,
+  paymentEventClaimDisposition,
+} from '@/lib/payments/provider'
 
 export class PaymentProcessingError extends Error {
   constructor(message: string, readonly status: number) {
     super(message)
+  }
+}
+
+export class PaymentEventInFlightError extends PaymentProcessingError {
+  constructor() {
+    super('Événement de paiement déjà en cours de traitement', 503)
   }
 }
 
@@ -71,14 +79,13 @@ async function claimPaymentEvent(input: {
     },
   })
   if (!existing) throw new Error('PAYMENT_EVENT_CONFLICT_WITHOUT_ROW')
-  if (existing.status === 'PROCESSED' || existing.status === 'IGNORED') {
+  const disposition = paymentEventClaimDisposition(existing)
+  if (disposition === 'FINALIZED') {
     return { id: existing.id, duplicate: true }
   }
+  if (disposition === 'IN_FLIGHT') throw new PaymentEventInFlightError()
 
-  const staleBefore = new Date(Date.now() - EVENT_PROCESSING_LEASE_MS)
-  if (existing.status === 'PROCESSING' && existing.processingStartedAt > staleBefore) {
-    return { id: existing.id, duplicate: true }
-  }
+  const staleBefore = new Date(Date.now() - PAYMENT_EVENT_PROCESSING_LEASE_MS)
 
   const reclaimed = await prisma.paymentEvent.updateMany({
     where: {
@@ -106,6 +113,61 @@ async function markEventFailed(eventId: string, error: unknown) {
     where: { id: eventId },
     data: { status: 'FAILED', lastError: safeError(error) },
   }).catch(ledgerError => console.error('[payment-event] failure update failed', ledgerError))
+}
+
+async function findOrAttachPaymentAttempt(input: {
+  provider: PaymentProviderId
+  providerCheckoutId: string
+  bookingRef: string
+}) {
+  const byCheckout = await prisma.paymentAttempt.findUnique({
+    where: {
+      provider_providerCheckoutId: {
+        provider: input.provider,
+        providerCheckoutId: input.providerCheckoutId,
+      },
+    },
+  })
+  if (byCheckout) return byCheckout
+
+  const candidates = await prisma.paymentAttempt.findMany({
+    where: {
+      provider: input.provider,
+      bookingRef: input.bookingRef,
+      status: { in: ['CREATED', 'PENDING'] },
+    },
+    orderBy: { createdAt: 'asc' },
+    take: 2,
+  })
+  if (candidates.length > 1) {
+    throw new PaymentProcessingError('Tentatives de paiement ambiguës', 409)
+  }
+  const candidate = candidates[0]
+  if (!candidate) return null
+  if (candidate.providerCheckoutId && candidate.providerCheckoutId !== input.providerCheckoutId) {
+    throw new PaymentProcessingError('Session de paiement incohérente', 409)
+  }
+  if (candidate.providerCheckoutId === input.providerCheckoutId) return candidate
+
+  const attached = await prisma.paymentAttempt.updateMany({
+    where: { id: candidate.id, providerCheckoutId: null },
+    data: {
+      providerCheckoutId: input.providerCheckoutId,
+      status: 'PENDING',
+      failureCode: null,
+    },
+  })
+  if (attached.count === 1) {
+    return prisma.paymentAttempt.findUnique({ where: { id: candidate.id } })
+  }
+  return prisma.paymentAttempt.findUnique({
+    where: {
+      provider_providerCheckoutId: {
+        provider: input.provider,
+        providerCheckoutId: input.providerCheckoutId,
+      },
+    },
+  })
 }
 
 async function reconcileExistingReservation(
@@ -215,13 +277,10 @@ export type PaidPaymentResult = {
 }
 
 export async function processPaidCheckout(event: NormalizedCheckoutPaidEvent): Promise<PaidPaymentResult> {
-  const existingAttempt = await prisma.paymentAttempt.findUnique({
-    where: {
-      provider_providerCheckoutId: {
-        provider: event.provider,
-        providerCheckoutId: event.providerCheckoutId,
-      },
-    },
+  const existingAttempt = await findOrAttachPaymentAttempt({
+    provider: event.provider,
+    providerCheckoutId: event.providerCheckoutId,
+    bookingRef: event.bookingRef,
   })
   const claimed = await claimPaymentEvent({
     provider: event.provider,
@@ -562,13 +621,10 @@ export async function processPaidCheckout(event: NormalizedCheckoutPaidEvent): P
 }
 
 export async function processExpiredCheckout(event: NormalizedCheckoutExpiredEvent) {
-  const attempt = await prisma.paymentAttempt.findUnique({
-    where: {
-      provider_providerCheckoutId: {
-        provider: event.provider,
-        providerCheckoutId: event.providerCheckoutId,
-      },
-    },
+  const attempt = await findOrAttachPaymentAttempt({
+    provider: event.provider,
+    providerCheckoutId: event.providerCheckoutId,
+    bookingRef: event.bookingRef,
   })
   const claimed = await claimPaymentEvent({
     provider: event.provider,

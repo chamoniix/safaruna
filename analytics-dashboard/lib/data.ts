@@ -32,10 +32,35 @@ export type AnalyticsData = {
   breakdowns: Record<'countries' | 'devices' | 'pages' | 'guides' | 'referrers' | 'events', Array<{ label: string; count: number }>>
   payments: {
     checkoutCreated: number; purchases: number; errors: number; cancelled: number; expired: number
+    providers: Array<{
+      provider: string; attempts: number; succeeded: number; pending: number
+      failed: number; cancelled: number; expired: number; capturedCents: number
+    }>
+    attempts: Array<{
+      id: string; bookingRef: string; provider: string; status: string
+      amountCents: number; currency: string; providerCheckoutId: string | null
+      providerPaymentId: string | null; checkoutExpiresAt: string | null
+      paidAt: string | null; failureCode: string | null; createdAt: string; updatedAt: string
+    }>
+    failedEvents: Array<{
+      id: string; provider: string; providerEventId: string; providerEventType: string
+      providerObjectId: string | null; status: string; processingAttempts: number
+      occurredAt: string; processedAt: string | null; lastError: string | null; bookingRef: string | null
+    }>
+    transactions: Array<{
+      id: string; bookingRef: string; provider: string; providerTransactionId: string
+      type: string; status: string; amountCents: number; currency: string; occurredAt: string
+    }>
     reservations: Array<{
       refNumber: string; status: string; totalPrice: number; createdAt: string
       selectedCities: string | null; nbPeople: number
       pelerin: { id: string; name: string | null; email: string | null }
+      payment: {
+        provider: string; status: string; amountCents: number; currency: string
+        providerCheckoutId: string | null; providerPaymentId: string | null
+        checkoutExpiresAt: string | null; paidAt: string | null
+        failureCode: string | null; createdAt: string
+      } | null
     }>
   }
   referrals: {
@@ -44,7 +69,7 @@ export type AnalyticsData = {
       id: string; status: string; createdAt: string; qualifiedAt: string | null
       sponsor: { name: string | null; firstName: string | null; lastName: string | null; email: string | null }
       referred: { name: string | null; firstName: string | null; lastName: string | null; email: string | null }
-      payment: { refNumber: string; totalPrice: number; createdAt: string } | null
+      payment: { refNumber: string; totalPrice: number; createdAt: string; provider: string | null } | null
       promoCodes: Array<{ code: string; kind: string; status: string; discountPercent: number; expiresAt: string; redeemedAt: string | null }>
     }>
   }

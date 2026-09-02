@@ -66,7 +66,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), payment=(self "https://js.stripe.com")',
+            value: 'camera=(), microphone=(), geolocation=(), payment=(self "https://js.stripe.com" "https://merchant.revolut.com" "https://checkout.revolut.com")',
           },
           // Content-Security-Policy is set dynamically by middleware (nonce-based)
           // to eliminate 'unsafe-inline' from script-src.

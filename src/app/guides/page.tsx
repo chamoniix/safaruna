@@ -64,6 +64,12 @@ const LANG_CODES: Record<string, string> = {
   espanol: 'Español', deutsch: 'Deutsch',
 };
 
+export function filterMobileLanguageOptions<T extends { label: string }>(options: T[], query: string): T[] {
+  const normalizedQuery = query.trim().normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  if (!normalizedQuery) return options.slice(0, 3);
+  return options.filter(option => option.label.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().includes(normalizedQuery));
+}
+
 type AvailableGuideApi = {
   slug: string;
   name?: string;
@@ -94,7 +100,7 @@ const GUIDES_DATA = [
     rating: 5.0,
     reviews: 0,
     pilgrims: 'OFFICIEL',
-    languages: ['🇫🇷 Français', '🇸🇦 Arabe', '🇩🇿 Algérien'],
+    languages: ['Français', 'العربية', 'الجزائرية', 'الدارجة'],
     services: ['Rituels Omra', 'Histoire islamique', 'PMR', 'Gestion de crise'],
     price: 150,
     priceSub: 'dès 150€/pers',
@@ -145,13 +151,13 @@ function GuideAvatarSVG({ slug, gradient, initials, isWoman }: { slug: string; g
         position: 'relative',
       }}>
         <Image
-          src="/guide-avatar.png"
+          src="/images/landing/guide-naim-laamari.jpg"
           alt="Naïm LAAMARI — Guide officiel SAFARUMA, guide privé Omra certifié à La Mecque"
           fill
+          sizes="72px"
           style={{
             objectFit: 'cover',
-            objectPosition: 'center 10%',
-            transform: 'scale(1.15)',
+            objectPosition: '62% 42%',
           }}
         />
       </div>
@@ -187,6 +193,16 @@ function GuideAvatarSVG({ slug, gradient, initials, isWoman }: { slug: string; g
       <circle cx="23" cy="14" r="6" fill="white" opacity="0.92" />
       <rect x="14" y="10" width="18" height="3" rx="1.5" fill={accent} opacity="0.95" />
       <path d="M15 24 Q13 34 13 42 L33 42 Q33 34 31 24 Q28 20 23 20 Q18 20 15 24Z" fill="white" opacity="0.85" />
+    </svg>
+  );
+}
+
+function FranceFlagSVG() {
+  return (
+    <svg width="16" height="12" viewBox="0 0 18 12" role="img" aria-label="Drapeau français" style={{ borderRadius: 2, boxShadow: '0 0 0 1px rgba(26,18,9,.12)', flexShrink: 0 }}>
+      <rect width="6" height="12" fill="#002395" />
+      <rect x="6" width="6" height="12" fill="#FFFFFF" />
+      <rect x="12" width="6" height="12" fill="#ED2939" />
     </svg>
   );
 }
@@ -281,6 +297,7 @@ export default function GuideSearchPage() {
   const [dateDepart, setDateDepart] = useState<Date | null>(null);
   const [calOffset, setCalOffset] = useState(0);
   const [openPop, setOpenPop] = useState<'dest' | 'cal' | 'langue' | 'voy' | null>(null);
+  const [languageQuery, setLanguageQuery] = useState('');
   const [nbPersonnes, setNbPersonnes] = useState(1);
   const [pmr, setPmr] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -308,6 +325,9 @@ export default function GuideSearchPage() {
         const mapped: GuideData[] = ((data.guides || []) as AvailableGuideApi[]).map(item => {
           const primaryIsMakkah = String(item.city || '').toUpperCase().includes('MAKKAH');
           const publicPrice = primaryIsMakkah ? item.prices?.makkah?.upTo6 : item.prices?.madinah?.upTo6;
+          const languageCodes = item.slug === 'naim-laamari'
+            ? ['fr', 'ar', 'algerien', 'darija'].filter(code => (item.languages || []).includes(code))
+            : (item.languages || []);
           return {
             slug: item.slug,
             gender: String(item.gender || '').toLowerCase(),
@@ -320,7 +340,7 @@ export default function GuideSearchPage() {
             rating: item.rating || 0,
             reviews: item.reviewCount || 0,
             pilgrims: '',
-            languages: (item.languages || []).map(code => LANG_CODES[code] || code),
+            languages: languageCodes.map(code => LANG_CODES[code] || code),
             services: [],
             price: publicPrice || 0,
             priceSub: primaryIsMakkah ? 'Makkah · par groupe' : 'Médine · par groupe',
@@ -645,7 +665,10 @@ export default function GuideSearchPage() {
 
               {/* Langue */}
               <button
-                onClick={() => setOpenPop(openPop === 'langue' ? null : 'langue')}
+                onClick={() => {
+                  setLanguageQuery('');
+                  setOpenPop(openPop === 'langue' ? null : 'langue');
+                }}
                 className="search-seg"
                 style={{ borderRight: '1px solid #E8DFC8' }}
               >
@@ -779,13 +802,37 @@ export default function GuideSearchPage() {
                 { val: 'espanol', label: 'Español' },
                 { val: 'deutsch', label: 'Deutsch' },
               ];
+              const visibleOptions = isMobile
+                ? filterMobileLanguageOptions(LANGUE_OPTIONS, languageQuery)
+                : LANGUE_OPTIONS;
               const inner = (
                 <>
-                  {LANGUE_OPTIONS.map(opt => (
+                  {isMobile && (
+                    <div style={{ marginBottom: '0.75rem' }}>
+                      <label htmlFor="mobile-language-search" style={{ display: 'block', fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7A6D5A', marginBottom: '0.45rem' }}>
+                        Rechercher une langue
+                      </label>
+                      <input
+                        id="mobile-language-search"
+                        type="search"
+                        value={languageQuery}
+                        onChange={event => setLanguageQuery(event.target.value)}
+                        placeholder="Ex. français, arabe…"
+                        autoComplete="off"
+                        style={{ width: '100%', boxSizing: 'border-box', border: '1.5px solid #E8DFC8', borderRadius: 12, padding: '0.8rem 0.9rem', background: '#FAF7F0', color: '#1A1209', fontFamily: 'inherit', fontSize: '0.88rem', outline: 'none' }}
+                      />
+                    </div>
+                  )}
+                  {visibleOptions.map(opt => (
                     <button key={opt.val} onClick={() => { setSelectedLangue(opt.val); setOpenPop(null); }} style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '0.85rem', border: selectedLangue === opt.val ? '2px solid #C9A84C' : '1.5px solid transparent', borderRadius: 12, background: selectedLangue === opt.val ? 'rgba(201,168,76,0.07)' : 'transparent', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', marginBottom: '0.3rem', transition: 'background 0.12s' }}>
                       <span style={{ fontSize: '0.9rem', fontWeight: selectedLangue === opt.val ? 700 : 500, color: selectedLangue === opt.val ? '#8B6914' : '#1A1209' }}>{opt.label}</span>
                     </button>
                   ))}
+                  {visibleOptions.length === 0 && (
+                    <div style={{ padding: '1rem 0.5rem', color: '#7A6D5A', fontSize: '0.82rem', textAlign: 'center' }}>
+                      Aucune langue trouvée.
+                    </div>
+                  )}
                 </>
               );
               if (isMobile) return (
@@ -1372,7 +1419,7 @@ function GuideDrawer({ guide: g, visible, onClose, returnSlug }: { guide: GuideD
             <div style={{ fontSize: '0.72rem', color: 'rgba(240,216,151,0.75)', fontStyle: 'italic', marginTop: '0.2rem' }}>{g.title}</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.5rem' }}>
               <span style={{ fontSize: '0.62rem', color: '#C9A84C', fontWeight: 800 }}>★</span>
-              <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>{g.reviews > 0 ? `★ ${g.rating} · ` : 'Nouveau guide · '}{g.experience} ans d&apos;expérience</span>
+              <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.85)', fontWeight: 700 }}>{g.reviews > 0 ? `★ ${g.rating} · ` : ''}{g.experience} ans d&apos;expérience</span>
             </div>
           </div>
         </div>
@@ -1447,6 +1494,11 @@ function GuideCard({ guide: g, official, onProfile, isLoading, returnSlug }: { g
             <div style={{ width: 7, height: 7, borderRadius: '50%', background: g.available ? '#27AE60' : '#aaa', border: '1.5px solid rgba(255,255,255,0.7)' }} />
             <span style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>{g.available ? 'Disponible' : 'Indisponible'}</span>
           </div>
+          {!official && (
+            <span style={{ position: 'absolute', top: 12, left: 12, background: '#E8F5EE', color: '#1D5C3A', border: '1px solid rgba(29,92,58,.22)', fontSize: '0.6rem', fontWeight: 800, padding: '0.22rem 0.65rem', borderRadius: 50 }}>
+              ✓ Vérifié
+            </span>
+          )}
           {official ? (
             <div style={{ position: 'absolute', top: 10, left: 10, display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
               <span style={{ background: '#1A1209', color: '#F0D897', fontSize: '0.52rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '0.2rem 0.55rem', borderRadius: 50, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>🛡 OFFICIEL SAFARUMA</span>
@@ -1463,18 +1515,22 @@ function GuideCard({ guide: g, official, onProfile, isLoading, returnSlug }: { g
         <div style={{ padding: '1.5rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.2rem', paddingTop: '0.25rem' }}>
             <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.2 }}>{g.name}</div>
-            <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1A1209', whiteSpace: 'nowrap', flexShrink: 0 }}>
-              {g.reviews > 0 ? <><span style={{ color: '#C9A84C' }}>★</span> {g.rating}<span style={{ fontWeight: 400, color: '#7A6D5A', fontSize: '0.7rem' }}> ({g.reviews})</span></> : <span style={{ fontWeight: 500, color: '#7A6D5A', fontSize: '0.68rem' }}>Nouveau guide</span>}
-            </div>
+            {g.reviews > 0 && <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1A1209', whiteSpace: 'nowrap', flexShrink: 0 }}><span style={{ color: '#C9A84C' }}>★</span> {g.rating}<span style={{ fontWeight: 400, color: '#7A6D5A', fontSize: '0.7rem' }}> ({g.reviews})</span></div>}
           </div>
           <div style={{ fontSize: '0.72rem', color: '#7A6D5A', fontStyle: 'italic', marginBottom: '0.6rem' }}>{g.title}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.72rem', color: '#7A6D5A', marginBottom: '0.75rem' }}>
-            <IconMap size={12} stroke="#7A6D5A" /> {g.location} · {g.experience} ans
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.72rem', color: '#7A6D5A', marginBottom: '0.3rem' }}>
+            <IconMap size={12} stroke="#7A6D5A" /> {g.slug === 'naim-laamari' ? 'Médine · Makkah' : g.location}
+          </div>
+          <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginBottom: '0.75rem' }}>
+            <strong style={{ color: '#4A3F30' }}>Expérience :</strong> {g.experience} ans
           </div>
 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', marginBottom: '0.7rem' }}>
-            {g.languages.map((l, i) => (
-              <span key={l} style={{ fontSize: '0.65rem', fontWeight: 600, padding: '0.15rem 0.55rem', borderRadius: 50, background: i === 0 ? '#FAF3E0' : '#E8DFC8', border: `1px solid ${i === 0 ? 'rgba(201,168,76,0.4)' : 'transparent'}`, color: i === 0 ? '#8B6914' : '#7A6D5A' }}>{l}</span>
+            {g.languages.slice(0, 1).map(l => (
+              <span key={l} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.65rem', fontWeight: 600, padding: '0.2rem 0.55rem', borderRadius: 50, background: '#FAF3E0', border: '1px solid rgba(201,168,76,0.4)', color: '#8B6914' }}>
+                {l.toLowerCase().includes('français') && <FranceFlagSVG />}
+                Français
+              </span>
             ))}
           </div>
 
@@ -1493,9 +1549,8 @@ function GuideCard({ guide: g, official, onProfile, isLoading, returnSlug }: { g
                 </>
               ) : (
                 <>
-                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 600, color: '#1A1209', lineHeight: 1 }}>{g.price}€</div>
-                  <div style={{ fontSize: '0.65rem', color: '#7A6D5A' }}>{g.priceSub}</div>
-                  <div style={{ fontSize: '0.6rem', color: '#9A8A7A', marginTop: '0.15rem' }}>Omra ~4-6h · Visites incluses</div>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 600, color: '#1A1209', lineHeight: 1 }}>{g.price} €</div>
+                  <div style={{ fontSize: '0.65rem', color: '#7A6D5A', marginTop: '0.2rem' }}>Le groupe jusqu&apos;à 6 personnes</div>
                 </>
               )}
             </div>
@@ -1506,12 +1561,7 @@ function GuideCard({ guide: g, official, onProfile, isLoading, returnSlug }: { g
                   <span style={{ fontSize: '0.62rem', fontWeight: 700, background: '#E8F5EE', color: '#1D5C3A', border: '1px solid rgba(29,92,58,0.2)', padding: '0.2rem 0.65rem', borderRadius: 50 }}>✓ Guide Vérifié</span>
                   <span style={{ fontSize: '0.62rem', fontWeight: 700, background: '#EEF2FF', color: '#1E3A5F', border: '1px solid rgba(30,58,95,0.2)', padding: '0.2rem 0.65rem', borderRadius: 50 }}>🎓 Formateur Certifié</span>
                 </>
-              ) : (
-                <>
-                  <span style={{ fontSize: '0.6rem', fontWeight: 700, background: '#E8F5EE', color: '#1D5C3A', padding: '0.15rem 0.55rem', borderRadius: 50 }}>✓ Vérifié</span>
-                  <span style={{ fontSize: '0.6rem', color: '#7A6D5A' }}>{g.pilgrims} pèlerins</span>
-                </>
-              )}
+              ) : null}
             </div>
           </div>
 

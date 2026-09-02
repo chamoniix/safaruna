@@ -163,7 +163,7 @@ const guides: CarouselItem[] = [
     meta: 'Français · Arabe · English · Darija',
     cta: 'Voir le profil complet',
     badges: ['OFFICIEL SAFARUMA', 'GUIDE VÉRIFIÉ', 'RESPONSABLE TERRAIN', 'FORMATEUR CERTIFIÉ'],
-    highlights: ['Nouveau guide · aucun avis pour le moment', 'Makkah', '8 ans d’expérience terrain', 'Français, Arabe, English, Darija'],
+    highlights: ['Médine · Makkah', '8 ans d’expérience terrain', 'Français, Arabe, Algérien, Darija'],
     price: 'À partir de 150€ / pers.',
   },
   {

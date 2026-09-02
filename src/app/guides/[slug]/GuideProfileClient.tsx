@@ -460,7 +460,7 @@ export default function GuideProfileClient({
                 </div>
               </div>}
 
-              {reviews.length === 0 ? <div style={{ padding: '2rem', borderRadius: 14, background: 'white', border: '1px solid #E8DFC8', textAlign: 'center', color: '#7A6D5A' }}>Nouveau guide — aucun avis pour le moment</div> : <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', scrollSnapType: 'x mandatory', paddingBottom: 8 }}>
+              {reviews.length === 0 ? <div style={{ padding: '2rem', borderRadius: 14, background: 'white', border: '1px solid #E8DFC8', textAlign: 'center', color: '#7A6D5A' }}>Aucun avis publié pour le moment.</div> : <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', scrollSnapType: 'x mandatory', paddingBottom: 8 }}>
                 {reviews.map((rev, i) => (
                   <div key={i} style={{
                     background: 'white',

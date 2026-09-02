@@ -14,6 +14,49 @@ type RevolutEmbeddedCheckoutProps = {
   onLeaveForPayment: () => void
 }
 
+type CheckoutScrollSnapshot = {
+  windowScrollY: number
+  bodyOverflow: string
+  bodyPosition: string
+  bodyTop: string
+  bodyWidth: string
+  documentOverflow: string
+  container: HTMLElement | null
+  containerOverflowY: string
+  containerScrollTop: number
+}
+
+export function captureCheckoutScrollState(target: HTMLElement): CheckoutScrollSnapshot {
+  const ownerDocument = target.ownerDocument
+  const container = target.closest<HTMLElement>('[data-checkout-scroll-container]')
+
+  return {
+    windowScrollY: ownerDocument.defaultView?.scrollY ?? 0,
+    bodyOverflow: ownerDocument.body.style.overflow,
+    bodyPosition: ownerDocument.body.style.position,
+    bodyTop: ownerDocument.body.style.top,
+    bodyWidth: ownerDocument.body.style.width,
+    documentOverflow: ownerDocument.documentElement.style.overflow,
+    container,
+    containerOverflowY: container?.style.overflowY ?? '',
+    containerScrollTop: container?.scrollTop ?? 0,
+  }
+}
+
+export function restoreCheckoutScrollState(snapshot: CheckoutScrollSnapshot, ownerDocument: Document): void {
+  ownerDocument.body.style.overflow = snapshot.bodyOverflow
+  ownerDocument.body.style.position = snapshot.bodyPosition
+  ownerDocument.body.style.top = snapshot.bodyTop
+  ownerDocument.body.style.width = snapshot.bodyWidth
+  ownerDocument.documentElement.style.overflow = snapshot.documentOverflow
+
+  if (snapshot.container) {
+    snapshot.container.style.overflowY = snapshot.containerOverflowY
+    snapshot.container.scrollTop = snapshot.containerScrollTop
+  }
+  ownerDocument.defaultView?.scrollTo(0, snapshot.windowScrollY)
+}
+
 export function isAllowedHostedCheckoutUrl(value: string): boolean {
   try {
     const url = new URL(value)
@@ -33,7 +76,21 @@ export default function RevolutEmbeddedCheckout({
   const targetRef = useRef<HTMLDivElement>(null)
   const instanceRef = useRef<{ destroy: () => void } | null>(null)
   const fallbackReportedRef = useRef<FallbackReason | null>(null)
+  const scrollSnapshotRef = useRef<CheckoutScrollSnapshot | null>(null)
+  const restoreTimersRef = useRef<number[]>([])
   const [fallbackReason, setFallbackReason] = useState<FallbackReason | null>(null)
+  const [isReady, setIsReady] = useState(false)
+
+  const restorePageScroll = () => {
+    const snapshot = scrollSnapshotRef.current
+    const ownerDocument = targetRef.current?.ownerDocument
+    if (!snapshot || !ownerDocument) return
+
+    restoreTimersRef.current.forEach(timer => window.clearTimeout(timer))
+    restoreTimersRef.current = [0, 250].map(delay => window.setTimeout(() => {
+      restoreCheckoutScrollState(snapshot, ownerDocument)
+    }, delay))
+  }
 
   const reportFallback = (reason: FallbackReason, error?: unknown) => {
     setFallbackReason(reason)
@@ -59,6 +116,8 @@ export default function RevolutEmbeddedCheckout({
         return
       }
 
+      scrollSnapshotRef.current = captureCheckoutScrollState(target)
+
       try {
         const { default: RevolutCheckout } = await import('@revolut/checkout')
         if (disposed || !targetRef.current) return
@@ -70,11 +129,16 @@ export default function RevolutEmbeddedCheckout({
           target: targetRef.current,
           createOrder: async () => ({ publicId: checkoutToken }),
           onSuccess: () => {
+            restorePageScroll()
             onLeaveForPayment()
             window.location.assign(confirmationUrl)
           },
-          onCancel: () => reportFallback('cancelled'),
+          onCancel: () => {
+            restorePageScroll()
+            reportFallback('cancelled')
+          },
           onError: ({ error }: { error: RevolutCheckoutError }) => {
+            restorePageScroll()
             reportFallback('payment_error', error)
           },
         })
@@ -84,6 +148,7 @@ export default function RevolutEmbeddedCheckout({
           return
         }
         instanceRef.current = instance
+        setIsReady(true)
       } catch (error) {
         if (!disposed) reportFallback('sdk_error', error)
       }
@@ -94,6 +159,11 @@ export default function RevolutEmbeddedCheckout({
       disposed = true
       instanceRef.current?.destroy()
       instanceRef.current = null
+      restoreTimersRef.current.forEach(timer => window.clearTimeout(timer))
+      restoreTimersRef.current = []
+      const snapshot = scrollSnapshotRef.current
+      const ownerDocument = target.ownerDocument
+      if (snapshot && ownerDocument) restoreCheckoutScrollState(snapshot, ownerDocument)
     }
     // The callbacks are intentionally fixed for this payment order.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -102,13 +172,42 @@ export default function RevolutEmbeddedCheckout({
   const hasSafeFallback = isAllowedHostedCheckoutUrl(hostedCheckoutUrl)
 
   return (
-    <div style={{ marginTop: '1rem' }}>
+    <div className="revolut-checkout-shell">
+      <style>{`
+        .revolut-checkout-shell { margin-top: 1rem; }
+        .revolut-checkout-stage { min-height: 390px; position: relative; }
+        .revolut-checkout-target { width: 100%; min-width: 0; }
+        .revolut-checkout-loader {
+          position: absolute; inset: 0; display: flex; flex-direction: column;
+          align-items: center; justify-content: center; gap: .75rem;
+          color: #7A6D5A; font-size: .8rem; text-align: center;
+        }
+        .revolut-checkout-spinner {
+          width: 28px; height: 28px; border-radius: 50%;
+          border: 3px solid #E8DFC8; border-top-color: #C9A84C;
+          animation: revolutCheckoutSpin .8s linear infinite;
+        }
+        @keyframes revolutCheckoutSpin { to { transform: rotate(360deg); } }
+        @media (max-width: 640px) {
+          .revolut-checkout-shell { margin-inline: -1.5rem; }
+          .revolut-checkout-intro { padding-inline: 1.5rem; }
+          .revolut-checkout-stage { min-height: 410px; }
+        }
+      `}</style>
       {!fallbackReason && (
-        <div style={{ color: '#7A6D5A', fontSize: '0.78rem', marginBottom: '0.75rem', textAlign: 'center' }}>
+        <div className="revolut-checkout-intro" style={{ color: '#7A6D5A', fontSize: '0.78rem', marginBottom: '0.75rem', textAlign: 'center' }}>
           Choisissez votre moyen de paiement sécurisé.
         </div>
       )}
-      <div ref={targetRef} aria-label="Paiement sécurisé Revolut" />
+      <div className="revolut-checkout-stage" aria-busy={!isReady && !fallbackReason}>
+        {!isReady && !fallbackReason && (
+          <div className="revolut-checkout-loader" role="status" aria-live="polite">
+            <span className="revolut-checkout-spinner" aria-hidden="true" />
+            Préparation des moyens de paiement sécurisés…
+          </div>
+        )}
+        <div ref={targetRef} className="revolut-checkout-target" aria-label="Paiement sécurisé Revolut" />
+      </div>
       {fallbackReason && (
         <div role="alert" style={{ background: '#FAF7F0', border: '1px solid #E8DFC8', borderRadius: 12, padding: '1rem', textAlign: 'center' }}>
           <div style={{ color: '#1A1209', fontSize: '0.82rem', fontWeight: 700, marginBottom: '0.75rem' }}>

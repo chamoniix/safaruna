@@ -882,7 +882,7 @@ export default function CheckoutPage() {
     <div style={{ height: '100vh', background: '#FAF7F0', fontFamily: 'var(--font-manrope, sans-serif)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <ProgressBar />
 
-      <div style={{ flex: 1, overflowY: 'auto' }}>
+      <div data-checkout-scroll-container style={{ flex: 1, overflowY: 'auto' }}>
       <div style={{ maxWidth: 680, margin: '0 auto', padding: '2rem 1.5rem 6rem' }}>
 
         {/* ── ÉTAPE 1 — DESTINATION ── */}
@@ -2187,9 +2187,10 @@ export default function CheckoutPage() {
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                style={{ width: '100%', padding: '1.1rem', background: submitting ? '#7A6D5A' : 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)', color: '#FAF7F0', border: 'none', borderRadius: 50, fontFamily: 'var(--font-cormorant, serif)', fontWeight: 700, fontSize: '1.1rem', cursor: submitting ? 'not-allowed' : 'pointer', letterSpacing: '0.06em', boxShadow: submitting ? 'none' : '0 4px 20px rgba(201,168,76,0.4)' }}
+                style={{ width: '100%', padding: '1.1rem', background: submitting ? '#7A6D5A' : 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)', color: '#FAF7F0', border: 'none', borderRadius: 50, fontFamily: 'var(--font-cormorant, serif)', fontWeight: 700, fontSize: '1.1rem', cursor: submitting ? 'not-allowed' : 'pointer', letterSpacing: '0.06em', boxShadow: submitting ? 'none' : '0 4px 20px rgba(201,168,76,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.65rem' }}
               >
-                {submitting ? 'Envoi en cours…' : `Payer ${totalAfterPromo.toLocaleString('fr-FR')}€`}
+                {submitting && <span aria-hidden="true" style={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid rgba(250,247,240,.45)', borderTopColor: '#FAF7F0', animation: 'spin .75s linear infinite', flexShrink: 0 }} />}
+                {submitting ? 'Préparation de votre paiement…' : `Payer ${totalAfterPromo.toLocaleString('fr-FR')}€`}
               </button>
             ) : (
               <RevolutEmbeddedCheckout

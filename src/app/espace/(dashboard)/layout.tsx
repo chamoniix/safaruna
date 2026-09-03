@@ -43,6 +43,11 @@ const IcoHeart = ({ c }: { c: string }) => (
     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
   </svg>
 );
+const IcoStar = ({ c }: { c: string }) => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z" />
+  </svg>
+);
 const IcoUser = ({ c }: { c: string }) => (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
@@ -69,6 +74,7 @@ const NAV: { section: string; items: NavItem[] }[] = [
   { section: 'Mon voyage', items: [
     { href: '/espace/tableau-de-bord', Icon: IcoHome,     label: 'Tableau de bord' },
     { href: '/espace/reservations',   Icon: IcoCalendar, label: 'Mes réservations' },
+    { href: '/espace/avis',           Icon: IcoStar,     label: 'Mes avis' },
     { href: '/espace/messages',       Icon: IcoChat,     label: 'Messages' },
     { href: '/espace/favoris',        Icon: IcoHeart,    label: 'Mes favoris' },
   ]},

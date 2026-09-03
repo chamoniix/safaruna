@@ -7,6 +7,18 @@ import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } fr
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PublicReviewCard from '@/components/PublicReviewCard';
+import {
+  IconAccessibility,
+  IconChat,
+  IconGlobe,
+  IconGraduationCap,
+  IconHeart,
+  IconMosque,
+  IconPerson,
+  IconShield,
+  IconSparkles,
+  IconUserGroup,
+} from '@/components/Icons';
 import type { PublicReviewItem } from '@/lib/public-reviews';
 
 const EASE_LUXURY = [0.16, 1, 0.3, 1] as const;
@@ -79,7 +91,6 @@ const partners = [
 const whyCards: CarouselItem[] = [
   {
     id: 'langue',
-    icon: '◆',
     title: 'Guide dans ta langue',
     text: 'Tu choisis ton guide selon ta langue. Ton guide te parle comme un ami, pas comme un conférencier.',
     href: '/guides',
@@ -88,7 +99,6 @@ const whyCards: CarouselItem[] = [
   },
   {
     id: 'guides-experts',
-    icon: '۞',
     title: 'Guides experts',
     text: 'Guides certifiés, passionnés et habitués du terrain pour une Omra claire, authentique et apaisée.',
     href: '/guides-certifies',
@@ -97,7 +107,6 @@ const whyCards: CarouselItem[] = [
   },
   {
     id: 'famille',
-    icon: '1',
     title: 'En famille',
     text: "Je veux emmener mes proches mais j'ai peur de mal organiser.",
     href: '/guides',
@@ -106,7 +115,6 @@ const whyCards: CarouselItem[] = [
   },
   {
     id: 'parents',
-    icon: '2',
     title: 'Pour mes parents',
     text: 'SVP prenez soin de mes parents. — Ces mots que vous direz à leur guide.',
     href: '/guides',
@@ -115,7 +123,6 @@ const whyCards: CarouselItem[] = [
   },
   {
     id: 'premiere-omra',
-    icon: '3',
     title: 'Ma 1ère Omra',
     text: 'Je veux enfin faire la Omra mais je ne sais pas par où commencer.',
     href: '/guide-omra',
@@ -124,7 +131,6 @@ const whyCards: CarouselItem[] = [
   },
   {
     id: 'pmr',
-    icon: '♿',
     title: 'Service PMR & assistance',
     text: 'Fauteuil roulant, enfants, personnes âgées, rythme adapté et logistique pensée avant le départ.',
     href: '/omra-pmr',
@@ -133,7 +139,6 @@ const whyCards: CarouselItem[] = [
   },
   {
     id: 'unique',
-    icon: '✦',
     title: 'Expérience unique',
     text: 'Certains lieux sont inaccessibles aux agences à cause du nombre de personnes. Avec un guide privé, toi si.',
     href: '/omra-avec-guide-prive',
@@ -142,7 +147,6 @@ const whyCards: CarouselItem[] = [
   },
   {
     id: 'personnalise',
-    icon: '☾',
     title: 'Service personnalisé',
     text: 'Un parcours humain, intime et sur-mesure pour comprendre chaque geste au lieu de simplement suivre.',
     href: '/histoire-premiere-omra',
@@ -151,7 +155,6 @@ const whyCards: CarouselItem[] = [
   },
   {
     id: 'assistance',
-    icon: '◌',
     title: 'Assistance en temps réel',
     text: 'On répond à toutes vos questions. Nos guides et nos équipes restent disponibles pour que votre voyage soit le plus agréable possible.',
     href: '/contact',
@@ -160,7 +163,6 @@ const whyCards: CarouselItem[] = [
   },
   {
     id: 'remplacement',
-    icon: '✓',
     title: 'Garantie remplacement',
     text: 'Si ton guide ne peut pas venir pour une urgence, on te trouve un guide équivalent certifié en moins de 2 heures.',
     href: '/guides',
@@ -168,6 +170,19 @@ const whyCards: CarouselItem[] = [
     image: '/images/landing/mosque-bg-beige.jpg',
   },
 ];
+
+const WHY_CARD_ICONS = {
+  langue: IconGlobe,
+  'guides-experts': IconGraduationCap,
+  famille: IconUserGroup,
+  parents: IconHeart,
+  'premiere-omra': IconMosque,
+  pmr: IconAccessibility,
+  unique: IconSparkles,
+  personnalise: IconPerson,
+  assistance: IconChat,
+  remplacement: IconShield,
+};
 
 const guideProfileFeature: CarouselItem = {
   id: 'profil-transparent',
@@ -837,33 +852,39 @@ function WhySection({ openModal }: { openModal: (item: ModalContent) => void }) 
           </Link>
         </Reveal>
         <Carousel label="Pourquoi choisir SAFARUMA">
-          {whyCards.map((card) => (
-            <motion.button
-              type="button"
-              key={card.id}
-              className="sfr-info-card"
-              whileHover={{ y: -5 }}
-              onClick={() =>
-                openModal({
-                  eyebrow: 'Pourquoi choisir SAFARUMA',
-                  title: card.title,
-                  text: card.text,
-                  href: card.href,
-                  cta: card.cta ?? 'En savoir plus',
-                })
-              }
-            >
-              <div className="sfr-photo-card-media">
-                <SmartImage src={card.image} alt={card.title} />
-              </div>
-              <div className="sfr-photo-card-overlay">
-                <span className="sfr-card-icon">{card.icon}</span>
-                <h3>{card.title}</h3>
-                <p>{card.text}</p>
-                <small>En savoir plus →</small>
-              </div>
-            </motion.button>
-          ))}
+          {whyCards.map((card) => {
+            const CardIcon = WHY_CARD_ICONS[card.id as keyof typeof WHY_CARD_ICONS];
+
+            return (
+              <motion.button
+                type="button"
+                key={card.id}
+                className="sfr-info-card"
+                whileHover={{ y: -5 }}
+                onClick={() =>
+                  openModal({
+                    eyebrow: 'Pourquoi choisir SAFARUMA',
+                    title: card.title,
+                    text: card.text,
+                    href: card.href,
+                    cta: card.cta ?? 'En savoir plus',
+                  })
+                }
+              >
+                <div className="sfr-photo-card-media">
+                  <SmartImage src={card.image} alt={card.title} />
+                </div>
+                <div className="sfr-photo-card-overlay">
+                  <span className="sfr-card-icon" aria-hidden="true">
+                    <CardIcon size={18} />
+                  </span>
+                  <h3>{card.title}</h3>
+                  <p>{card.text}</p>
+                  <small>En savoir plus →</small>
+                </div>
+              </motion.button>
+            );
+          })}
         </Carousel>
       </div>
     </section>

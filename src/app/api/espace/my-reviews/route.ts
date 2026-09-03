@@ -35,6 +35,7 @@ export async function GET() {
       orderBy: { updatedAt: 'desc' },
       select: {
         id: true,
+        directReviewKey: true,
         reservationId: true,
         ratingOverall: true,
         comment: true,
@@ -53,6 +54,18 @@ export async function GET() {
   ])
 
   const memberReview = experienceReviews.find(review => review.generalReviewKey !== null)
+  const directGuideReviews = guideReviews
+    .filter(review => review.directReviewKey !== null)
+    .map(review => ({
+      id: review.id,
+      guideName: guideName(review.guideProfile),
+      guideSlug: review.guideProfile.slug,
+      rating: review.ratingOverall,
+      comment: review.comment,
+      status: review.status,
+      createdAt: review.createdAt,
+      updatedAt: review.updatedAt,
+    }))
   const reservationReviews = new Map<string, {
     reservationId: string
     refNumber: string
@@ -95,6 +108,7 @@ export async function GET() {
   }
 
   for (const review of guideReviews) {
+    if (!review.reservationId || !review.reservation) continue
     const group = reservationReviews.get(review.reservationId) || {
       reservationId: review.reservationId,
       refNumber: review.reservation.refNumber,
@@ -124,6 +138,7 @@ export async function GET() {
       createdAt: memberReview.createdAt,
       updatedAt: memberReview.updatedAt,
     } : null,
+    directGuideReviews,
     reservationReviews: [...reservationReviews.values()]
       .map(group => ({
         ...group,

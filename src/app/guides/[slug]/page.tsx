@@ -26,7 +26,7 @@ const getGuideData = cache(async (slug: string) => prisma.guideProfile.findFirst
       orderBy: { createdAt: 'desc' },
       take: 3,
       include: {
-        pelerin: { select: { firstName: true, country: true } },
+        pelerin: { select: { firstName: true, country: true, image: true } },
         reservation: { select: { experienceReview: { select: { firstName: true, city: true, country: true } } } },
       },
     },
@@ -88,8 +88,11 @@ export default async function GuideProfilePage({ params }: { params: Promise<{ s
     : [guide.servesMakkah ? 'Makkah' : null, guide.servesMadinah ? 'Médine' : null]
   ).filter(Boolean) as string[]
   const reviews = guide.reviews.map(review => ({
-    name: review.reservation.experienceReview?.firstName || review.pelerin.firstName?.trim() || 'Pèlerin',
-    country: review.reservation.experienceReview
+    name: review.reviewerFirstName || review.reservation?.experienceReview?.firstName || review.pelerin.firstName?.trim() || 'Pèlerin',
+    avatarUrl: review.pelerin.image,
+    country: review.reviewerCity || review.reviewerCountry
+      ? [review.reviewerCity, review.reviewerCountry].filter(Boolean).join(', ')
+      : review.reservation?.experienceReview
       ? [review.reservation.experienceReview.city, review.reservation.experienceReview.country].filter(Boolean).join(', ')
       : review.pelerin.country || 'Pays non renseigné',
     flag: '',
@@ -102,7 +105,7 @@ export default async function GuideProfilePage({ params }: { params: Promise<{ s
     .filter(place => place.isActive && (place.includedInBase || guideActivePlaceKeys.has(place.key)))
     .map(place => ({ emoji: place.emoji, nameAr: place.nameAr, nameFr: place.nameFr, desc: place.desc, category: place.category }))
   const realStats = [
-    ratingAggregate._count.ratingOverall > 0 ? { value: String(ratingAggregate._count.ratingOverall), label: 'Avis vérifiés' } : null,
+    ratingAggregate._count.ratingOverall > 0 ? { value: String(ratingAggregate._count.ratingOverall), label: 'Avis validés' } : null,
     guide.experienceYears !== null ? { value: `${guide.experienceYears} ans`, label: 'Expérience' } : null,
   ].filter(Boolean) as Array<{ value: string; label: string }>
   const guideImage = account.image || (slug === 'naim-laamari' ? '/images/landing/guide-naim-laamari.jpg' : null)

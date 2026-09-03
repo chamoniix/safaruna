@@ -24,6 +24,7 @@ type ReservationReviewGroup = {
 }
 type ReviewsResponse = {
   memberReview: ReviewItem | null
+  directGuideReviews: Array<ReviewItem & { guideName: string; guideSlug: string | null }>
   reservationReviews: ReservationReviewGroup[]
 }
 
@@ -80,7 +81,7 @@ export default function MyReviewsPage() {
   if (error) return <div className={styles.error} role="alert">{error}</div>
   if (!data) return <div className={styles.loading} role="status">Chargement de vos avis…</div>
 
-  const isEmpty = !data.memberReview && data.reservationReviews.length === 0
+  const isEmpty = !data.memberReview && data.directGuideReviews.length === 0 && data.reservationReviews.length === 0
 
   return (
     <div className={styles.page}>
@@ -113,6 +114,23 @@ export default function MyReviewsPage() {
               <ReviewContent label="Avis membre" review={data.memberReview} />
             </article>
           )}
+
+          {data.directGuideReviews.map(review => (
+            <article className={styles.card} key={review.id}>
+              <div className={styles.cardHeader}>
+                <div>
+                  <span className={styles.kind}>Avis Guide</span>
+                  <h2>{review.guideName}</h2>
+                </div>
+                {review.guideSlug && (
+                  <Link className={styles.action} href={`/avis/guide/${review.guideSlug}`}>
+                    <Pencil size={16} aria-hidden="true" /> Modifier mon avis
+                  </Link>
+                )}
+              </div>
+              <ReviewContent label={`Avis Guide · ${review.guideName}`} review={review} />
+            </article>
+          ))}
 
           {data.reservationReviews.map(group => (
             <article className={styles.card} key={group.reservationId}>

@@ -22,9 +22,9 @@ export async function GET() {
   return NextResponse.json({
     reviews: reviews.map(review => ({
       id: review.id,
-      reservationRef: review.reservation.refNumber,
-      author: publicReviewerName(review.pelerin.firstName, review.pelerin.lastName),
-      country: review.pelerin.country,
+      reservationRef: review.reservation?.refNumber || null,
+      author: review.reviewerFirstName || publicReviewerName(review.pelerin.firstName, review.pelerin.lastName),
+      country: review.reviewerCountry || review.pelerin.country,
       ratingOverall: review.ratingOverall,
       ratingPunctuality: review.ratingPunctuality,
       ratingPedagogy: review.ratingPedagogy,

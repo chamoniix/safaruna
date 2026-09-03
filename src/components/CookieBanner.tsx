@@ -28,7 +28,7 @@ export default function CookieBanner() {
   const handleReject = () => { rejectAll(); setShow(false); };
   const handleSaved = () => { setShowModal(false); setShow(false); };
 
-  if (pathname === '/avis/deposer') return null;
+  if (pathname === '/avis/deposer' || pathname.startsWith('/avis/guide/')) return null;
 
   return (
     <>

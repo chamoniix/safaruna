@@ -55,6 +55,20 @@ type CarouselItem = {
   kind?: 'guide' | 'feature';
 };
 
+type HomeGuide = {
+  slug: string;
+  name: string;
+  city: string | null;
+  serviceCities: string[];
+  bio: string | null;
+  image: string | null;
+  experienceYears: number | null;
+  languages: string[];
+  rating: number | null;
+  reviewCount: number;
+  prices: { makkah: { upTo6: number }; madinah: { upTo6: number } };
+};
+
 const partners = [
   { name: 'Makkah', image: '/images/landing/partner-makkah.png' },
   { name: 'Saudia', image: '/images/landing/partner-saudia.png' },
@@ -155,67 +169,28 @@ const whyCards: CarouselItem[] = [
   },
 ];
 
-const guides: CarouselItem[] = [
-  {
-    id: 'naim-laamari',
-    title: 'Naïm LAAMARI',
-    text: 'Makkah · 8 ans · Responsable Terrain. Guide Officiel SAFARUMA, formateur certifié et guide vérifié pour les familles francophones.',
-    href: '/guides/naim-laamari',
-    image: '/images/landing/guide-naim-laamari.jpg',
-    meta: 'Français · Arabe · English · Darija',
-    cta: 'Voir le profil complet',
-    badges: ['OFFICIEL SAFARUMA', 'GUIDE VÉRIFIÉ', 'RESPONSABLE TERRAIN', 'FORMATEUR CERTIFIÉ'],
-    highlights: ['Médine · Makkah', '8 ans d’expérience terrain', 'Français, Arabe, Algérien, Darija'],
-    price: 'À partir de 150€ / pers.',
-  },
-  {
-    id: 'profil-transparent',
-    kind: 'feature',
-    icon: '◎',
-    title: 'Profil guide transparent',
-    text: 'Bio, certifications et avis vérifiés : tu sais exactement qui va t\'accompagner.',
-    href: '/guides',
-    meta: 'Confiance',
-    cta: 'Voir les guides',
-    badges: ['Certifications', 'Avis', 'Lieux couverts'],
-  },
-  {
-    id: 'youssef',
-    title: 'Youssef',
-    text: 'Accompagnement anglophone et arabe pour pèlerins internationaux, familles et petits groupes.',
-    href: '/guides',
-    image: '/why-safaruma/accompagnement-personnalise.jpg',
-    meta: 'Anglais + Arabe',
-    cta: 'Voir les guides disponibles',
-  },
-  {
-    id: 'ibrahim',
-    title: 'Ibrahim',
-    text: 'Profil turcophone et arabe, pensé pour les visiteurs qui veulent poser leurs questions sans barrière.',
-    href: '/guides',
-    image: '/images/landing/experience-historique.jpg',
-    meta: 'Turc + Arabe',
-    cta: 'Voir les guides disponibles',
-  },
-  {
-    id: 'muhammad',
-    title: 'Muhammad',
-    text: 'Guide indonésien et arabe pour une Omra calme, structurée et adaptée aux familles.',
-    href: '/guides',
-    image: '/why-safaruma/en-famille.jpg',
-    meta: 'Indonésien + Arabe',
-    cta: 'Voir les guides disponibles',
-  },
-  {
-    id: 'rachid',
-    title: 'Rachid',
-    text: 'Accompagnement espagnol et arabe pour découvrir les rites et les lieux avec plus de profondeur.',
-    href: '/guides',
-    image: '/images/landing/place-nabawi.jpg',
-    meta: 'Espagnol + Arabe',
-    cta: 'Voir les guides disponibles',
-  },
-];
+const guideProfileFeature: CarouselItem = {
+  id: 'profil-transparent',
+  kind: 'feature',
+  icon: '◎',
+  title: 'Profil guide transparent',
+  text: 'Bio, certifications et avis validés : tu sais exactement qui va t\'accompagner.',
+  href: '/guides',
+  meta: 'Confiance',
+  cta: 'Voir les guides',
+  badges: ['Certifications', 'Avis', 'Lieux couverts'],
+};
+
+const HOME_LANGUAGE_LABELS: Record<string, string> = {
+  fr: 'Français 🇫🇷',
+  ar: 'العربية 🇸🇦',
+  algerien: 'الجزائرية 🇩🇿',
+  darija: 'الدارجة 🇲🇦',
+  en: 'English 🇬🇧',
+  tr: 'Türkçe 🇹🇷',
+  id: 'Bahasa Indonesia 🇮🇩',
+  es: 'Español 🇪🇸',
+};
 
 const experiences: CarouselItem[] = [
   {
@@ -410,6 +385,7 @@ function Carousel({
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
   const [coarsePointer, setCoarsePointer] = useState(false);
+  const [interacting, setInteracting] = useState(false);
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(true);
   const items = React.Children.toArray(children);
@@ -457,19 +433,23 @@ function Carousel({
   }, [auto, coarsePointer, itemCount, updateScrollBounds]);
 
   useEffect(() => {
-    if (!auto || reduce || coarsePointer) return;
+    if (!auto || reduce || coarsePointer || interacting) return;
     let raf = 0;
     let last = performance.now();
+    let position = ref.current?.scrollLeft ?? 0;
 
     const tick = (now: number) => {
       const el = ref.current;
       if (el) {
         const delta = now - last;
-        const loopWidth = el.scrollWidth / 2;
-        el.scrollLeft += delta * 0.026;
-        if (loopWidth > 0 && el.scrollLeft >= loopWidth) {
-          el.scrollLeft -= loopWidth;
+        const firstItem = el.children.item(0) as HTMLElement | null;
+        const firstClone = el.children.item(itemCount) as HTMLElement | null;
+        const loopWidth = firstItem && firstClone ? firstClone.offsetLeft - firstItem.offsetLeft : 0;
+        position += delta * 0.026;
+        if (loopWidth > 0 && position >= loopWidth) {
+          position -= loopWidth;
         }
+        el.scrollLeft = position;
       }
       last = now;
       raf = window.requestAnimationFrame(tick);
@@ -477,11 +457,17 @@ function Carousel({
 
     raf = window.requestAnimationFrame(tick);
     return () => window.cancelAnimationFrame(raf);
-  }, [auto, reduce, coarsePointer]);
+  }, [auto, reduce, coarsePointer, interacting, itemCount]);
 
   return (
     <div
       className={`sfr-carousel-shell ${className ?? ''}`}
+      onPointerEnter={() => setInteracting(true)}
+      onPointerLeave={() => setInteracting(false)}
+      onFocusCapture={() => setInteracting(true)}
+      onBlurCapture={event => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setInteracting(false);
+      }}
     >
       <motion.button
         className={`sfr-carousel-arrow sfr-carousel-arrow--left${bounded && !canScrollPrev ? ' sfr-carousel-arrow-disabled' : ''}`}
@@ -885,6 +871,22 @@ function WhySection({ openModal }: { openModal: (item: ModalContent) => void }) 
 }
 
 function GuidesSection({ openModal }: { openModal: (item: ModalContent) => void }) {
+  const [liveGuides, setLiveGuides] = useState<HomeGuide[]>([]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch('/api/guides/available', { cache: 'no-store', signal: controller.signal })
+      .then(response => response.ok ? response.json() : Promise.reject(new Error('Chargement impossible')))
+      .then(data => setLiveGuides(Array.isArray(data.guides) ? data.guides : []))
+      .catch(error => { if (error.name !== 'AbortError') setLiveGuides([]); });
+    return () => controller.abort();
+  }, []);
+
+  const carouselGuides = [
+    ...liveGuides.map(guide => ({ guide, kind: 'guide' as const, key: guide.slug })),
+    { guide: null, kind: 'feature' as const, key: guideProfileFeature.id },
+  ];
+
   return (
     <section className="sfr-section sfr-section-dark">
       <div className="sfr-section-layout">
@@ -900,76 +902,71 @@ function GuidesSection({ openModal }: { openModal: (item: ModalContent) => void 
           </Link>
         </Reveal>
         <Carousel label="Guides privés SAFARUMA">
-          {guides.map((guide, index) => (
+          {carouselGuides.map(item => {
+            if (item.kind === 'feature') {
+              const guide = guideProfileFeature;
+              return (
+                <motion.button
+                  type="button"
+                  key={item.key}
+                  className="sfr-guide-card sfr-guide-card-feature"
+                  whileHover={{ y: -6 }}
+                  onClick={() => openModal({ eyebrow: 'Guide privé', title: guide.title, text: guide.text, href: guide.href, cta: guide.cta ?? 'Voir les guides', meta: guide.meta, badges: guide.badges })}
+                >
+                  <div className="sfr-guide-feature">
+                    <span className="sfr-card-icon">{guide.icon}</span>
+                    <h3>{guide.title}</h3>
+                    <p>{guide.text}</p>
+                    <small>{guide.cta} →</small>
+                  </div>
+                </motion.button>
+              );
+            }
+
+            const guide = item.guide;
+            if (!guide) return null;
+            const isOfficial = guide.slug === 'naim-laamari';
+            const cities = guide.serviceCities.map(city => city === 'MADINAH' ? 'Médine' : city === 'MAKKAH' ? 'Makkah' : city).join(' · ');
+            const languages = guide.languages.map(code => HOME_LANGUAGE_LABELS[code] || code).join(' · ');
+            const ratingLabel = guide.rating !== null && guide.reviewCount > 0
+              ? `★ ${guide.rating.toFixed(1)} · ${guide.reviewCount} avis`
+              : 'Aucun avis publié';
+            const price = guide.city === 'MAKKAH' ? guide.prices.makkah.upTo6 : guide.prices.madinah.upTo6;
+            return (
             <motion.button
               type="button"
-              key={guide.id}
-              className={`sfr-guide-card${guide.kind === 'feature' ? ' sfr-guide-card-feature' : ''}`}
+              key={item.key}
+              className="sfr-guide-card"
               whileHover={{ y: -6 }}
               onClick={() =>
                 openModal({
                   eyebrow: 'Guide privé',
-                  title: guide.title,
-                  text: guide.text,
-                  href: guide.href,
-                  cta: guide.cta ?? 'Voir le profil complet',
-                  meta: guide.meta,
-                  image: guide.image,
-                  badges: guide.badges,
-                  highlights: guide.highlights,
-                  price: guide.price,
+                  title: guide.name,
+                  text: guide.bio || `Guide privé SAFARUMA à ${cities}.`,
+                  href: `/guides/${guide.slug}`,
+                  cta: 'Voir le profil complet',
+                  meta: languages,
+                  image: guide.image || undefined,
+                  badges: isOfficial ? ['OFFICIEL SAFARUMA', 'GUIDE VÉRIFIÉ'] : ['GUIDE VÉRIFIÉ'],
+                  highlights: [cities, guide.experienceYears !== null ? `${guide.experienceYears} ans d’expérience` : '', languages].filter(Boolean),
+                  price: price > 0 ? `${price}€ par groupe jusqu’à 6 personnes` : undefined,
                 })
               }
             >
-              {guide.kind === 'feature' ? (
-                <div className="sfr-guide-feature">
-                  <span className="sfr-card-icon">{guide.icon}</span>
-                  <h3>{guide.title}</h3>
-                  <p>{guide.text}</p>
-                  <small>{guide.cta} →</small>
-                </div>
+              <div className="sfr-guide-photo">
+                {guide.image ? <SmartImage src={guide.image} alt={`Guide ${guide.name}`} /> : <Image src="/guide-badge.jpg" alt="" fill sizes="245px" className="sfr-guide-badge-image" />}
+              </div>
+              {isOfficial ? (
+                <div className="sfr-guide-trust sfr-guide-trust-compact">★ OFFICIEL SAFARUMA <span className="sfr-guide-status-ring">VÉRIFIÉ ✓</span></div>
               ) : (
-                <>
-                  <div className="sfr-guide-photo">
-                    {guide.id === 'naim-laamari' ? (
-                      <SmartImage src={guide.image} alt={`Guide ${guide.title}`} />
-                    ) : (
-                      <Image
-                        src="/guide-badge.jpg"
-                        alt=""
-                        fill
-                        sizes="245px"
-                        className="sfr-guide-badge-image"
-                      />
-                    )}
-                  </div>
-                  {guide.id === 'naim-laamari' ? (
-                    <>
-                      <div className="sfr-guide-trust sfr-guide-trust-compact">
-                        ★ OFFICIEL SAFARUMA <span className="sfr-guide-status-ring">VÉRIFIÉ ✓</span>
-                      </div>
-                      <div className="sfr-guide-meta-row">{guide.title} · Madinah · 8 ans</div>
-                      <div className="sfr-guide-rating sfr-guide-rating-compact">★★★★★ <strong>5.0</strong> · Français 🇫🇷 · Arabe 🇸🇦 · Algérien 🇩🇿</div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="sfr-guide-trust">
-                        <span>VÉRIFIÉ ✓</span>
-                      </div>
-                      <h3>{guide.title}</h3>
-                      <p>
-                        {guide.meta}{' '}
-                        <span className="sfr-flags">
-                          {['🇫🇷 🇸🇦', '', '🇬🇧 🇸🇦', '🇹🇷 🇸🇦', '🇮🇩 🇸🇦', '🇪🇸 🇸🇦'][index]}
-                        </span>
-                      </p>
-                    </>
-                  )}
-                  <span className="sfr-guide-profile-btn">Voir le profil →</span>
-                </>
+                <div className="sfr-guide-trust"><span>VÉRIFIÉ ✓</span></div>
               )}
+              <div className="sfr-guide-meta-row">{guide.name}{cities ? ` · ${cities}` : ''}{guide.experienceYears !== null ? ` · ${guide.experienceYears} ans` : ''}</div>
+              <div className="sfr-guide-rating sfr-guide-rating-compact"><strong>{ratingLabel}</strong>{languages ? ` · ${languages}` : ''}</div>
+              <span className="sfr-guide-profile-btn">Voir le profil →</span>
             </motion.button>
-          ))}
+            );
+          })}
         </Carousel>
       </div>
     </section>

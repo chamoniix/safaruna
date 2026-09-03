@@ -5,7 +5,7 @@ import { Star } from 'lucide-react'
 
 type Review = {
   id: string
-  reservationRef: string
+  reservationRef: string | null
   author: string
   country: string | null
   ratingOverall: number
@@ -40,7 +40,7 @@ export default function GuideReviewsPage() {
       {loading && <div style={{ padding: 35, textAlign: 'center', color: '#7A6D5A' }}>Chargement des avis…</div>}
       {error && <div style={{ padding: 14, color: '#B91C1C', background: '#FEF2F2', borderRadius: 10 }}>{error}</div>}
       {!loading && !error && reviews.length === 0 && <div style={{ padding: 36, background: 'white', border: '1px solid #E8DFC8', borderRadius: 14, textAlign: 'center', color: '#7A6D5A' }}>Aucun avis publié pour le moment.</div>}
-      {reviews.map(review => <article key={review.id} style={{ padding: 20, background: 'white', border: '1px solid #E8DFC8', borderRadius: 14 }}><div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}><div><strong style={{ color: '#1A1209' }}>{review.author}</strong><span style={{ color: '#7A6D5A', fontSize: 12 }}> · {review.country || 'Pays non renseigné'}</span></div><div style={{ color: '#B88918', fontWeight: 800 }}>★ {review.ratingOverall}/5</div></div><p style={{ color: '#4A3F30', lineHeight: 1.65, marginBottom: 10 }}>{review.comment}</p><div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', color: '#7A6D5A', fontSize: 12 }}><span>Ponctualité {review.ratingPunctuality ?? '—'}/5</span><span>Pédagogie {review.ratingPedagogy ?? '—'}/5</span><span>Connaissances {review.ratingKnowledge ?? '—'}/5</span><span>{review.reservationRef}</span></div></article>)}
+      {reviews.map(review => <article key={review.id} style={{ padding: 20, background: 'white', border: '1px solid #E8DFC8', borderRadius: 14 }}><div style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}><div><strong style={{ color: '#1A1209' }}>{review.author}</strong><span style={{ color: '#7A6D5A', fontSize: 12 }}> · {review.country || 'Pays non renseigné'}</span></div><div style={{ color: '#B88918', fontWeight: 800 }}>★ {review.ratingOverall}/5</div></div><p style={{ color: '#4A3F30', lineHeight: 1.65, marginBottom: 10 }}>{review.comment}</p><div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', color: '#7A6D5A', fontSize: 12 }}>{review.ratingPunctuality !== null && <span>Ponctualité {review.ratingPunctuality}/5</span>}{review.ratingPedagogy !== null && <span>Pédagogie {review.ratingPedagogy}/5</span>}{review.ratingKnowledge !== null && <span>Connaissances {review.ratingKnowledge}/5</span>}{review.reservationRef && <span>{review.reservationRef}</span>}</div></article>)}
     </div>
   )
 }

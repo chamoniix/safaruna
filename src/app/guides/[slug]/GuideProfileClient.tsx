@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { PLACES as LIB_PLACES } from '@/lib/places';
 import { trackAnalyticsEvent } from '@/lib/analytics-client';
 
@@ -23,6 +24,7 @@ interface Place {
 
 interface Review {
   name: string;
+  avatarUrl: string | null;
   country: string;
   flag: string;
   date: string;
@@ -417,6 +419,11 @@ export default function GuideProfileClient({
           {/* TAB: AVIS */}
           {activeTab === 2 && (
             <div style={{ minHeight: '50vh' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+                <Link href={`/avis/guide/${slug}`} style={{ display: 'inline-flex', alignItems: 'center', minHeight: 42, padding: '0.65rem 1rem', borderRadius: 999, background: '#1A1209', color: '#F0D897', fontSize: '0.8rem', fontWeight: 800, textDecoration: 'none' }}>
+                  Donner mon avis sur {guideName}
+                </Link>
+              </div>
               {rating !== null && reviews.length > 0 && <div style={{
                 background: 'white',
                 border: '1px solid #E8DFC8',
@@ -440,7 +447,7 @@ export default function GuideProfileClient({
                     {rating?.toFixed(1) ?? '—'}
                   </div>
                   <div style={{ color: '#C9A84C', fontSize: '1.1rem', letterSpacing: '2px', marginBottom: '0.25rem' }}>★★★★★</div>
-                  <div style={{ fontSize: '0.75rem', color: '#7A6D5A' }}>{reviewCount} avis vérifiés</div>
+                  <div style={{ fontSize: '0.75rem', color: '#7A6D5A' }}>{reviewCount} avis validés</div>
                 </div>
                 <div style={{ flex: 1, minWidth: '180px' }}>
                   {[5, 4, 3, 2, 1].map(star => {
@@ -484,8 +491,13 @@ export default function GuideProfileClient({
                           fontSize: '0.9rem',
                           color: '#4A3F30',
                           flexShrink: 0,
+                          overflow: 'hidden',
                         }}>
-                          {rev.name.charAt(0)}
+                          {rev.avatarUrl ? (
+                            // Google profile photos are user-specific remote URLs.
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={rev.avatarUrl} alt="" width={40} height={40} referrerPolicy="no-referrer" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          ) : rev.name.charAt(0)}
                         </div>
                         <div>
                           <div style={{ fontWeight: 700, fontSize: '0.88rem', color: '#1A1209' }}>

@@ -43,19 +43,20 @@ export async function GET(req: NextRequest) {
 
   const guideItems = reviews.map(review => {
     const guide = review.guideProfile.guideAccount
+    const reservationSignature = review.reservation?.experienceReview
     return {
       id: review.id,
       reviewType: 'GUIDE' as const,
       kind: 'GUIDE' as const,
       label: 'Avis Guide',
-      reservationRef: review.reservation.refNumber,
-      stayRating: review.reservation.stayRating,
-      stayComment: review.reservation.stayComment,
+      reservationRef: review.reservation?.refNumber || null,
+      stayRating: review.reservation?.stayRating || null,
+      stayComment: review.reservation?.stayComment || null,
       guideName: guide?.displayName || `${guide?.firstName ?? ''} ${guide?.lastName ?? ''}`.trim() || review.guideProfile.slug,
-      author: review.reservation.experienceReview?.firstName || publicReviewerName(review.pelerin.firstName, review.pelerin.lastName),
+      author: review.reviewerFirstName || reservationSignature?.firstName || publicReviewerName(review.pelerin.firstName, review.pelerin.lastName),
       authorEmail: review.pelerin.email,
-      country: review.reservation.experienceReview?.country || review.pelerin.country,
-      city: review.reservation.experienceReview?.city || null,
+      country: review.reviewerCountry || reservationSignature?.country || review.pelerin.country,
+      city: review.reviewerCity || reservationSignature?.city || null,
       ratingOverall: review.ratingOverall,
       ratingPunctuality: review.ratingPunctuality,
       ratingPedagogy: review.ratingPedagogy,

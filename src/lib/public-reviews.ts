@@ -60,6 +60,9 @@ export async function getPublicReviews(input: { page: number; limit: number; rat
         comment: true,
         moderatedAt: true,
         createdAt: true,
+        reviewerFirstName: true,
+        reviewerCity: true,
+        reviewerCountry: true,
         pelerin: { select: { firstName: true, lastName: true, country: true, image: true } },
         reservation: {
           select: {
@@ -95,7 +98,7 @@ export async function getPublicReviews(input: { page: number; limit: number; rat
 
   const normalizedGuides: Array<PublicReviewItem & { sortDate: Date }> = guideReviews.map(review => {
     const account = review.guideProfile.guideAccount
-    const signature = review.reservation.experienceReview
+    const signature = review.reservation?.experienceReview
     const guideName = account?.displayName
       || `${account?.firstName ?? ''} ${account?.lastName ?? ''}`.trim()
       || 'Guide SAFARUMA'
@@ -103,9 +106,11 @@ export async function getPublicReviews(input: { page: number; limit: number; rat
       id: `guide:${review.id}`,
       kind: 'GUIDE',
       label: 'Avis Guide',
-      firstName: signature?.firstName || review.pelerin.firstName?.trim() || 'Pèlerin',
+      firstName: review.reviewerFirstName || signature?.firstName || review.pelerin.firstName?.trim() || 'Pèlerin',
       avatarUrl: review.pelerin.image,
-      location: signature
+      location: review.reviewerCity || review.reviewerCountry
+        ? [review.reviewerCity, review.reviewerCountry].filter(Boolean).join(', ')
+        : signature
         ? [signature.city, signature.country].filter(Boolean).join(', ')
         : review.pelerin.country || '',
       rating: review.ratingOverall,

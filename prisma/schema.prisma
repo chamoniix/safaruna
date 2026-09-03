@@ -705,12 +705,16 @@ model Message {
 
 model Review {
   id                 String                 @id @default(cuid())
-  reservationId      String
-  reservation        Reservation            @relation(fields: [reservationId], references: [id])
+  reservationId      String?
+  reservation        Reservation?           @relation(fields: [reservationId], references: [id])
+  directReviewKey    String?                @unique
   guideProfileId     String
   guideProfile       GuideProfile           @relation(fields: [guideProfileId], references: [id])
   pelerinId          String
   pelerin            User                   @relation(fields: [pelerinId], references: [id])
+  reviewerFirstName  String?
+  reviewerCity       String?
+  reviewerCountry    String?
   ratingOverall      Int
   ratingPunctuality  Int?
   ratingPedagogy     Int?
@@ -727,6 +731,7 @@ model Review {
   updatedAt          DateTime               @updatedAt
 
   @@unique([reservationId, guideProfileId])
+  @@index([pelerinId, directReviewKey])
   @@index([guideProfileId, status, createdAt])
   @@index([status, createdAt])
 }

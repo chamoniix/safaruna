@@ -38,6 +38,24 @@ export async function GET(
           include: { reservation: { select: { refNumber: true } } },
         },
         places: true,
+        changeRequests: {
+          where: { status: 'PENDING' },
+          orderBy: { updatedAt: 'desc' },
+          take: 1,
+          select: {
+            id: true,
+            changes: true,
+            before: true,
+            requestedByEmail: true,
+            submittedIp: true,
+            submittedCountry: true,
+            submittedCity: true,
+            submittedDevice: true,
+            submittedBrowser: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
       },
     });
 
@@ -177,6 +195,7 @@ export async function GET(
           ? guide.interviewDate.toLocaleDateString('fr-FR')
           : null,
         interviewedBy: guide.interviewedBy,
+        pendingProfileChange: guide.changeRequests[0] || null,
         stats: {
           totalReservations,
           totalRevenue: Math.round(revenueAgg._sum.totalPrice || 0),

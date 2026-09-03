@@ -15,6 +15,11 @@ export async function GET(req: NextRequest) {
       guideAccount: { select: { id: true, displayName: true, email: true, registeredAt: true } },
       languages: true,
       reservations: { select: { id: true } },
+      changeRequests: {
+        where: { status: 'PENDING' },
+        take: 1,
+        select: { id: true },
+      },
     },
     orderBy: { guideAccount: { registeredAt: 'desc' } },
   });
@@ -32,6 +37,7 @@ export async function GET(req: NextRequest) {
       createdByEmail: g.createdByEmail,
       status: g.status,
       slug: g.slug || '',
+      pendingProfileChange: g.changeRequests.length > 0,
     })),
   });
 }

@@ -1,19 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { z } from 'zod';
 import { requireGuide } from '@/lib/require-account';
+import { getGuideRequestContext, hasTrustedGuideAuthOrigin } from '@/lib/guide-auth';
+import { guideProfileChangesObjectSchema, NoGuideProfileChangesError, publicPendingRequest, submitGuideProfileChanges } from '@/lib/guide-profile-changes';
 
-const profilPatchSchema = z.object({
-  firstName:       z.string().min(1).max(50).optional(),
-  lastName:        z.string().min(1).max(50).optional(),
-  phoneWhatsapp:   z.string().max(20).optional(),
-  country:         z.string().max(100).optional(),
-  bio:             z.string().max(2000).optional(),
-  city:            z.string().max(100).optional(),
-  gender:          z.enum(['HOMME', 'FEMME']).optional(),
-  nationality:     z.string().max(100).optional(),
-  experienceYears: z.coerce.number().int().min(0).max(60).optional(),
-}).strict();
+const profilPatchSchema = guideProfileChangesObjectSchema.pick({
+  firstName: true,
+  lastName: true,
+  phoneWhatsapp: true,
+  country: true,
+  bio: true,
+  city: true,
+  gender: true,
+  nationality: true,
+  experienceYears: true,
+}).refine(value => Object.keys(value).length > 0, 'Aucune modification transmise.');
 
 export async function GET() {
   const access = await requireGuide();
@@ -25,6 +26,12 @@ export async function GET() {
       guideProfile: {
         include: {
           languages: { select: { id: true, languageCode: true, level: true } },
+          changeRequests: {
+            where: { status: 'PENDING' },
+            orderBy: { updatedAt: 'desc' },
+            take: 1,
+            select: { id: true, changes: true, createdAt: true, updatedAt: true },
+          },
         },
       },
     },
@@ -62,52 +69,41 @@ export async function GET() {
       nationality: gp.nationality,
       experienceYears: gp.experienceYears,
       languages: gp.languages,
+      pendingChangeRequest: publicPendingRequest(gp.changeRequests[0] || null),
       createdAt: new Date(account.registeredAt).toLocaleDateString('fr-FR'),
     },
   });
 }
 
 export async function PATCH(req: NextRequest) {
+  if (!hasTrustedGuideAuthOrigin(req)) {
+    return NextResponse.json({ error: 'Origine non autorisée' }, { status: 403 });
+  }
   const access = await requireGuide();
   if (!access.ok) return access.response;
-
-  const account = await prisma.guideAccount.findUnique({
-    where: { id: access.actor.id },
-    include: { guideProfile: true },
-  });
-
-  if (!account) return NextResponse.json({ error: 'Introuvable' }, { status: 404 });
-  if (!account.guideProfile) return NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 });
 
   const raw = await req.json();
   const parsed = profilPatchSchema.safeParse(raw);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Données invalides' }, { status: 400 });
   }
-  const { firstName, lastName, phoneWhatsapp, country, bio, city, gender, nationality, experienceYears } = parsed.data;
+  let pendingRequest;
+  try {
+    pendingRequest = await submitGuideProfileChanges({
+      actor: access.actor,
+      changes: parsed.data,
+      context: getGuideRequestContext(req),
+    });
+  } catch (error) {
+    if (error instanceof NoGuideProfileChangesError) {
+      return NextResponse.json({ error: 'Aucune modification à envoyer.' }, { status: 400 });
+    }
+    throw error;
+  }
 
-  await prisma.$transaction([
-    prisma.guideAccount.update({
-      where: { id: access.actor.id },
-      data: {
-        ...(firstName !== undefined && { firstName: firstName.trim() || null }),
-        ...(lastName !== undefined && { lastName: lastName.trim() || null }),
-        ...(phoneWhatsapp !== undefined && { phoneWhatsapp: phoneWhatsapp.trim() || null }),
-        ...(country !== undefined && { country: country.trim() || null }),
-        ...(firstName && lastName && { displayName: `${firstName.trim()} ${lastName.trim()}` }),
-      },
-    }),
-    prisma.guideProfile.update({
-      where: { id: account.guideProfile.id },
-      data: {
-        ...(bio !== undefined && { bio: bio.trim() || null }),
-        ...(city !== undefined && { city: city.trim() || null }),
-        ...(gender !== undefined && { gender }),
-        ...(nationality !== undefined && { nationality: nationality.trim() || null }),
-        ...(experienceYears !== undefined && { experienceYears: experienceYears || null }),
-      },
-    }),
-  ]);
-
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({
+    ok: true,
+    pendingApproval: true,
+    pendingChangeRequest: publicPendingRequest(pendingRequest),
+  });
 }

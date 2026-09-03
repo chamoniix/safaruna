@@ -447,15 +447,15 @@ export function sendWelcomeGuide(to: string, name: string): Promise<EmailSendRes
     subject: 'Candidature reçue — SAFARUMA Guide',
     html: baseTemplate(`
       ${heading(`Barak Allahu fik, ${escapeHtml(name)} !`)}
-      ${p('BarakAllahu fik. L\'équipe SAFARUMA a bien reçu votre candidature en tant que guide Certifié SAFARUMA. Nous l\'examinerons insha\'Allah et vous contacterons sous <strong>48h</strong>.')}
+      ${p('Barak Allahu fik. L\'équipe SAFARUMA a bien reçu votre candidature pour devenir Guide Certifié SAFARUMA. Votre demande est maintenant en cours d\'étude. Nous reviendrons vers vous prochainement si nous avons besoin d\'informations complémentaires.')}
       ${divider()}
       <div style="background:#FAF7F0;border-left:3px solid #C9A84C;padding:16px 20px;border-radius:0 12px 12px 0;margin:16px 0;">
         <div style="font-size:12px;font-weight:700;color:#C9A84C;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">Prochaines étapes</div>
         <ol style="margin:0;padding-left:20px;font-size:13px;color:#4A3F30;line-height:2;">
-          <li>Vérification de vos documents (48h)</li>
-          <li>Entretien téléphonique avec notre équipe</li>
-          <li>Activation de votre profil guide</li>
-          <li>Vos premiers pèlerins vous contactent</li>
+          <li>Étude de votre candidature par l\'équipe SAFARUMA</li>
+          <li>Échange ou entretien si votre profil est retenu</li>
+          <li>Création de votre espace Guide après validation</li>
+          <li>Publication séparée de votre profil après contrôle par l\'administration</li>
         </ol>
       </div>
       ${divider()}

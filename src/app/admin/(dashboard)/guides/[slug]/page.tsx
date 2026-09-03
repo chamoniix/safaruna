@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { PLACES } from '@/lib/places';
@@ -9,6 +9,19 @@ import { GUIDE_LANGUAGES, LANG_CODE_TO_LABEL } from '@/lib/languages';
 type Language = { id: string; languageCode: string; level: string };
 type Reservation = { id: string; refNumber: string; startDate: string; nbPeople: number; totalPrice: number; status: string; createdAt: string };
 type GuidePlace = { id: string; placeKey: string; isActive: boolean };
+type ProfileChange = {
+  id: string;
+  changes: Record<string, unknown>;
+  before: Record<string, unknown>;
+  requestedByEmail: string;
+  submittedIp: string | null;
+  submittedCountry: string | null;
+  submittedCity: string | null;
+  submittedDevice: string | null;
+  submittedBrowser: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
 type Guide = {
   id: string; slug: string; bio: string | null; city: string | null;
   gender: 'HOMME' | 'FEMME' | null; servesMakkah: boolean; servesMadinah: boolean;
@@ -34,7 +47,31 @@ type Guide = {
   createdAt: string;
   approvedByEmail: string | null;
   approvedAt: string | null;
+  pendingProfileChange: ProfileChange | null;
 };
+
+const PROFILE_FIELD_LABELS: Record<string, string> = {
+  firstName: 'Prénom',
+  lastName: 'Nom',
+  phoneWhatsapp: 'WhatsApp',
+  country: 'Pays de résidence',
+  bio: 'Bio / présentation',
+  city: 'Ville principale',
+  gender: 'Genre',
+  nationality: 'Nationalité',
+  experienceYears: 'Années d’expérience',
+  languages: 'Langues parlées',
+};
+
+function displayProfileValue(value: unknown) {
+  if (Array.isArray(value)) return value.map(item => LANG_CODE_TO_LABEL[String(item)] || String(item)).join(', ') || 'Aucune';
+  if (value === null || value === undefined || value === '') return '—';
+  return String(value);
+}
+
+function errorMessage(cause: unknown, fallback: string) {
+  return cause instanceof Error ? cause.message : fallback;
+}
 
 const RES_STATUS: Record<string, { label: string; color: string; bg: string }> = {
   PENDING:   { label: 'En attente', color: '#92400E', bg: '#FEF3C7' },
@@ -78,6 +115,8 @@ export default function AdminGuideDetailPage() {
   const [saving, setSaving]               = useState(false);
   const [saveMsg, setSaveMsg]             = useState('');
   const [canManagePricing, setCanManagePricing] = useState(false);
+  const [reviewingProfileChange, setReviewingProfileChange] = useState(false);
+  const [profileChangeMessage, setProfileChangeMessage] = useState('');
 
   // Access management — validate / suspend / reactivate
   const [activating, setActivating]       = useState(false);
@@ -107,7 +146,7 @@ export default function AdminGuideDetailPage() {
   const [togglingPlace, setTogglingPlace] = useState<string | null>(null);
 
   // silent=true → update data without showing the full-page skeleton (used for post-action refreshes)
-  const fetchGuide = async (silent = false) => {
+  const fetchGuide = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
     setError('');
     try {
@@ -134,13 +173,13 @@ export default function AdminGuideDetailPage() {
       setInterviewScore(g.interviewScore?.toString() || '');
       setInterviewNotes(g.interviewNotes || '');
       const map: Record<string, boolean> = {};
-      g.places?.forEach((p: any) => { map[p.placeKey] = p.isActive; });
+      g.places?.forEach((place) => { map[place.placeKey] = place.isActive; });
       setPlacesMap(map);
-    } catch (e: any) { setError(e.message); }
+    } catch (cause) { setError(errorMessage(cause, 'Erreur réseau')); }
     if (!silent) setLoading(false);
-  };
+  }, [slug]);
 
-  useEffect(() => { if (slug) fetchGuide(); }, [slug]);
+  useEffect(() => { if (slug) fetchGuide(); }, [slug, fetchGuide]);
 
   const handleSave = async () => {
     setSaving(true); setSaveMsg('');
@@ -182,10 +221,32 @@ export default function AdminGuideDetailPage() {
       if (!res.ok) throw new Error(data.error || 'Erreur');
       setAccessResult({ message: data.message, type: 'success' });
       await fetchGuide(true); // silent — keep sections visible
-    } catch (e: any) {
-      setAccessResult({ message: e.message, type: 'error' });
+    } catch (cause) {
+      setAccessResult({ message: errorMessage(cause, 'Erreur'), type: 'error' });
     }
     setActivating(false);
+  };
+
+  const reviewProfileChange = async (action: 'APPROVE' | 'REJECT') => {
+    if (!guide?.pendingProfileChange) return;
+    if (!window.confirm(action === 'APPROVE' ? 'Publier ces modifications sur le profil du Guide ?' : 'Rejeter ces modifications ?')) return;
+    setReviewingProfileChange(true);
+    setProfileChangeMessage('');
+    try {
+      const response = await fetch(`/api/admin/guides/${slug}/profile-change`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId: guide.pendingProfileChange.id, action }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Traitement impossible');
+      setProfileChangeMessage(action === 'APPROVE' ? '✓ Modifications publiées' : '✓ Modifications rejetées');
+      await fetchGuide(true);
+    } catch (cause) {
+      setProfileChangeMessage(cause instanceof Error ? cause.message : 'Traitement impossible');
+    } finally {
+      setReviewingProfileChange(false);
+    }
   };
 
   const handleTogglePlace = async (placeKey: string) => {
@@ -357,6 +418,35 @@ export default function AdminGuideDetailPage() {
         </div>
       </div>
 
+      {/* Modifications demandées par le Guide — publication après validation */}
+      {guide.pendingProfileChange && (
+        <div style={{ ...sectionStyle, borderColor: '#F59E0B', background: '#FFFBEB' }}>
+          <div>
+            <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Modification du profil à valider</div>
+            <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 3 }}>
+              Demandée par {guide.pendingProfileChange.requestedByEmail} le {new Date(guide.pendingProfileChange.updatedAt).toLocaleString('fr-FR')}. Le profil public actuel est resté inchangé.
+            </div>
+          </div>
+          <div style={{ display: 'grid', gap: '0.65rem' }}>
+            {Object.entries(guide.pendingProfileChange.changes).map(([field, proposed]) => (
+              <div key={field} style={{ display: 'grid', gridTemplateColumns: 'minmax(130px, .7fr) 1fr 1fr', gap: '0.75rem', padding: '0.75rem', border: '1px solid #FDE68A', borderRadius: 8, background: 'white', alignItems: 'start' }}>
+                <strong style={{ fontSize: '0.75rem', color: '#1A1209' }}>{PROFILE_FIELD_LABELS[field] || field}</strong>
+                <div><small style={{ color: '#7A6D5A' }}>Actuel</small><div style={{ fontSize: '0.78rem', whiteSpace: 'pre-wrap' }}>{displayProfileValue(guide.pendingProfileChange?.before[field])}</div></div>
+                <div><small style={{ color: '#7A6D5A' }}>Demandé</small><div style={{ fontSize: '0.78rem', whiteSpace: 'pre-wrap', fontWeight: 700 }}>{displayProfileValue(proposed)}</div></div>
+              </div>
+            ))}
+          </div>
+          <div style={{ fontSize: '0.7rem', color: '#7A6D5A' }}>
+            Connexion : {guide.pendingProfileChange.submittedIp || 'IP inconnue'} · {[guide.pendingProfileChange.submittedCity, guide.pendingProfileChange.submittedCountry].filter(Boolean).join(', ') || 'localisation inconnue'} · {[guide.pendingProfileChange.submittedDevice, guide.pendingProfileChange.submittedBrowser].filter(Boolean).join(' · ') || 'appareil inconnu'}
+          </div>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <button onClick={() => reviewProfileChange('APPROVE')} disabled={reviewingProfileChange} style={{ padding: '0.65rem 1.4rem', border: 0, borderRadius: 50, background: '#166534', color: 'white', fontWeight: 700, cursor: reviewingProfileChange ? 'wait' : 'pointer' }}>Valider et publier</button>
+            <button onClick={() => reviewProfileChange('REJECT')} disabled={reviewingProfileChange} style={{ padding: '0.65rem 1.4rem', border: 0, borderRadius: 50, background: '#991B1B', color: 'white', fontWeight: 700, cursor: reviewingProfileChange ? 'wait' : 'pointer' }}>Rejeter</button>
+          </div>
+        </div>
+      )}
+      {profileChangeMessage && <div style={{ padding: '0.75rem 1rem', borderRadius: 8, background: profileChangeMessage.startsWith('✓') ? '#D1FAE5' : '#FEE2E2', color: profileChangeMessage.startsWith('✓') ? '#166534' : '#991B1B', fontSize: '0.82rem', fontWeight: 600 }}>{profileChangeMessage}</div>}
+
       {/* Section 1b — Gestion des accès */}
       <div style={{ ...sectionStyle, gap: '0.875rem' }}>
         <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Gestion des accès</div>
@@ -456,7 +546,7 @@ export default function AdminGuideDetailPage() {
 
             <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: '1rem', alignItems: 'start' }}>
               <div>
-                <label style={labelStyle}>Note de l'entretien (/20)</label>
+                <label style={labelStyle}>Note de l&apos;entretien (/20)</label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <input
                     type="number" min={0} max={20}
@@ -524,7 +614,7 @@ export default function AdminGuideDetailPage() {
             <input value={nationality} onChange={e => setNationality(e.target.value)} style={inputStyle} placeholder="Marocaine" />
           </div>
           <div>
-            <label style={labelStyle}>Années d'expérience</label>
+            <label style={labelStyle}>Années d&apos;expérience</label>
             <input value={expYears} onChange={e => setExpYears(e.target.value)} type="number" min={0} style={inputStyle} placeholder="8" />
           </div>
           <div>

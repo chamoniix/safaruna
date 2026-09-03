@@ -4,6 +4,8 @@ import { z } from 'zod'
 import { adminAuditDetail, adminAuditFields, getAdminActor, getAdminAuditContext } from '@/lib/check-admin'
 import { sendGuideAccess } from '@/lib/email'
 import prisma from '@/lib/prisma'
+import { decrypt } from '@/lib/crypto'
+import { PLACES } from '@/lib/places'
 
 const updateSchema = z.object({
   applicationId: z.string().min(1),
@@ -18,6 +20,16 @@ function slugBase(firstName: string, lastName: string) {
     .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '') || 'guide'
+}
+
+function maskedEncryptedValue(value: string | null, visibleCharacters: number) {
+  if (!value) return null
+  try {
+    const plain = decrypt(value)
+    return `••••${plain.slice(-visibleCharacters)}`
+  } catch {
+    return 'Indisponible'
+  }
 }
 
 async function availableSlug(firstName: string, lastName: string) {
@@ -76,6 +88,20 @@ export async function GET(req: NextRequest) {
         education: true,
         languages: true,
         masteredPlaces: true,
+        transportMode: true,
+        transportDetails: true,
+        proposedOmraPriceCents: true,
+        proposedMadinahPackagePriceCents: true,
+        proposedMadinahPlacePriceCents: true,
+        proposedMakkahPackagePriceCents: true,
+        proposedMakkahPlacePriceCents: true,
+        pricingDetails: true,
+        bankAccountFirstName: true,
+        bankAccountLastName: true,
+        bankName: true,
+        bankCountry: true,
+        ibanEncrypted: true,
+        bicEncrypted: true,
         acceptedCharteAt: true,
         status: true,
         reviewNotes: true,
@@ -93,7 +119,15 @@ export async function GET(req: NextRequest) {
   ])
 
   return NextResponse.json({
-    applications,
+    applications: applications.map(({ ibanEncrypted, bicEncrypted, ...application }) => ({
+      ...application,
+      masteredPlaces: application.masteredPlaces.map(key => ({
+        key,
+        name: PLACES.find(place => place.key === key)?.nameFr || key,
+      })),
+      ibanMasked: maskedEncryptedValue(ibanEncrypted, 4),
+      bicMasked: maskedEncryptedValue(bicEncrypted, 3),
+    })),
     pagination: { page, pageSize, total, pages: Math.max(1, Math.ceil(total / pageSize)) },
     counts: Object.fromEntries(statusCounts.map(row => [row.status, row._count._all])),
   })
@@ -206,7 +240,13 @@ export async function PATCH(req: NextRequest) {
             nationality: application.nationality,
             dateOfBirth: application.dateOfBirth,
             experienceYears: application.experienceYears,
+            university: application.education,
+            bankAccountFirstName: application.bankAccountFirstName,
+            bankAccountLastName: application.bankAccountLastName,
+            bankName: application.bankName,
+            bankCountry: application.bankCountry,
             ibanEncrypted: application.ibanEncrypted,
+            bicEncrypted: application.bicEncrypted,
             status: 'DRAFT',
             createdByType: actor.role,
             createdByAdminId: actor.id,
@@ -216,6 +256,11 @@ export async function PATCH(req: NextRequest) {
             approvedAt: now,
             languages: {
               create: application.languages.map(languageCode => ({ languageCode, level: 'NATIVE' })),
+            },
+            places: {
+              create: [...new Set(application.masteredPlaces)]
+                .filter(placeKey => PLACES.some(place => place.key === placeKey))
+                .map(placeKey => ({ placeKey, isActive: true })),
             },
           },
         },

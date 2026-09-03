@@ -3,15 +3,27 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { trackAnalyticsEvent } from '@/lib/analytics-client';
+import { PLACES } from '@/lib/places';
+import { GUIDE_LANGUAGES } from '@/lib/languages';
 
 const STEPS = [
   { num: 1, label: "Informations personnelles", icon: "👤" },
   { num: 2, label: "Langues & formation",        icon: "📚" },
   { num: 3, label: "Lieux & services",           icon: "🕌" },
-  { num: 4, label: "Forfaits & tarifs",          icon: "💰" },
-  { num: 5, label: "Documents",                  icon: "📄" },
-  { num: 6, label: "Charte islamique",           icon: "🤝" },
+  { num: 4, label: "Tarifs & coordonnées bancaires", icon: "💳" },
+  { num: 5, label: "Charte islamique",           icon: "🤝" },
 ];
+
+type ServiceCity = 'MAKKAH' | 'MADINAH';
+type TransportMode = 'NONE' | 'CAR' | 'VAN' | 'OTHER';
+
+const PLACE_GROUPS = [
+  { cat: 'Makkah', color: '#8B6914', bg: '#FAF3E0', border: 'rgba(201,168,76,0.3)', lieux: PLACES.filter(place => place.category === 'MAKKAH') },
+  { cat: 'Médine', color: '#1A4A8A', bg: '#EAF1FB', border: 'rgba(26,74,138,0.2)', lieux: PLACES.filter(place => place.category === 'MADINAH') },
+  { cat: 'Sites historiques', color: '#8B3A0A', bg: '#FEF0E6', border: 'rgba(192,90,16,0.2)', lieux: PLACES.filter(place => place.category === 'HISTORIQUE') },
+];
+const SIGNUP_LANGUAGE_CODES = new Set(['fr', 'ar', 'darija', 'en', 'turk', 'wolof', 'bahasa_id']);
+const SIGNUP_LANGUAGES = GUIDE_LANGUAGES.filter(language => SIGNUP_LANGUAGE_CODES.has(language.code));
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
@@ -59,9 +71,9 @@ export default function GuideOnboarding() {
   const [nom, setNom]                 = useState('');
   const [guideEmail, setGuideEmail]   = useState('');
   const [whatsapp, setWhatsapp]       = useState('');
-  const [city, setCity]               = useState('');
+  const [primaryCity, setPrimaryCity] = useState<ServiceCity | ''>('');
   const [gender, setGender]           = useState<'HOMME' | 'FEMME' | ''>('');
-  const [serviceCities, setServiceCities] = useState<Array<'MAKKAH' | 'MADINAH'>>([]);
+  const [offersSecondaryCity, setOffersSecondaryCity] = useState(false);
   const [nationality, setNationality] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
 
@@ -73,9 +85,31 @@ export default function GuideOnboarding() {
 
   // Step 3
   const [masteredPlaces, setMasteredPlaces] = useState<string[]>([]);
+  const [transportMode, setTransportMode] = useState<TransportMode>('NONE');
+  const [transportDetails, setTransportDetails] = useState('');
 
-  // Step 5
+  // Step 4
+  const [proposedOmraPrice, setProposedOmraPrice] = useState('');
+  const [proposedMadinahPackagePrice, setProposedMadinahPackagePrice] = useState('');
+  const [proposedMadinahPlacePrice, setProposedMadinahPlacePrice] = useState('');
+  const [proposedMakkahPackagePrice, setProposedMakkahPackagePrice] = useState('');
+  const [proposedMakkahPlacePrice, setProposedMakkahPlacePrice] = useState('');
+  const [pricingDetails, setPricingDetails] = useState('');
+  const [bankAccountFirstName, setBankAccountFirstName] = useState('');
+  const [bankAccountLastName, setBankAccountLastName] = useState('');
+  const [bankName, setBankName] = useState('');
+  const [bankCountry, setBankCountry] = useState('');
   const [iban, setIban] = useState('');
+  const [bic, setBic] = useState('');
+
+  const secondaryCity: ServiceCity | null = primaryCity === 'MAKKAH'
+    ? 'MADINAH'
+    : primaryCity === 'MADINAH'
+      ? 'MAKKAH'
+      : null;
+  const serviceCities: ServiceCity[] = primaryCity
+    ? offersSecondaryCity && secondaryCity ? [primaryCity, secondaryCity] : [primaryCity]
+    : [];
 
   const toggleLangue = (name: string) =>
     setSelectedLangues(prev => prev.includes(name) ? prev.filter(l => l !== name) : [...prev, name]);
@@ -85,13 +119,50 @@ export default function GuideOnboarding() {
   }, []);
 
   const advanceToNextStep = () => setCurrentStep(p => {
-    const nextStep = Math.min(p + 1, 6);
+    const nextStep = Math.min(p + 1, STEPS.length);
     trackAnalyticsEvent('guide_application_step', { step: nextStep });
     return nextStep;
   });
 
+  const stepError = (step: number): string => {
+    if (step === 1) {
+      if (!prenom.trim() || !nom.trim() || !guideEmail.trim() || !whatsapp.trim()) return 'Renseignez votre prénom, votre nom, votre email et votre numéro WhatsApp.';
+    }
+    if (step === 2) {
+      if (!dateOfBirth) return 'Indiquez votre date de naissance.';
+      if (!gender) return 'Choisissez le genre du guide.';
+      if (!primaryCity) return 'Choisissez votre ville principale.';
+      if (selectedLangues.length === 0) return 'Choisissez au moins une langue parlée.';
+      if (!education) return 'Choisissez votre formation islamique.';
+      if (!experienceYears) return 'Indiquez vos années d’expérience.';
+      if (!bio.trim()) return 'Présentez brièvement votre expérience et votre approche.';
+    }
+    if (step === 3 && transportMode === 'OTHER' && !transportDetails.trim()) {
+      return 'Décrivez le transport que vous proposez.';
+    }
+    if (step === 4) {
+      const isPositivePrice = (value: string) => Number.isFinite(Number(value)) && Number(value) > 0;
+      if (serviceCities.includes('MAKKAH') && ![proposedOmraPrice, proposedMakkahPackagePrice, proposedMakkahPlacePrice].every(isPositivePrice)) {
+        return 'Renseignez les trois tarifs demandés pour Makkah.';
+      }
+      if (serviceCities.includes('MADINAH') && ![proposedMadinahPackagePrice, proposedMadinahPlacePrice].every(isPositivePrice)) {
+        return 'Renseignez les deux tarifs demandés pour Médine.';
+      }
+      if (!bankAccountFirstName.trim() || !bankAccountLastName.trim() || !bankName.trim() || !bankCountry.trim() || !iban.trim() || !bic.trim()) {
+        return 'Toutes les coordonnées bancaires sont obligatoires.';
+      }
+    }
+    return '';
+  };
+
   const handleNext = async () => {
     setSubmitError('');
+    const validationError = stepError(currentStep);
+    if (validationError) {
+      if (currentStep === 1) setEmailError(validationError);
+      else setSubmitError(validationError);
+      return;
+    }
     if (currentStep !== 1) {
       advanceToNextStep();
       return;
@@ -128,12 +199,22 @@ export default function GuideOnboarding() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           firstName: prenom, lastName: nom, email: guideEmail,
-          whatsapp, city, gender, serviceCities, nationality, dateOfBirth, bio,
+          whatsapp, city: primaryCity, gender, serviceCities, nationality, dateOfBirth, bio,
           experienceYears: experienceYears ? Number(experienceYears) : undefined,
           education,
           languages: selectedLangues,
           masteredPlaces,
-          iban: iban || undefined,
+          transportMode,
+          transportDetails: transportDetails || undefined,
+          proposedOmraPrice: Number(proposedOmraPrice || 0),
+          proposedMadinahPackagePrice: Number(proposedMadinahPackagePrice || 0),
+          proposedMadinahPlacePrice: Number(proposedMadinahPlacePrice || 0),
+          proposedMakkahPackagePrice: Number(proposedMakkahPackagePrice || 0),
+          proposedMakkahPlacePrice: Number(proposedMakkahPlacePrice || 0),
+          pricingDetails: pricingDetails || undefined,
+          bankAccountFirstName, bankAccountLastName, bankName, bankCountry,
+          iban,
+          bic,
           acceptedCharte,
         }),
       });
@@ -144,6 +225,7 @@ export default function GuideOnboarding() {
           setEmailError(d.error || 'Adresse e-mail déjà utilisée. Veuillez en utiliser une autre.');
           return;
         }
+        if (typeof d.step === 'number') setCurrentStep(d.step);
         throw new Error(d.error || 'Erreur');
       }
       await res.json();
@@ -162,7 +244,7 @@ export default function GuideOnboarding() {
           <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', fontSize: '2rem' }}>✓</div>
           <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2rem', color: '#1A1209', marginBottom: '1rem', fontWeight: 400 }}>Dossier soumis</h1>
           <p style={{ color: '#7A6D5A', lineHeight: 1.7, marginBottom: '2rem', fontSize: '0.9rem' }}>
-            BarakAllahu fik. L&apos;équipe SAFARUMA a bien reçu votre candidature. Nous examinerons vos documents insha&apos;Allah et vous serez contacté sous 48h.
+            Barak Allahu fik. L&apos;équipe SAFARUMA a bien reçu votre candidature. Votre demande est en cours d&apos;étude et nous reviendrons vers vous prochainement si nous avons besoin d&apos;informations complémentaires.
           </p>
           <Link href="/" style={{ display: 'inline-block', background: '#1A1209', color: '#F0D897', padding: '0.8rem 2rem', borderRadius: 50, fontWeight: 700, fontSize: '0.85rem', textDecoration: 'none' }}>
             Retour à l&apos;accueil
@@ -273,7 +355,7 @@ export default function GuideOnboarding() {
         {/* Bottom note */}
         <div style={{ marginTop: 'auto', padding: '1.5rem 2rem', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
           <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.25)', lineHeight: 1.6 }}>
-            Vos données sont chiffrées et sécurisées. Seule l&apos;équipe SAFARUMA y accède pour la vérification.
+            Vos coordonnées bancaires sensibles sont chiffrées. Seule l&apos;équipe SAFARUMA y accède pour la vérification.
           </div>
         </div>
       </div>
@@ -384,50 +466,37 @@ export default function GuideOnboarding() {
                       <option value="FEMME">Femme</option>
                     </select>
                   </Field>
-                  <Field label="Ville de résidence">
-                    <select className="ins-input" style={inputStyle} required value={city} onChange={e => setCity(e.target.value)}>
+                  <Field label="Ville principale">
+                    <select className="ins-input" style={inputStyle} required value={primaryCity} onChange={e => setPrimaryCity(e.target.value as ServiceCity | '')}>
                       <option value="">Sélectionner</option>
-                      <option value="makkah">Makkah</option>
-                      <option value="madinah">Madinah</option>
-                      <option value="jeddah">Jeddah</option>
-                      <option value="autre">Autre</option>
+                      <option value="MAKKAH">Makkah</option>
+                      <option value="MADINAH">Médine</option>
                     </select>
+                    <p style={{ fontSize: '0.7rem', color: '#7A6D5A', margin: '0.45rem 0 0', lineHeight: 1.5 }}>Cette ville détermine les éventuels frais de déplacement et d&apos;hébergement.</p>
                   </Field>
                   <Field label="Nationalité">
                     <input type="text" className="ins-input" style={inputStyle} placeholder="Sénégalaise" value={nationality} onChange={e => setNationality(e.target.value)} />
                   </Field>
-                  <Field label="Villes proposées">
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      {(['MAKKAH', 'MADINAH'] as const).map(serviceCity => (
-                        <label key={serviceCity} style={{ flex: 1, padding: '0.7rem', border: serviceCities.includes(serviceCity) ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', borderRadius: 10, background: 'white', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}>
-                          <input type="checkbox" checked={serviceCities.includes(serviceCity)} onChange={() => setServiceCities(previous => previous.includes(serviceCity) ? previous.filter(item => item !== serviceCity) : [...previous, serviceCity])} style={{ marginRight: 6 }} />
-                          {serviceCity === 'MAKKAH' ? 'Makkah' : 'Médine'}
-                        </label>
-                      ))}
-                    </div>
+                  <Field label="Ville secondaire proposée">
+                    <label style={{ display: 'flex', gap: '0.65rem', alignItems: 'center', padding: '0.7rem', border: offersSecondaryCity ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', borderRadius: 10, background: 'white', cursor: primaryCity ? 'pointer' : 'not-allowed', fontSize: '0.8rem', fontWeight: 600, opacity: primaryCity ? 1 : 0.55 }}>
+                      <input type="checkbox" disabled={!primaryCity} checked={offersSecondaryCity} onChange={event => setOffersSecondaryCity(event.target.checked)} style={{ margin: 0 }} />
+                      {secondaryCity ? `Je peux également guider à ${secondaryCity === 'MAKKAH' ? 'Makkah' : 'Médine'}` : 'Choisissez d’abord votre ville principale'}
+                    </label>
                   </Field>
                 </div>
                 <div style={{ marginBottom: '2rem' }}>
                   <label style={labelStyle}>Langues parlées</label>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
-                    {[
-                      { flag: '🇫🇷', name: 'Français' },
-                      { flag: '🇸🇦', name: 'Arabe Classique' },
-                      { flag: '🇲🇦', name: 'Darija' },
-                      { flag: '🇬🇧', name: 'Anglais' },
-                      { flag: '🇹🇷', name: 'Turc' },
-                      { flag: '🇸🇳', name: 'Wolof' },
-                      { flag: '🇮🇩', name: 'Indonésien' },
-                    ].map(l => (
-                      <label key={l.name} style={{
+                    {SIGNUP_LANGUAGES.map(language => (
+                      <label key={language.code} style={{
                         display: 'flex', alignItems: 'center', gap: '0.5rem',
                         padding: '0.5rem 1rem', border: '1.5px solid #E8DFC8',
                         borderRadius: 50, cursor: 'pointer', background: 'white',
                         fontSize: '0.8rem', fontWeight: 500, color: '#1A1209',
                         transition: 'all 0.15s',
                       }}>
-                        <input type="checkbox" style={{ accentColor: '#C9A84C' }} checked={selectedLangues.includes(l.name)} onChange={() => toggleLangue(l.name)} />
-                        {l.flag} {l.name}
+                        <input type="checkbox" style={{ accentColor: '#C9A84C' }} checked={selectedLangues.includes(language.code)} onChange={() => toggleLangue(language.code)} />
+                        {language.label}
                       </label>
                     ))}
                   </div>
@@ -448,18 +517,6 @@ export default function GuideOnboarding() {
                 <Field label="Biographie (visible par les pèlerins)">
                   <textarea className="ins-input" style={{ ...inputStyle, height: 120, resize: 'vertical' }} placeholder="Présentez-vous, votre approche, votre rapport avec les Lieux Saints…" required value={bio} onChange={e => setBio(e.target.value)} />
                 </Field>
-                <div style={{ marginTop: '1.25rem' }}>
-                  <Field label="Photo de profil (JPG/PNG · max 5 Mo)">
-                    <div style={{ border: '2px dashed #E8DFC8', borderRadius: 12, padding: '1.5rem', textAlign: 'center', cursor: 'pointer', background: 'white', transition: 'border-color 0.2s' }}>
-                      <div style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>📸</div>
-                      <div style={{ fontSize: '0.8rem', color: '#7A6D5A', marginBottom: '0.75rem' }}>Glissez votre photo ou cliquez pour parcourir</div>
-                      <label style={{ display: 'inline-block', background: '#1A1209', color: '#F0D897', padding: '0.5rem 1.25rem', borderRadius: 50, fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}>
-                        Choisir un fichier
-                        <input type="file" style={{ display: 'none' }} accept="image/*" />
-                      </label>
-                    </div>
-                  </Field>
-                </div>
               </div>
             )}
 
@@ -473,83 +530,8 @@ export default function GuideOnboarding() {
                   Cochez tous les lieux pour lesquels vous êtes qualifié pour guider et expliquer en profondeur.
                 </p>
 
-                {/* 25 lieux en 6 catégories */}
-                {[
-                  {
-                    cat: 'Rituels',
-                    color: '#8B6914',
-                    bg: '#FAF3E0',
-                    border: 'rgba(201,168,76,0.3)',
-                    lieux: [
-                      { icon: '🕋', name: 'Masjid Al-Haram' },
-                      { icon: '💧', name: 'Zamzam' },
-                      { icon: '🔄', name: 'Tawaf complet' },
-                      { icon: '🚶', name: "Sa'i (Safa–Marwa)" },
-                      { icon: '🪢', name: 'Meeqat (points d\'entrée)' },
-                      { icon: '✂️', name: 'Tahallul (fin Ihram)' },
-                    ],
-                  },
-                  {
-                    cat: 'Montagnes & Grottes',
-                    color: '#1D5C3A',
-                    bg: '#E8F5EE',
-                    border: 'rgba(29,92,58,0.2)',
-                    lieux: [
-                      { icon: '⛰️', name: 'Jabal Al-Nour / Hira' },
-                      { icon: '⛰️', name: 'Jabal Thawr' },
-                      { icon: '⛰️', name: 'Jabal Uhud' },
-                      { icon: '🏔️', name: 'Jabal Rahmah / Arafat' },
-                    ],
-                  },
-                  {
-                    cat: 'Mosquées de Madinah',
-                    color: '#1A4A8A',
-                    bg: '#EAF1FB',
-                    border: 'rgba(26,74,138,0.2)',
-                    lieux: [
-                      { icon: '🕌', name: 'Masjid Quba' },
-                      { icon: '🕌', name: 'Masjid Al-Qiblatayn' },
-                      { icon: '🕌', name: 'Masjid Al-Ghamamah' },
-                      { icon: '🕌', name: 'Masjid Al-Fath' },
-                    ],
-                  },
-                  {
-                    cat: 'Sites historiques',
-                    color: '#8B3A0A',
-                    bg: '#FEF0E6',
-                    border: 'rgba(192,90,16,0.2)',
-                    lieux: [
-                      { icon: '⚔️', name: 'Bataille de Badr' },
-                      { icon: '🪖', name: 'Fossé de Khandaq' },
-                      { icon: '🪦', name: "Al-Baqi'" },
-                      { icon: '⛺', name: 'Mina' },
-                      { icon: '🌙', name: 'Muzdalifah' },
-                    ],
-                  },
-                  {
-                    cat: 'Culture & Musées',
-                    color: '#5A2D82',
-                    bg: '#F3EAF8',
-                    border: 'rgba(90,45,130,0.2)',
-                    lieux: [
-                      { icon: '📜', name: 'Musée de la Sîra' },
-                      { icon: '📚', name: 'Bibliothèque Roi Fahd' },
-                      { icon: '📖', name: 'Musée du Coran' },
-                      { icon: '🏛️', name: 'Musée national Arabie Saoudite' },
-                    ],
-                  },
-                  {
-                    cat: 'Autres villes',
-                    color: '#2D4A1A',
-                    bg: '#EBF3E0',
-                    border: 'rgba(45,74,26,0.2)',
-                    lieux: [
-                      { icon: '🌿', name: 'Taïf / Mosquée Addas' },
-                      { icon: '⚓', name: 'Yanbu' },
-                      { icon: '🏙️', name: 'Jeddah historique' },
-                    ],
-                  },
-                ].map(group => (
+                {/* Catalogue réellement utilisé par les profils et la réservation */}
+                {PLACE_GROUPS.map(group => (
                   <div key={group.cat} style={{ marginBottom: '1.75rem' }}>
                     <div style={{
                       display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
@@ -562,21 +544,21 @@ export default function GuideOnboarding() {
                     </div>
                     <div className="ins-grid-places" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.5rem' }}>
                       {group.lieux.map(l => (
-                        <label key={l.name} className="ins-place-label" style={{
+                        <label key={l.key} className="ins-place-label" style={{
                           display: 'flex', alignItems: 'center', gap: '0.6rem',
-                          padding: '0.65rem 0.85rem', border: masteredPlaces.includes(l.name) ? '1.5px solid #C9A84C' : '1.5px solid #E8DFC8',
+                          padding: '0.65rem 0.85rem', border: masteredPlaces.includes(l.key) ? '1.5px solid #C9A84C' : '1.5px solid #E8DFC8',
                           borderRadius: 8, cursor: 'pointer', background: 'white',
                           fontSize: '0.8rem', fontWeight: 500, color: '#1A1209',
                           transition: 'border-color 0.15s, background 0.15s',
                         }}>
                           <input
                             type="checkbox"
-                            checked={masteredPlaces.includes(l.name)}
-                            onChange={() => setMasteredPlaces(previous => previous.includes(l.name) ? previous.filter(item => item !== l.name) : [...previous, l.name])}
+                            checked={masteredPlaces.includes(l.key)}
+                            onChange={() => setMasteredPlaces(previous => previous.includes(l.key) ? previous.filter(item => item !== l.key) : [...previous, l.key])}
                             style={{ accentColor: '#C9A84C', width: 14, height: 14, flexShrink: 0 }}
                           />
-                          <span style={{ fontSize: '1rem' }}>{l.icon}</span>
-                          {l.name}
+                          <span style={{ fontSize: '1rem' }}>{l.emoji}</span>
+                          {l.nameFr}
                         </label>
                       ))}
                     </div>
@@ -590,16 +572,17 @@ export default function GuideOnboarding() {
                   </label>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
                     {[
-                      { id: 'none', icon: '🚶', title: 'Aucun transport',          sub: 'Le pèlerin gère ses propres déplacements.' },
-                      { id: 'car',  icon: '🚗', title: 'Voiture standard (4 pl.)',  sub: 'Je conduis les pèlerins dans mon véhicule.' },
-                      { id: 'van',  icon: '🚌', title: 'Van familial (7–9 pl.)',    sub: 'Idéal pour les grandes familles ou groupes.' },
+                      { id: 'NONE' as const, icon: '🚶', title: 'Aucun transport', sub: 'Je ne propose pas de véhicule.' },
+                      { id: 'CAR' as const, icon: '🚗', title: 'Voiture standard — jusqu’à 6 pèlerins', sub: 'Je conduis les pèlerins pendant les visites.' },
+                      { id: 'VAN' as const, icon: '🚌', title: 'Van', sub: 'Je peux proposer un van pour les groupes.' },
+                      { id: 'OTHER' as const, icon: '＋', title: 'Autre', sub: 'Je précise ma solution de transport.' },
                     ].map(opt => (
                       <label key={opt.id} style={{
                         display: 'flex', alignItems: 'center', gap: '1rem',
-                        padding: '0.85rem 1.1rem', border: '1.5px solid #E8DFC8',
+                        padding: '0.85rem 1.1rem', border: transportMode === opt.id ? '2px solid #C9A84C' : '1.5px solid #E8DFC8',
                         borderRadius: 12, cursor: 'pointer', background: 'white',
                       }}>
-                        <input type="radio" name="transport" style={{ accentColor: '#C9A84C', width: 16, height: 16, flexShrink: 0 }} defaultChecked={opt.id === 'none'} />
+                        <input type="radio" name="transport" style={{ accentColor: '#C9A84C', width: 16, height: 16, flexShrink: 0 }} checked={transportMode === opt.id} onChange={() => setTransportMode(opt.id)} />
                         <span style={{ fontSize: '1.1rem' }}>{opt.icon}</span>
                         <div>
                           <div style={{ fontWeight: 700, fontSize: '0.83rem', color: '#1A1209' }}>{opt.title}</div>
@@ -608,6 +591,11 @@ export default function GuideOnboarding() {
                       </label>
                     ))}
                   </div>
+                  {transportMode === 'OTHER' && <div style={{ marginTop: '0.85rem' }}>
+                    <Field label="Détails du transport proposé">
+                      <textarea className="ins-input" style={{ ...inputStyle, minHeight: 90, resize: 'vertical' }} required value={transportDetails} onChange={event => setTransportDetails(event.target.value)} placeholder="Type de véhicule, capacité, chauffeur, conditions…" />
+                    </Field>
+                  </div>}
                 </div>
               </div>
             )}
@@ -618,40 +606,58 @@ export default function GuideOnboarding() {
                 <h2 className="ins-h2" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2.5rem', fontWeight: 300, color: '#1A1209', marginBottom: '0.5rem', lineHeight: 1.1 }}>
                   {STEPS[currentStep - 1].label}
                 </h2>
-                <div style={{ background: '#1A1209', borderRadius: 16, padding: '1.25rem 1.5rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                  <div style={{ fontSize: '1.5rem' }}>💡</div>
-                  <div style={{ fontSize: '0.8rem', color: 'rgba(240,216,151,0.8)', lineHeight: 1.6 }}>
-                    SAFARUMA prélève <strong style={{ color: '#F0D897' }}>12% de commission</strong> sur chaque réservation. Les montants ci-dessous sont ce que vous recevrez de la plateforme.
+                <p style={{ color: '#7A6D5A', fontSize: '0.875rem', marginBottom: '1.25rem', lineHeight: 1.7 }}>
+                  Indiquez vos tarifs habituels pour un groupe jusqu&apos;à 6 pèlerins. Ils servent uniquement à étudier votre candidature : aucun tarif n&apos;est publié automatiquement.
+                </p>
+
+                <div style={{ display: 'grid', gap: '1rem' }}>
+                  {serviceCities.includes('MAKKAH') && <div style={{ padding: '1.25rem', border: '1.5px solid #E8DFC8', borderRadius: 16, background: 'white' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', marginBottom: '1rem' }}>
+                      <strong style={{ color: '#1A1209' }}>Services à Makkah</strong>
+                      <span style={{ background: '#FEE2E2', color: '#B91C1C', padding: '0.25rem 0.65rem', borderRadius: 50, fontSize: '0.62rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Obligatoire</span>
+                    </div>
+                    <div className="ins-pkg-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+                      <Field label="Accompagnement Omra (€)"><input type="number" min="0" step="0.01" className="ins-input" style={inputStyle} required value={proposedOmraPrice} onChange={event => setProposedOmraPrice(event.target.value)} /></Field>
+                      <Field label="Pack Makkah (€)"><input type="number" min="0" step="0.01" className="ins-input" style={inputStyle} required value={proposedMakkahPackagePrice} onChange={event => setProposedMakkahPackagePrice(event.target.value)} /></Field>
+                      <Field label="Une visite à Makkah (€)"><input type="number" min="0" step="0.01" className="ins-input" style={inputStyle} required value={proposedMakkahPlacePrice} onChange={event => setProposedMakkahPlacePrice(event.target.value)} /></Field>
+                    </div>
+                  </div>}
+
+                  {serviceCities.includes('MADINAH') && <div style={{ padding: '1.25rem', border: '1.5px solid #E8DFC8', borderRadius: 16, background: 'white' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', marginBottom: '1rem' }}>
+                      <strong style={{ color: '#1A1209' }}>Services à Médine</strong>
+                      <span style={{ background: '#FEE2E2', color: '#B91C1C', padding: '0.25rem 0.65rem', borderRadius: 50, fontSize: '0.62rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Obligatoire</span>
+                    </div>
+                    <div className="ins-pkg-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                      <Field label="Pack Médine (€)"><input type="number" min="0" step="0.01" className="ins-input" style={inputStyle} required value={proposedMadinahPackagePrice} onChange={event => setProposedMadinahPackagePrice(event.target.value)} /></Field>
+                      <Field label="Une visite à Médine (€)"><input type="number" min="0" step="0.01" className="ins-input" style={inputStyle} required value={proposedMadinahPlacePrice} onChange={event => setProposedMadinahPlacePrice(event.target.value)} /></Field>
+                    </div>
+                  </div>}
+
+                  <div style={{ padding: '1.25rem', border: '1.5px solid #E8DFC8', borderRadius: 16, background: 'white' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', marginBottom: '1rem' }}>
+                      <strong style={{ color: '#1A1209' }}>Précisions tarifaires</strong>
+                      <span style={{ background: '#EAF1FB', color: '#1D4ED8', padding: '0.25rem 0.65rem', borderRadius: 50, fontSize: '0.62rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Optionnel</span>
+                    </div>
+                    <textarea className="ins-input" style={{ ...inputStyle, minHeight: 90, resize: 'vertical' }} value={pricingDetails} onChange={event => setPricingDetails(event.target.value)} placeholder="Ajoutez ici toute précision utile sur vos tarifs ou une autre prestation." />
                   </div>
                 </div>
 
-                {[
-                  { name: 'Omra Essentielle (3h–5h)', tag: 'Obligatoire', required: true },
-                  { name: 'Ziyara Histoire (journée 8h)', tag: 'Optionnel' },
-                  { name: 'Séjour complet 5 jours',     tag: 'Optionnel' },
-                ].map((pkg, i) => (
-                  <div key={i} style={{
-                    padding: '1.25rem', border: '1.5px solid #E8DFC8', borderRadius: 16,
-                    marginBottom: '1rem', background: 'white',
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                      <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#1A1209' }}>{pkg.name}</div>
-                      <span style={{
-                        fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
-                        background: pkg.required ? 'linear-gradient(135deg, #F0D897, #C9A84C)' : '#FAF3E0',
-                        color: '#1A1209', padding: '0.2rem 0.6rem', borderRadius: 50,
-                      }}>{pkg.tag}</span>
-                    </div>
-                    <div className="ins-pkg-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                      <Field label="Prix par personne (€)">
-                        <input type="number" className="ins-input" style={inputStyle} placeholder="ex : 120" required={pkg.required} />
-                      </Field>
-                      <Field label="Prix de groupe max (€)">
-                        <input type="number" className="ins-input" style={inputStyle} placeholder="ex : 400" />
-                      </Field>
-                    </div>
+                <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #E8DFC8' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', marginBottom: '0.5rem' }}>
+                    <strong style={{ color: '#1A1209' }}>Coordonnées bancaires</strong>
+                    <span style={{ background: '#FEE2E2', color: '#B91C1C', padding: '0.25rem 0.65rem', borderRadius: 50, fontSize: '0.62rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Obligatoire</span>
                   </div>
-                ))}
+                  <p style={{ fontSize: '0.72rem', color: '#7A6D5A', marginBottom: '1rem', lineHeight: 1.5 }}>L&apos;IBAN et le BIC sont chiffrés. Aucune coordonnée bancaire n&apos;est publiée sur votre profil.</p>
+                  <div className="ins-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <Field label="Prénom du titulaire"><input type="text" className="ins-input" style={inputStyle} required value={bankAccountFirstName} onChange={event => setBankAccountFirstName(event.target.value)} /></Field>
+                    <Field label="Nom du titulaire"><input type="text" className="ins-input" style={inputStyle} required value={bankAccountLastName} onChange={event => setBankAccountLastName(event.target.value)} /></Field>
+                    <Field label="Nom de la banque"><input type="text" className="ins-input" style={inputStyle} required value={bankName} onChange={event => setBankName(event.target.value)} /></Field>
+                    <Field label="Pays de la banque"><input type="text" className="ins-input" style={inputStyle} required value={bankCountry} onChange={event => setBankCountry(event.target.value)} /></Field>
+                    <Field label="IBAN"><input type="text" className="ins-input" style={{ ...inputStyle, fontFamily: 'monospace', textTransform: 'uppercase' }} required value={iban} onChange={event => setIban(event.target.value)} placeholder="FR76…" /></Field>
+                    <Field label="SWIFT / BIC"><input type="text" className="ins-input" style={{ ...inputStyle, fontFamily: 'monospace', textTransform: 'uppercase' }} required value={bic} onChange={event => setBic(event.target.value)} placeholder="ABCDEFGH" /></Field>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -661,57 +667,9 @@ export default function GuideOnboarding() {
                 <h2 className="ins-h2" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2.5rem', fontWeight: 300, color: '#1A1209', marginBottom: '0.5rem', lineHeight: 1.1 }}>
                   {STEPS[currentStep - 1].label}
                 </h2>
-                <p style={{ color: '#7A6D5A', fontSize: '0.875rem', marginBottom: '2rem', lineHeight: 1.7 }}>
-                  Ces documents sont obligatoires pour la vérification KYC. Ils ne seront jamais rendus publics.
-                </p>
-
-                {[
-                  { icon: '🪪', title: "Pièce d'identité",       sub: 'Passeport ou CNI · JPG, PNG ou PDF · Max 5 Mo', required: true },
-                  { icon: '🎓', title: 'Diplôme ou Certificat Islamique', sub: 'Fortement recommandé', required: false },
-                ].map(doc => (
-                  <label key={doc.title} style={{
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                    gap: '0.75rem', padding: '2rem', border: '2px dashed #E8DFC8',
-                    borderRadius: 16, cursor: 'pointer', background: 'white',
-                    textAlign: 'center', marginBottom: '1rem', transition: 'border-color 0.2s',
-                  }}>
-                    <div style={{ fontSize: '2rem' }}>{doc.icon}</div>
-                    <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#1A1209' }}>{doc.title}</div>
-                    <div style={{ fontSize: '0.75rem', color: '#7A6D5A' }}>{doc.sub}</div>
-                    <span style={{ display: 'inline-block', background: '#1A1209', color: '#F0D897', padding: '0.5rem 1.25rem', borderRadius: 50, fontSize: '0.72rem', fontWeight: 700 }}>
-                      Parcourir…
-                    </span>
-                    <input type="file" style={{ display: 'none' }} accept=".jpg,.jpeg,.png,.pdf" />
-                  </label>
-                ))}
-
-                <div style={{ paddingTop: '1.5rem', borderTop: '1px solid #E8DFC8' }}>
-                  <label style={labelStyle}>Coordonnées bancaires (IBAN)</label>
-                  <p style={{ fontSize: '0.72rem', color: '#7A6D5A', marginBottom: '0.75rem', lineHeight: 1.5 }}>
-                    Pour recevoir vos virements mensuels. Données chiffrées AES-256.
-                  </p>
-                  <input
-                    type="text"
-                    className="ins-input"
-                    style={{ ...inputStyle, fontFamily: 'monospace', letterSpacing: '0.08em', textTransform: 'uppercase' }}
-                    placeholder="FR76 0000 0000 0000 0000 0000 000"
-                    required
-                    value={iban}
-                    onChange={e => setIban(e.target.value)}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* ── STEP 6 ── */}
-            {currentStep === 6 && (
-              <div>
-                <h2 className="ins-h2" style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2.5rem', fontWeight: 300, color: '#1A1209', marginBottom: '0.5rem', lineHeight: 1.1 }}>
-                  {STEPS[currentStep - 1].label}
-                </h2>
                 {/* Verset */}
                 <div style={{ background: '#1A1209', borderRadius: 20, padding: '2rem', textAlign: 'center', marginBottom: '2rem', position: 'relative', overflow: 'hidden' }}>
-                  <div style={{ position: 'absolute', right: '1rem', top: 0, fontSize: '6rem', color: 'rgba(201,168,76,0.08)', fontFamily: 'serif', lineHeight: 1, userSelect: 'none' }}>"</div>
+                  <div style={{ position: 'absolute', right: '1rem', top: 0, fontSize: '6rem', color: 'rgba(201,168,76,0.08)', fontFamily: 'serif', lineHeight: 1, userSelect: 'none' }}>&quot;</div>
                   <p style={{ fontFamily: 'var(--font-cormorant, serif)', fontStyle: 'italic', fontSize: '1.3rem', color: '#F0D897', lineHeight: 1.6, marginBottom: '0.75rem', position: 'relative', zIndex: 1 }}>
                     &ldquo;Et remplissez l&apos;engagement, car on sera interrogé au sujet des engagements.&rdquo;
                   </p>
@@ -725,10 +683,14 @@ export default function GuideOnboarding() {
                   <div style={{ ...labelStyle, marginBottom: '1rem' }}>Je m&apos;engage devant Allah à :</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
                     {[
-                      "N'enseigner que ce qui est authentique selon le Coran et la Sunnah.",
-                      "Ne pas percevoir de commissions cachées des commerçants ou hôtels.",
-                      "Respecter la clause de non-contournement de SAFARUMA pour toute transaction avec les pèlerins rencontrés via la plateforme.",
-                      "Être ponctuel, patient et bienveillant envers les pèlerins.",
+                      "Être totalement honnête sur mes compétences, mon expérience et ma connaissance des lieux.",
+                      "Ne guider que dans les lieux que je maîtrise et transmettre des informations exactes avec humilité.",
+                      "Respecter la dignité de chaque pèlerin, sans distinction d’origine, de connaissance ou de condition physique.",
+                      "Respecter les règles islamiques de mixité, de pudeur et de comportement dans les Lieux Saints.",
+                      "Transmettre le savoir religieux avec sincérité, sans déformation ni invention en cas de doute.",
+                      "Respecter une honnêteté financière absolue, sans surfacturation, commission cachée ni pot-de-vin.",
+                      "Protéger et accompagner avec attention les personnes âgées, les PMR, les femmes seules et les familles.",
+                      "Préserver strictement la confidentialité des informations personnelles confiées par les pèlerins.",
                     ].map((item, i) => (
                       <div key={i} style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
                         <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.6rem', fontWeight: 700, color: '#1A1209', flexShrink: 0, marginTop: 1 }}>✓</div>
@@ -736,6 +698,10 @@ export default function GuideOnboarding() {
                       </div>
                     ))}
                   </div>
+                </div>
+
+                <div style={{ background: '#FAF3E0', border: '1px solid #E8D08A', borderRadius: 12, padding: '1rem 1.1rem', marginBottom: '1.25rem', color: '#5F4B1D', fontSize: '0.78rem', lineHeight: 1.65 }}>
+                  SAFARUMA peut faire évoluer cette Charte afin de maintenir ses exigences de qualité, de sécurité et de conformité. La version applicable est celle communiquée au Guide à sa date d&apos;entrée en vigueur.
                 </div>
 
                 {/* Checkbox */}
@@ -753,7 +719,7 @@ export default function GuideOnboarding() {
                     onChange={e => setAcceptedCharte(e.target.checked)}
                   />
                   <span style={{ fontSize: '0.85rem', fontWeight: 600, color: acceptedCharte ? '#8B6914' : '#7A6D5A', lineHeight: 1.6 }}>
-                    Je prends Allah à témoin que j&apos;ai lu et j&apos;accepte sans réserve les termes de cette charte islamique et les CGU de SAFARUMA.
+                    Je prends Allah à témoin que j&apos;ai lu et j&apos;accepte sans réserve la <Link href="/charte-islamique" target="_blank" style={{ color: 'inherit', textDecoration: 'underline' }}>Charte islamique</Link> et les <Link href="/conditions-guides" target="_blank" style={{ color: 'inherit', textDecoration: 'underline' }}>Conditions Guides</Link> de SAFARUMA.
                   </span>
                 </label>
               </div>
@@ -773,7 +739,7 @@ export default function GuideOnboarding() {
                 </button>
               ) : <div />}
 
-              {currentStep < 6 ? (
+              {currentStep < STEPS.length ? (
                 <button
                   type="button" onClick={handleNext} disabled={checkingEmail}
                   style={{ padding: '0.85rem 2.25rem', borderRadius: 50, background: '#1A1209', color: '#F0D897', fontWeight: 700, fontSize: '0.875rem', border: 'none', cursor: checkingEmail ? 'wait' : 'pointer', opacity: checkingEmail ? 0.65 : 1, boxShadow: '0 4px 20px rgba(26,18,9,0.25)', letterSpacing: '0.03em' }}

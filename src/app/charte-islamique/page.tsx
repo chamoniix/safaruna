@@ -210,7 +210,8 @@ export default function CharteIslamique() {
 
       <section id="signature">
         <h2 style={h2}>Signature et application</h2>
-        <p style={p}>Cette Charte est signée électroniquement à l&apos;étape 6 du processus d&apos;inscription guide. En cochant la case de validation, le guide atteste sur l&apos;honneur et devant Allah ﷻ qu&apos;il a lu, compris et accepté les engagements de la Charte.</p>
+        <p style={p}>Cette Charte est signée électroniquement à l&apos;étape 5 du processus d&apos;inscription guide. En cochant la case de validation, le guide atteste sur l&apos;honneur et devant Allah ﷻ qu&apos;il a lu, compris et accepté les engagements de la Charte.</p>
+        <p style={p}>SAFARUMA peut faire évoluer cette Charte afin de maintenir ses exigences de qualité, de sécurité et de conformité. La version applicable est celle communiquée au Guide à sa date d&apos;entrée en vigueur.</p>
         <div className="legal-box-gold">
           <div className="box-title">Ce que signifie votre signature</div>
           <ul style={{ ...ul, marginBottom: 0 }}>

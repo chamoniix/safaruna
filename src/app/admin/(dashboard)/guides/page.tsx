@@ -15,6 +15,7 @@ type Guide = {
   createdByEmail: string | null;
   status: string;
   slug: string;
+  pendingProfileChange: boolean;
 };
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
@@ -49,8 +50,8 @@ export default function AdminGuidesPage() {
       if (!res.ok) throw new Error('Erreur ' + res.status);
       const data = await res.json();
       setGuides(data.guides || []);
-    } catch (e: any) {
-      setError(e.message || 'Erreur réseau');
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Erreur réseau');
     }
     setLoading(false);
   };
@@ -72,8 +73,8 @@ export default function AdminGuidesPage() {
       if (!res.ok) throw new Error(data.error || 'Erreur');
       setCreateResult({ slug: data.slug, accessEmailSent: data.accessEmailSent === true });
       await fetchGuides();
-    } catch (e: any) {
-      setCreateError(e.message);
+    } catch (cause) {
+      setCreateError(cause instanceof Error ? cause.message : 'Erreur');
     }
     setCreating(false);
   };
@@ -286,6 +287,7 @@ export default function AdminGuidesPage() {
                         <span style={{ display: 'inline-block', background: sc.bg, color: sc.color, fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.06em', padding: '0.28rem 0.65rem', borderRadius: 20, whiteSpace: 'nowrap' }}>
                           {sc.label}
                         </span>
+                        {g.pendingProfileChange && <span style={{ display: 'block', width: 'fit-content', marginTop: 5, background: '#FEF3C7', color: '#92400E', fontSize: '0.58rem', fontWeight: 800, padding: '0.22rem 0.55rem', borderRadius: 20, whiteSpace: 'nowrap' }}>MODIFICATION À VALIDER</span>}
                       </td>
                       <td style={{ padding: '0.875rem 1rem' }}>
                         <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>

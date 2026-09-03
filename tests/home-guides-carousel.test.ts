@@ -34,7 +34,7 @@ test('les cartes Pourquoi SAFARUMA utilisent uniquement les icônes SVG partagé
   )
 
   assert.doesNotMatch(whyCardsSource, /\bicon:\s*['"]/)
-  assert.match(home, /const WHY_CARD_ICONS = \{/)
+  assert.match(home, /const WHY_CARD_ICONS(?::[^=]+)? = \{/)
   assert.match(home, /<CardIcon size=\{18\} \/>/)
   assert.doesNotMatch(home, /<span className="sfr-card-icon">\{card\.icon\}<\/span>/)
 })

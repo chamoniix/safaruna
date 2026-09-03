@@ -19,6 +19,7 @@ import {
   IconSparkles,
   IconUserGroup,
 } from '@/components/Icons';
+import type { IconProps } from '@/components/Icons';
 import type { PublicReviewItem } from '@/lib/public-reviews';
 
 const EASE_LUXURY = [0.16, 1, 0.3, 1] as const;
@@ -88,7 +89,7 @@ const partners = [
   { name: 'Hilton', image: '/images/landing/partner-hilton.png' },
 ];
 
-const whyCards: CarouselItem[] = [
+const whyCards = [
   {
     id: 'langue',
     title: 'Guide dans ta langue',
@@ -169,9 +170,9 @@ const whyCards: CarouselItem[] = [
     cta: 'Trouver mon guide',
     image: '/images/landing/mosque-bg-beige.jpg',
   },
-];
+] as const satisfies readonly CarouselItem[];
 
-const WHY_CARD_ICONS = {
+const WHY_CARD_ICONS: Record<(typeof whyCards)[number]['id'], React.ComponentType<IconProps>> = {
   langue: IconGlobe,
   'guides-experts': IconGraduationCap,
   famille: IconUserGroup,
@@ -853,7 +854,7 @@ function WhySection({ openModal }: { openModal: (item: ModalContent) => void }) 
         </Reveal>
         <Carousel label="Pourquoi choisir SAFARUMA">
           {whyCards.map((card) => {
-            const CardIcon = WHY_CARD_ICONS[card.id as keyof typeof WHY_CARD_ICONS];
+            const CardIcon = WHY_CARD_ICONS[card.id];
 
             return (
               <motion.button

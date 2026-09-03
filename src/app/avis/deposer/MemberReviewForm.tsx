@@ -1,7 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { CheckCircle2, LoaderCircle, Star } from 'lucide-react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { useEffect, useRef, useState } from 'react'
+import { CheckCircle2, ClipboardCheck, HeartHandshake, LoaderCircle, PackageCheck, Star } from 'lucide-react'
 
 type ReviewStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'HIDDEN'
 type StoredReview = {
@@ -14,6 +16,7 @@ type StoredReview = {
 }
 
 export default function MemberReviewForm() {
+  const successTitleRef = useRef<HTMLHeadingElement>(null)
   const [firstName, setFirstName] = useState('')
   const [city, setCity] = useState('')
   const [country, setCountry] = useState('')
@@ -45,6 +48,10 @@ export default function MemberReviewForm() {
     return () => { active = false }
   }, [])
 
+  useEffect(() => {
+    if (success) successTitleRef.current?.focus()
+  }, [success])
+
   async function submit(event: React.FormEvent) {
     event.preventDefault()
     if (!rating) {
@@ -73,16 +80,73 @@ export default function MemberReviewForm() {
     return <div className="member-review-loading" role="status"><LoaderCircle size={26} className="member-review-spinner" /> Préparation du formulaire…</div>
   }
 
+  if (success) {
+    const features = [
+      {
+        title: 'Votre checklist Omra est prête',
+        text: 'Retrouvez dans votre espace les étapes à préparer avant le départ afin de ne rien oublier.',
+        image: '/parcours/preparation-conseils.jpg',
+        Icon: ClipboardCheck,
+      },
+      {
+        title: 'Préparez votre équipement à l’avance',
+        text: 'Ihram, ceinture et sandales peuvent être préparés à l’avance et apportés par votre guide.',
+        image: '/images/guide-omra/ihram.jpg',
+        Icon: PackageCheck,
+      },
+      {
+        title: 'Un accompagnement adapté à chacun',
+        text: 'SAFARUMA accompagne aussi les pèlerins à mobilité réduite avec un rythme et une assistance adaptés.',
+        image: '/why-safaruma/assistance-pmr.jpg',
+        Icon: HeartHandshake,
+      },
+    ]
+
+    return (
+      <section className="member-review-success" role="status" aria-live="polite" aria-labelledby="member-review-success-title">
+        <div className="member-review-success-mark" aria-hidden="true"><CheckCircle2 size={34} /></div>
+        <h2 id="member-review-success-title" ref={successTitleRef} tabIndex={-1}>Barakallahou fik</h2>
+        <p className="member-review-success-arabic" lang="ar" dir="rtl">بارك الله فيك</p>
+        <p className="member-review-success-copy">
+          Merci pour votre avis. Il a bien été transmis à notre équipe et sera publié après validation.
+        </p>
+        <span className="member-review-status-pill">En attente de validation</span>
+
+        <div className="member-review-discovery">
+          <p className="member-review-discovery-title">Le saviez-vous&nbsp;?</p>
+          <div className="member-review-feature-grid">
+            {features.map(({ title, text, image, Icon }) => (
+              <article className="member-review-feature" key={title}>
+                <div className="member-review-feature-image">
+                  <Image src={image} alt="" fill sizes="(max-width: 640px) 100vw, 240px" />
+                </div>
+                <div className="member-review-feature-body">
+                  <Icon size={20} aria-hidden="true" />
+                  <h3>{title}</h3>
+                  <p>{text}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <Link className="member-review-primary member-review-success-cta" href="/espace/tableau-de-bord">
+          Retour à mon espace
+        </Link>
+      </section>
+    )
+  }
+
   return (
     <form className="member-review-form" onSubmit={submit}>
-      {(success || existing?.status === 'PENDING') && (
+      {existing?.status === 'PENDING' && (
         <div className="member-review-notice" role="status" aria-live="polite">
           <CheckCircle2 size={19} />
-          <span>{success ? 'Merci, votre avis a bien été envoyé et sera publié après validation.' : 'Votre avis est en attente de validation. Vous pouvez encore le modifier.'}</span>
+          <span>Votre avis est en attente de validation. Vous pouvez encore le modifier.</span>
         </div>
       )}
 
-      {existing?.status === 'APPROVED' && !success && (
+      {existing?.status === 'APPROVED' && (
         <div className="member-review-notice member-review-notice--approved">
           Votre avis est publié. Toute modification demandera une nouvelle validation.
         </div>

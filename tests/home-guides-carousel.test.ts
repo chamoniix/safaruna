@@ -20,3 +20,21 @@ test('le carrousel ne combine plus deux moteurs de défilement', () => {
   assert.match(home, /let position = ref\.current\?\.scrollLeft \?\? 0/)
   assert.match(home, /position \+= delta \* 0\.026/)
 })
+
+test('le bloc Guides ne clone pas un Guide réel pour simuler une boucle', () => {
+  assert.match(home, /<Carousel label="Guides privés SAFARUMA" auto=\{false\}>/)
+  assert.match(styles, /\.sfr-carousel-track\s*\{[\s\S]*overflow-x:\s*auto;/)
+  assert.match(styles, /-webkit-overflow-scrolling:\s*touch;/)
+})
+
+test('les cartes Pourquoi SAFARUMA utilisent uniquement les icônes SVG partagées', () => {
+  const whyCardsSource = home.slice(
+    home.indexOf('const whyCards'),
+    home.indexOf('const guideProfileFeature'),
+  )
+
+  assert.doesNotMatch(whyCardsSource, /\bicon:\s*['"]/)
+  assert.match(home, /const WHY_CARD_ICONS(?::[^=]+)? = \{/)
+  assert.match(home, /<CardIcon size=\{18\} \/>/)
+  assert.doesNotMatch(home, /<span className="sfr-card-icon">\{card\.icon\}<\/span>/)
+})

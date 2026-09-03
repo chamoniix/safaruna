@@ -1119,16 +1119,19 @@ function ReviewsSection() {
             <br />
             notre plus belle récompense.
           </h2>
-          <p className="sfr-rating-line">Uniquement des avis réels, publiés après validation.</p>
           <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
             <Link className="sfr-title-action" href="/avis">Voir tous les avis</Link>
             <Link className="sfr-title-action" href="/avis/deposer">Donner mon avis</Link>
           </div>
         </Reveal>
-        {reviews.length > 0 ? (
-          <Carousel label="Avis clients">
+        {reviews.length > 1 ? (
+          <Carousel label="Avis clients" className="sfr-reviews-carousel" auto={false}>
             {reviews.map(review => <PublicReviewCard key={review.id} review={review} compact />)}
           </Carousel>
+        ) : reviews.length === 1 ? (
+          <div className="sfr-single-review">
+            <PublicReviewCard review={reviews[0]} compact />
+          </div>
         ) : (
           <div className="sfr-reviews-empty">{loading ? 'Chargement des avis…' : loadError ? 'Les avis sont temporairement indisponibles.' : 'Les premiers avis approuvés apparaîtront ici.'}</div>
         )}

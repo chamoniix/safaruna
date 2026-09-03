@@ -2304,31 +2304,38 @@ footer div::-webkit-scrollbar { display: none; }
 }
 
 .public-review-card {
-  min-height: 250px;
+  min-height: 230px;
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 18px;
   border: 1px solid rgba(21, 17, 12, 0.11);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.82);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.9);
   color: #1a1209;
-  box-shadow: 0 16px 42px rgba(45, 31, 10, 0.07);
+  box-shadow: 0 8px 24px rgba(45, 31, 10, 0.05);
 }
-.sfr-carousel-track .public-review-card { width: 300px; }
+.sfr-carousel-track .public-review-card { width: 320px; }
+.sfr-reviews-carousel .sfr-carousel-dots { display: none; }
+.sfr-single-review { min-width: 0; display: flex; justify-content: center; }
+.sfr-single-review .public-review-card { width: min(100%, 360px); }
 .sfr-reviews-empty { min-height: 180px; display: grid; place-items: center; padding: 24px; border: 1px solid rgba(21, 17, 12, 0.1); border-radius: 14px; background: rgba(255, 255, 255, 0.58); color: #7a6d5a; text-align: center; }
 .public-review-card-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.public-review-badge { padding: 5px 9px; border-radius: 999px; background: #f3ead7; color: #805d15; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.04em; }
+.public-review-author { min-width: 0; display: flex; align-items: center; gap: 10px; }
+.public-review-avatar { width: 40px; height: 40px; flex: 0 0 40px; display: grid; place-items: center; overflow: hidden; border-radius: 50%; background: #eadcbf; color: #5f4312; font-family: var(--font-cormorant), Georgia, serif; font-size: 1.08rem; font-weight: 800; }
+.public-review-avatar img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.public-review-identity { min-width: 0; display: grid; gap: 1px; }
+.public-review-identity strong { overflow: hidden; color: #1a1209; font-size: 0.88rem; text-overflow: ellipsis; white-space: nowrap; }
+.public-review-identity > span { overflow: hidden; color: #7a6d5a; font-size: 0.72rem; text-overflow: ellipsis; white-space: nowrap; }
+.public-review-badge { flex: 0 0 auto; padding: 4px 8px; border-radius: 999px; background: #f3ead7; color: #805d15; font-size: 0.61rem; font-weight: 800; letter-spacing: 0.03em; }
 .public-review-badge--verified { background: #e8f5ee; color: #1d5c3a; }
 .public-review-badge--guide { background: #ede9fe; color: #5b21b6; }
-.public-review-rating { display: inline-flex; align-items: center; gap: 4px; color: #9a6c14; font-size: 0.75rem; font-weight: 800; }
-.public-review-stars { display: flex; gap: 3px; margin: 18px 0 14px; color: #d5a14a; }
-.public-review-card blockquote { flex: 1; margin: 0; color: #44392b; font-family: var(--font-cormorant), Georgia, serif; font-size: 1.16rem; line-height: 1.5; }
-.public-review-card--compact { height: 300px; min-height: 300px; overflow: hidden; }
-.public-review-card--compact blockquote { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 6; }
-.public-review-card footer { display: grid; gap: 2px; margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(21, 17, 12, 0.08); }
-.public-review-card footer strong { color: #1a1209; font-size: 0.84rem; }
-.public-review-card footer span { color: #7a6d5a; font-size: 0.72rem; }
-.public-review-card footer a { margin-top: 4px; color: #8a6419; font-size: 0.72rem; font-weight: 800; text-decoration: none; }
+.public-review-stars { display: flex; align-items: center; gap: 8px; margin: 15px 0 12px; color: #d5a14a; }
+.public-review-stars > span { display: inline-flex; gap: 2px; }
+.public-review-stars small { color: #89651d; font-size: 0.7rem; font-weight: 800; }
+.public-review-card blockquote { flex: 1; margin: 0; color: #44392b; font-family: var(--font-cormorant), Georgia, serif; font-size: 1.08rem; line-height: 1.48; }
+.public-review-card--compact { height: 250px; min-height: 250px; overflow: hidden; }
+.public-review-card--compact blockquote { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 5; }
+.public-review-guide { margin-top: 15px; padding-top: 11px; border-top: 1px solid rgba(21, 17, 12, 0.08); color: #7b5817; font-size: 0.72rem; font-weight: 800; text-decoration: none; }
 
 .sfr-title-action {
   margin-top: 1.15rem;

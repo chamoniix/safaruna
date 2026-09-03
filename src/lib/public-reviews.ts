@@ -9,6 +9,7 @@ export type PublicReviewItem = {
   kind: PublicReviewKind
   label: 'Avis membre' | 'Avis vérifié' | 'Avis Guide'
   firstName: string
+  avatarUrl: string | null
   location: string
   rating: number
   comment: string
@@ -46,6 +47,7 @@ export async function getPublicReviews(input: { page: number; limit: number; rat
         comment: true,
         moderatedAt: true,
         createdAt: true,
+        user: { select: { image: true } },
       },
     }),
     prisma.review.findMany({
@@ -58,7 +60,7 @@ export async function getPublicReviews(input: { page: number; limit: number; rat
         comment: true,
         moderatedAt: true,
         createdAt: true,
-        pelerin: { select: { firstName: true, lastName: true, country: true } },
+        pelerin: { select: { firstName: true, lastName: true, country: true, image: true } },
         reservation: {
           select: {
             experienceReview: { select: { firstName: true, city: true, country: true } },
@@ -81,6 +83,7 @@ export async function getPublicReviews(input: { page: number; limit: number; rat
     kind: review.reservationId ? 'VERIFIED' : 'MEMBER',
     label: review.reservationId ? 'Avis vérifié' : 'Avis membre',
     firstName: review.firstName,
+    avatarUrl: review.user.image,
     location: [review.city, review.country].filter(Boolean).join(', '),
     rating: review.rating,
     comment: review.comment,
@@ -101,6 +104,7 @@ export async function getPublicReviews(input: { page: number; limit: number; rat
       kind: 'GUIDE',
       label: 'Avis Guide',
       firstName: signature?.firstName || review.pelerin.firstName?.trim() || 'Pèlerin',
+      avatarUrl: review.pelerin.image,
       location: signature
         ? [signature.city, signature.country].filter(Boolean).join(', ')
         : review.pelerin.country || '',
@@ -122,6 +126,7 @@ export async function getPublicReviews(input: { page: number; limit: number; rat
       kind: review.kind,
       label: review.label,
       firstName: review.firstName,
+      avatarUrl: review.avatarUrl,
       location: review.location,
       rating: review.rating,
       comment: review.comment,

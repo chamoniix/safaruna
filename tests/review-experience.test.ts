@@ -22,7 +22,7 @@ test('un avis envoyé remplace le formulaire par une confirmation et un retour a
 
 test('la confirmation présente les trois services demandés sans fausse action commerciale', () => {
   assert.match(form, /Votre checklist Omra est prête/)
-  assert.match(form, /Préparez votre équipement à l’avance/)
+  assert.match(form, /Achetez votre équipement à l’avance/)
   assert.match(form, /Un accompagnement adapté à chacun/)
   assert.match(form, /\/parcours\/preparation-conseils\.jpg/)
   assert.match(form, /\/images\/guide-omra\/ihram\.jpg/)

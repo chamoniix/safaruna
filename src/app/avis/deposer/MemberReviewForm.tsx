@@ -89,8 +89,8 @@ export default function MemberReviewForm() {
         Icon: ClipboardCheck,
       },
       {
-        title: 'Préparez votre équipement à l’avance',
-        text: 'Ihram, ceinture et sandales peuvent être préparés à l’avance et apportés par votre guide.',
+        title: 'Achetez votre équipement à l’avance',
+        text: 'Votre ihram, votre ceinture et vos sandales peuvent être préparés à l’avance et apportés par votre guide.',
         image: '/images/guide-omra/ihram.jpg',
         Icon: PackageCheck,
       },

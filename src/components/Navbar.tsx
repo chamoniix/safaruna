@@ -784,7 +784,11 @@ export default function Navbar({
           </div>
 
           <div className="nb-drawer-footer">
-            {session ? (
+            {status === 'loading' ? (
+              <div className="nb-drawer-dash" role="status" aria-label="Chargement du compte" style={{ opacity: 0.55 }}>
+                Chargement du compte…
+              </div>
+            ) : session ? (
               <>
                 <Link href={dashboardHref} className="nb-drawer-dash" onClick={() => setMobileOpen(false)}>
                   Mon espace

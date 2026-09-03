@@ -1,10 +1,12 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { hasConsented, acceptAll, rejectAll } from '@/lib/consent';
 import CookieModal from './CookieModal';
 
 export default function CookieBanner() {
+  const pathname = usePathname();
   const [show, setShow] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
@@ -25,6 +27,8 @@ export default function CookieBanner() {
   const handleAccept = () => { acceptAll(); setShow(false); };
   const handleReject = () => { rejectAll(); setShow(false); };
   const handleSaved = () => { setShowModal(false); setShow(false); };
+
+  if (pathname === '/avis/deposer') return null;
 
   return (
     <>

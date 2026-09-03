@@ -5,8 +5,24 @@
 
 import * as Sentry from "@sentry/nextjs";
 
+const sentryDsn =
+  process.env.SENTRY_DSN ?? process.env.NEXT_PUBLIC_SENTRY_DSN;
+const sentryEnvironment =
+  process.env.VERCEL_ENV === "production"
+    ? "vercel-production"
+    : process.env.VERCEL_ENV === "preview"
+      ? "vercel-preview"
+      : "local";
+const isMonitoredVercelRuntime =
+  Boolean(process.env.VERCEL_REGION) &&
+  process.env.VERCEL_REGION !== "dev1" &&
+  (process.env.VERCEL_ENV === "production" ||
+    process.env.VERCEL_ENV === "preview");
+
 Sentry.init({
-  dsn: "https://e0478a02489a1abc3c6427ee3cc288ef@o4511209444671488.ingest.de.sentry.io/4511209450438736",
+  dsn: sentryDsn,
+  enabled: Boolean(sentryDsn) && isMonitoredVercelRuntime,
+  environment: sentryEnvironment,
 
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
   tracesSampleRate: 1,

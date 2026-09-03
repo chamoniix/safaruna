@@ -4,10 +4,24 @@
 
 import * as Sentry from "@sentry/nextjs";
 
+const sentryDsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
+const vercelEnvironment = process.env.NEXT_PUBLIC_VERCEL_ENV;
+const sentryEnvironment =
+  vercelEnvironment === "production"
+    ? "vercel-production"
+    : vercelEnvironment === "preview"
+      ? "vercel-preview"
+      : "local";
+const localHostnames = new Set(["localhost", "127.0.0.1", "::1", "[::1]"]);
+const isLocalHostname = localHostnames.has(window.location.hostname.toLowerCase());
+const isMonitoredVercelDeployment =
+  vercelEnvironment === "production" || vercelEnvironment === "preview";
+
 Sentry.init({
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
-  enabled: process.env.NODE_ENV === "production",
-  environment: process.env.NEXT_PUBLIC_VERCEL_ENV || process.env.NODE_ENV,
+  dsn: sentryDsn,
+  enabled:
+    Boolean(sentryDsn) && isMonitoredVercelDeployment && !isLocalHostname,
+  environment: sentryEnvironment,
 
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
   tracesSampleRate: 1,

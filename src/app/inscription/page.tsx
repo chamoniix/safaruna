@@ -281,13 +281,6 @@ function RegisterForm() {
               )}
             </div>
 
-            {/* Verset */}
-            <div style={{ padding: '14px 16px', background: '#FAF7F0', borderRadius: 8, border: '1px solid #E8DFC8' }}>
-              <p style={{ fontSize: '0.8rem', color: '#7A6D5A', fontStyle: 'italic', textAlign: 'center', margin: 0, lineHeight: 1.6 }}>
-                &ldquo;Et remplissez l&apos;engagement, car on sera interrogé au sujet des engagements.&rdquo; (Coran 17:34)
-              </p>
-            </div>
-
             {/* Code parrainage — transmis silencieusement */}
             <input type="hidden" name="ref" value={refCode} />
             <input type="hidden" name="redirect" value={redirectParam} />

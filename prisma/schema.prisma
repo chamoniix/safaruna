@@ -237,6 +237,9 @@ model GuideProfile {
   approvedByAdmin       AdminAccount?    @relation("GuideApprovedByAdmin", fields: [approvedByAdminId], references: [id], onDelete: SetNull)
   approvedByEmail       String?
   approvedAt            DateTime?
+  profileSubmittedAt    DateTime?
+  cancellationCount     Int              @default(0)
+  permanentlyDeactivatedAt DateTime?
   createdAt             DateTime         @default(now())
   updatedAt             DateTime         @default(now()) @updatedAt
 
@@ -253,6 +256,7 @@ model GuideProfile {
   earnings             GuideEarning[]
   reviews              Review[]
   changeRequests       GuideProfileChangeRequest[]
+  reservationIncidents GuideReservationIncident[]
 }
 
 enum GuideAccountStatus {
@@ -662,6 +666,7 @@ model Reservation {
   paymentTransactions PaymentTransaction[]
   qualifiedReferral   Referral?          @relation("QualifiedReferral")
   promoCode           PromoCode?         @relation("PromoCodeReservation")
+  guideIncidents      GuideReservationIncident[]
 }
 
 model ReservationMission {
@@ -689,6 +694,41 @@ model ReservationMission {
 enum GuideConfirmationStatus {
   PENDING
   CONFIRMED
+  DECLINED
+  NO_RESPONSE
+}
+
+enum GuideReservationIncidentType {
+  GUIDE_DECLINED
+  NO_RESPONSE
+}
+
+enum GuideReservationIncidentStatus {
+  PENDING
+  COUNTED
+  EXCUSED
+}
+
+model GuideReservationIncident {
+  id              String                         @id @default(cuid())
+  reservationId   String
+  reservation     Reservation                    @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  guideProfileId  String
+  guideProfile    GuideProfile                   @relation(fields: [guideProfileId], references: [id])
+  type            GuideReservationIncidentType
+  reason          String?
+  status          GuideReservationIncidentStatus @default(PENDING)
+  reportedAt      DateTime                       @default(now())
+  reviewedByAdminId String?
+  reviewedByEmail String?
+  reviewNotes     String?
+  reviewedAt      DateTime?
+  createdAt       DateTime                       @default(now())
+  updatedAt       DateTime                       @updatedAt
+
+  @@unique([reservationId, guideProfileId])
+  @@index([guideProfileId, status, reportedAt])
+  @@index([status, reportedAt])
 }
 
 enum ReservationStatus {

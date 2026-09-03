@@ -22,6 +22,17 @@ type ProfileChange = {
   createdAt: string;
   updatedAt: string;
 };
+type ReservationIncident = {
+  id: string;
+  refNumber: string;
+  type: 'GUIDE_DECLINED' | 'NO_RESPONSE';
+  reason: string | null;
+  status: 'PENDING' | 'COUNTED' | 'EXCUSED';
+  reportedAt: string;
+  reviewedByEmail: string | null;
+  reviewNotes: string | null;
+  reviewedAt: string | null;
+};
 type Guide = {
   id: string; slug: string; bio: string | null; city: string | null;
   gender: 'HOMME' | 'FEMME' | null; servesMakkah: boolean; servesMadinah: boolean;
@@ -47,7 +58,11 @@ type Guide = {
   createdAt: string;
   approvedByEmail: string | null;
   approvedAt: string | null;
+  profileSubmittedAt: string | null;
+  cancellationCount: number;
+  permanentlyDeactivatedAt: string | null;
   pendingProfileChange: ProfileChange | null;
+  reservationIncidents: ReservationIncident[];
 };
 
 const PROFILE_FIELD_LABELS: Record<string, string> = {
@@ -117,6 +132,8 @@ export default function AdminGuideDetailPage() {
   const [canManagePricing, setCanManagePricing] = useState(false);
   const [reviewingProfileChange, setReviewingProfileChange] = useState(false);
   const [profileChangeMessage, setProfileChangeMessage] = useState('');
+  const [reviewingIncident, setReviewingIncident] = useState<string | null>(null);
+  const [incidentMessage, setIncidentMessage] = useState('');
 
   // Access management — validate / suspend / reactivate
   const [activating, setActivating]       = useState(false);
@@ -249,6 +266,30 @@ export default function AdminGuideDetailPage() {
     }
   };
 
+  const reviewIncident = async (incident: ReservationIncident, action: 'COUNT' | 'EXCUSE') => {
+    const question = action === 'COUNT'
+      ? `Comptabiliser cet incident pour ${incident.refNumber} ?`
+      : `Ne pas comptabiliser cet incident pour ${incident.refNumber} ?`;
+    if (!window.confirm(question)) return;
+    setReviewingIncident(incident.id);
+    setIncidentMessage('');
+    try {
+      const response = await fetch(`/api/admin/guides/${slug}/incidents`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ incidentId: incident.id, action }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Décision impossible');
+      setIncidentMessage(action === 'COUNT' ? '✓ Incident comptabilisé' : '✓ Incident non comptabilisé');
+      await fetchGuide(true);
+    } catch (cause) {
+      setIncidentMessage(errorMessage(cause, 'Décision impossible'));
+    } finally {
+      setReviewingIncident(null);
+    }
+  };
+
   const handleTogglePlace = async (placeKey: string) => {
     setTogglingPlace(placeKey);
     setPlacesMap(prev => ({ ...prev, [placeKey]: !prev[placeKey] }));
@@ -294,7 +335,7 @@ export default function AdminGuideDetailPage() {
         <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.6rem', fontWeight: 700, color: '#1A1209', margin: 0, flex: 1 }}>
           {guide.user.name || guide.user.firstName || 'Guide'}
         </h1>
-        {guide.slug && (
+        {guide.slug && guide.status === 'ACTIVE' && (
           <Link href={`/guides/${guide.slug}`} target="_blank" style={{ padding: '0.5rem 1rem', border: '1px solid #E8DFC8', borderRadius: 50, fontSize: '0.78rem', fontWeight: 600, color: '#7A6D5A', textDecoration: 'none', background: 'white' }}>
             Voir profil public ↗
           </Link>
@@ -394,7 +435,7 @@ export default function AdminGuideDetailPage() {
       {/* Traçabilité de création et d'approbation */}
       <div style={{ ...sectionStyle, gap: '0.75rem' }}>
         <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Traçabilité du profil</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
           <div>
             <div style={labelStyle}>Créé par</div>
             <div style={{ fontSize: '0.85rem', color: '#1A1209', fontWeight: 600 }}>
@@ -402,6 +443,12 @@ export default function AdminGuideDetailPage() {
             </div>
             <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 3 }}>
               {guide.createdByType === 'SELF_APPLICATION' ? 'Candidature guide validée' : guide.createdByType.replace('_', ' ')} · {new Date(guide.createdAt).toLocaleDateString('fr-FR')}
+            </div>
+          </div>
+          <div>
+            <div style={labelStyle}>Profil soumis</div>
+            <div style={{ fontSize: '0.85rem', color: '#1A1209', fontWeight: 600 }}>
+              {guide.profileSubmittedAt ? new Date(guide.profileSubmittedAt).toLocaleString('fr-FR') : 'Pas encore soumis'}
             </div>
           </div>
           <div>
@@ -447,12 +494,44 @@ export default function AdminGuideDetailPage() {
       )}
       {profileChangeMessage && <div style={{ padding: '0.75rem 1rem', borderRadius: 8, background: profileChangeMessage.startsWith('✓') ? '#D1FAE5' : '#FEE2E2', color: profileChangeMessage.startsWith('✓') ? '#166534' : '#991B1B', fontSize: '0.82rem', fontWeight: 600 }}>{profileChangeMessage}</div>}
 
+      <div style={{ ...sectionStyle, borderColor: guide.permanentlyDeactivatedAt ? '#B91C1C' : '#E8DFC8' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+          <div>
+            <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Incidents de réservation</div>
+            <div style={{ color: '#7A6D5A', fontSize: '0.75rem', marginTop: 3 }}>Seuls les incidents validés par Admin sont comptabilisés.</div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <strong style={{ display: 'block', fontSize: '1.5rem', color: guide.cancellationCount >= 3 ? '#B91C1C' : '#1A1209' }}>{guide.cancellationCount} / 3</strong>
+            <span style={{ fontSize: '0.68rem', color: guide.permanentlyDeactivatedAt ? '#B91C1C' : '#7A6D5A', fontWeight: 800 }}>{guide.permanentlyDeactivatedAt ? 'DÉSACTIVATION DÉFINITIVE' : 'INCIDENTS COMPTABILISÉS'}</span>
+          </div>
+        </div>
+        {guide.reservationIncidents.length === 0 ? (
+          <div style={{ padding: '1rem', borderRadius: 8, background: '#F9FAFB', color: '#7A6D5A', fontSize: '0.8rem' }}>Aucun incident réel enregistré.</div>
+        ) : guide.reservationIncidents.map(incident => (
+          <div key={incident.id} style={{ border: `1px solid ${incident.status === 'PENDING' ? '#F2D08B' : '#E8DFC8'}`, background: incident.status === 'PENDING' ? '#FFF7E5' : '#F9FAFB', borderRadius: 10, padding: '0.9rem', display: 'grid', gap: '0.55rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+              <strong style={{ color: '#1A1209', fontSize: '0.82rem' }}>{incident.refNumber} · {incident.type === 'NO_RESPONSE' ? 'Absence de réponse' : 'Indisponibilité déclarée'}</strong>
+              <span style={{ fontSize: '0.65rem', fontWeight: 800, color: incident.status === 'COUNTED' ? '#B91C1C' : incident.status === 'EXCUSED' ? '#166534' : '#92400E' }}>{incident.status === 'COUNTED' ? 'COMPTABILISÉ' : incident.status === 'EXCUSED' ? 'NON COMPTABILISÉ' : 'À EXAMINER'}</span>
+            </div>
+            <div style={{ color: '#4A3F30', fontSize: '0.78rem', whiteSpace: 'pre-wrap' }}>{incident.reason || 'Aucun motif communiqué'}</div>
+            <div style={{ color: '#7A6D5A', fontSize: '0.68rem' }}>Signalé le {new Date(incident.reportedAt).toLocaleString('fr-FR')}{incident.reviewedByEmail ? ` · traité par ${incident.reviewedByEmail}` : ''}</div>
+            {incident.status === 'PENDING' && (
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <button onClick={() => reviewIncident(incident, 'COUNT')} disabled={reviewingIncident === incident.id} style={{ border: 0, borderRadius: 50, padding: '0.5rem 1rem', background: '#B91C1C', color: 'white', fontWeight: 700, cursor: reviewingIncident ? 'wait' : 'pointer' }}>Comptabiliser</button>
+                <button onClick={() => reviewIncident(incident, 'EXCUSE')} disabled={reviewingIncident === incident.id} style={{ border: '1px solid #86EFAC', borderRadius: 50, padding: '0.5rem 1rem', background: 'white', color: '#166534', fontWeight: 700, cursor: reviewingIncident ? 'wait' : 'pointer' }}>Ne pas comptabiliser</button>
+              </div>
+            )}
+          </div>
+        ))}
+        {incidentMessage && <div style={{ color: incidentMessage.startsWith('✓') ? '#166534' : '#B91C1C', fontSize: '0.8rem', fontWeight: 700 }}>{incidentMessage}</div>}
+      </div>
+
       {/* Section 1b — Gestion des accès */}
       <div style={{ ...sectionStyle, gap: '0.875rem' }}>
         <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Gestion des accès</div>
 
         {/* REVIEW or DRAFT → activate */}
-        {(guide.status === 'REVIEW' || guide.status === 'DRAFT') && (
+        {guide.status === 'REVIEW' && (
             <button
               onClick={() => handleAccess('activate')}
               disabled={activating}
@@ -474,7 +553,7 @@ export default function AdminGuideDetailPage() {
         )}
 
         {/* SUSPENDED → reactivate */}
-        {guide.status === 'SUSPENDED' && (
+        {guide.status === 'SUSPENDED' && !guide.permanentlyDeactivatedAt && (
           <button
             onClick={() => handleAccess('activate')}
             disabled={activating}
@@ -482,6 +561,13 @@ export default function AdminGuideDetailPage() {
           >
             {activating ? '…' : 'Réactiver le profil'}
           </button>
+        )}
+
+        {guide.status === 'DRAFT' && (
+          <div style={{ color: '#7A6D5A', fontSize: '0.78rem' }}>Le Guide doit soumettre son profil depuis son espace avant que l’administration puisse l’activer.</div>
+        )}
+        {guide.permanentlyDeactivatedAt && (
+          <div style={{ color: '#B91C1C', fontSize: '0.78rem', fontWeight: 800 }}>Ce compte ne peut plus être réactivé : trois incidents ont été comptabilisés.</div>
         )}
 
         {/* Action result banner (validate / suspend / reactivate) */}

@@ -35,8 +35,8 @@ type Reservation = {
       occurredAt: string;
     } | null;
   } | null;
-  guideConfirmationStatus: 'NONE' | 'PENDING' | 'PARTIAL' | 'CONFIRMED';
-  missions: Array<{ id: string; city: string; guide: string; status: 'PENDING' | 'CONFIRMED'; requestedAt: string | null; confirmedAt: string | null }>;
+  guideConfirmationStatus: 'NONE' | 'PENDING' | 'PARTIAL' | 'CONFIRMED' | 'DECLINED' | 'NO_RESPONSE';
+  missions: Array<{ id: string; city: string; guide: string; status: 'PENDING' | 'CONFIRMED' | 'DECLINED' | 'NO_RESPONSE'; requestedAt: string | null; confirmedAt: string | null }>;
   createdAt: string;
 };
 
@@ -60,6 +60,8 @@ const GUIDE_CONFIRMATION_CONFIG = {
   PENDING: { label: 'Guide en attente', color: '#B45309', bg: '#FEF3C7' },
   PARTIAL: { label: 'Partielle', color: '#1D4ED8', bg: '#DBEAFE' },
   CONFIRMED: { label: 'Guide confirmé', color: '#047857', bg: '#D1FAE5' },
+  DECLINED: { label: 'Guide indisponible', color: '#B91C1C', bg: '#FEE2E2' },
+  NO_RESPONSE: { label: 'Sans réponse', color: '#B91C1C', bg: '#FEE2E2' },
 } as const;
 
 const PAYMENT_STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
@@ -104,7 +106,7 @@ export default function AdminReservations() {
       if (!res.ok) throw new Error('Erreur ' + res.status);
       const data = await res.json();
       setReservations(data.reservations || []);
-    } catch (e: any) { setError(e.message || 'Erreur réseau'); }
+    } catch (cause: unknown) { setError(cause instanceof Error ? cause.message : 'Erreur réseau'); }
     setLoading(false);
   };
 
@@ -113,10 +115,10 @@ export default function AdminReservations() {
   useEffect(() => {
     fetch('/api/admin/guides')
       .then(r => r.json())
-      .then(data => {
+      .then((data: { guides?: Array<{ id: string; name: string; city: string; status: string }> }) => {
         setAllGuides((data.guides || [])
-          .filter((g: any) => g.status === 'ACTIVE')
-          .map((g: any) => ({ id: g.id, name: g.name, city: g.city })))
+          .filter(g => g.status === 'ACTIVE')
+          .map(g => ({ id: g.id, name: g.name, city: g.city })))
       })
       .catch(() => {})
   }, []);
@@ -185,8 +187,8 @@ export default function AdminReservations() {
       setTransferNewGuideId('');
       setTransferMotif('');
       window.location.reload();
-    } catch (e: any) {
-      alert('Erreur : ' + e.message);
+    } catch (cause: unknown) {
+      alert('Erreur : ' + (cause instanceof Error ? cause.message : 'Action impossible'));
     }
     setSubmittingTransfer(false);
   };

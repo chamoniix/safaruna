@@ -53,7 +53,11 @@ export async function GET() {
   return NextResponse.json({
     reservations: reservations.map(reservation => ({
       ...reservation,
-      guideConfirmationStatus: reservation.missions.every(mission => mission.guideConfirmationStatus === 'CONFIRMED') ? 'CONFIRMED' : 'PENDING',
+      guideConfirmationStatus: reservation.missions.some(mission => mission.guideConfirmationStatus === 'NO_RESPONSE')
+        ? 'NO_RESPONSE'
+        : reservation.missions.some(mission => mission.guideConfirmationStatus === 'DECLINED')
+          ? 'DECLINED'
+          : reservation.missions.every(mission => mission.guideConfirmationStatus === 'CONFIRMED') ? 'CONFIRMED' : 'PENDING',
       guideEarning: reservation.guideEarnings[0]
         ? {
             service: reservation.guideEarnings[0].serviceNetCents / 100,

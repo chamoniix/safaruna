@@ -30,6 +30,42 @@ export const guideProfileChangesSchema = guideProfileChangesObjectSchema
 export type GuideProfileChanges = z.infer<typeof guideProfileChangesSchema>
 export class NoGuideProfileChangesError extends Error {}
 
+const GUIDE_PROFILE_REQUIRED_LABELS: Record<string, string> = {
+  firstName: 'prénom',
+  lastName: 'nom',
+  phoneWhatsapp: 'WhatsApp',
+  bio: 'présentation',
+  city: 'ville principale',
+  gender: 'genre',
+  nationality: 'nationalité',
+  experienceYears: 'années d’expérience',
+  languages: 'langue parlée',
+  serviceCities: 'ville proposée',
+}
+
+export function missingRequiredGuideProfileFields(input: {
+  firstName: string | null
+  lastName: string | null
+  phoneWhatsapp: string | null
+  bio: string | null
+  city: string | null
+  gender: string | null
+  nationality: string | null
+  experienceYears: number | null
+  languages: string[]
+  servesMakkah: boolean
+  servesMadinah: boolean
+}) {
+  const missing: string[] = []
+  for (const key of ['firstName', 'lastName', 'phoneWhatsapp', 'bio', 'city', 'gender', 'nationality'] as const) {
+    if (!input[key]?.trim()) missing.push(GUIDE_PROFILE_REQUIRED_LABELS[key])
+  }
+  if (input.experienceYears === null) missing.push(GUIDE_PROFILE_REQUIRED_LABELS.experienceYears)
+  if (input.languages.length === 0) missing.push(GUIDE_PROFILE_REQUIRED_LABELS.languages)
+  if (!input.servesMakkah && !input.servesMadinah) missing.push(GUIDE_PROFILE_REQUIRED_LABELS.serviceCities)
+  return missing
+}
+
 type StoredValues = Record<string, string | number | null | string[]>
 
 function compactChanges(changes: GuideProfileChanges): GuideProfileChanges {

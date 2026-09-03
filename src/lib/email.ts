@@ -26,6 +26,9 @@ export type EmailCategory =
   | 'GUIDE_PASSWORD_CHANGED'
   | 'GUIDE_PASSWORD_RESET'
   | 'GUIDE_PLACE_SUGGESTION'
+  | 'GUIDE_PROFILE_ACTIVATED'
+  | 'GUIDE_PROFILE_REVIEW_SUBMITTED'
+  | 'GUIDE_RESERVATION_INCIDENT'
   | 'GUIDE_RESERVATION_CONFIRMED'
   | 'PELERIN_EMAIL_VERIFICATION'
   | 'PELERIN_EMAIL_VERIFIED'
@@ -500,9 +503,34 @@ export function sendGuideAccess(opts: {
       <div style="text-align:center;padding:8px 0;">
         ${btn('Définir mon mot de passe', setupUrl)}
       </div>
-      ${p('<small style="color:#9A8D7A;">Ce lien est personnel, utilisable une seule fois et expire dans <strong>1 heure</strong>. En cas de problème : <a href="mailto:contact@safaruma.com" style="color:#C9A84C;">contact@safaruma.com</a></small>')}
+      ${p('<small style="color:#9A8D7A;">Ce lien est personnel, utilisable une seule fois et expire dans <strong>48 heures</strong>. En cas de problème : <a href="mailto:contact@safaruma.com" style="color:#C9A84C;">contact@safaruma.com</a></small>')}
     `),
   });
+}
+
+export function sendGuideProfileActivated(opts: {
+  to: string;
+  name: string;
+  profileUrl: string;
+}): Promise<EmailSendResult> {
+  return sendEmail({
+    category: 'GUIDE_PROFILE_ACTIVATED',
+    retryable: true,
+    idempotencyKey: `guide-profile-activated:${opts.to.toLowerCase()}:${opts.profileUrl}`,
+    reference: { type: 'GUIDE_PROFILE', id: opts.profileUrl },
+    to: { email: opts.to, name: opts.name },
+    subject: 'Votre profil Guide SAFARUMA est en ligne',
+    html: baseTemplate(`
+      ${heading(`Votre profil est en ligne, ${escapeHtml(opts.name)} !`)}
+      ${badge('PROFIL ACTIF ✓', '#1D5C3A')}
+      ${p('Votre profil Guide est désormais visible par les pèlerins sur SAFARUMA.')}
+      <div style="background:#FFF7E5;border:1px solid #F2D08B;border-radius:12px;padding:18px 20px;margin:18px 0;color:#7C5A20;font-size:13px;line-height:1.7;">
+        Vérifiez soigneusement votre calendrier et désactivez immédiatement toute date ou ville où vous n’êtes pas disponible. Une réservation laissée sans réponse entraîne la suspension du profil. Toute annulation est examinée par l’administration et trois annulations comptabilisées entraînent une désactivation définitive.
+      </div>
+      ${divider()}
+      <div style="text-align:center;padding:8px 0;">${btn('Voir mon profil', opts.profileUrl)}</div>
+    `),
+  })
 }
 
 // ─── 4. Confirmation de réservation ─────────────────────────────

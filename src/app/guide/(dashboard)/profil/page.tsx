@@ -91,6 +91,9 @@ export default function GuideProfil() {
   const [passwordError, setPasswordError] = useState('');
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [pendingChangeRequest, setPendingChangeRequest] = useState<Profile['pendingChangeRequest']>(null);
+  const [submittingProfile, setSubmittingProfile] = useState(false);
+  const [profileSubmissionMessage, setProfileSubmissionMessage] = useState('');
+  const [profileSubmissionError, setProfileSubmissionError] = useState('');
 
   // Editable fields
   const [firstName, setFirstName] = useState('');
@@ -190,6 +193,23 @@ export default function GuideProfil() {
       setSuccess('Modification des langues envoyée à l’administration.');
     } catch {
       setLangError('Impossible de supprimer cette langue.');
+    }
+  }
+
+  async function submitProfileForReview() {
+    setSubmittingProfile(true);
+    setProfileSubmissionMessage('');
+    setProfileSubmissionError('');
+    try {
+      const response = await fetch('/api/guide/profil/submit', { method: 'POST' });
+      const data = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(data.error || 'Envoi impossible.');
+      setProfile(current => current ? { ...current, status: 'REVIEW' } : current);
+      setProfileSubmissionMessage('Votre profil a été transmis. L’administration le traitera sous 48 h.');
+    } catch (cause) {
+      setProfileSubmissionError(cause instanceof Error ? cause.message : 'Envoi impossible.');
+    } finally {
+      setSubmittingProfile(false);
     }
   }
 
@@ -298,7 +318,7 @@ export default function GuideProfil() {
           </div>
           <div style={{ fontSize: '0.72rem', color: '#9CA3AF', marginTop: 2 }}>Guide depuis {profile.createdAt}</div>
         </div>
-        {profile.slug && (
+        {profile.slug && profile.status === 'ACTIVE' && (
           <Link href={`/guides/${profile.slug}`} target="_blank" style={{ fontSize: '0.75rem', fontWeight: 700, color: '#C9A84C', border: '1px solid #E8DFC8', padding: '0.4rem 1rem', borderRadius: 20, textDecoration: 'none', whiteSpace: 'nowrap' }}>
             Voir profil public ↗
           </Link>
@@ -308,6 +328,26 @@ export default function GuideProfil() {
       {pendingChangeRequest && (
         <div style={{ background: '#FEF3C7', border: '1px solid #F59E0B', borderRadius: 10, padding: '0.85rem 1rem', color: '#92400E', fontSize: '0.8rem', lineHeight: 1.6 }}>
           Une modification de votre profil est en attente de validation par l&apos;administration. Votre profil public actuel reste inchangé.
+        </div>
+      )}
+
+      {(profile.status === 'DRAFT' || profile.status === 'REVIEW') && (
+        <div style={{ ...card, padding: '1.25rem', borderColor: profile.status === 'REVIEW' ? '#F2D08B' : '#C9A84C', background: profile.status === 'REVIEW' ? '#FFF7E5' : 'white' }}>
+          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.25rem', fontWeight: 700, color: '#1A1209' }}>
+            {profile.status === 'REVIEW' ? 'Profil en cours de validation' : 'Finaliser la publication de mon profil'}
+          </div>
+          <p style={{ margin: '0.45rem 0 0', color: '#7A6D5A', fontSize: '0.8rem', lineHeight: 1.6 }}>
+            {profile.status === 'REVIEW'
+              ? 'Votre profil reste invisible au public pendant le contrôle. L’administration le traitera sous 48 h.'
+              : 'Vérifiez vos informations, vos langues, vos villes, vos lieux et votre calendrier. Enregistrez vos modifications avant de soumettre le profil.'}
+          </p>
+          {profile.status === 'DRAFT' && (
+            <button type="button" onClick={submitProfileForReview} disabled={submittingProfile} style={{ marginTop: '1rem', padding: '0.65rem 1.4rem', border: 0, borderRadius: 50, background: submittingProfile ? '#E8DFC8' : '#1D5C3A', color: submittingProfile ? '#7A6D5A' : 'white', fontWeight: 800, cursor: submittingProfile ? 'wait' : 'pointer' }}>
+              {submittingProfile ? 'Transmission…' : 'Soumettre mon profil pour validation'}
+            </button>
+          )}
+          {profileSubmissionMessage && <div style={{ marginTop: '0.75rem', color: '#166534', fontSize: '0.8rem', fontWeight: 700 }}>{profileSubmissionMessage}</div>}
+          {profileSubmissionError && <div style={{ marginTop: '0.75rem', color: '#B91C1C', fontSize: '0.8rem', fontWeight: 700 }}>{profileSubmissionError}</div>}
         </div>
       )}
 

@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuditDetail, adminAuditFields, checkAdmin, getAdminActor, getAdminAuditContext } from '@/lib/check-admin';
 import prisma from '@/lib/prisma';
-import { sendGuideAccess } from '@/lib/email';
+import { sendGuideAccess, sendGuideProfileActivated } from '@/lib/email';
 import { createHash, randomBytes } from 'node:crypto';
 import { Prisma } from '@prisma/client';
+import { missingRequiredGuideProfileFields } from '@/lib/guide-profile-changes';
 
 const EMAIL_ALREADY_USED = 'Adresse e-mail déjà utilisée. Veuillez en utiliser une autre.';
 
@@ -18,6 +19,10 @@ export async function GET(req: NextRequest) {
       changeRequests: {
         where: { status: 'PENDING' },
         take: 1,
+        select: { id: true },
+      },
+      reservationIncidents: {
+        where: { status: 'PENDING' },
         select: { id: true },
       },
     },
@@ -38,6 +43,9 @@ export async function GET(req: NextRequest) {
       status: g.status,
       slug: g.slug || '',
       pendingProfileChange: g.changeRequests.length > 0,
+      cancellationCount: g.cancellationCount,
+      permanentlyDeactivatedAt: g.permanentlyDeactivatedAt,
+      pendingIncidentCount: g.reservationIncidents.length,
     })),
   });
 }
@@ -80,7 +88,7 @@ export async function POST(req: NextRequest) {
 
   const invitationToken = randomBytes(32).toString('hex');
   const invitationTokenHash = createHash('sha256').update(invitationToken).digest('hex');
-  const invitationExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
+  const invitationExpiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXTAUTH_URL || 'https://safaruma.com';
   const setupUrl = `${baseUrl}/guide/reinitialiser-mot-de-passe?token=${invitationToken}`;
 
@@ -98,7 +106,7 @@ export async function POST(req: NextRequest) {
           guideProfile: {
             create: {
               slug,
-              status: 'REVIEW',
+              status: 'DRAFT',
               createdByType: actor.role,
               createdByAdminId: actor.id,
               createdByEmail: actor.email,
@@ -122,7 +130,7 @@ export async function POST(req: NextRequest) {
           action: 'GUIDE_CREATED_BY_ADMIN',
           target: account.id,
           detail: adminAuditDetail(auditContext, { email, slug, guideAccountId: account.id, guideProfileId: account.guideProfile?.id }),
-          after: { email, slug, status: 'REVIEW', createdByType: actor.role, createdByEmail: actor.email },
+          after: { email, slug, status: 'DRAFT', createdByType: actor.role, createdByEmail: actor.email },
           ...adminAuditFields(auditContext),
         },
       });
@@ -178,10 +186,65 @@ export async function PATCH(req: NextRequest) {
   }
   const status = action === 'activate' ? 'ACTIVE' : 'SUSPENDED';
 
-  const profile = await prisma.guideProfile.findUnique({ where: { id: guideId }, select: { guideAccountId: true, status: true } });
+  const profile = await prisma.guideProfile.findUnique({
+    where: { id: guideId },
+    select: {
+      guideAccountId: true,
+      status: true,
+      slug: true,
+      bio: true,
+      city: true,
+      gender: true,
+      nationality: true,
+      experienceYears: true,
+      servesMakkah: true,
+      servesMadinah: true,
+      permanentlyDeactivatedAt: true,
+      changeRequests: { where: { status: 'PENDING' }, take: 1, select: { id: true } },
+      languages: { select: { languageCode: true } },
+      guideAccount: { select: { email: true, displayName: true, firstName: true, lastName: true, phoneWhatsapp: true } },
+    },
+  });
   if (!profile) return NextResponse.json({ error: 'Guide introuvable' }, { status: 404 });
+  if (action === 'activate' && profile.permanentlyDeactivatedAt) {
+    return NextResponse.json({ error: 'Ce Guide est définitivement désactivé après trois annulations comptabilisées.' }, { status: 409 });
+  }
+  if (action === 'activate' && profile.status === 'DRAFT') {
+    return NextResponse.json({ error: 'Le Guide doit d’abord soumettre son profil pour validation.' }, { status: 409 });
+  }
+  if (action === 'activate' && (profile.status === 'DRAFT' || profile.status === 'REVIEW') && profile.changeRequests.length > 0) {
+    return NextResponse.json({ error: 'Validez ou rejetez d’abord les modifications de profil en attente.' }, { status: 409 });
+  }
+  if (action === 'activate') {
+    const missing = missingRequiredGuideProfileFields({
+      firstName: profile.guideAccount?.firstName || null,
+      lastName: profile.guideAccount?.lastName || null,
+      phoneWhatsapp: profile.guideAccount?.phoneWhatsapp || null,
+      bio: profile.bio,
+      city: profile.city,
+      gender: profile.gender,
+      nationality: profile.nationality,
+      experienceYears: profile.experienceYears,
+      languages: profile.languages.map(language => language.languageCode),
+      servesMakkah: profile.servesMakkah,
+      servesMadinah: profile.servesMadinah,
+    });
+    if (missing.length > 0) {
+      return NextResponse.json({ error: `Profil incomplet : ${missing.join(', ')}.` }, { status: 409 });
+    }
+  }
   await prisma.$transaction([
-    prisma.guideProfile.update({ where: { id: guideId }, data: { status } }),
+    prisma.guideProfile.update({
+      where: { id: guideId },
+      data: {
+        status,
+        ...(status === 'ACTIVE' && {
+          approvedByAdminId: actor.id,
+          approvedByEmail: actor.email,
+          approvedAt: new Date(),
+        }),
+      },
+    }),
     ...(profile.guideAccountId ? [prisma.guideAccount.update({ where: { id: profile.guideAccountId }, data: { status: status === 'SUSPENDED' ? 'SUSPENDED' : 'ACTIVE' } })] : []),
     prisma.auditLog.create({
       data: {
@@ -197,6 +260,17 @@ export async function PATCH(req: NextRequest) {
       },
     }),
   ]);
+
+  if (status === 'ACTIVE' && profile.status !== 'ACTIVE' && profile.guideAccount?.email && profile.slug) {
+    const name = profile.guideAccount.displayName
+      || `${profile.guideAccount.firstName ?? ''} ${profile.guideAccount.lastName ?? ''}`.trim()
+      || 'Guide';
+    await sendGuideProfileActivated({
+      to: profile.guideAccount.email,
+      name,
+      profileUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://safaruma.com'}/guides/${profile.slug}`,
+    }).catch(error => console.error('[guide activation email]', error));
+  }
 
   return NextResponse.json({ success: true });
 }

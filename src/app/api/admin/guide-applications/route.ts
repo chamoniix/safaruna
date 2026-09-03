@@ -213,7 +213,7 @@ export async function PATCH(req: NextRequest) {
   const slug = await availableSlug(application.firstName, application.lastName)
   const invitationToken = randomBytes(32).toString('hex')
   const invitationTokenHash = createHash('sha256').update(invitationToken).digest('hex')
-  const invitationExpiresAt = new Date(Date.now() + 60 * 60 * 1000)
+  const invitationExpiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000)
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXTAUTH_URL || 'https://safaruma.com'
   const setupUrl = `${baseUrl}/guide/reinitialiser-mot-de-passe?token=${invitationToken}`
   const now = new Date()
@@ -251,9 +251,6 @@ export async function PATCH(req: NextRequest) {
             createdByType: actor.role,
             createdByAdminId: actor.id,
             createdByEmail: actor.email,
-            approvedByAdminId: actor.id,
-            approvedByEmail: actor.email,
-            approvedAt: now,
             languages: {
               create: application.languages.map(languageCode => ({ languageCode, level: 'NATIVE' })),
             },
@@ -302,7 +299,8 @@ export async function PATCH(req: NextRequest) {
           status: 'APPROVED',
           reviewNotes: reviewNotes?.trim() || null,
           guideProfileId: guideAccount.guideProfile?.id,
-          approvedByEmail: actor.email,
+          applicationApprovedByEmail: actor.email,
+          publicProfileStatus: 'DRAFT',
         },
         ...adminAuditFields(auditContext),
       },

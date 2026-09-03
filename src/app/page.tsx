@@ -901,7 +901,7 @@ function GuidesSection({ openModal }: { openModal: (item: ModalContent) => void 
             Voir tous les guides
           </Link>
         </Reveal>
-        <Carousel label="Guides privés SAFARUMA">
+        <Carousel label="Guides privés SAFARUMA" auto={false}>
           {carouselGuides.map(item => {
             if (item.kind === 'feature') {
               const guide = guideProfileFeature;

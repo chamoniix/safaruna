@@ -20,3 +20,9 @@ test('le carrousel ne combine plus deux moteurs de défilement', () => {
   assert.match(home, /let position = ref\.current\?\.scrollLeft \?\? 0/)
   assert.match(home, /position \+= delta \* 0\.026/)
 })
+
+test('le bloc Guides ne clone pas un Guide réel pour simuler une boucle', () => {
+  assert.match(home, /<Carousel label="Guides privés SAFARUMA" auto=\{false\}>/)
+  assert.match(styles, /\.sfr-carousel-track\s*\{[\s\S]*overflow-x:\s*auto;/)
+  assert.match(styles, /-webkit-overflow-scrolling:\s*touch;/)
+})

@@ -215,7 +215,12 @@ model GuideProfile {
   diplomaUrl            String?
   idDocUrl              String?
   videoUrl              String?
+  bankAccountFirstName  String?
+  bankAccountLastName   String?
+  bankName              String?
+  bankCountry           String?
   ibanEncrypted         String?
+  bicEncrypted          String?
   status                ProfileStatus    @default(DRAFT)
   responseTimeAvg       String?
   completionRate        Int?             @default(0)
@@ -232,6 +237,9 @@ model GuideProfile {
   approvedByAdmin       AdminAccount?    @relation("GuideApprovedByAdmin", fields: [approvedByAdminId], references: [id], onDelete: SetNull)
   approvedByEmail       String?
   approvedAt            DateTime?
+  profileSubmittedAt    DateTime?
+  cancellationCount     Int              @default(0)
+  permanentlyDeactivatedAt DateTime?
   createdAt             DateTime         @default(now())
   updatedAt             DateTime         @default(now()) @updatedAt
 
@@ -247,6 +255,8 @@ model GuideProfile {
   reservationHolds     ReservationHold[]
   earnings             GuideEarning[]
   reviews              Review[]
+  changeRequests       GuideProfileChangeRequest[]
+  reservationIncidents GuideReservationIncident[]
 }
 
 enum GuideAccountStatus {
@@ -375,38 +385,84 @@ enum GuideApplicationSource {
   IMPORT
 }
 
+enum GuideProfileChangeRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model GuideProfileChangeRequest {
+  id                        String                          @id @default(cuid())
+  guideProfileId            String
+  guideProfile              GuideProfile                    @relation(fields: [guideProfileId], references: [id], onDelete: Cascade)
+  activeKey                 String?                         @unique
+  changes                   Json
+  before                    Json
+  status                    GuideProfileChangeRequestStatus @default(PENDING)
+  requestedByGuideAccountId String
+  requestedByEmail          String
+  submittedIp               String?
+  submittedCountry          String?
+  submittedCity             String?
+  submittedDevice           String?
+  submittedBrowser          String?
+  submittedUserAgent        String?
+  reviewedByAdminId         String?
+  reviewedByEmail           String?
+  reviewNotes               String?
+  reviewedAt                DateTime?
+  createdAt                 DateTime                        @default(now())
+  updatedAt                 DateTime                        @updatedAt
+
+  @@index([status, createdAt])
+  @@index([guideProfileId, createdAt])
+}
+
 model GuideApplication {
-  id                    String                 @id @default(cuid())
-  firstName             String
-  lastName              String
-  email                 String
-  whatsapp              String?
-  city                  String?
-  gender                String
-  serviceCities         String[]
-  nationality           String?
-  dateOfBirth           DateTime
-  bio                   String?
-  experienceYears       Int?
-  education             String
-  languages             String[]
-  masteredPlaces        String[]
-  ibanEncrypted         String?
-  acceptedCharteAt      DateTime
-  submittedIp           String?
-  submittedCountry      String?
-  submittedDevice       String?
-  submittedUserAgent    String?
-  source                GuideApplicationSource @default(PUBLIC_FORM)
-  status                GuideApplicationStatus @default(PENDING)
-  reviewNotes           String?
-  reviewedByAdminId     String?
-  reviewedByAdmin       AdminAccount?          @relation("GuideApplicationReviewedBy", fields: [reviewedByAdminId], references: [id], onDelete: SetNull)
-  reviewedByEmail       String?
-  reviewedAt            DateTime?
-  createdGuideProfileId String?
-  createdAt             DateTime               @default(now())
-  updatedAt             DateTime               @updatedAt
+  id                               String                 @id @default(cuid())
+  firstName                        String
+  lastName                         String
+  email                            String
+  whatsapp                         String?
+  city                             String?
+  gender                           String
+  serviceCities                    String[]
+  nationality                      String?
+  dateOfBirth                      DateTime
+  bio                              String?
+  experienceYears                  Int?
+  education                        String
+  languages                        String[]
+  masteredPlaces                   String[]
+  transportMode                    String
+  transportDetails                 String?
+  proposedOmraPriceCents           Int
+  proposedMadinahPackagePriceCents Int
+  proposedMadinahPlacePriceCents   Int
+  proposedMakkahPackagePriceCents  Int
+  proposedMakkahPlacePriceCents    Int
+  pricingDetails                   String?
+  bankAccountFirstName             String
+  bankAccountLastName              String
+  bankName                         String
+  bankCountry                      String
+  ibanEncrypted                    String?
+  bicEncrypted                     String?
+  acceptedCharteAt                 DateTime
+  submittedIp                      String?
+  submittedCountry                 String?
+  submittedDevice                  String?
+  submittedUserAgent               String?
+  source                           GuideApplicationSource @default(PUBLIC_FORM)
+  status                           GuideApplicationStatus @default(PENDING)
+  reviewNotes                      String?
+  reviewedByAdminId                String?
+  reviewedByAdmin                  AdminAccount?          @relation("GuideApplicationReviewedBy", fields: [reviewedByAdminId], references: [id], onDelete: SetNull)
+  reviewedByEmail                  String?
+  reviewedAt                       DateTime?
+  createdGuideProfileId            String?
+  createdAt                        DateTime               @default(now())
+  updatedAt                        DateTime               @updatedAt
 
   @@index([status, createdAt])
   @@index([email, createdAt])
@@ -610,6 +666,7 @@ model Reservation {
   paymentTransactions PaymentTransaction[]
   qualifiedReferral   Referral?          @relation("QualifiedReferral")
   promoCode           PromoCode?         @relation("PromoCodeReservation")
+  guideIncidents      GuideReservationIncident[]
 }
 
 model ReservationMission {
@@ -637,6 +694,41 @@ model ReservationMission {
 enum GuideConfirmationStatus {
   PENDING
   CONFIRMED
+  DECLINED
+  NO_RESPONSE
+}
+
+enum GuideReservationIncidentType {
+  GUIDE_DECLINED
+  NO_RESPONSE
+}
+
+enum GuideReservationIncidentStatus {
+  PENDING
+  COUNTED
+  EXCUSED
+}
+
+model GuideReservationIncident {
+  id              String                         @id @default(cuid())
+  reservationId   String
+  reservation     Reservation                    @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  guideProfileId  String
+  guideProfile    GuideProfile                   @relation(fields: [guideProfileId], references: [id])
+  type            GuideReservationIncidentType
+  reason          String?
+  status          GuideReservationIncidentStatus @default(PENDING)
+  reportedAt      DateTime                       @default(now())
+  reviewedByAdminId String?
+  reviewedByEmail String?
+  reviewNotes     String?
+  reviewedAt      DateTime?
+  createdAt       DateTime                       @default(now())
+  updatedAt       DateTime                       @updatedAt
+
+  @@unique([reservationId, guideProfileId])
+  @@index([guideProfileId, status, reportedAt])
+  @@index([status, reportedAt])
 }
 
 enum ReservationStatus {

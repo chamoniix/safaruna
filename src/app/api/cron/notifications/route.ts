@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma'
 import { baseTemplate, btn, divider, escapeHtml, heading, p, retryPendingEmails, sendEmail } from '@/lib/email'
 import { archiveExpiredAnalyticsEvents } from '@/lib/analytics-retention'
 import { confirmationDeadlines, reviewOpensAt } from '@/lib/guide-workflow'
+import { suspendGuideForReservationIncident } from '@/lib/guide-reservation-incidents'
 
 const DAY_MS = 86_400_000
 
@@ -111,18 +112,35 @@ export async function GET(req: NextRequest) {
       }
 
       if (new Date() >= deadlines.escalationAt) {
+        let suspended = false
+        try {
+          const incidentResult = await prisma.$transaction(tx => suspendGuideForReservationIncident(tx, {
+            reservationId: reservation.id,
+            guideProfileId,
+            refNumber: reservation.refNumber,
+            type: 'NO_RESPONSE',
+            reason: `Aucune réponse dans le délai ${deadlines.urgent ? 'urgent de 3 heures' : 'normal de 48 heures'}.`,
+            occurredAt: new Date(),
+            context: { actor: 'SYSTEM', actorRole: 'SYSTEM' },
+          }), { isolationLevel: Prisma.TransactionIsolationLevel.Serializable })
+          suspended = incidentResult.created
+        } catch (error) {
+          if (!(error instanceof Prisma.PrismaClientKnownRequestError && ['P2002', 'P2034'].includes(error.code))) throw error
+        }
+        if (!suspended) continue
         for (const admin of activeAdmins) {
           const result = await sendEmail({
-            category: 'GUIDE_CONFIRMATION_ESCALATION',
+            category: 'GUIDE_RESERVATION_INCIDENT',
             retryable: true,
             idempotencyKey: `guide-confirmation-escalation:${reservation.id}:${guideProfileId}:${admin.email.toLowerCase()}`,
             reference: { type: 'RESERVATION', id: reservation.id },
             to: { email: admin.email, name: admin.name || admin.role },
             subject: `[${admin.role}] Guide sans réponse — ${reservation.refNumber}`,
             html: baseTemplate(`
-              ${heading('Confirmation Guide en retard')}
-              ${p(`<strong>${escapeHtml(guideName)}</strong> n’a pas encore confirmé la réservation <strong>${escapeHtml(reservation.refNumber)}</strong>.`)}
+              ${heading('Guide suspendu après absence de réponse')}
+              ${p(`<strong>${escapeHtml(guideName)}</strong> n’a pas confirmé la réservation <strong>${escapeHtml(reservation.refNumber)}</strong> dans le délai ${deadlines.urgent ? 'urgent de 3 heures' : 'normal de 48 heures'}. Son profil a été suspendu automatiquement.`)}
               ${p(`Ville(s) : ${escapeHtml(cityNames)} · Départ : ${escapeHtml(dateFr(departureAt))}`)}
+              ${p('La réservation reste payée et confirmée. Aucun remboursement automatique n’a été déclenché. L’administration doit traiter l’incident et organiser la suite.')}
               ${divider()}
               ${btn('Ouvrir les réservations', `${process.env.NEXT_PUBLIC_BASE_URL || 'https://safaruma.com'}/admin/reservations`)}
             `),

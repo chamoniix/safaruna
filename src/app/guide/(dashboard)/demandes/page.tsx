@@ -9,7 +9,7 @@ type Mission = {
   startDate: string
   endDate: string
   selectedPlaces: string[] | null
-  guideConfirmationStatus: 'PENDING' | 'CONFIRMED'
+  guideConfirmationStatus: 'PENDING' | 'CONFIRMED' | 'DECLINED' | 'NO_RESPONSE'
   guideConfirmedAt: string | null
 }
 
@@ -27,7 +27,7 @@ type Reservation = {
   ihramAlert: boolean
   pelerin: { name: string | null; firstName: string | null; lastName: string | null; email: string | null }
   missions: Mission[]
-  guideConfirmationStatus: 'PENDING' | 'CONFIRMED'
+  guideConfirmationStatus: 'PENDING' | 'CONFIRMED' | 'DECLINED' | 'NO_RESPONSE'
   guideEarning: { service: number; places: number; transport: number; hotel: number; total: number; status: string } | null
 }
 
@@ -41,6 +41,9 @@ export default function GuideDemandesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
+  const [declineTarget, setDeclineTarget] = useState<Reservation | null>(null)
+  const [declineReason, setDeclineReason] = useState('')
+  const [declining, setDeclining] = useState(false)
 
   async function load() {
     setLoading(true)
@@ -74,9 +77,31 @@ export default function GuideDemandesPage() {
     setConfirmingId(id)
     const response = await fetch(`/api/guide/reservations/${id}/confirm`, { method: 'POST' })
     const data = await response.json().catch(() => ({}))
-    if (!response.ok) setError(data.error || 'La confirmation a échoué.')
+    if (!response.ok && data.suspended) window.location.assign('/guide/connexion')
+    else if (!response.ok) setError(data.error || 'La confirmation a échoué.')
     else await load()
     setConfirmingId(null)
+  }
+
+  async function declineReservation() {
+    if (!declineTarget || declineReason.trim().length < 10) {
+      setError('Expliquez la raison en au moins 10 caractères.')
+      return
+    }
+    setDeclining(true)
+    setError('')
+    const response = await fetch(`/api/guide/reservations/${declineTarget.id}/decline`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason: declineReason }),
+    })
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      setError(data.error || 'Le signalement a échoué.')
+      setDeclining(false)
+      return
+    }
+    window.location.assign('/guide/connexion')
   }
 
   const pending = reservations.filter(reservation => reservation.status === 'CONFIRMED' && reservation.guideConfirmationStatus === 'PENDING')
@@ -122,11 +147,29 @@ export default function GuideDemandesPage() {
             {reservation.ihramAlert && <div style={{ marginTop: 14, padding: 12, borderRadius: 9, color: '#991B1B', background: '#FEF2F2', border: '1px solid #FCA5A5', fontSize: 13, fontWeight: 700 }}>Alerte Ihram active pour cette réservation.</div>}
             <div style={{ marginTop: 16, paddingTop: 14, borderTop: '1px solid #EFE8DA', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
               <div><span style={{ color: '#7A6D5A', fontSize: 12 }}>Votre revenu net</span><div style={{ color: '#1D5C3A', fontSize: 21, fontWeight: 800 }}>{reservation.guideEarning ? `${reservation.guideEarning.total} €` : '—'}</div></div>
-              {isPending && <button type="button" onClick={() => confirmReservation(reservation.id)} disabled={confirmingId === reservation.id} style={{ border: 0, borderRadius: 999, padding: '12px 22px', background: '#1A1209', color: '#F0D897', fontWeight: 800, cursor: 'pointer', opacity: confirmingId === reservation.id ? .65 : 1 }}>{confirmingId === reservation.id ? 'Confirmation…' : 'Confirmer la réservation'}</button>}
+              {isPending && <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                <button type="button" onClick={() => { setDeclineTarget(reservation); setDeclineReason('') }} style={{ border: '1px solid #FCA5A5', borderRadius: 999, padding: '12px 18px', background: 'white', color: '#B91C1C', fontWeight: 800, cursor: 'pointer' }}>Je ne suis pas disponible</button>
+                <button type="button" onClick={() => confirmReservation(reservation.id)} disabled={confirmingId === reservation.id} style={{ border: 0, borderRadius: 999, padding: '12px 22px', background: '#1A1209', color: '#F0D897', fontWeight: 800, cursor: 'pointer', opacity: confirmingId === reservation.id ? .65 : 1 }}>{confirmingId === reservation.id ? 'Confirmation…' : 'Confirmer la réservation'}</button>
+              </div>}
             </div>
           </article>
         )
       })}
+
+      {declineTarget && (
+        <div role="dialog" aria-modal="true" aria-labelledby="decline-title" style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(26,18,9,.62)', display: 'grid', placeItems: 'center', padding: 16 }}>
+          <div style={{ width: '100%', maxWidth: 480, background: 'white', borderRadius: 16, padding: 24, boxShadow: '0 24px 70px rgba(0,0,0,.25)' }}>
+            <h2 id="decline-title" style={{ margin: 0, color: '#1A1209', fontSize: 23 }}>Signaler mon indisponibilité</h2>
+            <p style={{ color: '#7A6D5A', fontSize: 13, lineHeight: 1.65 }}>La réservation {declineTarget.refNumber} est déjà payée. Votre profil sera suspendu immédiatement pendant l’examen du motif par l’administration.</p>
+            <label style={{ display: 'block', color: '#4A3F30', fontSize: 12, fontWeight: 800, marginBottom: 6 }}>Motif obligatoire</label>
+            <textarea value={declineReason} onChange={event => setDeclineReason(event.target.value)} rows={5} maxLength={2000} placeholder="Expliquez précisément pourquoi vous ne pouvez pas assurer cette réservation…" style={{ width: '100%', boxSizing: 'border-box', border: '1px solid #E8DFC8', borderRadius: 10, padding: 12, resize: 'vertical', font: 'inherit', color: '#1A1209' }} />
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 9, marginTop: 16 }}>
+              <button type="button" onClick={() => setDeclineTarget(null)} disabled={declining} style={{ border: '1px solid #E8DFC8', borderRadius: 999, padding: '10px 17px', background: 'white', color: '#7A6D5A', fontWeight: 700 }}>Retour</button>
+              <button type="button" onClick={declineReservation} disabled={declining || declineReason.trim().length < 10} style={{ border: 0, borderRadius: 999, padding: '10px 17px', background: '#B91C1C', color: 'white', fontWeight: 800, opacity: declining || declineReason.trim().length < 10 ? .55 : 1 }}>{declining ? 'Envoi…' : 'Confirmer mon indisponibilité'}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

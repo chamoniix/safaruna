@@ -50,8 +50,12 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     reservations: reservations.map(r => {
       const confirmedMissions = r.missions.filter(mission => mission.guideConfirmationStatus === 'CONFIRMED').length;
+      const hasNoResponse = r.missions.some(mission => mission.guideConfirmationStatus === 'NO_RESPONSE');
+      const hasDeclined = r.missions.some(mission => mission.guideConfirmationStatus === 'DECLINED');
       const guideConfirmationStatus = r.missions.length === 0
         ? 'NONE'
+        : hasNoResponse ? 'NO_RESPONSE'
+        : hasDeclined ? 'DECLINED'
         : confirmedMissions === r.missions.length
           ? 'CONFIRMED'
           : confirmedMissions > 0 ? 'PARTIAL' : 'PENDING';

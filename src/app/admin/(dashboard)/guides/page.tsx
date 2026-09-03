@@ -15,6 +15,10 @@ type Guide = {
   createdByEmail: string | null;
   status: string;
   slug: string;
+  pendingProfileChange: boolean;
+  cancellationCount: number;
+  permanentlyDeactivatedAt: string | null;
+  pendingIncidentCount: number;
 };
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
@@ -49,8 +53,8 @@ export default function AdminGuidesPage() {
       if (!res.ok) throw new Error('Erreur ' + res.status);
       const data = await res.json();
       setGuides(data.guides || []);
-    } catch (e: any) {
-      setError(e.message || 'Erreur réseau');
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Erreur réseau');
     }
     setLoading(false);
   };
@@ -72,8 +76,8 @@ export default function AdminGuidesPage() {
       if (!res.ok) throw new Error(data.error || 'Erreur');
       setCreateResult({ slug: data.slug, accessEmailSent: data.accessEmailSent === true });
       await fetchGuides();
-    } catch (e: any) {
-      setCreateError(e.message);
+    } catch (cause) {
+      setCreateError(cause instanceof Error ? cause.message : 'Erreur');
     }
     setCreating(false);
   };
@@ -106,10 +110,11 @@ export default function AdminGuidesPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ guideId: guide.id, action }),
       });
-      if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Action impossible');
       await fetchGuides();
-    } catch {
-      alert('Erreur lors du changement de statut.');
+    } catch (cause) {
+      alert(cause instanceof Error ? cause.message : 'Erreur lors du changement de statut.');
     }
     setToggling(null);
   };
@@ -286,10 +291,14 @@ export default function AdminGuidesPage() {
                         <span style={{ display: 'inline-block', background: sc.bg, color: sc.color, fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.06em', padding: '0.28rem 0.65rem', borderRadius: 20, whiteSpace: 'nowrap' }}>
                           {sc.label}
                         </span>
+                        {g.pendingProfileChange && <span style={{ display: 'block', width: 'fit-content', marginTop: 5, background: '#FEF3C7', color: '#92400E', fontSize: '0.58rem', fontWeight: 800, padding: '0.22rem 0.55rem', borderRadius: 20, whiteSpace: 'nowrap' }}>MODIFICATION À VALIDER</span>}
+                        {g.pendingIncidentCount > 0 && <span style={{ display: 'block', width: 'fit-content', marginTop: 5, background: '#FEE2E2', color: '#B91C1C', fontSize: '0.58rem', fontWeight: 800, padding: '0.22rem 0.55rem', borderRadius: 20, whiteSpace: 'nowrap' }}>{g.pendingIncidentCount} INCIDENT À EXAMINER</span>}
+                        {g.cancellationCount > 0 && <span style={{ display: 'block', marginTop: 5, color: '#7A6D5A', fontSize: '0.62rem', fontWeight: 700 }}>{g.cancellationCount}/3 comptabilisé(s)</span>}
+                        {g.permanentlyDeactivatedAt && <span style={{ display: 'block', width: 'fit-content', marginTop: 5, background: '#7F1D1D', color: 'white', fontSize: '0.58rem', fontWeight: 800, padding: '0.22rem 0.55rem', borderRadius: 20, whiteSpace: 'nowrap' }}>DÉSACTIVÉ DÉFINITIVEMENT</span>}
                       </td>
                       <td style={{ padding: '0.875rem 1rem' }}>
                         <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                          <button
+                          {!g.permanentlyDeactivatedAt && g.status !== 'DRAFT' && <button
                             onClick={() => handleToggle(g)}
                             disabled={isToggling}
                             style={{
@@ -300,7 +309,7 @@ export default function AdminGuidesPage() {
                             }}
                           >
                             {isToggling ? '…' : isActive ? 'Suspendre' : 'Activer'}
-                          </button>
+                          </button>}
                           {g.slug && (
                             <>
                               <Link
@@ -309,13 +318,13 @@ export default function AdminGuidesPage() {
                               >
                                 Gérer ✏️
                               </Link>
-                              <Link
+                              {g.status === 'ACTIVE' && <Link
                                 href={`/guides/${g.slug}`}
                                 target="_blank"
                                 style={{ padding: '6px 14px', borderRadius: 50, border: '1px solid #E8DFC8', background: 'white', color: '#7A6D5A', fontSize: '0.75rem', fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center' }}
                               >
                                 Public ↗
-                              </Link>
+                              </Link>}
                             </>
                           )}
                         </div>

@@ -29,6 +29,12 @@ type Profile = {
   nationality: string | null;
   experienceYears: number | null;
   languages: { id: string; languageCode: string; level: string }[];
+  pendingChangeRequest: {
+    id: string;
+    changes: Record<string, unknown>;
+    createdAt: string;
+    updatedAt: string;
+  } | null;
   createdAt: string;
 };
 
@@ -84,6 +90,10 @@ export default function GuideProfil() {
   const [passwordMessage, setPasswordMessage] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const [pendingChangeRequest, setPendingChangeRequest] = useState<Profile['pendingChangeRequest']>(null);
+  const [submittingProfile, setSubmittingProfile] = useState(false);
+  const [profileSubmissionMessage, setProfileSubmissionMessage] = useState('');
+  const [profileSubmissionError, setProfileSubmissionError] = useState('');
 
   // Editable fields
   const [firstName, setFirstName] = useState('');
@@ -107,17 +117,22 @@ export default function GuideProfil() {
       .then(r => { if (!r.ok) throw new Error('Erreur ' + r.status); return r.json(); })
       .then(d => {
         const p: Profile = d.profile;
+        const pending = p.pendingChangeRequest?.changes || {};
         setProfile(p);
-        setFirstName(p.firstName || '');
-        setLastName(p.lastName || '');
-        setPhoneWhatsapp(p.phoneWhatsapp || '');
-        setCountry(p.country || '');
-        setBio(p.bio || '');
-        setCity(p.city || '');
-        setGender(p.gender || 'HOMME');
-        setNationality(p.nationality || '');
-        setExperienceYears(p.experienceYears?.toString() || '');
-        setLanguages(p.languages);
+        setPendingChangeRequest(p.pendingChangeRequest);
+        setFirstName(typeof pending.firstName === 'string' ? pending.firstName : p.firstName || '');
+        setLastName(typeof pending.lastName === 'string' ? pending.lastName : p.lastName || '');
+        setPhoneWhatsapp(typeof pending.phoneWhatsapp === 'string' ? pending.phoneWhatsapp : p.phoneWhatsapp || '');
+        setCountry(typeof pending.country === 'string' ? pending.country : p.country || '');
+        setBio(typeof pending.bio === 'string' ? pending.bio : p.bio || '');
+        setCity(typeof pending.city === 'string' ? pending.city : p.city || '');
+        setGender(pending.gender === 'HOMME' || pending.gender === 'FEMME' ? pending.gender : p.gender || 'HOMME');
+        setNationality(typeof pending.nationality === 'string' ? pending.nationality : p.nationality || '');
+        setExperienceYears(typeof pending.experienceYears === 'number' ? String(pending.experienceYears) : pending.experienceYears === null ? '' : p.experienceYears?.toString() || '');
+        const pendingLanguages = Array.isArray(pending.languages) ? pending.languages.filter(value => typeof value === 'string') as string[] : null;
+        setLanguages(pendingLanguages
+          ? pendingLanguages.map(languageCode => ({ id: `pending-${languageCode}`, languageCode, level: 'NATIVE' }))
+          : p.languages);
         setLoading(false);
       })
       .catch((e: Error) => { setError(e.message); setLoading(false); });
@@ -132,11 +147,12 @@ export default function GuideProfil() {
       const res = await fetch('/api/guide/profil', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ firstName, lastName, phoneWhatsapp, country, bio, city, gender, nationality, experienceYears }),
+        body: JSON.stringify({ firstName, lastName, phoneWhatsapp, country, bio, city, gender, nationality, experienceYears: experienceYears ? Number(experienceYears) : null }),
       });
-      if (!res.ok) throw new Error('Erreur lors de la sauvegarde');
-      setSuccess('Profil mis à jour avec succès.');
-      setProfile(p => p ? { ...p, firstName, lastName, name: `${firstName} ${lastName}`.trim() || p.name, phoneWhatsapp, country, bio, city, gender, nationality, experienceYears: parseInt(experienceYears) || null } : p);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erreur lors de l’envoi');
+      setPendingChangeRequest(data.pendingChangeRequest || null);
+      setSuccess('Demande envoyée à l’administration. Le profil public reste inchangé jusqu’à sa validation.');
     } catch (e: unknown) {
       setSaveError(e instanceof Error ? e.message : 'Erreur inconnue');
     } finally {
@@ -156,7 +172,9 @@ export default function GuideProfil() {
       });
       if (!res.ok) throw new Error((await res.json()).error || 'Erreur');
       const data = await res.json();
-      setLanguages(prev => [...prev, data.language]);
+      setLanguages((data.languages || []).map((languageCode: string) => ({ id: `pending-${languageCode}`, languageCode, level: 'NATIVE' })));
+      setPendingChangeRequest(data.pendingChangeRequest || null);
+      setSuccess('Modification des langues envoyée à l’administration.');
       if (selectRef.current) selectRef.current.value = '';
     } catch (e: unknown) {
       setLangError(e instanceof Error ? e.message : 'Erreur');
@@ -165,13 +183,33 @@ export default function GuideProfil() {
     }
   }
 
-  async function handleRemoveLanguage(id: string) {
+  async function handleRemoveLanguage(languageCode: string) {
     try {
-      const res = await fetch(`/api/guide/profil/languages?id=${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error();
-      setLanguages(prev => prev.filter(l => l.id !== id));
+      const res = await fetch(`/api/guide/profil/languages?languageCode=${encodeURIComponent(languageCode)}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Suppression impossible');
+      setLanguages((data.languages || []).map((code: string) => ({ id: `pending-${code}`, languageCode: code, level: 'NATIVE' })));
+      setPendingChangeRequest(data.pendingChangeRequest || null);
+      setSuccess('Modification des langues envoyée à l’administration.');
     } catch {
       setLangError('Impossible de supprimer cette langue.');
+    }
+  }
+
+  async function submitProfileForReview() {
+    setSubmittingProfile(true);
+    setProfileSubmissionMessage('');
+    setProfileSubmissionError('');
+    try {
+      const response = await fetch('/api/guide/profil/submit', { method: 'POST' });
+      const data = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(data.error || 'Envoi impossible.');
+      setProfile(current => current ? { ...current, status: 'REVIEW' } : current);
+      setProfileSubmissionMessage('Votre profil a été transmis. L’administration le traitera sous 48 h.');
+    } catch (cause) {
+      setProfileSubmissionError(cause instanceof Error ? cause.message : 'Envoi impossible.');
+    } finally {
+      setSubmittingProfile(false);
     }
   }
 
@@ -259,7 +297,7 @@ export default function GuideProfil() {
     );
   }
 
-  const displayName = `${firstName} ${lastName}`.trim() || profile.name;
+  const displayName = profile.name;
   const initials = displayName.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase() || 'G';
 
   return (
@@ -280,12 +318,38 @@ export default function GuideProfil() {
           </div>
           <div style={{ fontSize: '0.72rem', color: '#9CA3AF', marginTop: 2 }}>Guide depuis {profile.createdAt}</div>
         </div>
-        {profile.slug && (
+        {profile.slug && profile.status === 'ACTIVE' && (
           <Link href={`/guides/${profile.slug}`} target="_blank" style={{ fontSize: '0.75rem', fontWeight: 700, color: '#C9A84C', border: '1px solid #E8DFC8', padding: '0.4rem 1rem', borderRadius: 20, textDecoration: 'none', whiteSpace: 'nowrap' }}>
             Voir profil public ↗
           </Link>
         )}
       </div>
+
+      {pendingChangeRequest && (
+        <div style={{ background: '#FEF3C7', border: '1px solid #F59E0B', borderRadius: 10, padding: '0.85rem 1rem', color: '#92400E', fontSize: '0.8rem', lineHeight: 1.6 }}>
+          Une modification de votre profil est en attente de validation par l&apos;administration. Votre profil public actuel reste inchangé.
+        </div>
+      )}
+
+      {(profile.status === 'DRAFT' || profile.status === 'REVIEW') && (
+        <div style={{ ...card, padding: '1.25rem', borderColor: profile.status === 'REVIEW' ? '#F2D08B' : '#C9A84C', background: profile.status === 'REVIEW' ? '#FFF7E5' : 'white' }}>
+          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.25rem', fontWeight: 700, color: '#1A1209' }}>
+            {profile.status === 'REVIEW' ? 'Profil en cours de validation' : 'Finaliser la publication de mon profil'}
+          </div>
+          <p style={{ margin: '0.45rem 0 0', color: '#7A6D5A', fontSize: '0.8rem', lineHeight: 1.6 }}>
+            {profile.status === 'REVIEW'
+              ? 'Votre profil reste invisible au public pendant le contrôle. L’administration le traitera sous 48 h.'
+              : 'Vérifiez vos informations, vos langues, vos villes, vos lieux et votre calendrier. Enregistrez vos modifications avant de soumettre le profil.'}
+          </p>
+          {profile.status === 'DRAFT' && (
+            <button type="button" onClick={submitProfileForReview} disabled={submittingProfile} style={{ marginTop: '1rem', padding: '0.65rem 1.4rem', border: 0, borderRadius: 50, background: submittingProfile ? '#E8DFC8' : '#1D5C3A', color: submittingProfile ? '#7A6D5A' : 'white', fontWeight: 800, cursor: submittingProfile ? 'wait' : 'pointer' }}>
+              {submittingProfile ? 'Transmission…' : 'Soumettre mon profil pour validation'}
+            </button>
+          )}
+          {profileSubmissionMessage && <div style={{ marginTop: '0.75rem', color: '#166534', fontSize: '0.8rem', fontWeight: 700 }}>{profileSubmissionMessage}</div>}
+          {profileSubmissionError && <div style={{ marginTop: '0.75rem', color: '#B91C1C', fontSize: '0.8rem', fontWeight: 700 }}>{profileSubmissionError}</div>}
+        </div>
+      )}
 
       <div style={{ ...card, padding: '1.25rem' }}>
         <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209', marginBottom: '0.25rem' }}>Tarifs nets validés</div>
@@ -396,7 +460,7 @@ export default function GuideProfil() {
                 disabled={saving}
                 style={{ padding: '0.65rem 2rem', borderRadius: 50, fontWeight: 700, fontSize: '0.85rem', background: saving ? '#E8DFC8' : '#1A1209', color: saving ? '#7A6D5A' : '#F0D897', border: 'none', cursor: saving ? 'not-allowed' : 'pointer' }}
               >
-                {saving ? 'Sauvegarde…' : 'Sauvegarder'}
+                {saving ? 'Envoi…' : 'Envoyer pour validation'}
               </button>
             </div>
           </div>
@@ -407,7 +471,7 @@ export default function GuideProfil() {
       <div style={{ ...card, overflow: 'hidden' }}>
         <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid #F0EBE0' }}>
           <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Langues parlées</div>
-          <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>Sélectionnez vos langues une par une</div>
+          <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>Les changements sont publiés après validation par l&apos;administration.</div>
         </div>
         <div style={{ padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
 
@@ -421,7 +485,7 @@ export default function GuideProfil() {
                 >
                   {LANG_CODE_TO_LABEL[l.languageCode] || l.languageCode}
                   <button
-                    onClick={() => handleRemoveLanguage(l.id)}
+                    onClick={() => handleRemoveLanguage(l.languageCode)}
                     aria-label={`Supprimer ${LANG_CODE_TO_LABEL[l.languageCode] || l.languageCode}`}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 0.1rem', lineHeight: 1, color: '#9A8A7A', fontSize: '0.9rem', display: 'flex', alignItems: 'center' }}
                   >

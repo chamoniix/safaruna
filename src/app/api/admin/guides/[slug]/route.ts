@@ -38,6 +38,29 @@ export async function GET(
           include: { reservation: { select: { refNumber: true } } },
         },
         places: true,
+        changeRequests: {
+          where: { status: 'PENDING' },
+          orderBy: { updatedAt: 'desc' },
+          take: 1,
+          select: {
+            id: true,
+            changes: true,
+            before: true,
+            requestedByEmail: true,
+            submittedIp: true,
+            submittedCountry: true,
+            submittedCity: true,
+            submittedDevice: true,
+            submittedBrowser: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        },
+        reservationIncidents: {
+          orderBy: { reportedAt: 'desc' },
+          take: 20,
+          include: { reservation: { select: { refNumber: true } } },
+        },
       },
     });
 
@@ -106,6 +129,9 @@ export async function GET(
         createdAt: guide.createdAt,
         approvedByEmail: guide.approvedByEmail,
         approvedAt: guide.approvedAt,
+        profileSubmittedAt: guide.profileSubmittedAt,
+        cancellationCount: guide.cancellationCount,
+        permanentlyDeactivatedAt: guide.permanentlyDeactivatedAt,
         responseTimeAvg: guide.responseTimeAvg,
         completionRate: guide.completionRate,
         user: {
@@ -177,6 +203,18 @@ export async function GET(
           ? guide.interviewDate.toLocaleDateString('fr-FR')
           : null,
         interviewedBy: guide.interviewedBy,
+        pendingProfileChange: guide.changeRequests[0] || null,
+        reservationIncidents: guide.reservationIncidents.map(incident => ({
+          id: incident.id,
+          refNumber: incident.reservation.refNumber,
+          type: incident.type,
+          reason: incident.reason,
+          status: incident.status,
+          reportedAt: incident.reportedAt,
+          reviewedByEmail: incident.reviewedByEmail,
+          reviewNotes: incident.reviewNotes,
+          reviewedAt: incident.reviewedAt,
+        })),
         stats: {
           totalReservations,
           totalRevenue: Math.round(revenueAgg._sum.totalPrice || 0),

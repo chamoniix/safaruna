@@ -2,13 +2,13 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { confirmationDeadlines, publicReviewerName, reviewOpensAt } from '../src/lib/guide-workflow'
 
-test('confirmation standard: rappel 6h et escalade 24h', () => {
+test('confirmation standard: rappel 6h et suspension 48h', () => {
   const requestedAt = new Date('2026-09-01T08:00:00.000Z')
   const departureAt = new Date('2026-09-05T08:00:00.000Z')
   const deadlines = confirmationDeadlines(requestedAt, departureAt)
   assert.equal(deadlines.urgent, false)
   assert.equal(deadlines.reminderAt.toISOString(), '2026-09-01T14:00:00.000Z')
-  assert.equal(deadlines.escalationAt.toISOString(), '2026-09-02T08:00:00.000Z')
+  assert.equal(deadlines.escalationAt.toISOString(), '2026-09-03T08:00:00.000Z')
 })
 
 test('confirmation urgente: rappel 1h et escalade 3h', () => {

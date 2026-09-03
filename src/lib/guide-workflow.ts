@@ -5,7 +5,7 @@ export function confirmationDeadlines(requestedAt: Date, departureAt: Date) {
   return {
     urgent,
     reminderAt: new Date(requestedAt.getTime() + (urgent ? 1 : 6) * HOUR_MS),
-    escalationAt: new Date(requestedAt.getTime() + (urgent ? 3 : 24) * HOUR_MS),
+    escalationAt: new Date(requestedAt.getTime() + (urgent ? 3 : 48) * HOUR_MS),
   }
 }
 

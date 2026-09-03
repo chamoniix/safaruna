@@ -26,6 +26,9 @@ export type EmailCategory =
   | 'GUIDE_PASSWORD_CHANGED'
   | 'GUIDE_PASSWORD_RESET'
   | 'GUIDE_PLACE_SUGGESTION'
+  | 'GUIDE_PROFILE_ACTIVATED'
+  | 'GUIDE_PROFILE_REVIEW_SUBMITTED'
+  | 'GUIDE_RESERVATION_INCIDENT'
   | 'GUIDE_RESERVATION_CONFIRMED'
   | 'PELERIN_EMAIL_VERIFICATION'
   | 'PELERIN_EMAIL_VERIFIED'
@@ -447,15 +450,15 @@ export function sendWelcomeGuide(to: string, name: string): Promise<EmailSendRes
     subject: 'Candidature reçue — SAFARUMA Guide',
     html: baseTemplate(`
       ${heading(`Barak Allahu fik, ${escapeHtml(name)} !`)}
-      ${p('BarakAllahu fik. L\'équipe SAFARUMA a bien reçu votre candidature en tant que guide Certifié SAFARUMA. Nous l\'examinerons insha\'Allah et vous contacterons sous <strong>48h</strong>.')}
+      ${p('Barak Allahu fik. L\'équipe SAFARUMA a bien reçu votre candidature pour devenir Guide Certifié SAFARUMA. Votre demande est maintenant en cours d\'étude. Nous reviendrons vers vous prochainement si nous avons besoin d\'informations complémentaires.')}
       ${divider()}
       <div style="background:#FAF7F0;border-left:3px solid #C9A84C;padding:16px 20px;border-radius:0 12px 12px 0;margin:16px 0;">
         <div style="font-size:12px;font-weight:700;color:#C9A84C;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">Prochaines étapes</div>
         <ol style="margin:0;padding-left:20px;font-size:13px;color:#4A3F30;line-height:2;">
-          <li>Vérification de vos documents (48h)</li>
-          <li>Entretien téléphonique avec notre équipe</li>
-          <li>Activation de votre profil guide</li>
-          <li>Vos premiers pèlerins vous contactent</li>
+          <li>Étude de votre candidature par l\'équipe SAFARUMA</li>
+          <li>Échange ou entretien si votre profil est retenu</li>
+          <li>Création de votre espace Guide après validation</li>
+          <li>Publication séparée de votre profil après contrôle par l\'administration</li>
         </ol>
       </div>
       ${divider()}
@@ -500,9 +503,34 @@ export function sendGuideAccess(opts: {
       <div style="text-align:center;padding:8px 0;">
         ${btn('Définir mon mot de passe', setupUrl)}
       </div>
-      ${p('<small style="color:#9A8D7A;">Ce lien est personnel, utilisable une seule fois et expire dans <strong>1 heure</strong>. En cas de problème : <a href="mailto:contact@safaruma.com" style="color:#C9A84C;">contact@safaruma.com</a></small>')}
+      ${p('<small style="color:#9A8D7A;">Ce lien est personnel, utilisable une seule fois et expire dans <strong>48 heures</strong>. En cas de problème : <a href="mailto:contact@safaruma.com" style="color:#C9A84C;">contact@safaruma.com</a></small>')}
     `),
   });
+}
+
+export function sendGuideProfileActivated(opts: {
+  to: string;
+  name: string;
+  profileUrl: string;
+}): Promise<EmailSendResult> {
+  return sendEmail({
+    category: 'GUIDE_PROFILE_ACTIVATED',
+    retryable: true,
+    idempotencyKey: `guide-profile-activated:${opts.to.toLowerCase()}:${opts.profileUrl}`,
+    reference: { type: 'GUIDE_PROFILE', id: opts.profileUrl },
+    to: { email: opts.to, name: opts.name },
+    subject: 'Votre profil Guide SAFARUMA est en ligne',
+    html: baseTemplate(`
+      ${heading(`Votre profil est en ligne, ${escapeHtml(opts.name)} !`)}
+      ${badge('PROFIL ACTIF ✓', '#1D5C3A')}
+      ${p('Votre profil Guide est désormais visible par les pèlerins sur SAFARUMA.')}
+      <div style="background:#FFF7E5;border:1px solid #F2D08B;border-radius:12px;padding:18px 20px;margin:18px 0;color:#7C5A20;font-size:13px;line-height:1.7;">
+        Vérifiez soigneusement votre calendrier et désactivez immédiatement toute date ou ville où vous n’êtes pas disponible. Une réservation laissée sans réponse entraîne la suspension du profil. Toute annulation est examinée par l’administration et trois annulations comptabilisées entraînent une désactivation définitive.
+      </div>
+      ${divider()}
+      <div style="text-align:center;padding:8px 0;">${btn('Voir mon profil', opts.profileUrl)}</div>
+    `),
+  })
 }
 
 // ─── 4. Confirmation de réservation ─────────────────────────────

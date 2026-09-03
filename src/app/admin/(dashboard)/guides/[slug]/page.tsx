@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { PLACES } from '@/lib/places';
@@ -9,6 +9,30 @@ import { GUIDE_LANGUAGES, LANG_CODE_TO_LABEL } from '@/lib/languages';
 type Language = { id: string; languageCode: string; level: string };
 type Reservation = { id: string; refNumber: string; startDate: string; nbPeople: number; totalPrice: number; status: string; createdAt: string };
 type GuidePlace = { id: string; placeKey: string; isActive: boolean };
+type ProfileChange = {
+  id: string;
+  changes: Record<string, unknown>;
+  before: Record<string, unknown>;
+  requestedByEmail: string;
+  submittedIp: string | null;
+  submittedCountry: string | null;
+  submittedCity: string | null;
+  submittedDevice: string | null;
+  submittedBrowser: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+type ReservationIncident = {
+  id: string;
+  refNumber: string;
+  type: 'GUIDE_DECLINED' | 'NO_RESPONSE';
+  reason: string | null;
+  status: 'PENDING' | 'COUNTED' | 'EXCUSED';
+  reportedAt: string;
+  reviewedByEmail: string | null;
+  reviewNotes: string | null;
+  reviewedAt: string | null;
+};
 type Guide = {
   id: string; slug: string; bio: string | null; city: string | null;
   gender: 'HOMME' | 'FEMME' | null; servesMakkah: boolean; servesMadinah: boolean;
@@ -34,7 +58,35 @@ type Guide = {
   createdAt: string;
   approvedByEmail: string | null;
   approvedAt: string | null;
+  profileSubmittedAt: string | null;
+  cancellationCount: number;
+  permanentlyDeactivatedAt: string | null;
+  pendingProfileChange: ProfileChange | null;
+  reservationIncidents: ReservationIncident[];
 };
+
+const PROFILE_FIELD_LABELS: Record<string, string> = {
+  firstName: 'Prénom',
+  lastName: 'Nom',
+  phoneWhatsapp: 'WhatsApp',
+  country: 'Pays de résidence',
+  bio: 'Bio / présentation',
+  city: 'Ville principale',
+  gender: 'Genre',
+  nationality: 'Nationalité',
+  experienceYears: 'Années d’expérience',
+  languages: 'Langues parlées',
+};
+
+function displayProfileValue(value: unknown) {
+  if (Array.isArray(value)) return value.map(item => LANG_CODE_TO_LABEL[String(item)] || String(item)).join(', ') || 'Aucune';
+  if (value === null || value === undefined || value === '') return '—';
+  return String(value);
+}
+
+function errorMessage(cause: unknown, fallback: string) {
+  return cause instanceof Error ? cause.message : fallback;
+}
 
 const RES_STATUS: Record<string, { label: string; color: string; bg: string }> = {
   PENDING:   { label: 'En attente', color: '#92400E', bg: '#FEF3C7' },
@@ -78,6 +130,10 @@ export default function AdminGuideDetailPage() {
   const [saving, setSaving]               = useState(false);
   const [saveMsg, setSaveMsg]             = useState('');
   const [canManagePricing, setCanManagePricing] = useState(false);
+  const [reviewingProfileChange, setReviewingProfileChange] = useState(false);
+  const [profileChangeMessage, setProfileChangeMessage] = useState('');
+  const [reviewingIncident, setReviewingIncident] = useState<string | null>(null);
+  const [incidentMessage, setIncidentMessage] = useState('');
 
   // Access management — validate / suspend / reactivate
   const [activating, setActivating]       = useState(false);
@@ -107,7 +163,7 @@ export default function AdminGuideDetailPage() {
   const [togglingPlace, setTogglingPlace] = useState<string | null>(null);
 
   // silent=true → update data without showing the full-page skeleton (used for post-action refreshes)
-  const fetchGuide = async (silent = false) => {
+  const fetchGuide = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
     setError('');
     try {
@@ -134,13 +190,13 @@ export default function AdminGuideDetailPage() {
       setInterviewScore(g.interviewScore?.toString() || '');
       setInterviewNotes(g.interviewNotes || '');
       const map: Record<string, boolean> = {};
-      g.places?.forEach((p: any) => { map[p.placeKey] = p.isActive; });
+      g.places?.forEach((place) => { map[place.placeKey] = place.isActive; });
       setPlacesMap(map);
-    } catch (e: any) { setError(e.message); }
+    } catch (cause) { setError(errorMessage(cause, 'Erreur réseau')); }
     if (!silent) setLoading(false);
-  };
+  }, [slug]);
 
-  useEffect(() => { if (slug) fetchGuide(); }, [slug]);
+  useEffect(() => { if (slug) fetchGuide(); }, [slug, fetchGuide]);
 
   const handleSave = async () => {
     setSaving(true); setSaveMsg('');
@@ -182,10 +238,56 @@ export default function AdminGuideDetailPage() {
       if (!res.ok) throw new Error(data.error || 'Erreur');
       setAccessResult({ message: data.message, type: 'success' });
       await fetchGuide(true); // silent — keep sections visible
-    } catch (e: any) {
-      setAccessResult({ message: e.message, type: 'error' });
+    } catch (cause) {
+      setAccessResult({ message: errorMessage(cause, 'Erreur'), type: 'error' });
     }
     setActivating(false);
+  };
+
+  const reviewProfileChange = async (action: 'APPROVE' | 'REJECT') => {
+    if (!guide?.pendingProfileChange) return;
+    if (!window.confirm(action === 'APPROVE' ? 'Publier ces modifications sur le profil du Guide ?' : 'Rejeter ces modifications ?')) return;
+    setReviewingProfileChange(true);
+    setProfileChangeMessage('');
+    try {
+      const response = await fetch(`/api/admin/guides/${slug}/profile-change`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ requestId: guide.pendingProfileChange.id, action }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Traitement impossible');
+      setProfileChangeMessage(action === 'APPROVE' ? '✓ Modifications publiées' : '✓ Modifications rejetées');
+      await fetchGuide(true);
+    } catch (cause) {
+      setProfileChangeMessage(cause instanceof Error ? cause.message : 'Traitement impossible');
+    } finally {
+      setReviewingProfileChange(false);
+    }
+  };
+
+  const reviewIncident = async (incident: ReservationIncident, action: 'COUNT' | 'EXCUSE') => {
+    const question = action === 'COUNT'
+      ? `Comptabiliser cet incident pour ${incident.refNumber} ?`
+      : `Ne pas comptabiliser cet incident pour ${incident.refNumber} ?`;
+    if (!window.confirm(question)) return;
+    setReviewingIncident(incident.id);
+    setIncidentMessage('');
+    try {
+      const response = await fetch(`/api/admin/guides/${slug}/incidents`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ incidentId: incident.id, action }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Décision impossible');
+      setIncidentMessage(action === 'COUNT' ? '✓ Incident comptabilisé' : '✓ Incident non comptabilisé');
+      await fetchGuide(true);
+    } catch (cause) {
+      setIncidentMessage(errorMessage(cause, 'Décision impossible'));
+    } finally {
+      setReviewingIncident(null);
+    }
   };
 
   const handleTogglePlace = async (placeKey: string) => {
@@ -233,7 +335,7 @@ export default function AdminGuideDetailPage() {
         <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.6rem', fontWeight: 700, color: '#1A1209', margin: 0, flex: 1 }}>
           {guide.user.name || guide.user.firstName || 'Guide'}
         </h1>
-        {guide.slug && (
+        {guide.slug && guide.status === 'ACTIVE' && (
           <Link href={`/guides/${guide.slug}`} target="_blank" style={{ padding: '0.5rem 1rem', border: '1px solid #E8DFC8', borderRadius: 50, fontSize: '0.78rem', fontWeight: 600, color: '#7A6D5A', textDecoration: 'none', background: 'white' }}>
             Voir profil public ↗
           </Link>
@@ -333,7 +435,7 @@ export default function AdminGuideDetailPage() {
       {/* Traçabilité de création et d'approbation */}
       <div style={{ ...sectionStyle, gap: '0.75rem' }}>
         <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Traçabilité du profil</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
           <div>
             <div style={labelStyle}>Créé par</div>
             <div style={{ fontSize: '0.85rem', color: '#1A1209', fontWeight: 600 }}>
@@ -341,6 +443,12 @@ export default function AdminGuideDetailPage() {
             </div>
             <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 3 }}>
               {guide.createdByType === 'SELF_APPLICATION' ? 'Candidature guide validée' : guide.createdByType.replace('_', ' ')} · {new Date(guide.createdAt).toLocaleDateString('fr-FR')}
+            </div>
+          </div>
+          <div>
+            <div style={labelStyle}>Profil soumis</div>
+            <div style={{ fontSize: '0.85rem', color: '#1A1209', fontWeight: 600 }}>
+              {guide.profileSubmittedAt ? new Date(guide.profileSubmittedAt).toLocaleString('fr-FR') : 'Pas encore soumis'}
             </div>
           </div>
           <div>
@@ -357,12 +465,73 @@ export default function AdminGuideDetailPage() {
         </div>
       </div>
 
+      {/* Modifications demandées par le Guide — publication après validation */}
+      {guide.pendingProfileChange && (
+        <div style={{ ...sectionStyle, borderColor: '#F59E0B', background: '#FFFBEB' }}>
+          <div>
+            <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Modification du profil à valider</div>
+            <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 3 }}>
+              Demandée par {guide.pendingProfileChange.requestedByEmail} le {new Date(guide.pendingProfileChange.updatedAt).toLocaleString('fr-FR')}. Le profil public actuel est resté inchangé.
+            </div>
+          </div>
+          <div style={{ display: 'grid', gap: '0.65rem' }}>
+            {Object.entries(guide.pendingProfileChange.changes).map(([field, proposed]) => (
+              <div key={field} style={{ display: 'grid', gridTemplateColumns: 'minmax(130px, .7fr) 1fr 1fr', gap: '0.75rem', padding: '0.75rem', border: '1px solid #FDE68A', borderRadius: 8, background: 'white', alignItems: 'start' }}>
+                <strong style={{ fontSize: '0.75rem', color: '#1A1209' }}>{PROFILE_FIELD_LABELS[field] || field}</strong>
+                <div><small style={{ color: '#7A6D5A' }}>Actuel</small><div style={{ fontSize: '0.78rem', whiteSpace: 'pre-wrap' }}>{displayProfileValue(guide.pendingProfileChange?.before[field])}</div></div>
+                <div><small style={{ color: '#7A6D5A' }}>Demandé</small><div style={{ fontSize: '0.78rem', whiteSpace: 'pre-wrap', fontWeight: 700 }}>{displayProfileValue(proposed)}</div></div>
+              </div>
+            ))}
+          </div>
+          <div style={{ fontSize: '0.7rem', color: '#7A6D5A' }}>
+            Connexion : {guide.pendingProfileChange.submittedIp || 'IP inconnue'} · {[guide.pendingProfileChange.submittedCity, guide.pendingProfileChange.submittedCountry].filter(Boolean).join(', ') || 'localisation inconnue'} · {[guide.pendingProfileChange.submittedDevice, guide.pendingProfileChange.submittedBrowser].filter(Boolean).join(' · ') || 'appareil inconnu'}
+          </div>
+          <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+            <button onClick={() => reviewProfileChange('APPROVE')} disabled={reviewingProfileChange} style={{ padding: '0.65rem 1.4rem', border: 0, borderRadius: 50, background: '#166534', color: 'white', fontWeight: 700, cursor: reviewingProfileChange ? 'wait' : 'pointer' }}>Valider et publier</button>
+            <button onClick={() => reviewProfileChange('REJECT')} disabled={reviewingProfileChange} style={{ padding: '0.65rem 1.4rem', border: 0, borderRadius: 50, background: '#991B1B', color: 'white', fontWeight: 700, cursor: reviewingProfileChange ? 'wait' : 'pointer' }}>Rejeter</button>
+          </div>
+        </div>
+      )}
+      {profileChangeMessage && <div style={{ padding: '0.75rem 1rem', borderRadius: 8, background: profileChangeMessage.startsWith('✓') ? '#D1FAE5' : '#FEE2E2', color: profileChangeMessage.startsWith('✓') ? '#166534' : '#991B1B', fontSize: '0.82rem', fontWeight: 600 }}>{profileChangeMessage}</div>}
+
+      <div style={{ ...sectionStyle, borderColor: guide.permanentlyDeactivatedAt ? '#B91C1C' : '#E8DFC8' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+          <div>
+            <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Incidents de réservation</div>
+            <div style={{ color: '#7A6D5A', fontSize: '0.75rem', marginTop: 3 }}>Seuls les incidents validés par Admin sont comptabilisés.</div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <strong style={{ display: 'block', fontSize: '1.5rem', color: guide.cancellationCount >= 3 ? '#B91C1C' : '#1A1209' }}>{guide.cancellationCount} / 3</strong>
+            <span style={{ fontSize: '0.68rem', color: guide.permanentlyDeactivatedAt ? '#B91C1C' : '#7A6D5A', fontWeight: 800 }}>{guide.permanentlyDeactivatedAt ? 'DÉSACTIVATION DÉFINITIVE' : 'INCIDENTS COMPTABILISÉS'}</span>
+          </div>
+        </div>
+        {guide.reservationIncidents.length === 0 ? (
+          <div style={{ padding: '1rem', borderRadius: 8, background: '#F9FAFB', color: '#7A6D5A', fontSize: '0.8rem' }}>Aucun incident réel enregistré.</div>
+        ) : guide.reservationIncidents.map(incident => (
+          <div key={incident.id} style={{ border: `1px solid ${incident.status === 'PENDING' ? '#F2D08B' : '#E8DFC8'}`, background: incident.status === 'PENDING' ? '#FFF7E5' : '#F9FAFB', borderRadius: 10, padding: '0.9rem', display: 'grid', gap: '0.55rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+              <strong style={{ color: '#1A1209', fontSize: '0.82rem' }}>{incident.refNumber} · {incident.type === 'NO_RESPONSE' ? 'Absence de réponse' : 'Indisponibilité déclarée'}</strong>
+              <span style={{ fontSize: '0.65rem', fontWeight: 800, color: incident.status === 'COUNTED' ? '#B91C1C' : incident.status === 'EXCUSED' ? '#166534' : '#92400E' }}>{incident.status === 'COUNTED' ? 'COMPTABILISÉ' : incident.status === 'EXCUSED' ? 'NON COMPTABILISÉ' : 'À EXAMINER'}</span>
+            </div>
+            <div style={{ color: '#4A3F30', fontSize: '0.78rem', whiteSpace: 'pre-wrap' }}>{incident.reason || 'Aucun motif communiqué'}</div>
+            <div style={{ color: '#7A6D5A', fontSize: '0.68rem' }}>Signalé le {new Date(incident.reportedAt).toLocaleString('fr-FR')}{incident.reviewedByEmail ? ` · traité par ${incident.reviewedByEmail}` : ''}</div>
+            {incident.status === 'PENDING' && (
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <button onClick={() => reviewIncident(incident, 'COUNT')} disabled={reviewingIncident === incident.id} style={{ border: 0, borderRadius: 50, padding: '0.5rem 1rem', background: '#B91C1C', color: 'white', fontWeight: 700, cursor: reviewingIncident ? 'wait' : 'pointer' }}>Comptabiliser</button>
+                <button onClick={() => reviewIncident(incident, 'EXCUSE')} disabled={reviewingIncident === incident.id} style={{ border: '1px solid #86EFAC', borderRadius: 50, padding: '0.5rem 1rem', background: 'white', color: '#166534', fontWeight: 700, cursor: reviewingIncident ? 'wait' : 'pointer' }}>Ne pas comptabiliser</button>
+              </div>
+            )}
+          </div>
+        ))}
+        {incidentMessage && <div style={{ color: incidentMessage.startsWith('✓') ? '#166534' : '#B91C1C', fontSize: '0.8rem', fontWeight: 700 }}>{incidentMessage}</div>}
+      </div>
+
       {/* Section 1b — Gestion des accès */}
       <div style={{ ...sectionStyle, gap: '0.875rem' }}>
         <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Gestion des accès</div>
 
         {/* REVIEW or DRAFT → activate */}
-        {(guide.status === 'REVIEW' || guide.status === 'DRAFT') && (
+        {guide.status === 'REVIEW' && (
             <button
               onClick={() => handleAccess('activate')}
               disabled={activating}
@@ -384,7 +553,7 @@ export default function AdminGuideDetailPage() {
         )}
 
         {/* SUSPENDED → reactivate */}
-        {guide.status === 'SUSPENDED' && (
+        {guide.status === 'SUSPENDED' && !guide.permanentlyDeactivatedAt && (
           <button
             onClick={() => handleAccess('activate')}
             disabled={activating}
@@ -392,6 +561,13 @@ export default function AdminGuideDetailPage() {
           >
             {activating ? '…' : 'Réactiver le profil'}
           </button>
+        )}
+
+        {guide.status === 'DRAFT' && (
+          <div style={{ color: '#7A6D5A', fontSize: '0.78rem' }}>Le Guide doit soumettre son profil depuis son espace avant que l’administration puisse l’activer.</div>
+        )}
+        {guide.permanentlyDeactivatedAt && (
+          <div style={{ color: '#B91C1C', fontSize: '0.78rem', fontWeight: 800 }}>Ce compte ne peut plus être réactivé : trois incidents ont été comptabilisés.</div>
         )}
 
         {/* Action result banner (validate / suspend / reactivate) */}
@@ -456,7 +632,7 @@ export default function AdminGuideDetailPage() {
 
             <div style={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: '1rem', alignItems: 'start' }}>
               <div>
-                <label style={labelStyle}>Note de l'entretien (/20)</label>
+                <label style={labelStyle}>Note de l&apos;entretien (/20)</label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <input
                     type="number" min={0} max={20}
@@ -524,7 +700,7 @@ export default function AdminGuideDetailPage() {
             <input value={nationality} onChange={e => setNationality(e.target.value)} style={inputStyle} placeholder="Marocaine" />
           </div>
           <div>
-            <label style={labelStyle}>Années d'expérience</label>
+            <label style={labelStyle}>Années d&apos;expérience</label>
             <input value={expYears} onChange={e => setExpYears(e.target.value)} type="number" min={0} style={inputStyle} placeholder="8" />
           </div>
           <div>

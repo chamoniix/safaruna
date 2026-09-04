@@ -121,7 +121,21 @@ test('la charte complète et le parcours annoncé correspondent aux cinq étapes
   assert.match(form, /Préserver strictement la confidentialité/)
   assert.match(form, /SAFARUMA peut faire évoluer cette Charte/)
   assert.match(form, /href="\/charte-islamique"/)
-  assert.match(email, /Publication séparée de votre profil après contrôle/)
+  assert.match(form, /toute facturation passe exclusivement par SAFARUMA/)
+  assert.match(form, /confiés comme une amana/)
+  assert.doesNotMatch(form, /comportement dans les Lieux Saints/)
+  assert.match(email, /Création de votre espace Guide et publication en ligne de votre profil/)
+  assert.match(email, /Recevez vos premières réservations/)
+})
+
+test('les confirmations Guide utilisent les textes validés et le contact WhatsApp', () => {
+  assert.match(form, /بارك الله فيك/)
+  assert.match(form, /dans un délai de 72 h/)
+  assert.match(email, /subject: 'Candidature GUIDE SAFARUMA'/)
+  assert.match(email, /بارك الله فيك/)
+  assert.match(email, /ما شاء الله/)
+  assert.match(email, /https:\/\/wa\.me\/message\/3LAXCIZV7FFEK1/)
+  assert.match(email, /\+33 7 43 95 91 70/)
 })
 
 test('les données publiques soumises par le Guide restent en attente sans modifier le live', () => {

@@ -899,7 +899,11 @@ export default function CheckoutPage() {
           color: white; text-decoration: none; font-family: var(--font-cormorant, serif);
           font-size: 1.2rem; font-weight: 700; letter-spacing: .08em; white-space: nowrap;
         }
-        .checkout-account-actions { display: flex; justify-content: center; align-items: center; gap: .45rem; }
+        .checkout-account-actions {
+          position: static; inset: auto; z-index: auto; padding: 0; background: transparent;
+          border-bottom: 0; backdrop-filter: none; -webkit-backdrop-filter: none;
+          display: flex; justify-content: center; align-items: center; gap: .45rem;
+        }
         .checkout-account-link, .checkout-account-action {
           min-height: 34px; display: inline-flex; align-items: center; justify-content: center;
           padding: .4rem .75rem; border: 1px solid rgba(240,216,151,.28); border-radius: 999px;

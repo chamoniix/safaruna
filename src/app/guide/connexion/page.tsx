@@ -13,6 +13,7 @@ export default function GuideLoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
     setError('');
     try {
@@ -25,12 +26,13 @@ export default function GuideLoginPage() {
       if (response.ok) {
         router.push('/guide/tableau-de-bord');
         router.refresh();
+        return;
       } else {
         setError(data?.error || 'Identifiants incorrects. Vérifiez vos accès SAFARUMA.');
+        setLoading(false);
       }
     } catch {
       setError('Connexion momentanément indisponible. Réessayez.');
-    } finally {
       setLoading(false);
     }
   };
@@ -41,6 +43,17 @@ export default function GuideLoginPage() {
       background: '#1A1209', padding: '2rem 1rem',
       fontFamily: 'var(--font-manrope, sans-serif)',
     }}>
+      <style>{`
+        @keyframes guide-login-spin { to { transform: rotate(360deg); } }
+        .guide-login-submit { transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease; }
+        .guide-login-submit:not(:disabled):hover { transform: translateY(-1px); box-shadow: 0 10px 28px rgba(201,168,76,0.22); }
+        .guide-login-submit:not(:disabled):active { transform: translateY(1px) scale(0.99); box-shadow: none; }
+        .guide-login-input:focus-visible { border-color: #F0D897 !important; box-shadow: 0 0 0 3px rgba(240,216,151,0.14); }
+        @media (prefers-reduced-motion: reduce) {
+          .guide-login-submit { transition: none; }
+          .guide-login-spinner { animation-duration: 1.5s !important; }
+        }
+      `}</style>
       <div style={{ position: 'fixed', inset: 0, background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.08) 0%, transparent 60%)', pointerEvents: 'none' }} />
 
       <div style={{
@@ -74,6 +87,7 @@ export default function GuideLoginPage() {
                 Adresse e-mail
               </label>
               <input
+                className="guide-login-input"
                 type="email" required value={email} onChange={e => setEmail(e.target.value)}
                 placeholder="votre@email.com"
                 style={{ width: '100%', padding: '11px 14px', borderRadius: 10, border: '1.5px solid rgba(201,168,76,0.25)', background: 'rgba(255,255,255,0.05)', fontSize: '0.88rem', color: 'white', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
@@ -89,6 +103,7 @@ export default function GuideLoginPage() {
                 Mot de passe
               </label>
               <input
+                className="guide-login-input"
                 type="password" required value={password} onChange={e => setPassword(e.target.value)}
                 placeholder="••••••••"
                 style={{ width: '100%', padding: '11px 14px', borderRadius: 10, border: '1.5px solid rgba(201,168,76,0.25)', background: 'rgba(255,255,255,0.05)', fontSize: '0.88rem', color: 'white', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
@@ -101,8 +116,13 @@ export default function GuideLoginPage() {
               </div>
             )}
 
-            <button type="submit" disabled={loading} style={{ width: '100%', padding: '13px', marginTop: '0.25rem', background: '#C9A84C', color: '#1A1209', border: 'none', borderRadius: 50, cursor: loading ? 'not-allowed' : 'pointer', fontSize: '0.875rem', fontWeight: 700, letterSpacing: '0.04em', fontFamily: 'inherit', opacity: loading ? 0.7 : 1 }}>
-              {loading ? 'Connexion...' : 'Accéder à mon espace →'}
+            <button className="guide-login-submit" type="submit" disabled={loading} aria-busy={loading} style={{ width: '100%', minHeight: 48, padding: '13px', marginTop: '0.25rem', background: '#C9A84C', color: '#1A1209', border: 'none', borderRadius: 50, cursor: loading ? 'not-allowed' : 'pointer', fontSize: '0.875rem', fontWeight: 700, letterSpacing: '0.04em', fontFamily: 'inherit', opacity: loading ? 0.76 : 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 9 }}>
+              {loading ? (
+                <>
+                  <span className="guide-login-spinner" aria-hidden="true" style={{ width: 16, height: 16, border: '2px solid rgba(26,18,9,0.28)', borderTopColor: '#1A1209', borderRadius: '50%', animation: 'guide-login-spin 700ms linear infinite' }} />
+                  <span>Connexion en cours…</span>
+                </>
+              ) : 'Accéder à mon espace →'}
             </button>
           </form>
 

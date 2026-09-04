@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { DayPicker } from 'react-day-picker';
+import { fr as frLocale } from 'date-fns/locale';
+import 'react-day-picker/style.css';
 import { trackAnalyticsEvent } from '@/lib/analytics-client';
 import { PLACES } from '@/lib/places';
 import { GUIDE_LANGUAGES } from '@/lib/languages';
@@ -15,7 +18,7 @@ const STEPS = [
 ];
 
 type ServiceCity = 'MAKKAH' | 'MADINAH';
-type TransportMode = 'NONE' | 'CAR' | 'VAN' | 'OTHER';
+type TransportMode = 'CAR' | 'VAN' | 'OTHER';
 
 const PLACE_GROUPS = [
   { cat: 'Makkah', color: '#8B6914', bg: '#FAF3E0', border: 'rgba(201,168,76,0.3)', lieux: PLACES.filter(place => place.category === 'MAKKAH') },
@@ -57,6 +60,40 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
+function BirthDatePicker({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  const selected = value ? new Date(`${value}T12:00:00`) : null;
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <button type="button" className="ins-input" onClick={() => setOpen(current => !current)} aria-expanded={open} style={{ ...inputStyle, display: 'flex', alignItems: 'center', justifyContent: 'space-between', textAlign: 'left', cursor: 'pointer' }}>
+        <span style={{ color: selected ? '#1A1209' : '#8A8072' }}>{selected ? new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long' }).format(selected) : 'Choisir une date'}</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B6914" strokeWidth="1.8" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>
+      </button>
+      {open && <div className="birth-calendar" style={{ position: 'absolute', zIndex: 30, top: 'calc(100% + 8px)', left: 0, width: 'min(340px, calc(100vw - 2rem))', padding: '1rem', background: 'white', border: '1px solid #E8DFC8', borderRadius: 16, boxShadow: '0 18px 50px rgba(26,18,9,.16)' }}>
+        <DayPicker
+          mode="single"
+          locale={frLocale}
+          selected={selected || undefined}
+          defaultMonth={selected || new Date()}
+          captionLayout="dropdown"
+          startMonth={new Date(1900, 0, 1)}
+          endMonth={new Date()}
+          disabled={{ after: new Date() }}
+          onSelect={date => {
+            if (!date) return;
+            onChange(`${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`);
+            setOpen(false);
+          }}
+          showOutsideDays={false}
+          modifiersStyles={{ selected: { backgroundColor: '#C9A84C', color: '#1A1209', fontWeight: 800 } }}
+          styles={{ root: { width: '100%', margin: 0, fontFamily: 'inherit' }, month: { width: '100%' }, month_grid: { width: '100%' }, dropdowns: { justifyContent: 'center' } }}
+        />
+      </div>}
+    </div>
+  );
+}
+
 export default function GuideOnboarding() {
   const [currentStep, setCurrentStep] = useState(1);
   const [acceptedCharte, setAcceptedCharte] = useState(false);
@@ -79,22 +116,28 @@ export default function GuideOnboarding() {
 
   // Step 2
   const [selectedLangues, setSelectedLangues] = useState<string[]>([]);
+  const [otherLanguages, setOtherLanguages] = useState('');
   const [experienceYears, setExperienceYears] = useState('');
   const [education, setEducation] = useState('');
+  const [educationDetails, setEducationDetails] = useState('');
   const [bio, setBio]                         = useState('');
 
   // Step 3
   const [masteredPlaces, setMasteredPlaces] = useState<string[]>([]);
-  const [transportMode, setTransportMode] = useState<TransportMode>('NONE');
+  const [otherPlaces, setOtherPlaces] = useState('');
+  const [transportModes, setTransportModes] = useState<TransportMode[]>([]);
   const [transportDetails, setTransportDetails] = useState('');
 
   // Step 4
   const [proposedOmraPrice, setProposedOmraPrice] = useState('');
   const [proposedMadinahPackagePrice, setProposedMadinahPackagePrice] = useState('');
   const [proposedMadinahPlacePrice, setProposedMadinahPlacePrice] = useState('');
-  const [proposedMakkahPackagePrice, setProposedMakkahPackagePrice] = useState('');
   const [proposedMakkahPlacePrice, setProposedMakkahPlacePrice] = useState('');
   const [pricingDetails, setPricingDetails] = useState('');
+  const [makkahIncludedDetails, setMakkahIncludedDetails] = useState('');
+  const [makkahOtherDetails, setMakkahOtherDetails] = useState('');
+  const [madinahIncludedDetails, setMadinahIncludedDetails] = useState('');
+  const [madinahOtherDetails, setMadinahOtherDetails] = useState('');
   const [bankAccountFirstName, setBankAccountFirstName] = useState('');
   const [bankAccountLastName, setBankAccountLastName] = useState('');
   const [bankName, setBankName] = useState('');
@@ -132,24 +175,18 @@ export default function GuideOnboarding() {
       if (!dateOfBirth) return 'Indiquez votre date de naissance.';
       if (!gender) return 'Choisissez le genre du guide.';
       if (!primaryCity) return 'Choisissez votre ville principale.';
-      if (selectedLangues.length === 0) return 'Choisissez au moins une langue parlée.';
-      if (!education) return 'Choisissez votre formation islamique.';
+      if (selectedLangues.length === 0 && !otherLanguages.trim()) return 'Choisissez au moins une langue parlée.';
+      if (!education) return 'Choisissez votre formation.';
+      if (education === 'other' && !educationDetails.trim()) return 'Précisez votre formation.';
       if (!experienceYears) return 'Indiquez vos années d’expérience.';
       if (!bio.trim()) return 'Présentez brièvement votre expérience et votre approche.';
     }
-    if (step === 3 && transportMode === 'OTHER' && !transportDetails.trim()) {
+    if (step === 3 && transportModes.includes('OTHER') && !transportDetails.trim()) {
       return 'Décrivez le transport que vous proposez.';
     }
     if (step === 4) {
-      const isPositivePrice = (value: string) => Number.isFinite(Number(value)) && Number(value) > 0;
-      if (serviceCities.includes('MAKKAH') && ![proposedOmraPrice, proposedMakkahPackagePrice, proposedMakkahPlacePrice].every(isPositivePrice)) {
-        return 'Renseignez les trois tarifs demandés pour Makkah.';
-      }
-      if (serviceCities.includes('MADINAH') && ![proposedMadinahPackagePrice, proposedMadinahPlacePrice].every(isPositivePrice)) {
-        return 'Renseignez les deux tarifs demandés pour Médine.';
-      }
-      if (!bankAccountFirstName.trim() || !bankAccountLastName.trim() || !bankName.trim() || !bankCountry.trim() || !iban.trim() || !bic.trim()) {
-        return 'Toutes les coordonnées bancaires sont obligatoires.';
+      if (!bankAccountFirstName.trim() || !bankAccountLastName.trim() || !bankName.trim() || !bankCountry.trim() || !iban.trim()) {
+        return 'Renseignez les coordonnées bancaires obligatoires.';
       }
     }
     return '';
@@ -202,15 +239,21 @@ export default function GuideOnboarding() {
           whatsapp, city: primaryCity, gender, serviceCities, nationality, dateOfBirth, bio,
           experienceYears: experienceYears ? Number(experienceYears) : undefined,
           education,
+          educationDetails: educationDetails || undefined,
           languages: selectedLangues,
+          otherLanguages: otherLanguages || undefined,
           masteredPlaces,
-          transportMode,
+          otherPlaces: otherPlaces || undefined,
+          transportModes,
           transportDetails: transportDetails || undefined,
-          proposedOmraPrice: Number(proposedOmraPrice || 0),
-          proposedMadinahPackagePrice: Number(proposedMadinahPackagePrice || 0),
-          proposedMadinahPlacePrice: Number(proposedMadinahPlacePrice || 0),
-          proposedMakkahPackagePrice: Number(proposedMakkahPackagePrice || 0),
-          proposedMakkahPlacePrice: Number(proposedMakkahPlacePrice || 0),
+          proposedOmraPrice: proposedOmraPrice ? Number(proposedOmraPrice) : undefined,
+          proposedMadinahPackagePrice: proposedMadinahPackagePrice ? Number(proposedMadinahPackagePrice) : undefined,
+          proposedMadinahPlacePrice: proposedMadinahPlacePrice ? Number(proposedMadinahPlacePrice) : undefined,
+          proposedMakkahPlacePrice: proposedMakkahPlacePrice ? Number(proposedMakkahPlacePrice) : undefined,
+          makkahIncludedDetails: makkahIncludedDetails || undefined,
+          makkahOtherDetails: makkahOtherDetails || undefined,
+          madinahIncludedDetails: madinahIncludedDetails || undefined,
+          madinahOtherDetails: madinahOtherDetails || undefined,
           pricingDetails: pricingDetails || undefined,
           bankAccountFirstName, bankAccountLastName, bankName, bankCountry,
           iban,
@@ -367,6 +410,29 @@ export default function GuideOnboarding() {
           @media (min-width: 768px) { .inscription-main { margin-left: 300px; } }
           .ins-input:focus { border-color: #C9A84C !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.12); }
           .ins-input { transition: border-color 0.2s, box-shadow 0.2s; }
+          .birth-calendar .rdp-root { --rdp-accent-color: #8B6914; color: #1A1209; }
+          .birth-calendar .rdp-dropdowns { gap: 0.4rem; }
+          .birth-calendar .rdp-dropdown_root {
+            min-height: 2.25rem;
+            padding: 0.45rem 0.55rem;
+            border: 1px solid #D9CCAA;
+            border-radius: 9px;
+            background: #FAF7F0;
+            color: #1A1209;
+          }
+          .birth-calendar .rdp-caption_label {
+            color: #1A1209 !important;
+            font-size: 0.8rem !important;
+            font-weight: 800 !important;
+            line-height: 1.2;
+            opacity: 1 !important;
+            visibility: visible !important;
+          }
+          .birth-calendar .rdp-nav {
+            background: transparent !important;
+            backdrop-filter: none !important;
+          }
+          .birth-calendar .rdp-chevron { fill: #8B6914; }
           .ins-place-label:hover { border-color: #C9A84C !important; background: #FAF3E0 !important; }
           .ins-place-label:has(input:checked) { border-color: #C9A84C !important; background: #FAF3E0 !important; }
           .guide-sidebar-desktop { display: flex; }
@@ -457,7 +523,7 @@ export default function GuideOnboarding() {
                 </p>
                 <div className="ins-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '2rem' }}>
                   <Field label="Date de naissance">
-                    <input type="date" className="ins-input" style={inputStyle} required value={dateOfBirth} onChange={e => setDateOfBirth(e.target.value)} />
+                    <BirthDatePicker value={dateOfBirth} onChange={setDateOfBirth} />
                   </Field>
                   <Field label="Genre du guide">
                     <select className="ins-input" style={inputStyle} required value={gender} onChange={e => setGender(e.target.value as 'HOMME' | 'FEMME' | '')}>
@@ -477,11 +543,17 @@ export default function GuideOnboarding() {
                   <Field label="Nationalité">
                     <input type="text" className="ins-input" style={inputStyle} placeholder="Sénégalaise" value={nationality} onChange={e => setNationality(e.target.value)} />
                   </Field>
-                  <Field label="Ville secondaire proposée">
-                    <label style={{ display: 'flex', gap: '0.65rem', alignItems: 'center', padding: '0.7rem', border: offersSecondaryCity ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', borderRadius: 10, background: 'white', cursor: primaryCity ? 'pointer' : 'not-allowed', fontSize: '0.8rem', fontWeight: 600, opacity: primaryCity ? 1 : 0.55 }}>
-                      <input type="checkbox" disabled={!primaryCity} checked={offersSecondaryCity} onChange={event => setOffersSecondaryCity(event.target.checked)} style={{ margin: 0 }} />
-                      {secondaryCity ? `Je peux également guider à ${secondaryCity === 'MAKKAH' ? 'Makkah' : 'Médine'}` : 'Choisissez d’abord votre ville principale'}
-                    </label>
+                  <Field label="Villes proposées">
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem' }}>
+                      {(['MAKKAH', 'MADINAH'] as ServiceCity[]).map(serviceCity => {
+                        const isPrimary = primaryCity === serviceCity;
+                        const checked = serviceCities.includes(serviceCity);
+                        return <label key={serviceCity} style={{ display: 'flex', gap: '0.55rem', alignItems: 'center', padding: '0.7rem', border: checked ? '2px solid #C9A84C' : '1.5px solid #E8DFC8', borderRadius: 10, background: 'white', cursor: !primaryCity || isPrimary ? 'default' : 'pointer', fontSize: '0.8rem', fontWeight: 700, opacity: primaryCity ? 1 : 0.55 }}>
+                          <input type="checkbox" disabled={!primaryCity || isPrimary} checked={checked} onChange={event => setOffersSecondaryCity(event.target.checked)} style={{ margin: 0, accentColor: '#C9A84C' }} />
+                          {serviceCity === 'MAKKAH' ? 'Makkah' : 'Médine'}{isPrimary ? ' · principale' : ''}
+                        </label>;
+                      })}
+                    </div>
                   </Field>
                 </div>
                 <div style={{ marginBottom: '2rem' }}>
@@ -500,22 +572,29 @@ export default function GuideOnboarding() {
                       </label>
                     ))}
                   </div>
+                  <div style={{ marginTop: '0.85rem' }}>
+                    <Field label="Autre langue">
+                      <input type="text" className="ins-input" style={inputStyle} value={otherLanguages} onChange={event => setOtherLanguages(event.target.value)} placeholder="Indiquez une langue absente de la liste" />
+                    </Field>
+                  </div>
                 </div>
                 <div className="ins-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem', marginBottom: '1.25rem' }}>
-                  <Field label="Formation islamique">
+                  <Field label="Formation">
                     <select className="ins-input" style={inputStyle} required value={education} onChange={e => setEducation(e.target.value)}>
                       <option value="">Niveau d&apos;études</option>
                       <option value="uni">Université Islamique (Madinah / Umm Al-Qura…)</option>
                       <option value="institut">Institut spécialisé</option>
                       <option value="autodidacte">Autodidacte confirmé</option>
+                      <option value="other">Autre</option>
                     </select>
+                    {education === 'other' && <input type="text" className="ins-input" style={{ ...inputStyle, marginTop: '0.65rem' }} value={educationDetails} onChange={event => setEducationDetails(event.target.value)} placeholder="Précisez votre formation" />}
                   </Field>
                   <Field label="Années d'expérience">
                     <input type="number" min="0" max="40" className="ins-input" style={inputStyle} placeholder="ex : 8" required value={experienceYears} onChange={e => setExperienceYears(e.target.value)} />
                   </Field>
                 </div>
                 <Field label="Biographie (visible par les pèlerins)">
-                  <textarea className="ins-input" style={{ ...inputStyle, height: 120, resize: 'vertical' }} placeholder="Présentez-vous, votre approche, votre rapport avec les Lieux Saints…" required value={bio} onChange={e => setBio(e.target.value)} />
+                  <textarea className="ins-input" style={{ ...inputStyle, height: 120, resize: 'vertical' }} placeholder="Présentez-vous, votre approche et votre connaissance des lieux historiques…" required value={bio} onChange={e => setBio(e.target.value)} />
                 </Field>
               </div>
             )}
@@ -533,14 +612,23 @@ export default function GuideOnboarding() {
                 {/* Catalogue réellement utilisé par les profils et la réservation */}
                 {PLACE_GROUPS.map(group => (
                   <div key={group.cat} style={{ marginBottom: '1.75rem' }}>
-                    <div style={{
-                      display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                      fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.12em',
-                      textTransform: 'uppercase', color: group.color,
-                      background: group.bg, border: `1px solid ${group.border}`,
-                      padding: '0.25rem 0.75rem', borderRadius: 50, marginBottom: '0.75rem',
-                    }}>
-                      {group.cat}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', marginBottom: '0.75rem' }}>
+                      <div style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                        fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.12em',
+                        textTransform: 'uppercase', color: group.color,
+                        background: group.bg, border: `1px solid ${group.border}`,
+                        padding: '0.25rem 0.75rem', borderRadius: 50,
+                      }}>
+                        {group.cat}
+                      </div>
+                      {group.cat !== 'Sites historiques' && <button type="button" onClick={() => {
+                        const keys = group.lieux.map(place => place.key);
+                        const allSelected = keys.every(key => masteredPlaces.includes(key));
+                        setMasteredPlaces(previous => allSelected ? previous.filter(key => !keys.includes(key)) : [...new Set([...previous, ...keys])]);
+                      }} style={{ border: '1px solid #D9CCAA', background: 'white', color: '#6B5218', borderRadius: 50, padding: '0.35rem 0.75rem', fontSize: '0.68rem', fontWeight: 800, cursor: 'pointer' }}>
+                        {group.lieux.every(place => masteredPlaces.includes(place.key)) ? 'Tout désélectionner' : 'Tout sélectionner'}
+                      </button>}
                     </div>
                     <div className="ins-grid-places" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.5rem' }}>
                       {group.lieux.map(l => (
@@ -565,6 +653,12 @@ export default function GuideOnboarding() {
                   </div>
                 ))}
 
+                <div style={{ marginBottom: '1.75rem' }}>
+                  <Field label="Autre lieu historique">
+                    <textarea className="ins-input" style={{ ...inputStyle, minHeight: 86, resize: 'vertical' }} value={otherPlaces} onChange={event => setOtherPlaces(event.target.value)} placeholder="Indiquez un ou plusieurs lieux absents de la liste" />
+                  </Field>
+                </div>
+
                 {/* Transport */}
                 <div style={{ marginTop: '0.5rem' }}>
                   <label style={{ display: 'block', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: '0.75rem' }}>
@@ -572,17 +666,16 @@ export default function GuideOnboarding() {
                   </label>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
                     {[
-                      { id: 'NONE' as const, icon: '🚶', title: 'Aucun transport', sub: 'Je ne propose pas de véhicule.' },
                       { id: 'CAR' as const, icon: '🚗', title: 'Voiture standard — jusqu’à 6 pèlerins', sub: 'Je conduis les pèlerins pendant les visites.' },
                       { id: 'VAN' as const, icon: '🚌', title: 'Van', sub: 'Je peux proposer un van pour les groupes.' },
                       { id: 'OTHER' as const, icon: '＋', title: 'Autre', sub: 'Je précise ma solution de transport.' },
                     ].map(opt => (
                       <label key={opt.id} style={{
                         display: 'flex', alignItems: 'center', gap: '1rem',
-                        padding: '0.85rem 1.1rem', border: transportMode === opt.id ? '2px solid #C9A84C' : '1.5px solid #E8DFC8',
+                        padding: '0.85rem 1.1rem', border: transportModes.includes(opt.id) ? '2px solid #C9A84C' : '1.5px solid #E8DFC8',
                         borderRadius: 12, cursor: 'pointer', background: 'white',
                       }}>
-                        <input type="radio" name="transport" style={{ accentColor: '#C9A84C', width: 16, height: 16, flexShrink: 0 }} checked={transportMode === opt.id} onChange={() => setTransportMode(opt.id)} />
+                        <input type="checkbox" style={{ accentColor: '#C9A84C', width: 16, height: 16, flexShrink: 0 }} checked={transportModes.includes(opt.id)} onChange={() => setTransportModes(previous => previous.includes(opt.id) ? previous.filter(item => item !== opt.id) : [...previous, opt.id])} />
                         <span style={{ fontSize: '1.1rem' }}>{opt.icon}</span>
                         <div>
                           <div style={{ fontWeight: 700, fontSize: '0.83rem', color: '#1A1209' }}>{opt.title}</div>
@@ -591,7 +684,8 @@ export default function GuideOnboarding() {
                       </label>
                     ))}
                   </div>
-                  {transportMode === 'OTHER' && <div style={{ marginTop: '0.85rem' }}>
+                  {transportModes.length === 0 && <p style={{ margin: '0.7rem 0 0', color: '#7A6D5A', fontSize: '0.72rem' }}>Aucun transport sélectionné.</p>}
+                  {transportModes.includes('OTHER') && <div style={{ marginTop: '0.85rem' }}>
                     <Field label="Détails du transport proposé">
                       <textarea className="ins-input" style={{ ...inputStyle, minHeight: 90, resize: 'vertical' }} required value={transportDetails} onChange={event => setTransportDetails(event.target.value)} placeholder="Type de véhicule, capacité, chauffeur, conditions…" />
                     </Field>
@@ -607,30 +701,33 @@ export default function GuideOnboarding() {
                   {STEPS[currentStep - 1].label}
                 </h2>
                 <p style={{ color: '#7A6D5A', fontSize: '0.875rem', marginBottom: '1.25rem', lineHeight: 1.7 }}>
-                  Indiquez vos tarifs habituels pour un groupe jusqu&apos;à 6 pèlerins. Ils servent uniquement à étudier votre candidature : aucun tarif n&apos;est publié automatiquement.
+                  Les tarifs et précisions de services ci-dessous sont facultatifs et servent uniquement à étudier votre candidature. Aucun tarif n&apos;est publié automatiquement.
                 </p>
 
                 <div style={{ display: 'grid', gap: '1rem' }}>
                   {serviceCities.includes('MAKKAH') && <div style={{ padding: '1.25rem', border: '1.5px solid #E8DFC8', borderRadius: 16, background: 'white' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', marginBottom: '1rem' }}>
                       <strong style={{ color: '#1A1209' }}>Services à Makkah</strong>
-                      <span style={{ background: '#FEE2E2', color: '#B91C1C', padding: '0.25rem 0.65rem', borderRadius: 50, fontSize: '0.62rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Obligatoire</span>
+                      <span style={{ background: '#EAF1FB', color: '#1D4ED8', padding: '0.25rem 0.65rem', borderRadius: 50, fontSize: '0.62rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Facultatif</span>
                     </div>
-                    <div className="ins-pkg-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
-                      <Field label="Accompagnement Omra (€)"><input type="number" min="0" step="0.01" className="ins-input" style={inputStyle} required value={proposedOmraPrice} onChange={event => setProposedOmraPrice(event.target.value)} /></Field>
-                      <Field label="Pack Makkah (€)"><input type="number" min="0" step="0.01" className="ins-input" style={inputStyle} required value={proposedMakkahPackagePrice} onChange={event => setProposedMakkahPackagePrice(event.target.value)} /></Field>
-                      <Field label="Une visite à Makkah (€)"><input type="number" min="0" step="0.01" className="ins-input" style={inputStyle} required value={proposedMakkahPlacePrice} onChange={event => setProposedMakkahPlacePrice(event.target.value)} /></Field>
+                    <div className="ins-pkg-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                      <Field label="Accompagnement Omra — prix (€)"><input type="number" min="0" step="0.01" className="ins-input" style={inputStyle} value={proposedOmraPrice} onChange={event => setProposedOmraPrice(event.target.value)} /></Field>
+                      <Field label="Ce qui est inclus"><textarea className="ins-input" style={{ ...inputStyle, minHeight: 82, resize: 'vertical' }} value={makkahIncludedDetails} onChange={event => setMakkahIncludedDetails(event.target.value)} placeholder="Précisez ce qui est inclus dans cet accompagnement" /></Field>
+                      <Field label="Visite supplémentaire d’un lieu historique — prix (€)"><input type="number" min="0" step="0.01" className="ins-input" style={inputStyle} value={proposedMakkahPlacePrice} onChange={event => setProposedMakkahPlacePrice(event.target.value)} /></Field>
+                      <Field label="Autre précision"><textarea className="ins-input" style={{ ...inputStyle, minHeight: 82, resize: 'vertical' }} value={makkahOtherDetails} onChange={event => setMakkahOtherDetails(event.target.value)} placeholder="Toute autre précision utile pour Makkah" /></Field>
                     </div>
                   </div>}
 
                   {serviceCities.includes('MADINAH') && <div style={{ padding: '1.25rem', border: '1.5px solid #E8DFC8', borderRadius: 16, background: 'white' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', marginBottom: '1rem' }}>
                       <strong style={{ color: '#1A1209' }}>Services à Médine</strong>
-                      <span style={{ background: '#FEE2E2', color: '#B91C1C', padding: '0.25rem 0.65rem', borderRadius: 50, fontSize: '0.62rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Obligatoire</span>
+                      <span style={{ background: '#EAF1FB', color: '#1D4ED8', padding: '0.25rem 0.65rem', borderRadius: 50, fontSize: '0.62rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Facultatif</span>
                     </div>
                     <div className="ins-pkg-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                      <Field label="Pack Médine (€)"><input type="number" min="0" step="0.01" className="ins-input" style={inputStyle} required value={proposedMadinahPackagePrice} onChange={event => setProposedMadinahPackagePrice(event.target.value)} /></Field>
-                      <Field label="Une visite à Médine (€)"><input type="number" min="0" step="0.01" className="ins-input" style={inputStyle} required value={proposedMadinahPlacePrice} onChange={event => setProposedMadinahPlacePrice(event.target.value)} /></Field>
+                      <Field label="Accompagnement Médine — prix (€)"><input type="number" min="0" step="0.01" className="ins-input" style={inputStyle} value={proposedMadinahPackagePrice} onChange={event => setProposedMadinahPackagePrice(event.target.value)} /></Field>
+                      <Field label="Ce qui est inclus"><textarea className="ins-input" style={{ ...inputStyle, minHeight: 82, resize: 'vertical' }} value={madinahIncludedDetails} onChange={event => setMadinahIncludedDetails(event.target.value)} placeholder="Précisez ce qui est inclus dans cet accompagnement" /></Field>
+                      <Field label="Visite supplémentaire d’un lieu historique — prix (€)"><input type="number" min="0" step="0.01" className="ins-input" style={inputStyle} value={proposedMadinahPlacePrice} onChange={event => setProposedMadinahPlacePrice(event.target.value)} /></Field>
+                      <Field label="Autre précision"><textarea className="ins-input" style={{ ...inputStyle, minHeight: 82, resize: 'vertical' }} value={madinahOtherDetails} onChange={event => setMadinahOtherDetails(event.target.value)} placeholder="Toute autre précision utile pour Médine" /></Field>
                     </div>
                   </div>}
 
@@ -648,14 +745,14 @@ export default function GuideOnboarding() {
                     <strong style={{ color: '#1A1209' }}>Coordonnées bancaires</strong>
                     <span style={{ background: '#FEE2E2', color: '#B91C1C', padding: '0.25rem 0.65rem', borderRadius: 50, fontSize: '0.62rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Obligatoire</span>
                   </div>
-                  <p style={{ fontSize: '0.72rem', color: '#7A6D5A', marginBottom: '1rem', lineHeight: 1.5 }}>L&apos;IBAN et le BIC sont chiffrés. Aucune coordonnée bancaire n&apos;est publiée sur votre profil.</p>
+                  <p style={{ fontSize: '0.72rem', color: '#7A6D5A', marginBottom: '1rem', lineHeight: 1.5 }}>L&apos;IBAN et le BIC sont chiffrés. Aucune coordonnée bancaire n&apos;est publiée sur votre profil. Le BIC est facultatif.</p>
                   <div className="ins-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                     <Field label="Prénom du titulaire"><input type="text" className="ins-input" style={inputStyle} required value={bankAccountFirstName} onChange={event => setBankAccountFirstName(event.target.value)} /></Field>
                     <Field label="Nom du titulaire"><input type="text" className="ins-input" style={inputStyle} required value={bankAccountLastName} onChange={event => setBankAccountLastName(event.target.value)} /></Field>
                     <Field label="Nom de la banque"><input type="text" className="ins-input" style={inputStyle} required value={bankName} onChange={event => setBankName(event.target.value)} /></Field>
                     <Field label="Pays de la banque"><input type="text" className="ins-input" style={inputStyle} required value={bankCountry} onChange={event => setBankCountry(event.target.value)} /></Field>
                     <Field label="IBAN"><input type="text" className="ins-input" style={{ ...inputStyle, fontFamily: 'monospace', textTransform: 'uppercase' }} required value={iban} onChange={event => setIban(event.target.value)} placeholder="FR76…" /></Field>
-                    <Field label="SWIFT / BIC"><input type="text" className="ins-input" style={{ ...inputStyle, fontFamily: 'monospace', textTransform: 'uppercase' }} required value={bic} onChange={event => setBic(event.target.value)} placeholder="ABCDEFGH" /></Field>
+                    <Field label="SWIFT / BIC (facultatif)"><input type="text" className="ins-input" style={{ ...inputStyle, fontFamily: 'monospace', textTransform: 'uppercase' }} value={bic} onChange={event => setBic(event.target.value)} placeholder="ABCDEFGH" /></Field>
                   </div>
                 </div>
               </div>

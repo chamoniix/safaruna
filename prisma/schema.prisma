@@ -432,15 +432,23 @@ model GuideApplication {
   bio                              String?
   experienceYears                  Int?
   education                        String
+  educationDetails                 String?
   languages                        String[]
+  otherLanguages                   String?
   masteredPlaces                   String[]
+  otherPlaces                      String?
   transportMode                    String
+  transportModes                   String[]               @default([])
   transportDetails                 String?
-  proposedOmraPriceCents           Int
-  proposedMadinahPackagePriceCents Int
-  proposedMadinahPlacePriceCents   Int
-  proposedMakkahPackagePriceCents  Int
-  proposedMakkahPlacePriceCents    Int
+  proposedOmraPriceCents           Int?
+  proposedMadinahPackagePriceCents Int?
+  proposedMadinahPlacePriceCents   Int?
+  proposedMakkahPackagePriceCents  Int?
+  proposedMakkahPlacePriceCents    Int?
+  makkahIncludedDetails            String?
+  makkahOtherDetails               String?
+  madinahIncludedDetails           String?
+  madinahOtherDetails              String?
   pricingDetails                   String?
   bankAccountFirstName             String
   bankAccountLastName              String

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { CalendarDays, ExternalLink, Landmark } from 'lucide-react';
 
 type GuideData = {
   guide: {
@@ -101,6 +102,21 @@ export default function GuideDashboard() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', fontFamily: 'var(--font-manrope, sans-serif)' }}>
+      <style>{`
+        .guide-dashboard-actions { display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap; }
+        .guide-dashboard-link { min-height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.55rem 0.9rem; border-radius: 10px; font-size: 0.74rem; font-weight: 800; text-decoration: none; white-space: nowrap; transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease; }
+        .guide-dashboard-link:hover { transform: translateY(-1px); }
+        .guide-dashboard-link:active { transform: translateY(1px) scale(0.985); }
+        .guide-dashboard-link--calendar { background: #1A1209; color: #F0D897; box-shadow: 0 5px 14px rgba(26,18,9,0.16); }
+        .guide-dashboard-link--public { border: 1px solid currentColor; }
+        @media (max-width: 620px) {
+          .guide-dashboard-actions { width: 100%; }
+          .guide-dashboard-link { flex: 1 1 100%; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .guide-dashboard-link { transition: none; }
+        }
+      `}</style>
 
       {/* Status banner */}
       <div style={{ ...card, padding: '1rem 1.5rem', border: `1px solid ${sc.border}`, background: sc.bg, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
@@ -118,11 +134,16 @@ export default function GuideDashboard() {
             </div>
           </div>
         </div>
-        {guide.status === 'ACTIVE' && guide.slug && (
-          <Link href={`/guides/${guide.slug}`} target="_blank" style={{ fontSize: '0.72rem', fontWeight: 700, color: sc.color, border: `1px solid ${sc.border}`, padding: '0.35rem 0.875rem', borderRadius: 20, textDecoration: 'none', whiteSpace: 'nowrap' }}>
-            Voir mon profil public ↗
+        <div className="guide-dashboard-actions">
+          <Link href="/guide/calendrier" className="guide-dashboard-link guide-dashboard-link--calendar">
+            <CalendarDays size={16} /> Gérer mes disponibilités
           </Link>
-        )}
+          {guide.status === 'ACTIVE' && guide.slug && (
+            <Link href={`/guides/${guide.slug}`} target="_blank" className="guide-dashboard-link guide-dashboard-link--public" style={{ color: sc.color, borderColor: sc.border }}>
+              Voir mon profil public <ExternalLink size={14} />
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Stat cards */}
@@ -160,7 +181,7 @@ export default function GuideDashboard() {
           <div style={{ padding: '3rem 2rem', textAlign: 'center' }}>
             {guide.status === 'ACTIVE' ? (
               <>
-                <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🕌</div>
+                <Landmark size={40} color="#C9A84C" strokeWidth={1.5} style={{ marginBottom: '1rem' }} />
                 <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', color: '#1A1209', marginBottom: '0.5rem' }}>Aucune réservation pour l&apos;instant</div>
                 <div style={{ fontSize: '0.82rem', color: '#7A6D5A', marginBottom: '1.5rem', lineHeight: 1.6 }}>
                   Insha&apos;Allah, les pèlerins découvriront bientôt votre profil.

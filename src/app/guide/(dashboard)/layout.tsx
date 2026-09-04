@@ -4,6 +4,75 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useGuideSession } from '@/components/GuideSessionGuard';
+import {
+  BadgeCheck,
+  Bell,
+  CalendarDays,
+  ChartNoAxesCombined,
+  CircleDollarSign,
+  ClipboardList,
+  ExternalLink,
+  GraduationCap,
+  HandCoins,
+  House,
+  Inbox,
+  LockKeyhole,
+  LogOut,
+  MapPinned,
+  Menu,
+  MessageCircle,
+  Sparkles,
+  Star,
+  UserRoundPen,
+  X,
+  type LucideIcon,
+} from 'lucide-react';
+
+type GuideNavItem = {
+  href: string;
+  icon: LucideIcon;
+  label: string;
+  external?: boolean;
+};
+
+const GUIDE_NAV_SECTIONS: { section: string; items: GuideNavItem[] }[] = [
+  {
+    section: 'Tableau de bord',
+    items: [
+      { href: '/guide/tableau-de-bord', icon: House, label: 'Accueil' },
+      { href: '/guide/demandes', icon: Inbox, label: 'Nouvelles demandes' },
+      { href: '/guide/missions', icon: Sparkles, label: 'Mes missions' },
+      { href: '/guide/messages', icon: MessageCircle, label: 'Messages' },
+    ],
+  },
+  {
+    section: 'Gestion',
+    items: [
+      { href: '/guide/calendrier', icon: CalendarDays, label: 'Calendrier' },
+      { href: '/guide/lieux', icon: MapPinned, label: 'Lieux de visite' },
+      { href: '/guide/revenus', icon: CircleDollarSign, label: 'Mes revenus' },
+      { href: '/guide/avis', icon: Star, label: 'Mes avis' },
+    ],
+  },
+  {
+    section: 'Mon profil',
+    items: [
+      { href: '/guide/profil', icon: UserRoundPen, label: 'Modifier profil' },
+    ],
+  },
+  {
+    section: 'Ressources',
+    items: [
+      { href: '/guide/formation', icon: GraduationCap, label: 'Formation SAFARUMA' },
+      { href: '/guide/documents', icon: ClipboardList, label: 'Mes documents' },
+      { href: '/guide/performances', icon: ChartNoAxesCombined, label: 'Performances' },
+      { href: '/conditions-guides', icon: ClipboardList, label: 'Conditions Guides', external: true },
+      { href: '/charte-islamique', icon: LockKeyhole, label: 'Charte SAFARUMA', external: true },
+      { href: '/devenir-guide', icon: HandCoins, label: 'Revenus & Écosystème' },
+      { href: '/nos-guides-certifies', icon: BadgeCheck, label: 'Certification SAFARUMA', external: true },
+    ],
+  },
+];
 
 export default function GuideLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -88,8 +157,34 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
         @media (max-width: 1023px) { .guide-overlay.is-open { display: block; } }
         .guide-sb-close { display: none !important; }
         @media (max-width: 1023px) { .guide-sb-close { display: flex !important; } }
-        .g-nav-link { transition: background 0.15s, color 0.15s; }
+        .g-nav-link { transition: background-color 0.15s ease-out, color 0.15s ease-out, transform 0.15s ease-out; }
         .g-nav-link:hover { background: rgba(201,168,76,0.08) !important; color: rgba(255,255,255,0.8) !important; }
+        .g-nav-link:active { transform: translateX(2px); }
+        .g-nav-link:focus-visible,
+        .guide-main button:focus-visible,
+        .guide-main a:focus-visible {
+          outline: 3px solid rgba(201,168,76,0.48);
+          outline-offset: 2px;
+        }
+        .guide-main button {
+          transition: transform 0.14s ease-out, box-shadow 0.14s ease-out, background-color 0.14s ease-out, color 0.14s ease-out, opacity 0.14s ease-out;
+        }
+        .guide-main button:active:not(:disabled) { transform: translateY(1px) scale(0.985); }
+        .guide-route-loading__spinner {
+          width: 34px;
+          height: 34px;
+          border: 3px solid rgba(201,168,76,0.24);
+          border-top-color: #C9A84C;
+          border-radius: 50%;
+          animation: guide-spin 0.72s linear infinite;
+        }
+        @keyframes guide-spin { to { transform: rotate(360deg); } }
+        @media (prefers-reduced-motion: reduce) {
+          .guide-sidebar,
+          .g-nav-link,
+          .guide-main button { transition: none !important; }
+          .guide-route-loading__spinner { animation-duration: 1.5s; }
+        }
         /* Override global nav { position: fixed } inside sidebar */
         .guide-sidebar nav {
           position: static !important;
@@ -117,7 +212,7 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
             </Link>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span style={{ background: '#C9A84C', color: '#1A1209', fontSize: '0.58rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '0.18rem 0.55rem', borderRadius: 50 }}>Guide</span>
-              <button className="guide-sb-close" onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.4)', fontSize: '1rem', lineHeight: 1, padding: 0, alignItems: 'center', justifyContent: 'center', width: 24, height: 24 }}>✕</button>
+              <button type="button" aria-label="Fermer le menu Guide" className="guide-sb-close" onClick={() => setOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.72)', lineHeight: 1, padding: 0, alignItems: 'center', justifyContent: 'center', width: 44, height: 44 }}><X size={19} /></button>
             </div>
           </div>
 
@@ -140,39 +235,16 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
 
           {/* Nav */}
           <nav style={{ flex: 1, paddingTop: '0.5rem', overflowY: 'auto' }}>
-            {[
-              { section: 'Tableau de bord', items: [
-                { href: '/guide/tableau-de-bord', icon: '⌂', label: 'Accueil' },
-                { href: '/guide/demandes',        icon: '📥', label: 'Nouvelles demandes' },
-                { href: '/guide/missions',        icon: '✦', label: 'Mes missions' },
-                { href: '/guide/messages',        icon: '◎', label: 'Messages' },
-              ]},
-              { section: 'Gestion', items: [
-                { href: '/guide/calendrier', icon: '◻', label: 'Calendrier' },
-                { href: '/guide/lieux',      icon: '📍', label: 'Lieux de visite' },
-                { href: '/guide/revenus',    icon: '◈', label: 'Mes revenus' },
-                { href: '/guide/avis',       icon: '★', label: 'Mes avis' },
-              ]},
-              { section: 'Mon profil', items: [
-                { href: '/guide/profil',   icon: '◎', label: 'Modifier profil' },
-              ]},
-              { section: 'Ressources', items: [
-                { href: '/guide/formation',    icon: '🎓', label: 'Formation SAFARUMA' },
-                { href: '/guide/documents',    icon: '📄', label: 'Mes documents' },
-                { href: '/guide/performances', icon: '📊', label: 'Performances' },
-                { href: '/conditions-guides',  icon: '📋', label: 'Conditions Guides', external: true },
-                { href: '/charte-islamique',   icon: '🔒', label: 'Charte SAFARUMA', external: true },
-                { href: '/devenir-guide',      icon: '◈', label: 'Revenus & Écosystème' },
-                { href: '/nos-guides-certifies', icon: '✦', label: 'Certification SAFARUMA', external: true },
-              ]},
-            ].map((group) => (
+            {GUIDE_NAV_SECTIONS.map((group) => (
               <div key={group.section}>
-                <div style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)', padding: '0.9rem 1.5rem 0.35rem' }}>{group.section}</div>
+                <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.13em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.44)', padding: '0.95rem 1.5rem 0.4rem' }}>{group.section}</div>
                 {group.items.map((item) => {
-                  const content = <><span style={{ width: 16, textAlign: 'center', fontSize: '0.85rem', flexShrink: 0 }}>{item.icon}</span><span style={{ flex: 1 }}>{item.label}</span></>;
-                  const linkStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.55rem 1.5rem', textDecoration: 'none', fontSize: '0.82rem', fontWeight: isActive(item.href) ? 700 : 400, color: isActive(item.href) ? '#F0D897' : 'rgba(255,255,255,0.5)', background: isActive(item.href) ? 'rgba(201,168,76,0.12)' : 'transparent', borderLeft: `2px solid ${isActive(item.href) ? '#C9A84C' : 'transparent'}` };
+                  const Icon = item.icon;
+                  const active = isActive(item.href);
+                  const content = <><Icon size={18} strokeWidth={active ? 2.2 : 1.8} style={{ flex: '0 0 18px' }} /><span style={{ flex: 1 }}>{item.label}</span></>;
+                  const linkStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '0.75rem', minHeight: 44, padding: '0.55rem 1.5rem', boxSizing: 'border-box', textDecoration: 'none', fontSize: '0.84rem', fontWeight: active ? 700 : 500, color: active ? '#F0D897' : 'rgba(255,255,255,0.68)', background: active ? 'rgba(201,168,76,0.12)' : 'transparent', borderLeft: `2px solid ${active ? '#C9A84C' : 'transparent'}` };
                   return item.external ? (
-                    <a key={item.href} href={item.href} target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)} className="g-nav-link" style={linkStyle}>{content}<span aria-hidden="true" style={{ fontSize: '0.65rem' }}>↗</span></a>
+                    <a key={item.href} href={item.href} target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)} className="g-nav-link" style={linkStyle}>{content}<ExternalLink aria-hidden="true" size={13} /></a>
                   ) : (
                     <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className="g-nav-link" style={linkStyle}>{content}</Link>
                   );
@@ -183,7 +255,7 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
 
           {/* Footer */}
           <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
-            <button onClick={logout} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.72rem', color: 'rgba(255,255,255,0.25)', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>↩ Déconnexion</button>
+            <button onClick={logout} style={{ minHeight: 44, display: 'flex', alignItems: 'center', gap: 9, fontSize: '0.82rem', fontWeight: 700, color: '#FCA5A5', background: 'rgba(220,38,38,0.11)', border: '1px solid rgba(248,113,113,0.18)', borderRadius: 9, cursor: 'pointer', textAlign: 'left', padding: '0.65rem 0.8rem' }}><LogOut size={18} /> Déconnexion</button>
           </div>
         </aside>
 
@@ -195,19 +267,15 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
           {/* Topbar */}
           <header style={{ position: 'sticky', top: 0, zIndex: 40, background: 'rgba(245,242,236,0.94)', backdropFilter: 'blur(16px)', borderBottom: '1px solid #EDE8DC', padding: '0.9rem 1.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              <button className="guide-hamburger" onClick={() => setOpen(true)} style={{ width: 44, height: 44, borderRadius: 10, border: '1px solid #EDE8DC', background: 'white', cursor: 'pointer', gap: 4, flexShrink: 0, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ display: 'block', width: 16, height: 1.5, background: '#1A1209', borderRadius: 2 }} />
-                <span style={{ display: 'block', width: 12, height: 1.5, background: '#1A1209', borderRadius: 2 }} />
-                <span style={{ display: 'block', width: 16, height: 1.5, background: '#1A1209', borderRadius: 2 }} />
-              </button>
+              <button type="button" aria-label="Ouvrir le menu Guide" aria-expanded={open} className="guide-hamburger" onClick={() => setOpen(true)} style={{ width: 44, height: 44, borderRadius: 10, border: '1px solid #EDE8DC', background: 'white', cursor: 'pointer', gap: 4, flexShrink: 0, flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}><Menu size={20} /></button>
               <span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 600, color: '#1A1209' }}>Espace Guide</span>
             </div>
             <Link href="/" className="guide-center-brand" style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', fontFamily: 'var(--font-cormorant, Georgia, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209', letterSpacing: '0.08em', whiteSpace: 'nowrap', textDecoration: 'none' }}>
               SAFAR<span style={{ color: '#C9A84C' }}>U</span>MA
             </Link>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', position: 'relative' }}>
-              <button style={{ position: 'relative', width: 44, height: 44, borderRadius: '50%', border: '1px solid #EDE8DC', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '1rem', flexShrink: 0 }}>
-                🔔
+              <button type="button" aria-label="Notifications" style={{ position: 'relative', width: 44, height: 44, borderRadius: '50%', border: '1px solid #EDE8DC', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
+                <Bell size={18} />
                 <span style={{ position: 'absolute', top: 8, right: 8, width: 7, height: 7, borderRadius: '50%', background: '#C0392B', border: '2px solid white' }} />
               </button>
               <button
@@ -230,7 +298,7 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
             </div>
           </header>
 
-          <main style={{ flex: 1, overflowY: 'auto', minHeight: 0, padding: '2rem 1.75rem', maxWidth: 1200, width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
+          <main style={{ position: 'relative', flex: 1, overflowY: 'auto', minHeight: 0, padding: '2rem 1.75rem', maxWidth: 1200, width: '100%', margin: '0 auto', boxSizing: 'border-box' }}>
             {children}
           </main>
         </div>

@@ -34,7 +34,11 @@ export default function Page() {
   }
 
   if (!data) {
-    return <div style={{ padding: 35, textAlign: 'center', color: '#7A6D5A' }}>Chargement des performances…</div>
+    return (
+      <div role="status" aria-live="polite" aria-label="Chargement des performances" style={{ minHeight: 'calc(100vh - 9rem)', display: 'grid', placeItems: 'center' }}>
+        <div className="guide-route-loading__spinner" aria-hidden="true" />
+      </div>
+    )
   }
 
   const stats = data[period]

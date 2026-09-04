@@ -26,11 +26,11 @@ export async function GET() {
     prisma.reservation.count({ where: completedReservationWhere }),
     prisma.reservation.count({ where: { ...completedReservationWhere, startDate: { gte: startOfMonth } } }),
     prisma.guideEarning.aggregate({
-      where: { guideProfileId, reservation: { status: 'COMPLETED' } },
+      where: { guideProfileId, status: { not: 'CANCELLED' }, reservation: { status: 'COMPLETED' } },
       _sum: { totalNetCents: true },
     }),
     prisma.guideEarning.aggregate({
-      where: { guideProfileId, reservation: { status: 'COMPLETED', startDate: { gte: startOfMonth } } },
+      where: { guideProfileId, status: { not: 'CANCELLED' }, reservation: { status: 'COMPLETED', startDate: { gte: startOfMonth } } },
       _sum: { totalNetCents: true },
     }),
     prisma.review.findMany({

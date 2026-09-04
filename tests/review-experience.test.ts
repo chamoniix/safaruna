@@ -36,9 +36,10 @@ test('la page de dépôt garde le logo vers la home sans déconnecter le compte'
   assert.match(navbar, /status === 'loading'/)
 })
 
-test('le bandeau cookies est masqué uniquement sur le dépôt d’avis', () => {
+test('le bandeau cookies est masqué sur le dépôt d’avis et l’inscription Guide', () => {
   assert.match(cookieBanner, /usePathname/)
   assert.match(cookieBanner, /pathname === '\/avis\/deposer'/)
+  assert.match(cookieBanner, /pathname\.startsWith\('\/guide\/inscription'\)/)
 })
 
 test('le verset sans rapport est absent du formulaire d’inscription', () => {

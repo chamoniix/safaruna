@@ -285,9 +285,10 @@ export default function GuideOnboarding() {
       <div style={{ minHeight: '100vh', background: '#1A1209', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
         <div style={{ background: 'white', borderRadius: 24, padding: '3rem', maxWidth: 480, width: '100%', textAlign: 'center', boxShadow: '0 32px 80px rgba(0,0,0,0.3)' }}>
           <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', fontSize: '2rem' }}>✓</div>
-          <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2rem', color: '#1A1209', marginBottom: '1rem', fontWeight: 400 }}>Dossier soumis</h1>
+          <h1 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '2rem', color: '#1A1209', marginBottom: '1rem', fontWeight: 400 }}>Candidature envoyée</h1>
+          <p lang="ar" dir="rtl" style={{ color: '#8B6914', fontSize: '1.35rem', fontWeight: 700, margin: '0 0 0.75rem' }}>بارك الله فيك</p>
           <p style={{ color: '#7A6D5A', lineHeight: 1.7, marginBottom: '2rem', fontSize: '0.9rem' }}>
-            Barak Allahu fik. L&apos;équipe SAFARUMA a bien reçu votre candidature. Votre demande est en cours d&apos;étude et nous reviendrons vers vous prochainement si nous avons besoin d&apos;informations complémentaires.
+            Votre candidature a bien été reçue. Notre équipe reviendra vers vous dans un délai de 72 h.
           </p>
           <Link href="/" style={{ display: 'inline-block', background: '#1A1209', color: '#F0D897', padding: '0.8rem 2rem', borderRadius: 50, fontWeight: 700, fontSize: '0.85rem', textDecoration: 'none' }}>
             Retour à l&apos;accueil
@@ -783,10 +784,10 @@ export default function GuideOnboarding() {
                       "Être totalement honnête sur mes compétences, mon expérience et ma connaissance des lieux.",
                       "Ne guider que dans les lieux que je maîtrise et transmettre des informations exactes avec humilité.",
                       "Respecter la dignité de chaque pèlerin, sans distinction d’origine, de connaissance ou de condition physique.",
-                      "Respecter les règles islamiques de mixité, de pudeur et de comportement dans les Lieux Saints.",
+                      "Respecter les règles islamiques de mixité, de pudeur et de comportement.",
                       "Transmettre le savoir religieux avec sincérité, sans déformation ni invention en cas de doute.",
-                      "Respecter une honnêteté financière absolue, sans surfacturation, commission cachée ni pot-de-vin.",
-                      "Protéger et accompagner avec attention les personnes âgées, les PMR, les femmes seules et les familles.",
+                      "Respecter une honnêteté financière absolue ; toute facturation passe exclusivement par SAFARUMA.",
+                      "Prendre soin des pèlerins qui me sont confiés comme une amana, et assurer avec attention la prise en charge des personnes âgées, des PMR, des femmes seules et des familles.",
                       "Préserver strictement la confidentialité des informations personnelles confiées par les pèlerins.",
                     ].map((item, i) => (
                       <div key={i} style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>

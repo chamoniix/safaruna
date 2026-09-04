@@ -8,6 +8,8 @@ import { useGuideSession } from '@/components/GuideSessionGuard';
 export default function GuideLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [copied, setCopied] = useState(false);
   const guideSession = useGuideSession();
   const router = useRouter();
   const isActive = (p: string) => pathname === p || pathname.startsWith(p + '/');
@@ -17,6 +19,27 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
     ? `${su.firstName} ${su.lastName}`
     : su?.displayName || su?.email || 'Guide';
   const initials = displayName.split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase() || 'G';
+  const isLive = su.guideStatus === 'ACTIVE'
+    && su.acceptingBookings
+    && (su.servesMakkah || su.servesMadinah)
+    && Boolean(su.guideSlug);
+  const publicProfileUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://safaruma.com'}/guides/${su.guideSlug}`;
+
+  const copyProfileLink = async () => {
+    if (!isLive) return;
+    await navigator.clipboard.writeText(publicProfileUrl);
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1800);
+  };
+
+  const shareProfile = async () => {
+    if (!isLive) return;
+    if (navigator.share) {
+      await navigator.share({ title: `Profil Guide SAFARUMA — ${displayName}`, url: publicProfileUrl }).catch(() => null);
+      return;
+    }
+    await copyProfileLink();
+  };
 
   const logout = async () => {
     await fetch('/api/guide/auth/logout', { method: 'POST' }).catch(() => null);
@@ -102,10 +125,13 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
           <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
             <div style={{ position: 'relative', flexShrink: 0 }}>
               <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#1A1209' }}>{initials}</div>
-              <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10, borderRadius: '50%', background: '#C9A84C', border: '2px solid #1A1209' }} />
+              <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10, borderRadius: '50%', background: isLive ? '#22C55E' : '#6B7280', border: '2px solid #1A1209', boxShadow: isLive ? '0 0 0 3px rgba(34,197,94,0.13)' : 'none' }} />
             </div>
             <div style={{ minWidth: 0, flex: 1 }}>
               <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'white', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayName}</div>
+              <div style={{ marginTop: 2, fontSize: '0.6rem', fontWeight: 800, letterSpacing: '0.12em', color: isLive ? '#86EFAC' : 'rgba(255,255,255,0.4)' }}>
+                {isLive ? '● LIVE' : '● OFF'}
+              </div>
               <Link href="/guide/calendrier" aria-label="Gérer mes disponibilités dans le calendrier" style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', textDecoration: 'none' }}>
                 <span style={{ fontSize: '0.6rem', fontWeight: 600, color: '#F0D897' }}>Gérer les disponibilités →</span>
               </Link>
@@ -134,20 +160,23 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
                 { href: '/guide/formation',    icon: '🎓', label: 'Formation SAFARUMA' },
                 { href: '/guide/documents',    icon: '📄', label: 'Mes documents' },
                 { href: '/guide/performances', icon: '📊', label: 'Performances' },
-                { href: '/conditions-guides',  icon: '📋', label: 'Conditions Guides' },
-                { href: '/charte',             icon: '🔒', label: 'Charte SAFARUMA' },
+                { href: '/conditions-guides',  icon: '📋', label: 'Conditions Guides', external: true },
+                { href: '/charte-islamique',   icon: '🔒', label: 'Charte SAFARUMA', external: true },
                 { href: '/devenir-guide',      icon: '◈', label: 'Revenus & Écosystème' },
-                { href: '/nos-guides-certifies', icon: '✦', label: 'Certification SAFARUMA' },
+                { href: '/nos-guides-certifies', icon: '✦', label: 'Certification SAFARUMA', external: true },
               ]},
             ].map((group) => (
               <div key={group.section}>
                 <div style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.2)', padding: '0.9rem 1.5rem 0.35rem' }}>{group.section}</div>
-                {group.items.map((item) => (
-                  <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className="g-nav-link" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.55rem 1.5rem', textDecoration: 'none', fontSize: '0.82rem', fontWeight: isActive(item.href) ? 700 : 400, color: isActive(item.href) ? '#F0D897' : 'rgba(255,255,255,0.5)', background: isActive(item.href) ? 'rgba(201,168,76,0.12)' : 'transparent', borderLeft: `2px solid ${isActive(item.href) ? '#C9A84C' : 'transparent'}` }}>
-                    <span style={{ width: 16, textAlign: 'center', fontSize: '0.85rem', flexShrink: 0 }}>{item.icon}</span>
-                    <span style={{ flex: 1 }}>{item.label}</span>
-                  </Link>
-                ))}
+                {group.items.map((item) => {
+                  const content = <><span style={{ width: 16, textAlign: 'center', fontSize: '0.85rem', flexShrink: 0 }}>{item.icon}</span><span style={{ flex: 1 }}>{item.label}</span></>;
+                  const linkStyle: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.55rem 1.5rem', textDecoration: 'none', fontSize: '0.82rem', fontWeight: isActive(item.href) ? 700 : 400, color: isActive(item.href) ? '#F0D897' : 'rgba(255,255,255,0.5)', background: isActive(item.href) ? 'rgba(201,168,76,0.12)' : 'transparent', borderLeft: `2px solid ${isActive(item.href) ? '#C9A84C' : 'transparent'}` };
+                  return item.external ? (
+                    <a key={item.href} href={item.href} target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)} className="g-nav-link" style={linkStyle}>{content}<span aria-hidden="true" style={{ fontSize: '0.65rem' }}>↗</span></a>
+                  ) : (
+                    <Link key={item.href} href={item.href} onClick={() => setOpen(false)} className="g-nav-link" style={linkStyle}>{content}</Link>
+                  );
+                })}
               </div>
             ))}
           </nav>
@@ -176,12 +205,28 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
             <Link href="/" className="guide-center-brand" style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', fontFamily: 'var(--font-cormorant, Georgia, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209', letterSpacing: '0.08em', whiteSpace: 'nowrap', textDecoration: 'none' }}>
               SAFAR<span style={{ color: '#C9A84C' }}>U</span>MA
             </Link>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', position: 'relative' }}>
               <button style={{ position: 'relative', width: 44, height: 44, borderRadius: '50%', border: '1px solid #EDE8DC', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '1rem', flexShrink: 0 }}>
                 🔔
                 <span style={{ position: 'absolute', top: 8, right: 8, width: 7, height: 7, borderRadius: '50%', background: '#C0392B', border: '2px solid white' }} />
               </button>
-              <button style={{ padding: '0.5rem 1.25rem', borderRadius: 50, fontSize: '0.75rem', fontWeight: 700, background: '#C9A84C', color: '#1A1209', border: 'none', cursor: 'pointer', whiteSpace: 'nowrap' }}>Partager mon profil</button>
+              <button
+                type="button"
+                disabled={!isLive}
+                aria-expanded={shareOpen}
+                onClick={() => setShareOpen(value => !value)}
+                title={isLive ? 'Partager mon profil public' : 'Le partage sera disponible lorsque votre profil sera LIVE'}
+                style={{ padding: '0.5rem 1.25rem', borderRadius: 50, fontSize: '0.75rem', fontWeight: 700, background: isLive ? '#C9A84C' : '#E5E1D8', color: isLive ? '#1A1209' : '#8B8174', border: 'none', cursor: isLive ? 'pointer' : 'not-allowed', whiteSpace: 'nowrap' }}
+              >
+                Partager mon profil
+              </button>
+              {shareOpen && isLive && (
+                <div style={{ position: 'absolute', top: 'calc(100% + 0.65rem)', right: 0, zIndex: 60, width: 230, padding: '0.65rem', borderRadius: 12, border: '1px solid #E8DFC8', background: 'white', boxShadow: '0 16px 40px rgba(26,18,9,0.16)', display: 'grid', gap: '0.35rem' }}>
+                  <button type="button" onClick={shareProfile} style={{ padding: '0.65rem 0.75rem', border: 0, borderRadius: 8, background: '#F5F2EC', color: '#1A1209', textAlign: 'left', fontWeight: 700, cursor: 'pointer' }}>Partager…</button>
+                  <a href={`https://wa.me/?text=${encodeURIComponent(`Découvrez mon profil Guide SAFARUMA : ${publicProfileUrl}`)}`} target="_blank" rel="noopener noreferrer" style={{ padding: '0.65rem 0.75rem', borderRadius: 8, background: '#F0FDF4', color: '#166534', textDecoration: 'none', fontSize: '0.78rem', fontWeight: 700 }}>Partager sur WhatsApp</a>
+                  <button type="button" onClick={copyProfileLink} style={{ padding: '0.65rem 0.75rem', border: 0, borderRadius: 8, background: '#F5F2EC', color: '#1A1209', textAlign: 'left', fontWeight: 700, cursor: 'pointer' }}>{copied ? 'Lien copié ✓' : 'Copier le lien'}</button>
+                </div>
+              )}
             </div>
           </header>
 

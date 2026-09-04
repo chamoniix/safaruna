@@ -61,6 +61,9 @@ export async function POST(
         nationality: guide.nationality,
         experienceYears: guide.experienceYears,
         languages: guide.languages.map(language => language.languageCode).sort(),
+        pricingCorrectionRequest: null,
+        personalCorrectionRequest: null,
+        languagesCorrectionRequest: null,
       }
       for (const field of Object.keys(changes)) {
         if (!sameValue(current[field], before[field])) throw new ProfileChangedDuringReviewError(field)

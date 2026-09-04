@@ -79,7 +79,14 @@ export async function resolveGuideSession(token: string) {
       guideAccount: {
         include: {
           guideProfile: {
-            select: { id: true, status: true },
+            select: {
+              id: true,
+              status: true,
+              slug: true,
+              acceptingBookings: true,
+              servesMakkah: true,
+              servesMadinah: true,
+            },
           },
         },
       },

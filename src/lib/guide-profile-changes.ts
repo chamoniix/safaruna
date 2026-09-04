@@ -22,6 +22,9 @@ export const guideProfileChangesObjectSchema = z.object({
   languages: z.array(z.enum(languageCodes)).max(languageCodes.length)
     .refine(values => new Set(values).size === values.length, 'Une langue a été sélectionnée plusieurs fois.')
     .optional(),
+  pricingCorrectionRequest: z.string().trim().max(1000).optional(),
+  personalCorrectionRequest: z.string().trim().max(1000).optional(),
+  languagesCorrectionRequest: z.string().trim().max(1000).optional(),
 }).strict()
 
 export const guideProfileChangesSchema = guideProfileChangesObjectSchema
@@ -102,6 +105,9 @@ export async function submitGuideProfileChanges(input: {
       nationality: profile.nationality,
       experienceYears: profile.experienceYears,
       languages: profile.languages.map(language => language.languageCode).sort(),
+      pricingCorrectionRequest: null,
+      personalCorrectionRequest: null,
+      languagesCorrectionRequest: null,
     }
     const existing = await tx.guideProfileChangeRequest.findUnique({
       where: { activeKey: profile.id },

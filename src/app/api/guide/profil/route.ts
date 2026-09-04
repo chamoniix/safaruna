@@ -14,6 +14,10 @@ const profilPatchSchema = guideProfileChangesObjectSchema.pick({
   gender: true,
   nationality: true,
   experienceYears: true,
+  languages: true,
+  pricingCorrectionRequest: true,
+  personalCorrectionRequest: true,
+  languagesCorrectionRequest: true,
 }).refine(value => Object.keys(value).length > 0, 'Aucune modification transmise.');
 
 export async function GET() {

@@ -23,6 +23,10 @@ export type GuideActor = {
   role: 'GUIDE'
   guideProfileId: string
   guideStatus: 'DRAFT' | 'REVIEW' | 'ACTIVE'
+  guideSlug: string | null
+  acceptingBookings: boolean
+  servesMakkah: boolean
+  servesMadinah: boolean
   displayName: string | null
   firstName: string | null
   lastName: string | null
@@ -87,6 +91,10 @@ export async function requireGuide(): Promise<Allowed<GuideActor> | Denied> {
       role: 'GUIDE',
       guideProfileId: account.guideProfile.id,
       guideStatus: account.guideProfile.status,
+      guideSlug: account.guideProfile.slug,
+      acceptingBookings: account.guideProfile.acceptingBookings,
+      servesMakkah: account.guideProfile.servesMakkah,
+      servesMadinah: account.guideProfile.servesMadinah,
       displayName: account.displayName,
       firstName: account.firstName,
       lastName: account.lastName,

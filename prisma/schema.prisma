@@ -73,6 +73,7 @@ model User {
   sponsoredReferrals     Referral[]         @relation("ReferralSponsor")
   referral               Referral?          @relation("ReferralReferred")
   promoCodes             PromoCode[]
+  dashboardState         PelerinDashboardState?
 }
 
 model VerificationToken {
@@ -973,6 +974,19 @@ model SavedDua {
   savedAt DateTime @default(now())
 
   @@unique([userId, duaId])
+}
+
+model PelerinDashboardState {
+  id                        String   @id @default(cuid())
+  userId                    String   @unique
+  user                      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  memorizedDuaIds           Int[]    @default([])
+  completedChecklistItemIds Int[]    @default([])
+  customChecklistItems      Json     @default("[]")
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+
+  @@index([userId, updatedAt])
 }
 
 model Notification {

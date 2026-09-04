@@ -1,9 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
-const INITIAL_TASKS = [
+type ChecklistCategory = 'Administratif' | 'Spirituel' | 'Bagages';
+
+type ChecklistTask = {
+  id: number | string;
+  category: ChecklistCategory;
+  title: string;
+  desc: string;
+  done: boolean;
+  custom?: true;
+};
+
+const INITIAL_TASKS: ChecklistTask[] = [
   { id: 1, category: 'Administratif', title: 'Passeport valide (+6 mois)', desc: 'Vérifiez la date d\'expiration de votre passeport.', done: false },
   { id: 2, category: 'Administratif', title: 'Visa de Omra / eVisa Touristique', desc: 'Imprimez votre eVisa KSA ou Visa de Omra.', done: false },
   { id: 3, category: 'Administratif', title: 'Vaccin Méningite (ACYW)', desc: 'Carnet de vaccination jaune international requis.', done: false },
@@ -15,7 +26,7 @@ const INITIAL_TASKS = [
   { id: 9, category: 'Bagages', title: 'Sandales confortables', desc: 'Doivent laisser le talon et le dessus du pied découverts (hommes en Ihram).', done: false },
 ];
 
-const CATEGORY_CONFIG: Record<string, { color: string; bg: string; border: string; icon: string }> = {
+const CATEGORY_CONFIG: Record<ChecklistCategory, { color: string; bg: string; border: string; icon: string }> = {
   'Administratif': { color: '#1A4A8A', bg: '#EAF1FB', border: 'rgba(26,74,138,0.2)', icon: '📋' },
   'Spirituel':     { color: '#1D5C3A', bg: '#E8F5EE', border: 'rgba(29,92,58,0.2)',  icon: '🤲' },
   'Bagages':       { color: '#8B6914', bg: '#FAF3E0', border: 'rgba(201,168,76,0.3)', icon: '🧳' },
@@ -25,22 +36,131 @@ export default function PreparationChecklist() {
   const [tasks, setTasks] = useState(INITIAL_TASKS);
   const [newTaskInputs, setNewTaskInputs] = useState<Record<string, string>>({});
   const [showInput, setShowInput] = useState<Record<string, boolean>>({});
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
+  const [stateLoading, setStateLoading] = useState(true);
+  const [stateError, setStateError] = useState('');
 
-  const toggleTask = (id: number) =>
-    setTasks(ts => ts.map(t => t.id === id ? { ...t, done: !t.done } : t));
+  useEffect(() => {
+    const controller = new AbortController();
 
-  const addTask = (category: string) => {
+    fetch('/api/espace/dashboard-state', {
+      cache: 'no-store',
+      credentials: 'same-origin',
+      signal: controller.signal,
+    })
+      .then(async res => {
+        const payload = await res.json().catch(() => null);
+        if (!res.ok) throw new Error(payload?.error || 'Chargement impossible.');
+
+        const completedIds = Array.isArray(payload?.state?.completedChecklistItemIds)
+          ? new Set<number>(payload.state.completedChecklistItemIds)
+          : new Set<number>();
+        const customItems: ChecklistTask[] = Array.isArray(payload?.state?.customChecklistItems)
+          ? payload.state.customChecklistItems
+            .filter((item: unknown): item is { id: string; category: ChecklistCategory; title: string; done: boolean } => {
+              if (!item || typeof item !== 'object') return false;
+              const candidate = item as Record<string, unknown>;
+              return typeof candidate.id === 'string'
+                && ['Administratif', 'Spirituel', 'Bagages'].includes(String(candidate.category))
+                && typeof candidate.title === 'string'
+                && typeof candidate.done === 'boolean';
+            })
+            .map((item: { id: string; category: ChecklistCategory; title: string; done: boolean }) => ({ ...item, desc: '', custom: true }))
+          : [];
+
+        setTasks([
+          ...INITIAL_TASKS.map(task => ({ ...task, done: completedIds.has(Number(task.id)) })),
+          ...customItems,
+        ]);
+        setStateError('');
+      })
+      .catch(error => {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+        setStateError(error instanceof Error ? error.message : 'Chargement impossible.');
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setStateLoading(false);
+      });
+
+    return () => controller.abort();
+  }, []);
+
+  const toggleTask = async (id: number | string) => {
+    const pendingKey = String(id);
+    if (stateLoading || pendingIds.has(pendingKey)) return;
+    const previous = tasks.find(task => task.id === id)?.done ?? false;
+    const done = !previous;
+
+    setStateError('');
+    setPendingIds(current => new Set(current).add(pendingKey));
+    setTasks(current => current.map(task => task.id === id ? { ...task, done } : task));
+
+    try {
+      const body = typeof id === 'number'
+        ? { action: 'SET_CHECKLIST_ITEM', itemId: id, done }
+        : { action: 'SET_CUSTOM_CHECKLIST_ITEM', itemId: id, done };
+      const res = await fetch('/api/espace/dashboard-state', {
+        method: 'PATCH',
+        cache: 'no-store',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      const payload = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(payload?.error || 'Enregistrement impossible.');
+    } catch (error) {
+      setTasks(current => current.map(task => task.id === id ? { ...task, done: previous } : task));
+      setStateError(error instanceof Error ? error.message : 'Enregistrement impossible.');
+    } finally {
+      setPendingIds(current => {
+        const next = new Set(current);
+        next.delete(pendingKey);
+        return next;
+      });
+    }
+  };
+
+  const addTask = async (category: ChecklistCategory) => {
     const title = newTaskInputs[category]?.trim();
-    if (!title) return;
-    setTasks(ts => [...ts, { id: Date.now(), category, title, desc: '', done: false }]);
-    setNewTaskInputs(p => ({ ...p, [category]: '' }));
-    setShowInput(p => ({ ...p, [category]: false }));
+    if (!title || stateLoading || title.length > 120) return;
+    const id = crypto.randomUUID();
+    const item: ChecklistTask = { id, category, title, desc: '', done: false, custom: true };
+
+    setStateError('');
+    setPendingIds(current => new Set(current).add(id));
+    setTasks(current => [...current, item]);
+
+    try {
+      const res = await fetch('/api/espace/dashboard-state', {
+        method: 'PATCH',
+        cache: 'no-store',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'ADD_CUSTOM_CHECKLIST_ITEM',
+          item: { id, category, title, done: false },
+        }),
+      });
+      const payload = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(payload?.error || 'Enregistrement impossible.');
+      setNewTaskInputs(current => ({ ...current, [category]: '' }));
+      setShowInput(current => ({ ...current, [category]: false }));
+    } catch (error) {
+      setTasks(current => current.filter(task => task.id !== id));
+      setStateError(error instanceof Error ? error.message : 'Enregistrement impossible.');
+    } finally {
+      setPendingIds(current => {
+        const next = new Set(current);
+        next.delete(id);
+        return next;
+      });
+    }
   };
 
   const doneCount = tasks.filter(t => t.done).length;
   const total = tasks.length;
   const progress = total > 0 ? Math.round((doneCount / total) * 100) : 0;
-  const categories = ['Administratif', 'Spirituel', 'Bagages'];
+  const categories: ChecklistCategory[] = ['Administratif', 'Spirituel', 'Bagages'];
   const circumference = 2 * Math.PI * 28;
 
   return (
@@ -91,6 +211,12 @@ export default function PreparationChecklist() {
         </div>
       </div>
 
+      {stateError && (
+        <div role="alert" style={{ marginBottom: '1rem', border: '1px solid #C0392B', borderRadius: 10, padding: '0.7rem 0.9rem', color: '#8B1E14', background: '#FFF4F2', fontSize: '0.8rem', fontWeight: 700 }}>
+          {stateError}
+        </div>
+      )}
+
       {/* Grid */}
       <div className="cl-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.25rem' }}>
         {categories.map(cat => {
@@ -117,12 +243,14 @@ export default function PreparationChecklist() {
                 <div
                   key={task.id}
                   className="cl-task"
-                  onClick={() => toggleTask(task.id)}
+                  onClick={() => void toggleTask(task.id)}
+                  aria-busy={pendingIds.has(String(task.id))}
                   style={{
                     background: task.done ? '#FAF7F0' : 'white',
                     border: `1px solid ${task.done ? '#EDE8DC' : '#E8DFC8'}`,
                     borderRadius: 12, padding: '0.875rem 1rem',
-                    cursor: 'pointer', display: 'flex', alignItems: 'flex-start', gap: '0.75rem',
+                    cursor: stateLoading ? 'wait' : 'pointer', display: 'flex', alignItems: 'flex-start', gap: '0.75rem',
+                    opacity: pendingIds.has(String(task.id)) ? 0.65 : 1,
                   }}
                 >
                   <div style={{
@@ -157,12 +285,14 @@ export default function PreparationChecklist() {
                   <input
                     autoFocus
                     value={newTaskInputs[cat] || ''}
+                    maxLength={120}
+                    disabled={stateLoading}
                     onChange={e => setNewTaskInputs(p => ({ ...p, [cat]: e.target.value }))}
-                    onKeyDown={e => { if (e.key === 'Enter') addTask(cat); if (e.key === 'Escape') setShowInput(p => ({ ...p, [cat]: false })); }}
+                    onKeyDown={e => { if (e.key === 'Enter') void addTask(cat); if (e.key === 'Escape') setShowInput(p => ({ ...p, [cat]: false })); }}
                     placeholder="Nouvelle tâche..."
                     style={{ flex: 1, padding: '0.55rem 0.75rem', border: '1.5px solid #C9A84C', borderRadius: 8, fontSize: '0.82rem', fontFamily: 'inherit', color: '#1A1209', outline: 'none', background: '#FDFBF7' }}
                   />
-                  <button onClick={() => addTask(cat)} style={{ background: '#C9A84C', color: '#1A1209', border: 'none', borderRadius: 8, padding: '0.55rem 0.75rem', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer', fontFamily: 'inherit' }}>+</button>
+                  <button disabled={stateLoading} onClick={() => void addTask(cat)} style={{ background: '#C9A84C', color: '#1A1209', border: 'none', borderRadius: 8, padding: '0.55rem 0.75rem', fontWeight: 700, fontSize: '0.82rem', cursor: 'pointer', fontFamily: 'inherit' }}>+</button>
                   <button onClick={() => setShowInput(p => ({ ...p, [cat]: false }))} style={{ background: 'white', color: '#7A6D5A', border: '1px solid #E8DFC8', borderRadius: 8, padding: '0.55rem 0.75rem', fontSize: '0.82rem', cursor: 'pointer', fontFamily: 'inherit' }}>✕</button>
                 </div>
               ) : (
@@ -183,7 +313,7 @@ export default function PreparationChecklist() {
       <div style={{ marginTop: '2rem', background: 'linear-gradient(135deg, #1A1209, #2D1F08)', borderRadius: 16, padding: '1.75rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem', flexWrap: 'wrap', border: '1px solid rgba(201,168,76,0.2)' }}>
         <div>
           <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: '0.4rem' }}>Conseil spirituel</div>
-          <h3 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', color: 'white', marginBottom: '0.4rem', fontWeight: 600 }}>L'intention de la Omra (Niyyah)</h3>
+          <h3 style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', color: 'white', marginBottom: '0.4rem', fontWeight: 600 }}>L’intention de la Omra (Niyyah)</h3>
           <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.65, maxWidth: 480 }}>
             La préparation du cœur est plus importante que celle des valises. Purifiez votre intention avant le départ.
           </p>

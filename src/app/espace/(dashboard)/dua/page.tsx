@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const DUAS = [
   {
@@ -79,7 +79,7 @@ const TABS = [
   { key: 'favoris',  label: 'Mémorisées' },
 ];
 
-function DuaCard({ dua, onToggleLearned }: { dua: typeof DUAS[0]; onToggleLearned: (id: number) => void }) {
+function DuaCard({ dua, pending, onToggleLearned }: { dua: typeof DUAS[0]; pending: boolean; onToggleLearned: (id: number) => void }) {
   return (
     <div style={{
       background: 'white',
@@ -102,13 +102,14 @@ function DuaCard({ dua, onToggleLearned }: { dua: typeof DUAS[0]; onToggleLearne
         <button
           onClick={() => onToggleLearned(dua.id)}
           aria-pressed={dua.learned}
+          disabled={pending}
           style={{
             minHeight: 34, borderRadius: 999, flexShrink: 0,
             background: dua.learned ? '#E8F5EE' : 'white',
             border: `1.5px solid ${dua.learned ? '#1D5C3A' : '#C9A84C'}`,
             display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem', padding: '0.35rem 0.65rem',
             cursor: 'pointer', fontSize: '0.7rem', color: dua.learned ? '#1D5C3A' : '#8B6914',
-            fontWeight: 800, transition: 'all 0.15s', whiteSpace: 'nowrap',
+            fontWeight: 800, transition: 'all 0.15s', whiteSpace: 'nowrap', opacity: pending ? 0.65 : 1,
           }}
           title={dua.learned ? 'Mémorisée' : 'Marquer mémorisée'}
         >
@@ -146,9 +147,67 @@ function DuaCard({ dua, onToggleLearned }: { dua: typeof DUAS[0]; onToggleLearne
 export default function DuaTracker() {
   const [activeTab, setActiveTab] = useState('tous');
   const [duas, setDuas] = useState(DUAS);
+  const [pendingIds, setPendingIds] = useState<Set<number>>(new Set());
+  const [stateLoading, setStateLoading] = useState(true);
+  const [stateError, setStateError] = useState('');
 
-  const toggleLearned = (id: number) => {
-    setDuas(ds => ds.map(d => d.id === id ? { ...d, learned: !d.learned } : d));
+  useEffect(() => {
+    const controller = new AbortController();
+
+    fetch('/api/espace/dashboard-state', {
+      cache: 'no-store',
+      credentials: 'same-origin',
+      signal: controller.signal,
+    })
+      .then(async res => {
+        const payload = await res.json().catch(() => null);
+        if (!res.ok) throw new Error(payload?.error || 'Chargement impossible.');
+        const memorizedIds = Array.isArray(payload?.state?.memorizedDuaIds)
+          ? new Set<number>(payload.state.memorizedDuaIds)
+          : new Set<number>();
+        setDuas(current => current.map(dua => ({ ...dua, learned: memorizedIds.has(dua.id) })));
+        setStateError('');
+      })
+      .catch(error => {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+        setStateError(error instanceof Error ? error.message : 'Chargement impossible.');
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setStateLoading(false);
+      });
+
+    return () => controller.abort();
+  }, []);
+
+  const toggleLearned = async (id: number) => {
+    if (stateLoading || pendingIds.has(id)) return;
+    const previous = duas.find(dua => dua.id === id)?.learned ?? false;
+    const memorized = !previous;
+
+    setStateError('');
+    setPendingIds(current => new Set(current).add(id));
+    setDuas(current => current.map(dua => dua.id === id ? { ...dua, learned: memorized } : dua));
+
+    try {
+      const res = await fetch('/api/espace/dashboard-state', {
+        method: 'PATCH',
+        cache: 'no-store',
+        credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'SET_DUA', duaId: id, memorized }),
+      });
+      const payload = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(payload?.error || 'Enregistrement impossible.');
+    } catch (error) {
+      setDuas(current => current.map(dua => dua.id === id ? { ...dua, learned: previous } : dua));
+      setStateError(error instanceof Error ? error.message : 'Enregistrement impossible.');
+    } finally {
+      setPendingIds(current => {
+        const next = new Set(current);
+        next.delete(id);
+        return next;
+      });
+    }
   };
 
   const filtered = duas.filter(d => {
@@ -207,6 +266,12 @@ export default function DuaTracker() {
         ))}
       </div>
 
+      {stateError && (
+        <div role="alert" style={{ marginBottom: '1rem', border: '1px solid #C0392B', borderRadius: 10, padding: '0.7rem 0.9rem', color: '#8B1E14', background: '#FFF4F2', fontSize: '0.8rem', fontWeight: 700 }}>
+          {stateError}
+        </div>
+      )}
+
       {/* Empty state */}
       {filtered.length === 0 && (
         <div style={{ textAlign: 'center', padding: '3rem 1rem', color: '#7A6D5A' }}>
@@ -219,7 +284,7 @@ export default function DuaTracker() {
       {/* List */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {filtered.map(dua => (
-          <DuaCard key={dua.id} dua={dua} onToggleLearned={toggleLearned} />
+          <DuaCard key={dua.id} dua={dua} pending={stateLoading || pendingIds.has(dua.id)} onToggleLearned={toggleLearned} />
         ))}
       </div>
     </>

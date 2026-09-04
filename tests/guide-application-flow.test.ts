@@ -17,6 +17,9 @@ const guideCalendarRoute = readFileSync('src/app/api/guide/calendrier/route.ts',
 const profileChanges = readFileSync('src/lib/guide-profile-changes.ts', 'utf8')
 const adminReviewRoute = readFileSync('src/app/api/admin/guides/[slug]/profile-change/route.ts', 'utf8')
 const guideProfilePage = readFileSync('src/app/guide/(dashboard)/profil/page.tsx', 'utf8')
+const guideDashboardLayout = readFileSync('src/app/guide/(dashboard)/layout.tsx', 'utf8')
+const guideSessionRoute = readFileSync('src/app/api/guide/auth/session/route.ts', 'utf8')
+const adminGuidePage = readFileSync('src/app/admin/(dashboard)/guides/[slug]/page.tsx', 'utf8')
 const publicGuideRoute = readFileSync('src/app/api/guide/public/[slug]/route.ts', 'utf8')
 const profileChangeMigration = readFileSync('prisma/migrations/20260903165000_guide_profile_change_requests/migration.sql', 'utf8')
 
@@ -167,7 +170,39 @@ test('seules les disponibilités et les lieux restent modifiables immédiatement
   assert.match(guideCalendarRoute, /guideProfile\.update/)
   assert.match(guideCalendarRoute, /acceptingBookings/)
   assert.match(guideProfilePage, /Le profil public reste inchangé jusqu’à sa validation/)
-  assert.match(guideProfilePage, /Envoyer pour validation/)
+  assert.match(guideProfilePage, /Envoyer mon profil pour validation/)
+})
+
+test('le statut LIVE et le partage utilisent uniquement le profil Guide réel', () => {
+  for (const field of ['guideSlug', 'acceptingBookings', 'servesMakkah', 'servesMadinah']) {
+    assert.match(guideSessionRoute, new RegExp(field))
+    assert.match(guideDashboardLayout, new RegExp(field))
+  }
+  assert.match(guideDashboardLayout, /su\.guideStatus === 'ACTIVE'/)
+  assert.match(guideDashboardLayout, /disabled=\{!isLive\}/)
+  assert.match(guideDashboardLayout, /\/guides\/\$\{su\.guideSlug\}/)
+  assert.match(guideDashboardLayout, /Partager sur WhatsApp/)
+})
+
+test('les ressources officielles gardent le dashboard Guide ouvert', () => {
+  assert.match(guideDashboardLayout, /href: '\/conditions-guides'[\s\S]*external: true/)
+  assert.match(guideDashboardLayout, /href: '\/charte-islamique'[\s\S]*external: true/)
+  assert.match(guideDashboardLayout, /href: '\/nos-guides-certifies'[\s\S]*external: true/)
+  assert.match(guideDashboardLayout, /target="_blank"/)
+  assert.match(guideDashboardLayout, /rel="noopener noreferrer"/)
+})
+
+test('le profil Guide envoie une demande unique et traçable à Admin ou Superadmin', () => {
+  for (const field of ['pricingCorrectionRequest', 'personalCorrectionRequest', 'languagesCorrectionRequest']) {
+    assert.match(guideProfilePage, new RegExp(field))
+    assert.match(guideProfileRoute, new RegExp(field))
+    assert.match(profileChanges, new RegExp(field))
+    assert.match(adminReviewRoute, new RegExp(field))
+    assert.match(adminGuidePage, new RegExp(field))
+  }
+  assert.equal((guideProfilePage.match(/form="guide-profile-form"/g) || []).length, 1)
+  assert.match(guideProfilePage, /Aucun tarif n’est modifié automatiquement/)
+  assert.match(adminGuidePage, /Valider la demande/)
 })
 
 test('les langues de candidature utilisent les codes de la source unique', () => {

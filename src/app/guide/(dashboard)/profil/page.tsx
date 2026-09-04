@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { GUIDE_LANGUAGES, LANG_CODE_TO_LABEL } from '@/lib/languages';
 
@@ -91,9 +91,9 @@ export default function GuideProfil() {
   const [passwordError, setPasswordError] = useState('');
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [pendingChangeRequest, setPendingChangeRequest] = useState<Profile['pendingChangeRequest']>(null);
-  const [submittingProfile, setSubmittingProfile] = useState(false);
-  const [profileSubmissionMessage, setProfileSubmissionMessage] = useState('');
-  const [profileSubmissionError, setProfileSubmissionError] = useState('');
+  const [pricingCorrectionRequest, setPricingCorrectionRequest] = useState('');
+  const [personalCorrectionRequest, setPersonalCorrectionRequest] = useState('');
+  const [languagesCorrectionRequest, setLanguagesCorrectionRequest] = useState('');
 
   // Editable fields
   const [firstName, setFirstName] = useState('');
@@ -108,9 +108,7 @@ export default function GuideProfil() {
 
   // Languages
   const [languages, setLanguages] = useState<{ id: string; languageCode: string; level: string }[]>([]);
-  const [langAdding, setLangAdding] = useState(false);
   const [langError, setLangError] = useState('');
-  const selectRef = useRef<HTMLSelectElement>(null);
 
   useEffect(() => {
     fetch('/api/guide/profil')
@@ -133,6 +131,9 @@ export default function GuideProfil() {
         setLanguages(pendingLanguages
           ? pendingLanguages.map(languageCode => ({ id: `pending-${languageCode}`, languageCode, level: 'NATIVE' }))
           : p.languages);
+        setPricingCorrectionRequest(typeof pending.pricingCorrectionRequest === 'string' ? pending.pricingCorrectionRequest : '');
+        setPersonalCorrectionRequest(typeof pending.personalCorrectionRequest === 'string' ? pending.personalCorrectionRequest : '');
+        setLanguagesCorrectionRequest(typeof pending.languagesCorrectionRequest === 'string' ? pending.languagesCorrectionRequest : '');
         setLoading(false);
       })
       .catch((e: Error) => { setError(e.message); setLoading(false); });
@@ -140,6 +141,7 @@ export default function GuideProfil() {
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
+    const isDraftProfile = profile?.status === 'DRAFT';
     setSaving(true);
     setSaveError('');
     setSuccess('');
@@ -147,12 +149,33 @@ export default function GuideProfil() {
       const res = await fetch('/api/guide/profil', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ firstName, lastName, phoneWhatsapp, country, bio, city, gender, nationality, experienceYears: experienceYears ? Number(experienceYears) : null }),
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          phoneWhatsapp,
+          country,
+          bio,
+          city,
+          gender,
+          nationality,
+          experienceYears: experienceYears ? Number(experienceYears) : null,
+          languages: languages.map(language => language.languageCode).sort(),
+          pricingCorrectionRequest,
+          personalCorrectionRequest,
+          languagesCorrectionRequest,
+        }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Erreur lors de l’envoi');
-      setPendingChangeRequest(data.pendingChangeRequest || null);
-      setSuccess('Demande envoyée à l’administration. Le profil public reste inchangé jusqu’à sa validation.');
+      const noNewChanges = !res.ok && data.error === 'Aucune modification à envoyer.';
+      if (!res.ok && !(isDraftProfile && noNewChanges)) throw new Error(data.error || 'Erreur lors de l’envoi');
+      if (res.ok) setPendingChangeRequest(data.pendingChangeRequest || null);
+
+      if (isDraftProfile) {
+        await submitProfileForReview();
+        setSuccess('Votre profil a été transmis. L’administration le traitera sous 48 h.');
+      } else {
+        setSuccess('Demande envoyée à l’administration. Le profil public reste inchangé jusqu’à sa validation.');
+      }
     } catch (e: unknown) {
       setSaveError(e instanceof Error ? e.message : 'Erreur inconnue');
     } finally {
@@ -160,57 +183,23 @@ export default function GuideProfil() {
     }
   }
 
-  async function handleAddLanguage(code: string) {
+  function handleAddLanguage(code: string) {
     if (!code) return;
-    setLangAdding(true);
     setLangError('');
-    try {
-      const res = await fetch('/api/guide/profil/languages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ languageCode: code }),
-      });
-      if (!res.ok) throw new Error((await res.json()).error || 'Erreur');
-      const data = await res.json();
-      setLanguages((data.languages || []).map((languageCode: string) => ({ id: `pending-${languageCode}`, languageCode, level: 'NATIVE' })));
-      setPendingChangeRequest(data.pendingChangeRequest || null);
-      setSuccess('Modification des langues envoyée à l’administration.');
-      if (selectRef.current) selectRef.current.value = '';
-    } catch (e: unknown) {
-      setLangError(e instanceof Error ? e.message : 'Erreur');
-    } finally {
-      setLangAdding(false);
-    }
+    if (languages.some(language => language.languageCode === code)) return;
+    setLanguages(current => [...current, { id: `local-${code}`, languageCode: code, level: 'NATIVE' }]);
   }
 
-  async function handleRemoveLanguage(languageCode: string) {
-    try {
-      const res = await fetch(`/api/guide/profil/languages?languageCode=${encodeURIComponent(languageCode)}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Suppression impossible');
-      setLanguages((data.languages || []).map((code: string) => ({ id: `pending-${code}`, languageCode: code, level: 'NATIVE' })));
-      setPendingChangeRequest(data.pendingChangeRequest || null);
-      setSuccess('Modification des langues envoyée à l’administration.');
-    } catch {
-      setLangError('Impossible de supprimer cette langue.');
-    }
+  function handleRemoveLanguage(languageCode: string) {
+    setLangError('');
+    setLanguages(current => current.filter(language => language.languageCode !== languageCode));
   }
 
   async function submitProfileForReview() {
-    setSubmittingProfile(true);
-    setProfileSubmissionMessage('');
-    setProfileSubmissionError('');
-    try {
-      const response = await fetch('/api/guide/profil/submit', { method: 'POST' });
-      const data = await response.json() as { error?: string };
-      if (!response.ok) throw new Error(data.error || 'Envoi impossible.');
-      setProfile(current => current ? { ...current, status: 'REVIEW' } : current);
-      setProfileSubmissionMessage('Votre profil a été transmis. L’administration le traitera sous 48 h.');
-    } catch (cause) {
-      setProfileSubmissionError(cause instanceof Error ? cause.message : 'Envoi impossible.');
-    } finally {
-      setSubmittingProfile(false);
-    }
+    const response = await fetch('/api/guide/profil/submit', { method: 'POST' });
+    const data = await response.json() as { error?: string };
+    if (!response.ok) throw new Error(data.error || 'Envoi impossible.');
+    setProfile(current => current ? { ...current, status: 'REVIEW' } : current);
   }
 
   async function requestEmailChange(event: React.FormEvent) {
@@ -299,12 +288,23 @@ export default function GuideProfil() {
 
   const displayName = profile.name;
   const initials = displayName.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase() || 'G';
+  const isLive = profile.status === 'ACTIVE'
+    && profile.acceptingBookings
+    && (profile.servesMakkah || profile.servesMadinah)
+    && Boolean(profile.slug);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', fontFamily: 'var(--font-manrope, sans-serif)' }}>
+      <style>{`
+        .guide-profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .guide-profile-rate-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+        @media (max-width: 680px) {
+          .guide-profile-grid, .guide-profile-rate-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
 
       {/* Identity card */}
-      <div style={{ ...card, padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
+      <div style={{ ...card, order: -2, padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
         <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.5rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
           {initials}
         </div>
@@ -331,30 +331,47 @@ export default function GuideProfil() {
         </div>
       )}
 
-      {(profile.status === 'DRAFT' || profile.status === 'REVIEW') && (
-        <div style={{ ...card, padding: '1.25rem', borderColor: profile.status === 'REVIEW' ? '#F2D08B' : '#C9A84C', background: profile.status === 'REVIEW' ? '#FFF7E5' : 'white' }}>
-          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.25rem', fontWeight: 700, color: '#1A1209' }}>
-            {profile.status === 'REVIEW' ? 'Profil en cours de validation' : 'Finaliser la publication de mon profil'}
+      <div style={{ ...card, padding: '1.25rem', borderColor: isLive ? '#86EFAC' : '#D1D5DB', background: isLive ? '#F0FDF4' : '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem' }}>
+          <div role="status" aria-label={isLive ? 'Profil LIVE' : 'Profil OFF'} style={{ width: 52, height: 28, padding: 3, borderRadius: 99, background: isLive ? '#16A34A' : '#D1D5DB', display: 'flex', justifyContent: isLive ? 'flex-end' : 'flex-start', alignItems: 'center', boxSizing: 'border-box' }}>
+            <span style={{ width: 22, height: 22, borderRadius: '50%', background: 'white', boxShadow: '0 2px 5px rgba(0,0,0,0.18)' }} />
           </div>
-          <p style={{ margin: '0.45rem 0 0', color: '#7A6D5A', fontSize: '0.8rem', lineHeight: 1.6 }}>
-            {profile.status === 'REVIEW'
-              ? 'Votre profil reste invisible au public pendant le contrôle. L’administration le traitera sous 48 h.'
-              : 'Vérifiez vos informations, vos langues, vos villes, vos lieux et votre calendrier. Enregistrez vos modifications avant de soumettre le profil.'}
-          </p>
-          {profile.status === 'DRAFT' && (
-            <button type="button" onClick={submitProfileForReview} disabled={submittingProfile} style={{ marginTop: '1rem', padding: '0.65rem 1.4rem', border: 0, borderRadius: 50, background: submittingProfile ? '#E8DFC8' : '#1D5C3A', color: submittingProfile ? '#7A6D5A' : 'white', fontWeight: 800, cursor: submittingProfile ? 'wait' : 'pointer' }}>
-              {submittingProfile ? 'Transmission…' : 'Soumettre mon profil pour validation'}
-            </button>
-          )}
-          {profileSubmissionMessage && <div style={{ marginTop: '0.75rem', color: '#166534', fontSize: '0.8rem', fontWeight: 700 }}>{profileSubmissionMessage}</div>}
-          {profileSubmissionError && <div style={{ marginTop: '0.75rem', color: '#B91C1C', fontSize: '0.8rem', fontWeight: 700 }}>{profileSubmissionError}</div>}
+          <div>
+            <div style={{ fontSize: '0.72rem', fontWeight: 900, letterSpacing: '0.14em', color: isLive ? '#166534' : '#6B7280' }}>{isLive ? 'LIVE' : 'OFF'}</div>
+            <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.15rem', fontWeight: 700, color: '#1A1209' }}>
+              {profile.status === 'REVIEW'
+                ? 'Profil en cours de validation'
+                : profile.status === 'DRAFT'
+                  ? 'Complétez votre profil avant sa publication'
+                  : isLive
+                    ? 'Votre profil est visible par les pèlerins'
+                    : !profile.acceptingBookings
+                      ? 'Votre profil est en pause'
+                      : 'Aucune ville n’est activée'}
+            </div>
+            <p style={{ margin: '0.2rem 0 0', color: '#7A6D5A', fontSize: '0.76rem', lineHeight: 1.5 }}>
+              {profile.status === 'REVIEW'
+                ? 'Votre profil reste invisible pendant le contrôle. L’administration le traitera sous 48 h.'
+                : profile.status === 'DRAFT'
+                  ? 'Vérifiez vos informations, vos langues, vos villes, vos lieux et votre calendrier.'
+                : isLive
+                  ? 'Vos réservations sont activées pour au moins une ville.'
+                  : 'Votre fiche publique reste accessible, mais aucune nouvelle réservation ne peut être créée.'}
+            </p>
+          </div>
         </div>
-      )}
+        {profile.status === 'DRAFT' && (
+          <a href="#guide-profile-information" style={{ padding: '0.6rem 1.15rem', borderRadius: 50, background: '#1A1209', color: '#F0D897', fontSize: '0.76rem', fontWeight: 800, textDecoration: 'none' }}>Compléter mon profil</a>
+        )}
+        {profile.status === 'ACTIVE' && !isLive && (
+          <Link href="/guide/calendrier" style={{ padding: '0.6rem 1.15rem', borderRadius: 50, background: '#1A1209', color: '#F0D897', fontSize: '0.76rem', fontWeight: 800, textDecoration: 'none' }}>Gérer mes disponibilités</Link>
+        )}
+      </div>
 
       <div style={{ ...card, padding: '1.25rem' }}>
         <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209', marginBottom: '0.25rem' }}>Tarifs nets validés</div>
         <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginBottom: '1rem' }}>Montants qui vous sont reversés par ville. Seule l’administration peut les modifier.</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '0.75rem' }}>
+        <div className="guide-profile-rate-grid">
           {[
             { label: 'Makkah', enabled: profile.servesMakkah, values: [profile.makkahNetUpTo6Cents, profile.makkahNetUpTo15Cents, profile.makkahNetUpTo32Cents] },
             { label: 'Médine', enabled: profile.servesMadinah, values: [profile.madinahNetUpTo6Cents, profile.madinahNetUpTo15Cents, profile.madinahNetUpTo32Cents] },
@@ -371,17 +388,22 @@ export default function GuideProfil() {
             </div>
           ))}
         </div>
+        <div style={{ marginTop: '1rem' }}>
+          <span style={label}>Demande de correction</span>
+          <textarea value={pricingCorrectionRequest} onChange={event => setPricingCorrectionRequest(event.target.value)} rows={3} maxLength={1000} placeholder="Ex. : Je souhaite modifier un tarif validé…" style={{ ...input, resize: 'vertical', lineHeight: 1.55 }} />
+          <div style={{ marginTop: 4, fontSize: '0.68rem', color: '#7A6D5A' }}>Votre demande sera transmise à l’administration. Aucun tarif n’est modifié automatiquement.</div>
+        </div>
       </div>
 
       {/* Edit form */}
-      <form onSubmit={handleSave}>
-        <div style={{ ...card, overflow: 'hidden' }}>
+      <form id="guide-profile-form" onSubmit={handleSave}>
+        <div id="guide-profile-information" style={{ ...card, overflow: 'hidden', scrollMarginTop: 90 }}>
           <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid #F0EBE0' }}>
             <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Informations personnelles</div>
           </div>
           <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="guide-profile-grid">
               <div>
                 <span style={label}>Prénom</span>
                 <input style={input} value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Votre prénom" />
@@ -392,7 +414,7 @@ export default function GuideProfil() {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="guide-profile-grid">
               <div>
                 <span style={label}>WhatsApp</span>
                 <input style={input} value={phoneWhatsapp} onChange={e => setPhoneWhatsapp(e.target.value)} placeholder="+212 6XX XXX XXX" />
@@ -403,7 +425,7 @@ export default function GuideProfil() {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="guide-profile-grid">
               <div>
                 <span style={label}>Ville</span>
                 <input style={input} value={city} onChange={e => setCity(e.target.value)} placeholder="Médine, La Mecque…" />
@@ -414,7 +436,7 @@ export default function GuideProfil() {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="guide-profile-grid">
               <div>
                 <span style={label}>Genre du guide</span>
                 <select style={input} value={gender} onChange={e => setGender(e.target.value as 'HOMME' | 'FEMME')}>
@@ -447,22 +469,11 @@ export default function GuideProfil() {
               />
             </div>
 
-            {success && (
-              <div style={{ background: '#D1FAE5', border: '1px solid #6EE7B7', borderRadius: 8, padding: '0.6rem 1rem', fontSize: '0.82rem', color: '#1D5C3A' }}>{success}</div>
-            )}
-            {saveError && (
-              <div style={{ background: '#FEE2E2', border: '1px solid #FCA5A5', borderRadius: 8, padding: '0.6rem 1rem', fontSize: '0.82rem', color: '#DC2626' }}>{saveError}</div>
-            )}
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <button
-                type="submit"
-                disabled={saving}
-                style={{ padding: '0.65rem 2rem', borderRadius: 50, fontWeight: 700, fontSize: '0.85rem', background: saving ? '#E8DFC8' : '#1A1209', color: saving ? '#7A6D5A' : '#F0D897', border: 'none', cursor: saving ? 'not-allowed' : 'pointer' }}
-              >
-                {saving ? 'Envoi…' : 'Envoyer pour validation'}
-              </button>
+            <div>
+              <span style={label}>Demande de correction</span>
+              <textarea value={personalCorrectionRequest} onChange={event => setPersonalCorrectionRequest(event.target.value)} rows={3} maxLength={1000} placeholder="Précisez ici une correction que vous souhaitez transmettre à l’administration…" style={{ ...input, resize: 'vertical', lineHeight: 1.55 }} />
             </div>
+
           </div>
         </div>
       </form>
@@ -499,10 +510,8 @@ export default function GuideProfil() {
           {/* Dropdown d'ajout */}
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <select
-              ref={selectRef}
               defaultValue=""
-              onChange={e => { if (e.target.value) handleAddLanguage(e.target.value); }}
-              disabled={langAdding}
+              onChange={e => { if (e.target.value) handleAddLanguage(e.target.value); e.currentTarget.value = ''; }}
               style={{ ...input, flex: 1, cursor: 'pointer', appearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237A6D5A' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.875rem center', paddingRight: '2.25rem' }}
             >
               <option value="" disabled>Ajouter une langue…</option>
@@ -510,9 +519,11 @@ export default function GuideProfil() {
                 <option key={l.code} value={l.code}>{l.label}</option>
               ))}
             </select>
-            {langAdding && (
-              <span style={{ fontSize: '0.75rem', color: '#7A6D5A', whiteSpace: 'nowrap' }}>Ajout…</span>
-            )}
+          </div>
+
+          <div>
+            <span style={label}>Demande de correction</span>
+            <textarea value={languagesCorrectionRequest} onChange={event => setLanguagesCorrectionRequest(event.target.value)} rows={3} maxLength={1000} placeholder="Précisez une langue ou une correction à faire vérifier…" style={{ ...input, resize: 'vertical', lineHeight: 1.55 }} />
           </div>
 
           {langError && (
@@ -522,7 +533,7 @@ export default function GuideProfil() {
       </div>
 
       {/* Security */}
-      <div id="guide-email-security" style={{ ...card, padding: '1.25rem', background: '#F5F2EC', display: 'grid', gap: '1.25rem' }}>
+      <div id="guide-email-security" style={{ ...card, order: -1, padding: '1.25rem', background: '#F5F2EC', display: 'grid', gap: '1.25rem' }}>
         <div>
           <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209', marginBottom: '0.25rem' }}>Sécurité</div>
           <div style={{ fontSize: '0.75rem', color: '#7A6D5A' }}>Une modification d’adresse ou de mot de passe déconnecte toutes les sessions.</div>
@@ -558,6 +569,23 @@ export default function GuideProfil() {
           {passwordMessage && <div style={{ color: '#1D5C3A', fontSize: '0.75rem' }}>{passwordMessage}</div>}
           {passwordError && <div style={{ color: '#DC2626', fontSize: '0.75rem' }}>{passwordError}</div>}
         </form>
+      </div>
+
+      <div style={{ ...card, padding: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', borderColor: '#C9A84C' }}>
+        <div style={{ flex: '1 1 300px' }}>
+          <div style={{ fontWeight: 800, color: '#1A1209', fontSize: '0.9rem' }}>Vérifiez toutes vos informations avant l’envoi.</div>
+          <div style={{ color: '#7A6D5A', fontSize: '0.74rem', marginTop: 3 }}>Les données publiques restent inchangées jusqu’à la décision de l’administration.</div>
+          {success && <div role="status" style={{ marginTop: '0.7rem', color: '#166534', fontSize: '0.78rem', fontWeight: 700 }}>{success}</div>}
+          {saveError && <div role="alert" style={{ marginTop: '0.7rem', color: '#B91C1C', fontSize: '0.78rem', fontWeight: 700 }}>{saveError}</div>}
+        </div>
+        <button
+          type="submit"
+          form="guide-profile-form"
+          disabled={saving}
+          style={{ padding: '0.8rem 1.8rem', borderRadius: 50, fontWeight: 800, fontSize: '0.85rem', background: saving ? '#E8DFC8' : '#1D5C3A', color: saving ? '#7A6D5A' : 'white', border: 'none', cursor: saving ? 'wait' : 'pointer' }}
+        >
+          {saving ? 'Transmission…' : profile.status === 'DRAFT' ? 'Envoyer mon profil pour validation' : 'Envoyer mes modifications pour validation'}
+        </button>
       </div>
 
     </div>

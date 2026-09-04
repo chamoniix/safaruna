@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 
 export type GuideSessionUser = {
   id: string
@@ -11,6 +11,10 @@ export type GuideSessionUser = {
   lastName: string | null
   guideProfileId: string
   guideStatus: 'DRAFT' | 'REVIEW' | 'ACTIVE'
+  guideSlug: string | null
+  acceptingBookings: boolean
+  servesMakkah: boolean
+  servesMadinah: boolean
 }
 
 const GuideSessionContext = createContext<GuideSessionUser | null>(null)
@@ -28,6 +32,7 @@ export function GuideSessionGuard({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<GuideSessionUser | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
     let cancelled = false
@@ -53,7 +58,7 @@ export function GuideSessionGuard({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true
     }
-  }, [router])
+  }, [pathname, router])
 
   if (loading || !user) return <LoadingGuideSession />
 

@@ -76,6 +76,9 @@ const PROFILE_FIELD_LABELS: Record<string, string> = {
   nationality: 'Nationalité',
   experienceYears: 'Années d’expérience',
   languages: 'Langues parlées',
+  pricingCorrectionRequest: 'Demande de correction des tarifs',
+  personalCorrectionRequest: 'Demande de correction des informations',
+  languagesCorrectionRequest: 'Demande de correction des langues',
 };
 
 function displayProfileValue(value: unknown) {
@@ -469,7 +472,7 @@ export default function AdminGuideDetailPage() {
       {guide.pendingProfileChange && (
         <div style={{ ...sectionStyle, borderColor: '#F59E0B', background: '#FFFBEB' }}>
           <div>
-            <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Modification du profil à valider</div>
+            <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Demande de modification à traiter</div>
             <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 3 }}>
               Demandée par {guide.pendingProfileChange.requestedByEmail} le {new Date(guide.pendingProfileChange.updatedAt).toLocaleString('fr-FR')}. Le profil public actuel est resté inchangé.
             </div>
@@ -487,7 +490,7 @@ export default function AdminGuideDetailPage() {
             Connexion : {guide.pendingProfileChange.submittedIp || 'IP inconnue'} · {[guide.pendingProfileChange.submittedCity, guide.pendingProfileChange.submittedCountry].filter(Boolean).join(', ') || 'localisation inconnue'} · {[guide.pendingProfileChange.submittedDevice, guide.pendingProfileChange.submittedBrowser].filter(Boolean).join(' · ') || 'appareil inconnu'}
           </div>
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <button onClick={() => reviewProfileChange('APPROVE')} disabled={reviewingProfileChange} style={{ padding: '0.65rem 1.4rem', border: 0, borderRadius: 50, background: '#166534', color: 'white', fontWeight: 700, cursor: reviewingProfileChange ? 'wait' : 'pointer' }}>Valider et publier</button>
+            <button onClick={() => reviewProfileChange('APPROVE')} disabled={reviewingProfileChange} style={{ padding: '0.65rem 1.4rem', border: 0, borderRadius: 50, background: '#166534', color: 'white', fontWeight: 700, cursor: reviewingProfileChange ? 'wait' : 'pointer' }}>Valider la demande</button>
             <button onClick={() => reviewProfileChange('REJECT')} disabled={reviewingProfileChange} style={{ padding: '0.65rem 1.4rem', border: 0, borderRadius: 50, background: '#991B1B', color: 'white', fontWeight: 700, cursor: reviewingProfileChange ? 'wait' : 'pointer' }}>Rejeter</button>
           </div>
         </div>

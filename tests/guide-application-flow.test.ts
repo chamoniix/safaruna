@@ -8,6 +8,7 @@ const adminRoute = readFileSync('src/app/api/admin/guide-applications/route.ts',
 const adminPage = readFileSync('src/app/admin/(dashboard)/candidatures-guides/page.tsx', 'utf8')
 const schema = readFileSync('prisma/schema.prisma', 'utf8')
 const migration = readFileSync('prisma/migrations/20260903153000_guide_application_details/migration.sql', 'utf8')
+const optionalServicesMigration = readFileSync('prisma/migrations/20260904120000_guide_application_optional_services/migration.sql', 'utf8')
 const email = readFileSync('src/lib/email.ts', 'utf8')
 const guideProfileRoute = readFileSync('src/app/api/guide/profil/route.ts', 'utf8')
 const guideLanguagesRoute = readFileSync('src/app/api/guide/profil/languages/route.ts', 'utf8')
@@ -19,10 +20,9 @@ const guideProfilePage = readFileSync('src/app/guide/(dashboard)/profil/page.tsx
 const publicGuideRoute = readFileSync('src/app/api/guide/public/[slug]/route.ts', 'utf8')
 const profileChangeMigration = readFileSync('prisma/migrations/20260903165000_guide_profile_change_requests/migration.sql', 'utf8')
 
-test('le formulaire exige les cinq tarifs proposés sans les publier automatiquement', () => {
+test('les tarifs proposés sont facultatifs, distinguent null de zéro et ne sont pas publiés automatiquement', () => {
   for (const field of [
     'proposedOmraPrice',
-    'proposedMakkahPackagePrice',
     'proposedMakkahPlacePrice',
     'proposedMadinahPackagePrice',
     'proposedMadinahPlacePrice',
@@ -31,34 +31,71 @@ test('le formulaire exige les cinq tarifs proposés sans les publier automatique
     assert.match(publicRoute, new RegExp(`${field}Cents`))
     assert.match(adminRoute, new RegExp(`${field}Cents`))
   }
-  assert.match(form, /aucun tarif n&apos;est publié automatiquement/)
+  assert.match(publicRoute, /proposedMakkahPackagePrice/)
+  assert.match(adminRoute, /proposedMakkahPackagePriceCents/)
+  assert.match(publicRoute, /const optionalPriceSchema/)
+  assert.match(publicRoute, /\.min\(0, 'Le tarif ne peut pas être négatif\.'\)/)
+  assert.match(publicRoute, /proposedOmraPrice == null \? null/)
+  assert.doesNotMatch(publicRoute, /value === 0[^\n]*null/)
+  assert.match(schema, /proposedOmraPriceCents\s+Int\?/)
+  assert.match(schema, /proposedMadinahPackagePriceCents\s+Int\?/)
+  assert.match(schema, /proposedMakkahPlacePriceCents\s+Int\?/)
+  assert.match(optionalServicesMigration, /ALTER COLUMN "proposedOmraPriceCents" DROP NOT NULL/)
+  assert.match(form, /aucun tarif n&apos;est publié automatiquement/i)
   assert.match(adminPage, /Ils ne modifient pas les tarifs du profil public/)
   assert.doesNotMatch(adminRoute, /makkahNetUpTo6Cents:\s*application\.proposed/)
   assert.doesNotMatch(adminRoute, /madinahNetUpTo6Cents:\s*application\.proposed/)
 })
 
-test('transport, ville principale et ville secondaire sont réellement transmis et persistés', () => {
+test('transports multiples, ville principale et villes proposées sont réellement transmis et persistés', () => {
   assert.match(form, /Voiture standard — jusqu’à 6 pèlerins/)
   assert.match(form, /id: 'OTHER'/)
   assert.match(form, /transportDetails/)
   assert.match(form, /offersSecondaryCity/)
   assert.match(publicRoute, /city:\s*z\.enum\(\['MAKKAH', 'MADINAH'\]/)
-  assert.match(publicRoute, /transportMode:\s+z\.enum\(\['NONE', 'CAR', 'VAN', 'OTHER'\]/)
+  assert.match(publicRoute, /transportModes:\s+z\.array\(z\.enum\(TRANSPORT_MODES\)\)/)
+  assert.match(publicRoute, /legacyTransportMode = transportModes\[0\] \?\? 'NONE'/)
   assert.match(schema, /transportMode\s+String/)
+  assert.match(schema, /transportModes\s+String\[\]/)
   assert.match(migration, /ADD COLUMN "transportMode" TEXT NOT NULL/)
+  assert.match(optionalServicesMigration, /ADD COLUMN "transportModes" TEXT\[\] NOT NULL/)
 })
 
-test('les coordonnées bancaires obligatoires sont chiffrées et masquées pour la liste administrative', () => {
+test('les coordonnées bancaires obligatoires sont chiffrées, le BIC facultatif reste chiffré et la liste administrative est masquée', () => {
   for (const field of ['bankAccountFirstName', 'bankAccountLastName', 'bankName', 'bankCountry']) {
     assert.match(publicRoute, new RegExp(`${field}: z\\.string`))
     assert.match(schema, new RegExp(`${field}\\s+String`))
   }
   assert.match(publicRoute, /ibanEncrypted: encrypt\(iban\)/)
-  assert.match(publicRoute, /bicEncrypted: encrypt\(bic\)/)
+  assert.match(publicRoute, /bic:\s*z\.string\(\)\.trim\(\)\.max\(100\)\.optional\(\)/)
+  assert.doesNotMatch(publicRoute, /SWIFT \/ BIC invalide/)
+  assert.match(publicRoute, /bicEncrypted: normalizedBic \? encrypt\(normalizedBic\) : null/)
   assert.match(adminRoute, /ibanMasked: maskedEncryptedValue\(ibanEncrypted, 4\)/)
   assert.match(adminRoute, /bicMasked: maskedEncryptedValue\(bicEncrypted, 3\)/)
   assert.doesNotMatch(adminPage, /ibanEncrypted/)
   assert.doesNotMatch(adminPage, /bicEncrypted/)
+})
+
+test('les langues, formations, lieux et précisions libres sont persistés sans publication directe', () => {
+  for (const field of [
+    'educationDetails',
+    'otherLanguages',
+    'otherPlaces',
+    'makkahIncludedDetails',
+    'makkahOtherDetails',
+    'madinahIncludedDetails',
+    'madinahOtherDetails',
+  ]) {
+    assert.match(publicRoute, new RegExp(field))
+    assert.match(adminRoute, new RegExp(`${field}: true`))
+    assert.match(schema, new RegExp(`${field}\\s+String\\?`))
+    assert.match(optionalServicesMigration, new RegExp(`"${field}"`))
+  }
+  assert.match(publicRoute, /education === 'other' \? 'Autre' : EDUCATION_LABELS\[education\]/)
+  assert.match(adminRoute, /university: application\.educationDetails \|\| application\.education/)
+  assert.match(publicRoute, /languages\.length === 0 && !value\.otherLanguages/)
+  assert.match(adminRoute, /status: 'DRAFT'/)
+  assert.doesNotMatch(adminRoute, /status: 'ACTIVE'/)
 })
 
 test('la candidature est contrôlée par Admin avant toute publication du profil', () => {

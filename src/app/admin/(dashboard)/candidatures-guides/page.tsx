@@ -18,15 +18,21 @@ type Application = {
   bio: string | null
   experienceYears: number | null
   education: string
+  educationDetails: string | null
   languages: string[]
+  otherLanguages: string | null
   masteredPlaces: Array<{ key: string; name: string }>
-  transportMode: string
+  otherPlaces: string | null
+  transportModes: string[]
   transportDetails: string | null
-  proposedOmraPriceCents: number
-  proposedMadinahPackagePriceCents: number
-  proposedMadinahPlacePriceCents: number
-  proposedMakkahPackagePriceCents: number
-  proposedMakkahPlacePriceCents: number
+  proposedOmraPriceCents: number | null
+  proposedMadinahPackagePriceCents: number | null
+  proposedMadinahPlacePriceCents: number | null
+  proposedMakkahPlacePriceCents: number | null
+  makkahIncludedDetails: string | null
+  makkahOtherDetails: string | null
+  madinahIncludedDetails: string | null
+  madinahOtherDetails: string | null
   pricingDetails: string | null
   bankAccountFirstName: string
   bankAccountLastName: string
@@ -65,19 +71,18 @@ const tones: Record<Status, { color: string; bg: string }> = {
 }
 
 function formatDate(value: string | null) {
-  return value ? new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : '—'
+  return value ? new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(value)) : 'Non renseigné'
 }
 
 function formatBirthDate(value: string) {
   return new Intl.DateTimeFormat('fr-FR', { dateStyle: 'long', timeZone: 'UTC' }).format(new Date(value))
 }
 
-function formatEuros(cents: number) {
-  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(cents / 100)
+function formatEuros(cents: number | null) {
+  return cents === null ? 'Non renseigné' : new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(cents / 100)
 }
 
 const transportLabels: Record<string, string> = {
-  NONE: 'Aucun transport',
   CAR: 'Voiture, jusqu’à 6 pèlerins',
   VAN: 'Van',
   OTHER: 'Autre',
@@ -161,10 +166,10 @@ export default function GuideApplicationsPage() {
       <div style={{ overflowX: 'auto' }}><table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 880 }}>
         <thead><tr style={{ background: '#F8F6F2' }}>{['Candidat', 'Contact', 'Ville(s)', 'Langues', 'Reçue', 'Statut', ''].map(label => <th key={label} style={{ padding: 12, textAlign: 'left', color: '#7A6D5A', fontSize: 11, textTransform: 'uppercase' }}>{label}</th>)}</tr></thead>
         <tbody>{loading ? <tr><td colSpan={7} style={{ padding: 30, textAlign: 'center' }}>Chargement…</td></tr> : !data?.applications.length ? <tr><td colSpan={7} style={{ padding: 30, textAlign: 'center', color: '#7A6D5A' }}>Aucune candidature réelle.</td></tr> : data.applications.map(item => <tr key={item.id} style={{ borderTop: '1px solid #F0EBE0' }}>
-          <td style={{ padding: 12 }}><strong>{item.firstName} {item.lastName}</strong><small style={{ display: 'block', color: '#7A6D5A' }}>{item.gender} · {item.nationality || '—'}</small></td>
-          <td style={{ padding: 12 }}><span>{item.email}</span><small style={{ display: 'block', color: '#7A6D5A' }}>{item.whatsapp || '—'}</small></td>
-          <td style={{ padding: 12 }}>{item.serviceCities.join(' · ')}</td>
-          <td style={{ padding: 12 }}>{item.languages.map(code => LANG_CODE_TO_LABEL[code] || code).join(', ') || '—'}</td>
+          <td style={{ padding: 12 }}><strong>{item.firstName} {item.lastName}</strong><small style={{ display: 'block', color: '#7A6D5A' }}>{item.gender} · {item.nationality || 'Non renseigné'}</small></td>
+          <td style={{ padding: 12 }}><span>{item.email}</span><small style={{ display: 'block', color: '#7A6D5A' }}>{item.whatsapp || 'Non renseigné'}</small></td>
+          <td style={{ padding: 12 }}>{item.serviceCities.join(' · ') || 'Non renseigné'}</td>
+          <td style={{ padding: 12 }}>{[item.languages.map(code => LANG_CODE_TO_LABEL[code] || code).join(', '), item.otherLanguages].filter(Boolean).join(', ') || 'Non renseigné'}</td>
           <td style={{ padding: 12, whiteSpace: 'nowrap' }}>{formatDate(item.createdAt)}</td>
           <td style={{ padding: 12 }}><span style={{ background: tones[item.status].bg, color: tones[item.status].color, padding: '5px 10px', borderRadius: 20, fontSize: 11, fontWeight: 700 }}>{labels[item.status]}</span></td>
           <td style={{ padding: 12 }}><button onClick={() => { setSelected(item); setNotes(item.reviewNotes || '') }} style={{ border: 0, borderRadius: 20, padding: '7px 12px', background: '#1A1209', color: '#F0D897', cursor: 'pointer' }}>Voir</button></td>
@@ -181,20 +186,25 @@ export default function GuideApplicationsPage() {
       <article style={{ width: 'min(760px,100%)', maxHeight: '90vh', overflow: 'auto', background: 'white', borderRadius: 16, padding: 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 20 }}><div><h2 style={{ margin: 0 }}>{selected.firstName} {selected.lastName}</h2><p style={{ color: '#7A6D5A' }}>Candidature {selected.id}</p></div><button onClick={() => setSelected(null)} style={{ border: 0, background: 'transparent', fontSize: 20 }}>×</button></div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(210px,1fr))', gap: 12, background: '#F8F6F2', padding: 16, borderRadius: 12 }}>
-          <div><b>Email</b><p>{selected.email}</p></div><div><b>WhatsApp</b><p>{selected.whatsapp || '—'}</p></div><div><b>Date de naissance</b><p>{formatBirthDate(selected.dateOfBirth)}</p></div><div><b>Formation</b><p>{selected.education}</p></div><div><b>Ville principale</b><p>{selected.city || '—'}</p></div><div><b>Villes servies</b><p>{selected.serviceCities.join(', ')}</p></div><div><b>Langues</b><p>{selected.languages.map(code => LANG_CODE_TO_LABEL[code] || code).join(', ') || '—'}</p></div><div><b>Expérience</b><p>{selected.experienceYears ?? '—'} an(s)</p></div><div><b>Pays de soumission</b><p>{selected.submittedCountry || '—'}</p></div><div><b>Appareil</b><p>{selected.submittedDevice || '—'}</p></div>
+          <div><b>Email</b><p>{selected.email}</p></div><div><b>WhatsApp</b><p>{selected.whatsapp || 'Non renseigné'}</p></div><div><b>Date de naissance</b><p>{formatBirthDate(selected.dateOfBirth)}</p></div><div><b>Formation</b><p>{selected.education}{selected.educationDetails ? ` — ${selected.educationDetails}` : ''}</p></div><div><b>Ville principale</b><p>{selected.city || 'Non renseigné'}</p></div><div><b>Villes servies</b><p>{selected.serviceCities.join(', ') || 'Non renseigné'}</p></div><div><b>Langues</b><p>{[selected.languages.map(code => LANG_CODE_TO_LABEL[code] || code).join(', '), selected.otherLanguages].filter(Boolean).join(', ') || 'Non renseigné'}</p></div><div><b>Expérience</b><p>{selected.experienceYears === null ? 'Non renseigné' : `${selected.experienceYears} an(s)`}</p></div><div><b>Pays de soumission</b><p>{selected.submittedCountry || 'Non renseigné'}</p></div><div><b>Appareil</b><p>{selected.submittedDevice || 'Non renseigné'}</p></div>
         </div>
-        <div style={{ marginTop: 16 }}><b>Lieux maîtrisés</b><p style={{ lineHeight: 1.6 }}>{selected.masteredPlaces.map(place => place.name).join(', ') || '—'}</p></div>
-        <div style={{ marginTop: 16 }}><b>Transport proposé</b><p style={{ lineHeight: 1.6 }}>{transportLabels[selected.transportMode] || selected.transportMode}{selected.transportDetails ? ` — ${selected.transportDetails}` : ''}</p></div>
+        <div style={{ marginTop: 16 }}><b>Lieux maîtrisés</b><p style={{ lineHeight: 1.6 }}>{selected.masteredPlaces.map(place => place.name).join(', ') || 'Non renseigné'}</p>{selected.otherPlaces && <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}><b>Autres lieux :</b> {selected.otherPlaces}</p>}</div>
+        <div style={{ marginTop: 16 }}><b>Transport proposé</b><p style={{ lineHeight: 1.6 }}>{selected.transportModes.length ? selected.transportModes.map(mode => transportLabels[mode] || mode).join(', ') : 'Aucun transport sélectionné'}{selected.transportDetails ? ` — ${selected.transportDetails}` : ''}</p></div>
         <div style={{ marginTop: 16 }}>
           <b>Tarifs proposés par le candidat</b>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 10, marginTop: 10 }}>
             <div><small>Accompagnement Omra</small><p>{formatEuros(selected.proposedOmraPriceCents)}</p></div>
-            <div><small>Pack Makkah</small><p>{formatEuros(selected.proposedMakkahPackagePriceCents)}</p></div>
-            <div><small>Une visite Makkah</small><p>{formatEuros(selected.proposedMakkahPlacePriceCents)}</p></div>
-            <div><small>Pack Médine</small><p>{formatEuros(selected.proposedMadinahPackagePriceCents)}</p></div>
-            <div><small>Une visite Médine</small><p>{formatEuros(selected.proposedMadinahPlacePriceCents)}</p></div>
+            <div><small>Visite supplémentaire Makkah</small><p>{formatEuros(selected.proposedMakkahPlacePriceCents)}</p></div>
+            <div><small>Accompagnement Médine</small><p>{formatEuros(selected.proposedMadinahPackagePriceCents)}</p></div>
+            <div><small>Visite supplémentaire Médine</small><p>{formatEuros(selected.proposedMadinahPlacePriceCents)}</p></div>
           </div>
-          {selected.pricingDetails && <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{selected.pricingDetails}</p>}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(220px,1fr))', gap: 10 }}>
+            <div><small>Inclus à Makkah</small><p style={{ whiteSpace: 'pre-wrap' }}>{selected.makkahIncludedDetails || 'Non renseigné'}</p></div>
+            <div><small>Autres précisions Makkah</small><p style={{ whiteSpace: 'pre-wrap' }}>{selected.makkahOtherDetails || 'Non renseigné'}</p></div>
+            <div><small>Inclus à Médine</small><p style={{ whiteSpace: 'pre-wrap' }}>{selected.madinahIncludedDetails || 'Non renseigné'}</p></div>
+            <div><small>Autres précisions Médine</small><p style={{ whiteSpace: 'pre-wrap' }}>{selected.madinahOtherDetails || 'Non renseigné'}</p></div>
+          </div>
+          <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}><b>Précisions tarifaires :</b> {selected.pricingDetails || 'Non renseigné'}</p>
           <small style={{ color: '#7A6D5A' }}>Ces montants sont informatifs. Ils ne modifient pas les tarifs du profil public.</small>
         </div>
         <div style={{ marginTop: 16 }}>
@@ -203,11 +213,11 @@ export default function GuideApplicationsPage() {
             <div><small>Titulaire</small><p>{selected.bankAccountFirstName} {selected.bankAccountLastName}</p></div>
             <div><small>Banque</small><p>{selected.bankName}</p></div>
             <div><small>Pays</small><p>{selected.bankCountry}</p></div>
-            <div><small>IBAN</small><p>{selected.ibanMasked || '—'}</p></div>
-            <div><small>SWIFT / BIC</small><p>{selected.bicMasked || '—'}</p></div>
+            <div><small>IBAN</small><p>{selected.ibanMasked || 'Non renseigné'}</p></div>
+            <div><small>SWIFT / BIC</small><p>{selected.bicMasked || 'Non renseigné'}</p></div>
           </div>
         </div>
-        <div style={{ marginTop: 16 }}><b>Présentation</b><p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{selected.bio || '—'}</p></div>
+        <div style={{ marginTop: 16 }}><b>Présentation</b><p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>{selected.bio || 'Non renseigné'}</p></div>
         <label style={{ display: 'grid', gap: 7, marginTop: 16 }}><b>Notes internes</b><textarea value={notes} onChange={event => setNotes(event.target.value)} rows={4} maxLength={2000} style={{ padding: 12, border: '1px solid #E8DFC8', borderRadius: 8 }} /></label>
         {selected.reviewedByEmail && <p style={{ color: '#7A6D5A', fontSize: 12 }}>Dernier traitement : {selected.reviewedByEmail} · {formatDate(selected.reviewedAt)}</p>}
         {selected.status !== 'APPROVED' && <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', flexWrap: 'wrap', marginTop: 18 }}>

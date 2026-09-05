@@ -492,7 +492,7 @@ function FlowMakkah({ openStep, togStep, openSplit, togSplit, theme }: {
 
       <StepCard num={2} icon={<IconPlane color={theme.accent} />}
         title="Dans l'avion — miqat + ihram"
-        emotion="L'Omra commence au-dessus des nuages"
+        emotion="La omra commence au-dessus des nuages"
         open={openStep === 'm2'} onToggle={() => togStep('m2')} theme={theme}
       >
         <StepDesc>
@@ -509,7 +509,7 @@ function FlowMakkah({ openStep, togStep, openSplit, togSplit, theme }: {
       >
         <StepDesc>
           Votre guide vous attend à la sortie bagages, prend vos valises
-          et vous conduit à l&apos;hôtel. Vous êtes déjà en ihram — l&apos;Omra commence très vite.
+          et vous conduit à l&apos;hôtel. Vous êtes déjà en ihram — la omra commence très vite.
         </StepDesc>
         <InfoTag text="Pick-up aéroport — si sélectionné" />
       </StepCard>

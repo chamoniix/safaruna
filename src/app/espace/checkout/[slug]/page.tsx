@@ -1165,7 +1165,7 @@ export default function CheckoutPage() {
                     Omra — Makkah
                   </div>
                   <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: '0.15rem', lineHeight: 1.4 }}>
-                    Ihram · Tawaf · Sa&apos;i · Lieux saints
+                    Ihram · Tawaf · Sa&apos;i · Lieux historiques
                   </div>
                 </div>
                 {/* Price + radio */}

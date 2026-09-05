@@ -346,7 +346,7 @@ const steps: CarouselItem[] = [
   {
     id: 'visites',
     title: 'Accompagnement visites guidées privées',
-    text: 'Lieux saints, sites historiques et explications adaptées à ta langue, ton niveau et ton rythme.',
+    text: 'Lieux historiques et explications adaptées à ta langue, ton niveau et ton rythme.',
     href: '/lieux-saints',
     meta: 'Étape 4',
     image: '/parcours/accompagnement-visites.jpg',
@@ -354,7 +354,7 @@ const steps: CarouselItem[] = [
   },
   {
     id: 'apres',
-    title: 'Après l’Omra',
+    title: 'Après la omra',
     text: 'Suivi, conseils, souvenirs et continuité spirituelle pour ne pas repartir avec seulement des photos.',
     href: '/espace/tableau-de-bord',
     meta: 'Étape 5',
@@ -710,7 +710,7 @@ function HeroSection() {
           </p>
           <p className="sfr-hero-lead">
             <span>Guide certifié à La Mecque et Médine.</span>{' '}
-            <span>Visite des lieux saints et sites historiques.</span>
+            <span>Visite des lieux historiques.</span>
           </p>
           <div className="sfr-hero-actions">
             <Link href="/guides" className="sfr-btn sfr-btn-gold">

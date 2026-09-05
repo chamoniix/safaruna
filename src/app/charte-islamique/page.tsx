@@ -37,7 +37,7 @@ export default function CharteIslamique() {
           marginBottom: '1rem',
           direction: 'rtl',
         }}>
-          وَمَن يُعَظِّمْ شَعَائِرَ اللَّهِ
+          يَا أَيُّهَا الَّذِينَ آمَنُوا أَوْفُوا بِالْعُقُودِ
         </div>
         <p style={{
           fontFamily: 'var(--font-cormorant, Georgia, serif)',
@@ -48,7 +48,7 @@ export default function CharteIslamique() {
           margin: '0 0 0.75rem',
           fontStyle: 'italic',
         }}>
-          “Et quiconque honore les rites sacrés d&apos;Allah, c&apos;est assurément le fruit de la piété des cœurs.”
+          “Ô les croyants ! Remplissez fidèlement vos engagements.”
         </p>
         <p style={{
           fontSize: '0.78rem',
@@ -59,7 +59,7 @@ export default function CharteIslamique() {
           letterSpacing: '0.08em',
           textTransform: 'uppercase',
         }}>
-          Sourate Al-Hajj · 22:32
+          Sourate Al-Ma’idah · 5:1
         </p>
         <div style={{
           display: 'grid',
@@ -77,7 +77,7 @@ export default function CharteIslamique() {
             },
             {
               title: 'Connaissance',
-              text: "L'Omra sans savoir, c'est marcher dans le noir. Avec SAFARUMA, chaque pas a un sens.",
+              text: "La omra sans savoir, c'est marcher dans le noir. Avec SAFARUMA, chaque pas a un sens.",
             },
           ].map((item) => (
             <div key={item.title} style={{
@@ -159,12 +159,12 @@ export default function CharteIslamique() {
           {
             num: '٦',
             title: 'Honnêteté financière',
-            text: 'Ne jamais surfacturer un pèlerin en situation de vulnérabilité. Ne jamais accepter de pot-de-vin (bakchich) de commerçants pour orienter les clients. Tous les revenus doivent être halal et transparents.',
+            text: 'Ne jamais contourner SAFARUMA pour demander ou percevoir directement auprès d’un pèlerin une rémunération ou une compensation liée aux prestations réservées sur la plateforme. Toute facturation de ces prestations passe exclusivement par SAFARUMA. Ne jamais accepter de pot-de-vin de commerçants pour orienter les pèlerins.',
           },
           {
             num: '٧',
             title: 'Protection des vulnérables',
-            text: 'Porter une attention particulière et bienveillante aux personnes âgées, aux personnes à mobilité réduite (PMR), aux femmes seules et aux familles avec jeunes enfants. Adapter le rythme et l\'accompagnement à leurs besoins.',
+            text: 'Porter une attention particulière et bienveillante aux personnes âgées, aux personnes à mobilité réduite (PMR) et aux familles avec jeunes enfants. Adapter le rythme et l\'accompagnement à leurs besoins.',
           },
           {
             num: '٨',
@@ -204,7 +204,7 @@ export default function CharteIslamique() {
             Le Prophète Muhammad ﷺ — Rapporté par Muslim (n° 55)
           </p>
         </div>
-        <p style={p}>Ces paroles prophétiques résument l&apos;esprit de la Charte SAFARUMA. Un Guide qui trompe — sur ses compétences, ses tarifs, ou en pratiquant des paiements cachés — s&apos;expose non seulement aux sanctions de SAFARUMA, mais rompt un serment moral.</p>
+        <p style={p}>Ces paroles prophétiques résument l&apos;esprit de la Charte SAFARUMA. Un Guide qui trompe — en pratiquant des paiements cachés — s&apos;expose non seulement aux sanctions de SAFARUMA, mais rompt un serment moral.</p>
         <p style={p}>Nous croyons que les meilleurs guides sont ceux qui n&apos;ont pas besoin d&apos;être surveillés — parce qu&apos;ils agissent par conscience, par foi, et par amour pour leurs frères et sœurs en Islam.</p>
       </section>
 
@@ -222,7 +222,7 @@ export default function CharteIslamique() {
           </ul>
         </div>
         <p style={p}>En cas de violation de la Charte, SAFARUMA applique les sanctions prévues dans les <a href="/conditions-guides" style={{ color: '#C9A84C', fontWeight: 600 }}>Conditions Guides</a>, pouvant aller jusqu&apos;à la suspension définitive du compte.</p>
-        <p style={p}>Que Allah ﷻ facilite votre mission et bénisse vos efforts au service des pèlerins. <strong>Barak Allahu fik.</strong></p>
+        <p style={p}>Que Allah ﷻ facilite votre mission et bénisse vos efforts au service des pèlerins. <strong>بارك الله فيك.</strong></p>
       </section>
 
     </LegalLayout>

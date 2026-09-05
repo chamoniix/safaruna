@@ -22,11 +22,11 @@ const faqSchema = {
 
 export const metadata: Metadata = {
   title: `FAQ Omra — ${totalQ} réponses sur les guides privés et le pèlerinage | SAFARUMA`,
-  description: "Réponses détaillées : rituels Omra, choix d'un guide privé, prix, formalités, lieux saints. Toutes les questions des futurs pèlerins.",
+  description: "Réponses détaillées : rituels Omra, choix d'un guide privé, prix, formalités, lieux historiques. Toutes les questions des futurs pèlerins.",
   alternates: { canonical: 'https://safaruma.com/faq' },
   openGraph: {
     title: `FAQ Omra — ${totalQ} réponses sur les guides privés et le pèlerinage | SAFARUMA`,
-    description: "Réponses détaillées : rituels Omra, choix d'un guide privé, prix, formalités, lieux saints. Toutes les questions des futurs pèlerins.",
+    description: "Réponses détaillées : rituels Omra, choix d'un guide privé, prix, formalités, lieux historiques. Toutes les questions des futurs pèlerins.",
     url: 'https://safaruma.com/faq',
     type: 'website',
     siteName: 'SAFARUMA',

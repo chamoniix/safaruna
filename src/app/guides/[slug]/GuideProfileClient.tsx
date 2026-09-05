@@ -55,7 +55,7 @@ interface GuideProfileClientProps {
   servesMadinah: boolean;
 }
 
-const TAB_LABELS = ['Présentation', 'Lieux Saints', 'Avis'];
+const TAB_LABELS = ['Présentation', 'Lieux historiques', 'Avis'];
 
 function ProfileFavoriteButton({ guideName, active, pending, onClick }: { guideName: string; active: boolean; pending: boolean; onClick: () => void }) {
   return (

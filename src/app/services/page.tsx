@@ -39,7 +39,7 @@ const SERVICES: Service[] = [
     icon: <IconGraduationCap size={36} stroke="#C9A84C" />,
     arabic: 'مرشد',
     title: 'Guide privé certifié',
-    desc: 'Chaque guide Safaruma est sélectionné, interviewé et certifié. Maîtrise des rituels, connaissance des lieux saints, accompagnement en français — votre guide est là du premier au dernier rite.',
+    desc: 'Chaque guide Safaruma est sélectionné, interviewé et certifié. Maîtrise des rituels, connaissance des lieux historiques, accompagnement en français — votre guide est là du premier au dernier rite.',
     features: ['Certification Safaruma vérifiée', 'Maîtrise des rituels Omra', 'Francophone natif', 'Accompagnement du début à la fin'],
     price: 'Sur devis',
     color: '#8B6914',

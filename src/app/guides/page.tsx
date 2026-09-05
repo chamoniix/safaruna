@@ -112,7 +112,7 @@ const GUIDES_DATA = [
     available: true,
     isOfficial: true,
     specialisteEnfants: false,
-    shortBio: 'Naïm accompagne les pèlerins depuis 8 ans à Madinah. Responsable terrain SAFARUMA, formateur certifié, il maîtrise les rituels de l\'Omra, l\'histoire islamique des lieux saints, et assure une prise en charge PMR et gestion de crise. Plus de 500 familles l\'ont choisi pour la qualité humaine de son accompagnement.',
+    shortBio: 'Naïm accompagne les pèlerins depuis 8 ans à Madinah. Responsable terrain SAFARUMA, formateur certifié, il maîtrise les rituels de la omra, l\'histoire islamique des lieux historiques, et assure une prise en charge PMR et gestion de crise. Plus de 500 familles l\'ont choisi pour la qualité humaine de son accompagnement.',
   },
   {
     slug: 'bientot-disponible',
@@ -671,7 +671,7 @@ export default function GuideSearchPage() {
         </div>
       </FilterCard>
 
-      <FilterCard title="Lieux saints">
+      <FilterCard title="Lieux historiques">
         <div style={{ position: 'relative' }}>
           <button onClick={() => setLieuxDropOpen(v => !v)} style={{ width: '100%', border: '1.5px solid #E8DFC8', borderRadius: 10, padding: '0.5rem 0.75rem', fontSize: '0.82rem', color: '#7A6D5A', background: 'white', fontFamily: 'inherit', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', outline: 'none' }}>
             <span>{selectedLieux.length > 0 ? `${selectedLieux.length} lieu(x)` : 'Sélectionner'}</span>

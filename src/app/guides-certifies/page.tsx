@@ -15,7 +15,7 @@ export default function GuidesCertifiesPage() {
         <h1>Un guide privé ne doit pas seulement connaître les lieux. Il doit savoir accompagner.</h1>
         <p>
           SAFARUMA met en avant des guides capables d’expliquer les rites, d’adapter le rythme au pèlerin et de
-          transmettre l’histoire des lieux saints sans transformer la Omra en simple circuit touristique.
+          transmettre l’histoire des lieux historiques sans transformer la Omra en simple circuit touristique.
         </p>
         <Link href="/guides">Voir les guides</Link>
       </section>

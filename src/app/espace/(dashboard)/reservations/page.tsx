@@ -13,8 +13,24 @@ type Reservation = {
   review: { rating: number; comment: string; status: string } | null;
 };
 
+type PendingPayment = {
+  refNumber: string;
+  provider: 'REVOLUT';
+  guideSlug: string;
+  packageName: string;
+  destination: 'MAKKAH' | 'MADINAH' | 'BOTH';
+  startDate: string;
+  nbPeople: number;
+  amountCents: number;
+  currency: string;
+  promotion: { code: string; discountPercent: number } | null;
+  expiresAt: string;
+  createdAt: string;
+};
+
 type ReservationsData = {
   stats: { total: number; upcoming: number; completed: number; totalSpent: number; };
+  pendingPayments: PendingPayment[];
   reservations: Reservation[];
 };
 
@@ -154,12 +170,59 @@ export default function EspaceReservations() {
   }
 
   const { stats } = data;
+  const pendingPayments = data.pendingPayments ?? [];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', fontFamily: 'var(--font-manrope, sans-serif)' }}>
 
       {reviewTarget && (
         <ReviewModal reservation={reviewTarget} onClose={() => setReviewTarget(null)} onSuccess={() => { setReviewTarget(null); fetchData(); }} />
+      )}
+
+      {pendingPayments.length > 0 && (
+        <section style={{ ...card, padding: '1.1rem 1.25rem', borderColor: '#F0C96A', background: '#FFFBEB' }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', marginBottom: '.85rem' }}>
+            <div>
+              <div style={{ fontSize: '.9rem', fontWeight: 800, color: '#1A1209' }}>Paiements en attente</div>
+              <div style={{ fontSize: '.72rem', color: '#7A6D5A', marginTop: '.2rem' }}>Votre sélection est conservée jusqu’à l’heure indiquée.</div>
+            </div>
+            <span style={{ fontSize: '.68rem', fontWeight: 800, color: '#8B6914', background: '#FEF3C7', borderRadius: 20, padding: '.3rem .65rem' }}>
+              {pendingPayments.length} en cours
+            </span>
+          </div>
+
+          <div style={{ display: 'grid', gap: '.65rem' }}>
+            {pendingPayments.map(payment => {
+              const destination = payment.destination === 'BOTH'
+                ? 'Makkah + Médine'
+                : payment.destination === 'MAKKAH' ? 'Makkah' : 'Médine';
+              const amount = new Intl.NumberFormat('fr-FR', {
+                style: 'currency',
+                currency: payment.currency,
+              }).format(payment.amountCents / 100);
+
+              return (
+                <div key={payment.refNumber} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap', background: 'white', border: '1px solid #F3DFC0', borderRadius: 10, padding: '.85rem 1rem' }}>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: '.8rem', fontWeight: 800, color: '#1A1209' }}>{payment.packageName} · {destination}</div>
+                    <div style={{ fontSize: '.7rem', color: '#7A6D5A', marginTop: '.25rem' }}>
+                      Réf. {payment.refNumber} · Départ {new Date(`${payment.startDate}T00:00:00`).toLocaleDateString('fr-FR')} · {payment.nbPeople} personne{payment.nbPeople > 1 ? 's' : ''}
+                    </div>
+                    <div style={{ fontSize: '.7rem', color: '#8B6914', marginTop: '.25rem', fontWeight: 700 }}>
+                      {amount}{payment.promotion ? ` · Code ${payment.promotion.code} appliqué` : ''} · disponible jusqu’à {new Date(payment.expiresAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                  </div>
+                  <Link
+                    href={`/espace/checkout/${encodeURIComponent(payment.guideSlug)}?ref=${encodeURIComponent(payment.refNumber)}`}
+                    style={{ display: 'inline-block', flexShrink: 0, background: '#1A1209', color: '#F0D897', padding: '.6rem 1rem', borderRadius: 50, fontWeight: 800, fontSize: '.74rem', textDecoration: 'none' }}
+                  >
+                    Reprendre le paiement
+                  </Link>
+                </div>
+              );
+            })}
+          </div>
+        </section>
       )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>

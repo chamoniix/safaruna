@@ -22,7 +22,7 @@ function safePelerinRedirect(value: string | null | undefined): string {
   try {
     const url = new URL(value, 'https://safaruma.com');
     if (url.origin !== 'https://safaruma.com') return '';
-    if (url.pathname !== '/avis/deposer' && !url.pathname.startsWith('/avis/guide/') && url.pathname !== '/espace' && !url.pathname.startsWith('/espace/')) return '';
+    if (url.pathname !== '/avis/deposer' && !url.pathname.startsWith('/avis/guide/') && url.pathname !== '/guides' && !url.pathname.startsWith('/guides/') && url.pathname !== '/espace' && !url.pathname.startsWith('/espace/')) return '';
     return `${url.pathname}${url.search}${url.hash}`;
   } catch {
     return '';

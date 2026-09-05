@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { PLACES as LIB_PLACES } from '@/lib/places';
 import { trackAnalyticsEvent } from '@/lib/analytics-client';
 
@@ -55,6 +57,36 @@ interface GuideProfileClientProps {
 
 const TAB_LABELS = ['Présentation', 'Lieux Saints', 'Avis'];
 
+function ProfileFavoriteButton({ guideName, active, pending, onClick }: { guideName: string; active: boolean; pending: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={pending}
+      aria-pressed={active}
+      aria-label={active ? `Retirer ${guideName} des favoris` : `Ajouter ${guideName} aux favoris`}
+      title={active ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+      style={{
+        width: 42,
+        height: 42,
+        borderRadius: '50%',
+        border: `1px solid ${active ? '#DC2626' : '#E8DFC8'}`,
+        background: active ? '#FDECEC' : 'white',
+        color: active ? '#DC2626' : '#7A6D5A',
+        display: 'grid',
+        placeItems: 'center',
+        cursor: pending ? 'wait' : 'pointer',
+        opacity: pending ? 0.55 : 1,
+        flexShrink: 0,
+      }}
+    >
+      <svg width="19" height="19" viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+      </svg>
+    </button>
+  );
+}
+
 export default function GuideProfileClient({
   slug,
   guideName,
@@ -73,11 +105,97 @@ export default function GuideProfileClient({
   servesMakkah,
   servesMadinah,
 }: GuideProfileClientProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const searchParamString = searchParams.toString();
+  const favoriteIntent = searchParams.get('favorite');
+  const { status: sessionStatus } = useSession();
   const [activeTab, setActiveTab] = useState(0);
+  const [favorite, setFavorite] = useState(false);
+  const [favoritePending, setFavoritePending] = useState(false);
+  const [favoriteError, setFavoriteError] = useState('');
 
   useEffect(() => {
     trackAnalyticsEvent('guide_viewed', { guideSlug: slug, guideName });
   }, [slug, guideName]);
+
+  useEffect(() => {
+    if (sessionStatus !== 'authenticated') {
+      if (sessionStatus === 'unauthenticated') setFavorite(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    let active = true;
+    const loadFavorite = async () => {
+      try {
+        const response = await fetch('/api/espace/favorites', { cache: 'no-store', signal: controller.signal });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || 'Chargement impossible');
+        let isFavorite = ((data.favorites || []) as Array<{ slug: string }>).some(item => item.slug === slug);
+
+        if (favoriteIntent === slug) {
+          const saveResponse = await fetch('/api/espace/favorites', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ guideSlug: slug }),
+            signal: controller.signal,
+          });
+          const saveData = await saveResponse.json().catch(() => ({}));
+          if (!saveResponse.ok) throw new Error(saveData.error || 'Enregistrement impossible');
+          isFavorite = true;
+        }
+
+        if (active) {
+          setFavorite(isFavorite);
+          setFavoriteError('');
+        }
+      } catch (error) {
+        if (active && (error as Error).name !== 'AbortError') setFavoriteError('Impossible de synchroniser ce favori. Réessayez.');
+      } finally {
+        if (active && favoriteIntent) {
+          const params = new URLSearchParams(searchParamString);
+          params.delete('favorite');
+          const query = params.toString();
+          router.replace(query ? `/guides/${slug}?${query}` : `/guides/${slug}`, { scroll: false });
+        }
+      }
+    };
+
+    loadFavorite();
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [favoriteIntent, router, searchParamString, sessionStatus, slug]);
+
+  async function toggleFavorite() {
+    if (sessionStatus === 'loading' || favoritePending) return;
+    if (sessionStatus !== 'authenticated') {
+      const params = new URLSearchParams(searchParamString);
+      params.set('favorite', slug);
+      const callbackUrl = `/guides/${slug}?${params.toString()}`;
+      router.push(`/connexion?redirect=${encodeURIComponent(callbackUrl)}`);
+      return;
+    }
+
+    setFavoritePending(true);
+    setFavoriteError('');
+    try {
+      const response = await fetch('/api/espace/favorites', {
+        method: favorite ? 'DELETE' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guideSlug: slug }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Modification impossible');
+      setFavorite(!favorite);
+    } catch {
+      setFavoriteError('Impossible de modifier ce favori. Réessayez.');
+    } finally {
+      setFavoritePending(false);
+    }
+  }
 
   const bookable = acceptingBookings && (servesMakkah || servesMadinah);
   const checkoutHref = `/espace/checkout/${slug}`;
@@ -523,6 +641,9 @@ export default function GuideProfileClient({
         {/* RIGHT SIDE — Bouton réserver (desktop) */}
         <div className="profile-booking-sticky">
           <div style={{ position: 'sticky', top: '90px', background: 'white', borderRadius: '20px', border: '1px solid #E8DFC8', boxShadow: '0 8px 32px rgba(26,18,9,0.08)', padding: '1.5rem', textAlign: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '0.65rem' }}>
+              <ProfileFavoriteButton guideName={guideName} active={favorite} pending={favoritePending} onClick={toggleFavorite} />
+            </div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: bookable ? '#D1FAE5' : '#FEF3C7', color: bookable ? '#1D5C3A' : '#92400E', fontSize: '0.75rem', fontWeight: 700, padding: '0.3rem 0.875rem', borderRadius: 50, marginBottom: '1.25rem' }}>
               <span style={{ width: 7, height: 7, borderRadius: '50%', background: bookable ? '#1D5C3A' : '#D97706', display: 'inline-block' }}/>
               {bookable ? 'Disponible' : 'Temporairement indisponible'}
@@ -549,17 +670,20 @@ export default function GuideProfileClient({
             <div style={{ marginTop: '1rem', fontSize: '0.72rem', color: '#9CA3AF', lineHeight: 1.6 }}>
               Guide certifié SAFARUMA · Paiement sécurisé
             </div>
+            {favoriteError && <div role="alert" style={{ marginTop: '0.8rem', color: '#C0392B', fontSize: '0.72rem', lineHeight: 1.5 }}>{favoriteError}</div>}
           </div>
         </div>
       </div>
 
       {/* Mobile booking bar (fixed bottom) */}
       <div className="profile-mobile-booking">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+        <ProfileFavoriteButton guideName={guideName} active={favorite} pending={favoritePending} onClick={toggleFavorite} />
         <a
           href={bookable ? checkoutHref : '#'}
           aria-disabled={!bookable}
           style={{
-            display: 'block', width: '100%', padding: '0.875rem',
+            display: 'block', flex: 1, width: 'auto', padding: '0.875rem',
             background: !bookable ? '#E8DFC8' : 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)',
             color: '#1A1209',
             borderRadius: 50, fontFamily: 'var(--font-manrope, sans-serif)', fontWeight: 800,
@@ -569,6 +693,7 @@ export default function GuideProfileClient({
         >
           {!bookable ? 'Réservations en pause' : 'Réserver ce guide'}
         </a>
+        </div>
       </div>
     </div>
   );

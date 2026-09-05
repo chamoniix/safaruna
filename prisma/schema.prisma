@@ -74,6 +74,7 @@ model User {
   referral               Referral?          @relation("ReferralReferred")
   promoCodes             PromoCode[]
   dashboardState         PelerinDashboardState?
+  favoriteGuides         GuideFavorite[]
 }
 
 model VerificationToken {
@@ -258,6 +259,20 @@ model GuideProfile {
   reviews              Review[]
   changeRequests       GuideProfileChangeRequest[]
   reservationIncidents GuideReservationIncident[]
+  favoritedBy          GuideFavorite[]
+}
+
+model GuideFavorite {
+  id             String       @id @default(cuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guideProfileId String
+  guideProfile   GuideProfile @relation(fields: [guideProfileId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+
+  @@unique([userId, guideProfileId])
+  @@index([userId, createdAt])
+  @@index([guideProfileId, createdAt])
 }
 
 enum GuideAccountStatus {

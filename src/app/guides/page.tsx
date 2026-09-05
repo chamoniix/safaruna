@@ -2,7 +2,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import Image from 'next/image';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -283,9 +284,16 @@ function CalendarPicker({ dateArrivee, setDateArrivee, dateDepart, setDateDepart
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function GuideSearchPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const { status: sessionStatus } = useSession();
   const returnSlug = searchParams.get('returnSlug');
+  const favoriteIntent = searchParams.get('favorite');
+  const searchParamString = searchParams.toString();
   const [guideList, setGuideList] = useState<GuideData[]>([]);
   const [guidesLoading, setGuidesLoading] = useState(true);
+  const [favoriteSlugs, setFavoriteSlugs] = useState<Set<string>>(new Set());
+  const [pendingFavoriteSlugs, setPendingFavoriteSlugs] = useState<Set<string>>(new Set());
+  const [favoriteError, setFavoriteError] = useState('');
 
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedLangue, setSelectedLangue] = useState('');
@@ -308,6 +316,94 @@ export default function GuideSearchPage() {
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
   }, []);
+
+  useEffect(() => {
+    if (sessionStatus !== 'authenticated') {
+      if (sessionStatus === 'unauthenticated') setFavoriteSlugs(new Set());
+      return;
+    }
+
+    const controller = new AbortController();
+    let active = true;
+    const loadFavorites = async () => {
+      try {
+        const response = await fetch('/api/espace/favorites', { cache: 'no-store', signal: controller.signal });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || 'Chargement impossible');
+        const loaded = new Set<string>(((data.favorites || []) as Array<{ slug: string }>).map(favorite => favorite.slug));
+
+        if (favoriteIntent && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(favoriteIntent)) {
+          const saveResponse = await fetch('/api/espace/favorites', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ guideSlug: favoriteIntent }),
+            signal: controller.signal,
+          });
+          const saveData = await saveResponse.json().catch(() => ({}));
+          if (!saveResponse.ok) throw new Error(saveData.error || 'Enregistrement impossible');
+          loaded.add(favoriteIntent);
+        }
+
+        if (active) {
+          setFavoriteSlugs(loaded);
+          setFavoriteError('');
+        }
+      } catch (error) {
+        if (active && (error as Error).name !== 'AbortError') setFavoriteError('Impossible de synchroniser vos favoris. Réessayez.');
+      } finally {
+        if (active && favoriteIntent) {
+          const params = new URLSearchParams(searchParamString);
+          params.delete('favorite');
+          const query = params.toString();
+          router.replace(query ? `/guides?${query}` : '/guides', { scroll: false });
+        }
+      }
+    };
+
+    loadFavorites();
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [favoriteIntent, router, searchParamString, sessionStatus]);
+
+  async function toggleFavorite(slug: string) {
+    if (sessionStatus === 'loading' || pendingFavoriteSlugs.has(slug)) return;
+    if (sessionStatus !== 'authenticated') {
+      const params = new URLSearchParams(searchParamString);
+      params.set('favorite', slug);
+      const callbackUrl = `/guides?${params.toString()}`;
+      router.push(`/connexion?redirect=${encodeURIComponent(callbackUrl)}`);
+      return;
+    }
+
+    const favorite = favoriteSlugs.has(slug);
+    setPendingFavoriteSlugs(current => new Set(current).add(slug));
+    setFavoriteError('');
+    try {
+      const response = await fetch('/api/espace/favorites', {
+        method: favorite ? 'DELETE' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guideSlug: slug }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || 'Modification impossible');
+      setFavoriteSlugs(current => {
+        const next = new Set(current);
+        if (favorite) next.delete(slug);
+        else next.add(slug);
+        return next;
+      });
+    } catch {
+      setFavoriteError('Impossible de modifier ce favori. Réessayez.');
+    } finally {
+      setPendingFavoriteSlugs(current => {
+        const next = new Set(current);
+        next.delete(slug);
+        return next;
+      });
+    }
+  }
 
   // Pre-filter city from URL param (e.g. ?city=MADINAH coming from checkout)
   useEffect(() => {
@@ -1026,11 +1122,13 @@ export default function GuideSearchPage() {
             </>
           )}
 
+          {favoriteError && <div role="alert" style={{ marginBottom: '1rem', padding: '0.7rem 0.9rem', borderRadius: 10, background: '#FDECEA', border: '1px solid #F5C6C2', color: '#C0392B', fontSize: '0.78rem' }}>{favoriteError}</div>}
+
           {/* Official guide */}
           {filteredOfficial.map(g => (
             <div key={g.slug} className="guide-official-wrap">
               <div className="guide-official-label">★ RESPONSABLE OFFICIEL SAFARUMA</div>
-              <GuideCard guide={g} official onProfile={() => openDrawer(g)} isLoading={loadingSlug === g.slug} returnSlug={returnSlug} />
+              <GuideCard guide={g} official onProfile={() => openDrawer(g)} isLoading={loadingSlug === g.slug} returnSlug={returnSlug} isFavorite={favoriteSlugs.has(g.slug)} favoritePending={pendingFavoriteSlugs.has(g.slug)} onFavorite={() => toggleFavorite(g.slug)} />
             </div>
           ))}
 
@@ -1054,7 +1152,7 @@ export default function GuideSearchPage() {
           )}
 
           <div className="guides-grid">
-            {filteredNonOfficial.map(g => <GuideCard key={g.slug} guide={g} onProfile={() => openDrawer(g)} isLoading={loadingSlug === g.slug} returnSlug={returnSlug} />)}
+            {filteredNonOfficial.map(g => <GuideCard key={g.slug} guide={g} onProfile={() => openDrawer(g)} isLoading={loadingSlug === g.slug} returnSlug={returnSlug} isFavorite={favoriteSlugs.has(g.slug)} favoritePending={pendingFavoriteSlugs.has(g.slug)} onFavorite={() => toggleFavorite(g.slug)} />)}
           </div>
 
           {/* ── Section Prochainement ── */}
@@ -1117,7 +1215,7 @@ export default function GuideSearchPage() {
 
       {/* ── GUIDE DRAWER ── */}
       {drawerGuide && (
-        <GuideDrawer guide={drawerGuide} visible={drawerVisible} onClose={closeDrawer} returnSlug={returnSlug} />
+        <GuideDrawer guide={drawerGuide} visible={drawerVisible} onClose={closeDrawer} returnSlug={returnSlug} isFavorite={favoriteSlugs.has(drawerGuide.slug)} favoritePending={pendingFavoriteSlugs.has(drawerGuide.slug)} onFavorite={() => toggleFavorite(drawerGuide.slug)} />
       )}
 
       {/* ── CSS ── */}
@@ -1372,7 +1470,37 @@ function FilterCard({ title, children }: { title: string; children: React.ReactN
 }
 
 // ─── Guide Drawer ─────────────────────────────────────────────────────────────
-function GuideDrawer({ guide: g, visible, onClose, returnSlug }: { guide: GuideData; visible: boolean; onClose: () => void; returnSlug?: string | null }) {
+function FavoriteHeartButton({ guideName, active, pending, onClick, dark = false }: { guideName: string; active: boolean; pending: boolean; onClick: () => void; dark?: boolean }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={pending}
+      aria-pressed={active}
+      aria-label={active ? `Retirer ${guideName} des favoris` : `Ajouter ${guideName} aux favoris`}
+      title={active ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+      style={{
+        width: 38,
+        height: 38,
+        borderRadius: '50%',
+        border: `1px solid ${active ? '#DC2626' : dark ? 'rgba(255,255,255,.35)' : '#E8DFC8'}`,
+        background: active ? '#FDECEC' : dark ? 'rgba(255,255,255,.1)' : 'white',
+        color: active ? '#DC2626' : dark ? 'white' : '#7A6D5A',
+        display: 'grid',
+        placeItems: 'center',
+        cursor: pending ? 'wait' : 'pointer',
+        opacity: pending ? 0.55 : 1,
+        flexShrink: 0,
+      }}
+    >
+      <svg width="18" height="18" viewBox="0 0 24 24" fill={active ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+      </svg>
+    </button>
+  );
+}
+
+function GuideDrawer({ guide: g, visible, onClose, returnSlug, isFavorite, favoritePending, onFavorite }: { guide: GuideData; visible: boolean; onClose: () => void; returnSlug?: string | null; isFavorite: boolean; favoritePending: boolean; onFavorite: () => void }) {
   return (
     <>
       {/* Overlay */}
@@ -1406,7 +1534,10 @@ function GuideDrawer({ guide: g, visible, onClose, returnSlug }: { guide: GuideD
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 1.5rem 1rem' }}>
           <span style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.4rem', fontWeight: 700, color: '#1A1209' }}>Fiche guide</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7A6D5A', fontSize: '1.3rem', lineHeight: 1 }}>✕</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <FavoriteHeartButton guideName={g.name} active={isFavorite} pending={favoritePending} onClick={onFavorite} />
+            <button onClick={onClose} aria-label="Fermer la fiche" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7A6D5A', fontSize: '1.3rem', lineHeight: 1 }}>✕</button>
+          </div>
         </div>
 
         {/* Guide hero band */}
@@ -1476,7 +1607,7 @@ function GuideDrawer({ guide: g, visible, onClose, returnSlug }: { guide: GuideD
   );
 }
 
-function GuideCard({ guide: g, official, onProfile, isLoading, returnSlug }: { guide: GuideData; official?: boolean; onProfile?: () => void; isLoading?: boolean; returnSlug?: string | null }) {
+function GuideCard({ guide: g, official, onProfile, isLoading, returnSlug, isFavorite, favoritePending, onFavorite }: { guide: GuideData; official?: boolean; onProfile?: () => void; isLoading?: boolean; returnSlug?: string | null; isFavorite: boolean; favoritePending: boolean; onFavorite: () => void }) {
   return (
     <div
       className={official ? 'guide-official-card' : ''}
@@ -1515,7 +1646,10 @@ function GuideCard({ guide: g, official, onProfile, isLoading, returnSlug }: { g
         <div style={{ padding: '1.5rem 1.25rem 1.25rem', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.2rem', paddingTop: '0.25rem' }}>
             <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#1A1209', lineHeight: 1.2 }}>{g.name}</div>
-            {g.reviews > 0 && <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1A1209', whiteSpace: 'nowrap', flexShrink: 0 }}><span style={{ color: '#C9A84C' }}>★</span> {g.rating}<span style={{ fontWeight: 400, color: '#7A6D5A', fontSize: '0.7rem' }}> ({g.reviews})</span></div>}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}>
+              {g.reviews > 0 && <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1A1209', whiteSpace: 'nowrap', flexShrink: 0 }}><span style={{ color: '#C9A84C' }}>★</span> {g.rating}<span style={{ fontWeight: 400, color: '#7A6D5A', fontSize: '0.7rem' }}> ({g.reviews})</span></div>}
+              <FavoriteHeartButton guideName={g.name} active={isFavorite} pending={favoritePending} onClick={onFavorite} />
+            </div>
           </div>
           <div style={{ fontSize: '0.72rem', color: '#7A6D5A', fontStyle: 'italic', marginBottom: '0.6rem' }}>{g.title}</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.72rem', color: '#7A6D5A', marginBottom: '0.3rem' }}>

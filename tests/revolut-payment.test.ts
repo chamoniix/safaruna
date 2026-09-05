@@ -122,6 +122,26 @@ test('crée un ordre Revolut automatique avec un line_item de service et sans in
   }])
 })
 
+test('transmet la remise de campagne à Revolut sans modifier le montant débité', async () => {
+  configureRevolut()
+  let requestBody: Record<string, unknown> = {}
+  globalThis.fetch = async (_input, init) => {
+    requestBody = JSON.parse(String(init?.body)) as Record<string, unknown>
+    return new Response(JSON.stringify(order({ amount: 1_300 })), { status: 201, headers: { 'content-type': 'application/json' } })
+  }
+  await revolutPaymentProvider().createHostedCheckout({
+    ...checkoutInput(), amountCents: 1_300, grossAmountCents: 13_000,
+    discount: { name: 'Code TEST90', amountCents: 11_700 },
+  })
+  assert.deepEqual(requestBody.line_items, [{
+    name: 'SAFARUMA — Accompagnement', type: 'service', quantity: { value: 1 },
+    unit_price_amount: 13_000, total_amount: 1_300, external_id: 'SAF-TEST-001',
+    description: 'Accompagnement · Makkah · 2 personne(s)',
+    discounts: [{ name: 'Code TEST90', amount: 11_700 }],
+    image_urls: ['https://safaruma.com/og-image.jpg'],
+  }])
+})
+
 test('récupère par référence un ordre créé malgré un timeout sans refaire de POST', async () => {
   configureRevolut()
   const methods: string[] = []

@@ -73,6 +73,15 @@ export type AnalyticsData = {
       promoCodes: Array<{ code: string; kind: string; status: string; discountPercent: number; expiresAt: string; redeemedAt: string | null }>
     }>
   }
+  promotions?: {
+    campaigns: Array<{
+      id: string; name: string; code: string; status: string; discountPercent: number
+      startsAt: string; expiresAt: string; maxRedemptions: number | null
+      maxRedemptionsPerPelerin: number | null; maxDiscountBudgetEuros: number | null
+      createdAt: string; createdByAdmin: { email: string }
+      redeemedCount: number; heldCount: number; promotionExpenseEuros: number
+    }>
+  }
   accounts: {
     recent: Array<{ id: string; name: string | null; email: string | null; role: string; country: string | null; createdAt: string; lastLogin: string | null }>
     total: number; page: number; pageSize: number; pages: number; byRole: Record<string, number>

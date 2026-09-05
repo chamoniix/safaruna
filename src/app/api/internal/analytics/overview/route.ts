@@ -94,7 +94,7 @@ export async function GET(req: NextRequest) {
   const start = new Date(Date.now() - days * 86_400_000)
   const activeSince = new Date(Date.now() - 5 * 60_000)
 
-  const [events, usersTotal, usersNew, usersByRole, recentUsers, reservations, guidesActive, guidesPending, guideApplicationsNew, guideApplications, guideApplicationsTotal, guideApplicationCounts, adminAccounts, adminLoginAttempts, adminSessionsActive, emailDeliveries, paymentAttempts, paymentAttemptCounts, failedPaymentEvents, paymentTransactions, capturedPaymentsByProvider, sentry, referrals] = await Promise.all([
+  const [events, usersTotal, usersNew, usersByRole, recentUsers, reservations, guidesActive, guidesPending, guideApplicationsNew, guideApplications, guideApplicationsTotal, guideApplicationCounts, adminAccounts, adminLoginAttempts, adminSessionsActive, emailDeliveries, paymentAttempts, paymentAttemptCounts, failedPaymentEvents, paymentTransactions, capturedPaymentsByProvider, sentry, referrals, promotionCampaigns, promotionRedemptionStats] = await Promise.all([
     prisma.analyticsEvent.findMany({
       where: { createdAt: { gte: start } },
       orderBy: { createdAt: 'desc' },
@@ -220,6 +220,21 @@ export async function GET(req: NextRequest) {
         },
         promoCodes: { select: { code: true, kind: true, status: true, discountBps: true, expiresAt: true, redeemedAt: true } },
       },
+    }),
+    prisma.promotionCampaign.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 200,
+      select: {
+        id: true, name: true, code: true, status: true, discountBps: true,
+        startsAt: true, expiresAt: true, maxRedemptions: true,
+        maxRedemptionsPerPelerin: true, maxDiscountBudgetCents: true, createdAt: true,
+        createdByAdmin: { select: { email: true } },
+      },
+    }),
+    prisma.promotionRedemption.groupBy({
+      by: ['campaignId', 'status'],
+      _count: { _all: true },
+      _sum: { discountAmountCents: true },
     }),
   ])
 
@@ -481,6 +496,22 @@ export async function GET(req: NextRequest) {
         } : null,
         promoCodes: referral.promoCodes.map(code => ({ ...code, discountPercent: code.discountBps / 100 })),
       })),
+    },
+    promotions: {
+      campaigns: promotionCampaigns.map(campaign => {
+        const campaignStats = promotionRedemptionStats.filter(item => item.campaignId === campaign.id)
+        const redeemed = campaignStats.find(item => item.status === 'REDEEMED')
+        const held = campaignStats.find(item => item.status === 'HELD')
+        return {
+          ...campaign,
+          status: campaign.status === 'ACTIVE' && campaign.expiresAt <= new Date() ? 'EXPIRED' : campaign.status,
+          discountPercent: campaign.discountBps / 100,
+          maxDiscountBudgetEuros: campaign.maxDiscountBudgetCents === null ? null : campaign.maxDiscountBudgetCents / 100,
+          redeemedCount: redeemed?._count._all ?? 0,
+          heldCount: held?._count._all ?? 0,
+          promotionExpenseEuros: (redeemed?._sum.discountAmountCents ?? 0) / 100,
+        }
+      }),
     },
     accounts: {
       recent: recentUsers,

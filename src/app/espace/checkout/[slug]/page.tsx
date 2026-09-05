@@ -728,7 +728,10 @@ export default function CheckoutPage() {
     setPromoError('')
     try {
       const response = await fetch('/api/espace/promo/validate', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: promoInput }),
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+          code: promoInput,
+          grossAmountCents: Math.round(total * 100),
+        }),
       })
       const body = await response.json()
       if (!response.ok) throw new Error(body.error || 'Code promotionnel invalide.')

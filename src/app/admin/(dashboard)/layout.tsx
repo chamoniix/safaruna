@@ -10,6 +10,7 @@ import {
   CircleDollarSign, ClipboardList, Gauge, Landmark, LogOut, MapPinned,
   MessageSquare, Settings, ShieldCheck, Users, UserRoundCheck,
   Star,
+  TicketPercent,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -41,6 +42,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: '/admin/revenus', label: 'Revenus', icon: CircleDollarSign },
       { href: '/admin/commissions', label: 'Commissions', icon: Landmark },
+      { href: '/admin/promotions', label: 'Promotions', icon: TicketPercent },
       { href: '/admin/lieux', label: 'Lieux & Tarifs', icon: MapPinned },
     ],
   },

@@ -58,10 +58,10 @@ model User {
   accounts               Account[]
   sessions               Session[]
   // As a Pelerin
-  reservations           Reservation[]      @relation("PelerinReservations")
-  conversationsAsPelerin Conversation[]     @relation("PelerinConversations")
-  messages               Message[]          @relation("PelerinMessages")
-  legacyMessages         Message[]          @relation("LegacyMessageSender")
+  reservations           Reservation[]          @relation("PelerinReservations")
+  conversationsAsPelerin Conversation[]         @relation("PelerinConversations")
+  messages               Message[]              @relation("PelerinMessages")
+  legacyMessages         Message[]              @relation("LegacyMessageSender")
   reviews                Review[]
   experienceReviews      ExperienceReview[]
   savedDuas              SavedDua[]
@@ -70,9 +70,10 @@ model User {
   analyticsEvents        AnalyticsEvent[]
   reservationDrafts      ReservationDraft[]
   referralCode           ReferralCode?
-  sponsoredReferrals     Referral[]         @relation("ReferralSponsor")
-  referral               Referral?          @relation("ReferralReferred")
+  sponsoredReferrals     Referral[]             @relation("ReferralSponsor")
+  referral               Referral?              @relation("ReferralReferred")
   promoCodes             PromoCode[]
+  promotionRedemptions   PromotionRedemption[]
   dashboardState         PelerinDashboardState?
   favoriteGuides         GuideFavorite[]
 }
@@ -139,6 +140,7 @@ model AdminAccount {
   moderatedReviews           Review[]                  @relation("ReviewModeratedBy")
   moderatedExperienceReviews ExperienceReview[]        @relation("ExperienceReviewModeratedBy")
   auditLogs                  AuditLog[]                @relation("AuditActorAdmin")
+  createdPromotionCampaigns  PromotionCampaign[]       @relation("PromotionCampaignCreatedByAdmin")
 }
 
 model AdminPasswordResetToken {
@@ -194,62 +196,62 @@ model AdminLoginAttempt {
 // Safaruna Core Models
 
 model GuideProfile {
-  id                    String           @id @default(cuid())
-  guideAccountId        String?          @unique
-  guideAccount          GuideAccount?    @relation(fields: [guideAccountId], references: [id], onDelete: SetNull)
-  slug                  String?          @unique
-  bio                   String?
-  city                  String?
-  gender                String?
-  servesMakkah          Boolean          @default(false)
-  servesMadinah         Boolean          @default(false)
-  acceptingBookings     Boolean          @default(true)
-  makkahNetUpTo6Cents   Int              @default(10000)
-  makkahNetUpTo15Cents  Int              @default(13000)
-  makkahNetUpTo32Cents  Int              @default(16000)
-  madinahNetUpTo6Cents  Int              @default(10000)
-  madinahNetUpTo15Cents Int              @default(13000)
-  madinahNetUpTo32Cents Int              @default(16000)
-  nationality           String?
-  dateOfBirth           DateTime?
-  experienceYears       Int?
-  university            String?
-  diplomaUrl            String?
-  idDocUrl              String?
-  videoUrl              String?
-  bankAccountFirstName  String?
-  bankAccountLastName   String?
-  bankName              String?
-  bankCountry           String?
-  ibanEncrypted         String?
-  bicEncrypted          String?
-  status                ProfileStatus    @default(DRAFT)
-  responseTimeAvg       String?
-  completionRate        Int?             @default(0)
-  commissionRate        Float            @default(0.15)
-  interviewScore        Int?
-  interviewNotes        String?
-  interviewDate         DateTime?
-  interviewedBy         String?
-  createdByType         GuideCreatorType @default(LEGACY_UNKNOWN)
-  createdByAdminId      String?
-  createdByAdmin        AdminAccount?    @relation("GuideCreatedByAdmin", fields: [createdByAdminId], references: [id], onDelete: SetNull)
-  createdByEmail        String?
-  approvedByAdminId     String?
-  approvedByAdmin       AdminAccount?    @relation("GuideApprovedByAdmin", fields: [approvedByAdminId], references: [id], onDelete: SetNull)
-  approvedByEmail       String?
-  approvedAt            DateTime?
-  profileSubmittedAt    DateTime?
-  cancellationCount     Int              @default(0)
+  id                       String           @id @default(cuid())
+  guideAccountId           String?          @unique
+  guideAccount             GuideAccount?    @relation(fields: [guideAccountId], references: [id], onDelete: SetNull)
+  slug                     String?          @unique
+  bio                      String?
+  city                     String?
+  gender                   String?
+  servesMakkah             Boolean          @default(false)
+  servesMadinah            Boolean          @default(false)
+  acceptingBookings        Boolean          @default(true)
+  makkahNetUpTo6Cents      Int              @default(10000)
+  makkahNetUpTo15Cents     Int              @default(13000)
+  makkahNetUpTo32Cents     Int              @default(16000)
+  madinahNetUpTo6Cents     Int              @default(10000)
+  madinahNetUpTo15Cents    Int              @default(13000)
+  madinahNetUpTo32Cents    Int              @default(16000)
+  nationality              String?
+  dateOfBirth              DateTime?
+  experienceYears          Int?
+  university               String?
+  diplomaUrl               String?
+  idDocUrl                 String?
+  videoUrl                 String?
+  bankAccountFirstName     String?
+  bankAccountLastName      String?
+  bankName                 String?
+  bankCountry              String?
+  ibanEncrypted            String?
+  bicEncrypted             String?
+  status                   ProfileStatus    @default(DRAFT)
+  responseTimeAvg          String?
+  completionRate           Int?             @default(0)
+  commissionRate           Float            @default(0.15)
+  interviewScore           Int?
+  interviewNotes           String?
+  interviewDate            DateTime?
+  interviewedBy            String?
+  createdByType            GuideCreatorType @default(LEGACY_UNKNOWN)
+  createdByAdminId         String?
+  createdByAdmin           AdminAccount?    @relation("GuideCreatedByAdmin", fields: [createdByAdminId], references: [id], onDelete: SetNull)
+  createdByEmail           String?
+  approvedByAdminId        String?
+  approvedByAdmin          AdminAccount?    @relation("GuideApprovedByAdmin", fields: [approvedByAdminId], references: [id], onDelete: SetNull)
+  approvedByEmail          String?
+  approvedAt               DateTime?
+  profileSubmittedAt       DateTime?
+  cancellationCount        Int              @default(0)
   permanentlyDeactivatedAt DateTime?
-  createdAt             DateTime         @default(now())
-  updatedAt             DateTime         @default(now()) @updatedAt
+  createdAt                DateTime         @default(now())
+  updatedAt                DateTime         @default(now()) @updatedAt
 
   // Relations
   packages             Package[]
   availabilities       Availability[]
-  reservations         Reservation[]        @relation("GuideReservations")
-  conversationsAsGuide Conversation[]       @relation("GuideConversations")
+  reservations         Reservation[]               @relation("GuideReservations")
+  conversationsAsGuide Conversation[]              @relation("GuideConversations")
   languages            GuideLanguage[]
   places               GuidePlace[]
   transfers            Transfer[]
@@ -575,6 +577,19 @@ enum PromoCodeStatus {
   EXPIRED
 }
 
+enum PromotionCampaignStatus {
+  ACTIVE
+  DISABLED
+  EXHAUSTED
+}
+
+enum PromotionRedemptionStatus {
+  HELD
+  REDEEMED
+  RELEASED
+  EXPIRED
+}
+
 model ReferralCode {
   id        String   @id @default(cuid())
   ownerId   String   @unique
@@ -608,27 +623,72 @@ model Referral {
 }
 
 model PromoCode {
-  id              String          @id @default(cuid())
-  code            String          @unique
+  id              String            @id @default(cuid())
+  code            String            @unique
   kind            PromoCodeKind
-  status          PromoCodeStatus @default(ACTIVE)
+  status          PromoCodeStatus   @default(ACTIVE)
   ownerId         String
-  owner           User            @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  owner           User              @relation(fields: [ownerId], references: [id], onDelete: Restrict)
   referralId      String
-  referral        Referral        @relation(fields: [referralId], references: [id], onDelete: Restrict)
-  discountBps     Int             @default(1000)
+  referral        Referral          @relation(fields: [referralId], references: [id], onDelete: Restrict)
+  discountBps     Int               @default(1000)
   expiresAt       DateTime
-  reservedDraftId String?         @unique
+  reservedDraftId String?           @unique
   reservedDraft   ReservationDraft? @relation("PromoCodeReservationDraft", fields: [reservedDraftId], references: [id], onDelete: SetNull)
-  reservationId   String?         @unique
-  reservation     Reservation?    @relation("PromoCodeReservation", fields: [reservationId], references: [id], onDelete: SetNull)
+  reservationId   String?           @unique
+  reservation     Reservation?      @relation("PromoCodeReservation", fields: [reservationId], references: [id], onDelete: SetNull)
   redeemedAt      DateTime?
-  createdAt       DateTime        @default(now())
-  updatedAt       DateTime        @updatedAt
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 
   @@unique([referralId, kind])
   @@index([ownerId, status, expiresAt])
   @@index([status, expiresAt])
+}
+
+model PromotionCampaign {
+  id                       String                  @id @default(cuid())
+  code                     String                  @unique
+  name                     String
+  status                   PromotionCampaignStatus @default(ACTIVE)
+  discountBps              Int
+  startsAt                 DateTime
+  expiresAt                DateTime
+  maxRedemptions           Int?
+  maxRedemptionsPerPelerin Int?
+  maxDiscountBudgetCents   Int?
+  createdByAdminId         String
+  createdByAdmin           AdminAccount            @relation("PromotionCampaignCreatedByAdmin", fields: [createdByAdminId], references: [id], onDelete: Restrict)
+  redemptions              PromotionRedemption[]
+  createdAt                DateTime                @default(now())
+  updatedAt                DateTime                @updatedAt
+
+  @@index([status, startsAt, expiresAt])
+}
+
+model PromotionRedemption {
+  id                  String                    @id @default(cuid())
+  campaignId          String
+  campaign            PromotionCampaign         @relation(fields: [campaignId], references: [id], onDelete: Restrict)
+  pelerinId           String
+  pelerin             User                      @relation(fields: [pelerinId], references: [id], onDelete: Restrict)
+  status              PromotionRedemptionStatus @default(HELD)
+  reservationDraftId  String?                   @unique
+  reservationDraft    ReservationDraft?         @relation(fields: [reservationDraftId], references: [id], onDelete: SetNull)
+  reservationId       String?                   @unique
+  reservation         Reservation?              @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  grossAmountCents    Int
+  discountAmountCents Int
+  discountBpsSnapshot Int
+  campaignCodeSnapshot String
+  heldAt              DateTime                  @default(now())
+  redeemedAt          DateTime?
+  releasedAt          DateTime?
+  createdAt           DateTime                  @default(now())
+  updatedAt           DateTime                  @updatedAt
+
+  @@index([campaignId, status])
+  @@index([campaignId, pelerinId, status])
 }
 
 model ReferralOAuthIntent {
@@ -644,42 +704,44 @@ model ReferralOAuthIntent {
 }
 
 model Reservation {
-  id                  String            @id @default(cuid())
-  refNumber           String            @unique // SAF-2025-XXXXX
-  pelerinId           String
-  pelerin             User              @relation("PelerinReservations", fields: [pelerinId], references: [id])
-  guideProfileId      String
-  guideProfile        GuideProfile      @relation("GuideReservations", fields: [guideProfileId], references: [id])
-  packageId           String
-  package             Package           @relation(fields: [packageId], references: [id])
-  startDate           DateTime
-  endDate             DateTime
-  nbPeople            Int
-  transportOption     String?
-  optionsJson         Json?
-  basePrice           Float
-  commissionAmount    Float
-  totalPrice          Float
-  status              ReservationStatus @default(PENDING)
-  stripePaymentId     String?           @unique
-  notes               String?
-  selectedPlaces      Json?
-  selectedCities      String?
-  withTransport       Boolean           @default(false)
-  withCar             Boolean           @default(false)
-  gender              String?
-  langue              String?
-  arrivalPoint        String?
-  cityOrder           String?
-  guideBedProvided    Boolean           @default(false)
-  ihramAlert          Boolean           @default(false)
-  pricingJson         Json?
-  reviewRequestSentAt DateTime?
-  stayRating          Int?
-  stayComment         String?
-  feedbackSubmittedAt DateTime?
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
+  id                      String            @id @default(cuid())
+  refNumber               String            @unique // SAF-2025-XXXXX
+  pelerinId               String
+  pelerin                 User              @relation("PelerinReservations", fields: [pelerinId], references: [id])
+  guideProfileId          String
+  guideProfile            GuideProfile      @relation("GuideReservations", fields: [guideProfileId], references: [id])
+  packageId               String
+  package                 Package           @relation(fields: [packageId], references: [id])
+  startDate               DateTime
+  endDate                 DateTime
+  nbPeople                Int
+  transportOption         String?
+  optionsJson             Json?
+  basePrice               Float
+  commissionAmount        Float
+  totalPrice              Float
+  status                  ReservationStatus @default(PENDING)
+  stripePaymentId         String?           @unique
+  notes                   String?
+  selectedPlaces          Json?
+  selectedCities          String?
+  withTransport           Boolean           @default(false)
+  withCar                 Boolean           @default(false)
+  gender                  String?
+  langue                  String?
+  arrivalPoint            String?
+  cityOrder               String?
+  guideBedProvided        Boolean           @default(false)
+  ihramAlert              Boolean           @default(false)
+  pricingJson             Json?
+  grossPrice              Float?
+  promotionDiscountAmount Float             @default(0)
+  reviewRequestSentAt     DateTime?
+  stayRating              Int?
+  stayComment             String?
+  feedbackSubmittedAt     DateTime?
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
 
   reviews             Review[]
   experienceReview    ExperienceReview?
@@ -688,8 +750,9 @@ model Reservation {
   guideEarnings       GuideEarning[]
   paymentAttempts     PaymentAttempt[]
   paymentTransactions PaymentTransaction[]
-  qualifiedReferral   Referral?          @relation("QualifiedReferral")
-  promoCode           PromoCode?         @relation("PromoCodeReservation")
+  qualifiedReferral   Referral?                  @relation("QualifiedReferral")
+  promoCode           PromoCode?                 @relation("PromoCodeReservation")
+  promotionRedemption PromotionRedemption?
   guideIncidents      GuideReservationIncident[]
 }
 
@@ -734,21 +797,21 @@ enum GuideReservationIncidentStatus {
 }
 
 model GuideReservationIncident {
-  id              String                         @id @default(cuid())
-  reservationId   String
-  reservation     Reservation                    @relation(fields: [reservationId], references: [id], onDelete: Cascade)
-  guideProfileId  String
-  guideProfile    GuideProfile                   @relation(fields: [guideProfileId], references: [id])
-  type            GuideReservationIncidentType
-  reason          String?
-  status          GuideReservationIncidentStatus @default(PENDING)
-  reportedAt      DateTime                       @default(now())
+  id                String                         @id @default(cuid())
+  reservationId     String
+  reservation       Reservation                    @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  guideProfileId    String
+  guideProfile      GuideProfile                   @relation(fields: [guideProfileId], references: [id])
+  type              GuideReservationIncidentType
+  reason            String?
+  status            GuideReservationIncidentStatus @default(PENDING)
+  reportedAt        DateTime                       @default(now())
   reviewedByAdminId String?
-  reviewedByEmail String?
-  reviewNotes     String?
-  reviewedAt      DateTime?
-  createdAt       DateTime                       @default(now())
-  updatedAt       DateTime                       @updatedAt
+  reviewedByEmail   String?
+  reviewNotes       String?
+  reviewedAt        DateTime?
+  createdAt         DateTime                       @default(now())
+  updatedAt         DateTime                       @updatedAt
 
   @@unique([reservationId, guideProfileId])
   @@index([guideProfileId, status, reportedAt])
@@ -1081,16 +1144,17 @@ model EmailDeliveryEvent {
 }
 
 model ReservationDraft {
-  id              String            @id @default(cuid())
-  refNumber       String            @unique
-  data            String // JSON stringifié
-  expiresAt       DateTime
-  createdAt       DateTime          @default(now())
-  stripeSessionId String?           @unique
-  pelerinId       String
-  pelerin         User              @relation(fields: [pelerinId], references: [id], onDelete: Cascade)
-  holds           ReservationHold[]
-  promoCode       PromoCode?        @relation("PromoCodeReservationDraft")
+  id                  String               @id @default(cuid())
+  refNumber           String               @unique
+  data                String // JSON stringifié
+  expiresAt           DateTime
+  createdAt           DateTime             @default(now())
+  stripeSessionId     String?              @unique
+  pelerinId           String
+  pelerin             User                 @relation(fields: [pelerinId], references: [id], onDelete: Cascade)
+  holds               ReservationHold[]
+  promoCode           PromoCode?           @relation("PromoCodeReservationDraft")
+  promotionRedemption PromotionRedemption?
 
   @@index([pelerinId, createdAt])
 }

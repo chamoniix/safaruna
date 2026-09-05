@@ -284,10 +284,11 @@ async function createRevolutHostedCheckout(
       name: input.productName,
       type: 'service',
       quantity: { value: 1 },
-      unit_price_amount: input.amountCents,
+      unit_price_amount: input.grossAmountCents ?? input.amountCents,
       total_amount: input.amountCents,
       external_id: input.bookingRef,
       description: input.description,
+      ...(input.discount ? { discounts: [{ name: input.discount.name, amount: input.discount.amountCents }] } : {}),
       ...(input.imageUrl ? { image_urls: [input.imageUrl] } : {}),
     }],
   }

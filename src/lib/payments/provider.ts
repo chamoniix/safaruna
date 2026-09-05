@@ -21,6 +21,8 @@ export type HostedCheckoutInput = {
   bookingRef: string
   idempotencyKey: string
   amountCents: number
+  grossAmountCents?: number
+  discount?: { name: string; amountCents: number }
   currency: string
   productName: string
   description: string

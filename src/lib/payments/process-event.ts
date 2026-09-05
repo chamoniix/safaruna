@@ -385,8 +385,17 @@ export async function processPaidCheckout(event: NormalizedCheckoutPaidEvent): P
     }
 
     const totalGuideNetCents = data.earnings.reduce((sum, earning) => sum + earning.totalNetCents, 0)
+    const grossAmountCents = Math.round((data.pricing.grossTotal ?? data.totalPrice) * 100)
+    const promotionDiscountCents = data.promotionCampaign
+      ? Math.round((data.pricing.promoDiscount ?? 0) * 100)
+      : 0
+    if (data.promotionCampaign && grossAmountCents - promotionDiscountCents !== event.amountCents) {
+      throw new PaymentProcessingError('Montant de campagne promotionnelle incohérent', 400)
+    }
     const commission = (event.amountCents - totalGuideNetCents) / 100
-    if (commission < 0) throw new PaymentProcessingError('Rémunérations guides incohérentes', 400)
+    if (commission < 0 && !data.promotionCampaign) {
+      throw new PaymentProcessingError('Rémunérations guides incohérentes', 400)
+    }
 
     const reservationCreated = await prisma.$transaction(async tx => {
       const duplicate = await tx.reservation.findUnique({ where: { refNumber: event.bookingRef } })
@@ -420,6 +429,8 @@ export async function processPaidCheckout(event: NormalizedCheckoutPaidEvent): P
           basePrice: event.amountCents / 100,
           commissionAmount: commission,
           totalPrice: event.amountCents / 100,
+          grossPrice: grossAmountCents / 100,
+          promotionDiscountAmount: promotionDiscountCents / 100,
           status: 'CONFIRMED',
           selectedPlaces: data.selectedPlaces,
           selectedCities: data.cityChoice,
@@ -512,6 +523,54 @@ export async function processPaidCheckout(event: NormalizedCheckoutPaidEvent): P
         }
       }
 
+      if (data.promotionCampaign) {
+        const redemption = await tx.promotionRedemption.findUnique({
+          where: { reservationDraftId: draft.id },
+          include: { campaign: true },
+        })
+        if (
+          !redemption
+          || redemption.status !== 'HELD'
+          || redemption.campaignId !== data.promotionCampaign.id
+          || redemption.campaignCodeSnapshot !== data.promotionCampaign.code
+          || redemption.pelerinId !== pelerin.id
+          || redemption.grossAmountCents !== grossAmountCents
+          || redemption.discountAmountCents !== promotionDiscountCents
+          || redemption.discountBpsSnapshot !== data.promotionCampaign.discountBps
+        ) throw new PaymentProcessingError('Campagne promotionnelle incohérente', 400)
+
+        const redeemed = await tx.promotionRedemption.updateMany({
+          where: { id: redemption.id, status: 'HELD', reservationDraftId: draft.id },
+          data: {
+            status: 'REDEEMED',
+            redeemedAt: event.occurredAt,
+            reservationDraftId: null,
+            reservationId: reservation.id,
+          },
+        })
+        if (redeemed.count !== 1) throw new PaymentProcessingError('Campagne promotionnelle déjà traitée', 409)
+
+        if (redemption.campaign.maxRedemptions !== null || redemption.campaign.maxDiscountBudgetCents !== null) {
+          const [redeemedCount, redeemedBudget] = await Promise.all([
+            tx.promotionRedemption.count({ where: { campaignId: redemption.campaignId, status: 'REDEEMED' } }),
+            tx.promotionRedemption.aggregate({
+              where: { campaignId: redemption.campaignId, status: 'REDEEMED' },
+              _sum: { discountAmountCents: true },
+            }),
+          ])
+          const redemptionLimitReached = redemption.campaign.maxRedemptions !== null
+            && redeemedCount >= redemption.campaign.maxRedemptions
+          const budgetReached = redemption.campaign.maxDiscountBudgetCents !== null
+            && (redeemedBudget._sum.discountAmountCents ?? 0) >= redemption.campaign.maxDiscountBudgetCents
+          if (redemptionLimitReached || budgetReached) {
+            await tx.promotionCampaign.updateMany({
+              where: { id: redemption.campaignId, status: 'ACTIVE' },
+              data: { status: 'EXHAUSTED' },
+            })
+          }
+        }
+      }
+
       await tx.guideEarning.createMany({
         data: data.earnings.map(earning => ({
           reservationId: reservation.id,
@@ -584,6 +643,9 @@ export async function processPaidCheckout(event: NormalizedCheckoutPaidEvent): P
             cityChoice: data.cityChoice,
             missions: data.missions.length,
             promoCode: data.promoCode?.code || null,
+            promotionCampaign: data.promotionCampaign?.code || null,
+            grossAmountCents,
+            promotionDiscountCents,
           }),
         },
       })
@@ -656,11 +718,19 @@ export async function processExpiredCheckout(event: NormalizedCheckoutExpiredEve
         },
         data: { status: 'EXPIRED' },
       })
+      let referralPromoReleased = false
+      let campaignPromotionReleased = false
       if (draft) {
-        await tx.promoCode.updateMany({
+        const referralRelease = await tx.promoCode.updateMany({
           where: { reservedDraftId: draft.id, status: 'HELD' },
           data: { status: 'ACTIVE', reservedDraftId: null },
         })
+        const campaignRelease = await tx.promotionRedemption.updateMany({
+          where: { reservationDraftId: draft.id, status: 'HELD' },
+          data: { status: 'EXPIRED', releasedAt: event.occurredAt, reservationDraftId: null },
+        })
+        referralPromoReleased = referralRelease.count === 1
+        campaignPromotionReleased = campaignRelease.count === 1
       }
       const removed = await tx.reservationDraft.deleteMany({ where: { refNumber: event.bookingRef } })
       await tx.paymentEvent.update({
@@ -673,7 +743,7 @@ export async function processExpiredCheckout(event: NormalizedCheckoutExpiredEve
           actorRole: 'SYSTEM',
           action: 'PAYMENT_SESSION_EXPIRED',
           target: event.bookingRef,
-          detail: JSON.stringify({ provider: event.provider, promoCodeReleased: Boolean(draft) }),
+          detail: JSON.stringify({ provider: event.provider, referralPromoReleased, campaignPromotionReleased }),
         },
       })
       return removed

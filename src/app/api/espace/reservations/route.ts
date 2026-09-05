@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma';
 import { requirePelerin } from '@/lib/require-account';
 import { reviewOpensAt } from '@/lib/guide-workflow';
 import { retrieveRevolutOrder } from '@/lib/payments/revolut-provider';
-import type { PaymentDraftData } from '@/lib/payments/types';
+import { isResumableBookingDate, type PaymentDraftData } from '@/lib/payments/types';
 
 const noStoreHeaders = { 'Cache-Control': 'no-store' }
 
@@ -15,16 +15,11 @@ type ResumableDraftData = PaymentDraftData & {
 function parseResumableDraft(data: string): ResumableDraftData | null {
   try {
     const parsed = JSON.parse(data) as Partial<ResumableDraftData>
-    const validDate = (value: unknown) => (
-      typeof value === 'string'
-      && /^\d{4}-\d{2}-\d{2}$/.test(value)
-      && !Number.isNaN(Date.parse(`${value}T00:00:00.000Z`))
-    )
     if (
       !parsed
       || !['MAKKAH', 'MADINAH', 'BOTH'].includes(String(parsed.cityChoice))
-      || !validDate(parsed.departDate)
-      || !validDate(parsed.returnDate)
+      || !isResumableBookingDate(parsed.departDate)
+      || !isResumableBookingDate(parsed.returnDate)
       || !Number.isInteger(parsed.nbPersonnes)
       || Number(parsed.nbPersonnes) < 1
       || Number(parsed.nbPersonnes) > 32

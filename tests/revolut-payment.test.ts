@@ -15,12 +15,21 @@ import {
   getActivePaymentProvider,
   paymentEventClaimDisposition,
 } from '../src/lib/payments/provider'
+import { isResumableBookingDate } from '../src/lib/payments/types'
 
 const originalSecret = process.env.REVOLUT_MERCHANT_SECRET_KEY
 const originalWebhookSecret = process.env.REVOLUT_WEBHOOK_SIGNING_SECRET
 const originalPublicKey = process.env.NEXT_PUBLIC_REVOLUT_MERCHANT_PUBLIC_KEY
 const originalPaymentProvider = process.env.PAYMENT_PROVIDER
 const originalFetch = globalThis.fetch
+
+test('accepte les dates canoniques et leur format ISO réellement persisté pour reprendre un paiement', () => {
+  assert.equal(isResumableBookingDate('2026-09-16'), true)
+  assert.equal(isResumableBookingDate('2026-09-16T12:00:00.000Z'), true)
+  assert.equal(isResumableBookingDate('2026-02-30'), false)
+  assert.equal(isResumableBookingDate('2026-09-16T00:00:00.000Z'), false)
+  assert.equal(isResumableBookingDate('16/09/2026'), false)
+})
 
 function configureRevolut() {
   process.env.REVOLUT_MERCHANT_SECRET_KEY = 'sk_test'

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { checkAdmin } from '@/lib/check-admin';
 import prisma from '@/lib/prisma';
+import { missionDurationDays } from '@/lib/guide-workflow';
 
 export async function GET(
   req: NextRequest,
@@ -21,6 +22,7 @@ export async function GET(
             include: { guideAccount: { select: { displayName: true, firstName: true, lastName: true } } }
           },
           package: { select: { name: true, durationDays: true } },
+          missions: { select: { startDate: true, endDate: true } },
           reviews: { select: { ratingOverall: true, comment: true } },
         }
       },
@@ -46,7 +48,7 @@ export async function GET(
   if (!user) return NextResponse.json({ error: 'Introuvable' }, { status: 404 });
 
   const totalSpent = user.reservations
-    .filter(r => r.status === 'COMPLETED')
+    .filter(r => r.status === 'CONFIRMED' || r.status === 'COMPLETED')
     .reduce((sum, r) => sum + r.totalPrice, 0);
 
   const avgRating = user.reviews.length > 0
@@ -76,7 +78,7 @@ export async function GET(
       guideName: r.guideProfile.guideAccount?.displayName ||
         `${r.guideProfile.guideAccount?.firstName ?? ''} ${r.guideProfile.guideAccount?.lastName ?? ''}`.trim() || '—',
       packageName: r.package.name,
-      durationDays: r.package.durationDays,
+      durationDays: missionDurationDays(r.missions),
       startDate: new Date(r.startDate).toLocaleDateString('fr-FR'),
       nbPeople: r.nbPeople,
       totalPrice: r.totalPrice,

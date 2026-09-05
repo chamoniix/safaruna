@@ -8,7 +8,7 @@ type Reservation = {
   pelerin: string;
   guide: string;
   packageName: string;
-  durationDays: number;
+  durationDays: number | null;
   startDate: string;
   nbPeople: number;
   basePrice: number;
@@ -286,7 +286,7 @@ export default function AdminReservations() {
                       <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.75rem', fontWeight: 700, color: '#1A1209', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{r.refNumber}</td>
                       <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.82rem', color: '#1A1209', whiteSpace: 'nowrap' }}>{r.pelerin}</td>
                       <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.82rem', color: '#4A3F30', whiteSpace: 'nowrap' }}>{r.guide}</td>
-                      <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.75rem', color: '#7A6D5A' }}>{r.packageName}<br /><span style={{ fontSize: '0.65rem' }}>{r.durationDays}j</span></td>
+                      <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.75rem', color: '#7A6D5A' }}>{r.packageName}{r.durationDays !== null && <><br /><span style={{ fontSize: '0.65rem' }}>{r.durationDays}j d’accompagnement</span></>}</td>
                       <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.75rem', color: '#4A3F30', whiteSpace: 'nowrap' }}>{r.startDate}</td>
                       <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.82rem', color: '#1A1209', textAlign: 'center' }}>{r.nbPeople}</td>
                       <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.85rem', fontWeight: 700, color: '#1A1209', whiteSpace: 'nowrap' }}>{r.totalPrice} €</td>

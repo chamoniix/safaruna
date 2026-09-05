@@ -25,7 +25,7 @@ type PelerinDetail = {
     refNumber: string;
     guideName: string;
     packageName: string;
-    durationDays: number;
+    durationDays: number | null;
     startDate: string;
     nbPeople: number;
     totalPrice: number;
@@ -206,7 +206,7 @@ export default function PelerinDetailPage() {
                         <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.82rem', color: '#4A3F30', whiteSpace: 'nowrap' }}>{r.guideName}</td>
                         <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.75rem', color: '#7A6D5A' }}>
                           {r.packageName}<br />
-                          <span style={{ fontSize: '0.65rem' }}>{r.durationDays}j</span>
+                          {r.durationDays !== null && <span style={{ fontSize: '0.65rem' }}>{r.durationDays}j d’accompagnement</span>}
                         </td>
                         <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.75rem', color: '#4A3F30', whiteSpace: 'nowrap' }}>{r.startDate}</td>
                         <td style={{ padding: '0.75rem 0.875rem', fontSize: '0.82rem', color: '#1A1209', textAlign: 'center' }}>{r.nbPeople}</td>

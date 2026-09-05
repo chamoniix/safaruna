@@ -12,6 +12,7 @@ import {
 import prisma from '@/lib/prisma'
 import { PLACES } from '@/lib/places'
 import { requirePelerin } from '@/lib/require-account'
+import { missionDurationDays } from '@/lib/guide-workflow'
 
 export const dynamic = 'force-dynamic'
 
@@ -180,6 +181,8 @@ export default async function ReservationDetailPage({
 
   if (!reservation) notFound()
 
+  const durationDays = missionDurationDays(reservation.missions)
+
   const status = STATUS[reservation.status] ?? {
     label: reservation.status,
     color: '#5A4E3A',
@@ -310,7 +313,7 @@ export default async function ReservationDetailPage({
       <section style={{ ...panel, padding: 22 }}>
         <h2 style={sectionTitle}>Informations du séjour</h2>
         <dl style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14, margin: '16px 0 0' }}>
-          <div><dt style={{ color: '#7A6D5A', fontSize: 12, fontWeight: 700 }}>Formule</dt><dd style={{ margin: '4px 0 0', color: '#1A1209', fontSize: 14, fontWeight: 700 }}>{reservation.package.name} · {reservation.package.durationDays} jour{reservation.package.durationDays > 1 ? 's' : ''}</dd></div>
+          <div><dt style={{ color: '#7A6D5A', fontSize: 12, fontWeight: 700 }}>Formule</dt><dd style={{ margin: '4px 0 0', color: '#1A1209', fontSize: 14, fontWeight: 700 }}>{reservation.package.name}{durationDays !== null && <> · {durationDays} jour{durationDays > 1 ? 's' : ''} d’accompagnement</>}</dd></div>
           <div><dt style={{ color: '#7A6D5A', fontSize: 12, fontWeight: 700 }}>Point d’arrivée</dt><dd style={{ margin: '4px 0 0', color: '#1A1209', fontSize: 14, fontWeight: 700 }}>{cityLabel(reservation.arrivalPoint)}</dd></div>
           <div><dt style={{ color: '#7A6D5A', fontSize: 12, fontWeight: 700 }}>Profil demandé</dt><dd style={{ margin: '4px 0 0', color: '#1A1209', fontSize: 14, fontWeight: 700 }}>{reservation.gender || 'Non renseigné'}</dd></div>
           <div><dt style={{ color: '#7A6D5A', fontSize: 12, fontWeight: 700 }}>Transport entre les villes</dt><dd style={{ margin: '4px 0 0', color: '#1A1209', fontSize: 14, fontWeight: 700 }}>{sameGuideForBothCities && intercityTransport > 0 ? `${transportOption === 'TRAIN' ? 'Train A/R du Guide' : 'Voiture privée A/R du Guide'} · ${money(intercityTransport)}` : 'Non applicable'}</dd></div>

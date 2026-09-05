@@ -1,6 +1,19 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { confirmationDeadlines, publicReviewerName, reviewOpensAt } from '../src/lib/guide-workflow'
+import { confirmationDeadlines, missionDurationDays, publicReviewerName, reviewOpensAt } from '../src/lib/guide-workflow'
+
+test('la durée affichée utilise les journées inclusives des missions, sans les jours libres du séjour', () => {
+  const mission = (start: string, end: string) => ({ startDate: new Date(start), endDate: new Date(end) })
+  assert.equal(missionDurationDays([mission('2026-09-16T12:00:00Z', '2026-09-16T12:00:00Z')]), 1)
+  assert.equal(missionDurationDays([
+    mission('2026-09-16T12:00:00Z', '2026-09-17T12:00:00Z'),
+    mission('2026-09-20T12:00:00Z', '2026-09-22T12:00:00Z'),
+  ]), 5)
+  assert.equal(missionDurationDays([mission('2026-10-31T12:00:00Z', '2026-11-01T12:00:00Z')]), 2)
+  assert.equal(missionDurationDays([]), null)
+  assert.equal(missionDurationDays([mission('2026-09-17', '2026-09-16')]), null)
+  assert.equal(missionDurationDays([mission('invalid', '2026-09-16')]), null)
+})
 
 test('confirmation standard: rappel 6h et suspension 48h', () => {
   const requestedAt = new Date('2026-09-01T08:00:00.000Z')

@@ -62,6 +62,12 @@ export async function GET(req: NextRequest) {
         { firstName: { contains: query, mode: 'insensitive' as const } },
         { lastName: { contains: query, mode: 'insensitive' as const } },
         { whatsapp: { contains: query, mode: 'insensitive' as const } },
+        { AND: query.split(/\s+/).map(term => ({
+          OR: [
+            { firstName: { contains: term, mode: 'insensitive' as const } },
+            { lastName: { contains: term, mode: 'insensitive' as const } },
+          ],
+        })) },
       ],
     }),
   }

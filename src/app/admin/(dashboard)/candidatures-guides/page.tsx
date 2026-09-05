@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { LANG_CODE_TO_LABEL } from '@/lib/languages'
 
 type Status = 'PENDING' | 'IN_REVIEW' | 'APPROVED' | 'REJECTED'
@@ -98,26 +98,41 @@ export default function GuideApplicationsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [loadError, setLoadError] = useState('')
+  const activeRequest = useRef<AbortController | null>(null)
 
   const load = useCallback(async () => {
+    activeRequest.current?.abort()
+    const controller = new AbortController()
+    activeRequest.current = controller
     setLoading(true)
-    setError('')
+    setLoadError('')
+    setData(null)
     const params = new URLSearchParams({ page: String(page) })
     if (status !== 'ALL') params.set('status', status)
     if (query.trim()) params.set('q', query.trim())
     try {
-      const response = await fetch(`/api/admin/guide-applications?${params}`, { cache: 'no-store' })
+      const response = await fetch(`/api/admin/guide-applications?${params}`, { cache: 'no-store', signal: controller.signal })
       const payload = await response.json()
+      if (controller.signal.aborted) return
       if (!response.ok) throw new Error(payload.error || 'Chargement impossible')
       setData(payload)
     } catch (cause) {
-      setError(cause instanceof Error ? cause.message : 'Chargement impossible')
+      if (!controller.signal.aborted) setLoadError(cause instanceof Error ? cause.message : 'Chargement impossible')
     } finally {
-      setLoading(false)
+      if (!controller.signal.aborted) setLoading(false)
     }
   }, [page, query, status])
 
-  useEffect(() => { void load() }, [load])
+  const reloadCurrentFilters = useRef<(() => Promise<void>) | null>(null)
+  useEffect(() => {
+    reloadCurrentFilters.current = load
+    void load()
+    return () => {
+      reloadCurrentFilters.current = null
+      activeRequest.current?.abort()
+    }
+  }, [load])
 
   async function update(nextStatus: Exclude<Status, 'PENDING'>) {
     if (!selected) return
@@ -135,7 +150,7 @@ export default function GuideApplicationsPage() {
       if (!response.ok) throw new Error(payload.error || 'Mise à jour impossible')
       setSelected(null)
       setNotes('')
-      await load()
+      await reloadCurrentFilters.current?.()
       if (nextStatus === 'APPROVED' && payload.accessEmailSent !== true) {
         setError('Candidature validée et compte créé, mais l’invitation n’a pas pu être envoyée. Le guide peut utiliser « Mot de passe oublié ».')
       }
@@ -150,7 +165,7 @@ export default function GuideApplicationsPage() {
     <section style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 12 }}>
       {(['PENDING', 'IN_REVIEW', 'APPROVED', 'REJECTED'] as Status[]).map(item => <button key={item} onClick={() => { setStatus(item); setPage(1) }} style={{ textAlign: 'left', border: status === item ? '2px solid #C9A84C' : '1px solid #E8DFC8', borderRadius: 12, padding: 16, background: 'white', cursor: 'pointer' }}>
         <span style={{ display: 'block', color: '#7A6D5A', fontSize: 11, textTransform: 'uppercase', letterSpacing: '.08em', fontWeight: 700 }}>{labels[item]}</span>
-        <strong style={{ display: 'block', fontSize: 28, color: tones[item].color, marginTop: 8 }}>{data?.counts[item] || 0}</strong>
+        <strong style={{ display: 'block', fontSize: 28, color: tones[item].color, marginTop: 8 }}>{loading || !data ? '—' : data.counts[item] ?? 0}</strong>
       </button>)}
     </section>
 
@@ -163,9 +178,12 @@ export default function GuideApplicationsPage() {
         </select>
       </div>
       {error && <div style={{ margin: 16, padding: 12, background: '#FEE2E2', color: '#991B1B', borderRadius: 8 }}>{error}</div>}
+      {loadError && <div role="alert" style={{ margin: 16, padding: 12, background: '#FEE2E2', color: '#991B1B', borderRadius: 8 }}>
+        {loadError} <button type="button" onClick={() => void load()} disabled={loading}>Réessayer</button>
+      </div>}
       <div style={{ overflowX: 'auto' }}><table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 880 }}>
         <thead><tr style={{ background: '#F8F6F2' }}>{['Candidat', 'Contact', 'Ville(s)', 'Langues', 'Reçue', 'Statut', ''].map(label => <th key={label} style={{ padding: 12, textAlign: 'left', color: '#7A6D5A', fontSize: 11, textTransform: 'uppercase' }}>{label}</th>)}</tr></thead>
-        <tbody>{loading ? <tr><td colSpan={7} style={{ padding: 30, textAlign: 'center' }}>Chargement…</td></tr> : !data?.applications.length ? <tr><td colSpan={7} style={{ padding: 30, textAlign: 'center', color: '#7A6D5A' }}>Aucune candidature réelle.</td></tr> : data.applications.map(item => <tr key={item.id} style={{ borderTop: '1px solid #F0EBE0' }}>
+        <tbody>{loading ? <tr><td colSpan={7} style={{ padding: 30, textAlign: 'center' }}>Chargement…</td></tr> : !data ? <tr><td colSpan={7} style={{ padding: 30, textAlign: 'center', color: '#991B1B' }}>Les candidatures n’ont pas pu être chargées.</td></tr> : !data.applications.length ? <tr><td colSpan={7} style={{ padding: 30, textAlign: 'center', color: '#7A6D5A' }}>Aucune candidature ne correspond aux filtres sélectionnés.</td></tr> : data.applications.map(item => <tr key={item.id} style={{ borderTop: '1px solid #F0EBE0' }}>
           <td style={{ padding: 12 }}><strong>{item.firstName} {item.lastName}</strong><small style={{ display: 'block', color: '#7A6D5A' }}>{item.gender} · {item.nationality || 'Non renseigné'}</small></td>
           <td style={{ padding: 12 }}><span>{item.email}</span><small style={{ display: 'block', color: '#7A6D5A' }}>{item.whatsapp || 'Non renseigné'}</small></td>
           <td style={{ padding: 12 }}>{item.serviceCities.join(' · ') || 'Non renseigné'}</td>
@@ -176,9 +194,9 @@ export default function GuideApplicationsPage() {
         </tr>)}</tbody>
       </table></div>
       <div style={{ padding: 14, display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #E8DFC8' }}>
-        <button disabled={!data || page <= 1} onClick={() => setPage(value => Math.max(1, value - 1))}>Précédent</button>
-        <span>Page {data?.pagination.page || 1} / {data?.pagination.pages || 1} · {data?.pagination.total || 0} candidature(s)</span>
-        <button disabled={!data || page >= data.pagination.pages} onClick={() => setPage(value => value + 1)}>Suivant</button>
+        <button disabled={loading || !data || page <= 1} onClick={() => setPage(value => Math.max(1, value - 1))}>Précédent</button>
+        <span>{loading ? 'Chargement…' : data ? `Page ${data.pagination.page} / ${data.pagination.pages} · ${data.pagination.total} candidature(s)` : 'Pagination indisponible'}</span>
+        <button disabled={loading || !data || page >= data.pagination.pages} onClick={() => setPage(value => value + 1)}>Suivant</button>
       </div>
     </section>
 

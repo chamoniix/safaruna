@@ -40,6 +40,14 @@ export type RevolutOrder = {
   payments?: RevolutPayment[]
 }
 
+export const REVOLUT_SUCCESSFUL_PAYMENT_STATES = ['captured', 'completed'] as const
+
+export function isSuccessfulRevolutPaymentState(
+  state: string | undefined,
+): state is (typeof REVOLUT_SUCCESSFUL_PAYMENT_STATES)[number] {
+  return REVOLUT_SUCCESSFUL_PAYMENT_STATES.some(successfulState => successfulState === state)
+}
+
 export class RevolutApiError extends Error {
   constructor(
     message: string,

@@ -6,6 +6,7 @@ import {
   classifyRevolutWebhookEvent,
   deterministicRevolutEventId,
   RevolutApiError,
+  retrieveRevolutOrder,
   revolutPaymentProvider,
   verifyRevolutWebhookSignature,
   type RevolutOrder,
@@ -159,6 +160,21 @@ test('récupère par référence un ordre créé malgré un timeout sans refaire
 
   assert.equal(result.checkoutId, order().id)
   assert.deepEqual(methods, ['POST', 'GET', 'GET'])
+})
+
+test('récupère un ordre existant avec son jeton public pour reprendre le checkout', async () => {
+  configureRevolut()
+  let requestedUrl = ''
+  globalThis.fetch = async input => {
+    requestedUrl = String(input)
+    return new Response(JSON.stringify(order()), { status: 200 })
+  }
+
+  const result = await retrieveRevolutOrder(order().id!)
+
+  assert.match(requestedUrl, new RegExp(`/orders/${order().id}$`))
+  assert.equal(result.token, 'public-order-token')
+  assert.equal(result.checkout_url, 'https://checkout.revolut.com/payment-link/public-order-token')
 })
 
 test('réconcilie aussi un ordre si Revolut renvoie un body invalide avec un statut 5xx', async () => {
@@ -346,4 +362,37 @@ test('le webhook Revolut dérive le pèlerin du draft puis de la réservation po
   assert.match(resolver, /prisma\.reservationDraft\.findUnique/)
   assert.match(resolver, /prisma\.reservation\.findUnique/)
   assert.match(resolver, /analyticsSessionHash/)
+})
+
+test('la reprise du paiement reste liée au pèlerin, au draft et au prix serveur', () => {
+  const apiSource = readFileSync('src/app/api/espace/reservations/route.ts', 'utf8')
+  const checkoutSource = readFileSync('src/app/espace/checkout/[slug]/page.tsx', 'utf8')
+  const dashboardSource = readFileSync('src/app/espace/(dashboard)/reservations/page.tsx', 'utf8')
+
+  assert.match(apiSource, /where: \{ refNumber, pelerinId: userId \}/)
+  assert.match(apiSource, /retrieveRevolutOrder\(pendingAttempt\.providerCheckoutId\)/)
+  assert.match(apiSource, /order\.merchant_order_data\?\.reference === refNumber/)
+  assert.match(apiSource, /order\.amount === pendingAttempt\.amountCents/)
+  assert.match(apiSource, /order\.currency === pendingAttempt\.currency\.toUpperCase\(\)/)
+  assert.match(apiSource, /order\.capture_mode === 'automatic'/)
+  assert.match(apiSource, /hostname === 'checkout\.revolut\.com'/)
+  assert.match(apiSource, /promotionSnapshot\(draft\)/)
+  assert.match(apiSource, /campaignCodeSnapshot/)
+  assert.match(apiSource, /discountBpsSnapshot/)
+  assert.match(apiSource, /pricing: draftData\.pricing/)
+  assert.match(apiSource, /pendingPayments/)
+  assert.doesNotMatch(`${apiSource}\n${checkoutSource}\n${dashboardSource}`, /TEST90/)
+
+  assert.match(checkoutSource, /searchParams\.get\('ref'\)/)
+  assert.match(checkoutSource, /fetch\(`\/api\/espace\/reservations\?ref=/)
+  assert.match(checkoutSource, /cache: 'no-store'/)
+  assert.match(checkoutSource, /setAppliedPromo\(pending\.promotion\)/)
+  assert.match(checkoutSource, /setResumedPricing\(pending\.pricing\)/)
+  assert.match(checkoutSource, /setPaymentSession\(\{/)
+  assert.match(checkoutSource, /nextParams\.set\('ref', data\.refNumber\)/)
+  assert.match(checkoutSource, /Reprise de votre paiement/)
+
+  assert.match(dashboardSource, /Paiements en attente/)
+  assert.match(dashboardSource, /Reprendre le paiement/)
+  assert.match(dashboardSource, /\?ref=\$\{encodeURIComponent\(payment\.refNumber\)\}/)
 })

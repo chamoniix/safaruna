@@ -62,6 +62,51 @@ type PaymentSession = {
   refNumber: string
 }
 
+type CheckoutPricingSnapshot = {
+  base: number
+  places: number
+  intercityTransport: number
+  localTransportMakkah: number
+  localTransportMadinah: number
+  localTransportDaysMakkah: number
+  localTransportDaysMadinah: number
+  localVehicle: { label: string }
+  guideHotelNights: number
+  guideHotel: number
+  promoDiscount: number
+  grossTotal: number
+  total: number
+}
+
+type PendingCheckoutResponse = {
+  verification?: { refNumber?: string; state?: 'confirmed' | 'pending' | 'failed' }
+  pendingCheckout?: PaymentSession & {
+    expiresAt: string
+    promotion: { code: string; discountPercent: number } | null
+    pricing: CheckoutPricingSnapshot
+    checkout: {
+      guideSlug: string
+      cityChoice: CityChoice
+      departDate: string
+      returnDate: string
+      nbPersonnes: number
+      gender: Gender
+      langue: string
+      arrivalPoint: 'JEDDAH' | 'MADINAH' | 'MAKKAH'
+      selectedPlaces: string[]
+      transportOption: TransportOption
+      taxiDirection: 'MAKKAH' | 'MADINAH' | null
+      localTransportMakkah: LocalTransportOption
+      localTransportMadinah: LocalTransportOption
+      guideBedProvided: boolean
+      selectedGuideSlug: string
+      selectedGuideSlugMadinah: string | null
+      packageName: string
+    }
+  }
+  error?: string
+}
+
 // ── Composant PlaceSelector ───────────────────────
 function PlaceSelector({
   title, places, selected, onToggle, prices, onDetail,
@@ -233,6 +278,7 @@ export default function CheckoutPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { data: session, status } = useSession()
+  const resumeRef = searchParams.get('ref')
 
   const [step, setStep] = useState(1)
   const [guide, setGuide] = useState<PublicGuide | null>(null)
@@ -289,6 +335,8 @@ export default function CheckoutPage() {
   // Étape 4
   const [submitting, setSubmitting] = useState(false)
   const [paymentSession, setPaymentSession] = useState<PaymentSession | null>(null)
+  const [resumingPayment, setResumingPayment] = useState(Boolean(resumeRef))
+  const [resumedPricing, setResumedPricing] = useState<CheckoutPricingSnapshot | null>(null)
   const [error, setError] = useState('')
   const [checkingAvailability, setCheckingAvailability] = useState(false)
   const [promoInput, setPromoInput] = useState('')
@@ -305,6 +353,89 @@ export default function CheckoutPage() {
       router.push(`/connexion?redirect=${encodeURIComponent(current)}`)
     }
   }, [status, slug, router, searchParams])
+
+  // Une référence de paiement appartient au serveur. Elle permet de reprendre
+  // le même ordre Revolut après un rafraîchissement ou une reconnexion.
+  useEffect(() => {
+    if (!resumeRef) {
+      setResumingPayment(false)
+      return
+    }
+    if (status !== 'authenticated') return
+    if (paymentSession?.refNumber === resumeRef) {
+      setResumingPayment(false)
+      return
+    }
+
+    const controller = new AbortController()
+    setResumingPayment(true)
+    setError('')
+
+    fetch(`/api/espace/reservations?ref=${encodeURIComponent(resumeRef)}`, {
+      cache: 'no-store',
+      signal: controller.signal,
+    })
+      .then(async response => {
+        const data = await response.json() as PendingCheckoutResponse
+        if (!response.ok) throw new Error(data.error || 'Impossible de reprendre le paiement')
+        return data
+      })
+      .then(data => {
+        if (controller.signal.aborted) return
+        if (data.verification?.state === 'confirmed') {
+          router.replace(`/espace/checkout/${slug}/confirmation?ref=${encodeURIComponent(resumeRef)}&payment=success`)
+          return
+        }
+        if (data.verification?.state === 'failed') {
+          throw new Error('Ce paiement a expiré ou a été annulé.')
+        }
+
+        const pending = data.pendingCheckout
+        if (
+          !pending
+          || pending.provider !== 'REVOLUT'
+          || pending.refNumber !== resumeRef
+          || pending.checkout.guideSlug !== slug
+        ) {
+          throw new Error('Le paiement est encore en cours de vérification. Réessayez dans un instant.')
+        }
+
+        const checkout = pending.checkout
+        setCityChoice(checkout.cityChoice)
+        setRange({ from: new Date(checkout.departDate), to: new Date(checkout.returnDate) })
+        setNbPersonnes(checkout.nbPersonnes)
+        setGender(checkout.gender)
+        setLangue(checkout.langue)
+        setArrivalPoint(checkout.arrivalPoint)
+        setSelectedPlaces(checkout.selectedPlaces)
+        setTransportOption(checkout.transportOption)
+        setTaxiDirection(checkout.taxiDirection)
+        setLocalTransportMakkah(checkout.localTransportMakkah)
+        setLocalTransportMadinah(checkout.localTransportMadinah)
+        setGuideBedProvided(checkout.guideBedProvided)
+        setSelectedGuideSlug(checkout.selectedGuideSlug)
+        setSelectedGuideSlugMadinah(checkout.selectedGuideSlugMadinah)
+        setStep(5)
+        setPromoInput(pending.promotion?.code ?? '')
+        setAppliedPromo(pending.promotion)
+        setResumedPricing(pending.pricing)
+        setPaymentSession({
+          provider: 'REVOLUT',
+          checkoutToken: pending.checkoutToken,
+          sessionUrl: pending.sessionUrl,
+          refNumber: pending.refNumber,
+        })
+      })
+      .catch(error => {
+        if (controller.signal.aborted) return
+        setError(error instanceof Error ? error.message : 'Impossible de reprendre le paiement')
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setResumingPayment(false)
+      })
+
+    return () => controller.abort()
+  }, [paymentSession?.refNumber, resumeRef, router, slug, status])
 
   useEffect(() => {
     if (!slug || bookingStartedSlug.current === slug) return
@@ -573,6 +704,18 @@ export default function CheckoutPage() {
   const total = prixBase + prixLieux + prixTransport + prixVoiture + prixHotelGuide
   const promoDiscountEstimate = appliedPromo ? Math.round(total * appliedPromo.discountPercent) / 100 : 0
   const totalAfterPromo = total - promoDiscountEstimate
+  const displayedBasePrice = resumedPricing?.base ?? prixBase
+  const displayedPlacesPrice = resumedPricing?.places ?? prixLieux
+  const displayedIntercityPrice = resumedPricing?.intercityTransport ?? prixTransport
+  const displayedMakkahTransportPrice = resumedPricing?.localTransportMakkah ?? prixVoitureMakkah
+  const displayedMadinahTransportPrice = resumedPricing?.localTransportMadinah ?? prixVoitureMadinah
+  const displayedMakkahDays = resumedPricing?.localTransportDaysMakkah ?? daysMakkah
+  const displayedMadinahDays = resumedPricing?.localTransportDaysMadinah ?? daysMadinah
+  const displayedLocalVehicleLabel = resumedPricing?.localVehicle.label ?? transportPricing.localVehicle.label
+  const displayedGuideHotelNights = resumedPricing?.guideHotelNights ?? transportPricing.guideHotelNights
+  const displayedGuideHotelPrice = resumedPricing?.guideHotel ?? prixHotelGuide
+  const displayedPromoDiscount = resumedPricing?.promoDiscount ?? promoDiscountEstimate
+  const displayedTotal = resumedPricing?.total ?? totalAfterPromo
 
   // Lieux supplémentaires par ville — historiques fusionnés dans la bonne ville
   const getAvailablePlacesByCity = (city: 'MAKKAH' | 'MADINAH'): Place[] => {
@@ -711,6 +854,24 @@ export default function CheckoutPage() {
         sessionUrl: data.sessionUrl,
         refNumber: data.refNumber,
       })
+      setResumedPricing({
+        base: prixBase,
+        places: prixLieux,
+        intercityTransport: prixTransport,
+        localTransportMakkah: prixVoitureMakkah,
+        localTransportMadinah: prixVoitureMadinah,
+        localTransportDaysMakkah: daysMakkah,
+        localTransportDaysMadinah: daysMadinah,
+        localVehicle: { label: transportPricing.localVehicle.label },
+        guideHotelNights: transportPricing.guideHotelNights,
+        guideHotel: prixHotelGuide,
+        promoDiscount: promoDiscountEstimate,
+        grossTotal: total,
+        total: totalAfterPromo,
+      })
+      const nextParams = new URLSearchParams(searchParams.toString())
+      nextParams.set('ref', data.refNumber)
+      router.replace(`/espace/checkout/${slug}?${nextParams.toString()}`, { scroll: false })
       setSubmitting(false)
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : 'Erreur lors de la préparation du paiement'
@@ -2127,11 +2288,19 @@ export default function CheckoutPage() {
                   <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1A1209' }}>{basePackage?.name}</div>
                   <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>Accompagnement sélectionné</div>
                 </div>
-                <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>{prixBase}€</div>
+                <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>{displayedBasePrice}€</div>
               </div>
 
               {/* Visites supp */}
-              {extraPlaces.map(pk => {
+              {resumedPricing && extraPlaces.length > 0 ? (
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', padding: '0.75rem 1.25rem', borderBottom: '1px solid #F5F0E8' }}>
+                  <div>
+                    <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>Visites supplémentaires</div>
+                    <div style={{ fontSize: '0.7rem', color: '#7A6D5A', marginTop: 2 }}>{extraPlaces.map(pk => placeCatalog.find(place => place.key === pk)?.nameFr).filter(Boolean).join(' · ')}</div>
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209', whiteSpace: 'nowrap' }}>{displayedPlacesPrice}€</div>
+                </div>
+              ) : extraPlaces.map(pk => {
                 const place = placeCatalog.find(p => p.key === pk)
                 const prix = displayPlacePrices[pk]
                 return place ? (
@@ -2150,20 +2319,20 @@ export default function CheckoutPage() {
                   <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>
                     {transportOption === 'TRAIN' ? '🚄 Billet de train A/R du guide' : '🚗 Voiture privée A/R du guide'}
                   </div>
-                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{prixTransport}€</div>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{displayedIntercityPrice}€</div>
                 </div>
               )}
 
               {localTransportMakkah === 'CAR' && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 1.25rem', borderBottom: '1px solid #F5F0E8' }}>
-                  <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>🚗 {transportPricing.localVehicle.label} — Makkah ({daysMakkah} j.)</div>
-                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{prixVoitureMakkah}€</div>
+                  <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>🚗 {displayedLocalVehicleLabel} — Makkah ({displayedMakkahDays} j.)</div>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{displayedMakkahTransportPrice}€</div>
                 </div>
               )}
               {localTransportMadinah === 'CAR' && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 1.25rem', borderBottom: '1px solid #F5F0E8' }}>
-                  <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>🚗 {transportPricing.localVehicle.label} — Médine ({daysMadinah} j.)</div>
-                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{prixVoitureMadinah}€</div>
+                  <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>🚗 {displayedLocalVehicleLabel} — Médine ({displayedMadinahDays} j.)</div>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{displayedMadinahTransportPrice}€</div>
                 </div>
               )}
 
@@ -2181,9 +2350,9 @@ export default function CheckoutPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 1.25rem', borderBottom: '1px solid #F5F0E8' }}>
                   <div>
                     <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>🏨 Hébergement du guide</div>
-                    <div style={{ fontSize: '0.7rem', color: '#7A6D5A', marginTop: 2 }}>{guideBedProvided ? 'Lit fourni par le client' : `${transportPricing.guideHotelNights} nuit(s) hors ville principale`}</div>
+                    <div style={{ fontSize: '0.7rem', color: '#7A6D5A', marginTop: 2 }}>{guideBedProvided ? 'Lit fourni par le client' : `${displayedGuideHotelNights} nuit(s) hors ville principale`}</div>
                   </div>
-                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{prixHotelGuide}€</div>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{displayedGuideHotelPrice}€</div>
                 </div>
               )}
 
@@ -2200,7 +2369,7 @@ export default function CheckoutPage() {
               {appliedPromo && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '.75rem 1.25rem', borderBottom: '1px solid #F5F0E8', color: '#1D5C3A' }}>
                   <div style={{ fontSize: '.85rem', fontWeight: 700 }}>Réduction promotionnelle ({appliedPromo.discountPercent} %)</div>
-                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700 }}>−{promoDiscountEstimate.toLocaleString('fr-FR')}€</div>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700 }}>−{displayedPromoDiscount.toLocaleString('fr-FR')}€</div>
                 </div>
               )}
 
@@ -2211,7 +2380,7 @@ export default function CheckoutPage() {
                   <div style={{ fontSize: '0.7rem', color: '#7A6D5A' }}>Pour {nbPersonnes} personne{nbPersonnes > 1 ? 's' : ''}</div>
                 </div>
                 <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.75rem', fontWeight: 700, color: '#C9A84C' }}>
-                  {totalAfterPromo.toLocaleString('fr-FR')}€
+                  {displayedTotal.toLocaleString('fr-FR')}€
                 </div>
               </div>
             </div>
@@ -2257,14 +2426,24 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            {!paymentSession ? (
+            {resumingPayment ? (
+              <button
+                type="button"
+                disabled
+                aria-busy="true"
+                style={{ width: '100%', padding: '1.1rem', background: '#7A6D5A', color: '#FAF7F0', border: 'none', borderRadius: 50, fontFamily: 'var(--font-cormorant, serif)', fontWeight: 700, fontSize: '1.1rem', cursor: 'wait', letterSpacing: '0.06em', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.65rem' }}
+              >
+                <span aria-hidden="true" style={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid rgba(250,247,240,.45)', borderTopColor: '#FAF7F0', animation: 'spin .75s linear infinite', flexShrink: 0 }} />
+                Reprise de votre paiement…
+              </button>
+            ) : !paymentSession ? (
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
                 style={{ width: '100%', padding: '1.1rem', background: submitting ? '#7A6D5A' : 'linear-gradient(135deg, #C9A84C 0%, #8B6914 100%)', color: '#FAF7F0', border: 'none', borderRadius: 50, fontFamily: 'var(--font-cormorant, serif)', fontWeight: 700, fontSize: '1.1rem', cursor: submitting ? 'not-allowed' : 'pointer', letterSpacing: '0.06em', boxShadow: submitting ? 'none' : '0 4px 20px rgba(201,168,76,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '.65rem' }}
               >
                 {submitting && <span aria-hidden="true" style={{ width: 18, height: 18, borderRadius: '50%', border: '2px solid rgba(250,247,240,.45)', borderTopColor: '#FAF7F0', animation: 'spin .75s linear infinite', flexShrink: 0 }} />}
-                {submitting ? 'Préparation de votre paiement…' : `Payer ${totalAfterPromo.toLocaleString('fr-FR')}€`}
+                {submitting ? 'Préparation de votre paiement…' : `Payer ${displayedTotal.toLocaleString('fr-FR')}€`}
               </button>
             ) : (
               <RevolutEmbeddedCheckout

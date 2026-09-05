@@ -16,6 +16,7 @@ import {
 import {
   classifyRevolutWebhookEvent,
   deterministicRevolutEventId,
+  REVOLUT_SUCCESSFUL_PAYMENT_STATES,
   retrieveRevolutOrder,
   verifyRevolutWebhookSignature,
   type RevolutOrder,
@@ -87,7 +88,7 @@ function latestPaymentByState(order: RevolutOrder, states: Set<string>): Revolut
 
 function paymentForEvent(order: RevolutOrder, eventType: string): RevolutPayment | null {
   if (eventType === 'ORDER_COMPLETED') {
-    return latestPaymentByState(order, new Set(['completed']))
+    return latestPaymentByState(order, new Set(REVOLUT_SUCCESSFUL_PAYMENT_STATES))
   }
   if (eventType === 'ORDER_PAYMENT_DECLINED') {
     return latestPaymentByState(order, new Set(['declined', 'soft_declined']))
@@ -98,8 +99,8 @@ function paymentForEvent(order: RevolutOrder, eventType: string): RevolutPayment
   return null
 }
 
-function requiredCompletedPayment(order: RevolutOrder): RevolutPayment {
-  const payment = latestPaymentByState(order, new Set(['completed']))
+function requiredSuccessfulPayment(order: RevolutOrder): RevolutPayment {
+  const payment = latestPaymentByState(order, new Set(REVOLUT_SUCCESSFUL_PAYMENT_STATES))
   if (!payment) throw new PaymentProcessingError('Paiement Revolut final manquant', 400)
   return payment
 }
@@ -222,10 +223,10 @@ export async function POST(req: Request) {
       if (!Number.isInteger(order.amount) || (order.amount ?? 0) <= 0 || order.currency !== 'EUR') {
         throw new PaymentProcessingError('Montant Revolut incohérent', 400)
       }
-      const completedPayment = payment ?? requiredCompletedPayment(order)
+      const successfulPayment = payment ?? requiredSuccessfulPayment(order)
       if (
-        (completedPayment.amount !== undefined && completedPayment.amount !== order.amount)
-        || (completedPayment.currency !== undefined && completedPayment.currency !== order.currency)
+        (successfulPayment.amount !== undefined && successfulPayment.amount !== order.amount)
+        || (successfulPayment.currency !== undefined && successfulPayment.currency !== order.currency)
       ) {
         throw new PaymentProcessingError('Paiement Revolut incohérent', 400)
       }
@@ -237,7 +238,7 @@ export async function POST(req: Request) {
         providerEventId,
         providerEventType: payload.event,
         providerCheckoutId: payload.order_id,
-        providerPaymentId: requiredString(completedPayment.id, 'Paiement'),
+        providerPaymentId: requiredString(successfulPayment.id, 'Paiement'),
         bookingRef: authoritative.bookingRef,
         pelerinId,
         pelerinEmail,

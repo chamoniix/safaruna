@@ -5,6 +5,7 @@ import test from 'node:test'
 import {
   classifyRevolutWebhookEvent,
   deterministicRevolutEventId,
+  isSuccessfulRevolutPaymentState,
   RevolutApiError,
   retrieveRevolutOrder,
   revolutPaymentProvider,
@@ -297,6 +298,46 @@ test('seul ORDER_COMPLETED confirme et les échecs de tentative restent non term
   assert.equal(classifyRevolutWebhookEvent('ORDER_PAYMENT_DECLINED', 'pending'), 'IGNORED')
   assert.equal(classifyRevolutWebhookEvent('ORDER_PAYMENT_FAILED', 'pending'), 'IGNORED')
   assert.equal(classifyRevolutWebhookEvent('ORDER_FAILED', 'completed'), 'IGNORED')
+})
+
+test('accepte un paiement captured lorsque l’ordre Revolut autoritatif est completed', () => {
+  const completedOrder = order({
+    state: 'completed',
+    payments: [{
+      id: 'payment-captured',
+      state: 'captured',
+      amount: 13_000,
+      currency: 'EUR',
+      updated_at: '2026-09-02T12:05:00.000Z',
+    }],
+  })
+  const capturedPayment = completedOrder.payments?.[0]
+
+  assert.equal(completedOrder.state, 'completed')
+  assert.equal(isSuccessfulRevolutPaymentState(capturedPayment?.state), true)
+  assert.equal(isSuccessfulRevolutPaymentState('completed'), true)
+  assert.equal(isSuccessfulRevolutPaymentState('authorised'), false)
+  assert.equal(classifyRevolutWebhookEvent('ORDER_COMPLETED', completedOrder.state), 'PAID')
+  assert.equal(
+    deterministicRevolutEventId({
+      eventType: 'ORDER_COMPLETED',
+      order: completedOrder,
+      payment: capturedPayment,
+    }),
+    deterministicRevolutEventId({
+      eventType: 'ORDER_COMPLETED',
+      order: completedOrder,
+      payment: { ...capturedPayment, state: 'completed' },
+    }),
+  )
+
+  const webhookSource = readFileSync('src/app/api/revolut/webhook/route.ts', 'utf8')
+  const completedEventBranch = webhookSource.slice(
+    webhookSource.indexOf("if (eventType === 'ORDER_COMPLETED')"),
+    webhookSource.indexOf("if (eventType === 'ORDER_PAYMENT_DECLINED')"),
+  )
+  assert.match(completedEventBranch, /REVOLUT_SUCCESSFUL_PAYMENT_STATES/)
+  assert.doesNotMatch(completedEventBranch, /new Set\(\['completed'\]\)/)
 })
 
 test('préserve le draft si l’annulation provider n’est pas confirmée', () => {

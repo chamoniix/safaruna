@@ -212,7 +212,7 @@ export default function CommentSePasseLaOmra() {
             "On s'est assis dans un coin du Haram. Ibrahim nous a laissé notre espace, il comprenait que certains moments n'appartiennent qu'à Allah et à ses serviteurs. Puis il nous a proposé de l'eau de Zamzam et nous a demandé ce que nous voulions faire ensuite. C'est ça, un guide privé : vous avez le temps, vous avez la paix."
           </Perspective>
 
-          <InfoCard icon="✦" texte="L'Omra accomplie avec un guide privé, c'est la différence entre faire les rituels et les vivre. Chaque geste a un sens. Chaque moment est guidé." />
+          <InfoCard icon="✦" texte="La omra accomplie avec un guide privé, c'est la différence entre faire les rituels et les vivre. Chaque geste a un sens. Chaque moment est guidé." />
         </div>
 
         {/* ── FAQ ── */}

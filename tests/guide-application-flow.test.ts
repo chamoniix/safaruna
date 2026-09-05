@@ -23,6 +23,20 @@ const adminGuidePage = readFileSync('src/app/admin/(dashboard)/guides/[slug]/pag
 const publicGuideRoute = readFileSync('src/app/api/guide/public/[slug]/route.ts', 'utf8')
 const profileChangeMigration = readFileSync('prisma/migrations/20260903165000_guide_profile_change_requests/migration.sql', 'utf8')
 
+test('la navigation du calendrier de naissance ne recouvre pas les sélecteurs de mois et année', () => {
+  const navigation = form.match(/\.birth-calendar \.rdp-nav\s*\{([^}]+)\}/)?.[1]
+  assert.ok(navigation)
+  // The global site nav uses left:0, padding and z-index:100. DayPicker must
+  // retain its compact, right-aligned navigation, scoped to this picker only.
+  for (const reset of ['left: auto', 'padding: 0', 'z-index: auto', 'border: 0', 'justify-content: normal']) {
+    assert.ok(navigation.includes(reset), `missing calendar-only reset: ${reset}`)
+  }
+  assert.match(form, /startMonth=\{new Date\(1900, 0, 1\)\}/)
+  assert.match(form, /disabled=\{\{ after: new Date\(\) \}\}/)
+  assert.match(form, /date\.getFullYear\(\)/)
+  assert.doesNotMatch(form.slice(form.indexOf('function BirthDatePicker'), form.indexOf('export default function GuideOnboarding')), /toISOString/)
+})
+
 test('les tarifs proposés sont facultatifs, distinguent null de zéro et ne sont pas publiés automatiquement', () => {
   for (const field of [
     'proposedOmraPrice',

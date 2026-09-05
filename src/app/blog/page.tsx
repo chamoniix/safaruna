@@ -7,8 +7,8 @@ import type { Metadata } from 'next';
 import { BLOG_ARTICLES_LIST as ARTICLES } from './data';
 
 export const metadata: Metadata = {
-  title: 'Blog — Hajj, Omra & lieux saints — SAFARUMA',
-  description: 'Actualités Hajj 2026, histoire des lieux saints, guides pratiques pour la Omra et témoignages de pèlerins francophones.',
+  title: 'Blog — Hajj, Omra & lieux historiques — SAFARUMA',
+  description: 'Actualités Hajj 2026, histoire des lieux historiques, guides pratiques pour la Omra et témoignages de pèlerins francophones.',
   alternates: { canonical: 'https://safaruma.com/blog' },
 };
 
@@ -178,7 +178,7 @@ export default function BlogPage() {
             Recevez nos articles <em>chaque semaine</em>
           </h2>
           <p className="reveal reveal-d1" style={{ color: 'var(--muted)', lineHeight: 1.75, marginBottom: '2rem', fontSize: '0.9rem' }}>
-            Conseils spirituels, guides pratiques et actualités des Lieux Saints — directement dans votre boîte mail.
+            Conseils spirituels, guides pratiques et actualités des Lieux historiques — directement dans votre boîte mail.
           </p>
           <div className="reveal reveal-d2">
             <NewsletterForm />

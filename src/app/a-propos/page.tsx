@@ -52,7 +52,7 @@ const VALEURS: Array<{ icon: React.ReactNode; title: string; desc: string }> = [
   { icon: <IconMosque size={28} stroke="#C9A84C" />, title: "Foi d'abord", desc: "Chaque décision que nous prenons est filtrée par une question simple : est-ce que cela sert le pèlerin dans son voyage spirituel ?" },
   { icon: <IconGraduationCap size={28} stroke="#C9A84C" />, title: 'Excellence certifiée', desc: "Nos guides sont diplômés en sciences islamiques, formés à l'accueil et certifiés après un examen rigoureux par notre équipe." },
   { icon: <IconHandshake size={28} stroke="#C9A84C" />, title: 'Confiance totale', desc: "Paiement sécurisé, annulation gratuite 48h, assistance 24h/24. Nous ne disparaissons pas une fois la réservation faite." },
-  { icon: <IconGlobe size={28} stroke="#C9A84C" />, title: 'Accessibilité', desc: "L'Omra de qualité ne devrait pas être réservée à ceux qui parlent arabe. Nous guidons dans 12 langues." },
+  { icon: <IconGlobe size={28} stroke="#C9A84C" />, title: 'Accessibilité', desc: "La omra de qualité ne devrait pas être réservée à ceux qui parlent arabe. Nous guidons dans 12 langues." },
   { icon: <IconSparkles size={28} stroke="#C9A84C" />, title: 'Présence', desc: "Pas de groupe de 40 personnes. Un guide, votre famille. Une Omra sur-mesure, à votre rythme, selon vos besoins." },
   { icon: <IconMoon size={28} stroke="#C9A84C" />, title: 'Continuité spirituelle', desc: "Notre accompagnement ne s'arrête pas à l'aéroport. Ressources, du'as, récits — nous restons présents avant, pendant et après." },
 ];
@@ -621,7 +621,7 @@ export default function AProposPage() {
             lineHeight: 1.6,
             margin: 0,
           }}>
-            L&apos;Omra n&apos;est pas un voyage touristique.
+            La omra n&apos;est pas un voyage touristique.
             C&apos;est un rendez-vous avec Allah.
             Nous voulons que vous y soyez pleinement présent.
           </blockquote>

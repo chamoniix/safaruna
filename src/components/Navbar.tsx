@@ -15,7 +15,7 @@ const MENUS = [
     label: 'Découvrir',
     items: [
       { href: '/guides',             label: 'Nos guides',            desc: 'Trouvez votre guide certifié' },
-      { href: '/lieux-saints',       label: 'Lieux saints',          desc: '26 fiches encyclopédiques' },
+      { href: '/lieux-saints',       label: 'Lieux historiques',          desc: '26 fiches encyclopédiques' },
       { href: '/nos-guides-certifies', label: 'Guides certifiés',    desc: 'Notre processus de vérification' },
     ],
   },

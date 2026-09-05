@@ -181,7 +181,7 @@ export default function GuideLieuxPage() {
         <div>
           <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Proposer un nouveau lieu</div>
           <div style={{ fontSize: '0.78rem', color: '#7A6D5A', marginTop: 2 }}>
-            Vous connaissez un lieu saint qui n&apos;est pas dans notre liste ? Suggérez-le à notre équipe.
+            Vous connaissez un lieu historique qui n&apos;est pas dans notre liste ? Suggérez-le à notre équipe.
           </div>
         </div>
         {suggestionSent ? (

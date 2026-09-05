@@ -45,7 +45,7 @@ export const CATEGORIES: FaqCategory[] = [
     id: 'guides',
     label: 'Guides',
     questions: [
-      { q: "Comment sont sélectionnés les guides SAFARUMA ?", a: "Chaque candidat passe par : vérification de l'expérience et des connaissances islamiques, entretien vidéo approfondi, test de connaissances historiques sur les Lieux Saints, vérification des antécédents, puis période probatoire. Moins de 30% des candidats sont retenus. Tous les guides sont réévalués annuellement." },
+      { q: "Comment sont sélectionnés les guides SAFARUMA ?", a: "Chaque candidat passe par : vérification de l'expérience et des connaissances islamiques, entretien vidéo approfondi, test de connaissances historiques sur les Lieux historiques, vérification des antécédents, puis période probatoire. Moins de 30% des candidats sont retenus. Tous les guides sont réévalués annuellement." },
       { q: "Quelle certification les guides doivent-ils avoir ?", a: "Nos guides sont sélectionnés sur la base de leur expérience terrain, de leurs connaissances islamiques et historiques approfondies, et d'un entretien rigoureux mené par notre équipe. Chaque profil est vérifié et validé par SAFARUMA avant activation." },
       { q: "Les guides parlent-ils français ?", a: "Oui, tous nos guides certifiés parlent au minimum le français et l'arabe. Beaucoup maîtrisent également l'anglais, le wolof, le darija, l'ourdou ou le turc. Filtrez par langue directement sur la page Guides." },
       { q: "Comment choisir le bon guide ?", a: "Consultez les profils : langues parlées, années d'expérience, spécialités (histoire islamique, PMR, familles), avis vérifiés, tarif journalier et disponibilités. Vous pouvez envoyer un message avant de réserver pour tester la communication." },

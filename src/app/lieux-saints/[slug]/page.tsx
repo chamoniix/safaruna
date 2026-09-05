@@ -441,7 +441,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const desc = rich.excerpt.slice(0, 155);
     const url = `https://safaruma.com/lieux-saints/${slug}`;
     return {
-      title: `${rich.title} | Lieux saints | SAFARUMA`,
+      title: `${rich.title} | Lieux historiques | SAFARUMA`,
       description: desc,
       alternates: { canonical: url },
       openGraph: { title: rich.title, description: desc, url, type: 'article' },
@@ -450,10 +450,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const found = findLieuSimple(slug);
-  if (!found) return { title: 'Lieu introuvable | SAFARUMA', description: 'Ce lieu saint est introuvable.' };
+  if (!found) return { title: 'Lieu introuvable | SAFARUMA', description: 'Ce lieu historique est introuvable.' };
   const desc = found.lieu.description.slice(0, 155);
   return {
-    title: `${found.lieu.title} | Lieux saints | SAFARUMA`,
+    title: `${found.lieu.title} | Lieux historiques | SAFARUMA`,
     description: desc,
     openGraph: { title: found.lieu.title, description: desc },
   };
@@ -491,7 +491,7 @@ function RichLieuPage({ lieu }: { lieu: LieuSaint }) {
     '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Accueil', item: 'https://safaruma.com' },
-      { '@type': 'ListItem', position: 2, name: 'Lieux saints', item: 'https://safaruma.com/lieux-saints' },
+      { '@type': 'ListItem', position: 2, name: 'Lieux historiques', item: 'https://safaruma.com/lieux-saints' },
       { '@type': 'ListItem', position: 3, name: lieu.title, item: url },
     ],
   };
@@ -562,7 +562,7 @@ function RichLieuPage({ lieu }: { lieu: LieuSaint }) {
           <nav aria-label="Fil d'Ariane" style={{ display: 'flex', gap: '0.4rem', fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
             <Link href="/" style={{ color: 'rgba(201,168,76,0.7)', textDecoration: 'none' }}>Accueil</Link>
             <span>/</span>
-            <Link href="/lieux-saints" style={{ color: 'rgba(201,168,76,0.7)', textDecoration: 'none' }}>Lieux saints</Link>
+            <Link href="/lieux-saints" style={{ color: 'rgba(201,168,76,0.7)', textDecoration: 'none' }}>Lieux historiques</Link>
             <span>/</span>
             <span style={{ color: 'rgba(255,255,255,0.5)' }}>{lieu.title}</span>
           </nav>
@@ -708,7 +708,7 @@ function SimpleLieuPage({ lieu, city }: { lieu: LieuSimple; city: 'Makkah' | 'Ma
         <nav aria-label="Fil d'Ariane" style={{ maxWidth: 720, margin: '0 auto', padding: '0 1.5rem 1.25rem', fontSize: '0.8rem', color: '#6B5A3A', display: 'flex', gap: '0.4rem', alignItems: 'center', flexWrap: 'wrap' }}>
           <Link href="/" style={{ color: '#C9A84C', textDecoration: 'none' }}>Accueil</Link>
           <span>/</span>
-          <Link href="/lieux-saints" style={{ color: '#C9A84C', textDecoration: 'none' }}>Lieux saints</Link>
+          <Link href="/lieux-saints" style={{ color: '#C9A84C', textDecoration: 'none' }}>Lieux historiques</Link>
           <span>/</span>
           <span style={{ color: '#1A1209' }}>{lieu.title}</span>
         </nav>
@@ -738,7 +738,7 @@ function SimpleLieuPage({ lieu, city }: { lieu: LieuSimple; city: 'Makkah' | 'Ma
         </section>
         <section style={{ maxWidth: 720, margin: '0 auto', padding: '3rem 1.5rem 4rem', textAlign: 'center' }}>
           <p style={{ fontSize: '1rem', color: '#6B5A3A', marginBottom: '1.5rem', lineHeight: 1.6 }}>
-            Visitez {lieu.title} avec un guide francophone expert des lieux saints.
+            Visitez {lieu.title} avec un guide francophone expert des lieux historiques.
           </p>
           <Link href="/guides" style={{ display: 'inline-block', backgroundColor: accentColor, color: '#fff', fontWeight: 700, fontSize: '0.95rem', padding: '0.9rem 2rem', borderRadius: '0.375rem', textDecoration: 'none', letterSpacing: '0.02em' }}>
             Réserver avec un guide →

@@ -430,6 +430,11 @@ export default function GuideOnboarding() {
             visibility: visible !important;
           }
           .birth-calendar .rdp-nav {
+            left: auto;
+            padding: 0;
+            z-index: auto;
+            border: 0;
+            justify-content: normal;
             background: transparent !important;
             backdrop-filter: none !important;
           }

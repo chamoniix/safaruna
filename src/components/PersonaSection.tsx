@@ -31,7 +31,7 @@ const PERSONAS = [
     ),
     title: 'Pour mes parents',
     desc: '"SVP prenez soin de mes parents." — Ces mots que vous direz à leur guide.',
-    response: "Ils partent. Vous restez. Votre guide privé prend soin de vos parents comme vous le feriez vous-même — il les accompagne à chaque étape des rituels, leur raconte l'histoire de ces lieux saints qu'ils n'ont jamais eu l'occasion d'apprendre, à leur rythme, avec patience. Ils repartiront avec quelque chose que vous leur aurez offert pour toujours.",
+    response: "Ils partent. Vous restez. Votre guide privé prend soin de vos parents comme vous le feriez vous-même — il les accompagne à chaque étape des rituels, leur raconte l'histoire de ces lieux historiques qu'ils n'ont jamais eu l'occasion d'apprendre, à leur rythme, avec patience. Ils repartiront avec quelque chose que vous leur aurez offert pour toujours.",
     link: '/offrir-omra-parents',
   },
   {

@@ -5,7 +5,7 @@ import Footer from '@/components/Footer';
 
 export const metadata: Metadata = {
   title: 'Offrir la Omra à ses parents — Guide privé qui prend soin d\'eux | SAFARUMA',
-  description: 'Vous voulez offrir la Omra à vos parents ? Notre guide privé prend soin d\'eux sur place — accompagnement personnalisé, histoire des lieux saints, rythme adapté aux personnes âgées.',
+  description: 'Vous voulez offrir la Omra à vos parents ? Notre guide privé prend soin d\'eux sur place — accompagnement personnalisé, histoire des lieux historiques, rythme adapté aux personnes âgées.',
   keywords: [
     'offrir omra parents',
     'omra cadeau parents',
@@ -90,7 +90,7 @@ export default function OffrirOmraParentsPage() {
                   </svg>
                 ),
                 title: 'Il leur raconte ce qu\'ils n\'ont jamais appris',
-                text: 'Ibrahim, Hajar, le Prophète ﷺ — l\'histoire de ces lieux saints racontée sur les lieux mêmes. Vos parents repartiront en ayant compris ce qu\'aucune école ne leur a enseigné.',
+                text: 'Ibrahim, Hajar, le Prophète ﷺ — l\'histoire de ces lieux historiques racontée sur les lieux mêmes. Vos parents repartiront en ayant compris ce qu\'aucune école ne leur a enseigné.',
               },
               {
                 icon: (

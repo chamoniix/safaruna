@@ -87,7 +87,7 @@ export default async function RootLayout({
                 "slogan": "La première plateforme dédiée aux guides privés pour la Omra",
                 "address": { "@type": "PostalAddress", "streetAddress": "Unit 13 Freeland Park Wareham Road", "addressLocality": "Lytchett Matravers, Poole", "addressRegion": "England", "postalCode": "BH16 6FA", "addressCountry": "GB" },
                 "areaServed": ["FR","BE","CH","MC","LU","MA","DZ","TN","SN","CI","ML","BF","GN","NE","TG","BJ","CM","GA","CA"],
-                "knowsAbout": ["Omra","Pèlerinage islamique","La Mecque","Médine","Tawaf","Sa'i","Ihram","Lieux saints"],
+                "knowsAbout": ["Omra","Pèlerinage islamique","La Mecque","Médine","Tawaf","Sa'i","Ihram","Lieux historiques"],
                 "sameAs": [
                   "https://www.instagram.com/safaruma_",
                   "https://www.tiktok.com/@safaruma",

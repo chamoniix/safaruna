@@ -71,7 +71,7 @@ const FORMULES = [
   {
     badge: null,
     name: 'La Lumière de Madinah',
-    subtitle: 'Circuit privé des lieux saints de Médine',
+    subtitle: 'Circuit privé des lieux historiques de Médine',
     pour: 'Pour ceux qui reviennent une deuxième fois, qui veulent approfondir la dimension historique, ou qui souhaitent visiter Madinah indépendamment.',
     inclus: [
       'Masjid An-Nabawi et la Rawdah — timing optimisé pour les créneaux d\'accès',

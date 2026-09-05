@@ -16,7 +16,7 @@ export const BASE_PACKAGES: BasePackage[] = [
     name: 'Omra — Makkah',
     cities: 'MAKKAH',
     emoji: '🕋',
-    description: "La Omra complète : Ihram, Tawaf, Sa'i, Tahallul + accompagnement dans les lieux saints de Makkah.",
+    description: "La Omra complète : Ihram, Tawaf, Sa'i, Tahallul + accompagnement dans les lieux historiques de Makkah.",
     includedPlaces: ['masjid-al-haram', 'kaaba', 'zamzam', 'safa-marwa'],
   },
   {

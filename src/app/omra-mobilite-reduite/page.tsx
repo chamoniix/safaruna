@@ -55,7 +55,7 @@ const COMPETENCES = [
   { title: 'Sa\'i accessible', text: 'Fauteuils de location réservés à l\'avance. Votre guide gère toute la logistique du parcours Safa-Marwa.' },
   { title: 'Horaires stratégiques', text: 'Moins de foule tôt le matin ou après l\'Icha. Votre guide planifie les rituels aux meilleurs créneaux.' },
   { title: 'Médine accessible', text: 'La mosquée du Prophète ﷺ dispose d\'espaces dédiés. Votre guide vous accompagne sur tout le site.' },
-  { title: 'Assistance logistique', text: 'Votre guide connaît les démarches pour le fauteuil à l\'aéroport, à l\'hôtel et dans les lieux saints.' },
+  { title: 'Assistance logistique', text: 'Votre guide connaît les démarches pour le fauteuil à l\'aéroport, à l\'hôtel et dans les lieux historiques.' },
 ];
 
 const FAQS = [

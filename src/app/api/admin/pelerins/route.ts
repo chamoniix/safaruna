@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
       reservationCount: u.reservations.length,
       totalSpent: Math.round(
         u.reservations
-          .filter(r => r.status === 'COMPLETED')
+          .filter(r => r.status === 'CONFIRMED' || r.status === 'COMPLETED')
           .reduce((sum, r) => sum + r.totalPrice, 0)
       ),
     })),

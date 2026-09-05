@@ -1,5 +1,18 @@
 export const HOUR_MS = 60 * 60 * 1000
 
+// Display the actual days of accompaniment, not the stay or a legacy package duration.
+export function missionDurationDays(missions: Array<{ startDate: Date; endDate: Date }>): number | null {
+  if (missions.length === 0) return null
+  let days = 0
+  for (const mission of missions) {
+    const start = Date.UTC(mission.startDate.getUTCFullYear(), mission.startDate.getUTCMonth(), mission.startDate.getUTCDate())
+    const end = Date.UTC(mission.endDate.getUTCFullYear(), mission.endDate.getUTCMonth(), mission.endDate.getUTCDate())
+    if (!Number.isFinite(start) || !Number.isFinite(end) || end < start) return null
+    days += (end - start) / (24 * HOUR_MS) + 1
+  }
+  return days
+}
+
 export function confirmationDeadlines(requestedAt: Date, departureAt: Date) {
   const urgent = departureAt.getTime() - requestedAt.getTime() < 48 * HOUR_MS
   return {

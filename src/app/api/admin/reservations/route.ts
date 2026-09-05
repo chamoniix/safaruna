@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { adminAuditDetail, adminAuditFields, checkAdmin, getAdminActor, getAdminAuditContext } from '@/lib/check-admin';
 import { assertMissionsAvailable, eachBookingDate, GuideAvailabilityConflictError } from '@/lib/guide-availability';
 import prisma from '@/lib/prisma';
+import { missionDurationDays } from '@/lib/guide-workflow';
 import { sendReservationConfirmation, sendEmail } from '@/lib/email';
 
 export async function GET(req: NextRequest) {
@@ -20,6 +21,8 @@ export async function GET(req: NextRequest) {
         select: {
           id: true,
           city: true,
+          startDate: true,
+          endDate: true,
           guideConfirmationStatus: true,
           guideConfirmationRequestedAt: true,
           guideConfirmedAt: true,
@@ -69,7 +72,7 @@ export async function GET(req: NextRequest) {
         || `${r.guideProfile.guideAccount?.firstName ?? ''} ${r.guideProfile.guideAccount?.lastName ?? ''}`.trim()
         || '—',
       packageName: r.package.name,
-      durationDays: r.package.durationDays,
+      durationDays: missionDurationDays(r.missions),
       startDate: new Date(r.startDate).toLocaleDateString('fr-FR'),
       nbPeople: r.nbPeople,
       basePrice: r.basePrice,

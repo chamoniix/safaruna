@@ -40,7 +40,7 @@ export async function GET() {
     }),
     prisma.reservation.count({ where: { pelerinId: user.id, status: 'COMPLETED' } }),
     prisma.reservation.aggregate({
-      where: { pelerinId: user.id, status: 'COMPLETED' },
+      where: { pelerinId: user.id, status: { in: ['CONFIRMED', 'COMPLETED'] } },
       _sum: { totalPrice: true },
     }),
   ]);

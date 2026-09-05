@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { requirePelerin } from '@/lib/require-account';
-import { reviewOpensAt } from '@/lib/guide-workflow';
+import { missionDurationDays, reviewOpensAt } from '@/lib/guide-workflow';
 import { retrieveRevolutOrder } from '@/lib/payments/revolut-provider';
 import { isResumableBookingDate, type PaymentDraftData } from '@/lib/payments/types';
 
@@ -262,7 +262,7 @@ export async function GET(req: NextRequest) {
       }
     }),
     prisma.reservation.aggregate({
-      where: { pelerinId: userId, status: 'COMPLETED' },
+      where: { pelerinId: userId, status: { in: ['CONFIRMED', 'COMPLETED'] } },
       _sum: { totalPrice: true },
     }),
     prisma.reservationDraft.findMany({
@@ -353,7 +353,7 @@ export async function GET(req: NextRequest) {
         endDate: mission.endDate.toISOString(),
       })),
       packageName: r.package.name,
-      durationDays: r.package.durationDays,
+      durationDays: missionDurationDays(r.missions),
       startDate: new Date(r.startDate).toLocaleDateString('fr-FR'),
       startDateRaw: r.startDate.toISOString(),
       nbPeople: r.nbPeople,

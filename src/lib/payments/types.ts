@@ -46,6 +46,7 @@ export type PaymentDraftData = {
   cityOrder: Array<'MAKKAH' | 'MADINAH'>
   ihramAlert: boolean
   promoCode: { id: string; code: string; discountBps: number } | null
+  promotionCampaign: { id: string; code: string; discountBps: number } | null
   missions: DraftMission[]
   pricing: {
     base: number

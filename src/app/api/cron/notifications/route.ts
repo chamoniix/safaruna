@@ -5,6 +5,7 @@ import { baseTemplate, btn, divider, escapeHtml, heading, p, retryPendingEmails,
 import { archiveExpiredAnalyticsEvents } from '@/lib/analytics-retention'
 import { confirmationDeadlines, reviewOpensAt } from '@/lib/guide-workflow'
 import { suspendGuideForReservationIncident } from '@/lib/guide-reservation-incidents'
+import { deleteTerminalExpiredDrafts } from '@/lib/payments/expired-drafts'
 
 const DAY_MS = 86_400_000
 
@@ -267,7 +268,10 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const deletedDrafts = await prisma.reservationDraft.deleteMany({ where: { expiresAt: { lt: new Date() } } })
+  const draftsReleased = await prisma.$transaction(
+    tx => deleteTerminalExpiredDrafts(tx),
+    { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
+  )
   const analyticsEventsArchived = await archiveExpiredAnalyticsEvents()
-  return NextResponse.json({ success: true, reservationsChecked: reservations.length, emailsSent: sent, confirmationReminders, confirmationEscalations, reviewRequests, emailRetries, draftsReleased: deletedDrafts.count, analyticsEventsArchived, checkedAt: new Date().toISOString() })
+  return NextResponse.json({ success: true, reservationsChecked: reservations.length, emailsSent: sent, confirmationReminders, confirmationEscalations, reviewRequests, emailRetries, draftsReleased, analyticsEventsArchived, checkedAt: new Date().toISOString() })
 }

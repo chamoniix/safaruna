@@ -208,7 +208,7 @@ export default function EspaceReservations() {
             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 780 }}>
               <thead>
                 <tr style={{ background: '#F5F2EC', borderBottom: '1px solid #E8DFC8' }}>
-                  {['Réf', 'Guide', 'Forfait', 'Départ', 'Pers.', 'Montant', 'Statut', 'Avis'].map(h => (
+                  {['Réf', 'Guide', 'Forfait', 'Départ', 'Pers.', 'Montant', 'Statut', 'Avis', 'Détails'].map(h => (
                     <th key={h} style={{ padding: '0.75rem 0.875rem', textAlign: 'left', fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
                 </tr>
@@ -237,6 +237,11 @@ export default function EspaceReservations() {
                             Laisser un avis
                           </Link>
                         )}
+                      </td>
+                      <td style={{ padding: '0.75rem 0.875rem', whiteSpace: 'nowrap' }}>
+                        <Link href={`/espace/reservations/${r.id}`} style={{ color: '#8B6914', fontSize: '0.75rem', fontWeight: 800 }}>
+                          Voir le détail
+                        </Link>
                       </td>
                     </tr>
                   );

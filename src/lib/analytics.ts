@@ -10,6 +10,8 @@ export const ANALYTICS_EVENT_NAMES = [
   'cta_click',
   'guide_search',
   'guide_viewed',
+  'guide_favorite_added',
+  'guide_favorite_removed',
   'guide_application_started',
   'guide_application_step',
   'guide_application_submitted',

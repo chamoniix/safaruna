@@ -47,11 +47,11 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/favicon.ico', sizes: 'any' },
-      { url: '/logo.png', type: 'image/png' },
+      { url: '/favicon.ico?v=20260906', sizes: '16x16 32x32 48x48', type: 'image/x-icon' },
+      { url: '/favicon-48.png', sizes: '48x48', type: 'image/png' },
     ],
     apple: { url: '/logo.png', type: 'image/png' },
-    shortcut: '/favicon.ico',
+    shortcut: '/favicon.ico?v=20260906',
   },
   manifest: '/manifest.webmanifest',
 };

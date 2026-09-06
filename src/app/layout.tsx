@@ -33,14 +33,14 @@ export const metadata: Metadata = {
     description: 'Guides privés certifiés pour la Omra, la découverte historique et le tourisme spirituel.',
     url: 'https://safaruma.com',
     siteName: 'SAFARUMA',
-    images: [{ url: '/logo.png', width: 800, height: 800, alt: 'SAFARUMA' }],
+    images: [{ url: '/safaruma-share.png', width: 1254, height: 1254, alt: 'SAFARUMA' }],
     locale: 'fr_FR',
     type: 'website',
   },
   twitter: {
     card: 'summary',
     title: 'SAFARUMA',
-    images: ['/logo.png'],
+    images: ['/safaruma-share.png'],
   },
   alternates: {
     canonical: 'https://safaruma.com',

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { PLACES } from '@/lib/places';
 import { GUIDE_LANGUAGES, LANG_CODE_TO_LABEL } from '@/lib/languages';
+import GuidePhotoEditor from '@/components/admin/GuidePhotoEditor';
 
 type Language = { id: string; languageCode: string; level: string };
 type Reservation = { id: string; refNumber: string; startDate: string; nbPeople: number; totalPrice: number; status: string; createdAt: string };
@@ -364,25 +365,7 @@ export default function AdminGuideDetailPage() {
         <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Identité</div>
 
         {/* Avatar + infos rapides */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-          {guide.user.image ? (
-            <img src={guide.user.image} alt="" style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-          ) : (
-            <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
-              {initials(guide)}
-            </div>
-          )}
-          <div>
-            <div style={{ fontWeight: 700, fontSize: '1rem', color: '#1A1209' }}>{guide.user.name || '—'}</div>
-            <div style={{ fontSize: '0.8rem', color: '#7A6D5A' }}>{guide.user.email}</div>
-            <div style={{ fontSize: '0.72rem', color: '#9A8A7A', marginTop: 2 }}>
-              Inscrit le {new Date(guide.user.createdAt).toLocaleDateString('fr-FR')}
-            </div>
-          </div>
-          <div style={{ marginLeft: 'auto', fontSize: '0.72rem', color: '#9CA3AF', fontStyle: 'italic' }}>
-            Upload photo — fonctionnalité R2 à venir
-          </div>
-        </div>
+        <GuidePhotoEditor key={slug} slug={slug} name={guide.user.name || 'Guide'} email={guide.user.email} registeredAt={guide.user.createdAt} initials={initials(guide)} />
 
         <div style={{ height: 1, background: '#F0EBE0' }} />
 

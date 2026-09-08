@@ -1,0 +1,26 @@
+.root { color: #1a1209; }
+.row { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; }
+.avatar { width: 56px; height: 56px; flex-shrink: 0; border-radius: 50%; object-fit: cover; }
+.fallback { display: grid; place-items: center; background: #fef3c7; color: #78350f; font-weight: 700; }
+.controls { margin-left: auto; }
+.fileInput { display: none; }
+.button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; padding: 10px 16px; border: 1px solid #d6d3d1; border-radius: 12px; font: inherit; font-size: 14px; font-weight: 700; line-height: 1.4; cursor: pointer; transition: transform .15s, filter .15s; }
+.button:hover:not(:disabled) { filter: brightness(.96); }
+.button:active:not(:disabled) { transform: scale(.98); }
+.button:focus-visible, .retry:focus-visible { outline: 3px solid #b45309; outline-offset: 3px; }
+.button:disabled { cursor: not-allowed; opacity: .6; }
+.replace { background: #fffbeb; border-color: #fcd34d; color: #451a03; }
+.primary { background: #065f46; border-color: #065f46; color: white; }
+.secondary { background: white; color: #292524; }
+.help { margin-top: 8px; font-size: 12px; line-height: 1.6; color: #57534e; }
+.preview { margin-top: 16px; padding: 16px; border: 1px solid #fde68a; border-radius: 12px; background: #fffdf5; }
+.title { margin-bottom: 12px; font-size: 14px; font-weight: 700; }
+.photo { max-height: 256px; max-width: 100%; border-radius: 8px; object-fit: contain; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.error, .success { margin-top: 12px; padding: 12px; border-radius: 8px; font-size: 14px; }
+.error { background: #fef2f2; color: #991b1b; }
+.success { background: #ecfdf5; color: #064e3b; }
+.retry { margin-left: 8px; color: inherit; text-decoration: underline; cursor: pointer; }
+.spinner { animation: photo-spin 1s linear infinite; }
+@keyframes photo-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .button { transition: none; } .button:active:not(:disabled) { transform: none; } .spinner { animation-duration: 2s; } }

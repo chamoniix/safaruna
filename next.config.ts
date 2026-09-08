@@ -1,7 +1,18 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from '@sentry/nextjs'
 
+const guidePhotoStoreId = process.env.BLOB_STORE_ID?.trim().replace(/^store_/, '')
+
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: guidePhotoStoreId && /^[a-zA-Z0-9]+$/.test(guidePhotoStoreId) ? [{
+      protocol: 'https',
+      hostname: `${guidePhotoStoreId.toLowerCase()}.public.blob.vercel-storage.com`,
+      port: '',
+      pathname: '/guide-photos/**',
+      search: '',
+    }] : [],
+  },
   turbopack: {
     root: process.cwd(),
   },

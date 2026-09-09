@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { GUIDE_LANGUAGES, LANG_CODE_TO_LABEL } from '@/lib/languages';
 
 type Profile = {
   id: string;
   name: string;
+  image: string | null;
   firstName: string | null;
   lastName: string | null;
   email: string;
@@ -306,7 +308,7 @@ export default function GuideProfil() {
       {/* Identity card */}
       <div style={{ ...card, order: -2, padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap' }}>
         <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.5rem', fontWeight: 700, color: '#1A1209', flexShrink: 0 }}>
-          {initials}
+          {profile.image ? <Image src={profile.image} alt={`Portrait de ${displayName}`} width={64} height={64} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} /> : initials}
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.5rem', fontWeight: 700, color: '#1A1209' }}>{displayName}</div>

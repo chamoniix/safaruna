@@ -28,6 +28,7 @@ export type GuideActor = {
   servesMakkah: boolean
   servesMadinah: boolean
   displayName: string | null
+  image: string | null
   firstName: string | null
   lastName: string | null
 }
@@ -96,6 +97,7 @@ export async function requireGuide(): Promise<Allowed<GuideActor> | Denied> {
       servesMakkah: account.guideProfile.servesMakkah,
       servesMadinah: account.guideProfile.servesMadinah,
       displayName: account.displayName,
+      image: account.image,
       firstName: account.firstName,
       lastName: account.lastName,
     },

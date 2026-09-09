@@ -74,6 +74,7 @@ export function filterMobileLanguageOptions<T extends { label: string }>(options
 type AvailableGuideApi = {
   slug: string;
   name?: string;
+  image?: string | null;
   city?: string | null;
   gender?: string;
   serviceCities?: string[];
@@ -139,11 +140,12 @@ const GUIDES_DATA = [
   },
 ];
 
-type GuideData = typeof GUIDES_DATA[0];
+type GuideData = typeof GUIDES_DATA[0] & { image: string | null };
 
 // ─── SVG Avatars ──────────────────────────────────────────────────────────────
-function GuideAvatarSVG({ slug, gradient, initials, isWoman }: { slug: string; gradient: string; initials: string; isWoman?: boolean }) {
-  if (slug === 'naim-laamari') {
+function GuideAvatarSVG({ slug, name, image, gradient, initials, isWoman }: { slug: string; name: string; image: string | null; gradient: string; initials: string; isWoman?: boolean }) {
+  const photo = image || (slug === 'naim-laamari' ? '/images/landing/guide-naim-laamari.jpg' : null);
+  if (photo) {
     return (
       <div style={{
         width: '100%', height: '100%',
@@ -152,13 +154,13 @@ function GuideAvatarSVG({ slug, gradient, initials, isWoman }: { slug: string; g
         position: 'relative',
       }}>
         <Image
-          src="/images/landing/guide-naim-laamari.jpg"
-          alt="Naïm LAAMARI — Guide officiel SAFARUMA, guide privé Omra certifié à La Mecque"
+          src={photo}
+          alt={`Portrait de ${name}`}
           fill
           sizes="72px"
           style={{
             objectFit: 'cover',
-            objectPosition: '62% 42%',
+            objectPosition: slug === 'naim-laamari' ? '62% 42%' : 'center',
           }}
         />
       </div>
@@ -426,6 +428,7 @@ export default function GuideSearchPage() {
             : (item.languages || []);
           return {
             slug: item.slug,
+            image: item.image || null,
             gender: String(item.gender || '').toLowerCase(),
             zones: (item.serviceCities || []).map((value: string) => value.toLowerCase()),
             name: item.name || 'Guide SAFARUMA',
@@ -1543,7 +1546,7 @@ function GuideDrawer({ guide: g, visible, onClose, returnSlug, isFavorite, favor
         {/* Guide hero band */}
         <div style={{ background: g.gradient, padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div style={{ width: 72, height: 72, borderRadius: '50%', border: '3px solid #C9A84C', overflow: 'hidden', flexShrink: 0, boxShadow: '0 0 0 3px #1A1209' }}>
-            <GuideAvatarSVG slug={g.slug} gradient={g.gradient} initials={g.initials} isWoman={g.slug === 'fatima-al-omari' || g.slug === 'samira-al-rashidi'} />
+            <GuideAvatarSVG slug={g.slug} name={g.name} image={g.image} gradient={g.gradient} initials={g.initials} isWoman={g.slug === 'fatima-al-omari' || g.slug === 'samira-al-rashidi'} />
           </div>
           <div>
             <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#F0D897', lineHeight: 1.2 }}>{g.name}</div>
@@ -1619,7 +1622,7 @@ function GuideCard({ guide: g, official, onProfile, isLoading, returnSlug, isFav
         <div className="guide-card-banner" style={{ background: g.gradient, position: 'relative', overflow: 'hidden', flexShrink: 0 }}>
           <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 30% 50%, rgba(255,255,255,0.06) 0%, transparent 70%)', pointerEvents: 'none' }} />
           <div style={{ position: 'absolute', top: '50%', right: '1.25rem', transform: 'translateY(-50%)', width: official ? 64 : 52, height: official ? 64 : 52, borderRadius: '50%', border: official ? '3px solid #C9A84C' : '3px solid rgba(255,255,255,0.6)', overflow: 'hidden', zIndex: 1, boxShadow: official ? '0 0 0 3px #1A1209, 0 4px 16px rgba(201,168,76,0.4)' : '0 2px 12px rgba(0,0,0,0.3)' }}>
-            <GuideAvatarSVG slug={g.slug} gradient={g.gradient} initials={g.initials} isWoman={g.slug === 'fatima-al-omari' || g.slug === 'samira-al-rashidi'} />
+            <GuideAvatarSVG slug={g.slug} name={g.name} image={g.image} gradient={g.gradient} initials={g.initials} isWoman={g.slug === 'fatima-al-omari' || g.slug === 'samira-al-rashidi'} />
           </div>
           <div style={{ position: 'absolute', bottom: 8, right: 12, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
             <div style={{ width: 7, height: 7, borderRadius: '50%', background: g.available ? '#27AE60' : '#aaa', border: '1.5px solid rgba(255,255,255,0.7)' }} />

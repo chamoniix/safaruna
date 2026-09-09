@@ -7,6 +7,7 @@ export type GuideSessionUser = {
   id: string
   email: string
   displayName: string | null
+  image: string | null
   firstName: string | null
   lastName: string | null
   guideProfileId: string

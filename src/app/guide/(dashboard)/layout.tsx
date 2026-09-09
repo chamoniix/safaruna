@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useGuideSession } from '@/components/GuideSessionGuard';
@@ -219,7 +220,7 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
           {/* Guide profile + availability toggle */}
           <div style={{ padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
             <div style={{ position: 'relative', flexShrink: 0 }}>
-              <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#1A1209' }}>{initials}</div>
+              <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'linear-gradient(135deg, #F0D897, #C9A84C)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-cormorant, serif)', fontSize: '1rem', fontWeight: 700, color: '#1A1209' }}>{su.image ? <Image src={su.image} alt={`Portrait de ${displayName}`} width={42} height={42} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} /> : initials}</div>
               <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10, borderRadius: '50%', background: isLive ? '#22C55E' : '#6B7280', border: '2px solid #1A1209', boxShadow: isLive ? '0 0 0 3px rgba(34,197,94,0.13)' : 'none' }} />
             </div>
             <div style={{ minWidth: 0, flex: 1 }}>

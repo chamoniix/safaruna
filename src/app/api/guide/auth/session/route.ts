@@ -11,6 +11,7 @@ export async function GET() {
         id: access.actor.id,
         email: access.actor.email,
         displayName: access.actor.displayName,
+        image: access.actor.image,
         firstName: access.actor.firstName,
         lastName: access.actor.lastName,
         guideProfileId: access.actor.guideProfileId,

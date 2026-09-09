@@ -2,6 +2,9 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
 import sharp from 'sharp'
+import React from 'react'
+import { renderToStaticMarkup } from 'react-dom/server'
+import ts from 'typescript'
 import { createGuidePhotoHandlers, GuidePhotoError, MAX_GUIDE_PHOTO_BYTES, photoState, readPhotoBody, validateGuidePhoto, type PhotoActor, type PhotoGuide } from '../src/lib/guide-photo'
 
 const superadmin: PhotoActor = { id: 'superadmin-test', email: 'test@example.invalid', role: 'SUPERADMIN' }
@@ -196,4 +199,47 @@ test('production adapter uses atomic versioned update and audit, OIDC, and targe
   assert.match(ui, /FileReader/)
   assert.match(ui, /Publier cette photo/)
   assert.doesNotMatch(readFileSync('src/app/admin/(dashboard)/guides/[slug]/page.tsx', 'utf8'), /fonctionnalité R2 à venir/)
+})
+
+test('search avatars display the approved photo for Naim and other guides, with existing fallbacks', () => {
+  // Execute the actual component without mounting the search page or calling its APIs.
+  const source = readFileSync('src/app/guides/page.tsx', 'utf8')
+  const ast = ts.createSourceFile('page.tsx', source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX)
+  const declaration = ast.statements.find(statement => ts.isFunctionDeclaration(statement) && statement.name?.text === 'GuideAvatarSVG')
+  assert.ok(declaration)
+  const compiled = ts.transpileModule(declaration.getText(ast), { compilerOptions: { jsx: ts.JsxEmit.React, target: ts.ScriptTarget.ES2020 } }).outputText
+  const ImageStub = ({ src, alt, style }: { src: string; alt: string; style: React.CSSProperties }) => React.createElement('img', { src, alt, style })
+  const Avatar = new Function('React', 'Image', `${compiled}; return GuideAvatarSVG`)(React, ImageStub)
+  const render = (slug: string, image: string | null) => renderToStaticMarkup(React.createElement(Avatar, { slug, image, name: 'Guide Test', gradient: '', initials: 'GT' }))
+  for (const slug of ['naim-laamari', 'another-guide']) {
+    const html = render(slug, 'https://photos.example.invalid/approved.jpg')
+    assert.match(html, /src="https:\/\/photos.example.invalid\/approved.jpg"/)
+    assert.match(html, /alt="Portrait de Guide Test"/)
+    assert.doesNotMatch(html, /src="\/images\/landing\/guide-naim-laamari.jpg"/)
+  }
+  assert.match(render('naim-laamari', null), /src="\/images\/landing\/guide-naim-laamari.jpg"/)
+  assert.match(render('another-guide', null), /<svg/)
+  assert.doesNotMatch(render('another-guide', null), /<img/)
+})
+
+test('approved account photo is exposed read-only in the guide profile and session', () => {
+  const profileRoute = readFileSync('src/app/api/guide/profil/route.ts', 'utf8')
+  assert.match(profileRoute, /image: account.image \|\| null/)
+  const patchFields = profileRoute.slice(profileRoute.indexOf('.pick({'), profileRoute.indexOf('}).refine'))
+  assert.doesNotMatch(patchFields, /image|photo/)
+  assert.match(readFileSync('src/lib/require-account.ts', 'utf8'), /image: account.image/)
+  assert.match(readFileSync('src/app/api/guide/auth/session/route.ts', 'utf8'), /image: access.actor.image/)
+  const profile = readFileSync('src/app/guide/(dashboard)/profil/page.tsx', 'utf8')
+  const layout = readFileSync('src/app/guide/(dashboard)/layout.tsx', 'utf8')
+  assert.match(profile, /src=\{profile.image\}/)
+  assert.match(layout, /src=\{su.image\}/)
+  assert.doesNotMatch(profile + layout, /type="file"|Publier cette photo/)
+})
+
+test('both search card variants use the photo supplied by the available-guides API', () => {
+  const search = readFileSync('src/app/guides/page.tsx', 'utf8')
+  assert.match(search, /image: item.image \|\| null/)
+  const avatars = search.match(/<GuideAvatarSVG\b[^>]*\/>/g) || []
+  assert.equal(avatars.length, 2)
+  for (const avatar of avatars) assert.match(avatar, /image=\{g.image\}/)
 })

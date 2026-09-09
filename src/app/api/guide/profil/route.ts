@@ -51,6 +51,7 @@ export async function GET() {
     profile: {
       id: account.id,
       name: displayName,
+      image: account.image || null,
       firstName: account.firstName,
       lastName: account.lastName,
       email: account.email || '—',

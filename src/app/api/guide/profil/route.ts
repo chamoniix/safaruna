@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { requireGuide } from '@/lib/require-account';
 import { getGuideRequestContext, hasTrustedGuideAuthOrigin } from '@/lib/guide-auth';
 import { guideProfileChangesObjectSchema, NoGuideProfileChangesError, publicPendingRequest, submitGuideProfileChanges } from '@/lib/guide-profile-changes';
+import { applicationMediaSelect, applicationMediaView } from '@/lib/guide-application-media';
 
 const profilPatchSchema = guideProfileChangesObjectSchema.pick({
   firstName: true,
@@ -45,6 +46,10 @@ export async function GET() {
   if (!account.guideProfile) return NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 });
 
   const gp = account.guideProfile;
+  const application = await prisma.guideApplication.findFirst({
+    where: { createdGuideProfileId: gp.id, status: 'APPROVED' },
+    orderBy: { createdAt: 'desc' }, select: applicationMediaSelect,
+  });
   const displayName = account.displayName || `${account.firstName ?? ''} ${account.lastName ?? ''}`.trim() || account.email || '—';
 
   return NextResponse.json({
@@ -52,6 +57,7 @@ export async function GET() {
       id: account.id,
       name: displayName,
       image: account.image || null,
+      applicationMedia: application ? applicationMediaView(application) : null,
       firstName: account.firstName,
       lastName: account.lastName,
       email: account.email || '—',

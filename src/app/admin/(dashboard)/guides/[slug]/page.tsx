@@ -6,6 +6,8 @@ import { useParams } from 'next/navigation';
 import { PLACES } from '@/lib/places';
 import { GUIDE_LANGUAGES, LANG_CODE_TO_LABEL } from '@/lib/languages';
 import GuidePhotoEditor from '@/components/admin/GuidePhotoEditor';
+import ApplicationMediaPanel from '@/components/guide/ApplicationMediaPanel';
+import type { ApplicationMediaView } from '@/lib/guide-application-media';
 
 type Language = { id: string; languageCode: string; level: string };
 type Reservation = { id: string; refNumber: string; startDate: string; nbPeople: number; totalPrice: number; status: string; createdAt: string };
@@ -35,6 +37,7 @@ type ReservationIncident = {
   reviewedAt: string | null;
 };
 type Guide = {
+  applicationMedia: ApplicationMediaView | null;
   id: string; slug: string; bio: string | null; city: string | null;
   gender: 'HOMME' | 'FEMME' | null; servesMakkah: boolean; servesMadinah: boolean;
   acceptingBookings: boolean;
@@ -366,6 +369,7 @@ export default function AdminGuideDetailPage() {
 
         {/* Avatar + infos rapides */}
         <GuidePhotoEditor key={slug} slug={slug} name={guide.user.name || 'Guide'} email={guide.user.email} registeredAt={guide.user.createdAt} initials={initials(guide)} />
+        <ApplicationMediaPanel data={guide.applicationMedia} />
 
         <div style={{ height: 1, background: '#F0EBE0' }} />
 

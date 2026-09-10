@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { adminAuditDetail, adminAuditFields, getAdminActor, getAdminAuditContext } from '@/lib/check-admin';
 import prisma from '@/lib/prisma';
 import { decrypt } from '@/lib/crypto';
+import { applicationMediaSelect, applicationMediaView } from '@/lib/guide-application-media';
 
 export async function GET(
   req: NextRequest,
@@ -102,12 +103,18 @@ export async function GET(
       },
     });
 
+    const application = await prisma.guideApplication.findFirst({
+      where: { createdGuideProfileId: guide.id, status: 'APPROVED' },
+      orderBy: { createdAt: 'desc' }, select: applicationMediaSelect,
+    });
+
     return NextResponse.json({
       permissions: {
         canManagePricing: actor.role === 'SUPERADMIN',
       },
       guide: {
         id: guide.id,
+        applicationMedia: application ? applicationMediaView(application) : null,
         slug: guide.slug,
         bio: guide.bio,
         city: guide.city,

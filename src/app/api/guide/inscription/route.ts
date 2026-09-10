@@ -8,6 +8,9 @@ import { checkRateLimit, guideApplicationRatelimit } from '@/lib/ratelimit';
 import { Prisma } from '@prisma/client';
 import { PLACES } from '@/lib/places';
 import { GUIDE_LANGUAGES, LANG_CODE_TO_LABEL } from '@/lib/languages';
+import { applicationMediaSchema } from '@/lib/guide-application-media';
+import { readApplicationPhotoReceipt } from '@/lib/guide-application-photo-receipt';
+import { GuidePhotoError } from '@/lib/guide-photo';
 
 const EMAIL_ALREADY_USED = 'Adresse e-mail déjà utilisée. Veuillez en utiliser une autre.';
 const EDUCATION_LABELS = {
@@ -28,6 +31,9 @@ const FIELD_STEPS: Record<string, number> = {
   makkahIncludedDetails: 4, makkahOtherDetails: 4, madinahIncludedDetails: 4, madinahOtherDetails: 4,
   bankAccountFirstName: 4, bankAccountLastName: 4, bankName: 4, bankCountry: 4, iban: 4, bic: 4,
   acceptedCharte: 5,
+  profilePhotoReceipt: 2, hasPersonalVehicle: 3, vehicleModel: 3, vehicleYear: 3,
+  vehiclePassengerSeats: 3, vehicleColor: 3, vehicleSeatsConfirmed: 3,
+  vehicleDashboardPhotoReceipt: 3, vehicleSeatsPhotoReceipt: 3, vehicleExteriorPhotoReceipt: 3,
 };
 
 const optionalPriceSchema = z.number({ error: 'Indiquez un tarif valide.' })
@@ -108,11 +114,15 @@ const inscriptionSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  if (req.headers.get('origin') !== req.nextUrl.origin || req.headers.get('sec-fetch-site') === 'cross-site') {
+    return NextResponse.json({ error: 'Origine non autorisée.' }, { status: 403 });
+  }
   const limited = await checkRateLimit(req, guideApplicationRatelimit);
   if (limited) return limited;
 
-  const raw = await req.json();
-  const parsed = inscriptionSchema.safeParse(raw);
+  let raw;
+  try { raw = await req.json(); } catch { return NextResponse.json({ error: 'Données invalides.' }, { status: 400 }); }
+  const parsed = inscriptionSchema.and(applicationMediaSchema).safeParse(raw);
   if (!parsed.success) {
     const issue = parsed.error.issues[0];
     const field = typeof issue?.path[0] === 'string' ? issue.path[0] : null;
@@ -155,6 +165,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: EMAIL_ALREADY_USED }, { status: 409 });
   }
 
+  const media = parsed.data;
+  let photoPaths;
+  try {
+    photoPaths = {
+      profilePhotoPath: readApplicationPhotoReceipt(media.profilePhotoReceipt, email, 'profile'),
+      vehicleDashboardPhotoPath: media.hasPersonalVehicle && media.vehicleDashboardPhotoReceipt ? readApplicationPhotoReceipt(media.vehicleDashboardPhotoReceipt, email, 'dashboard') : null,
+      vehicleSeatsPhotoPath: media.hasPersonalVehicle && media.vehicleSeatsPhotoReceipt ? readApplicationPhotoReceipt(media.vehicleSeatsPhotoReceipt, email, 'seats') : null,
+      vehicleExteriorPhotoPath: media.hasPersonalVehicle && media.vehicleExteriorPhotoReceipt ? readApplicationPhotoReceipt(media.vehicleExteriorPhotoReceipt, email, 'exterior') : null,
+    };
+  } catch (error) {
+    if (error instanceof GuidePhotoError) return NextResponse.json({ error: error.message }, { status: error.status });
+    throw error;
+  }
+
   let application;
   try {
     application = await prisma.$transaction(async tx => {
@@ -181,6 +205,13 @@ export async function POST(req: NextRequest) {
           transportMode: legacyTransportMode,
           transportModes,
           transportDetails: transportDetails || null,
+          ...photoPaths,
+          hasPersonalVehicle: media.hasPersonalVehicle,
+          vehicleModel: media.hasPersonalVehicle ? media.vehicleModel : null,
+          vehicleYear: media.hasPersonalVehicle ? media.vehicleYear : null,
+          vehiclePassengerSeats: media.hasPersonalVehicle ? media.vehiclePassengerSeats : null,
+          vehicleColor: media.hasPersonalVehicle ? media.vehicleColor : null,
+          vehicleSeatsConfirmed: media.hasPersonalVehicle ? media.vehicleSeatsConfirmed : null,
           proposedOmraPriceCents: proposedOmraPrice == null ? null : Math.round(proposedOmraPrice * 100),
           proposedMadinahPackagePriceCents: proposedMadinahPackagePrice == null ? null : Math.round(proposedMadinahPackagePrice * 100),
           proposedMadinahPlacePriceCents: proposedMadinahPlacePrice == null ? null : Math.round(proposedMadinahPlacePrice * 100),

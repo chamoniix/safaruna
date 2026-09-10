@@ -458,6 +458,16 @@ model GuideApplication {
   transportMode                    String
   transportModes                   String[]               @default([])
   transportDetails                 String?
+  profilePhotoPath                 String?
+  hasPersonalVehicle               Boolean?
+  vehicleModel                     String?
+  vehicleYear                      Int?
+  vehiclePassengerSeats            Int?
+  vehicleColor                     String?
+  vehicleSeatsConfirmed            Boolean?
+  vehicleDashboardPhotoPath        String?
+  vehicleSeatsPhotoPath            String?
+  vehicleExteriorPhotoPath         String?
   proposedOmraPriceCents           Int?
   proposedMadinahPackagePriceCents Int?
   proposedMadinahPlacePriceCents   Int?

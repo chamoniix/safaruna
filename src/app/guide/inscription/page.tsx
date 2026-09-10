@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { DayPicker } from 'react-day-picker';
 import { fr as frLocale } from 'date-fns/locale';
+import { z } from 'zod';
 import 'react-day-picker/style.css';
 import { trackAnalyticsEvent } from '@/lib/analytics-client';
 import { PLACES } from '@/lib/places';
@@ -63,13 +64,17 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 
 const MAX_PHOTO_BYTES = 4_000_000;
 const PHOTO_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+// Same format/normalization as the inscription API; parity is regression-tested.
+// This does not verify account ownership or introduce a new banking rule.
+const applicationIbanSchema = z.string().transform(value => value.replace(/\s+/g, '').toUpperCase())
+  .pipe(z.string().min(15, 'IBAN invalide.').max(34, 'IBAN invalide.').regex(/^[A-Z]{2}\d{2}[A-Z0-9]+$/, 'IBAN invalide.'));
 
 function PhotoField({ kind, file, onChange }: { kind: ApplicationPhotoKind; file: File | null; onChange: (file: File | null) => void }) {
   const [error, setError] = useState('');
   const input = useRef<HTMLInputElement>(null);
   return <div style={{ border: '1.5px solid #E8DFC8', borderRadius: 12, padding: '1rem', background: 'white' }}>
     <label htmlFor={`application-photo-${kind}`} style={labelStyle}>{APPLICATION_PHOTO_LABELS[kind]} · {kind === 'profile' ? 'Obligatoire' : 'Conseillée, facultative'}</label>
-    <input ref={input} id={`application-photo-${kind}`} type="file" accept="image/jpeg,image/png,image/webp" style={{ width: '100%', fontSize: '0.8rem' }} onChange={event => {
+    <input ref={input} id={`application-photo-${kind}`} type="file" hidden accept="image/jpeg,image/png,image/webp" onChange={event => {
       const selected = event.target.files?.[0];
       if (!selected) return;
       if (!PHOTO_CONTENT_TYPES.includes(selected.type) || selected.size === 0 || selected.size > MAX_PHOTO_BYTES) {
@@ -81,7 +86,11 @@ function PhotoField({ kind, file, onChange }: { kind: ApplicationPhotoKind; file
       setError('');
       onChange(selected);
     }} />
-    <p style={{ color: '#7A6D5A', fontSize: '0.72rem', margin: '0.6rem 0 0' }}>{file ? `${file.name} · ${Math.ceil(file.size / 1000)} Ko` : 'JPEG, PNG ou WebP · 4 Mo maximum.'}</p>
+    <button type="button" className="application-photo-import" onClick={() => input.current?.click()} aria-label={`${file ? 'Remplacer la photo' : 'Importer une photo'} — ${APPLICATION_PHOTO_LABELS[kind]}`}>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M12 16V3m-5 5 5-5 5 5M4 15v5a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5" /></svg>
+      {file ? 'Remplacer la photo' : 'Importer une photo'}
+    </button>
+    <p role="status" aria-live="polite" style={{ color: '#7A6D5A', fontSize: '0.72rem', margin: '0.6rem 0 0', overflowWrap: 'anywhere' }}>{file ? `${file.name} · ${Math.ceil(file.size / 1000)} Ko` : 'Aucune photo sélectionnée · JPEG, PNG ou WebP · 4 Mo maximum.'}</p>
     {file && <button type="button" onClick={() => { onChange(null); setError(''); if (input.current) input.current.value = ''; }} style={{ border: 0, background: 'transparent', color: '#991B1B', padding: '0.5rem 0 0', cursor: 'pointer' }}>Retirer cette photo</button>}
     {error && <p role="alert" style={{ color: '#B91C1C', fontSize: '0.78rem', marginBottom: 0 }}>{error}</p>}
   </div>;
@@ -180,6 +189,9 @@ export default function GuideOnboarding() {
   const [bankName, setBankName] = useState('');
   const [bankCountry, setBankCountry] = useState('');
   const [iban, setIban] = useState('');
+  const [ibanTouched, setIbanTouched] = useState(false);
+  const ibanInput = useRef<HTMLInputElement>(null);
+  const ibanError = ibanTouched && !applicationIbanSchema.safeParse(iban).success ? 'IBAN invalide.' : '';
   const [bic, setBic] = useState('');
 
   const secondaryCity: ServiceCity | null = primaryCity === 'MAKKAH'
@@ -236,12 +248,17 @@ export default function GuideOnboarding() {
       if (!bankAccountFirstName.trim() || !bankAccountLastName.trim() || !bankName.trim() || !bankCountry.trim() || !iban.trim()) {
         return 'Renseignez les coordonnées bancaires obligatoires.';
       }
+      if (!applicationIbanSchema.safeParse(iban).success) return 'IBAN invalide.';
     }
     return '';
   };
 
   const handleNext = async () => {
     setSubmitError('');
+    if (currentStep === 4) {
+      setIbanTouched(true);
+      if (!applicationIbanSchema.safeParse(iban).success) ibanInput.current?.focus();
+    }
     const validationError = stepError(currentStep);
     if (validationError) {
       if (currentStep === 1) setEmailError(validationError);
@@ -280,7 +297,7 @@ export default function GuideOnboarding() {
     if (submissionInFlight.current) return;
     for (let step = 1; step < STEPS.length; step++) {
       const validationError = stepError(step);
-      if (validationError) { setCurrentStep(step); setSubmitError(validationError); return; }
+      if (validationError) { if (step === 4) setIbanTouched(true); setCurrentStep(step); setSubmitError(validationError); return; }
     }
     if (!acceptedCharte) { setSubmitError('Acceptez la Charte et les Conditions Guides avant l’envoi.'); return; }
     submissionInFlight.current = true;
@@ -491,6 +508,12 @@ export default function GuideOnboarding() {
           .inscription-main { margin-left: 0; }
           @media (min-width: 768px) { .inscription-main { margin-left: 300px; } }
           .ins-input:focus { border-color: #C9A84C !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.12); }
+          .application-photo-import { display: inline-flex; align-items: center; justify-content: center; gap: .55rem; min-height: 44px; max-width: 100%; padding: .7rem 1rem; border: 1px solid #1A1209; border-radius: 10px; background: #1A1209; color: #F0D897; font: 700 .82rem/1.4 var(--font-manrope, sans-serif); cursor: pointer; transition: transform .15s, background .15s; }
+          .application-photo-import:hover { background: #392A15; }
+          .application-photo-import:active { transform: scale(.98); }
+          .application-photo-import:focus-visible { outline: 3px solid #C9A84C; outline-offset: 3px; }
+          .application-photo-import:disabled { opacity: .6; cursor: wait; }
+          @media (prefers-reduced-motion: reduce) { .application-photo-import { transition: none; } .application-photo-import:active { transform: none; } }
           .ins-input { transition: border-color 0.2s, box-shadow 0.2s; }
           .birth-calendar .rdp-root { --rdp-accent-color: #8B6914; color: #1A1209; }
           .birth-calendar .rdp-dropdowns { gap: 0.4rem; }
@@ -686,7 +709,7 @@ export default function GuideOnboarding() {
                 </Field>
                 <div style={{ marginTop: '1.25rem' }}>
                   <PhotoField kind="profile" file={photos.profile} onChange={file => setPhoto('profile', file)} />
-                  <p style={{ color: '#7A6D5A', fontSize: '0.78rem', lineHeight: 1.65 }}>Cette photo apparaîtra sur votre fiche publique uniquement après validation du Superadmin. Notre équipe pourra l’adapter aux couleurs de SAFARUMA. Elle reste privée avant cette validation.</p>
+                  <p style={{ color: '#7A6D5A', fontSize: '0.78rem', lineHeight: 1.65 }}>Cette photo apparaîtra sur votre fiche publique uniquement après validation. Notre équipe pourra l’adapter aux couleurs de SAFARUMA.</p>
                 </div>
               </div>
             )}
@@ -781,7 +804,7 @@ export default function GuideOnboarding() {
                   </label>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
                     {[
-                      { id: 'CAR' as const, icon: '🚗', title: 'Voiture standard — jusqu’à 6 pèlerins', sub: 'Je conduis les pèlerins pendant les visites.' },
+                      { id: 'CAR' as const, icon: '🚗', title: 'Véhicule standard — jusqu’à 4 pèlerins', sub: 'Je conduis les pèlerins pendant les visites.' },
                       { id: 'VAN' as const, icon: '🚌', title: 'Van', sub: 'Je peux proposer un van pour les groupes.' },
                       { id: 'OTHER' as const, icon: '＋', title: 'Autre', sub: 'Je précise ma solution de transport.' },
                     ].map(opt => (
@@ -866,7 +889,11 @@ export default function GuideOnboarding() {
                     <Field label="Nom du titulaire"><input type="text" className="ins-input" style={inputStyle} required value={bankAccountLastName} onChange={event => setBankAccountLastName(event.target.value)} /></Field>
                     <Field label="Nom de la banque"><input type="text" className="ins-input" style={inputStyle} required value={bankName} onChange={event => setBankName(event.target.value)} /></Field>
                     <Field label="Pays de la banque"><input type="text" className="ins-input" style={inputStyle} required value={bankCountry} onChange={event => setBankCountry(event.target.value)} /></Field>
-                    <Field label="IBAN"><input type="text" className="ins-input" style={{ ...inputStyle, fontFamily: 'monospace', textTransform: 'uppercase' }} required value={iban} onChange={event => setIban(event.target.value)} placeholder="FR76…" /></Field>
+                    <div>
+                      <label htmlFor="application-iban" style={labelStyle}>IBAN</label>
+                      <input ref={ibanInput} id="application-iban" type="text" className="ins-input" style={{ ...inputStyle, fontFamily: 'monospace', textTransform: 'uppercase', ...(ibanError ? { borderColor: '#B91C1C' } : {}) }} required value={iban} aria-invalid={Boolean(ibanError)} aria-describedby={ibanError ? 'application-iban-error' : undefined} onBlur={() => setIbanTouched(true)} onChange={event => { setIban(event.target.value); if (submitError === 'IBAN invalide.') setSubmitError(''); }} placeholder="FR76…" />
+                      {ibanError && <p id="application-iban-error" role="alert" style={{ color: '#B91C1C', fontSize: '0.78rem', margin: '0.5rem 0 0' }}>{ibanError}</p>}
+                    </div>
                     <Field label="SWIFT / BIC (facultatif)"><input type="text" className="ins-input" style={{ ...inputStyle, fontFamily: 'monospace', textTransform: 'uppercase' }} value={bic} onChange={event => setBic(event.target.value)} placeholder="ABCDEFGH" /></Field>
                   </div>
                 </div>

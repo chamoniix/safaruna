@@ -2,9 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { LANG_CODE_TO_LABEL } from '@/lib/languages'
+import ApplicationMediaPanel from '@/components/guide/ApplicationMediaPanel'
+import type { ApplicationMediaView } from '@/lib/guide-application-media'
 
 type Status = 'PENDING' | 'IN_REVIEW' | 'APPROVED' | 'REJECTED'
 type Application = {
+  applicationMedia: ApplicationMediaView | null
   id: string
   firstName: string
   lastName: string
@@ -209,6 +212,7 @@ export default function GuideApplicationsPage() {
         <div style={{ marginTop: 16 }}><b>Lieux maîtrisés</b><p style={{ lineHeight: 1.6 }}>{selected.masteredPlaces.map(place => place.name).join(', ') || 'Non renseigné'}</p>{selected.otherPlaces && <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}><b>Autres lieux :</b> {selected.otherPlaces}</p>}</div>
         <div style={{ marginTop: 16 }}><b>Transport proposé</b><p style={{ lineHeight: 1.6 }}>{selected.transportModes.length ? selected.transportModes.map(mode => transportLabels[mode] || mode).join(', ') : 'Aucun transport sélectionné'}{selected.transportDetails ? ` — ${selected.transportDetails}` : ''}</p></div>
         <div style={{ marginTop: 16 }}>
+          <ApplicationMediaPanel data={selected.applicationMedia} />
           <b>Tarifs proposés par le candidat</b>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: 10, marginTop: 10 }}>
             <div><small>Accompagnement Omra</small><p>{formatEuros(selected.proposedOmraPriceCents)}</p></div>

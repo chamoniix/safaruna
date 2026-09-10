@@ -6,6 +6,7 @@ import { sendGuideAccess } from '@/lib/email'
 import prisma from '@/lib/prisma'
 import { decrypt } from '@/lib/crypto'
 import { PLACES } from '@/lib/places'
+import { applicationMediaSelect, applicationMediaView } from '@/lib/guide-application-media'
 
 const updateSchema = z.object({
   applicationId: z.string().min(1),
@@ -79,7 +80,7 @@ export async function GET(req: NextRequest) {
       skip: (page - 1) * pageSize,
       take: pageSize,
       select: {
-        id: true,
+        ...applicationMediaSelect,
         firstName: true,
         lastName: true,
         email: true,
@@ -134,7 +135,9 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     applications: applications.map(({ ibanEncrypted, bicEncrypted, ...application }) => ({
-      ...application,
+      // Keep storage locations server-side; the dashboard receives authorized routes only.
+      ...Object.fromEntries(Object.entries(application).filter(([key]) => !key.endsWith('PhotoPath'))),
+      applicationMedia: applicationMediaView(application),
       masteredPlaces: application.masteredPlaces.map(key => ({
         key,
         name: PLACES.find(place => place.key === key)?.nameFr || key,
@@ -211,7 +214,7 @@ export async function PATCH(req: NextRequest) {
       })
       return item
     })
-    return NextResponse.json({ application: updated })
+    return NextResponse.json({ application: { id: updated.id, status: updated.status, reviewNotes: updated.reviewNotes, updatedAt: updated.updatedAt } })
   }
 
   const [identity, existing, existingGuideAccount] = await Promise.all([

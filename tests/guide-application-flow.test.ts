@@ -130,7 +130,9 @@ test('la validation par étape remplace les erreurs techniques du schéma', () =
   assert.match(publicRoute, /step: field \? FIELD_STEPS\[field\]/)
   assert.match(publicRoute, /Choisissez le genre du guide/)
   assert.doesNotMatch(form, /currentStep < 6/)
-  assert.doesNotMatch(form, /type="file"/)
+  // Photos are now explicitly requested; KYC documents still are not collected.
+  assert.match(form, /type="file"/)
+  assert.doesNotMatch(form, /application\/pdf/)
   assert.doesNotMatch(form, /12% de commission/)
 })
 

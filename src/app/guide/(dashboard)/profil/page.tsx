@@ -4,8 +4,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { GUIDE_LANGUAGES, LANG_CODE_TO_LABEL } from '@/lib/languages';
+import ApplicationMediaPanel from '@/components/guide/ApplicationMediaPanel';
+import type { ApplicationMediaView } from '@/lib/guide-application-media';
 
 type Profile = {
+  applicationMedia: ApplicationMediaView | null;
   id: string;
   name: string;
   image: string | null;
@@ -326,6 +329,8 @@ export default function GuideProfil() {
           </Link>
         )}
       </div>
+
+      <ApplicationMediaPanel data={profile.applicationMedia} />
 
       {pendingChangeRequest && (
         <div style={{ background: '#FEF3C7', border: '1px solid #F59E0B', borderRadius: 10, padding: '0.85rem 1rem', color: '#92400E', fontSize: '0.8rem', lineHeight: 1.6 }}>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { DayPicker } from 'react-day-picker';
 import { fr as frLocale } from 'date-fns/locale';
@@ -8,6 +8,7 @@ import 'react-day-picker/style.css';
 import { trackAnalyticsEvent } from '@/lib/analytics-client';
 import { PLACES } from '@/lib/places';
 import { GUIDE_LANGUAGES } from '@/lib/languages';
+import { APPLICATION_PHOTO_LABELS, applicationMediaSchema, type ApplicationPhotoKind } from '@/lib/guide-application-media';
 
 const STEPS = [
   { num: 1, label: "Informations personnelles", icon: "👤" },
@@ -60,6 +61,32 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
+const MAX_PHOTO_BYTES = 4_000_000;
+const PHOTO_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
+function PhotoField({ kind, file, onChange }: { kind: ApplicationPhotoKind; file: File | null; onChange: (file: File | null) => void }) {
+  const [error, setError] = useState('');
+  const input = useRef<HTMLInputElement>(null);
+  return <div style={{ border: '1.5px solid #E8DFC8', borderRadius: 12, padding: '1rem', background: 'white' }}>
+    <label htmlFor={`application-photo-${kind}`} style={labelStyle}>{APPLICATION_PHOTO_LABELS[kind]} · {kind === 'profile' ? 'Obligatoire' : 'Conseillée, facultative'}</label>
+    <input ref={input} id={`application-photo-${kind}`} type="file" accept="image/jpeg,image/png,image/webp" style={{ width: '100%', fontSize: '0.8rem' }} onChange={event => {
+      const selected = event.target.files?.[0];
+      if (!selected) return;
+      if (!PHOTO_CONTENT_TYPES.includes(selected.type) || selected.size === 0 || selected.size > MAX_PHOTO_BYTES) {
+        event.target.value = '';
+        onChange(null);
+        setError('Choisissez une image JPEG, PNG ou WebP de 4 Mo maximum.');
+        return;
+      }
+      setError('');
+      onChange(selected);
+    }} />
+    <p style={{ color: '#7A6D5A', fontSize: '0.72rem', margin: '0.6rem 0 0' }}>{file ? `${file.name} · ${Math.ceil(file.size / 1000)} Ko` : 'JPEG, PNG ou WebP · 4 Mo maximum.'}</p>
+    {file && <button type="button" onClick={() => { onChange(null); setError(''); if (input.current) input.current.value = ''; }} style={{ border: 0, background: 'transparent', color: '#991B1B', padding: '0.5rem 0 0', cursor: 'pointer' }}>Retirer cette photo</button>}
+    {error && <p role="alert" style={{ color: '#B91C1C', fontSize: '0.78rem', marginBottom: 0 }}>{error}</p>}
+  </div>;
+}
+
 function BirthDatePicker({ value, onChange }: { value: string; onChange: (value: string) => void }) {
   const selected = value ? new Date(`${value}T12:00:00`) : null;
   const [open, setOpen] = useState(false);
@@ -102,6 +129,10 @@ export default function GuideOnboarding() {
   const [submitError, setSubmitError] = useState('');
   const [checkingEmail, setCheckingEmail] = useState(false);
   const [emailError, setEmailError] = useState('');
+  const [uploadProgress, setUploadProgress] = useState('');
+  const submissionInFlight = useRef(false);
+  const [photos, setPhotos] = useState<Record<ApplicationPhotoKind, File | null>>({ profile: null, dashboard: null, seats: null, exterior: null });
+  const setPhoto = (kind: ApplicationPhotoKind, file: File | null) => setPhotos(previous => ({ ...previous, [kind]: file }));
 
   // Step 1
   const [prenom, setPrenom]           = useState('');
@@ -127,6 +158,12 @@ export default function GuideOnboarding() {
   const [otherPlaces, setOtherPlaces] = useState('');
   const [transportModes, setTransportModes] = useState<TransportMode[]>([]);
   const [transportDetails, setTransportDetails] = useState('');
+  const [hasPersonalVehicle, setHasPersonalVehicle] = useState<boolean | null>(null);
+  const [vehicleModel, setVehicleModel] = useState('');
+  const [vehicleYear, setVehicleYear] = useState('');
+  const [vehiclePassengerSeats, setVehiclePassengerSeats] = useState('');
+  const [vehicleColor, setVehicleColor] = useState('');
+  const [vehicleSeatsConfirmed, setVehicleSeatsConfirmed] = useState(false);
 
   // Step 4
   const [proposedOmraPrice, setProposedOmraPrice] = useState('');
@@ -172,6 +209,7 @@ export default function GuideOnboarding() {
       if (!prenom.trim() || !nom.trim() || !guideEmail.trim() || !whatsapp.trim()) return 'Renseignez votre prénom, votre nom, votre email et votre numéro WhatsApp.';
     }
     if (step === 2) {
+      if (!photos.profile) return 'Ajoutez votre photo de profil.';
       if (!dateOfBirth) return 'Indiquez votre date de naissance.';
       if (!gender) return 'Choisissez le genre du guide.';
       if (!primaryCity) return 'Choisissez votre ville principale.';
@@ -183,6 +221,16 @@ export default function GuideOnboarding() {
     }
     if (step === 3 && transportModes.includes('OTHER') && !transportDetails.trim()) {
       return 'Décrivez le transport que vous proposez.';
+    }
+    if (step === 3) {
+      if (hasPersonalVehicle === null) return 'Indiquez si vous disposez d’un véhicule personnel.';
+      if (hasPersonalVehicle) {
+        const checked = applicationMediaSchema.safeParse({ profilePhotoReceipt: 'validation', hasPersonalVehicle,
+          vehicleModel, vehicleYear: vehicleYear ? Number(vehicleYear) : null,
+          vehiclePassengerSeats: vehiclePassengerSeats ? Number(vehiclePassengerSeats) : null,
+          vehicleColor, vehicleSeatsConfirmed });
+        if (!checked.success) return checked.error.issues[0]?.message || 'Vérifiez les informations du véhicule.';
+      }
     }
     if (step === 4) {
       if (!bankAccountFirstName.trim() || !bankAccountLastName.trim() || !bankName.trim() || !bankCountry.trim() || !iban.trim()) {
@@ -229,8 +277,33 @@ export default function GuideOnboarding() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submissionInFlight.current) return;
+    for (let step = 1; step < STEPS.length; step++) {
+      const validationError = stepError(step);
+      if (validationError) { setCurrentStep(step); setSubmitError(validationError); return; }
+    }
+    if (!acceptedCharte) { setSubmitError('Acceptez la Charte et les Conditions Guides avant l’envoi.'); return; }
+    submissionInFlight.current = true;
     setSubmitting(true); setSubmitError('');
     try {
+      // Receipts are scoped to this attempt; retrying always uploads the selected files again.
+      const receipts: Partial<Record<ApplicationPhotoKind, string>> = {};
+      const kinds: ApplicationPhotoKind[] = hasPersonalVehicle ? ['profile', 'dashboard', 'seats', 'exterior'] : ['profile'];
+      const filesToSend = kinds.filter(kind => photos[kind]);
+      for (const [index, kind] of filesToSend.entries()) {
+        const file = photos[kind]!;
+        setUploadProgress(`Envoi des photos ${index + 1}/${filesToSend.length} — ${APPLICATION_PHOTO_LABELS[kind]}…`);
+        const response = await fetch(`/api/guide/inscription/photos?kind=${kind}`, {
+          method: 'POST', headers: { 'Content-Type': file.type, 'x-guide-email': encodeURIComponent(guideEmail.trim().toLowerCase()) }, body: file,
+        });
+        const payload = await response.json();
+        if (!response.ok || typeof payload.receipt !== 'string') {
+          setCurrentStep(kind === 'profile' ? 2 : 3);
+          throw new Error(`${APPLICATION_PHOTO_LABELS[kind]} : ${payload.error || 'L’envoi a échoué. Réessayez.'}`);
+        }
+        receipts[kind] = payload.receipt;
+      }
+      setUploadProgress('Enregistrement de votre candidature…');
       const res = await fetch('/api/guide/inscription', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -246,6 +319,12 @@ export default function GuideOnboarding() {
           otherPlaces: otherPlaces || undefined,
           transportModes,
           transportDetails: transportDetails || undefined,
+          profilePhotoReceipt: receipts.profile,
+          hasPersonalVehicle,
+          ...(hasPersonalVehicle ? {
+            vehicleModel, vehicleYear: Number(vehicleYear), vehiclePassengerSeats: Number(vehiclePassengerSeats), vehicleColor, vehicleSeatsConfirmed,
+            vehicleDashboardPhotoReceipt: receipts.dashboard, vehicleSeatsPhotoReceipt: receipts.seats, vehicleExteriorPhotoReceipt: receipts.exterior,
+          } : {}),
           proposedOmraPrice: proposedOmraPrice ? Number(proposedOmraPrice) : undefined,
           proposedMadinahPackagePrice: proposedMadinahPackagePrice ? Number(proposedMadinahPackagePrice) : undefined,
           proposedMadinahPlacePrice: proposedMadinahPlacePrice ? Number(proposedMadinahPlacePrice) : undefined,
@@ -276,6 +355,8 @@ export default function GuideOnboarding() {
     } catch (err: unknown) {
       setSubmitError(err instanceof Error ? err.message : 'Envoi impossible. Réessayez dans quelques instants.');
     } finally {
+      submissionInFlight.current = false;
+      setUploadProgress('');
       setSubmitting(false);
     }
   };
@@ -490,6 +571,7 @@ export default function GuideOnboarding() {
         {/* Form */}
         <div className="ins-form-wrap" style={{ flex: 1, padding: '2.5rem 2rem', maxWidth: 760, width: '100%', margin: '0 auto' }}>
           <form onSubmit={handleSubmit}>
+            <fieldset disabled={submitting} style={{ border: 0, margin: 0, padding: 0, minWidth: 0 }} aria-busy={submitting}>
 
             {/* ── STEP 1 ── */}
             {currentStep === 1 && (
@@ -602,6 +684,10 @@ export default function GuideOnboarding() {
                 <Field label="Biographie (visible par les pèlerins)">
                   <textarea className="ins-input" style={{ ...inputStyle, height: 120, resize: 'vertical' }} placeholder="Présentez-vous, votre approche et votre connaissance des lieux historiques…" required value={bio} onChange={e => setBio(e.target.value)} />
                 </Field>
+                <div style={{ marginTop: '1.25rem' }}>
+                  <PhotoField kind="profile" file={photos.profile} onChange={file => setPhoto('profile', file)} />
+                  <p style={{ color: '#7A6D5A', fontSize: '0.78rem', lineHeight: 1.65 }}>Cette photo apparaîtra sur votre fiche publique uniquement après validation du Superadmin. Notre équipe pourra l’adapter aux couleurs de SAFARUMA. Elle reste privée avant cette validation.</p>
+                </div>
               </div>
             )}
 
@@ -663,6 +749,29 @@ export default function GuideOnboarding() {
                   <Field label="Autre lieu historique">
                     <textarea className="ins-input" style={{ ...inputStyle, minHeight: 86, resize: 'vertical' }} value={otherPlaces} onChange={event => setOtherPlaces(event.target.value)} placeholder="Indiquez un ou plusieurs lieux absents de la liste" />
                   </Field>
+                </div>
+
+                <div style={{ margin: '1.75rem 0' }}>
+                  <div id="personal-vehicle-label" style={labelStyle}>Disposez-vous d’un véhicule personnel pour transporter les pèlerins ?</div>
+                  <div role="radiogroup" aria-labelledby="personal-vehicle-label" style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                    {[true, false].map(value => <label key={String(value)} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', color: '#1A1209', cursor: 'pointer' }}>
+                      <input type="radio" name="personalVehicle" checked={hasPersonalVehicle === value} onChange={() => setHasPersonalVehicle(value)} style={{ accentColor: '#C9A84C' }} />{value ? 'Oui' : 'Non'}
+                    </label>)}
+                  </div>
+                  {hasPersonalVehicle && <>
+                    <div className="ins-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                      <Field label="Modèle du véhicule"><input aria-label="Modèle du véhicule" className="ins-input" style={inputStyle} value={vehicleModel} maxLength={120} onChange={event => setVehicleModel(event.target.value)} placeholder="Marque et modèle" /></Field>
+                      <Field label="Année du véhicule"><input aria-label="Année du véhicule" type="number" min="1000" max="9999" step="1" className="ins-input" style={inputStyle} value={vehicleYear} onChange={event => setVehicleYear(event.target.value)} placeholder="Ex. 2022" /></Field>
+                      <Field label="Places disponibles, hors conducteur"><input aria-label="Places disponibles, hors conducteur" type="number" min="1" max="999" step="1" className="ins-input" style={inputStyle} value={vehiclePassengerSeats} onChange={event => { setVehiclePassengerSeats(event.target.value); setVehicleSeatsConfirmed(false); }} /></Field>
+                      <Field label="Couleur du véhicule"><input aria-label="Couleur du véhicule" className="ins-input" style={inputStyle} value={vehicleColor} maxLength={80} onChange={event => setVehicleColor(event.target.value)} /></Field>
+                    </div>
+                    <label style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start', margin: '1rem 0', fontSize: '0.8rem', color: '#1A1209', lineHeight: 1.6 }}>
+                      <input type="checkbox" checked={vehicleSeatsConfirmed} onChange={event => setVehicleSeatsConfirmed(event.target.checked)} style={{ accentColor: '#C9A84C', marginTop: 4 }} />
+                      Je confirme que ce nombre correspond aux places disponibles pour les pèlerins, sans compter la place du conducteur.
+                    </label>
+                    <p style={{ color: '#7A6D5A', fontSize: '0.78rem', lineHeight: 1.65 }}>Les photos du véhicule sont facultatives mais conseillées pour compléter votre dossier. Elles sont réservées à l’équipe SAFARUMA et à votre espace Guide ; elles ne seront pas publiées sur le site.</p>
+                    <div style={{ display: 'grid', gap: '0.75rem' }}>{(['dashboard', 'seats', 'exterior'] as const).map(kind => <PhotoField key={kind} kind={kind} file={photos[kind]} onChange={file => setPhoto(kind, file)} />)}</div>
+                  </>}
                 </div>
 
                 {/* Transport */}
@@ -832,6 +941,7 @@ export default function GuideOnboarding() {
             {submitError && (
               <div style={{ background: '#FEE2E2', border: '1px solid #FCA5A5', borderRadius: 8, padding: '0.75rem 1rem', fontSize: '0.83rem', color: '#DC2626', marginTop: '1rem' }}>{submitError}</div>
             )}
+            {submitting && <p role="status" aria-live="polite" style={{ color: '#6B5218', fontSize: '0.83rem', marginTop: '1rem' }}>{uploadProgress || 'Préparation de votre dossier…'}</p>}
             <div className="ins-nav-btns" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '3rem', paddingTop: '1.5rem', borderTop: '1px solid #E8DFC8' }}>
               {currentStep > 1 ? (
                 <button
@@ -866,7 +976,7 @@ export default function GuideOnboarding() {
                 </button>
               )}
             </div>
-
+            </fieldset>
           </form>
         </div>
       </div>

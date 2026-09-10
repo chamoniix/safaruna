@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import test from 'node:test'
+import { runInNewContext } from 'node:vm'
+import ts from 'typescript'
+import { z } from 'zod'
 
 const form = readFileSync('src/app/guide/inscription/page.tsx', 'utf8')
 const publicRoute = readFileSync('src/app/api/guide/inscription/route.ts', 'utf8')
@@ -65,7 +68,7 @@ test('les tarifs proposés sont facultatifs, distinguent null de zéro et ne son
 })
 
 test('transports multiples, ville principale et villes proposées sont réellement transmis et persistés', () => {
-  assert.match(form, /Voiture standard — jusqu’à 6 pèlerins/)
+  assert.match(form, /Véhicule standard — jusqu’à 4 pèlerins/)
   assert.match(form, /id: 'OTHER'/)
   assert.match(form, /transportDetails/)
   assert.match(form, /offersSecondaryCity/)
@@ -225,4 +228,58 @@ test('les langues de candidature utilisent les codes de la source unique', () =>
   assert.match(form, /GUIDE_LANGUAGES/)
   assert.match(publicRoute, /LANGUAGE_CODES/)
   assert.match(publicRoute, /LANG_CODE_TO_LABEL/)
+})
+
+test('IBAN : les formats rejetés par le serveur bloquent déjà la sortie de l’étape bancaire', () => {
+  const stepSource = form.slice(form.indexOf('const stepError ='), form.indexOf('const handleNext ='))
+  const ibanSource = form.match(/const applicationIbanSchema = ([\s\S]*?);/)?.[0] || ''
+  const serverSource = publicRoute.match(/iban: (z\.string\(\)[\s\S]*?),\n  bic:/)?.[1]
+  assert.ok(serverSource)
+  const serverSchema = runInNewContext(`(${serverSource})`, { z })
+  const code = ts.transpile(`${ibanSource}\n${stepSource}\nstepError(4)`, { target: ts.ScriptTarget.ES2022 })
+  for (const iban of ['', 'invalide', 'FR76', 'FR76!234567890123', 'FR76' + '1'.repeat(31),
+    'FR7630006000011234567890189', ' fr76 3000 6000 0112 3456 7890 189 ', 'GB82 WEST 1234 5698 7654 32']) {
+    const error = runInNewContext(code, { z, iban, bankAccountFirstName: 'Test', bankAccountLastName: 'Guide', bankName: 'Banque', bankCountry: 'France' })
+    assert.equal(error === '', serverSchema.safeParse(iban).success, `format: ${iban}`)
+  }
+  assert.match(form, /aria-invalid=\{Boolean\(ibanError\)\}/)
+  assert.match(form, /id="application-iban-error" role="alert"/)
+})
+
+test('les quatre champs photo proposent un bouton importer sans changer le flux d’upload', () => {
+  const photoField = form.slice(form.indexOf('function PhotoField'), form.indexOf('function BirthDatePicker'))
+  assert.match(photoField, /type="file"[^\n]*hidden/)
+  assert.match(photoField, /onClick=\{\(\) => input\.current\?\.click\(\)\}/)
+  assert.match(photoField, /Importer une photo/)
+  assert.match(photoField, /Remplacer la photo/)
+  assert.match(photoField, /overflowWrap: 'anywhere'/)
+  assert.match(form, /Cette photo apparaîtra sur votre fiche publique uniquement après validation\. Notre équipe pourra l’adapter aux couleurs de SAFARUMA\./)
+})
+
+test('Suivant reste sur les coordonnées bancaires invalides, puis avance après correction sans appel réseau', async () => {
+  const schemaSource = form.match(/const applicationIbanSchema = ([\s\S]*?);/)?.[0]
+  assert.ok(schemaSource)
+  const source = form.slice(form.indexOf('const stepError ='), form.indexOf('const handlePrev ='))
+  const code = ts.transpile(`${schemaSource}\n${source}\nhandleNext()`, { target: ts.ScriptTarget.ES2022 })
+  let advances = 0
+  let focused = 0
+  let touched = false
+  let error = ''
+  const context = {
+    z, currentStep: 4, iban: 'invalide', bankAccountFirstName: 'Test', bankAccountLastName: 'Guide', bankName: 'Banque', bankCountry: 'France',
+    setSubmitError: (value: string) => { error = value },
+    setIbanTouched: (value: boolean) => { touched = value },
+    ibanInput: { current: { focus: () => { focused++ } } },
+    advanceToNextStep: () => { advances++ },
+    fetch: () => { assert.fail('aucun appel réseau attendu à l’étape bancaire') },
+  }
+  await runInNewContext(code, { ...context })
+  assert.equal(advances, 0)
+  assert.equal(focused, 1)
+  assert.equal(touched, true)
+  assert.equal(error, 'IBAN invalide.')
+  context.iban = 'FR76 3000 6000 0112 3456 7890 189'
+  await runInNewContext(code, { ...context })
+  assert.equal(advances, 1)
+  assert.equal(error, '')
 })

@@ -144,6 +144,14 @@ export default function GuideProfil() {
       .catch((e: Error) => { setError(e.message); setLoading(false); });
   }, []);
 
+  const loadedProfileId = profile?.id;
+  useEffect(() => {
+    // Le profil et son bouton sont montés après le chargement des données.
+    if (!loading && loadedProfileId && window.location.hash === '#guide-profile-submission') {
+      document.getElementById('guide-profile-submission')?.scrollIntoView({ block: 'start' });
+    }
+  }, [loading, loadedProfileId]);
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     const isDraftProfile = profile?.status === 'DRAFT';
@@ -578,7 +586,7 @@ export default function GuideProfil() {
         </form>
       </div>
 
-      <div style={{ ...card, padding: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', borderColor: '#C9A84C' }}>
+      <div id="guide-profile-submission" style={{ ...card, scrollMarginTop: 90, padding: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', borderColor: '#C9A84C' }}>
         <div style={{ flex: '1 1 300px' }}>
           <div style={{ fontWeight: 800, color: '#1A1209', fontSize: '0.9rem' }}>Vérifiez toutes vos informations avant l’envoi.</div>
           <div style={{ color: '#7A6D5A', fontSize: '0.74rem', marginTop: 3 }}>Les données publiques restent inchangées jusqu’à la décision de l’administration.</div>

@@ -1,6 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
+import { useGuideSession } from '@/components/GuideSessionGuard'
 import {
   CalendarDays,
   CheckCircle2,
@@ -28,6 +30,8 @@ function toYMD(date: Date): string {
 }
 
 export default function GuideCalendrierPage() {
+  const session = useGuideSession()
+  const isPublished = session.guideStatus === 'ACTIVE'
   const [city, setCity] = useState<ServiceCity>('MAKKAH')
   const [availabilities, setAvailabilities] = useState<Avail[]>([])
   const [services, setServices] = useState({ makkah: false, madinah: false })
@@ -35,6 +39,7 @@ export default function GuideCalendrierPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState<string | null>(null)
   const [error, setError] = useState('')
+  const [savedMessage, setSavedMessage] = useState('')
   const [currentMonth, setCurrentMonth] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1))
 
   const year = currentMonth.getFullYear()
@@ -45,6 +50,7 @@ export default function GuideCalendrierPage() {
   const fetchAvails = useCallback(async () => {
     setLoading(true)
     setError('')
+    setSavedMessage('')
     try {
       const params = new URLSearchParams({ city, from: rangeFrom, to: rangeTo })
       const response = await fetch(`/api/guide/calendrier?${params}`)
@@ -53,10 +59,13 @@ export default function GuideCalendrierPage() {
       setAvailabilities(data.availabilities || [])
       setServices(data.services || { makkah: false, madinah: false })
       setAcceptingBookings(Boolean(data.acceptingBookings))
+      return true
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Chargement impossible')
+      return false
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }, [city, rangeFrom, rangeTo])
 
   useEffect(() => { fetchAvails() }, [fetchAvails])
@@ -65,10 +74,12 @@ export default function GuideCalendrierPage() {
   const serviceEnabled = city === 'MAKKAH' ? services.makkah : services.madinah
 
   const toggleAcceptingBookings = async () => {
+    if (!isPublished || loading || saving !== null) return
     const enabled = !acceptingBookings
     if (!enabled && !window.confirm('Mettre toutes les nouvelles réservations en pause ? Vos réservations déjà payées restent inchangées.')) return
     setSaving('global')
     setError('')
+    setSavedMessage('')
     try {
       const response = await fetch('/api/guide/calendrier', {
         method: 'PATCH',
@@ -78,6 +89,7 @@ export default function GuideCalendrierPage() {
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Modification impossible')
       setAcceptingBookings(enabled)
+      setSavedMessage('Modification enregistrée.')
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Modification impossible')
     }
@@ -85,10 +97,12 @@ export default function GuideCalendrierPage() {
   }
 
   const toggleService = async () => {
+    if (loading || saving !== null) return
     const enabled = !serviceEnabled
     if (!enabled && !window.confirm(`Désactiver ${city === 'MAKKAH' ? 'Makkah' : 'Médine'} pour les nouvelles réservations ? Vos réservations déjà payées restent inchangées.`)) return
     setSaving('service')
     setError('')
+    setSavedMessage('')
     try {
       const response = await fetch('/api/guide/calendrier', {
         method: 'PATCH',
@@ -98,6 +112,7 @@ export default function GuideCalendrierPage() {
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Modification impossible')
       setServices(previous => city === 'MAKKAH' ? { ...previous, makkah: enabled } : { ...previous, madinah: enabled })
+      setSavedMessage('Modification enregistrée.')
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Modification impossible')
     }
@@ -106,7 +121,7 @@ export default function GuideCalendrierPage() {
 
   const handleDayClick = async (date: string) => {
     const current = availMap[date]
-    if (current?.status === 'BOOKED' || current?.status === 'HELD' || !serviceEnabled) return
+    if (loading || saving !== null || current?.status === 'BOOKED' || current?.status === 'HELD' || !serviceEnabled) return
     const previous = availabilities
     const remove = current?.status === 'UNAVAILABLE'
     setAvailabilities(remove
@@ -114,6 +129,7 @@ export default function GuideCalendrierPage() {
       : [...previous, { id: `optimistic-${date}`, date, city, status: 'UNAVAILABLE' }])
     setSaving(date)
     setError('')
+    setSavedMessage('')
     try {
       const response = await fetch('/api/guide/calendrier', {
         method: remove ? 'DELETE' : 'POST',
@@ -122,7 +138,7 @@ export default function GuideCalendrierPage() {
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Modification impossible')
-      await fetchAvails()
+      if (await fetchAvails()) setSavedMessage('Modification enregistrée.')
     } catch (cause) {
       setAvailabilities(previous)
       setError(cause instanceof Error ? cause.message : 'Modification impossible')
@@ -163,6 +179,7 @@ export default function GuideCalendrierPage() {
         .calendar-status-panel { display: flex; align-items: center; justify-content: space-between; gap: 1rem; border: 1px solid; border-radius: 14px; padding: 1rem 1.1rem; }
         .calendar-status-panel.is-on { background: #F0FAF5; border-color: #A7D8BE; }
         .calendar-status-panel.is-off { background: #FFF4F3; border-color: #F1B5AF; }
+        .calendar-status-panel.is-unpublished { background: #F3F4F6; border-color: #D1D5DB; }
         .calendar-status-copy { display: flex; align-items: center; gap: 0.75rem; min-width: 0; }
         .calendar-status-icon { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 10px; flex: 0 0 40px; }
         .is-on .calendar-status-icon { color: #166534; background: #D9F3E5; }
@@ -172,6 +189,10 @@ export default function GuideCalendrierPage() {
         .calendar-action { min-height: 44px; padding: 0.62rem 1rem; border: 0; border-radius: 10px; color: white; font: 700 0.78rem/1 var(--font-manrope, sans-serif); cursor: pointer; white-space: nowrap; }
         .calendar-action.is-danger { background: #9F2D28; }
         .calendar-action.is-success { background: #17633D; }
+        .calendar-action.is-unpublished { background: #E5E7EB; color: #4B5563; }
+        .calendar-action.is-unpublished:disabled { opacity: 1; }
+        .calendar-save-status { display: flex; align-items: center; gap: 0.5rem; color: #166534; font-size: 0.84rem; }
+        .calendar-profile-return { align-self: flex-start; padding: 0.75rem 1rem; border-radius: 10px; background: #17633D; color: white; font-size: 0.84rem; font-weight: 700; text-decoration: none; }
         .calendar-action:disabled { cursor: not-allowed; opacity: 0.58; }
         .calendar-city-workspace { overflow: hidden; border: 1px solid var(--calendar-line); border-radius: 14px; background: white; }
         .calendar-city-tabs { display: grid; grid-template-columns: 1fr 1fr; padding: 0.4rem; gap: 0.4rem; background: #F1EDE5; }
@@ -233,19 +254,19 @@ export default function GuideCalendrierPage() {
         <div className="calendar-title">
           <span className="calendar-eyebrow"><CalendarDays size={16} /> Disponibilités</span>
           <h1>Calendrier</h1>
-          <p>Indiquez uniquement les dates où vous n’êtes pas disponible. Les autres dates restent ouvertes à la réservation.</p>
+          <p>Indiquez uniquement les dates où vous n’êtes pas disponible. Les autres dates sont disponibles, sous réserve de la publication de votre profil et de l’activation des réservations pour la ville.</p>
         </div>
 
-        <div className={`calendar-status-panel ${acceptingBookings ? 'is-on' : 'is-off'}`}>
+        <div className={`calendar-status-panel ${!isPublished ? 'is-unpublished' : acceptingBookings ? 'is-on' : 'is-off'}`}>
           <div className="calendar-status-copy">
             <span className="calendar-status-icon"><Power size={20} /></span>
             <div>
-              <strong>Nouvelles réservations {acceptingBookings ? 'activées' : 'en pause'}</strong>
-              <span>{acceptingBookings ? 'Votre profil peut apparaître dans les recherches.' : 'Votre fiche reste accessible sans nouvelle réservation.'}</span>
+              <strong>{!isPublished ? session.guideStatus === 'REVIEW' ? 'Profil en cours d’examen' : 'Profil brouillon · non publié' : `Nouvelles réservations ${acceptingBookings ? 'activées' : 'en pause'}`}</strong>
+              <span>{!isPublished ? 'Préparez vos villes et vos dates. La pause et la réactivation seront accessibles après publication par l’équipe.' : acceptingBookings ? 'Votre profil peut apparaître dans les recherches.' : 'Votre fiche reste accessible sans nouvelle réservation.'}</span>
             </div>
           </div>
-          <button type="button" onClick={toggleAcceptingBookings} disabled={saving !== null} className={`calendar-action ${acceptingBookings ? 'is-danger' : 'is-success'}`}>
-            {saving === 'global' ? 'Enregistrement…' : acceptingBookings ? 'Mettre en pause' : 'Réactiver'}
+          <button type="button" onClick={toggleAcceptingBookings} disabled={!isPublished || loading || saving !== null} className={`calendar-action ${!isPublished ? 'is-unpublished' : acceptingBookings ? 'is-danger' : 'is-success'}`}>
+            {!isPublished ? 'Après publication' : saving === 'global' ? 'Enregistrement…' : acceptingBookings ? 'Mettre en pause' : 'Réactiver'}
           </button>
         </div>
       </div>
@@ -256,7 +277,7 @@ export default function GuideCalendrierPage() {
             const itemEnabled = item === 'MAKKAH' ? services.makkah : services.madinah
             const CityIcon = item === 'MAKKAH' ? Landmark : MapPin
             return (
-              <button key={item} type="button" role="tab" aria-selected={city === item} onClick={() => setCity(item)} className={`calendar-city-tab${city === item ? ' is-selected' : ''}`}>
+              <button key={item} type="button" role="tab" aria-selected={city === item} disabled={loading || saving !== null} onClick={() => setCity(item)} className={`calendar-city-tab${city === item ? ' is-selected' : ''}`}>
                 <CityIcon size={18} />
                 <span>{item === 'MAKKAH' ? 'Makkah' : 'Médine'}</span>
                 <span className={`calendar-city-tab__state${itemEnabled ? ' is-on' : ''}`} aria-label={itemEnabled ? 'activée' : 'désactivée'} />
@@ -267,21 +288,24 @@ export default function GuideCalendrierPage() {
         <div className="calendar-city-control">
           <div>
             <strong>{city === 'MAKKAH' ? 'Makkah' : 'Médine'} · {serviceEnabled ? 'activée' : 'désactivée'}</strong>
-            <p>{serviceEnabled ? 'Les pèlerins peuvent vous choisir pour cette ville.' : 'Votre profil n’apparaît pas dans les recherches pour cette ville.'}</p>
+            <p>{!isPublished ? 'Ce choix prépare votre profil ; il ne le publie pas sur le site.' : serviceEnabled ? acceptingBookings ? 'Les pèlerins peuvent vous choisir pour cette ville.' : 'Ville activée, mais les nouvelles réservations sont en pause.' : 'Votre profil n’apparaît pas dans les recherches pour cette ville.'}</p>
           </div>
-          <button type="button" onClick={toggleService} disabled={saving !== null} className={`calendar-action ${serviceEnabled ? 'is-danger' : 'is-success'}`}>
+          <button type="button" onClick={toggleService} disabled={loading || saving !== null} className={`calendar-action ${serviceEnabled ? 'is-danger' : 'is-success'}`}>
             {saving === 'service' ? 'Enregistrement…' : serviceEnabled ? 'Désactiver cette ville' : 'Activer cette ville'}
           </button>
         </div>
       </section>
 
       {error && <div role="alert" style={{ background: '#FEE2E2', border: '1px solid #FCA5A5', borderRadius: 9, padding: '0.8rem 1rem', color: '#991B1B', fontSize: '0.84rem' }}>{error}</div>}
+      <div role="status" aria-live="polite" className="calendar-save-status">
+        {saving !== null ? <><LoaderCircle size={17} className="calendar-spin" /> Enregistrement en cours…</> : savedMessage ? <><CheckCircle2 size={17} /> {savedMessage}</> : 'Enregistrement automatique à chaque modification : aucun bouton de sauvegarde supplémentaire.'}
+      </div>
 
       <section className="calendar-board" aria-busy={loading}>
         <div className="calendar-toolbar">
-          <button type="button" aria-label="Mois précédent" onClick={() => setCurrentMonth(value => new Date(value.getFullYear(), value.getMonth() - 1, 1))} className="calendar-month-button"><ChevronLeft size={20} /></button>
+          <button type="button" aria-label="Mois précédent" disabled={loading || saving !== null} onClick={() => setCurrentMonth(value => new Date(value.getFullYear(), value.getMonth() - 1, 1))} className="calendar-month-button"><ChevronLeft size={20} /></button>
           <h2>{MONTHS_FR[month]} {year}</h2>
-          <button type="button" aria-label="Mois suivant" onClick={() => setCurrentMonth(value => new Date(value.getFullYear(), value.getMonth() + 1, 1))} className="calendar-month-button"><ChevronRight size={20} /></button>
+          <button type="button" aria-label="Mois suivant" disabled={loading || saving !== null} onClick={() => setCurrentMonth(value => new Date(value.getFullYear(), value.getMonth() + 1, 1))} className="calendar-month-button"><ChevronRight size={20} /></button>
         </div>
 
         <div className="calendar-legend" aria-label="Légende du calendrier">
@@ -302,7 +326,7 @@ export default function GuideCalendrierPage() {
             const isBooked = record?.status === 'BOOKED'
             const isHeld = record?.status === 'HELD'
             const isUnavailable = record?.status === 'UNAVAILABLE'
-            const disabled = isPast || isBooked || isHeld || !serviceEnabled
+            const disabled = loading || saving !== null || isPast || isBooked || isHeld || !serviceEnabled
             const borderColor = isBooked ? '#93C5FD' : isHeld ? '#FCD34D' : isUnavailable ? '#FCA5A5' : '#F0EBE0'
             const background = isPast || !serviceEnabled ? '#F5F5F5' : isBooked ? '#DBEAFE' : isHeld ? '#FEF3C7' : isUnavailable ? '#FEE2E2' : 'white'
             const color = isBooked ? '#1D4ED8' : isHeld ? '#B45309' : isUnavailable ? '#DC2626' : '#1A1209'
@@ -331,6 +355,9 @@ export default function GuideCalendrierPage() {
         <CalendarDays size={18} style={{ flex: '0 0 18px', marginTop: 2 }} />
         Cliquez uniquement sur les dates où vous n’êtes pas disponible. Toutes les dates sans croix rouge sont considérées comme disponibles. Une date réservée ou en cours de paiement ne peut pas être modifiée.
       </div>
+      <Link href="/guide/profil#guide-profile-submission" className="calendar-profile-return">
+        Retour au profil pour vérifier et envoyer pour validation
+      </Link>
     </div>
   )
 }

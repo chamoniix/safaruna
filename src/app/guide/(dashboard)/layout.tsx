@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { useGuideSession } from '@/components/GuideSessionGuard';
+import { isGuideOperationalPath, useGuideSession } from '@/components/GuideSessionGuard';
 import {
   BadgeCheck,
   Bell,
@@ -85,6 +85,9 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
   const isActive = (p: string) => pathname === p || pathname.startsWith(p + '/');
 
   const su = guideSession;
+  const navSections = GUIDE_NAV_SECTIONS
+    .map(group => ({ ...group, items: group.items.filter(item => su.guideStatus === 'ACTIVE' || !isGuideOperationalPath(item.href)) }))
+    .filter(group => group.items.length > 0);
   const displayName = su?.firstName && su?.lastName
     ? `${su.firstName} ${su.lastName}`
     : su?.displayName || su?.email || 'Guide';
@@ -236,7 +239,7 @@ export default function GuideLayout({ children }: { children: React.ReactNode })
 
           {/* Nav */}
           <nav style={{ flex: 1, paddingTop: '0.5rem', overflowY: 'auto' }}>
-            {GUIDE_NAV_SECTIONS.map((group) => (
+            {navSections.map((group) => (
               <div key={group.section}>
                 <div style={{ fontSize: '0.68rem', fontWeight: 700, letterSpacing: '0.13em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.44)', padding: '0.95rem 1.5rem 0.4rem' }}>{group.section}</div>
                 {group.items.map((item) => {

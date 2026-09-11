@@ -20,7 +20,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> },
 ) {
   if (!hasTrustedGuideAuthOrigin(req)) return NextResponse.json({ error: 'Origine non autorisée' }, { status: 403 })
-  const access = await requireGuide()
+  const access = await requireGuide({ published: true })
   if (!access.ok) return access.response
 
   const parsed = declineSchema.safeParse(await req.json().catch(() => null))

@@ -27,6 +27,6 @@ test('Performances utilise le chargement centré du dashboard Guide', () => {
 })
 
 test('les performances sont protégées et excluent tous les revenus annulés', () => {
-  assert.match(performancesRoute, /requireGuide\(\)/)
+  assert.match(performancesRoute, /requireGuide\(\{ published: true \}\)/)
   assert.equal(performancesRoute.match(/status: \{ not: 'CANCELLED' \}/g)?.length, 2)
 })

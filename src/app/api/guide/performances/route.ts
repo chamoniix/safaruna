@@ -8,7 +8,7 @@ function averageRating(rows: { ratingOverall: number }[]) {
 }
 
 export async function GET() {
-  const access = await requireGuide()
+  const access = await requireGuide({ published: true })
   if (!access.ok) return access.response
 
   const guideProfileId = access.actor.guideProfileId

@@ -20,6 +20,12 @@ export type GuideSessionUser = {
 
 const GuideSessionContext = createContext<GuideSessionUser | null>(null)
 
+// Match child routes too (mission/message details), but not similarly named routes.
+export function isGuideOperationalPath(pathname: string): boolean {
+  return ['tableau-de-bord', 'demandes', 'missions', 'messages', 'revenus', 'paiements', 'avis', 'performances']
+    .some(segment => pathname === `/guide/${segment}` || pathname.startsWith(`/guide/${segment}/`))
+}
+
 function LoadingGuideSession() {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F8F6F2' }}>
@@ -32,6 +38,7 @@ function LoadingGuideSession() {
 export function GuideSessionGuard({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<GuideSessionUser | null>(null)
   const [loading, setLoading] = useState(true)
+  const [verifiedPath, setVerifiedPath] = useState<string | null>(null)
   const router = useRouter()
   const pathname = usePathname()
 
@@ -45,6 +52,7 @@ export function GuideSessionGuard({ children }: { children: React.ReactNode }) {
       .then(data => {
         if (!cancelled) {
           setUser(data.user)
+          setVerifiedPath(pathname)
           setLoading(false)
         }
       })
@@ -61,7 +69,15 @@ export function GuideSessionGuard({ children }: { children: React.ReactNode }) {
     }
   }, [pathname, router])
 
-  if (loading || !user) return <LoadingGuideSession />
+  const blocked = user !== null && user.guideStatus !== 'ACTIVE' && isGuideOperationalPath(pathname)
+
+  useEffect(() => {
+    if (verifiedPath === pathname && blocked) router.replace('/guide/profil')
+  }, [verifiedPath, pathname, blocked, router])
+
+  // Never mount an operational page while awaiting the status for this navigation.
+  // Sensitive reads/writes are independently protected in each API handler.
+  if (loading || !user || verifiedPath !== pathname || blocked) return <LoadingGuideSession />
 
   return (
     <GuideSessionContext.Provider value={user}>

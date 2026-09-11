@@ -73,7 +73,7 @@ export async function requirePelerin(): Promise<Allowed<PelerinActor> | Denied> 
   return { ok: true, actor: { id: user.id, email: user.email, role: 'PELERIN' } }
 }
 
-export async function requireGuide(): Promise<Allowed<GuideActor> | Denied> {
+export async function requireGuide(options: { published?: boolean } = {}): Promise<Allowed<GuideActor> | Denied> {
   const token = await readGuideSessionToken()
   if (!token) return denied(401, 'Non autorisé')
 
@@ -83,6 +83,11 @@ export async function requireGuide(): Promise<Allowed<GuideActor> | Denied> {
 
   if (account.status !== 'ACTIVE' || account.guideProfile?.status === 'SUSPENDED') return denied(403, 'Compte guide suspendu')
   if (!account.email || !account.guideProfile) return denied(403, 'Profil guide introuvable')
+  // Operational access depends on approval, not on accepting new bookings.
+  // Published Guides on pause must still be able to handle their existing missions.
+  if (options.published && account.guideProfile.status !== 'ACTIVE') {
+    return denied(403, 'Votre profil doit être validé avant d’accéder à cette rubrique.')
+  }
 
   return {
     ok: true,

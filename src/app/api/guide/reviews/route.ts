@@ -4,7 +4,7 @@ import { publicReviewerName } from '@/lib/guide-workflow'
 import { requireGuide } from '@/lib/require-account'
 
 export async function GET() {
-  const access = await requireGuide()
+  const access = await requireGuide({ published: true })
   if (!access.ok) return access.response
 
   const reviews = await prisma.review.findMany({

@@ -7,7 +7,7 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const access = await requireGuide();
+  const access = await requireGuide({ published: true });
   if (!access.ok) return access.response;
   const guideProfileId = access.actor.guideProfileId;
 
@@ -63,7 +63,7 @@ export async function POST(
   const limited = await checkRateLimit(req, apiRatelimit);
   if (limited) return limited;
 
-  const access = await requireGuide();
+  const access = await requireGuide({ published: true });
   if (!access.ok) return access.response;
   const guideProfileId = access.actor.guideProfileId;
 

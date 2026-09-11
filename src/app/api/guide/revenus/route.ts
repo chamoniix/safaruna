@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma'
 import { requireGuide } from '@/lib/require-account'
 
 export async function GET() {
-  const access = await requireGuide()
+  const access = await requireGuide({ published: true })
   if (!access.ok) return access.response
   const guideProfileId = access.actor.guideProfileId
   const now = new Date()

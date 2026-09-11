@@ -157,7 +157,90 @@ test('les confirmations Guide utilisent les textes validés et le contact WhatsA
   assert.match(email, /بارك الله فيك/)
   assert.match(email, /ما شاء الله/)
   assert.match(email, /https:\/\/wa\.me\/message\/3LAXCIZV7FFEK1/)
-  assert.match(email, /\+33 7 43 95 91 70/)
+  assert.match(email.replaceAll('&nbsp;', ' '), /\+33 7 43 95 91 70/)
+})
+
+// Execute the real template functions, replacing delivery before evaluating any
+// code: no provider, Prisma, credentials or network is involved in these tests.
+function renderGuideEmail(functionName: string, ...args: unknown[]) {
+  const source = ts.createSourceFile('email.ts', email, ts.ScriptTarget.Latest, true)
+  const functions = source.statements.filter((node) =>
+    ts.isFunctionDeclaration(node) && node.name?.text !== 'sendEmail',
+  ).map((node) => node.getText(source)).join('\n')
+  const js = ts.transpileModule(functions, {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+  }).outputText
+  let message: { html: string; subject: string; category: string; to: { email: string }; throwOnError?: boolean } | undefined
+  const context = {
+    exports: {} as Record<string, (...values: unknown[]) => unknown>,
+    sendEmail: (value: typeof message) => { message = value; return Promise.resolve() },
+  }
+  runInNewContext(js, context)
+  context.exports[functionName](...args)
+  assert.ok(message)
+  return message
+}
+
+test('les emails candidature isolent la formule arabe du nom et conservent les décisions réelles', () => {
+  const name = 'Guide <test> & équipe'
+  const received = renderGuideEmail('sendWelcomeGuide', 'guide@example.test', name)
+  const approved = renderGuideEmail('sendGuideAccess', {
+    to: 'guide@example.test', email: 'guide@example.test', name,
+    setupUrl: 'https://safaruma.com/guide/nouveau-mot-de-passe?token=example', profileActive: false,
+  })
+  for (const [message, greeting] of [[received, 'بارك الله فيك'], [approved, 'ما شاء الله']] as const) {
+    assert.match(message.html, new RegExp(`<h1[^>]*lang="ar"[^>]*dir="rtl"[^>]*>${greeting}</h1>`))
+    assert.match(message.html, /<p[^>]*dir="auto"[^>]*>Guide &lt;test&gt; &amp; équipe<\/p>/)
+    assert.doesNotMatch(message.html, /<test>/)
+    assert.equal(message.to.email, 'guide@example.test')
+  }
+  assert.equal(received.subject, 'Candidature GUIDE SAFARUMA')
+  assert.match(received.html, /délai de 72 h/)
+  assert.equal(approved.category, 'GUIDE_ACCESS_INVITATION')
+  assert.equal(approved.throwOnError, true)
+  assert.match(approved.html, /CANDIDATURE VALIDÉE/)
+  assert.doesNotMatch(approved.html, /PROFIL ACTIF/)
+  assert.match(approved.html, /expire dans <strong>48 heures<\/strong>/)
+  assert.match(approved.html, /href="https:\/\/safaruma.com\/guide\/nouveau-mot-de-passe\?token=example"/)
+})
+
+test('les deux emails Guide ont un vrai bouton WhatsApp et un numéro insécable', () => {
+  const messages = [
+    renderGuideEmail('sendWelcomeGuide', 'guide@example.test', 'Guide'),
+    renderGuideEmail('sendGuideAccess', {
+      to: 'guide@example.test', email: 'long.address.for.mobile@example.test', name: 'Guide',
+      setupUrl: 'https://safaruma.com/guide/nouveau-mot-de-passe', profileActive: true,
+    }),
+  ]
+  for (const { html } of messages) {
+    const button = html.match(/<a href="https:\/\/wa\.me\/message\/3LAXCIZV7FFEK1"[^>]*>[\s\S]*?<\/a>/)?.[0]
+    assert.ok(button)
+    assert.match(button, /background:#128C7E/)
+    assert.match(button, /white-space:nowrap/)
+    assert.match(button, /<img[^>]*src="https:\/\/safaruma.com\/whatsapp-email.png"/)
+    assert.match(button, /\+33&nbsp;7&nbsp;43&nbsp;95&nbsp;91&nbsp;70/)
+    assert.doesNotMatch(button, /<svg/)
+    assert.match(html, /padding:24px;border:1px solid/)
+  }
+  assert.match(messages[1].html, /PROFIL ACTIF/)
+})
+
+test('la salutation arabe du mot de passe reste réservée au Guide et préserve les détails de sécurité', () => {
+  const context = { date: '11 septembre 2026', ip: '192.0.2.1', country: 'France', city: 'Paris' }
+  for (const name of ['Guide <test>', '']) {
+    const message = renderGuideEmail('sendGuidePasswordChanged', { to: 'guide@example.test', name, context })
+    assert.match(message.html, /lang="ar" dir="rtl"[^>]*>السلام عليكم<\/span>/)
+    assert.doesNotMatch(message.html, /Bonjour/)
+    assert.match(message.html, /192\.0\.2\.1/)
+    assert.match(message.html, /11 septembre 2026/)
+    assert.match(message.html, /Toutes les sessions ont été déconnectées/)
+    assert.equal(message.throwOnError, true)
+    assert.equal(message.category, 'GUIDE_PASSWORD_CHANGED')
+  }
+  const admin = renderGuideEmail('sendAdminPasswordChanged', { to: 'admin@example.test', name: 'Admin', role: 'ADMIN', context })
+  assert.match(admin.html, /Bonjour Admin/)
+  assert.doesNotMatch(admin.html, /السلام عليكم/)
+  assert.match(admin.html, /padding:40px;border:1px solid/)
 })
 
 test('les données publiques soumises par le Guide restent en attente sans modifier le live', () => {

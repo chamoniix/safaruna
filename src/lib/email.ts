@@ -306,14 +306,14 @@ export function escapeHtml(str: unknown): string {
 
 // ─── Template helpers ───────────────────────────────────────────
 
-export function baseTemplate(content: string): string {
+export function baseTemplate(content: string, guideMobileLayout = false): string {
   return `<!DOCTYPE html>
 <html lang="fr">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SAFARUMA</title></head>
 <body style="margin:0;padding:0;background:#FAF7F0;font-family:Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF7F0;padding:40px 16px;">
     <tr><td align="center">
-      <table width="580" cellpadding="0" cellspacing="0" style="max-width:580px;width:100%;">
+      <table width="580" cellpadding="0" cellspacing="0" style="max-width:580px;width:100%;${guideMobileLayout ? 'table-layout:fixed;' : ''}">
 
         <!-- Header -->
         <tr>
@@ -327,7 +327,7 @@ export function baseTemplate(content: string): string {
 
         <!-- Body -->
         <tr>
-          <td style="background:white;padding:40px;border:1px solid #E8DFC8;border-top:none;">
+          <td style="background:white;padding:${guideMobileLayout ? '24' : '40'}px;border:1px solid #E8DFC8;border-top:none;">
             ${content}
           </td>
         </tr>
@@ -443,13 +443,30 @@ export function sendWelcomePelerin(to: string, name: string): Promise<EmailSendR
 
 // ─── 2. Bienvenue guide ──────────────────────────────────────────
 
+// Keep Arabic and recipient names in separate blocks so bidirectional text
+// cannot reorder punctuation or crowd the greeting on narrow email clients.
+function guideEmailGreeting(arabic: string, name: string): string {
+  return `<h1 lang="ar" dir="rtl" style="font-family:Arial,sans-serif;font-size:24px;font-weight:400;line-height:1.8;text-align:left;color:#1A1209;margin:0;padding:2px 0;">${escapeHtml(arabic)}</h1>
+    <p dir="auto" style="font-size:18px;line-height:1.6;color:#1A1209;margin:0 0 16px;overflow-wrap:anywhere;word-break:break-word;">${escapeHtml(name)}</p>`;
+}
+
+function guideWhatsAppButton(): string {
+  return `<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin:16px 0;">
+    <tr><td align="center" bgcolor="#128C7E" style="background:#128C7E;border-radius:10px;">
+      <a href="https://wa.me/message/3LAXCIZV7FFEK1" dir="ltr" style="display:block;background:#128C7E;color:#FFFFFF;border-radius:10px;padding:14px 8px;font-family:Arial,sans-serif;font-size:12px;line-height:20px;font-weight:700;text-align:center;text-decoration:none;white-space:nowrap;">
+        <img src="https://safaruma.com/whatsapp-email.png" width="18" height="18" alt="" style="display:inline-block;vertical-align:middle;border:0;margin-right:4px;">WhatsApp&nbsp;·&nbsp;<span style="white-space:nowrap;">+33&nbsp;7&nbsp;43&nbsp;95&nbsp;91&nbsp;70</span>
+      </a>
+    </td></tr>
+  </table>`;
+}
+
 export function sendWelcomeGuide(to: string, name: string): Promise<EmailSendResult> {
   return sendEmail({
     category: 'GUIDE_APPLICATION_RECEIVED',
     to: { email: to, name },
     subject: 'Candidature GUIDE SAFARUMA',
     html: baseTemplate(`
-      ${heading(`بارك الله فيك، ${escapeHtml(name)}`)}
+      ${guideEmailGreeting('بارك الله فيك', name)}
       ${p('Votre candidature pour devenir Guide SAFARUMA a bien été reçue. Notre équipe reviendra vers vous dans un délai de 72 h.')}
       ${divider()}
       <div style="background:#FAF7F0;border-left:3px solid #C9A84C;padding:16px 20px;border-radius:0 12px 12px 0;margin:16px 0;">
@@ -462,8 +479,9 @@ export function sendWelcomeGuide(to: string, name: string): Promise<EmailSendRes
         </ol>
       </div>
       ${divider()}
-      ${p(`Des questions ? Contactez-nous à <a href="mailto:contact@safaruma.com" style="color:#C9A84C;font-weight:700;">contact@safaruma.com</a> ou sur <a href="https://wa.me/message/3LAXCIZV7FFEK1" style="color:#128C7E;font-weight:700;text-decoration:none;"><svg width="16" height="16" viewBox="0 0 24 24" fill="#25D366" style="display:inline-block;vertical-align:-3px;margin-right:4px;" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>WhatsApp&nbsp;: +33 7 43 95 91 70</a>.`)}
-    `),
+      ${p('Des questions ? Contactez-nous à <a href="mailto:contact@safaruma.com" style="color:#C9A84C;font-weight:700;">contact@safaruma.com</a> ou sur WhatsApp.')}
+      ${guideWhatsAppButton()}
+    `, true),
   });
 }
 
@@ -483,7 +501,7 @@ export function sendGuideAccess(opts: {
     subject: profileActive ? 'Activez votre accès Guide SAFARUMA — Bienvenue !' : 'Définissez votre accès Guide SAFARUMA',
     throwOnError: true,
     html: baseTemplate(`
-      ${heading(`ما شاء الله، ${escapeHtml(name)}`)}
+      ${guideEmailGreeting('ما شاء الله', name)}
       ${badge(profileActive ? 'PROFIL ACTIF ✓' : 'CANDIDATURE VALIDÉE ✓', '#1D5C3A')}
       ${p(profileActive
         ? 'Votre dossier a été examiné et approuvé par l\'équipe SAFARUMA. Votre profil guide est maintenant actif et visible par les pèlerins.'
@@ -491,20 +509,17 @@ export function sendGuideAccess(opts: {
       ${divider()}
       <div style="background:#1A1209;border-radius:12px;padding:24px;margin:16px 0;">
         <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#F0D897;margin-bottom:16px;">Votre adresse de connexion</div>
-        <table cellpadding="0" cellspacing="0" width="100%">
-          <tr>
-            <td style="font-size:12px;color:#E8DFC8;padding:6px 0;width:40%;">Email</td>
-            <td style="font-size:13px;color:#FFF3C4;font-weight:700;font-family:monospace;">${escapeHtml(email)}</td>
-          </tr>
-        </table>
+        <div style="font-size:12px;color:#E8DFC8;padding:6px 0;">Email</div>
+        <div dir="ltr" style="font-size:13px;line-height:1.6;color:#FFF3C4;font-weight:700;font-family:monospace;overflow-wrap:anywhere;word-break:break-all;">${escapeHtml(email)}</div>
         <div style="margin-top:12px;font-size:11px;color:#E8DFC8;">Définissez vous-même votre mot de passe avec le lien personnel ci-dessous.</div>
       </div>
       ${divider()}
       <div style="text-align:center;padding:8px 0;">
         ${btn('Définir mon mot de passe', setupUrl)}
       </div>
-      ${p('<small style="color:#9A8D7A;">Ce lien est personnel, utilisable une seule fois et expire dans <strong>48 heures</strong>. En cas de problème : <a href="mailto:contact@safaruma.com" style="color:#C9A84C;">contact@safaruma.com</a> ou <a href="https://wa.me/message/3LAXCIZV7FFEK1" style="color:#128C7E;font-weight:700;">WhatsApp&nbsp;: +33 7 43 95 91 70</a>.</small>')}
-    `),
+      ${p('<small style="color:#9A8D7A;">Ce lien est personnel, utilisable une seule fois et expire dans <strong>48 heures</strong>. En cas de problème : <a href="mailto:contact@safaruma.com" style="color:#C9A84C;">contact@safaruma.com</a>.</small>')}
+      ${guideWhatsAppButton()}
+    `, true),
   });
 }
 
@@ -860,7 +875,7 @@ export function sendGuidePasswordChanged(opts: {
     throwOnError: true,
     html: baseTemplate(`
       ${heading('Mot de passe modifié')}
-      ${p(`Bonjour${name ? ' ' + escapeHtml(name) : ''},`)}
+      ${p(`<span lang="ar" dir="rtl" style="display:block;font-family:Arial,sans-serif;font-size:20px;line-height:1.8;text-align:left;">السلام عليكم</span>${name ? `<span dir="auto" style="display:block;overflow-wrap:anywhere;">${escapeHtml(name)}</span>` : ''}`)}
       ${p('Le mot de passe de votre espace Guide SAFARUMA vient d’être modifié. Toutes les sessions ont été déconnectées.')}
       ${guideSecurityContext(context)}
       ${p('<small style="color:#9A8D7A;">Si vous n’êtes pas à l’origine de cette action, utilisez immédiatement « Mot de passe oublié » puis contactez SAFARUMA.</small>')}

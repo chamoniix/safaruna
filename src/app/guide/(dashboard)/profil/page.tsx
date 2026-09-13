@@ -6,8 +6,11 @@ import Image from 'next/image';
 import { GUIDE_LANGUAGES, LANG_CODE_TO_LABEL } from '@/lib/languages';
 import ApplicationMediaPanel from '@/components/guide/ApplicationMediaPanel';
 import type { ApplicationMediaView } from '@/lib/guide-application-media';
+import type { GuideDossierView } from '@/lib/guide-dossier';
+import { GUIDE_DOSSIER_ACKNOWLEDGEMENTS, GUIDE_PAYOUT_POLICY, type GuideDossierSection } from '@/lib/guide-payout-policy';
 
 type Profile = {
+  dossier: GuideDossierView;
   applicationMedia: ApplicationMediaView | null;
   id: string;
   name: string;
@@ -99,6 +102,7 @@ export default function GuideProfil() {
   const [pricingCorrectionRequest, setPricingCorrectionRequest] = useState('');
   const [personalCorrectionRequest, setPersonalCorrectionRequest] = useState('');
   const [languagesCorrectionRequest, setLanguagesCorrectionRequest] = useState('');
+  const [dossierChecks, setDossierChecks] = useState<Partial<Record<GuideDossierSection, boolean>>>({});
 
   // Editable fields
   const [firstName, setFirstName] = useState('');
@@ -159,6 +163,19 @@ export default function GuideProfil() {
     setSaveError('');
     setSuccess('');
     try {
+      const confirmations = profile?.dossier.confirmations
+        .filter(item => dossierChecks[item.section] && !item.confirmed)
+        .map(item => ({ section: item.section, revision: item.revision })) || [];
+      if (confirmations.length > 0) {
+        const response = await fetch('/api/guide/profil', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ confirmations }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Les confirmations n’ont pas pu être enregistrées.');
+        setProfile(current => current ? { ...current, dossier: result.dossier } : current);
+        setDossierChecks({});
+      }
       const res = await fetch('/api/guide/profil', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -180,14 +197,25 @@ export default function GuideProfil() {
       });
       const data = await res.json();
       const noNewChanges = !res.ok && data.error === 'Aucune modification à envoyer.';
-      if (!res.ok && !(isDraftProfile && noNewChanges)) throw new Error(data.error || 'Erreur lors de l’envoi');
+      if (!res.ok && !(noNewChanges && (isDraftProfile || confirmations.length > 0))) throw new Error(data.error || 'Erreur lors de l’envoi');
       if (res.ok) setPendingChangeRequest(data.pendingChangeRequest || null);
 
       if (isDraftProfile) {
         await submitProfileForReview();
         setSuccess('Votre profil a été transmis. L’administration le traitera sous 48 h.');
       } else {
-        setSuccess('Demande envoyée à l’administration. Le profil public reste inchangé jusqu’à sa validation.');
+        setSuccess(noNewChanges ? 'Vos confirmations ont été enregistrées. Votre statut et votre profil public restent inchangés.' : 'Demande envoyée à l’administration. Le profil public reste inchangé jusqu’à sa validation.');
+      }
+      // Refresh stored completeness after the pending-profile write as well.
+      // A refresh failure must not claim the successful submission was rolled back.
+      try {
+        const refreshed = await fetch('/api/guide/profil', { cache: 'no-store' });
+        if (!refreshed.ok) throw new Error('refresh');
+        const current = await refreshed.json();
+        setProfile(current.profile);
+        setPendingChangeRequest(current.profile.pendingChangeRequest);
+      } catch {
+        setSaveError('L’envoi a réussi, mais l’actualisation du dossier a échoué. Rechargez la page pour voir son état enregistré.');
       }
     } catch (e: unknown) {
       setSaveError(e instanceof Error ? e.message : 'Erreur inconnue');
@@ -340,6 +368,18 @@ export default function GuideProfil() {
 
       <ApplicationMediaPanel data={profile.applicationMedia} />
 
+      <section aria-labelledby="guide-dossier-progress" style={{ ...card, padding: '1.25rem' }}>
+        <h2 id="guide-dossier-progress" style={{ fontSize: '1.1rem', margin: '0 0 0.5rem', color: '#1A1209' }}>Votre dossier Guide</h2>
+        <p style={{ fontSize: '0.8rem', color: '#4A3F30', lineHeight: 1.6 }}>
+          {profile.dossier.progress.filter(item => item.complete).length} / {profile.dossier.progress.length} rubriques complétées et enregistrées.
+          {' '}Cela ne vaut pas validation administrative ni publication de votre profil.
+        </p>
+        <ul style={{ paddingLeft: '1.25rem', fontSize: '0.8rem', lineHeight: 1.9, color: '#4A3F30' }}>
+          {profile.dossier.progress.map(item => <li key={item.key}>{item.label} : <strong>{item.complete ? 'Complété' : 'À compléter'}</strong></li>)}
+        </ul>
+        {profile.dossier.missingProfileFields.length > 0 && <p style={{ fontSize: '0.78rem', color: '#92400E' }}>Informations manquantes : {profile.dossier.missingProfileFields.join(', ')}.</p>}
+      </section>
+
       {pendingChangeRequest && (
         <div style={{ background: '#FEF3C7', border: '1px solid #F59E0B', borderRadius: 10, padding: '0.85rem 1rem', color: '#92400E', fontSize: '0.8rem', lineHeight: 1.6 }}>
           Une modification de votre profil est en attente de validation par l&apos;administration. Votre profil public actuel reste inchangé.
@@ -384,17 +424,14 @@ export default function GuideProfil() {
       </div>
 
       <div style={{ ...card, padding: '1.25rem' }}>
-        <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209', marginBottom: '0.25rem' }}>Tarifs nets validés</div>
-        <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginBottom: '1rem' }}>Montants qui vous sont reversés par ville. Seule l’administration peut les modifier.</div>
+        <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209', marginBottom: '0.25rem' }}>Montants nets de votre dossier</div>
+        <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginBottom: '1rem' }}>Montants actuellement enregistrés, à vérifier avant votre accord. Seul le Superadmin peut modifier les tarifs effectifs.</div>
         <div className="guide-profile-rate-grid">
-          {[
-            { label: 'Makkah', enabled: profile.servesMakkah, values: [profile.makkahNetUpTo6Cents, profile.makkahNetUpTo15Cents, profile.makkahNetUpTo32Cents] },
-            { label: 'Médine', enabled: profile.servesMadinah, values: [profile.madinahNetUpTo6Cents, profile.madinahNetUpTo15Cents, profile.madinahNetUpTo32Cents] },
-          ].map(item => (
-            <div key={item.label} style={{ border: `1px solid ${item.enabled ? '#C9A84C' : '#E5E7EB'}`, borderRadius: 10, padding: '0.875rem', background: item.enabled ? '#FEF9EC' : '#F9FAFB', opacity: item.enabled ? 1 : 0.65 }}>
-              <div style={{ fontWeight: 800, fontSize: '0.82rem', color: '#1A1209', marginBottom: '0.5rem' }}>{item.label} · {item.enabled ? 'Disponible' : 'Indisponible'}</div>
+          {profile.dossier.rates.base.map(item => (
+            <div key={item.city} style={{ border: `1px solid ${item.enabled ? '#C9A84C' : '#E5E7EB'}`, borderRadius: 10, padding: '0.875rem', background: item.enabled ? '#FEF9EC' : '#F9FAFB', opacity: item.enabled ? 1 : 0.65 }}>
+              <div style={{ fontWeight: 800, fontSize: '0.82rem', color: '#1A1209', marginBottom: '0.5rem' }}>{item.city} · {item.enabled ? 'Disponible' : 'Indisponible'}</div>
               {item.enabled && [
-                ['1–6 clients', item.values[0]], ['7–15 clients', item.values[1]], ['16–32 clients', item.values[2]],
+                ['1–6 clients', item.cents[0]], ['7–15 clients', item.cents[1]], ['16–32 clients', item.cents[2]],
               ].map(([group, cents]) => (
                 <div key={String(group)} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#7A6D5A', padding: '0.2rem 0' }}>
                   <span>{group}</span><strong style={{ color: '#1A1209' }}>{Number(cents) / 100} €</strong>
@@ -403,12 +440,48 @@ export default function GuideProfil() {
             </div>
           ))}
         </div>
+        <details style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#4A3F30' }}>
+          <summary style={{ cursor: 'pointer', fontWeight: 700, padding: '0.5rem 0' }}>Montants nets des lieux supplémentaires</summary>
+          <p>Par groupe : 1–6 / 7–15 / 16–32 clients. Les lieux inclus dans la prestation de base ne sont pas facturés ici en supplément.</p>
+          <p>Catalogue actuel ; les lieux réellement proposés restent ceux activés dans votre espace.</p>
+          <dl>
+            {profile.dossier.rates.places.map(place => <div key={place.key} style={{ padding: '0.5rem 0', borderBottom: '1px solid #E8DFC8' }}>
+              <dt style={{ fontWeight: 600 }}>{place.name}</dt>
+              <dd style={{ margin: '0.25rem 0 0' }}>{place.cents.map(cents => `${cents / 100} €`).join(' / ')}</dd>
+            </div>)}
+          </dl>
+        </details>
+        <details style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: '#4A3F30' }}>
+          <summary style={{ cursor: 'pointer', fontWeight: 700, padding: '0.5rem 0' }}>Transport et hébergement : montants nets</summary>
+          <p>Uniquement lorsque ces options figurent dans la réservation. Il ne s’agit pas des prix facturés au pèlerin.</p>
+          <dl>{([
+            ['Train — par trajet', 'trainPerTrip'], ['Train — aller-retour', 'trainRoundTrip'],
+            ['Taxi interville — aller simple', 'taxiOneWay'], ['Taxi interville — aller-retour', 'taxiRoundTrip'],
+            ['Voiture locale — par jour', 'localCarPerDay'], ['Minivan local — par jour', 'localMinivanPerDay'],
+            ['Bus local — par jour', 'localBusPerDay'], ['Hôtel du Guide — par nuit', 'guideHotelPerNight'],
+          ] as const).map(([name, key]) => <div key={key} style={{ padding: '0.3rem 0' }}><dt>{name}</dt><dd style={{ margin: 0, fontWeight: 700 }}>{profile.dossier.rates.travelNetEuros[key]} €</dd></div>)}</dl>
+        </details>
         <div style={{ marginTop: '1rem' }}>
           <span style={label}>Demande de correction</span>
           <textarea value={pricingCorrectionRequest} onChange={event => setPricingCorrectionRequest(event.target.value)} rows={3} maxLength={1000} placeholder="Ex. : Je souhaite modifier un tarif validé…" style={{ ...input, resize: 'vertical', lineHeight: 1.55 }} />
           <div style={{ marginTop: 4, fontSize: '0.68rem', color: '#7A6D5A' }}>Votre demande sera transmise à l’administration. Aucun tarif n’est modifié automatiquement.</div>
         </div>
       </div>
+
+      <section aria-labelledby="guide-bank-details" data-clarity-mask="true" data-sentry-mask style={{ ...card, padding: '1.25rem', color: '#1A1209' }}>
+        <h2 id="guide-bank-details" style={{ fontSize: '1.1rem', margin: '0 0 0.75rem' }}>Coordonnées bancaires de votre dossier</h2>
+        <p style={{ fontSize: '0.8rem', lineHeight: 1.6 }}>{GUIDE_PAYOUT_POLICY.holder}</p>
+        {!profile.dossier.bank.readable ? <p role="alert" style={{ color: '#B91C1C', fontSize: '0.8rem' }}>Les coordonnées bancaires ne peuvent pas être affichées. Contactez l’équipe avant de les confirmer.</p> : (
+          <dl className="guide-profile-grid" style={{ fontSize: '0.82rem', lineHeight: 1.6 }}>
+            {[
+              ['Titulaire', [profile.dossier.bank.firstName, profile.dossier.bank.lastName].filter(Boolean).join(' ')],
+              ['Banque', profile.dossier.bank.bankName], ['Pays de la banque', profile.dossier.bank.country],
+              ['IBAN', profile.dossier.bank.iban], ['SWIFT / BIC (facultatif)', profile.dossier.bank.bic],
+            ].map(([name, value]) => <div key={name}><dt style={{ color: '#4A3F30' }}>{name}</dt><dd style={{ margin: 0, fontWeight: 600, overflowWrap: 'anywhere' }}>{value || 'Non renseigné'}</dd></div>)}
+          </dl>
+        )}
+        <p style={{ fontSize: '0.78rem', color: '#4A3F30', lineHeight: 1.6 }}>Votre confirmation est une déclaration de votre part, pas une vérification bancaire. Si une information est absente ou incorrecte, indiquez-la dans la demande de correction des informations personnelles, sans y recopier votre IBAN.</p>
+      </section>
 
       {/* Edit form */}
       <form id="guide-profile-form" onSubmit={handleSave}>
@@ -585,6 +658,31 @@ export default function GuideProfil() {
           {passwordError && <div style={{ color: '#DC2626', fontSize: '0.75rem' }}>{passwordError}</div>}
         </form>
       </div>
+
+      <section aria-labelledby="guide-dossier-confirmations" style={{ ...card, padding: '1.25rem', color: '#1A1209' }}>
+        <h2 id="guide-dossier-confirmations" style={{ fontSize: '1.1rem', margin: '0 0 0.75rem' }}>Rémunération et confirmations</h2>
+        {Object.values(GUIDE_PAYOUT_POLICY).map(text => <p key={text} style={{ fontSize: '0.8rem', lineHeight: 1.65 }}>{text}</p>)}
+        <p style={{ fontSize: '0.8rem', lineHeight: 1.8 }}>
+          <Link href="/conditions-guides" target="_blank" rel="noopener noreferrer">Lire les Conditions Guides</Link>{' · '}
+          <Link href="/charte-islamique" target="_blank" rel="noopener noreferrer">Lire la Charte SAFARUMA</Link>{' · '}
+          <Link href="/guide/calendrier">Vérifier mon calendrier</Link>{' · '}
+          <Link href="/guide/lieux">Vérifier mes lieux</Link>
+        </p>
+        <p style={{ fontSize: '0.78rem', color: '#4A3F30' }}>Une date sans marque est disponible. Vous n’avez pas besoin de créer une indisponibilité pour confirmer votre calendrier.</p>
+        <fieldset disabled={saving} style={{ border: 0, padding: 0, margin: '1rem 0' }}>
+          <legend style={{ fontSize: '0.8rem', fontWeight: 700, marginBottom: '0.75rem' }}>Vos confirmations personnelles</legend>
+          {profile.dossier.confirmations.map(item => <div key={item.section} style={{ marginBottom: '0.9rem', fontSize: '0.8rem', lineHeight: 1.55 }}>
+            {item.confirmed ? <p style={{ margin: 0, color: '#166534' }}>{GUIDE_DOSSIER_ACKNOWLEDGEMENTS[item.section]} <strong>Enregistré le {new Date(item.confirmedAt!).toLocaleString('fr-FR')}.</strong></p> : <>
+              <label style={{ display: 'flex', gap: '0.7rem', alignItems: 'flex-start' }}>
+                <input type="checkbox" checked={Boolean(dossierChecks[item.section])} disabled={!item.ready} onChange={event => setDossierChecks(current => ({ ...current, [item.section]: event.target.checked }))} style={{ width: 20, height: 20, flexShrink: 0, marginTop: 2, accentColor: '#1D5C3A' }} />
+                <span>{GUIDE_DOSSIER_ACKNOWLEDGEMENTS[item.section]}</span>
+              </label>
+              {!item.ready && <p style={{ margin: '0.3rem 0 0 2rem', color: '#92400E' }}>Complétez les coordonnées bancaires ou les villes concernées avant de confirmer cette rubrique.</p>}
+            </>}
+          </div>)}
+        </fieldset>
+        <p style={{ fontSize: '0.74rem', color: '#4A3F30', lineHeight: 1.6 }}>Les cases cochées sont enregistrées avec le bouton d’envoi ci-dessous. Elles ne déclenchent ni virement, ni validation bancaire, ni publication. Si les informations enregistrées changent, la rubrique concernée doit être confirmée à nouveau.</p>
+      </section>
 
       <div id="guide-profile-submission" style={{ ...card, scrollMarginTop: 90, padding: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', borderColor: '#C9A84C' }}>
         <div style={{ flex: '1 1 300px' }}>

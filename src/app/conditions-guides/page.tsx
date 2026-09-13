@@ -1,4 +1,5 @@
 import LegalLayout, { h2, p, ul, li } from '@/components/LegalLayout';
+import { GUIDE_PAYOUT_POLICY } from '@/lib/guide-payout-policy';
 
 export const metadata = {
   title: 'Conditions Guides — SAFARUMA',
@@ -55,12 +56,15 @@ export default function ConditionsGuides() {
           <ul style={{ ...ul, marginBottom: 0 }}>
             <li style={li}><strong>Tarifs proposés lors de la candidature</strong> puis validés par SAFARUMA avant publication</li>
             <li style={li}><strong>Rémunération nette</strong> visible dans l’espace Guide, sans affichage du montant total payé par le client</li>
-            <li style={li}><strong>Virement le 1er du mois</strong> pour toutes les missions terminées du mois précédent</li>
+            <li style={li}><strong>Délai d’envoi du virement</strong> : {GUIDE_PAYOUT_POLICY.delay}</li>
+            <li style={li}>{GUIDE_PAYOUT_POLICY.bankDelay}</li>
+            <li style={li}>{GUIDE_PAYOUT_POLICY.currency}</li>
             <li style={li}><strong>Aucun abonnement mensuel</strong> — vous payez seulement quand vous gagnez</li>
             <li style={li}>Aucun frais d’inscription, aucune commission en cas d’annulation client remboursée intégralement</li>
           </ul>
         </div>
-        <p style={p}>Les virements sont effectués par virement bancaire vers l’IBAN que vous avez renseigné. Vous êtes responsable de déclarer vos revenus conformément à la législation fiscale de votre pays de résidence.</p>
+        <p style={p}>{GUIDE_PAYOUT_POLICY.holder}</p>
+        <p style={p}>Vous êtes responsable de déclarer vos revenus conformément à la législation fiscale de votre pays de résidence.</p>
       </section>
 
       <section id="annulation">

@@ -15,8 +15,8 @@ export type EffectivePlace = Place & {
   netUpTo32Cents: number
 }
 
-export async function getEffectivePlaceCatalog(): Promise<EffectivePlace[]> {
-  const settings = await prisma.placePrice.findMany({
+export async function getEffectivePlaceCatalog(db: Pick<typeof prisma, 'placePrice'> = prisma): Promise<EffectivePlace[]> {
+  const settings = await db.placePrice.findMany({
     select: {
       placeKey: true,
       price: true,

@@ -7,6 +7,7 @@ import { readGuideProfileMedia } from '@/lib/guide-profile-media'
 import { encrypt } from '@/lib/crypto'
 import { readAdminGuideDossier } from '@/lib/guide-dossier'
 import prisma from '@/lib/prisma'
+import { dispatchGuideDossierEmails, queueGuideDossierEmail } from '@/lib/email'
 
 const reviewSchema = z.discriminatedUnion('action', [z.object({
   requestId: z.string().min(1),
@@ -68,7 +69,7 @@ export async function POST(
           after: { revision: dossier.bankVerification.revision, accountHolderConfirmed: true },
           ...adminAuditFields(auditContext),
         } })
-        return { status: 'BANK_VERIFIED' }
+        return { status: 'BANK_VERIFIED', emailIds: [] }
       }
       if (guide.guideAccount.status !== 'ACTIVE' || guide.status === 'SUSPENDED' || guide.permanentlyDeactivatedAt) throw new Error('GUIDE_FORBIDDEN')
 
@@ -92,14 +93,18 @@ export async function POST(
           } })
         }
         await tx.guideProfile.update({ where: { id: guide.id }, data: { status: 'DRAFT', profileSubmittedAt: null } })
-        await tx.auditLog.create({ data: {
+        const returnEvent = await tx.auditLog.create({ data: {
           actor: actor.email, actorRole: actor.role, actorAdminId: actor.id,
           action: 'GUIDE_PROFILE_RETURNED_TO_DRAFT', target: guide.id,
           detail: adminAuditDetail(auditContext, { reason: expected.reviewNotes, requestId: pending?.id ?? null }),
           before: { status: 'REVIEW', profileSubmittedAt: expected.profileSubmittedAt }, after: { status: 'DRAFT' },
           ...adminAuditFields(auditContext),
         } })
-        return { status: 'DRAFT' }
+        const emailId = await queueGuideDossierEmail(tx, {
+          eventId: returnEvent.id, guideProfileId: guide.id, event: 'RETURNED',
+          to: guide.guideAccount.email, name: guide.guideAccount.displayName || guide.guideAccount.firstName || 'Guide',
+        })
+        return { status: 'DRAFT', emailIds: [emailId] }
       }
 
       const changeRequest = await tx.guideProfileChangeRequest.findUnique({ where: { id: parsed.data.requestId } })
@@ -205,7 +210,7 @@ export async function POST(
           reviewedAt: new Date(),
         },
       })
-      await tx.auditLog.create({
+      const decision = await tx.auditLog.create({
         data: {
           actor: actor.email,
           actorRole: actor.role,
@@ -221,9 +226,14 @@ export async function POST(
         },
       })
 
-      return reviewed
+      const emailId = await queueGuideDossierEmail(tx, {
+        eventId: decision.id, guideProfileId: guide.id, event: action === 'APPROVE' ? 'APPROVED' : 'REJECTED',
+        to: guide.guideAccount.email, name: guide.guideAccount.displayName || guide.guideAccount.firstName || 'Guide',
+      })
+      return { status: reviewed.status, emailIds: [emailId] }
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable })
 
+    await dispatchGuideDossierEmails(result.emailIds)
     return NextResponse.json({ success: true, status: result.status }, { headers: privateHeaders })
   } catch (error) {
     if (error instanceof Error && error.message === 'BANK_INCOMPLETE') return NextResponse.json({ error: 'Complétez les coordonnées bancaires avant leur vérification.' }, { status: 409, headers: privateHeaders })

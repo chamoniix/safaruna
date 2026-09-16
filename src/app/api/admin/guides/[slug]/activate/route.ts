@@ -2,7 +2,7 @@ import { Prisma } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getAdminActor, getAdminAuditContext } from '@/lib/check-admin'
-import { sendGuideProfileActivated } from '@/lib/email'
+import { dispatchGuideDossierEmails } from '@/lib/email'
 import { decideGuideStatus, GuideDossierDecisionError } from '@/lib/guide-dossier'
 import prisma from '@/lib/prisma'
 
@@ -22,14 +22,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
   const { slug } = await params
   try {
     const result = await prisma.$transaction(tx => decideGuideStatus(tx, actor, getAdminAuditContext(req), { slug }, body.data.action, body.data.revision), { isolationLevel: Prisma.TransactionIsolationLevel.Serializable })
-    const { profile, status } = result
-    if (status === 'ACTIVE' && profile.status !== 'ACTIVE' && profile.guideAccount?.email && profile.slug) {
-      await sendGuideProfileActivated({
-        to: profile.guideAccount.email,
-        name: profile.guideAccount.displayName || `${profile.guideAccount.firstName ?? ''} ${profile.guideAccount.lastName ?? ''}`.trim() || 'Guide',
-        profileUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://safaruma.com'}/guides/${profile.slug}`,
-      }).catch(error => console.error('[guide activation email]', error))
-    }
+    const { status, emailIds } = result
+    await dispatchGuideDossierEmails(emailIds)
     return NextResponse.json({ success: true, newStatus: status, message: status === 'ACTIVE' ? 'Profil activé.' : 'Profil suspendu.' }, { headers })
   } catch (error) {
     if (error instanceof GuideDossierDecisionError) return NextResponse.json({ error: error.message }, { status: error.status, headers })

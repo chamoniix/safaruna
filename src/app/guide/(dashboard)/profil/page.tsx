@@ -5,6 +5,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { GUIDE_LANGUAGES, LANG_CODE_TO_LABEL } from '@/lib/languages';
 import ApplicationMediaPanel from '@/components/guide/ApplicationMediaPanel';
+import GuideDossierProposalEditor from '@/components/guide/GuideDossierProposalEditor';
+import type { GuideDossierProposal } from '@/components/guide/GuideDossierProposalEditor';
 import type { ApplicationMediaView } from '@/lib/guide-application-media';
 import type { GuideDossierView } from '@/lib/guide-dossier';
 import { GUIDE_DOSSIER_ACKNOWLEDGEMENTS, GUIDE_PAYOUT_POLICY, type GuideDossierSection } from '@/lib/guide-payout-policy';
@@ -39,10 +41,13 @@ type Profile = {
   languages: { id: string; languageCode: string; level: string }[];
   pendingChangeRequest: {
     id: string;
+    revision: string;
     changes: Record<string, unknown>;
     createdAt: string;
     updatedAt: string;
   } | null;
+  latestProfileDecision: { id: string; status: string; reviewNotes: string | null; reviewedAt: string | null; changes: Record<string, unknown> } | null;
+  profileReturn: { reason: string; at: string } | null;
   createdAt: string;
 };
 
@@ -118,6 +123,29 @@ export default function GuideProfil() {
   // Languages
   const [languages, setLanguages] = useState<{ id: string; languageCode: string; level: string }[]>([]);
   const [langError, setLangError] = useState('');
+  const [identityEditing, setIdentityEditing] = useState(false);
+  const [languagesEditing, setLanguagesEditing] = useState(false);
+  const [proposal, setProposal] = useState<GuideDossierProposal>({});
+  const [uploading, setUploading] = useState(false);
+  const [editorVersion, setEditorVersion] = useState(0);
+  const [resubmitRequestId, setResubmitRequestId] = useState<string | null>(null);
+
+  function fillFields(p: Profile, pending: Record<string, unknown>) {
+    setFirstName(typeof pending.firstName === 'string' ? pending.firstName : p.firstName || '');
+    setLastName(typeof pending.lastName === 'string' ? pending.lastName : p.lastName || '');
+    setPhoneWhatsapp(typeof pending.phoneWhatsapp === 'string' ? pending.phoneWhatsapp : p.phoneWhatsapp || '');
+    setCountry(typeof pending.country === 'string' ? pending.country : p.country || '');
+    setBio(typeof pending.bio === 'string' ? pending.bio : p.bio || '');
+    setCity(typeof pending.city === 'string' ? pending.city : p.city || '');
+    setGender(pending.gender === 'HOMME' || pending.gender === 'FEMME' ? pending.gender : p.gender || 'HOMME');
+    setNationality(typeof pending.nationality === 'string' ? pending.nationality : p.nationality || '');
+    setExperienceYears(typeof pending.experienceYears === 'number' ? String(pending.experienceYears) : pending.experienceYears === null ? '' : p.experienceYears?.toString() || '');
+    setLanguages(Array.isArray(pending.languages)
+      ? (pending.languages.filter(value => typeof value === 'string') as string[]).map(languageCode => ({ id: `pending-${languageCode}`, languageCode, level: 'NATIVE' })) : p.languages);
+    setPricingCorrectionRequest(typeof pending.pricingCorrectionRequest === 'string' ? pending.pricingCorrectionRequest : '');
+    setPersonalCorrectionRequest(typeof pending.personalCorrectionRequest === 'string' ? pending.personalCorrectionRequest : '');
+    setLanguagesCorrectionRequest(typeof pending.languagesCorrectionRequest === 'string' ? pending.languagesCorrectionRequest : '');
+  }
 
   useEffect(() => {
     fetch('/api/guide/profil')
@@ -127,22 +155,7 @@ export default function GuideProfil() {
         const pending = p.pendingChangeRequest?.changes || {};
         setProfile(p);
         setPendingChangeRequest(p.pendingChangeRequest);
-        setFirstName(typeof pending.firstName === 'string' ? pending.firstName : p.firstName || '');
-        setLastName(typeof pending.lastName === 'string' ? pending.lastName : p.lastName || '');
-        setPhoneWhatsapp(typeof pending.phoneWhatsapp === 'string' ? pending.phoneWhatsapp : p.phoneWhatsapp || '');
-        setCountry(typeof pending.country === 'string' ? pending.country : p.country || '');
-        setBio(typeof pending.bio === 'string' ? pending.bio : p.bio || '');
-        setCity(typeof pending.city === 'string' ? pending.city : p.city || '');
-        setGender(pending.gender === 'HOMME' || pending.gender === 'FEMME' ? pending.gender : p.gender || 'HOMME');
-        setNationality(typeof pending.nationality === 'string' ? pending.nationality : p.nationality || '');
-        setExperienceYears(typeof pending.experienceYears === 'number' ? String(pending.experienceYears) : pending.experienceYears === null ? '' : p.experienceYears?.toString() || '');
-        const pendingLanguages = Array.isArray(pending.languages) ? pending.languages.filter(value => typeof value === 'string') as string[] : null;
-        setLanguages(pendingLanguages
-          ? pendingLanguages.map(languageCode => ({ id: `pending-${languageCode}`, languageCode, level: 'NATIVE' }))
-          : p.languages);
-        setPricingCorrectionRequest(typeof pending.pricingCorrectionRequest === 'string' ? pending.pricingCorrectionRequest : '');
-        setPersonalCorrectionRequest(typeof pending.personalCorrectionRequest === 'string' ? pending.personalCorrectionRequest : '');
-        setLanguagesCorrectionRequest(typeof pending.languagesCorrectionRequest === 'string' ? pending.languagesCorrectionRequest : '');
+        fillFields(p, pending);
         setLoading(false);
       })
       .catch((e: Error) => { setError(e.message); setLoading(false); });
@@ -158,10 +171,12 @@ export default function GuideProfil() {
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
+    if (saving || uploading || !profile) return;
     const isDraftProfile = profile?.status === 'DRAFT';
     setSaving(true);
     setSaveError('');
     setSuccess('');
+    let proposalRecorded = false;
     try {
       const confirmations = profile?.dossier.confirmations
         .filter(item => dossierChecks[item.section] && !item.confirmed)
@@ -176,29 +191,36 @@ export default function GuideProfil() {
         setProfile(current => current ? { ...current, dossier: result.dossier } : current);
         setDossierChecks({});
       }
+      const changes = {
+        ...(identityEditing ? { firstName, lastName, phoneWhatsapp, country, bio, city, gender, nationality, experienceYears: experienceYears ? Number(experienceYears) : null } : {}),
+        ...(languagesEditing ? { languages: languages.map(language => language.languageCode).sort() } : {}),
+        ...(pricingCorrectionRequest ? { pricingCorrectionRequest } : {}),
+        ...(personalCorrectionRequest ? { personalCorrectionRequest } : {}),
+        ...(languagesCorrectionRequest ? { languagesCorrectionRequest } : {}),
+        ...proposal,
+        ...(resubmitRequestId ? { resubmitRequestId } : {}),
+      };
+      let noNewChanges = Object.keys(changes).length === 0;
+      if (!noNewChanges) {
       const res = await fetch('/api/guide/profil', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          firstName,
-          lastName,
-          phoneWhatsapp,
-          country,
-          bio,
-          city,
-          gender,
-          nationality,
-          experienceYears: experienceYears ? Number(experienceYears) : null,
-          languages: languages.map(language => language.languageCode).sort(),
-          pricingCorrectionRequest,
-          personalCorrectionRequest,
-          languagesCorrectionRequest,
-        }),
+        body: JSON.stringify(changes),
       });
       const data = await res.json();
-      const noNewChanges = !res.ok && data.error === 'Aucune modification à envoyer.';
+      noNewChanges = !res.ok && data.error === 'Aucune modification à envoyer.';
       if (!res.ok && !(noNewChanges && (isDraftProfile || confirmations.length > 0))) throw new Error(data.error || 'Erreur lors de l’envoi');
-      if (res.ok) setPendingChangeRequest(data.pendingChangeRequest || null);
+      if (res.ok) {
+        proposalRecorded = true;
+        setPendingChangeRequest(data.pendingChangeRequest || null);
+        setProposal({});
+        setResubmitRequestId(null);
+        setIdentityEditing(false);
+        setLanguagesEditing(false);
+        setEditorVersion(current => current + 1);
+      }
+      }
+      if (noNewChanges && !isDraftProfile && confirmations.length === 0) throw new Error('Aucune modification à envoyer.');
 
       if (isDraftProfile) {
         await submitProfileForReview();
@@ -214,11 +236,12 @@ export default function GuideProfil() {
         const current = await refreshed.json();
         setProfile(current.profile);
         setPendingChangeRequest(current.profile.pendingChangeRequest);
+        fillFields(current.profile, current.profile.pendingChangeRequest?.changes || {});
       } catch {
         setSaveError('L’envoi a réussi, mais l’actualisation du dossier a échoué. Rechargez la page pour voir son état enregistré.');
       }
     } catch (e: unknown) {
-      setSaveError(e instanceof Error ? e.message : 'Erreur inconnue');
+      setSaveError(`${proposalRecorded ? 'Vos modifications sont enregistrées. La soumission complète n’a pas abouti : ' : ''}${e instanceof Error ? e.message : 'Erreur inconnue'}`);
     } finally {
       setSaving(false);
     }
@@ -328,6 +351,12 @@ export default function GuideProfil() {
   }
 
   const displayName = profile.name;
+  const rejectedDecision = profile.latestProfileDecision?.status === 'REJECTED' ? profile.latestProfileDecision : null;
+  const editingChanges = resubmitRequestId && rejectedDecision ? rejectedDecision.changes : pendingChangeRequest?.changes || {};
+  function reviewNote(fields: string[]) {
+    return rejectedDecision && fields.some(field => Object.hasOwn(rejectedDecision.changes, field))
+      ? <p role="note" style={{ color: '#B91C1C', fontSize: '0.8rem', lineHeight: 1.6 }}>Dernière correction refusée : {rejectedDecision.reviewNotes}</p> : null;
+  }
   const initials = displayName.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase() || 'G';
   const isLive = profile.status === 'ACTIVE'
     && profile.acceptingBookings
@@ -385,6 +414,25 @@ export default function GuideProfil() {
           Une modification de votre profil est en attente de validation par l&apos;administration. Votre profil public actuel reste inchangé.
         </div>
       )}
+      {profile.profileReturn && profile.status === 'DRAFT' && <div role="status" style={{ ...card, padding: '1rem', color: '#92400E' }}>
+        <strong>Dossier retourné pour correction</strong>
+        <p>{profile.profileReturn.reason}</p>
+        <p>Corrigez les rubriques concernées, puis utilisez le bouton d’envoi en bas de page.</p>
+      </div>}
+      {rejectedDecision && !pendingChangeRequest && <div style={{ ...card, padding: '1rem', color: '#92400E' }}>
+        <strong>Dernière demande refusée</strong>
+        <p>{rejectedDecision.reviewNotes}</p>
+        <button type="button" disabled={saving || uploading || Boolean(resubmitRequestId)} onClick={() => {
+          fillFields(profile, rejectedDecision.changes);
+          setResubmitRequestId(rejectedDecision.id);
+          setIdentityEditing(true);
+          setLanguagesEditing(true);
+          setProposal({});
+          setEditorVersion(current => current + 1);
+        }} style={{ ...input, width: 'auto', cursor: 'pointer', fontWeight: 700 }}>
+          {resubmitRequestId ? 'Correction reprise — vérifiez puis envoyez en bas de page' : 'Reprendre cette demande'}
+        </button>
+      </div>}
 
       <div style={{ ...card, padding: '1.25rem', borderColor: isLive ? '#86EFAC' : '#D1D5DB', background: isLive ? '#F0FDF4' : '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem' }}>
@@ -465,6 +513,7 @@ export default function GuideProfil() {
           <span style={label}>Demande de correction</span>
           <textarea value={pricingCorrectionRequest} onChange={event => setPricingCorrectionRequest(event.target.value)} rows={3} maxLength={1000} placeholder="Ex. : Je souhaite modifier un tarif validé…" style={{ ...input, resize: 'vertical', lineHeight: 1.55 }} />
           <div style={{ marginTop: 4, fontSize: '0.68rem', color: '#7A6D5A' }}>Votre demande sera transmise à l’administration. Aucun tarif n’est modifié automatiquement.</div>
+          {reviewNote(['pricingCorrectionRequest'])}
         </div>
       </div>
 
@@ -480,16 +529,30 @@ export default function GuideProfil() {
             ].map(([name, value]) => <div key={name}><dt style={{ color: '#4A3F30' }}>{name}</dt><dd style={{ margin: 0, fontWeight: 600, overflowWrap: 'anywhere' }}>{value || 'Non renseigné'}</dd></div>)}
           </dl>
         )}
-        <p style={{ fontSize: '0.78rem', color: '#4A3F30', lineHeight: 1.6 }}>Votre confirmation est une déclaration de votre part, pas une vérification bancaire. Si une information est absente ou incorrecte, indiquez-la dans la demande de correction des informations personnelles, sans y recopier votre IBAN.</p>
+        <p style={{ fontSize: '0.78rem', color: '#4A3F30', lineHeight: 1.6 }}>Votre confirmation est une déclaration de votre part, pas une vérification bancaire. Utilisez « Modifier les coordonnées bancaires » ci-dessous pour proposer une correction, sans recopier votre IBAN dans les commentaires.</p>
       </section>
+      <GuideDossierProposalEditor
+        key={editorVersion}
+        email={profile.email}
+        bank={profile.dossier.bank}
+        media={profile.applicationMedia}
+        initialBank={editingChanges.bankProposal as GuideDossierProposal['bankProposal']}
+        initialMedia={editingChanges.media as ApplicationMediaView | undefined}
+        disabled={saving}
+        onChange={setProposal}
+        onBusyChange={setUploading}
+      />
+      {reviewNote(['bankEncrypted', 'bankProposal', 'media'])}
 
       {/* Edit form */}
       <form id="guide-profile-form" onSubmit={handleSave}>
         <div id="guide-profile-information" style={{ ...card, overflow: 'hidden', scrollMarginTop: 90 }}>
           <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid #F0EBE0' }}>
             <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Informations personnelles</div>
+            <button type="button" disabled={saving} onClick={() => setIdentityEditing(true)} style={{ ...input, width: 'auto', marginTop: '0.5rem', cursor: 'pointer' }}>{identityEditing ? 'Proposition en cours — envoyer en bas de page' : 'Modifier les informations personnelles'}</button>
+            {pendingChangeRequest && <p style={{ fontSize: '0.75rem', color: '#92400E' }}>Les valeurs proposées sont affichées ci-dessous ; elles ne sont pas encore appliquées.</p>}
           </div>
-          <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <fieldset disabled={!identityEditing || saving} style={{ border: 0, margin: 0, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
             <div className="guide-profile-grid">
               <div>
@@ -562,7 +625,8 @@ export default function GuideProfil() {
               <textarea value={personalCorrectionRequest} onChange={event => setPersonalCorrectionRequest(event.target.value)} rows={3} maxLength={1000} placeholder="Précisez ici une correction que vous souhaitez transmettre à l’administration…" style={{ ...input, resize: 'vertical', lineHeight: 1.55 }} />
             </div>
 
-          </div>
+          </fieldset>
+          {reviewNote(['firstName', 'lastName', 'phoneWhatsapp', 'country', 'bio', 'city', 'gender', 'nationality', 'experienceYears', 'personalCorrectionRequest'])}
         </div>
       </form>
 
@@ -571,8 +635,9 @@ export default function GuideProfil() {
         <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid #F0EBE0' }}>
           <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Langues parlées</div>
           <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>Les changements sont publiés après validation par l&apos;administration.</div>
+          <button type="button" disabled={saving} onClick={() => setLanguagesEditing(true)} style={{ ...input, width: 'auto', marginTop: '0.5rem', cursor: 'pointer' }}>{languagesEditing ? 'Proposition en cours — envoyer en bas de page' : 'Modifier les langues'}</button>
         </div>
-        <div style={{ padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
+        <fieldset disabled={!languagesEditing || saving} style={{ border: 0, margin: 0, padding: '1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
 
           {/* Chips des langues sélectionnées */}
           {languages.length > 0 && (
@@ -617,7 +682,8 @@ export default function GuideProfil() {
           {langError && (
             <div style={{ fontSize: '0.78rem', color: '#DC2626' }}>{langError}</div>
           )}
-        </div>
+        </fieldset>
+        {reviewNote(['languages', 'languagesCorrectionRequest'])}
       </div>
 
       {/* Security */}
@@ -694,10 +760,10 @@ export default function GuideProfil() {
         <button
           type="submit"
           form="guide-profile-form"
-          disabled={saving}
+          disabled={saving || uploading}
           style={{ padding: '0.8rem 1.8rem', borderRadius: 50, fontWeight: 800, fontSize: '0.85rem', background: saving ? '#E8DFC8' : '#1D5C3A', color: saving ? '#7A6D5A' : 'white', border: 'none', cursor: saving ? 'wait' : 'pointer' }}
         >
-          {saving ? 'Transmission…' : profile.status === 'DRAFT' ? 'Envoyer mon profil pour validation' : 'Envoyer mes modifications pour validation'}
+          {uploading ? 'Importation des photos…' : saving ? 'Transmission…' : profile.status === 'DRAFT' ? 'Envoyer mon profil pour validation' : 'Envoyer mes modifications pour validation'}
         </button>
       </div>
 

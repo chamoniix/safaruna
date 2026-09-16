@@ -2,36 +2,48 @@ import { Prisma } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { adminAuditDetail, adminAuditFields, getAdminActor, getAdminAuditContext } from '@/lib/check-admin'
-import { guideProfileChangesSchema } from '@/lib/guide-profile-changes'
+import { guideProfileChangesSchema, bankBeforeSnapshot, decryptBankProposal, profileChangeRevision, redactProfileAudit, sameProfileValue } from '@/lib/guide-profile-changes'
+import { readGuideProfileMedia } from '@/lib/guide-profile-media'
+import { encrypt } from '@/lib/crypto'
 import prisma from '@/lib/prisma'
 
-const reviewSchema = z.object({
+const reviewSchema = z.discriminatedUnion('action', [z.object({
   requestId: z.string().min(1),
-  action: z.enum(['APPROVE', 'REJECT']),
+  revision: z.string().regex(/^[a-f0-9]{64}$/),
+  action: z.literal('APPROVE'),
   reviewNotes: z.string().trim().max(2000).optional(),
-}).strict()
+}).strict(), z.object({
+  requestId: z.string().min(1), revision: z.string().regex(/^[a-f0-9]{64}$/),
+  action: z.literal('REJECT'), reviewNotes: z.string().trim().min(1).max(2000),
+}).strict(), z.object({
+  action: z.literal('RETURN_TO_DRAFT'), reviewNotes: z.string().trim().min(1).max(2000),
+  profileSubmittedAt: z.string().datetime().nullable(), profileUpdatedAt: z.string().datetime(),
+  requestId: z.string().min(1).optional(), revision: z.string().regex(/^[a-f0-9]{64}$/).optional(),
+}).strict()])
+
+const privateHeaders = { 'Cache-Control': 'private, no-store' }
 
 class ProfileChangedDuringReviewError extends Error {}
-
-function sameValue(left: unknown, right: unknown) {
-  return JSON.stringify(left) === JSON.stringify(right)
-}
 
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ slug: string }> },
 ) {
+  const origin = req.headers.get('origin')
+  if (origin && origin !== req.nextUrl.origin) return NextResponse.json({ error: 'Origine non autorisée' }, { status: 403, headers: privateHeaders })
   const actor = await getAdminActor(req)
   if (!actor) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
-  const parsed = reviewSchema.safeParse(await req.json())
+  const parsed = reviewSchema.safeParse(await req.json().catch(() => null))
   if (!parsed.success) return NextResponse.json({ error: 'Paramètres invalides' }, { status: 400 })
 
   const { slug } = await params
   const auditContext = getAdminAuditContext(req)
-  const { requestId, action, reviewNotes } = parsed.data
+  const { action, reviewNotes } = parsed.data
 
   try {
     const result = await prisma.$transaction(async tx => {
+      const currentAdmin = actor.id ? await tx.adminAccount.findUnique({ where: { id: actor.id }, select: { status: true, role: true, email: true } }) : null
+      if (!currentAdmin || currentAdmin.status !== 'ACTIVE' || currentAdmin.role !== actor.role || currentAdmin.email !== actor.email) throw new Error('ADMIN_FORBIDDEN')
       const guide = await tx.guideProfile.findUnique({
         where: { slug },
         include: {
@@ -40,15 +52,51 @@ export async function POST(
         },
       })
       if (!guide?.guideAccount) throw new Error('GUIDE_NOT_FOUND')
+      if (guide.guideAccount.status !== 'ACTIVE' || guide.status === 'SUSPENDED' || guide.permanentlyDeactivatedAt) throw new Error('GUIDE_FORBIDDEN')
 
-      const changeRequest = await tx.guideProfileChangeRequest.findUnique({ where: { id: requestId } })
+      if (parsed.data.action === 'RETURN_TO_DRAFT') {
+        const expected = parsed.data
+        if (guide.status !== 'REVIEW' || guide.updatedAt.toISOString() !== expected.profileUpdatedAt || (guide.profileSubmittedAt?.toISOString() ?? null) !== expected.profileSubmittedAt) throw new ProfileChangedDuringReviewError('status')
+        const pending = await tx.guideProfileChangeRequest.findUnique({ where: { activeKey: guide.id } })
+        if (pending ? pending.status !== 'PENDING' || pending.id !== expected.requestId || profileChangeRevision(pending) !== expected.revision : Boolean(expected.requestId || expected.revision)) throw new ProfileChangedDuringReviewError('request')
+        const reviewedAt = new Date()
+        if (pending) {
+          await tx.guideProfileChangeRequest.update({ where: { id: pending.id }, data: {
+            activeKey: null, status: 'REJECTED', reviewedByAdminId: actor.id,
+            reviewedByEmail: actor.email, reviewNotes: expected.reviewNotes, reviewedAt,
+          } })
+          await tx.auditLog.create({ data: {
+            actor: actor.email, actorRole: actor.role, actorAdminId: actor.id,
+            action: 'GUIDE_PROFILE_CHANGE_REJECTED', target: pending.id,
+            detail: adminAuditDetail(auditContext, { guideProfileId: guide.id, reason: 'RETURN_TO_DRAFT' }),
+            before: redactProfileAudit(pending.before), after: { rejected: true, changes: redactProfileAudit(pending.changes) },
+            ...adminAuditFields(auditContext),
+          } })
+        }
+        await tx.guideProfile.update({ where: { id: guide.id }, data: { status: 'DRAFT', profileSubmittedAt: null } })
+        await tx.auditLog.create({ data: {
+          actor: actor.email, actorRole: actor.role, actorAdminId: actor.id,
+          action: 'GUIDE_PROFILE_RETURNED_TO_DRAFT', target: guide.id,
+          detail: adminAuditDetail(auditContext, { reason: expected.reviewNotes, requestId: pending?.id ?? null }),
+          before: { status: 'REVIEW', profileSubmittedAt: expected.profileSubmittedAt }, after: { status: 'DRAFT' },
+          ...adminAuditFields(auditContext),
+        } })
+        return { status: 'DRAFT' }
+      }
+
+      const changeRequest = await tx.guideProfileChangeRequest.findUnique({ where: { id: parsed.data.requestId } })
       if (!changeRequest || changeRequest.guideProfileId !== guide.id) throw new Error('REQUEST_NOT_FOUND')
       if (changeRequest.status !== 'PENDING' || changeRequest.activeKey !== guide.id) throw new Error('REQUEST_ALREADY_REVIEWED')
+      if (profileChangeRevision(changeRequest) !== parsed.data.revision) throw new ProfileChangedDuringReviewError('revision')
 
       const changesResult = guideProfileChangesSchema.safeParse(changeRequest.changes)
       const before = changeRequest.before as Record<string, unknown>
       if (!changesResult.success) throw new Error('INVALID_STORED_REQUEST')
       const changes = changesResult.data
+      let bank: ReturnType<typeof decryptBankProposal> | null = null
+      if (changes.bankEncrypted && action === 'APPROVE') {
+        try { bank = decryptBankProposal(changes.bankEncrypted) } catch { throw new Error('INVALID_STORED_REQUEST') }
+      }
 
       const current: Record<string, unknown> = {
         firstName: guide.guideAccount.firstName,
@@ -65,8 +113,12 @@ export async function POST(
         personalCorrectionRequest: null,
         languagesCorrectionRequest: null,
       }
-      for (const field of Object.keys(changes)) {
-        if (!sameValue(current[field], before[field])) throw new ProfileChangedDuringReviewError(field)
+      if (action === 'APPROVE') {
+        if (changes.bankEncrypted) current.bankEncrypted = bankBeforeSnapshot(guide)
+        if (changes.media) current.media = (await readGuideProfileMedia(tx, guide.id)).snapshot
+        for (const field of Object.keys(changes)) {
+          if (!sameProfileValue(current[field], before[field])) throw new ProfileChangedDuringReviewError(field)
+        }
       }
 
       if (action === 'APPROVE') {
@@ -97,8 +149,17 @@ export async function POST(
           ...(changes.nationality !== undefined && { nationality: changes.nationality || null }),
           ...(changes.experienceYears !== undefined && { experienceYears: changes.experienceYears }),
         }
-        if (Object.keys(profileData).length > 0) {
-          await tx.guideProfile.update({ where: { id: guide.id }, data: profileData })
+        let bankData = {}
+        if (bank) {
+          try { bankData = { bankAccountFirstName: bank.firstName, bankAccountLastName: bank.lastName,
+            bankName: bank.bankName, bankCountry: bank.country, ibanEncrypted: encrypt(bank.iban),
+            bicEncrypted: bank.bic ? encrypt(bank.bic) : null } }
+          catch { throw new Error('BANK_UNAVAILABLE') }
+        }
+        if (Object.keys(profileData).length > 0 || bank) {
+          await tx.guideProfile.update({ where: { id: guide.id }, data: {
+            ...profileData, ...bankData,
+          } })
         }
         if (changes.languages !== undefined) {
           await tx.guideLanguage.deleteMany({ where: { guideProfileId: guide.id } })
@@ -133,10 +194,10 @@ export async function POST(
           action: action === 'APPROVE' ? 'GUIDE_PROFILE_CHANGE_APPROVED' : 'GUIDE_PROFILE_CHANGE_REJECTED',
           target: changeRequest.id,
           detail: adminAuditDetail(auditContext, { guideProfileId: guide.id, fields: Object.keys(changes) }),
-          before: before as Prisma.InputJsonObject,
+          before: redactProfileAudit(before),
           after: action === 'APPROVE'
-            ? changes as Prisma.InputJsonObject
-            : { rejected: true, changes } as Prisma.InputJsonObject,
+            ? redactProfileAudit(changes)
+            : { rejected: true, changes: redactProfileAudit(changes) },
           ...adminAuditFields(auditContext),
         },
       })
@@ -144,11 +205,13 @@ export async function POST(
       return reviewed
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable })
 
-    return NextResponse.json({ success: true, status: result.status })
+    return NextResponse.json({ success: true, status: result.status }, { headers: privateHeaders })
   } catch (error) {
-    if (error instanceof ProfileChangedDuringReviewError) {
+    if (error instanceof Error && error.message === 'BANK_UNAVAILABLE') return NextResponse.json({ error: 'Les coordonnées bancaires ne peuvent pas être enregistrées actuellement. Réessayez ultérieurement.' }, { status: 503, headers: privateHeaders })
+    if (error instanceof ProfileChangedDuringReviewError || (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2034')) {
       return NextResponse.json({ error: 'Le profil a changé depuis cette demande. Rechargez la fiche avant de décider.' }, { status: 409 })
     }
+    if (error instanceof Error && ['ADMIN_FORBIDDEN', 'GUIDE_FORBIDDEN'].includes(error.message)) return NextResponse.json({ error: 'Accès non autorisé.' }, { status: 403, headers: privateHeaders })
     if (error instanceof Error && error.message === 'GUIDE_NOT_FOUND') {
       return NextResponse.json({ error: 'Guide introuvable' }, { status: 404 })
     }

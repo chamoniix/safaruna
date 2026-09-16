@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { requireGuide } from '@/lib/require-account';
 import { getGuideRequestContext, hasTrustedGuideAuthOrigin } from '@/lib/guide-auth';
-import { guideProfileChangesObjectSchema, NoGuideProfileChangesError, publicPendingRequest, submitGuideProfileChanges } from '@/lib/guide-profile-changes';
-import { applicationMediaSelect, applicationMediaView } from '@/lib/guide-application-media';
+import { guideProfileProposalSchema, NoGuideProfileChangesError, publicPendingRequest, safeProfileChanges, profileChangeRevision, submitGuideProfileChanges } from '@/lib/guide-profile-changes';
+import { readGuideProfileMedia } from '@/lib/guide-profile-media';
+import { GuidePhotoError } from '@/lib/guide-photo';
 import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { dossierAction, readGuideDossier } from '@/lib/guide-dossier';
@@ -18,21 +19,7 @@ const confirmationsSchema = z.object({
   }).strict()).min(1).max(4).refine(items => new Set(items.map(item => item.section)).size === items.length),
 }).strict();
 
-const profilPatchSchema = guideProfileChangesObjectSchema.pick({
-  firstName: true,
-  lastName: true,
-  phoneWhatsapp: true,
-  country: true,
-  bio: true,
-  city: true,
-  gender: true,
-  nationality: true,
-  experienceYears: true,
-  languages: true,
-  pricingCorrectionRequest: true,
-  personalCorrectionRequest: true,
-  languagesCorrectionRequest: true,
-}).refine(value => Object.keys(value).length > 0, 'Aucune modification transmise.');
+const profilPatchSchema = guideProfileProposalSchema;
 
 export async function GET() {
   const access = await requireGuide();
@@ -48,7 +35,7 @@ export async function GET() {
             where: { status: 'PENDING' },
             orderBy: { updatedAt: 'desc' },
             take: 1,
-            select: { id: true, changes: true, createdAt: true, updatedAt: true },
+            select: { id: true, changes: true, before: true, createdAt: true, updatedAt: true },
           },
         },
       },
@@ -59,10 +46,22 @@ export async function GET() {
   if (!account.guideProfile) return NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 });
 
   const gp = account.guideProfile;
-  const application = await prisma.guideApplication.findFirst({
-    where: { createdGuideProfileId: gp.id, status: 'APPROVED' },
-    orderBy: { createdAt: 'desc' }, select: applicationMediaSelect,
-  });
+  const [media, latestDecision, lastReturn] = await Promise.all([
+    readGuideProfileMedia(prisma, gp.id),
+    prisma.guideProfileChangeRequest.findFirst({
+      where: { guideProfileId: gp.id, status: { in: ['APPROVED', 'REJECTED'] } },
+      orderBy: [{ reviewedAt: 'desc' }, { id: 'desc' }],
+      select: { id: true, status: true, reviewNotes: true, reviewedAt: true, changes: true, before: true, updatedAt: true },
+    }),
+    prisma.auditLog.findFirst({ where: { target: gp.id, action: 'GUIDE_PROFILE_RETURNED_TO_DRAFT' }, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], select: { detail: true, createdAt: true } }),
+  ]);
+  let profileReturn: { reason: string; at: Date } | null = null;
+  if (lastReturn) {
+    try {
+      const detail = JSON.parse(lastReturn.detail || '{}');
+      if (typeof detail.reason === 'string') profileReturn = { reason: detail.reason, at: lastReturn.createdAt };
+    } catch { /* Ignore malformed legacy audit metadata. */ }
+  }
   const displayName = account.displayName || `${account.firstName ?? ''} ${account.lastName ?? ''}`.trim() || account.email || '—';
   let dossier;
   try {
@@ -78,7 +77,7 @@ export async function GET() {
       id: account.id,
       name: displayName,
       image: account.image || null,
-      applicationMedia: application ? applicationMediaView(application) : null,
+      applicationMedia: media.view,
       firstName: account.firstName,
       lastName: account.lastName,
       email: account.email || '—',
@@ -102,6 +101,8 @@ export async function GET() {
       experienceYears: gp.experienceYears,
       languages: gp.languages,
       pendingChangeRequest: publicPendingRequest(gp.changeRequests[0] || null),
+      latestProfileDecision: latestDecision ? { id: latestDecision.id, status: latestDecision.status, reviewNotes: latestDecision.reviewNotes, reviewedAt: latestDecision.reviewedAt, changes: safeProfileChanges(latestDecision.changes, latestDecision.id), revision: profileChangeRevision(latestDecision) } : null,
+      profileReturn,
       createdAt: new Date(account.registeredAt).toLocaleDateString('fr-FR'),
       dossier: dossier.view,
     },
@@ -155,7 +156,9 @@ export async function PATCH(req: NextRequest) {
   const access = await requireGuide();
   if (!access.ok) return access.response;
 
-  const raw = await req.json();
+  const limited = await checkRateLimit(req, apiRatelimit);
+  if (limited) return limited;
+  const raw = await req.json().catch(() => null);
   const parsed = profilPatchSchema.safeParse(raw);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'Données invalides' }, { status: 400 });
@@ -171,6 +174,15 @@ export async function PATCH(req: NextRequest) {
     if (error instanceof NoGuideProfileChangesError) {
       return NextResponse.json({ error: 'Aucune modification à envoyer.' }, { status: 400 });
     }
+    if (error instanceof Error && error.message === 'BANK_UNAVAILABLE') return NextResponse.json({ error: 'Les coordonnées bancaires ne peuvent pas être enregistrées actuellement. Réessayez ultérieurement.' }, { status: 503, headers: privateHeaders });
+    if (error instanceof z.ZodError || error instanceof GuidePhotoError) {
+      return NextResponse.json({ error: 'La proposition contient des informations ou médias invalides.' }, { status: 400, headers: privateHeaders });
+    }
+    if (error instanceof Error && error.message === 'PROFILE_FORBIDDEN') return NextResponse.json({ error: 'Accès au profil non autorisé.' }, { status: 403, headers: privateHeaders });
+    if (error instanceof Error && error.message === 'RESUBMIT_NOT_FOUND') return NextResponse.json({ error: 'Demande à reprendre introuvable.' }, { status: 404, headers: privateHeaders });
+    if ((error instanceof Error && error.message === 'PROFILE_CHANGED') || (error instanceof Prisma.PrismaClientKnownRequestError && ['P2034', 'P2002'].includes(error.code))) {
+      return NextResponse.json({ error: 'Le dossier a changé. Rechargez la page avant de renvoyer votre demande.' }, { status: 409, headers: privateHeaders });
+    }
     throw error;
   }
 
@@ -178,5 +190,5 @@ export async function PATCH(req: NextRequest) {
     ok: true,
     pendingApproval: true,
     pendingChangeRequest: publicPendingRequest(pendingRequest),
-  });
+  }, { headers: privateHeaders });
 }

@@ -295,16 +295,16 @@ test('les ressources officielles gardent le dashboard Guide ouvert', () => {
 })
 
 test('le profil Guide envoie une demande unique et traçable à Admin ou Superadmin', () => {
+  assert.match(guideProfileRoute, /const profilPatchSchema = guideProfileProposalSchema/)
   for (const field of ['pricingCorrectionRequest', 'personalCorrectionRequest', 'languagesCorrectionRequest']) {
     assert.match(guideProfilePage, new RegExp(field))
-    assert.match(guideProfileRoute, new RegExp(field))
     assert.match(profileChanges, new RegExp(field))
     assert.match(adminReviewRoute, new RegExp(field))
     assert.match(adminGuidePage, new RegExp(field))
   }
   assert.equal((guideProfilePage.match(/form="guide-profile-form"/g) || []).length, 1)
   assert.match(guideProfilePage, /Aucun tarif n’est modifié automatiquement/)
-  assert.match(adminGuidePage, /Valider la demande/)
+  assert.match(adminGuidePage, /Approuver ces modifications/)
 })
 
 test('les langues de candidature utilisent les codes de la source unique', () => {

@@ -28,6 +28,9 @@ export type EmailCategory =
   | 'GUIDE_PLACE_SUGGESTION'
   | 'GUIDE_PROFILE_ACTIVATED'
   | 'GUIDE_PROFILE_REVIEW_SUBMITTED'
+  | 'GUIDE_DOSSIER_RECEIVED'
+  | 'GUIDE_DOSSIER_CORRECTION_DECIDED'
+  | 'GUIDE_DOSSIER_RETURNED'
   | 'GUIDE_RESERVATION_INCIDENT'
   | 'GUIDE_RESERVATION_CONFIRMED'
   | 'PELERIN_EMAIL_VERIFICATION'
@@ -233,14 +236,16 @@ export async function sendEmail(payload: EmailPayload): Promise<EmailSendResult>
   }
 }
 
-export async function retryPendingEmails(limit = 20) {
+export async function retryPendingEmails(limit = 20, deliveryIds?: string[]) {
   const now = new Date();
   const staleSendingBefore = new Date(now.getTime() - 15 * 60_000);
   const candidates = await prisma.emailDelivery.findMany({
     where: {
+      ...(deliveryIds && { id: { in: deliveryIds } }),
       payloadEncrypted: { not: null },
       attempts: { lt: 3 },
       OR: [
+        { status: 'QUEUED', category: { in: [...GUIDE_DOSSIER_EMAIL_CATEGORIES] }, nextAttemptAt: { lte: now } },
         { status: 'RETRY_PENDING', nextAttemptAt: { lte: now } },
         { status: 'SENDING', updatedAt: { lte: staleSendingBefore } },
       ],
@@ -523,29 +528,55 @@ export function sendGuideAccess(opts: {
   });
 }
 
-export function sendGuideProfileActivated(opts: {
-  to: string;
-  name: string;
-  profileUrl: string;
-}): Promise<EmailSendResult> {
-  return sendEmail({
-    category: 'GUIDE_PROFILE_ACTIVATED',
-    retryable: true,
-    idempotencyKey: `guide-profile-activated:${opts.to.toLowerCase()}:${opts.profileUrl}`,
-    reference: { type: 'GUIDE_PROFILE', id: opts.profileUrl },
+const GUIDE_DOSSIER_EMAIL_CATEGORIES = [
+  'GUIDE_PROFILE_REVIEW_SUBMITTED', 'GUIDE_PROFILE_ACTIVATED',
+  'GUIDE_DOSSIER_RECEIVED', 'GUIDE_DOSSIER_CORRECTION_DECIDED', 'GUIDE_DOSSIER_RETURNED',
+] as const;
+
+// Saved in the SAME transaction as the decision; no provider call before commit.
+// Reuses the existing encrypted delivery ledger and its retry scheduler.
+export async function queueGuideDossierEmail(db: Prisma.TransactionClient, opts: {
+  eventId: string; guideProfileId: string; to: string; name: string;
+  event: 'SUBMITTED' | 'ADMIN_REVIEW' | 'APPROVED' | 'REJECTED' | 'RETURNED' | 'ACTIVATED';
+  slug?: string | null; guideName?: string;
+}) {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://safaruma.com';
+  const copy = {
+    SUBMITTED: { category: 'GUIDE_DOSSIER_RECEIVED', title: 'Votre dossier Guide a bien été reçu', text: 'Votre dossier est en cours d’examen par l’équipe SAFARUMA. Vous pouvez suivre son état dans votre espace Guide. Cette réception ne vaut pas publication de votre profil.' },
+    ADMIN_REVIEW: { category: 'GUIDE_PROFILE_REVIEW_SUBMITTED', title: 'Un dossier Guide est à examiner', text: 'Un Guide a soumis son dossier, à traiter sous 48 h. Consultez les informations et les confirmations enregistrées avant de prendre votre décision.' },
+    APPROVED: { category: 'GUIDE_DOSSIER_CORRECTION_DECIDED', title: 'Vos modifications ont été approuvées', text: 'L’équipe SAFARUMA a approuvé votre demande de modification. Consultez votre dossier pour retrouver les informations retenues. Cette décision ne publie pas automatiquement votre profil ni votre portrait.' },
+    REJECTED: { category: 'GUIDE_DOSSIER_CORRECTION_DECIDED', title: 'Votre demande de modification a été examinée', text: 'Votre demande de modification n’a pas été approuvée. Le motif de la décision est disponible dans votre espace Guide.' },
+    RETURNED: { category: 'GUIDE_DOSSIER_RETURNED', title: 'Votre dossier Guide nécessite des corrections', text: 'Votre dossier a été remis en brouillon. Consultez le motif dans votre espace Guide, corrigez les informations demandées, puis soumettez à nouveau votre dossier.' },
+    ACTIVATED: { category: 'GUIDE_PROFILE_ACTIVATED', title: 'Votre profil Guide SAFARUMA est en ligne', text: 'Votre profil public est accessible et vos rubriques opérationnelles sont ouvertes. La réception de nouvelles réservations dépend de votre pause générale, des villes proposées et de vos disponibilités. Vérifiez soigneusement votre calendrier.' },
+  }[opts.event];
+  const url = opts.event === 'ADMIN_REVIEW'
+    ? `${baseUrl}/admin/guides${opts.slug ? `/${encodeURIComponent(opts.slug)}` : ''}`
+    : `${baseUrl}/guide/profil`;
+  const idempotencyKey = `guide-dossier:${opts.eventId}:${opts.event}:${opts.to.toLowerCase()}`;
+  const payload: StoredEmailPayload = {
     to: { email: opts.to, name: opts.name },
-    subject: 'Votre profil Guide SAFARUMA est en ligne',
-    html: baseTemplate(`
-      ${heading(`Votre profil est en ligne, ${escapeHtml(opts.name)} !`)}
-      ${badge('PROFIL ACTIF ✓', '#1D5C3A')}
-      ${p('Votre profil Guide est désormais visible par les pèlerins sur SAFARUMA.')}
-      <div style="background:#FFF7E5;border:1px solid #F2D08B;border-radius:12px;padding:18px 20px;margin:18px 0;color:#7C5A20;font-size:13px;line-height:1.7;">
-        Vérifiez soigneusement votre calendrier et désactivez immédiatement toute date ou ville où vous n’êtes pas disponible. Une réservation laissée sans réponse entraîne la suspension du profil. Toute annulation est examinée par l’administration et trois annulations comptabilisées entraînent une désactivation définitive.
-      </div>
-      ${divider()}
-      <div style="text-align:center;padding:8px 0;">${btn('Voir mon profil', opts.profileUrl)}</div>
-    `),
-  })
+    subject: copy.title,
+    category: copy.category as EmailCategory,
+    reference: { type: 'GUIDE_PROFILE', id: opts.guideProfileId },
+    providerIdempotencyKey: providerIdempotencyKey(idempotencyKey),
+    html: baseTemplate(`${heading(copy.title)}${p(`السلام عليكم ${escapeHtml(opts.name)},`)}${p(copy.text)}
+      ${opts.event === 'ADMIN_REVIEW' && opts.guideName ? p(`Guide : ${escapeHtml(opts.guideName)}`) : ''}
+      ${opts.event === 'ACTIVATED' ? p('Une réservation laissée sans réponse entraîne la suspension du profil. Toute annulation est examinée par l’administration et trois annulations comptabilisées entraînent une désactivation définitive.') : ''}
+      ${divider()}${btn(opts.event === 'ADMIN_REVIEW' ? 'Examiner le dossier' : 'Ouvrir mon espace Guide', url)}`, true),
+  };
+  const delivery = await db.emailDelivery.create({ data: {
+    idempotencyKey, provider: EMAIL_PROVIDER, category: payload.category,
+    recipientEmail: opts.to.toLowerCase(), referenceType: 'GUIDE_PROFILE', referenceId: opts.guideProfileId,
+    maxAttempts: 3, payloadEncrypted: encrypt(JSON.stringify(payload)), nextAttemptAt: new Date(),
+  } });
+  return delivery.id;
+}
+
+export async function dispatchGuideDossierEmails(deliveryIds: string[]) {
+  if (!deliveryIds.length) return;
+  // A provider failure must not report an already committed decision as failed.
+  // QUEUED/RETRY_PENDING rows remain recoverable by the existing cron.
+  await retryPendingEmails(deliveryIds.length, deliveryIds).catch(error => console.error('[guide dossier email dispatch]', error));
 }
 
 // ─── 4. Confirmation de réservation ─────────────────────────────

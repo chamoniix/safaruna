@@ -32,6 +32,17 @@ function fixture() {
   let authenticated = true
   let failCatalog = false
   let conflict = false
+  let inTransaction = false
+  let queueFailure = false
+  const notifications: any[] = []
+  const email = {
+    queueGuideDossierEmail: async (tx: unknown, opts: any) => {
+      assert.equal(tx, db); assert.equal(inTransaction, true)
+      if (queueFailure) throw new Error('queue unavailable')
+      notifications.push(opts); return `delivery-${notifications.length}`
+    },
+    dispatchGuideDossierEmails: async (ids: string[]) => { assert.equal(inTransaction, false); emails += ids.length },
+  }
   const db: any = {
     adminAccount: { findUnique: async () => currentAdmin, findMany: async () => [currentAdmin] },
     guideAccount: { findUnique: async () => ({ ...account, guideProfile: profile }), update: async ({ data }: any) => { writes.push(['account', data]); Object.assign(account, data) } },
@@ -45,8 +56,9 @@ function fixture() {
     $transaction: async (fn: any, options: any) => {
       assert.equal(options.isolationLevel, 'Serializable')
       if (conflict) throw new (require('@prisma/client').Prisma.PrismaClientKnownRequestError)('Concurrent modification', { code: 'P2034', clientVersion: 'test' })
-      const oldProfile = { ...profile }, oldAccount = { ...account }, count = writes.length, oldEvents = [...events]
-      try { return await fn(db) } catch (error) { Object.assign(profile, oldProfile); Object.assign(account, oldAccount); writes.splice(count); events = oldEvents; throw error }
+      const oldProfile = { ...profile }, oldAccount = { ...account }, count = writes.length, oldEvents = [...events], queued = notifications.length
+      inTransaction = true
+      try { return await fn(db) } catch (error) { Object.assign(profile, oldProfile); Object.assign(account, oldAccount); writes.splice(count); events = oldEvents; notifications.splice(queued); throw error } finally { inTransaction = false }
     },
   }
   const admin = { getAdminActor: async () => authenticated ? actor : null, getAdminAuditContext: () => ({}), adminAuditFields: () => ({ ip: '127.0.0.1' }), adminAuditDetail: (_: unknown, info: unknown) => JSON.stringify(info || {}) }
@@ -57,13 +69,14 @@ function fixture() {
   }
   const policy = load('src/lib/guide-payout-policy.ts', {})
   const dossier = load('src/lib/guide-dossier.ts', {
+    '@/lib/email': email,
     'server-only': {}, '@/lib/crypto': { decrypt: (value: string) => value === 'iban-one' || value === 'iban-one-new-nonce' ? 'FR_TEST_IBAN_ONE' : 'FR_TEST_IBAN_TWO' },
     '@/lib/check-admin': admin, '@/lib/guide-profile-media': { readGuideProfileMedia: async () => ({ snapshot: { profilePhotoPath: 'private/test.webp' } }) },
     '@/lib/guide-profile-changes': changes, '@/lib/guide-payout-policy': policy,
     '@/lib/place-catalog': { getEffectivePlaceCatalog: async () => { if (failCatalog) throw new Error('catalog unavailable'); return [] } },
     '@/lib/booking-pricing': { BOOKING_NET_COSTS: { hotel: 80 } },
   })
-  const shared = { '@/lib/prisma': db, '@/lib/check-admin': admin, '@/lib/guide-dossier': dossier, '@/lib/guide-profile-changes': changes, '@/lib/guide-profile-media': {}, '@/lib/crypto': {}, '@/lib/email': { sendGuideProfileActivated: async () => { emails++ } } }
+  const shared = { '@/lib/prisma': db, '@/lib/check-admin': admin, '@/lib/guide-dossier': dossier, '@/lib/guide-profile-changes': changes, '@/lib/guide-profile-media': {}, '@/lib/crypto': {}, '@/lib/email': email }
   const detail = load('src/app/api/admin/guides/[slug]/activate/route.ts', shared)
   const listing = load('src/app/api/admin/guides/route.ts', shared)
   const bank = load('src/app/api/admin/guides/[slug]/profile-change/route.ts', shared)
@@ -71,7 +84,7 @@ function fixture() {
     ...shared,
     '@/lib/require-account': { requireGuide: async () => ({ ok: true, actor: { id: account.id, email: account.email, guideProfileId: profile.id } }) },
     '@/lib/guide-auth': { hasTrustedGuideAuthOrigin: () => true, getGuideRequestContext: () => ({ ip: '127.0.0.1' }) },
-    '@/lib/email': { sendEmail: async () => { emails++ }, baseTemplate: (s: string) => s, heading: () => '', badge: () => '', p: () => '', btn: () => '', divider: () => '', escapeHtml: (s: string) => s },
+    '@/lib/email': email,
   })
   const request = (body: unknown, origin = 'https://safaruma.com') => ({ nextUrl: { origin: 'https://safaruma.com' }, headers: new Headers({ origin }), json: async () => body })
   const read = () => dossier.readAdminGuideDossier(db, account.id, actor)
@@ -86,10 +99,45 @@ function fixture() {
   const patch = (body: any, origin?: string) => listing.PATCH(request({ guideId: profile.id, ...body }, origin))
   const verify = (body: any, origin?: string) => bank.POST(request(body, origin), { params: Promise.resolve({ slug: profile.slug }) })
   return { db, actor, currentAdmin, profile, account, writes, read, complete, append, post, patch, verify, request, dossier, submit: () => submit.POST(request({})),
-    events: () => events, emails: () => emails, noAuth: () => { authenticated = false }, breakCatalog: () => { failCatalog = true }, conflict: () => { conflict = true } }
+    events: () => events, emails: () => emails, notifications, breakQueue: () => { queueFailure = true }, noAuth: () => { authenticated = false }, breakCatalog: () => { failCatalog = true }, conflict: () => { conflict = true } }
 }
 
+test('submission and audit roll back if acknowledgement cannot be durably queued', async () => {
+  const f = fixture()
+  f.profile.status = 'DRAFT'
+  await f.complete()
+  f.breakQueue()
+  await assert.rejects(f.submit(), /queue unavailable/)
+  assert.equal(f.profile.status, 'DRAFT')
+  assert.equal(f.writes.length, 0)
+  assert.equal(f.emails(), 0)
+  assert.equal(f.events().some(e => e.action === 'GUIDE_PROFILE_SUBMITTED_FOR_REVIEW'), false)
+})
+
 for (const endpoint of ['post', 'patch'] as const) {
+  test(`${endpoint}: queue persistence failure rolls back activation and does not send`, async () => {
+    const f = fixture()
+    await f.complete()
+    const state = await f.read()
+    f.breakQueue()
+    assert.equal((await f[endpoint]({ action: 'activate', revision: state.revision })).status, 500)
+    assert.equal(f.profile.status, 'REVIEW')
+    assert.equal(f.writes.length, 0)
+    assert.equal(f.notifications.length, 0)
+    assert.equal(f.emails(), 0)
+    assert.equal(f.events().some(e => e.action === 'GUIDE_ACTIVATED'), false)
+  })
+
+  test(`${endpoint}: already ACTIVE rejection does not send a publication notification`, async () => {
+    const f = fixture()
+    f.profile.status = 'ACTIVE'
+    f.profile.approvedAt = new Date('2026-09-15')
+    const state = await f.read()
+    assert.equal((await f[endpoint]({ action: 'activate', revision: state.revision })).status, 409)
+    assert.equal(f.notifications.length, 0)
+    assert.equal(f.emails(), 0)
+  })
+
   test(`${endpoint}: first publication requires complete current dossier + Superadmin, preserves paused bookings`, async () => {
     const f = fixture()
     let state = await f.read()
@@ -105,6 +153,8 @@ for (const endpoint of ['post', 'patch'] as const) {
     assert.equal(f.profile.status, 'ACTIVE')
     assert.equal(f.profile.acceptingBookings, false)
     assert.equal(f.emails(), 1)
+    assert.equal(f.notifications[0].event, 'ACTIVATED')
+    assert.equal(f.notifications[0].eventId, f.events().find(e => e.action === 'GUIDE_ACTIVATED').id)
     assert.doesNotMatch(JSON.stringify(f.events()), /FR_TEST_IBAN|iban-one|private\/test/)
   })
 
@@ -226,10 +276,14 @@ test('initial submission requires every Guide confirmation, not administrative b
   for (const item of dossier.view.confirmations) await f.append(f.dossier.dossierAction(item.section), { revision: item.revision })
   assert.equal((await f.read()).bankVerification.verified, false)
   assert.equal((await f.submit()).status, 200)
-  assert.equal(f.profile.status, 'REVIEW'); assert.equal(f.emails(), 1)
-  assert.equal((await f.submit()).status, 200); assert.equal(f.emails(), 1, 'repeat submission must not send email again')
+  assert.equal(f.profile.status, 'REVIEW'); assert.equal(f.emails(), 2)
+  assert.deepEqual(f.notifications.map(item => item.event), ['SUBMITTED', 'ADMIN_REVIEW'])
+  assert.equal(f.notifications[0].eventId, f.notifications[1].eventId)
+  assert.equal(f.notifications[0].to, 'guide@example.test')
+  assert.equal(f.notifications[1].to, 'admin@example.test')
+  assert.equal((await f.submit()).status, 200); assert.equal(f.emails(), 2, 'repeat submission must not send email again')
   f.account.status = 'SUSPENDED'
-  assert.equal((await f.submit()).status, 403); assert.equal(f.emails(), 1)
+  assert.equal((await f.submit()).status, 403); assert.equal(f.emails(), 2)
 })
 
 test('manual verification rejects untrusted origins and database serialization conflicts without audit', async () => {

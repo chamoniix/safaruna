@@ -9,6 +9,7 @@ import { BOOKING_NET_COSTS } from '@/lib/booking-pricing'
 import { missingRequiredGuideProfileFields, guideProfileChangesSchema, decryptBankProposal } from '@/lib/guide-profile-changes'
 import { GUIDE_DOSSIER_ACKNOWLEDGEMENTS, GUIDE_DOSSIER_TERMS_VERSION, GUIDE_PAYOUT_POLICY, type GuideDossierSection } from '@/lib/guide-payout-policy'
 import { adminAuditDetail, adminAuditFields, type AdminActor, type AdminAuditContext } from '@/lib/check-admin'
+import { queueGuideDossierEmail } from '@/lib/email'
 
 export const dossierSections = Object.keys(GUIDE_DOSSIER_ACKNOWLEDGEMENTS) as GuideDossierSection[]
 export const dossierAction = (section: GuideDossierSection) => `GUIDE_DOSSIER_${section.toUpperCase()}_CONFIRMED`
@@ -189,11 +190,18 @@ export async function decideGuideStatus(db: Prisma.TransactionClient, actor: Adm
   } })
   await db.guideAccount.update({ where: { id: profile.guideAccount.id }, data: { status } })
   if (status === 'SUSPENDED') await db.guideSession.updateMany({ where: { guideAccountId: profile.guideAccount.id, revokedAt: null }, data: { revokedAt: new Date() } })
-  await db.auditLog.create({ data: {
+  const decision = await db.auditLog.create({ data: {
     actor: actor.email, actorRole: actor.role, actorAdminId: actor.id,
     action: status === 'ACTIVE' ? 'GUIDE_ACTIVATED' : 'GUIDE_SUSPENDED', target: profile.id,
     detail: adminAuditDetail(auditContext, dossier ? { revision, previouslyPublished: dossier.activation.previouslyPublished } : {}),
     before: { status: profile.status }, after: { status }, ...adminAuditFields(auditContext),
   } })
-  return { status, profile }
+  const emailIds = status === 'ACTIVE' && profile.status !== 'ACTIVE'
+    ? [await queueGuideDossierEmail(db, {
+      eventId: decision.id, guideProfileId: profile.id, event: 'ACTIVATED',
+      to: profile.guideAccount.email,
+      name: profile.guideAccount.displayName || profile.guideAccount.firstName || 'Guide',
+      slug: profile.slug,
+    })] : []
+  return { status, profile, emailIds }
 }

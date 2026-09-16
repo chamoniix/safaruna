@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
-import { baseTemplate, badge, btn, divider, escapeHtml, heading, p, sendEmail } from '@/lib/email'
+import { dispatchGuideDossierEmails, queueGuideDossierEmail } from '@/lib/email'
 import { getGuideRequestContext, hasTrustedGuideAuthOrigin } from '@/lib/guide-auth'
 import { readGuideDossier } from '@/lib/guide-dossier'
 import prisma from '@/lib/prisma'
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
   const requestContext = getGuideRequestContext(req)
   const submittedAt = new Date()
 
-  let result: { alreadySubmitted: boolean; slug: string | null; name: string }
+  let result: { alreadySubmitted: boolean; emailIds: string[] }
   try {
     result = await prisma.$transaction(async tx => {
     const account = await tx.guideAccount.findUnique({
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     if (!account?.guideProfile) throw new Error('PROFILE_NOT_FOUND')
     if (account.status !== 'ACTIVE' || account.guideProfile.permanentlyDeactivatedAt) throw new Error('DOSSIER_FORBIDDEN')
     const profile = account.guideProfile
-    if (profile.status === 'REVIEW') return { alreadySubmitted: true, slug: profile.slug, name: account.displayName || account.firstName || 'Guide' }
+    if (profile.status === 'REVIEW') return { alreadySubmitted: true, emailIds: [] }
     if (profile.status !== 'DRAFT') throw new Error('PROFILE_NOT_DRAFT')
 
     const dossier = await readGuideDossier(tx, account.id)
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
       where: { id: profile.id },
       data: { status: 'REVIEW', profileSubmittedAt: submittedAt },
     })
-    await tx.auditLog.create({
+    const submission = await tx.auditLog.create({
       data: {
         actor: access.actor.email,
         actorRole: 'GUIDE',
@@ -66,7 +66,16 @@ export async function POST(req: NextRequest) {
         after: { status: 'REVIEW', profileSubmittedAt: submittedAt.toISOString() },
       },
     })
-    return { alreadySubmitted: false, slug: profile.slug, name: account.displayName || account.firstName || 'Guide' }
+    const name = account.displayName || account.firstName || 'Guide'
+    const emailIds = [await queueGuideDossierEmail(tx, {
+      eventId: submission.id, guideProfileId: profile.id, event: 'SUBMITTED', to: account.email, name,
+    })]
+    const admins = await tx.adminAccount.findMany({ where: { status: 'ACTIVE' }, select: { email: true, name: true, role: true } })
+    for (const admin of admins) emailIds.push(await queueGuideDossierEmail(tx, {
+      eventId: submission.id, guideProfileId: profile.id, event: 'ADMIN_REVIEW',
+      to: admin.email, name: admin.name || admin.role, slug: profile.slug, guideName: name,
+    }))
+    return { alreadySubmitted: false, emailIds }
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable })
   } catch (error) {
     if (error instanceof Error && error.message === 'DOSSIER_FORBIDDEN') return NextResponse.json({ error: 'Accès Guide non autorisé.' }, { status: 403 })
@@ -85,25 +94,7 @@ export async function POST(req: NextRequest) {
 
   if (result.alreadySubmitted) return NextResponse.json({ success: true, alreadySubmitted: true, status: 'REVIEW' })
 
-  const admins = await prisma.adminAccount.findMany({
-    where: { status: 'ACTIVE' },
-    select: { email: true, name: true, role: true },
-  })
-  await Promise.allSettled(admins.map(admin => sendEmail({
-    category: 'GUIDE_PROFILE_REVIEW_SUBMITTED',
-    retryable: true,
-    idempotencyKey: `guide-profile-review:${access.actor.guideProfileId}:${submittedAt.toISOString()}:${admin.email.toLowerCase()}`,
-    reference: { type: 'GUIDE_PROFILE', id: access.actor.guideProfileId },
-    to: { email: admin.email, name: admin.name || admin.role },
-    subject: `[${admin.role}] Profil Guide à valider — ${result.name}`,
-    html: baseTemplate(`
-      ${heading('Un Guide a soumis son profil')}
-      ${badge('À TRAITER SOUS 48 H', '#D97706')}
-      ${p(`<strong>${escapeHtml(result.name)}</strong> a terminé son profil et demande sa publication.`)}
-      ${divider()}
-      ${btn('Examiner le profil', `${process.env.NEXT_PUBLIC_BASE_URL || 'https://safaruma.com'}/admin/guides/${encodeURIComponent(result.slug || '')}`)}
-    `),
-  })))
+  await dispatchGuideDossierEmails(result.emailIds)
 
   return NextResponse.json({ success: true, status: 'REVIEW', submittedAt })
 }

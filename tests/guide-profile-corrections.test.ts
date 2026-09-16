@@ -20,6 +20,8 @@ const bank = { firstName: 'Guide', lastName: 'Test', bankName: 'Test bank', coun
 function fixture() {
   let tick = 0
   const requests: any[] = [], audits: any[] = [], profileWrites: any[] = [], accountWrites: any[] = []
+  const notifications: any[] = [], dispatched: string[] = []
+  let inTransaction = false
   const account: any = { id: 'account-a', status: 'ACTIVE', firstName: 'Old', lastName: 'Guide', email: 'guide@example.test', phoneWhatsapp: null, country: null, image: 'public-unchanged' }
   const profile: any = {
     id: 'profile-a', slug: 'guide-test', guideAccount: account, status: 'ACTIVE', permanentlyDeactivatedAt: null,
@@ -54,12 +56,13 @@ function fixture() {
       },
     },
     guideLanguage: { deleteMany: async () => {}, createMany: async () => {} },
-    auditLog: { create: async ({ data }: any) => { audits.push(data); return data } },
+    auditLog: { create: async ({ data }: any) => { const entry = { id: `audit-${audits.length}`, ...data }; audits.push(entry); return entry } },
     $transaction: async (callback: any, options: any) => {
       transactionCalls++
       assert.equal(options.isolationLevel, 'Serializable')
       if (transactionError) throw transactionError
-      return callback(db)
+      inTransaction = true
+      try { return await callback(db) } finally { inTransaction = false }
     },
   }
   const crypto = {
@@ -83,6 +86,10 @@ function fixture() {
     '@/lib/crypto': crypto, '@/lib/guide-profile-media': media,
   })
   const route = load('src/app/api/admin/guides/[slug]/profile-change/route.ts', {
+    '@/lib/email': {
+      queueGuideDossierEmail: async (tx: unknown, opts: any) => { assert.equal(tx, db); assert.equal(inTransaction, true); notifications.push(opts); return `delivery-${notifications.length}` },
+      dispatchGuideDossierEmails: async (ids: string[]) => { assert.equal(inTransaction, false); dispatched.push(...ids) },
+    },
     '@/lib/prisma': db, '@/lib/guide-profile-changes': changes, '@/lib/guide-profile-media': media, '@/lib/crypto': crypto,
     '@/lib/guide-dossier': { readAdminGuideDossier: () => { throw new Error('Unexpected bank verification in correction tests') } },
     '@/lib/check-admin': {
@@ -96,7 +103,7 @@ function fixture() {
     json: async () => { bodyReads++; return body },
   }, { params: Promise.resolve({ slug: profile.slug }) })
   const decide = (row: any, action = 'APPROVE', reviewNotes?: string) => review({ action, requestId: row.id, revision: changes.profileChangeRevision(row), ...(reviewNotes !== undefined && { reviewNotes }) })
-  return { changes, submit, review, decide, account, profile, requests, audits, profileWrites, accountWrites, baseline,
+  return { changes, submit, review, decide, account, profile, requests, audits, profileWrites, accountWrites, baseline, notifications, dispatched,
     denyAuth: () => { authAllowed = false }, counters: () => ({ authCalls, transactionCalls, bodyReads }),
     breakCrypto: () => { brokenCrypto = true }, disableAdmin: () => { adminActive = false }, failTransaction: () => { transactionError = new Prisma.PrismaClientKnownRequestError('conflict', { code: 'P2034', clientVersion: 'test' }) } }
 }
@@ -152,6 +159,9 @@ test('admin approval applies bank but never activates account/profile, publishes
   const response = await f.decide(row)
   assert.equal(response.status, 200)
   assert.equal(row.status, 'APPROVED')
+  assert.equal(f.notifications[0].event, 'APPROVED')
+  assert.equal(f.notifications[0].eventId, f.audits.at(-1).id)
+  assert.equal(f.dispatched.length, 1)
   assert.equal(f.profile.bankAccountFirstName, bank.firstName)
   assert.match(f.profile.ibanEncrypted, /^sealed:/)
   assert.equal(f.profile.status, 'ACTIVE')
@@ -180,6 +190,11 @@ test('reject requires a motif and rejected request can be explicitly resubmitted
   assert.equal((await f.decide(row, 'REJECT')).status, 400)
   assert.equal((await f.decide(row, 'REJECT', ' ')).status, 400)
   assert.equal((await f.decide(row, 'REJECT', 'Merci de corriger.')).status, 200)
+  assert.equal(f.notifications.length, 1)
+  assert.equal(f.notifications[0].event, 'REJECTED')
+  assert.equal(f.notifications[0].to, 'guide@example.test')
+  assert.equal((await f.decide(row, 'REJECT', 'Merci de corriger.')).status, 409)
+  assert.equal(f.notifications.length, 1, 'repeated decision does not send again')
   assert.equal(f.profileWrites.length, 0)
   const resubmitted = await f.submit({ resubmitRequestId: row.id, bio: 'Corrected bio' })
   assert.notEqual(resubmitted.id, row.id)
@@ -217,6 +232,9 @@ test('return-to-draft only affects REVIEW and needs exact dossier + pending vers
     assert.equal(f.requests.length, withPending ? 1 : 0)
     if (pending) assert.equal(pending.status, 'REJECTED')
     assert.equal(f.audits.at(-1).action, 'GUIDE_PROFILE_RETURNED_TO_DRAFT')
+    assert.equal(f.notifications.length, 1, 'return with pending correction sends one email, not two')
+    assert.equal(f.notifications[0].event, 'RETURNED')
+    assert.equal(f.notifications[0].eventId, f.audits.at(-1).id)
     assert.equal(JSON.parse(f.audits.at(-1).detail).reason, body.reviewNotes)
   }
   const f = fixture()

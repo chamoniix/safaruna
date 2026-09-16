@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuditDetail, adminAuditFields, checkAdmin, getAdminActor, getAdminAuditContext } from '@/lib/check-admin';
 import prisma from '@/lib/prisma';
-import { sendGuideAccess, sendGuideProfileActivated } from '@/lib/email';
+import { sendGuideAccess, dispatchGuideDossierEmails } from '@/lib/email';
 import { createHash, randomBytes } from 'node:crypto';
 import { Prisma } from '@prisma/client';
 import { decideGuideStatus, GuideDossierDecisionError } from '@/lib/guide-dossier';
@@ -185,14 +185,8 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: 'Action ou version du dossier invalide. Rechargez la fiche.' }, { status: 400 });
   }
   try {
-    const { status, profile } = await prisma.$transaction(tx => decideGuideStatus(tx, actor, getAdminAuditContext(req), { id: body.guideId }, body.action, body.revision), { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
-    if (status === 'ACTIVE' && profile.status !== 'ACTIVE' && profile.guideAccount?.email && profile.slug) {
-      await sendGuideProfileActivated({
-        to: profile.guideAccount.email,
-        name: profile.guideAccount.displayName || `${profile.guideAccount.firstName ?? ''} ${profile.guideAccount.lastName ?? ''}`.trim() || 'Guide',
-        profileUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://safaruma.com'}/guides/${profile.slug}`,
-      }).catch(error => console.error('[guide activation email]', error));
-    }
+    const { status, emailIds } = await prisma.$transaction(tx => decideGuideStatus(tx, actor, getAdminAuditContext(req), { id: body.guideId }, body.action, body.revision), { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+    await dispatchGuideDossierEmails(emailIds);
     return NextResponse.json({ success: true, newStatus: status }, { headers: { 'Cache-Control': 'private, no-store' } });
   } catch (error) {
     if (error instanceof GuideDossierDecisionError) return NextResponse.json({ error: error.message }, { status: error.status });

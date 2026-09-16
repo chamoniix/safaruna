@@ -14,7 +14,11 @@ type Reservation = { id: string; refNumber: string; startDate: string; nbPeople:
 type GuidePlace = { id: string; placeKey: string; isActive: boolean };
 type ProfileChange = {
   id: string;
-  changes: Record<string, unknown>;
+  revision: string;
+  changes: Record<string, unknown> & {
+    bankProposal?: { firstName: string; lastName: string; bankName: string; country: string; iban: string; bic: string } | null;
+    media?: ApplicationMediaView;
+  };
   before: Record<string, unknown>;
   requestedByEmail: string;
   submittedIp: string | null;
@@ -38,6 +42,7 @@ type ReservationIncident = {
 };
 type Guide = {
   applicationMedia: ApplicationMediaView | null;
+  profileMedia: ApplicationMediaView | null;
   id: string; slug: string; bio: string | null; city: string | null;
   gender: 'HOMME' | 'FEMME' | null; servesMakkah: boolean; servesMadinah: boolean;
   acceptingBookings: boolean;
@@ -63,6 +68,7 @@ type Guide = {
   approvedByEmail: string | null;
   approvedAt: string | null;
   profileSubmittedAt: string | null;
+  profileUpdatedAt: string;
   cancellationCount: number;
   permanentlyDeactivatedAt: string | null;
   pendingProfileChange: ProfileChange | null;
@@ -139,6 +145,11 @@ export default function AdminGuideDetailPage() {
   const [canManagePricing, setCanManagePricing] = useState(false);
   const [reviewingProfileChange, setReviewingProfileChange] = useState(false);
   const [profileChangeMessage, setProfileChangeMessage] = useState('');
+  const [profileChangeReason, setProfileChangeReason] = useState('');
+  const [returnDraftReason, setReturnDraftReason] = useState('');
+  const [returningToDraft, setReturningToDraft] = useState(false);
+  const [returnDraftMessage, setReturnDraftMessage] = useState('');
+  const [reviewNeedsRefresh, setReviewNeedsRefresh] = useState(false);
   const [reviewingIncident, setReviewingIncident] = useState<string | null>(null);
   const [incidentMessage, setIncidentMessage] = useState('');
 
@@ -170,13 +181,13 @@ export default function AdminGuideDetailPage() {
   const [togglingPlace, setTogglingPlace] = useState<string | null>(null);
 
   // silent=true → update data without showing the full-page skeleton (used for post-action refreshes)
-  const fetchGuide = useCallback(async (silent = false) => {
+  const fetchGuide = useCallback(async (silent = false, propagateError = false) => {
     if (!silent) setLoading(true);
     setError('');
     try {
       const res = await fetch(`/api/admin/guides/${slug}`);
-      if (!res.ok) throw new Error('Erreur ' + res.status);
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Erreur ' + res.status);
       const g: Guide = data.guide;
       setCanManagePricing(Boolean(data.permissions?.canManagePricing));
       setGuide(g);
@@ -199,8 +210,13 @@ export default function AdminGuideDetailPage() {
       const map: Record<string, boolean> = {};
       g.places?.forEach((place) => { map[place.placeKey] = place.isActive; });
       setPlacesMap(map);
-    } catch (cause) { setError(errorMessage(cause, 'Erreur réseau')); }
-    if (!silent) setLoading(false);
+      setReviewNeedsRefresh(false);
+    } catch (cause) {
+      if (propagateError) throw cause;
+      setError(errorMessage(cause, 'Erreur réseau'));
+    } finally {
+      if (!silent) setLoading(false);
+    }
   }, [slug]);
 
   useEffect(() => { if (slug) fetchGuide(); }, [slug, fetchGuide]);
@@ -252,24 +268,82 @@ export default function AdminGuideDetailPage() {
   };
 
   const reviewProfileChange = async (action: 'APPROVE' | 'REJECT') => {
-    if (!guide?.pendingProfileChange) return;
-    if (!window.confirm(action === 'APPROVE' ? 'Publier ces modifications sur le profil du Guide ?' : 'Rejeter ces modifications ?')) return;
+    if (!guide?.pendingProfileChange || reviewNeedsRefresh) return;
+    if (action === 'REJECT' && !profileChangeReason.trim()) {
+      setProfileChangeMessage('Indiquez le motif du refus à transmettre au Guide.');
+      return;
+    }
+    if (!window.confirm(action === 'APPROVE' ? 'Approuver ces modifications ? Les photos restent dans le dossier privé ; le portrait public n’est pas modifié.' : 'Rejeter ces modifications et transmettre ce motif au Guide ?')) return;
     setReviewingProfileChange(true);
     setProfileChangeMessage('');
     try {
       const response = await fetch(`/api/admin/guides/${slug}/profile-change`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ requestId: guide.pendingProfileChange.id, action }),
+        body: JSON.stringify({ requestId: guide.pendingProfileChange.id, revision: guide.pendingProfileChange.revision, action, reviewNotes: profileChangeReason.trim() }),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Traitement impossible');
-      setProfileChangeMessage(action === 'APPROVE' ? '✓ Modifications publiées' : '✓ Modifications rejetées');
-      await fetchGuide(true);
+      if (!response.ok) {
+        if (response.status === 409) {
+          setReviewNeedsRefresh(true);
+          try { await fetchGuide(true, true); } catch (cause) {
+            throw new Error(`${data.error || 'La demande a changé.'} Rechargement impossible : ${errorMessage(cause, 'Erreur réseau')}`);
+          }
+        }
+        throw new Error(data.error || 'Traitement impossible');
+      }
+      setReviewNeedsRefresh(true);
+      setProfileChangeReason('');
+      try { await fetchGuide(true, true); } catch (cause) {
+        throw new Error(`Décision enregistrée, mais rechargement impossible : ${errorMessage(cause, 'Erreur réseau')}`);
+      }
+      setProfileChangeMessage(action === 'APPROVE' ? '✓ Modifications approuvées. Le portrait public n’a pas été modifié.' : '✓ Modifications rejetées. Le motif est disponible dans l’espace Guide.');
     } catch (cause) {
       setProfileChangeMessage(cause instanceof Error ? cause.message : 'Traitement impossible');
     } finally {
       setReviewingProfileChange(false);
+    }
+  };
+
+  const returnToDraft = async () => {
+    if (!guide || guide.status !== 'REVIEW' || reviewNeedsRefresh) return;
+    if (!returnDraftReason.trim()) {
+      setReturnDraftMessage('Indiquez les corrections demandées au Guide.');
+      return;
+    }
+    if (!window.confirm('Renvoyer ce dossier au Guide pour correction ? Son compte est conservé.')) return;
+    setReturningToDraft(true);
+    setReturnDraftMessage('');
+    try {
+      const response = await fetch(`/api/admin/guides/${slug}/profile-change`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'RETURN_TO_DRAFT', reviewNotes: returnDraftReason.trim(),
+          profileSubmittedAt: guide.profileSubmittedAt, profileUpdatedAt: guide.profileUpdatedAt,
+          ...(guide.pendingProfileChange ? { requestId: guide.pendingProfileChange.id, revision: guide.pendingProfileChange.revision } : {}),
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        if (response.status === 409) {
+          setReviewNeedsRefresh(true);
+          try { await fetchGuide(true, true); } catch (cause) {
+            throw new Error(`${data.error || 'Le dossier a changé.'} Rechargement impossible : ${errorMessage(cause, 'Erreur réseau')}`);
+          }
+        }
+        throw new Error(data.error || 'Retour pour correction impossible');
+      }
+      setReviewNeedsRefresh(true);
+      setReturnDraftReason('');
+      try { await fetchGuide(true, true); } catch (cause) {
+        throw new Error(`Dossier renvoyé pour correction, mais rechargement impossible : ${errorMessage(cause, 'Erreur réseau')}`);
+      }
+      setReturnDraftMessage('✓ Dossier renvoyé en brouillon. Le Guide peut consulter le motif et soumettre ses corrections.');
+    } catch (cause) {
+      setReturnDraftMessage(errorMessage(cause, 'Retour pour correction impossible'));
+    } finally {
+      setReturningToDraft(false);
     }
   };
 
@@ -369,7 +443,14 @@ export default function AdminGuideDetailPage() {
 
         {/* Avatar + infos rapides */}
         <GuidePhotoEditor key={slug} slug={slug} name={guide.user.name || 'Guide'} email={guide.user.email} registeredAt={guide.user.createdAt} initials={initials(guide)} />
-        <ApplicationMediaPanel data={guide.applicationMedia} />
+        <div>
+          <div style={labelStyle}>Dossier privé actuel — photos et véhicule</div>
+          <ApplicationMediaPanel data={guide.profileMedia} />
+        </div>
+        {guide.applicationMedia && <details>
+          <summary style={{ color: '#7A6D5A', fontSize: '0.78rem', cursor: 'pointer' }}>Informations de la candidature d’origine</summary>
+          <ApplicationMediaPanel data={guide.applicationMedia} />
+        </details>}
 
         <div style={{ height: 1, background: '#F0EBE0' }} />
 
@@ -455,17 +536,17 @@ export default function AdminGuideDetailPage() {
         </div>
       </div>
 
-      {/* Modifications demandées par le Guide — publication après validation */}
+      {/* Modifications demandées par le Guide — examen du dossier privé */}
       {guide.pendingProfileChange && (
         <div style={{ ...sectionStyle, borderColor: '#F59E0B', background: '#FFFBEB' }}>
           <div>
             <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Demande de modification à traiter</div>
             <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 3 }}>
-              Demandée par {guide.pendingProfileChange.requestedByEmail} le {new Date(guide.pendingProfileChange.updatedAt).toLocaleString('fr-FR')}. Le profil public actuel est resté inchangé.
+              Demandée par {guide.pendingProfileChange.requestedByEmail} le {new Date(guide.pendingProfileChange.updatedAt).toLocaleString('fr-FR')}. Les données actuelles sont conservées jusqu’à l’approbation. Les photos approuvées restent privées ; le portrait public relève d’une action séparée du Superadmin.
             </div>
           </div>
           <div style={{ display: 'grid', gap: '0.65rem' }}>
-            {Object.entries(guide.pendingProfileChange.changes).map(([field, proposed]) => (
+            {Object.entries(guide.pendingProfileChange.changes).filter(([field]) => field in PROFILE_FIELD_LABELS).map(([field, proposed]) => (
               <div key={field} style={{ display: 'grid', gridTemplateColumns: 'minmax(130px, .7fr) 1fr 1fr', gap: '0.75rem', padding: '0.75rem', border: '1px solid #FDE68A', borderRadius: 8, background: 'white', alignItems: 'start' }}>
                 <strong style={{ fontSize: '0.75rem', color: '#1A1209' }}>{PROFILE_FIELD_LABELS[field] || field}</strong>
                 <div><small style={{ color: '#7A6D5A' }}>Actuel</small><div style={{ fontSize: '0.78rem', whiteSpace: 'pre-wrap' }}>{displayProfileValue(guide.pendingProfileChange?.before[field])}</div></div>
@@ -473,16 +554,49 @@ export default function AdminGuideDetailPage() {
               </div>
             ))}
           </div>
+          {'bankProposal' in guide.pendingProfileChange.changes && <div data-clarity-mask="true" data-sentry-mask style={{ border: '1px solid #FDE68A', borderRadius: 8, padding: '0.75rem', background: 'white' }}>
+            <strong style={{ fontSize: '0.85rem', color: '#1A1209' }}>Coordonnées bancaires proposées — privées</strong>
+            <p style={{ fontSize: '0.75rem', color: '#7A6D5A' }}>IBAN actuel : {guide.ibanMasked || 'Non renseigné'}. Ces coordonnées ne sont ni publiées ni envoyées par e-mail.</p>
+            {guide.pendingProfileChange.changes.bankProposal ? <dl style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', margin: 0 }}>
+              {([
+                ['Prénom du titulaire', guide.pendingProfileChange.changes.bankProposal.firstName],
+                ['Nom du titulaire', guide.pendingProfileChange.changes.bankProposal.lastName],
+                ['Banque', guide.pendingProfileChange.changes.bankProposal.bankName],
+                ['Pays', guide.pendingProfileChange.changes.bankProposal.country],
+                ['IBAN', guide.pendingProfileChange.changes.bankProposal.iban],
+                ['BIC / SWIFT', guide.pendingProfileChange.changes.bankProposal.bic],
+              ]).map(([label, value]) => <div key={label}><dt style={labelStyle}>{label}</dt><dd style={{ margin: 0, fontSize: '0.78rem', fontWeight: 700, overflowWrap: 'anywhere' }}>{value || '—'}</dd></div>)}
+            </dl> : <p role="alert" style={{ color: '#991B1B', fontSize: '0.78rem' }}>La proposition bancaire ne peut pas être lue. Rechargez le dossier avant de décider.</p>}
+          </div>}
+          {guide.pendingProfileChange.changes.media && <div>
+            <div style={labelStyle}>Photos et véhicule — actuel</div>
+            <ApplicationMediaPanel data={guide.profileMedia} />
+            <div style={{ ...labelStyle, marginTop: '1rem' }}>Photos et véhicule — proposé</div>
+            <ApplicationMediaPanel data={guide.pendingProfileChange.changes.media} />
+          </div>}
           <div style={{ fontSize: '0.7rem', color: '#7A6D5A' }}>
             Connexion : {guide.pendingProfileChange.submittedIp || 'IP inconnue'} · {[guide.pendingProfileChange.submittedCity, guide.pendingProfileChange.submittedCountry].filter(Boolean).join(', ') || 'localisation inconnue'} · {[guide.pendingProfileChange.submittedDevice, guide.pendingProfileChange.submittedBrowser].filter(Boolean).join(' · ') || 'appareil inconnu'}
           </div>
+          <div>
+            <label htmlFor="profile-change-reason" style={labelStyle}>Motif transmis au Guide — obligatoire en cas de refus</label>
+            <textarea id="profile-change-reason" value={profileChangeReason} onChange={event => setProfileChangeReason(event.target.value)} rows={3} maxLength={2000} style={inputStyle} disabled={reviewingProfileChange || returningToDraft} />
+          </div>
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <button onClick={() => reviewProfileChange('APPROVE')} disabled={reviewingProfileChange} style={{ padding: '0.65rem 1.4rem', border: 0, borderRadius: 50, background: '#166534', color: 'white', fontWeight: 700, cursor: reviewingProfileChange ? 'wait' : 'pointer' }}>Valider la demande</button>
-            <button onClick={() => reviewProfileChange('REJECT')} disabled={reviewingProfileChange} style={{ padding: '0.65rem 1.4rem', border: 0, borderRadius: 50, background: '#991B1B', color: 'white', fontWeight: 700, cursor: reviewingProfileChange ? 'wait' : 'pointer' }}>Rejeter</button>
+            <button onClick={() => reviewProfileChange('APPROVE')} disabled={reviewingProfileChange || returningToDraft || reviewNeedsRefresh} style={{ padding: '0.65rem 1.4rem', border: 0, borderRadius: 50, background: '#166534', color: 'white', fontWeight: 700, cursor: reviewingProfileChange ? 'wait' : 'pointer' }}>Approuver ces modifications</button>
+            <button onClick={() => reviewProfileChange('REJECT')} disabled={reviewingProfileChange || returningToDraft || reviewNeedsRefresh || !profileChangeReason.trim()} style={{ padding: '0.65rem 1.4rem', border: 0, borderRadius: 50, background: '#991B1B', color: 'white', fontWeight: 700, cursor: reviewingProfileChange ? 'wait' : 'pointer' }}>Rejeter</button>
           </div>
         </div>
       )}
-      {profileChangeMessage && <div style={{ padding: '0.75rem 1rem', borderRadius: 8, background: profileChangeMessage.startsWith('✓') ? '#D1FAE5' : '#FEE2E2', color: profileChangeMessage.startsWith('✓') ? '#166534' : '#991B1B', fontSize: '0.82rem', fontWeight: 600 }}>{profileChangeMessage}</div>}
+      {profileChangeMessage && <div role="status" style={{ padding: '0.75rem 1rem', borderRadius: 8, background: profileChangeMessage.startsWith('✓') ? '#D1FAE5' : '#FEE2E2', color: profileChangeMessage.startsWith('✓') ? '#166534' : '#991B1B', fontSize: '0.82rem', fontWeight: 600 }}>{profileChangeMessage}</div>}
+      {reviewNeedsRefresh && <button onClick={() => fetchGuide()} style={{ ...inputStyle, cursor: 'pointer' }}>Recharger le dossier avant toute nouvelle décision</button>}
+      {guide.status === 'REVIEW' && <div style={{ ...sectionStyle, borderColor: '#F59E0B', background: '#FFFBEB' }}>
+        <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Renvoyer le dossier pour correction</div>
+        <div style={{ color: '#7A6D5A', fontSize: '0.78rem' }}>Le dossier repasse en brouillon. Le compte du Guide est conservé et le motif apparaît dans son espace. Cette action ne s’applique pas aux profils actifs.</div>
+        <label htmlFor="return-draft-reason" style={labelStyle}>Corrections demandées au Guide — obligatoire</label>
+        <textarea id="return-draft-reason" value={returnDraftReason} onChange={event => setReturnDraftReason(event.target.value)} rows={3} maxLength={2000} style={inputStyle} disabled={returningToDraft || reviewingProfileChange} />
+        <button onClick={returnToDraft} disabled={returningToDraft || reviewingProfileChange || reviewNeedsRefresh || !returnDraftReason.trim()} style={{ padding: '0.65rem 1.4rem', border: 0, borderRadius: 50, background: '#991B1B', color: 'white', fontWeight: 700, cursor: returningToDraft ? 'wait' : 'pointer', alignSelf: 'flex-start' }}>{returningToDraft ? 'Envoi…' : 'Renvoyer pour correction'}</button>
+      </div>}
+      {returnDraftMessage && <div role="status" style={{ padding: '0.75rem 1rem', borderRadius: 8, background: returnDraftMessage.startsWith('✓') ? '#D1FAE5' : '#FEE2E2', color: returnDraftMessage.startsWith('✓') ? '#166534' : '#991B1B', fontSize: '0.82rem', fontWeight: 600 }}>{returnDraftMessage}</div>}
 
       <div style={{ ...sectionStyle, borderColor: guide.permanentlyDeactivatedAt ? '#B91C1C' : '#E8DFC8' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', alignItems: 'flex-start', flexWrap: 'wrap' }}>

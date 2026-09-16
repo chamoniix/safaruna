@@ -4,6 +4,8 @@ import { adminAuditDetail, adminAuditFields, getAdminActor, getAdminAuditContext
 import prisma from '@/lib/prisma';
 import { decrypt } from '@/lib/crypto';
 import { applicationMediaSelect, applicationMediaView } from '@/lib/guide-application-media';
+import { readGuideProfileMedia } from '@/lib/guide-profile-media';
+import { profileChangeRevision, safeProfileBefore, safeProfileChanges } from '@/lib/guide-profile-changes';
 
 export async function GET(
   req: NextRequest,
@@ -107,6 +109,8 @@ export async function GET(
       where: { createdGuideProfileId: guide.id, status: 'APPROVED' },
       orderBy: { createdAt: 'desc' }, select: applicationMediaSelect,
     });
+    const profileMedia = await readGuideProfileMedia(prisma, guide.id);
+    const pendingProfileChange = guide.changeRequests[0];
 
     return NextResponse.json({
       permissions: {
@@ -115,6 +119,7 @@ export async function GET(
       guide: {
         id: guide.id,
         applicationMedia: application ? applicationMediaView(application) : null,
+        profileMedia: profileMedia.view,
         slug: guide.slug,
         bio: guide.bio,
         city: guide.city,
@@ -137,6 +142,7 @@ export async function GET(
         approvedByEmail: guide.approvedByEmail,
         approvedAt: guide.approvedAt,
         profileSubmittedAt: guide.profileSubmittedAt,
+        profileUpdatedAt: guide.updatedAt,
         cancellationCount: guide.cancellationCount,
         permanentlyDeactivatedAt: guide.permanentlyDeactivatedAt,
         responseTimeAvg: guide.responseTimeAvg,
@@ -210,7 +216,20 @@ export async function GET(
           ? guide.interviewDate.toLocaleDateString('fr-FR')
           : null,
         interviewedBy: guide.interviewedBy,
-        pendingProfileChange: guide.changeRequests[0] || null,
+        pendingProfileChange: pendingProfileChange ? {
+          id: pendingProfileChange.id,
+          revision: profileChangeRevision(pendingProfileChange),
+          changes: safeProfileChanges(pendingProfileChange.changes, pendingProfileChange.id),
+          before: safeProfileBefore(pendingProfileChange.before, pendingProfileChange.id),
+          requestedByEmail: pendingProfileChange.requestedByEmail,
+          submittedIp: pendingProfileChange.submittedIp,
+          submittedCountry: pendingProfileChange.submittedCountry,
+          submittedCity: pendingProfileChange.submittedCity,
+          submittedDevice: pendingProfileChange.submittedDevice,
+          submittedBrowser: pendingProfileChange.submittedBrowser,
+          createdAt: pendingProfileChange.createdAt,
+          updatedAt: pendingProfileChange.updatedAt,
+        } : null,
         reservationIncidents: guide.reservationIncidents.map(incident => ({
           id: incident.id,
           refNumber: incident.reservation.refNumber,
@@ -228,7 +247,7 @@ export async function GET(
           avgRating: null,
         },
       },
-    });
+    }, { headers: { 'Cache-Control': 'private, no-store' } });
   } catch (err) {
     console.error('[admin/guides/slug GET]', err);
     return NextResponse.json(

@@ -3,6 +3,7 @@ import 'server-only'
 import { createHash } from 'node:crypto'
 import type { Prisma } from '@prisma/client'
 import { decrypt } from '@/lib/crypto'
+import { readGuideProfileMedia } from '@/lib/guide-profile-media'
 import { getEffectivePlaceCatalog } from '@/lib/place-catalog'
 import { BOOKING_NET_COSTS } from '@/lib/booking-pricing'
 import { missingRequiredGuideProfileFields, guideProfileChangesSchema } from '@/lib/guide-profile-changes'
@@ -31,8 +32,8 @@ export async function readGuideDossier(db: Prisma.TransactionClient, guideAccoun
   if (!account?.guideProfile) throw new Error('DOSSIER_NOT_FOUND')
   const gp = account.guideProfile
   if (account.status !== 'ACTIVE' || gp.status === 'SUSPENDED' || gp.permanentlyDeactivatedAt) throw new Error('DOSSIER_FORBIDDEN')
-  const [application, catalog, places, dates, ...acknowledgements] = await Promise.all([
-    db.guideApplication.findFirst({ where: { createdGuideProfileId: gp.id, status: 'APPROVED' }, orderBy: { createdAt: 'desc' }, select: { profilePhotoPath: true } }),
+  const [media, catalog, places, dates, ...acknowledgements] = await Promise.all([
+    readGuideProfileMedia(db, gp.id),
     getEffectivePlaceCatalog(db),
     db.guidePlace.findMany({ where: { guideProfileId: gp.id }, orderBy: { placeKey: 'asc' }, select: { placeKey: true, isActive: true } }),
     db.availability.findMany({ where: { guideProfileId: gp.id, status: 'UNAVAILABLE' }, orderBy: [{ date: 'asc' }, { city: 'asc' }], select: { date: true, city: true } }),
@@ -97,7 +98,7 @@ export async function readGuideDossier(db: Prisma.TransactionClient, guideAccoun
   })
   const progress = [
     { key: 'identity', label: 'Informations du profil renseignées', complete: missing.length === 0 },
-    { key: 'photo', label: 'Photo présente au dossier', complete: Boolean(account.image || application?.profilePhotoPath) },
+    { key: 'photo', label: 'Photo présente au dossier', complete: Boolean(account.image || media.snapshot.profilePhotoPath || pending.media?.profilePhotoPath) },
     ...confirmations.map(item => ({ key: item.section, label: { bank: 'Coordonnées confirmées par vous', rates: 'Montants nets acceptés', terms: 'Conditions et rémunération acceptées', calendar: 'Disponibilités vérifiées par vous' }[item.section], complete: item.ready && item.confirmed })),
   ]
   return {

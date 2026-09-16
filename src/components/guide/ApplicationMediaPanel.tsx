@@ -18,7 +18,7 @@ export default function ApplicationMediaPanel({ data }: { data: ApplicationMedia
   return <section style={{ marginTop: 20, padding: 18, border: '1px solid #E8DFC8', borderRadius: 12, background: 'white', color: '#1A1209' }}>
     <h3 style={{ margin: '0 0 8px', fontSize: 16 }}>Photo proposée et véhicule personnel</h3>
     <p style={{ margin: '0 0 16px', fontSize: 12, lineHeight: 1.6, color: '#7A6D5A' }}>Informations en lecture seule. L’envoi d’une photo ne la publie pas automatiquement. Seul le Superadmin peut publier le portrait. Les photos du véhicule restent privées.</p>
-    {!data ? <p style={{ margin: 0, color: '#7A6D5A', fontSize: 13 }}>Aucune photo ni information de véhicule renseignée dans une candidature associée à ce profil.</p> : <>
+    {!data ? <p style={{ margin: 0, color: '#7A6D5A', fontSize: 13 }}>Aucune photo ni information de véhicule renseignée dans ce dossier.</p> : <>
       <dl style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: 12, margin: '0 0 18px', fontSize: 13 }}>
         {[
           ['Véhicule personnel', data.hasPersonalVehicle === null ? 'Non renseigné' : data.hasPersonalVehicle ? 'Oui' : 'Non'],

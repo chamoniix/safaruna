@@ -32,9 +32,15 @@ function fixture() {
   let trusted = true
   let access = true
   let brokenCrypto = false
+  const mediaModule = load('src/lib/guide-profile-media.ts', {
+    '@/lib/guide-application-media': load('src/lib/guide-application-media.ts', {}),
+    '@/lib/guide-application-photo-receipt': { readApplicationPhotoReceipt: () => { throw new Error('Unexpected upload in dossier test') } },
+  })
+  const media = { ...mediaModule, readGuideProfileMedia: async () => ({ snapshot: { profilePhotoPath: 'private/photo-test' }, view: null }) }
   const db: any = {
     guideAccount: { findUnique: async (query: any) => { queries.push(query); return query.where.id === account.id ? account : null } },
     guideApplication: { findFirst: async () => ({ profilePhotoPath: 'private/photo-test' }) },
+    guideProfileChangeRequest: { findFirst: async () => null },
     guidePlace: { findMany: async () => [{ placeKey: 'test-place', isActive: true }] },
     availability: { findMany: async (query: any) => { assert.equal(query.where.status, 'UNAVAILABLE'); return unavailable } },
     auditLog: {
@@ -49,18 +55,21 @@ function fixture() {
   }
   const changes = load('src/lib/guide-profile-changes.ts', {
     'server-only': {}, '@/lib/prisma': db, '@/lib/languages': { GUIDE_LANGUAGES: [{ code: 'fr' }] },
+    '@/lib/guide-profile-media': media, '@/lib/crypto': { decrypt: () => { throw new Error('Unexpected proposed bank') }, encrypt: () => { throw new Error('Unexpected write') } },
   })
   const dossier = load('src/lib/guide-dossier.ts', {
     'server-only': {}, '@/lib/crypto': { decrypt: () => { if (brokenCrypto) throw new Error('secret crypto failure'); return 'FR7612345678901234567890123' } },
     '@/lib/place-catalog': { getEffectivePlaceCatalog: async (client: any) => { assert.equal(client, db); return catalog } },
     '@/lib/booking-pricing': { BOOKING_NET_COSTS: { trainPerTrip: 80, guideHotelPerNight: 80 } },
     '@/lib/guide-profile-changes': changes, '@/lib/guide-payout-policy': policy,
+    '@/lib/guide-profile-media': media,
   })
   const route = load('src/app/api/guide/profil/route.ts', {
     '@/lib/prisma': db, '@/lib/require-account': { requireGuide: async () => access ? { ok: true, actor: { id: account.id, email: account.email } } : { ok: false, response: new Response('{}', { status: 401 }) } },
     '@/lib/guide-auth': { hasTrustedGuideAuthOrigin: () => trusted, getGuideRequestContext: () => ({ ip: '127.0.0.1', userAgent: 'test', country: 'FR', city: null, device: 'DESKTOP', browser: 'test' }) },
     '@/lib/guide-profile-changes': changes, '@/lib/guide-application-media': { applicationMediaSelect: {}, applicationMediaView: () => ({ photos: {} }) },
     '@/lib/guide-dossier': dossier, '@/lib/guide-payout-policy': policy,
+    '@/lib/guide-profile-media': media, '@/lib/guide-photo': { GuidePhotoError: class extends Error {} },
     '@/lib/ratelimit': { apiRatelimit: null, checkRateLimit: async () => null },
   })
   const read = () => dossier.readGuideDossier(db, account.id)
@@ -196,6 +205,7 @@ test('profile renders real dossier data, readable banking and a single final sub
     'next/image': () => null,
     '@/lib/languages': { GUIDE_LANGUAGES: [{ code: 'fr', label: 'Français' }], LANG_CODE_TO_LABEL: { fr: 'Français' } },
     '@/components/guide/ApplicationMediaPanel': () => null,
+    '@/components/guide/GuideDossierProposalEditor': () => null,
     '@/lib/guide-payout-policy': f.policy,
   }).default
   const html = renderToStaticMarkup(react.createElement(Page))

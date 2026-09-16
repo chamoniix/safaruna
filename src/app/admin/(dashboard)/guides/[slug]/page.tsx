@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { PLACES } from '@/lib/places';
@@ -41,6 +41,12 @@ type ReservationIncident = {
   reviewedAt: string | null;
 };
 type Guide = {
+  dossier: {
+    bank: { firstName: string | null; lastName: string | null; bankName: string | null; country: string | null; iban: string | null; bic: string | null; readable: boolean };
+    progress: { key: string; label: string; complete: boolean }[];
+    bankVerification: { revision: string; verified: boolean; verifiedAt: string | null; verifiedByEmail: string | null };
+    activation: { previouslyPublished: boolean; requiresSuperadmin: boolean; canActivate: boolean; blockers: string[]; revision: string };
+  } | null;
   applicationMedia: ApplicationMediaView | null;
   profileMedia: ApplicationMediaView | null;
   id: string; slug: string; bio: string | null; city: string | null;
@@ -89,6 +95,11 @@ const PROFILE_FIELD_LABELS: Record<string, string> = {
   pricingCorrectionRequest: 'Demande de correction des tarifs',
   personalCorrectionRequest: 'Demande de correction des informations',
   languagesCorrectionRequest: 'Demande de correction des langues',
+};
+
+const ADMIN_DOSSIER_LABELS: Record<string, string> = {
+  bank: 'Coordonnées confirmées par le Guide',
+  calendar: 'Disponibilités vérifiées par le Guide',
 };
 
 function displayProfileValue(value: unknown) {
@@ -156,6 +167,10 @@ export default function AdminGuideDetailPage() {
   // Access management — validate / suspend / reactivate
   const [activating, setActivating]       = useState(false);
   const [accessResult, setAccessResult]   = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [verifyingBank, setVerifyingBank] = useState(false);
+  const [bankAttestationRevision, setBankAttestationRevision] = useState<string | null>(null);
+  const [bankReviewResult, setBankReviewResult] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const dossierMutation = useRef(false);
 
 
   // Identity editing
@@ -191,6 +206,7 @@ export default function AdminGuideDetailPage() {
       const g: Guide = data.guide;
       setCanManagePricing(Boolean(data.permissions?.canManagePricing));
       setGuide(g);
+      setBankAttestationRevision(null);
       setBio(g.bio || '');
       setCity(g.city || '');
       setGender(g.gender || 'HOMME');
@@ -228,7 +244,8 @@ export default function AdminGuideDetailPage() {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          bio, city, gender, servesMakkah, servesMadinah, acceptingBookings, nationality,
+          bio, gender, servesMakkah, servesMadinah, acceptingBookings, nationality,
+          ...(city !== (guide?.city || '') && { city }),
           experienceYears: expYears ? Number(expYears) : null,
           ...(canManagePricing && {
             makkahNetUpTo6Cents: Math.round(Number(makkahRates.upTo6) * 100),
@@ -249,26 +266,78 @@ export default function AdminGuideDetailPage() {
   };
 
   const handleAccess = async (action: 'activate' | 'suspend') => {
+    if (!guide || dossierMutation.current || reviewingProfileChange || returningToDraft) return;
+    if (action === 'activate' && (reviewNeedsRefresh || !guide.dossier?.activation.canActivate)) return;
+    dossierMutation.current = true;
     setActivating(true);
     setAccessResult(null);
     try {
       const res = await fetch(`/api/admin/guides/${slug}/activate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action }),
+        body: JSON.stringify({ action, ...(action === 'activate' && { revision: guide.dossier!.activation.revision }) }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Erreur');
+      if (!res.ok) {
+        if (res.status === 409) {
+          setReviewNeedsRefresh(true);
+          try { await fetchGuide(true, true); } catch (cause) {
+            throw new Error(`${data.error || 'Le dossier a changé.'} Rechargement impossible : ${errorMessage(cause, 'Erreur réseau')}`);
+          }
+        }
+        throw new Error(data.error || 'Erreur');
+      }
+      setReviewNeedsRefresh(true);
+      try { await fetchGuide(true, true); } catch (cause) {
+        throw new Error(`Décision enregistrée, mais rechargement impossible : ${errorMessage(cause, 'Erreur réseau')}`);
+      }
       setAccessResult({ message: data.message, type: 'success' });
-      await fetchGuide(true); // silent — keep sections visible
     } catch (cause) {
       setAccessResult({ message: errorMessage(cause, 'Erreur'), type: 'error' });
+    } finally {
+      setActivating(false);
+      dossierMutation.current = false;
     }
-    setActivating(false);
+  };
+
+  const verifyBank = async () => {
+    const dossier = guide?.dossier;
+    if (!dossier || !dossier.bank.readable || dossier.bankVerification.verified || reviewNeedsRefresh || dossierMutation.current || reviewingProfileChange || returningToDraft || bankAttestationRevision !== dossier.bankVerification.revision) return;
+    dossierMutation.current = true;
+    setVerifyingBank(true);
+    setBankReviewResult(null);
+    try {
+      const response = await fetch(`/api/admin/guides/${slug}/profile-change`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'VERIFY_BANK', revision: dossier.bankVerification.revision, accountHolderConfirmed: true }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        if (response.status === 409) {
+          setReviewNeedsRefresh(true);
+          setBankAttestationRevision(null);
+          try { await fetchGuide(true, true); } catch (cause) {
+            throw new Error(`${data.error || 'Les coordonnées ont changé.'} Rechargement impossible : ${errorMessage(cause, 'Erreur réseau')}`);
+          }
+        }
+        throw new Error(data.error || 'Vérification non enregistrée');
+      }
+      setReviewNeedsRefresh(true);
+      setBankAttestationRevision(null);
+      try { await fetchGuide(true, true); } catch (cause) {
+        throw new Error(`Vérification enregistrée, mais rechargement impossible : ${errorMessage(cause, 'Erreur réseau')}`);
+      }
+      setBankReviewResult({ type: 'success', message: 'Vérification manuelle enregistrée pour ces coordonnées.' });
+    } catch (cause) {
+      setBankReviewResult({ type: 'error', message: errorMessage(cause, 'Vérification non enregistrée') });
+    } finally {
+      setVerifyingBank(false);
+      dossierMutation.current = false;
+    }
   };
 
   const reviewProfileChange = async (action: 'APPROVE' | 'REJECT') => {
-    if (!guide?.pendingProfileChange || reviewNeedsRefresh) return;
+    if (!guide?.pendingProfileChange || reviewNeedsRefresh || dossierMutation.current) return;
     if (action === 'REJECT' && !profileChangeReason.trim()) {
       setProfileChangeMessage('Indiquez le motif du refus à transmettre au Guide.');
       return;
@@ -306,7 +375,7 @@ export default function AdminGuideDetailPage() {
   };
 
   const returnToDraft = async () => {
-    if (!guide || guide.status !== 'REVIEW' || reviewNeedsRefresh) return;
+    if (!guide || guide.status !== 'REVIEW' || reviewNeedsRefresh || dossierMutation.current) return;
     if (!returnDraftReason.trim()) {
       setReturnDraftMessage('Indiquez les corrections demandées au Guide.');
       return;
@@ -582,8 +651,8 @@ export default function AdminGuideDetailPage() {
             <textarea id="profile-change-reason" value={profileChangeReason} onChange={event => setProfileChangeReason(event.target.value)} rows={3} maxLength={2000} style={inputStyle} disabled={reviewingProfileChange || returningToDraft} />
           </div>
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-            <button onClick={() => reviewProfileChange('APPROVE')} disabled={reviewingProfileChange || returningToDraft || reviewNeedsRefresh} style={{ padding: '0.65rem 1.4rem', border: 0, borderRadius: 50, background: '#166534', color: 'white', fontWeight: 700, cursor: reviewingProfileChange ? 'wait' : 'pointer' }}>Approuver ces modifications</button>
-            <button onClick={() => reviewProfileChange('REJECT')} disabled={reviewingProfileChange || returningToDraft || reviewNeedsRefresh || !profileChangeReason.trim()} style={{ padding: '0.65rem 1.4rem', border: 0, borderRadius: 50, background: '#991B1B', color: 'white', fontWeight: 700, cursor: reviewingProfileChange ? 'wait' : 'pointer' }}>Rejeter</button>
+            <button onClick={() => reviewProfileChange('APPROVE')} disabled={reviewingProfileChange || returningToDraft || activating || verifyingBank || reviewNeedsRefresh} style={{ padding: '0.65rem 1.4rem', border: 0, borderRadius: 50, background: '#166534', color: 'white', fontWeight: 700, cursor: reviewingProfileChange ? 'wait' : 'pointer' }}>Approuver ces modifications</button>
+            <button onClick={() => reviewProfileChange('REJECT')} disabled={reviewingProfileChange || returningToDraft || activating || verifyingBank || reviewNeedsRefresh || !profileChangeReason.trim()} style={{ padding: '0.65rem 1.4rem', border: 0, borderRadius: 50, background: '#991B1B', color: 'white', fontWeight: 700, cursor: reviewingProfileChange ? 'wait' : 'pointer' }}>Rejeter</button>
           </div>
         </div>
       )}
@@ -594,7 +663,7 @@ export default function AdminGuideDetailPage() {
         <div style={{ color: '#7A6D5A', fontSize: '0.78rem' }}>Le dossier repasse en brouillon. Le compte du Guide est conservé et le motif apparaît dans son espace. Cette action ne s’applique pas aux profils actifs.</div>
         <label htmlFor="return-draft-reason" style={labelStyle}>Corrections demandées au Guide — obligatoire</label>
         <textarea id="return-draft-reason" value={returnDraftReason} onChange={event => setReturnDraftReason(event.target.value)} rows={3} maxLength={2000} style={inputStyle} disabled={returningToDraft || reviewingProfileChange} />
-        <button onClick={returnToDraft} disabled={returningToDraft || reviewingProfileChange || reviewNeedsRefresh || !returnDraftReason.trim()} style={{ padding: '0.65rem 1.4rem', border: 0, borderRadius: 50, background: '#991B1B', color: 'white', fontWeight: 700, cursor: returningToDraft ? 'wait' : 'pointer', alignSelf: 'flex-start' }}>{returningToDraft ? 'Envoi…' : 'Renvoyer pour correction'}</button>
+        <button onClick={returnToDraft} disabled={returningToDraft || reviewingProfileChange || activating || verifyingBank || reviewNeedsRefresh || !returnDraftReason.trim()} style={{ padding: '0.65rem 1.4rem', border: 0, borderRadius: 50, background: '#991B1B', color: 'white', fontWeight: 700, cursor: returningToDraft ? 'wait' : 'pointer', alignSelf: 'flex-start' }}>{returningToDraft ? 'Envoi…' : 'Renvoyer pour correction'}</button>
       </div>}
       {returnDraftMessage && <div role="status" style={{ padding: '0.75rem 1rem', borderRadius: 8, background: returnDraftMessage.startsWith('✓') ? '#D1FAE5' : '#FEE2E2', color: returnDraftMessage.startsWith('✓') ? '#166534' : '#991B1B', fontSize: '0.82rem', fontWeight: 600 }}>{returnDraftMessage}</div>}
 
@@ -634,14 +703,60 @@ export default function AdminGuideDetailPage() {
       <div style={{ ...sectionStyle, gap: '0.875rem' }}>
         <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Gestion des accès</div>
 
+        {guide.dossier ? <>
+          <div style={{ fontSize: '0.82rem', color: '#4A3F30' }}>
+            {guide.dossier.activation.previouslyPublished
+              ? 'Profil déjà publié : l’Admin peut le réactiver après suspension. Les éléments du dossier à régulariser ci-dessous ne suspendent pas automatiquement un profil actif.'
+              : 'Première publication : réservée au Superadmin, après validation du dossier et du portrait public.'}
+          </div>
+          <ul style={{ margin: 0, paddingLeft: '1.25rem', color: '#4A3F30', fontSize: '0.8rem', lineHeight: 1.8 }}>
+            {guide.dossier.progress.map(item => <li key={item.key}>
+              {item.complete ? 'Complété — ' : 'À compléter — '}
+              {ADMIN_DOSSIER_LABELS[item.key] || item.label}
+            </li>)}
+          </ul>
+          <div data-clarity-mask="true" data-sentry-mask style={{ padding: '1rem', border: '1px solid #E8DFC8', borderRadius: 8, display: 'grid', gap: '0.75rem' }}>
+            <strong style={{ color: '#1A1209', fontSize: '0.88rem' }}>Vérification bancaire manuelle — données privées</strong>
+            <div style={{ color: '#4A3F30', fontSize: '0.8rem' }}>Identité du Guide : {guide.user.firstName || '—'} {guide.user.lastName || '—'}</div>
+            {guide.dossier.bank.readable ? <dl style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', margin: 0 }}>
+              {([
+                ['Prénom du titulaire', guide.dossier.bank.firstName], ['Nom du titulaire', guide.dossier.bank.lastName],
+                ['Banque', guide.dossier.bank.bankName], ['Pays de la banque', guide.dossier.bank.country],
+                ['IBAN', guide.dossier.bank.iban], ['BIC / SWIFT', guide.dossier.bank.bic],
+              ]).map(([label, value]) => <div key={label}><dt style={labelStyle}>{label}</dt><dd style={{ margin: 0, fontSize: '0.8rem', overflowWrap: 'anywhere', color: '#1A1209' }}>{value || 'Non renseigné'}</dd></div>)}
+            </dl> : <p style={{ margin: 0, fontSize: '0.8rem', color: '#991B1B' }}>Coordonnées bancaires indisponibles : aucune vérification ne peut être enregistrée.</p>}
+            <p style={{ margin: 0, fontSize: '0.76rem', color: '#7A6D5A' }}>La déclaration du Guide ne prouve pas la titularité du compte. Vérifiez les coordonnées et l’identité du titulaire avant de confirmer. Aucun virement n’est déclenché.</p>
+            {guide.dossier.bankVerification.verified ? <div style={{ fontSize: '0.8rem', color: '#166534' }}>
+              Vérification manuelle enregistrée par {guide.dossier.bankVerification.verifiedByEmail || 'l’administration'}
+              {guide.dossier.bankVerification.verifiedAt ? ` le ${new Date(guide.dossier.bankVerification.verifiedAt).toLocaleString('fr-FR')}` : ''}.
+            </div> : <>
+              <label style={{ display: 'flex', gap: '0.65rem', alignItems: 'flex-start', fontSize: '0.8rem', color: '#1A1209' }}>
+                <input type="checkbox" checked={bankAttestationRevision === guide.dossier.bankVerification.revision}
+                  disabled={!guide.dossier.bank.readable || verifyingBank || activating || reviewingProfileChange || returningToDraft || reviewNeedsRefresh}
+                  onChange={event => setBankAttestationRevision(event.target.checked ? guide.dossier!.bankVerification.revision : null)} />
+                J’ai vérifié que ce compte bancaire appartient personnellement au Guide. Aucun compte de tiers n’est accepté.
+              </label>
+              <button onClick={verifyBank} disabled={!guide.dossier.bank.readable || bankAttestationRevision !== guide.dossier.bankVerification.revision || verifyingBank || activating || reviewingProfileChange || returningToDraft || reviewNeedsRefresh}
+                style={{ padding: '0.65rem 1.4rem', border: 0, borderRadius: 50, background: '#166534', color: 'white', fontWeight: 700, alignSelf: 'start', justifySelf: 'start', cursor: verifyingBank ? 'wait' : 'pointer' }}>
+                {verifyingBank ? 'Enregistrement…' : 'Confirmer la vérification bancaire'}
+              </button>
+            </>}
+          </div>
+          {bankReviewResult && <div role="status" style={{ fontSize: '0.8rem', color: bankReviewResult.type === 'success' ? '#166534' : '#991B1B' }}>{bankReviewResult.message}</div>}
+          {guide.dossier.activation.blockers.length > 0 && <div style={{ fontSize: '0.8rem', color: '#92400E' }}>
+            <strong>Points bloquant l’activation</strong>
+            <ul style={{ marginBottom: 0, paddingLeft: '1.25rem' }}>{guide.dossier.activation.blockers.map((item, index) => <li key={`${index}-${item}`}>{item}</li>)}</ul>
+          </div>}
+        </> : <div style={{ fontSize: '0.8rem', color: '#991B1B' }}>Dossier indisponible. Rechargez la page avant toute décision d’activation.</div>}
+
         {/* REVIEW or DRAFT → activate */}
         {guide.status === 'REVIEW' && (
             <button
               onClick={() => handleAccess('activate')}
-              disabled={activating}
+              disabled={activating || verifyingBank || reviewingProfileChange || returningToDraft || reviewNeedsRefresh || !guide.dossier?.activation.canActivate}
               style={{ padding: '0.7rem 1.75rem', background: activating ? '#9CA3AF' : '#1D5C3A', color: 'white', border: 'none', borderRadius: 50, fontWeight: 700, fontSize: '0.85rem', cursor: activating ? 'not-allowed' : 'pointer', fontFamily: 'inherit', alignSelf: 'flex-start' }}
             >
-              {activating ? 'Validation…' : '✓ Valider le profil guide'}
+              {activating ? 'Validation…' : 'Publier le profil guide'}
             </button>
         )}
 
@@ -649,7 +764,7 @@ export default function AdminGuideDetailPage() {
         {guide.status === 'ACTIVE' && (
           <button
             onClick={() => { if (confirm('Suspendre ce guide ?')) handleAccess('suspend'); }}
-            disabled={activating}
+            disabled={activating || verifyingBank || reviewingProfileChange || returningToDraft}
             style={{ padding: '0.7rem 1.75rem', background: activating ? '#9CA3AF' : '#DC2626', color: 'white', border: 'none', borderRadius: 50, fontWeight: 700, fontSize: '0.85rem', cursor: activating ? 'not-allowed' : 'pointer', fontFamily: 'inherit', alignSelf: 'flex-start' }}
           >
             {activating ? '…' : 'Suspendre le profil'}
@@ -660,10 +775,10 @@ export default function AdminGuideDetailPage() {
         {guide.status === 'SUSPENDED' && !guide.permanentlyDeactivatedAt && (
           <button
             onClick={() => handleAccess('activate')}
-            disabled={activating}
+            disabled={activating || verifyingBank || reviewingProfileChange || returningToDraft || reviewNeedsRefresh || !guide.dossier?.activation.canActivate}
             style={{ padding: '0.7rem 1.75rem', background: activating ? '#9CA3AF' : '#1D5C3A', color: 'white', border: 'none', borderRadius: 50, fontWeight: 700, fontSize: '0.85rem', cursor: activating ? 'not-allowed' : 'pointer', fontFamily: 'inherit', alignSelf: 'flex-start' }}
           >
-            {activating ? '…' : 'Réactiver le profil'}
+            {activating ? '…' : guide.dossier?.activation.previouslyPublished ? 'Réactiver le profil' : 'Publier le profil guide'}
           </button>
         )}
 
@@ -796,8 +911,13 @@ export default function AdminGuideDetailPage() {
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
           <div>
-            <label style={labelStyle}>Ville</label>
-            <input value={city} onChange={e => setCity(e.target.value)} style={inputStyle} placeholder="Makkah" />
+            <label htmlFor="guide-main-city" style={labelStyle}>Ville principale</label>
+            <select id="guide-main-city" value={city} onChange={e => setCity(e.target.value)} style={inputStyle}>
+              <option value="" disabled>Choisir une ville</option>
+              {city && city !== 'MAKKAH' && city !== 'MADINAH' && <option value={city} disabled>{city} — valeur historique à vérifier</option>}
+              <option value="MAKKAH" disabled={!servesMakkah}>Makkah</option>
+              <option value="MADINAH" disabled={!servesMadinah}>Médine</option>
+            </select>
           </div>
           <div>
             <label style={labelStyle}>Nationalité</label>

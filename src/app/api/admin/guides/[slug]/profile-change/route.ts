@@ -5,6 +5,7 @@ import { adminAuditDetail, adminAuditFields, getAdminActor, getAdminAuditContext
 import { guideProfileChangesSchema, bankBeforeSnapshot, decryptBankProposal, profileChangeRevision, redactProfileAudit, sameProfileValue } from '@/lib/guide-profile-changes'
 import { readGuideProfileMedia } from '@/lib/guide-profile-media'
 import { encrypt } from '@/lib/crypto'
+import { readAdminGuideDossier } from '@/lib/guide-dossier'
 import prisma from '@/lib/prisma'
 
 const reviewSchema = z.discriminatedUnion('action', [z.object({
@@ -19,6 +20,8 @@ const reviewSchema = z.discriminatedUnion('action', [z.object({
   action: z.literal('RETURN_TO_DRAFT'), reviewNotes: z.string().trim().min(1).max(2000),
   profileSubmittedAt: z.string().datetime().nullable(), profileUpdatedAt: z.string().datetime(),
   requestId: z.string().min(1).optional(), revision: z.string().regex(/^[a-f0-9]{64}$/).optional(),
+}).strict(), z.object({
+  action: z.literal('VERIFY_BANK'), revision: z.string().regex(/^[a-f0-9]{64}$/), accountHolderConfirmed: z.literal(true),
 }).strict()])
 
 const privateHeaders = { 'Cache-Control': 'private, no-store' }
@@ -38,7 +41,8 @@ export async function POST(
 
   const { slug } = await params
   const auditContext = getAdminAuditContext(req)
-  const { action, reviewNotes } = parsed.data
+  const { action } = parsed.data
+  const reviewNotes = 'reviewNotes' in parsed.data ? parsed.data.reviewNotes : undefined
 
   try {
     const result = await prisma.$transaction(async tx => {
@@ -52,6 +56,20 @@ export async function POST(
         },
       })
       if (!guide?.guideAccount) throw new Error('GUIDE_NOT_FOUND')
+      if (parsed.data.action === 'VERIFY_BANK') {
+        if (guide.permanentlyDeactivatedAt) throw new Error('GUIDE_FORBIDDEN')
+        const dossier = await readAdminGuideDossier(tx, guide.guideAccount.id, actor)
+        if (dossier.bankVerification.revision !== parsed.data.revision) throw new ProfileChangedDuringReviewError('bank')
+        if (!dossier.confirmations.find(item => item.section === 'bank')?.ready) throw new Error('BANK_INCOMPLETE')
+        if (!dossier.bankVerification.verified) await tx.auditLog.create({ data: {
+          actor: actor.email, actorRole: actor.role, actorAdminId: actor.id,
+          action: 'GUIDE_BANK_VERIFIED', target: guide.id,
+          detail: adminAuditDetail(auditContext),
+          after: { revision: dossier.bankVerification.revision, accountHolderConfirmed: true },
+          ...adminAuditFields(auditContext),
+        } })
+        return { status: 'BANK_VERIFIED' }
+      }
       if (guide.guideAccount.status !== 'ACTIVE' || guide.status === 'SUSPENDED' || guide.permanentlyDeactivatedAt) throw new Error('GUIDE_FORBIDDEN')
 
       if (parsed.data.action === 'RETURN_TO_DRAFT') {
@@ -93,6 +111,7 @@ export async function POST(
       const before = changeRequest.before as Record<string, unknown>
       if (!changesResult.success) throw new Error('INVALID_STORED_REQUEST')
       const changes = changesResult.data
+      if (action === 'APPROVE' && changes.city !== undefined && !((changes.city === 'MAKKAH' && guide.servesMakkah) || (changes.city === 'MADINAH' && guide.servesMadinah))) throw new Error('CITY_UNAVAILABLE')
       let bank: ReturnType<typeof decryptBankProposal> | null = null
       if (changes.bankEncrypted && action === 'APPROVE') {
         try { bank = decryptBankProposal(changes.bankEncrypted) } catch { throw new Error('INVALID_STORED_REQUEST') }
@@ -207,6 +226,8 @@ export async function POST(
 
     return NextResponse.json({ success: true, status: result.status }, { headers: privateHeaders })
   } catch (error) {
+    if (error instanceof Error && error.message === 'BANK_INCOMPLETE') return NextResponse.json({ error: 'Complétez les coordonnées bancaires avant leur vérification.' }, { status: 409, headers: privateHeaders })
+    if (error instanceof Error && error.message === 'CITY_UNAVAILABLE') return NextResponse.json({ error: 'La ville principale proposée doit être Makkah ou Médine et être actuellement proposée par le Guide.' }, { status: 409, headers: privateHeaders })
     if (error instanceof Error && error.message === 'BANK_UNAVAILABLE') return NextResponse.json({ error: 'Les coordonnées bancaires ne peuvent pas être enregistrées actuellement. Réessayez ultérieurement.' }, { status: 503, headers: privateHeaders })
     if (error instanceof ProfileChangedDuringReviewError || (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2034')) {
       return NextResponse.json({ error: 'Le profil a changé depuis cette demande. Rechargez la fiche avant de décider.' }, { status: 409 })

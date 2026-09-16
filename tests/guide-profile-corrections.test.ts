@@ -23,7 +23,7 @@ function fixture() {
   const account: any = { id: 'account-a', status: 'ACTIVE', firstName: 'Old', lastName: 'Guide', email: 'guide@example.test', phoneWhatsapp: null, country: null, image: 'public-unchanged' }
   const profile: any = {
     id: 'profile-a', slug: 'guide-test', guideAccount: account, status: 'ACTIVE', permanentlyDeactivatedAt: null,
-    bio: 'Old bio', city: 'MADINAH', gender: 'HOMME', nationality: 'FR', experienceYears: 1, languages: [{ languageCode: 'fr' }],
+    bio: 'Old bio', city: 'MADINAH', gender: 'HOMME', nationality: 'FR', experienceYears: 1, languages: [{ languageCode: 'fr' }], servesMakkah: true, servesMadinah: true,
     bankAccountFirstName: 'Old', bankAccountLastName: 'Guide', bankName: 'Old bank', bankCountry: 'FR', ibanEncrypted: 'old-cipher', bicEncrypted: null,
     updatedAt: new Date('2026-09-13T10:00:00Z'), profileSubmittedAt: null,
   }
@@ -84,6 +84,7 @@ function fixture() {
   })
   const route = load('src/app/api/admin/guides/[slug]/profile-change/route.ts', {
     '@/lib/prisma': db, '@/lib/guide-profile-changes': changes, '@/lib/guide-profile-media': media, '@/lib/crypto': crypto,
+    '@/lib/guide-dossier': { readAdminGuideDossier: () => { throw new Error('Unexpected bank verification in correction tests') } },
     '@/lib/check-admin': {
       getAdminActor: async () => { authCalls++; return authAllowed ? { id: 'admin-a', role: 'ADMIN', email: 'admin@example.test' } : null },
       getAdminAuditContext: () => ({ ip: '127.0.0.1' }), adminAuditDetail: (_context: any, detail: any) => JSON.stringify(detail), adminAuditFields: () => ({}),
@@ -262,4 +263,47 @@ test('review rejects cross-site origins before authentication/body/DB and anonym
   assert.equal(f.audits.length, 0)
   assert.equal(f.profileWrites.length, 0)
   assert.equal(f.accountWrites.length, 0)
+})
+
+test('new main city proposals use supported served cities, without rewriting legacy profiles', async () => {
+  const f = fixture()
+  assert.equal(f.changes.guideProfileProposalSchema.safeParse({ city: 'Médine' }).success, false)
+  assert.equal(f.changes.guideProfileProposalSchema.safeParse({ city: 'Jeddah' }).success, false)
+  f.profile.servesMakkah = false
+  await assert.rejects(() => f.submit({ city: 'MAKKAH' }), /ville principale/)
+  assert.equal(f.requests.length, 0)
+  f.profile.servesMakkah = true
+  const proposal = await f.submit({ city: 'MAKKAH' })
+  assert.equal(proposal.changes.city, 'MAKKAH')
+  assert.equal(f.profile.city, 'MADINAH', 'a proposal must not change the current main city')
+
+  const legacy = fixture()
+  legacy.profile.city = 'Médine'
+  await legacy.submit({ bio: 'Une présentation actualisée' })
+  assert.equal(legacy.profile.city, 'Médine')
+  assert.equal(legacy.requests[0].changes.city, undefined)
+})
+
+test('strict initial completion checks main city while legacy required-field checks remain available', () => {
+  const f = fixture()
+  const identity = {
+    firstName: 'Test', lastName: 'Guide', phoneWhatsapp: '+33000000000', bio: 'Présentation',
+    city: 'MADINAH', gender: 'HOMME', nationality: 'FR', experienceYears: 0,
+    languages: ['fr'], servesMakkah: true, servesMadinah: true,
+  }
+  assert.equal(f.changes.missingRequiredGuideProfileFields(identity, { requireSupportedCity: true }).length, 0)
+  assert.match(f.changes.missingRequiredGuideProfileFields({ ...identity, servesMadinah: false }, { requireSupportedCity: true }).join(), /ville principale parmi les villes proposées/)
+  assert.match(f.changes.missingRequiredGuideProfileFields({ ...identity, city: 'Médine' }, { requireSupportedCity: true }).join(), /choisissez Makkah ou Médine/)
+  assert.equal(f.changes.missingRequiredGuideProfileFields({ ...identity, city: 'Médine' }).length, 0)
+})
+
+test('administration cannot approve a proposed main city no longer offered by the Guide', async () => {
+  const f = fixture()
+  const row = await f.submit({ city: 'MAKKAH' })
+  f.profile.servesMakkah = false
+  const response = await f.decide(row)
+  assert.equal(response.status, 409)
+  assert.equal(f.profile.city, 'MADINAH')
+  assert.equal(row.status, 'PENDING')
+  assert.equal(f.profileWrites.length, 0)
 })

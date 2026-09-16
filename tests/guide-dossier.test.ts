@@ -58,7 +58,8 @@ function fixture() {
     '@/lib/guide-profile-media': media, '@/lib/crypto': { decrypt: () => { throw new Error('Unexpected proposed bank') }, encrypt: () => { throw new Error('Unexpected write') } },
   })
   const dossier = load('src/lib/guide-dossier.ts', {
-    'server-only': {}, '@/lib/crypto': { decrypt: () => { if (brokenCrypto) throw new Error('secret crypto failure'); return 'FR7612345678901234567890123' } },
+    '@/lib/check-admin': {},
+    'server-only': {}, '@/lib/crypto': { decrypt: (value: string) => { if (brokenCrypto) throw new Error('secret crypto failure'); return value === 'new-encrypted-iban' ? 'FR7612345678901234567890124' : 'FR7612345678901234567890123' } },
     '@/lib/place-catalog': { getEffectivePlaceCatalog: async (client: any) => { assert.equal(client, db); return catalog } },
     '@/lib/booking-pricing': { BOOKING_NET_COSTS: { trainPerTrip: 80, guideHotelPerNight: 80 } },
     '@/lib/guide-profile-changes': changes, '@/lib/guide-payout-policy': policy,

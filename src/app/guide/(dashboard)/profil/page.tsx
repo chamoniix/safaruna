@@ -192,7 +192,9 @@ export default function GuideProfil() {
         setDossierChecks({});
       }
       const changes = {
-        ...(identityEditing ? { firstName, lastName, phoneWhatsapp, country, bio, city, gender, nationality, experienceYears: experienceYears ? Number(experienceYears) : null } : {}),
+        ...(identityEditing ? { firstName, lastName, phoneWhatsapp, country, bio,
+          ...(city !== profile.city || pendingChangeRequest?.changes.city !== undefined || resubmitRequestId ? { city } : {}),
+          gender, nationality, experienceYears: experienceYears ? Number(experienceYears) : null } : {}),
         ...(languagesEditing ? { languages: languages.map(language => language.languageCode).sort() } : {}),
         ...(pricingCorrectionRequest ? { pricingCorrectionRequest } : {}),
         ...(personalCorrectionRequest ? { personalCorrectionRequest } : {}),
@@ -242,6 +244,21 @@ export default function GuideProfil() {
       }
     } catch (e: unknown) {
       setSaveError(`${proposalRecorded ? 'Vos modifications sont enregistrées. La soumission complète n’a pas abouti : ' : ''}${e instanceof Error ? e.message : 'Erreur inconnue'}`);
+      if (proposalRecorded) {
+        // A saved proposal can change the details awaiting personal confirmation.
+        // Show the recorded version before asking the Guide to confirm it again.
+        try {
+          const response = await fetch('/api/guide/profil', { cache: 'no-store' });
+          if (!response.ok) throw new Error('refresh');
+          const refreshed = await response.json();
+          setProfile(refreshed.profile);
+          setPendingChangeRequest(refreshed.profile.pendingChangeRequest);
+          fillFields(refreshed.profile, refreshed.profile.pendingChangeRequest?.changes || {});
+          setDossierChecks({});
+        } catch {
+          setSaveError(current => `${current} Rechargez la page pour vérifier les informations enregistrées avant de les confirmer.`);
+        }
+      }
     } finally {
       setSaving(false);
     }
@@ -520,6 +537,7 @@ export default function GuideProfil() {
       <section aria-labelledby="guide-bank-details" data-clarity-mask="true" data-sentry-mask style={{ ...card, padding: '1.25rem', color: '#1A1209' }}>
         <h2 id="guide-bank-details" style={{ fontSize: '1.1rem', margin: '0 0 0.75rem' }}>Coordonnées bancaires de votre dossier</h2>
         <p style={{ fontSize: '0.8rem', lineHeight: 1.6 }}>{GUIDE_PAYOUT_POLICY.holder}</p>
+        {profile.dossier.bankProposalPending && <p role="note" style={{ fontSize: '0.8rem', color: '#92400E', lineHeight: 1.6 }}>Coordonnées proposées — en attente de validation par l’équipe. Votre confirmation porte sur les informations affichées ci-dessous ; elle ne remplace pas la vérification administrative.</p>}
         {!profile.dossier.bank.readable ? <p role="alert" style={{ color: '#B91C1C', fontSize: '0.8rem' }}>Les coordonnées bancaires ne peuvent pas être affichées. Contactez l’équipe avant de les confirmer.</p> : (
           <dl className="guide-profile-grid" style={{ fontSize: '0.82rem', lineHeight: 1.6 }}>
             {[
@@ -578,8 +596,14 @@ export default function GuideProfil() {
 
             <div className="guide-profile-grid">
               <div>
-                <span style={label}>Ville</span>
-                <input style={input} value={city} onChange={e => setCity(e.target.value)} placeholder="Médine, La Mecque…" />
+                <label htmlFor="guide-main-city" style={label}>Ville principale</label>
+                <select id="guide-main-city" style={input} value={city} onChange={e => setCity(e.target.value)}>
+                  <option value="">Choisir une ville</option>
+                  {city && !['MAKKAH', 'MADINAH'].includes(city) && <option value={city} disabled>{city} — à préciser</option>}
+                  <option value="MAKKAH" disabled={!profile.servesMakkah}>Makkah</option>
+                  <option value="MADINAH" disabled={!profile.servesMadinah}>Médine</option>
+                </select>
+                <p style={{ fontSize: '0.75rem', color: '#7A6D5A', marginTop: 6 }}>Choisissez une ville proposée dans votre calendrier. Ce choix reste soumis à validation.</p>
               </div>
               <div>
                 <span style={label}>Nationalité</span>

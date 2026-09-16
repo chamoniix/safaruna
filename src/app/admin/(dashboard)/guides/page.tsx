@@ -99,16 +99,15 @@ export default function AdminGuidesPage() {
   };
 
   const handleToggle = async (guide: Guide) => {
-    const action = guide.status === 'ACTIVE' ? 'suspend' : 'activate';
-    const label = action === 'suspend' ? 'suspendre' : 'activer';
-    if (!window.confirm(`Confirmer : ${label} le guide ${guide.name} ?`)) return;
+    if (guide.status !== 'ACTIVE' || toggling) return;
+    if (!window.confirm(`Confirmer : suspendre le guide ${guide.name} ?`)) return;
 
     setToggling(guide.id);
     try {
       const res = await fetch('/api/admin/guides', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ guideId: guide.id, action }),
+        body: JSON.stringify({ guideId: guide.id, action: 'suspend' }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Action impossible');
@@ -298,9 +297,9 @@ export default function AdminGuidesPage() {
                       </td>
                       <td style={{ padding: '0.875rem 1rem' }}>
                         <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                          {!g.permanentlyDeactivatedAt && g.status !== 'DRAFT' && <button
+                          {!g.permanentlyDeactivatedAt && isActive && <button
                             onClick={() => handleToggle(g)}
-                            disabled={isToggling}
+                            disabled={Boolean(toggling)}
                             style={{
                               padding: '6px 14px', borderRadius: 50, border: 'none', cursor: isToggling ? 'not-allowed' : 'pointer',
                               background: isActive ? '#DC2626' : '#1D5C3A', color: 'white',
@@ -308,7 +307,7 @@ export default function AdminGuidesPage() {
                               opacity: isToggling ? 0.6 : 1, whiteSpace: 'nowrap',
                             }}
                           >
-                            {isToggling ? '…' : isActive ? 'Suspendre' : 'Activer'}
+                            {isToggling ? '…' : 'Suspendre'}
                           </button>}
                           {g.slug && (
                             <>
@@ -316,7 +315,7 @@ export default function AdminGuidesPage() {
                                 href={`/admin/guides/${g.slug}`}
                                 style={{ padding: '6px 16px', borderRadius: 50, border: 'none', background: '#1A1209', color: '#F0D897', fontSize: '0.75rem', fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
                               >
-                                Gérer ✏️
+                                {g.status === 'REVIEW' || g.status === 'SUSPENDED' ? 'Examiner le dossier' : 'Gérer ✏️'}
                               </Link>
                               {g.status === 'ACTIVE' && <Link
                                 href={`/guides/${g.slug}`}

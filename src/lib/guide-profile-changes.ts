@@ -43,6 +43,7 @@ export const bankProposalSchema = z.object({
 }).strict()
 
 export const guideProfileProposalSchema = guideProfileChangesObjectSchema.extend({
+  city: z.enum(['MAKKAH', 'MADINAH'], { error: 'Choisissez Makkah ou Médine comme ville principale.' }).optional(),
   bankProposal: bankProposalSchema.optional(),
   mediaProposal: mediaProposalSchema.optional(),
   resubmitRequestId: z.string().min(1).optional(),
@@ -82,7 +83,7 @@ export function missingRequiredGuideProfileFields(input: {
   languages: string[]
   servesMakkah: boolean
   servesMadinah: boolean
-}) {
+}, options: { requireSupportedCity?: boolean } = {}) {
   const missing: string[] = []
   for (const key of ['firstName', 'lastName', 'phoneWhatsapp', 'bio', 'city', 'gender', 'nationality'] as const) {
     if (!input[key]?.trim()) missing.push(GUIDE_PROFILE_REQUIRED_LABELS[key])
@@ -90,6 +91,10 @@ export function missingRequiredGuideProfileFields(input: {
   if (input.experienceYears === null) missing.push(GUIDE_PROFILE_REQUIRED_LABELS.experienceYears)
   if (input.languages.length === 0) missing.push(GUIDE_PROFILE_REQUIRED_LABELS.languages)
   if (!input.servesMakkah && !input.servesMadinah) missing.push(GUIDE_PROFILE_REQUIRED_LABELS.serviceCities)
+  if (options.requireSupportedCity && input.city?.trim()) {
+    if (!['MAKKAH', 'MADINAH'].includes(input.city)) missing.push('ville principale : choisissez Makkah ou Médine')
+    else if ((input.city === 'MAKKAH' && !input.servesMakkah) || (input.city === 'MADINAH' && !input.servesMadinah)) missing.push('ville principale parmi les villes proposées')
+  }
   return missing
 }
 
@@ -240,6 +245,16 @@ export async function submitGuideProfileChanges(input: {
       return !sameProfileValue(comparableValue, current[field])
     })
     const mergedChanges = { ...(existingChanges || {}), ...Object.fromEntries(changedEntries) } as StoredValues
+    // New choices must be supported and served. Legacy stored values are not
+    // rewritten; an unrelated correction can still be reviewed separately.
+    if (proposal.city !== undefined || (proposal.resubmitRequestId && mergedChanges.city !== undefined)) {
+      const proposedCity = mergedChanges.city ?? proposal.city
+      if (!['MAKKAH', 'MADINAH'].includes(String(proposedCity)) ||
+        (proposedCity === 'MAKKAH' && !profile.servesMakkah) ||
+        (proposedCity === 'MADINAH' && !profile.servesMadinah)) {
+        throw new z.ZodError([{ code: 'custom', path: ['city'], message: 'La ville principale doit être Makkah ou Médine et faire partie de vos villes proposées.' }])
+      }
+    }
     if (Object.keys(mergedChanges).length === 0) throw new NoGuideProfileChangesError('Aucune modification à valider')
     const mergedBefore = { ...(existingBefore || {}) }
     for (const [field] of changedEntries) {

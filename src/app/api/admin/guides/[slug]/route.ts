@@ -6,6 +6,7 @@ import { decrypt } from '@/lib/crypto';
 import { applicationMediaSelect, applicationMediaView } from '@/lib/guide-application-media';
 import { readGuideProfileMedia } from '@/lib/guide-profile-media';
 import { profileChangeRevision, safeProfileBefore, safeProfileChanges } from '@/lib/guide-profile-changes';
+import { readAdminGuideDossier, requireCurrentDossierAdmin } from '@/lib/guide-dossier';
 
 export async function GET(
   req: NextRequest,
@@ -18,9 +19,11 @@ export async function GET(
   const { slug } = await params;
 
   try {
+    return await prisma.$transaction(async tx => {
+    await requireCurrentDossierAdmin(tx, actor);
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
-    const guide = await prisma.guideProfile.findUnique({
+    const guide = await tx.guideProfile.findUnique({
       where: { slug },
       include: {
         guideAccount: {
@@ -70,24 +73,24 @@ export async function GET(
     if (!guide)
       return NextResponse.json({ error: 'Guide introuvable' }, { status: 404 });
 
-    const activeHolds = await prisma.reservationHold.findMany({
+    const activeHolds = await tx.reservationHold.findMany({
       where: { guideProfileId: guide.id, expiresAt: { gt: new Date() } },
       orderBy: { date: 'asc' },
       select: { id: true, date: true, city: true, draftRefNumber: true },
     });
 
     // Stats séparées — sans filtres imbriqués
-    const totalReservations = await prisma.reservation.count({
+    const totalReservations = await tx.reservation.count({
       where: { guideProfileId: guide.id },
     });
 
-    const revenueAgg = await prisma.reservation.aggregate({
+    const revenueAgg = await tx.reservation.aggregate({
       where: { guideProfileId: guide.id, status: 'COMPLETED' },
       _sum: { totalPrice: true },
     });
 
     // Conversations séparées — sans include imbriqué complexe
-    const conversations = await prisma.conversation.findMany({
+    const conversations = await tx.conversation.findMany({
       where: { guideProfileId: guide.id },
       orderBy: { updatedAt: 'desc' },
       take: 5,
@@ -105,11 +108,12 @@ export async function GET(
       },
     });
 
-    const application = await prisma.guideApplication.findFirst({
+    const application = await tx.guideApplication.findFirst({
       where: { createdGuideProfileId: guide.id, status: 'APPROVED' },
       orderBy: { createdAt: 'desc' }, select: applicationMediaSelect,
     });
-    const profileMedia = await readGuideProfileMedia(prisma, guide.id);
+    const profileMedia = await readGuideProfileMedia(tx, guide.id);
+    const dossier = guide.guideAccount ? await readAdminGuideDossier(tx, guide.guideAccount.id, actor) : null;
     const pendingProfileChange = guide.changeRequests[0];
 
     return NextResponse.json({
@@ -118,6 +122,7 @@ export async function GET(
       },
       guide: {
         id: guide.id,
+        dossier,
         applicationMedia: application ? applicationMediaView(application) : null,
         profileMedia: profileMedia.view,
         slug: guide.slug,
@@ -248,6 +253,7 @@ export async function GET(
         },
       },
     }, { headers: { 'Cache-Control': 'private, no-store' } });
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
   } catch (err) {
     console.error('[admin/guides/slug GET]', err);
     return NextResponse.json(
@@ -321,6 +327,10 @@ export async function PATCH(
     });
     if (!guide)
       return NextResponse.json({ error: 'Guide introuvable' }, { status: 404 });
+
+    if (body.city !== undefined && !((body.city === 'MAKKAH' && (body.servesMakkah ?? guide.servesMakkah) === true) || (body.city === 'MADINAH' && (body.servesMadinah ?? guide.servesMadinah) === true))) {
+      return NextResponse.json({ error: 'Choisissez Makkah ou Médine parmi les villes proposées.' }, { status: 400 });
+    }
 
     if (body.firstName !== undefined || body.lastName !== undefined ||
         body.phoneWhatsapp !== undefined) {

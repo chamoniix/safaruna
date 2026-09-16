@@ -2,7 +2,7 @@ import { Prisma } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
 import { baseTemplate, badge, btn, divider, escapeHtml, heading, p, sendEmail } from '@/lib/email'
 import { getGuideRequestContext, hasTrustedGuideAuthOrigin } from '@/lib/guide-auth'
-import { guideProfileChangesSchema, missingRequiredGuideProfileFields } from '@/lib/guide-profile-changes'
+import { readGuideDossier } from '@/lib/guide-dossier'
 import prisma from '@/lib/prisma'
 import { requireGuide } from '@/lib/require-account'
 
@@ -33,30 +33,14 @@ export async function POST(req: NextRequest) {
       },
     })
     if (!account?.guideProfile) throw new Error('PROFILE_NOT_FOUND')
+    if (account.status !== 'ACTIVE' || account.guideProfile.permanentlyDeactivatedAt) throw new Error('DOSSIER_FORBIDDEN')
     const profile = account.guideProfile
     if (profile.status === 'REVIEW') return { alreadySubmitted: true, slug: profile.slug, name: account.displayName || account.firstName || 'Guide' }
     if (profile.status !== 'DRAFT') throw new Error('PROFILE_NOT_DRAFT')
 
-    const pending = profile.changeRequests[0]
-      ? guideProfileChangesSchema.safeParse(profile.changeRequests[0].changes)
-      : null
-    const changes = pending?.success ? pending.data : {}
-    const effective = {
-      firstName: changes.firstName ?? account.firstName,
-      lastName: changes.lastName ?? account.lastName,
-      phoneWhatsapp: changes.phoneWhatsapp ?? account.phoneWhatsapp,
-      bio: changes.bio ?? profile.bio,
-      city: changes.city ?? profile.city,
-      gender: changes.gender ?? profile.gender,
-      nationality: changes.nationality ?? profile.nationality,
-      experienceYears: changes.experienceYears ?? profile.experienceYears,
-      languages: changes.languages ?? profile.languages.map(language => language.languageCode),
-      servesMakkah: profile.servesMakkah,
-      servesMadinah: profile.servesMadinah,
-    }
-    const missing = missingRequiredGuideProfileFields(effective)
+    const dossier = await readGuideDossier(tx, account.id)
+    const missing = dossier.view.progress.filter(item => !item.complete).map(item => item.label)
     if (missing.length > 0) throw new Error(`PROFILE_INCOMPLETE:${missing.join(', ')}`)
-
     await tx.guideProfile.update({
       where: { id: profile.id },
       data: { status: 'REVIEW', profileSubmittedAt: submittedAt },
@@ -85,6 +69,8 @@ export async function POST(req: NextRequest) {
     return { alreadySubmitted: false, slug: profile.slug, name: account.displayName || account.firstName || 'Guide' }
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable })
   } catch (error) {
+    if (error instanceof Error && error.message === 'DOSSIER_FORBIDDEN') return NextResponse.json({ error: 'Accès Guide non autorisé.' }, { status: 403 })
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2034') return NextResponse.json({ error: 'Votre dossier a changé. Rechargez la page avant de le soumettre.' }, { status: 409 })
     if (error instanceof Error && error.message === 'PROFILE_NOT_FOUND') {
       return NextResponse.json({ error: 'Profil Guide introuvable' }, { status: 404 })
     }

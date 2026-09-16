@@ -7,6 +7,7 @@ const migration = readFileSync('prisma/migrations/20260903180000_guide_onboardin
 const applicationReview = readFileSync('src/app/api/admin/guide-applications/route.ts', 'utf8')
 const manualGuideRoute = readFileSync('src/app/api/admin/guides/route.ts', 'utf8')
 const activationRoute = readFileSync('src/app/api/admin/guides/[slug]/activate/route.ts', 'utf8')
+const dossierService = readFileSync('src/lib/guide-dossier.ts', 'utf8')
 const profileSubmitRoute = readFileSync('src/app/api/guide/profil/submit/route.ts', 'utf8')
 const declineRoute = readFileSync('src/app/api/guide/reservations/[id]/decline/route.ts', 'utf8')
 const confirmationRoute = readFileSync('src/app/api/guide/reservations/[id]/confirm/route.ts', 'utf8')
@@ -25,18 +26,21 @@ test('l’accès initial est choisi par le Guide via un lien personnel de 48 heu
   assert.doesNotMatch(applicationReview, /temporaryPassword|mot de passe provisoire/i)
 })
 
-test('un nouveau profil reste hors ligne jusqu’à la double validation Guide puis Admin', () => {
+test('un nouveau profil reste hors ligne jusqu’à la validation Guide puis Superadmin', () => {
   assert.match(applicationReview, /status: 'DRAFT'/)
   assert.doesNotMatch(applicationReview, /approvedAt: now/)
   assert.match(manualGuideRoute, /status: 'DRAFT'/)
   assert.match(profileSubmitRoute, /profile\.status !== 'DRAFT'/)
   assert.match(profileSubmitRoute, /status: 'REVIEW', profileSubmittedAt: submittedAt/)
   assert.match(profileSubmitRoute, /GUIDE_PROFILE_SUBMITTED_FOR_REVIEW/)
-  assert.match(activationRoute, /guide\.status === 'DRAFT'/)
-  assert.match(activationRoute, /changeRequests\.length > 0/)
+  assert.match(activationRoute, /decideGuideStatus/)
+  assert.match(manualGuideRoute, /decideGuideStatus/)
+  assert.match(dossierService, /profile\.status === 'DRAFT'/)
+  assert.match(dossierService, /profile\.changeRequests\.length/)
   assert.match(activationRoute, /sendGuideProfileActivated/)
-  assert.match(activationRoute, /approvedAt: new Date\(\)/)
-  assert.match(activationRoute, /missingRequiredGuideProfileFields/)
+  assert.match(dossierService, /approvedAt: profile\.approvedAt \?\? new Date\(\)/)
+  assert.match(dossierService, /missingRequiredGuideProfileFields/)
+  assert.match(dossierService, /actor\.role !== 'SUPERADMIN'/)
   assert.match(publicGuideRoute, /status: 'ACTIVE'/)
 })
 
@@ -66,7 +70,7 @@ test('seul Admin décide si un incident est comptabilisé et le troisième est d
   assert.match(incidentRoute, /cancellationCount >= 3/)
   assert.match(incidentRoute, /GUIDE_RESERVATION_INCIDENT_COUNTED/)
   assert.match(incidentRoute, /GUIDE_RESERVATION_INCIDENT_EXCUSED/)
-  assert.match(activationRoute, /permanentlyDeactivatedAt/)
+  assert.match(dossierService, /permanentlyDeactivatedAt/)
 })
 
 test('la base conserve un incident unique par réservation et Guide', () => {

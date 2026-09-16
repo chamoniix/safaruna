@@ -132,3 +132,48 @@ test('saved correction survives draft submission failure and retry does not rese
   assert.equal(h.calls.filter(call => call.method === 'PATCH').length, 1)
   assert.equal(h.calls.filter(call => call.url.endsWith('/submit')).length, 2)
 })
+
+test('main city offers only Makkah and Madinah and excludes unserved city choices', async () => {
+  const h = harness()
+  h.profile.servesMakkah = false
+  await h.ready()
+  const select = h.find(node => node.type === 'select' && node.props.id === 'guide-main-city')
+  const options = h.nodes(select).filter(node => node.type === 'option')
+  assert.deepEqual(options.map(node => node.props.value), ['', 'MAKKAH', 'MADINAH'])
+  assert.equal(options.find(node => node.props.value === 'MAKKAH').props.disabled, true)
+  assert.equal(options.find(node => node.props.value === 'MADINAH').props.disabled, false)
+})
+
+test('unrelated identity proposal does not replace an unchanged legacy main city', async () => {
+  const h = harness()
+  h.profile.city = 'Médine'
+  await h.ready()
+  h.find(node => node.type === 'button' && h.text(node) === 'Modifier les informations personnelles').props.onClick()
+  h.find(node => node.type === 'input' && node.props.placeholder === 'Votre prénom').props.onChange({ target: { value: 'Corrected' } })
+  await h.submit()
+  const body = JSON.parse(h.calls.find(call => call.method === 'PATCH').body)
+  assert.equal(body.firstName, 'Corrected')
+  assert.equal(Object.hasOwn(body, 'city'), false)
+})
+
+test('saved bank proposal refreshes the dossier after incomplete submission, so the Guide can confirm the proposed revision', async () => {
+  const h = harness('DRAFT'); await h.ready()
+  h.find(node => node.type === h.Editor).props.onChange({ bankProposal: { firstName: 'Test', lastName: 'Guide', bankName: 'Bank', country: 'FR', iban: 'TEST-IBAN', bic: '' } })
+  h.setHandler(async (url, options) => {
+    if (options?.method === 'PATCH') return { ok: true, json: async () => ({ pendingChangeRequest: { id: 'saved', changes: {} } }) }
+    if (url.endsWith('/submit')) return { ok: false, json: async () => ({ error: 'Confirmez les coordonnées proposées.' }) }
+    return { ok: true, json: async () => ({ profile: { ...h.profile, pendingChangeRequest: { id: 'saved', changes: {} }, dossier: {
+      ...h.profile.dossier, bankProposalPending: true,
+      confirmations: [{ section: 'terms', ready: true, confirmed: false, revision: 'new-proposal-revision' }],
+    } } }) }
+  })
+  await h.submit()
+  assert.match(h.text(h.render()), /Coordonnées proposées — en attente/)
+  assert.match(h.text(h.render()), /Vos modifications sont enregistrées/)
+  h.find(node => node.type === 'input' && node.props.type === 'checkbox').props.onChange({ target: { checked: true } })
+  h.setHandler(async () => ({ ok: false, json: async () => ({ error: 'Stop after observed confirmation payload' }) }))
+  await h.submit()
+  const confirmation = h.calls.find(call => call.method === 'POST' && !call.url.endsWith('/submit'))
+  assert.equal(JSON.parse(confirmation.body).confirmations[0].revision, 'new-proposal-revision')
+  assert.equal(h.calls.filter(call => call.method === 'PATCH').length, 1)
+})

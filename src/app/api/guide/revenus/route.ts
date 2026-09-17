@@ -29,7 +29,9 @@ export async function GET() {
       },
     }),
     prisma.transfer.findFirst({
-      where: { guideProfileId, status: 'PENDING' },
+      // Do not expose an unconfirmed administrative preparation as a promised
+      // transfer. The new manual-transfer history will be connected in lot 3.
+      where: { guideProfileId, status: 'PENDING', recordedEarningId: null },
       orderBy: { createdAt: 'desc' },
     }),
   ])

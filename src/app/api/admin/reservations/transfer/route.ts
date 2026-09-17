@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { adminAuditDetail, adminAuditFields, getAdminActor, getAdminAuditContext } from '@/lib/check-admin';
 import prisma from '@/lib/prisma';
 import { baseTemplate, badge, btn, divider, escapeHtml, heading, p, sendEmail } from '@/lib/email';
+import { assertNoRecordedGuideTransfer, GuideTransferError } from '@/lib/guide-transfers';
 
 const DAY_MS = 86_400_000;
 
@@ -67,6 +68,11 @@ export async function POST(req: NextRequest) {
   const confirmationRequestedAt = new Date();
   try {
     await prisma.$transaction(async tx => {
+      const current = await tx.reservation.findUnique({ where: { id: reservationId }, select: { guideProfileId: true, status: true } });
+      if (!current || current.guideProfileId !== reservation.guideProfileId || current.status !== reservation.status) {
+        throw new GuideTransferError('La réservation a changé. Rechargez la page avant de remplacer son Guide.');
+      }
+      await assertNoRecordedGuideTransfer(tx, reservationId, reservation.guideProfileId);
       for (const mission of assignedMissions) {
         const dates = eachDate(mission.startDate, mission.endDate);
         const [conflict, hold] = await Promise.all([
@@ -128,6 +134,9 @@ export async function POST(req: NextRequest) {
       });
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
   } catch (error) {
+    if (error instanceof GuideTransferError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     if (error instanceof TransferConflictError || (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2034')) {
       return NextResponse.json({ error: 'La disponibilité du nouveau guide a changé. Rechargez la page puis réessayez.' }, { status: 409 });
     }

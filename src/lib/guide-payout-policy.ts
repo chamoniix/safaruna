@@ -15,3 +15,21 @@ export const GUIDE_DOSSIER_ACKNOWLEDGEMENTS = {
 } as const
 
 export type GuideDossierSection = keyof typeof GUIDE_DOSSIER_ACKNOWLEDGEMENTS
+
+export const GUIDE_PAYOUT_TIME_ZONE = 'Asia/Riyadh'
+
+// A calendar date, not 72 elapsed hours. No unapproved holiday calendar.
+export function guideTransferDueAt(stayEnd: Date): Date {
+  if (!Number.isFinite(stayEnd.getTime())) throw new Error('Date de fin de séjour invalide.')
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: GUIDE_PAYOUT_TIME_ZONE, year: 'numeric', month: '2-digit', day: '2-digit',
+  }).formatToParts(stayEnd)
+  const part = (type: Intl.DateTimeFormatPartTypes) => Number(parts.find(item => item.type === type)?.value)
+  const day = new Date(Date.UTC(part('year'), part('month') - 1, part('day')))
+  for (let remaining = 3; remaining > 0;) {
+    day.setUTCDate(day.getUTCDate() + 1)
+    if ([1, 2, 3, 4].includes(day.getUTCDay())) remaining--
+  }
+  // Riyadh midnight (UTC+03:00), independent of the server's local timezone.
+  return new Date(day.getTime() - 3 * 60 * 60 * 1000)
+}

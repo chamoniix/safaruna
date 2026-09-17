@@ -32,17 +32,23 @@ function fixture() {
     serviceNetCents: 10000, placesNetCents: 5000, transportNetCents: 0, hotelNetCents: 0,
     totalNetCents: 15000, breakdown: {}, status: 'UPCOMING' as GuideEarningStatus, transferId: null as string | null,
     reservation: { id: 'reservation', refNumber: 'TEST-RESERVATION', status: 'COMPLETED', endDate: new Date('2026-01-01T12:00:00Z'), stripePaymentId: null as string | null, paymentAttempts: [{ id: 'succeeded' }] },
-    guideProfile: { id: 'guide', guideAccountId: 'account' },
+    guideProfile: { id: 'guide', guideAccountId: 'account', guideAccount: { email: 'guide@example.test', displayName: 'Test Guide', firstName: 'Test', lastName: 'Guide' } },
   }
   let records: Transfer[] = []
   let audits: Record<string, unknown>[] = []
+  let emails: Record<string, unknown>[] = []
+  let failQueue = false
   let failAudit = false, conflict = false, failedClaim = false
   let inTransaction = false
   const updateEarning = (data: { status?: GuideEarningStatus; transferId?: string }) => { Object.assign(earning, data); return { count: 1 } }
   const db = {
+    emailDelivery: { findFirst: async () => null },
     adminAccount: { findUnique: async () => current },
+    reservation: { findUnique: async () => ({ refNumber: earning.reservation.refNumber }) as { refNumber: string } | null },
     guideEarning: {
       findUnique: async () => earning,
+      findMany: async () => [{ ...earning, recordedTransfer: records[0] ?? null,
+        guideProfile: { guideAccount: { displayName: 'Test Guide', firstName: 'Test', lastName: 'Guide' } } }],
       findFirst: async () => earning.status === 'PAID' || earning.transferId || records.length ? { id: earning.id } : null,
       updateMany: async ({ data }: { data: { status?: GuideEarningStatus; transferId?: string } }) => {
         assert.ok(inTransaction)
@@ -72,13 +78,14 @@ function fixture() {
     $transaction: async <T>(fn: (client: unknown) => Promise<T>, options: { isolationLevel: string }) => {
       assert.equal(options.isolationLevel, 'Serializable')
       if (conflict) throw new Prisma.PrismaClientKnownRequestError('test conflict', { code: 'P2034', clientVersion: 'test' })
-      const oldRecords = structuredClone(records), oldEarning = structuredClone(earning), oldAudits = [...audits]
+      const oldRecords = structuredClone(records), oldEarning = structuredClone(earning), oldAudits = [...audits], oldEmails = [...emails]
       inTransaction = true
-      try { return await fn(db) } catch (error) { records = oldRecords; Object.assign(earning, oldEarning); audits = oldAudits; throw error } finally { inTransaction = false }
+      try { return await fn(db) } catch (error) { records = oldRecords; Object.assign(earning, oldEarning); audits = oldAudits; emails = oldEmails; throw error } finally { inTransaction = false }
     },
   }
   const service = load<typeof import('../src/lib/guide-transfers')>('src/lib/guide-transfers.ts', {
     'server-only': {}, '@/lib/prisma': db,
+    '@/lib/email': { queueGuideTransferEmail: async (_: unknown, input: Record<string, unknown>) => { assert.ok(inTransaction); if (failQueue) throw new Error('queue unavailable'); emails.push(input); return 'delivery' } },
     '@/lib/crypto': { encrypt: (value: string) => Buffer.from(value).toString('base64') },
     '@/lib/guide-payout-policy': { guideTransferDueAt },
     '@/lib/check-admin': { adminAuditDetail: (_: unknown, detail: unknown) => JSON.stringify(detail), adminAuditFields: () => ({ ip: '127.0.0.1', requestId: 'test' }) },
@@ -94,7 +101,7 @@ function fixture() {
   const prepareInput = async () => ({ earningId: earning.id, sourceRevision: (await service.readGuideTransferPreparation(actor, earning.id)).preparation!.sourceRevision, bankReference: 'BANK-REFERENCE-1', sentAt: '2026-01-07T12:00:00Z' })
   return {
     actor, current, earning, bank, context, service, db,
-    records: () => records, audits: () => audits, prepareInput,
+    records: () => records, audits: () => audits, emails: () => emails, failQueue: () => { failQueue = true }, prepareInput,
     prepare: async () => service.prepareGuideTransfer(actor, context, await prepareInput()),
     confirm: (revision = 0) => service.confirmGuideTransfer(actor, context, { transferId: 'transfer', revision }),
     correct: (extra: Record<string, unknown> = {}) => service.correctGuideTransfer(actor, context, { transferId: 'transfer', revision: 1, bankReference: 'BANK-REFERENCE-2', sentAt: '2026-01-08T12:00:00Z', reason: 'Référence bancaire corrigée', ...extra }),
@@ -127,6 +134,85 @@ test('preparation uses fixed full net and approved bank, no financial side effec
   assert.ok(f.records()[0].bankSnapshotEncrypted)
 })
 
+test('reservation read uses real earnings and masks bank information', async () => {
+  const f = fixture()
+  const result = await f.service.readReservationGuideTransfers(f.actor, 'reservation')
+  assert.equal(result.refNumber, 'TEST-RESERVATION'); assert.equal(result.items.length, 1)
+  const item = result.items[0]
+  assert.equal(item.guideName, 'Test Guide'); assert.equal(item.amountCents, 15000)
+  assert.equal(item.preparation?.ibanLast4, 'IBAN'); assert.equal(item.preparation?.accountHolder, 'Test Guide')
+  assert.equal(item.record, null); assert.equal(item.blockedReason, null)
+  assert.equal(item.canConfirm, false); assert.equal(item.canCorrect, false)
+  assert.doesNotMatch(JSON.stringify(result), /TEST_PRIVATE_IBAN|bankSnapshotEncrypted/)
+  assert.equal(f.records().length, 0); assert.equal(f.audits().length, 0)
+})
+
+test('reservation read keeps Admin read-only after preparation and enables Superadmin actions', async () => {
+  const f = fixture(); await f.prepare()
+  let item = (await f.service.readReservationGuideTransfers(f.actor, 'reservation')).items[0]
+  assert.equal(item.preparation, null); assert.equal(item.record?.bankReference, 'BANK-REFERENCE-1')
+  assert.equal(item.canConfirm, false); assert.equal(item.canCorrect, false)
+  f.superadmin(); item = (await f.service.readReservationGuideTransfers(f.actor, 'reservation')).items[0]
+  assert.equal(item.canConfirm, true); assert.equal(item.canCorrect, true)
+})
+
+for (const change of ['bank', 'net', 'unverified', 'incomplete'] as const) test(`obsolete preparation ${change} remains visible but cannot be edited or confirmed`, async () => {
+  const f = fixture(); await f.prepare(); f.superadmin()
+  if (change === 'bank') f.bankChange()
+  if (change === 'net') f.earning.totalNetCents = 20000
+  if (change === 'unverified') f.unverify()
+  if (change === 'incomplete') f.bank.iban = ''
+  const before = structuredClone(f.records())
+  const item = (await f.service.readReservationGuideTransfers(f.actor, 'reservation')).items[0]
+  assert.equal(item.amountCents, 15000); assert.equal(item.record?.bankReference, 'BANK-REFERENCE-1')
+  assert.equal(item.reviewRequired, true); assert.ok(item.blockedReason)
+  assert.equal(item.canConfirm, false); assert.equal(item.canCorrect, false); assert.equal(item.preparation, null)
+  await assert.rejects(f.correct({ revision: 0 }))
+  await assert.rejects(f.confirm())
+  assert.deepEqual(f.records(), before); assert.equal(f.audits().length, 1)
+})
+
+test('confirmed transfer history is readable when current bank becomes invalid', async () => {
+  const f = fixture(); await f.prepare(); f.superadmin(); await f.confirm(); f.bank.iban = ''
+  const item = (await f.service.readReservationGuideTransfers(f.actor, 'reservation')).items[0]
+  assert.equal(item.record?.status, 'PAID'); assert.equal(item.blockedReason, null)
+  assert.equal(item.canConfirm, false); assert.equal(item.canCorrect, true)
+  assert.equal(item.preparation, null)
+})
+
+test('unexpected record state is blocked in the panel and direct correction command', async () => {
+  const f = fixture(); await f.prepare(); f.superadmin(); f.records()[0].status = 'PROCESSING'
+  const item = (await f.service.readReservationGuideTransfers(f.actor, 'reservation')).items[0]
+  assert.equal(item.reviewRequired, true); assert.equal(item.canCorrect, false)
+  await assert.rejects(f.correct({ revision: 0 }), /vérifier manuellement/)
+  assert.equal(f.records()[0].bankReference, 'BANK-REFERENCE-1'); assert.equal(f.audits().length, 1)
+})
+
+test('legacy paid earnings and incomplete reservations are shown with a blocking reason', async () => {
+  const f = fixture(); f.earning.status = 'PAID'
+  let item = (await f.service.readReservationGuideTransfers(f.actor, 'reservation')).items[0]
+  assert.match(item.blockedReason!, /historique/); assert.equal(item.preparation, null)
+  f.earning.status = 'UPCOMING'; f.earning.reservation.status = 'CONFIRMED'
+  item = (await f.service.readReservationGuideTransfers(f.actor, 'reservation')).items[0]
+  assert.match(item.blockedReason!, /terminée/); assert.equal(item.preparation, null)
+  assert.equal(item.reviewRequired, false)
+})
+
+test('reservation read handles empty, missing, invalid and unauthorized requests without inventing earnings', async () => {
+  const f = fixture(); f.db.guideEarning.findMany = async () => []
+  assert.equal((await f.service.readReservationGuideTransfers(f.actor, 'reservation')).items.length, 0)
+  f.db.reservation.findUnique = async () => null
+  await assert.rejects(f.service.readReservationGuideTransfers(f.actor, 'missing'), (error: unknown) => error instanceof f.service.GuideTransferError && error.status === 404)
+  await assert.rejects(f.service.readReservationGuideTransfers(f.actor, ''), (error: unknown) => error instanceof f.service.GuideTransferError && error.status === 400)
+  f.current.status = 'SUSPENDED'
+  await assert.rejects(f.service.readReservationGuideTransfers(f.actor, 'reservation'), /non autorisé/)
+})
+
+test('unexpected database failure is not masked as business ineligibility', async () => {
+  const f = fixture(); f.db.guideEarning.findUnique = async () => { throw new Error('database unavailable') }
+  await assert.rejects(f.service.readReservationGuideTransfers(f.actor, 'reservation'), /database unavailable/)
+})
+
 test('double preparation returns the same record, conflicting second request rejected', async () => {
   const f = fixture(), input = await f.prepareInput()
   const first = await f.service.prepareGuideTransfer(f.actor, f.context, input)
@@ -144,6 +230,17 @@ test('Admin cannot confirm; Superadmin confirms once without pretending bank rec
   await f.confirm()
   assert.equal(f.audits().length, 2)
   assert.equal('receivedAt' in result, false)
+  assert.equal(f.emails().length, 1)
+  assert.equal(f.emails()[0].to, 'guide@example.test')
+  assert.equal(f.emails()[0].amountCents, 15000)
+  assert.doesNotMatch(JSON.stringify(f.emails()), /TEST_PRIVATE_IBAN/)
+})
+
+test('email persistence failure rolls back confirmation without provider calls', async () => {
+  const f = fixture(); await f.prepare(); f.superadmin(); f.failQueue()
+  await assert.rejects(f.confirm(), /queue unavailable/)
+  assert.equal(f.records()[0].status, 'PENDING'); assert.equal(f.earning.status, 'UPCOMING')
+  assert.equal(f.audits().length, 1); assert.equal(f.emails().length, 0)
 })
 
 test('current administrative role is rechecked, not trusted from stale actor', async () => {
@@ -243,6 +340,8 @@ test('only Superadmin corrects metadata; original bank reference remains in audi
   assert.equal((event.before as { bankReference: string }).bankReference, 'BANK-REFERENCE-1')
   assert.equal((event.after as { bankReference: string }).bankReference, 'BANK-REFERENCE-2')
   assert.doesNotMatch(JSON.stringify(event), /TEST_PRIVATE_IBAN/)
+  assert.equal(f.emails().length, 1, 'correction updates history only, not another email')
+  assert.equal(f.emails()[0].bankReference, 'BANK-REFERENCE-1', 'initial queued email is an immutable confirmation snapshot')
 })
 
 test('prepared, paid and historical records protect reassignment and status mutations', async () => {

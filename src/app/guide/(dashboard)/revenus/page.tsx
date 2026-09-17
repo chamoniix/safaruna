@@ -23,10 +23,15 @@ type Data = {
     netMois: number;
     upcomingNet: number;
     paidNet: number;
+    sentNet: number;
     nbMissions: number;
   };
   prochainVirement: { amount: number; period: string; status: string } | null;
   history: HistoryRow[];
+  transfers: { page: number; pages: number; total: number; rows: Array<{
+    id: string; refNumber: string; amountCents: number; currency: string;
+    bankReference: string; sentAt: string; confirmedAt: string;
+  }> };
 };
 
 const card: React.CSSProperties = {
@@ -40,13 +45,17 @@ export default function GuideRevenus() {
   const [data, setData] = useState<Data | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [transferPage, setTransferPage] = useState(1);
+  const [pageLoading, setPageLoading] = useState(false);
 
   useEffect(() => {
-    fetch('/api/guide/revenus')
+    const controller = new AbortController();
+    fetch(`/api/guide/revenus?transferPage=${transferPage}`, { signal: controller.signal, cache: 'no-store' })
       .then(r => { if (!r.ok) throw new Error('Erreur ' + r.status); return r.json(); })
-      .then(d => { setData(d); setLoading(false); })
-      .catch((e: Error) => { setError(e.message); setLoading(false); });
-  }, []);
+      .then(d => { setData(d); setLoading(false); setPageLoading(false); })
+      .catch((e: Error) => { if (!controller.signal.aborted) { setError(e.message); setLoading(false); setPageLoading(false); } });
+    return () => controller.abort();
+  }, [transferPage]);
 
   if (loading) {
     return (
@@ -69,7 +78,7 @@ export default function GuideRevenus() {
     );
   }
 
-  const { stats, prochainVirement, history } = data;
+  const { stats, prochainVirement, history, transfers } = data;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', fontFamily: 'var(--font-manrope, sans-serif)' }}>
@@ -93,9 +102,9 @@ export default function GuideRevenus() {
           <div style={{ fontSize: '0.65rem', color: '#7A6D5A', marginTop: 4 }}>Missions confirmées</div>
         </div>
         <div style={{ ...card, background: '#D1FAE5', padding: '1rem 1.25rem' }}>
-          <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.4rem' }}>Déjà versé</div>
-          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', fontWeight: 700, color: '#1D5C3A', lineHeight: 1 }}>{stats.paidNet} €</div>
-          <div style={{ fontSize: '0.65rem', color: '#7A6D5A', marginTop: 4 }}>Virements enregistrés</div>
+          <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.4rem' }}>Virements envoyés</div>
+          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.8rem', fontWeight: 700, color: '#1D5C3A', lineHeight: 1 }}>{stats.sentNet} €</div>
+          <div style={{ fontSize: '0.65rem', color: '#7A6D5A', marginTop: 4 }}>Envois confirmés par l’équipe</div>
         </div>
         <div style={{ ...card, background: '#FEF9E7', padding: '1rem 1.25rem' }}>
           <div style={{ fontSize: '0.62rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#7A6D5A', marginBottom: '0.4rem' }}>Net ce mois</div>
@@ -125,9 +134,29 @@ export default function GuideRevenus() {
       </div>
 
       {/* History table */}
+      <section style={{ ...card, padding: '1rem 1.25rem' }} aria-busy={pageLoading}>
+        <h2 style={{ fontSize: '1.2rem', margin: 0, color: '#1A1209' }}>Mes virements envoyés</h2>
+        <p style={{ fontSize: '0.78rem', color: '#4A3F30' }}>Montants envoyés en EUR. La réception, les frais éventuels et le taux de change dépendent de votre banque. Les corrections de référence ou de date sont actualisées ici, sans nouvel email.</p>
+        {transfers.rows.length === 0 ? <p>Aucun virement confirmé à afficher.</p> : <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 520 }}>
+            <thead><tr>{['Réservation', 'Montant envoyé', 'Référence bancaire', 'Date d’envoi (Arabie saoudite)'].map(label => <th key={label} style={{ textAlign: 'left', padding: 10 }}>{label}</th>)}</tr></thead>
+            <tbody>{transfers.rows.map(row => <tr key={row.id} style={{ borderTop: '1px solid #E8DFC8' }}>
+              <td style={{ padding: 10 }}>{row.refNumber}</td>
+              <td style={{ padding: 10, whiteSpace: 'nowrap' }}>{(row.amountCents / 100).toLocaleString('fr-FR', { style: 'currency', currency: row.currency })}</td>
+              <td style={{ padding: 10, overflowWrap: 'anywhere', maxWidth: 260 }}>{row.bankReference}</td>
+              <td style={{ padding: 10 }}>{new Date(row.sentAt).toLocaleString('fr-FR', { timeZone: 'Asia/Riyadh', dateStyle: 'short', timeStyle: 'short' })}</td>
+            </tr>)}</tbody>
+          </table>
+        </div>}
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap', marginTop: 12 }}>
+          <button type="button" disabled={pageLoading || transfers.page <= 1} onClick={() => { setPageLoading(true); setTransferPage(page => page - 1); }}>Précédent</button>
+          <span role="status">{pageLoading ? 'Chargement…' : `Page ${transfers.page} sur ${transfers.pages}`}</span>
+          <button type="button" disabled={pageLoading || transfers.page >= transfers.pages} onClick={() => { setPageLoading(true); setTransferPage(page => page + 1); }}>Suivant</button>
+        </div>
+      </section>
       <div style={{ ...card, overflow: 'hidden' }}>
         <div style={{ padding: '1rem 1.25rem', borderBottom: '1px solid #F0EBE0' }}>
-          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Historique des paiements</div>
+          <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Revenus des missions terminées</div>
           <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>10 dernières missions terminées</div>
         </div>
         {history.length === 0 ? (

@@ -105,17 +105,25 @@ test('published paused Guide can still read their conversations and revenues wit
   const queries: any[] = []
   const prisma = {
     conversation: { findMany: async (query: unknown) => { queries.push(query); return [] } },
-    guideEarning: { findMany: async (query: unknown) => { queries.push(query); return [] } },
-    transfer: { findFirst: async (query: unknown) => { queries.push(query); return null } },
+    guideEarning: {
+      findMany: async (query: unknown) => { queries.push(query); return [] },
+      aggregate: async (query: unknown) => { queries.push(query); return { _sum: { totalNetCents: null }, _count: { _all: 0 } } },
+    },
+    transfer: {
+      findFirst: async (query: unknown) => { queries.push(query); return null },
+      findMany: async (query: unknown) => { queries.push(query); return [] },
+      aggregate: async (query: unknown) => { queries.push(query); return { _sum: { amountCents: null } } },
+      count: async (query: unknown) => { queries.push(query); return 0 },
+    },
   }
   for (const route of ['conversations', 'revenus']) {
     const handler = load(`src/app/api/guide/${route}/route.ts`, {
       '@/lib/require-account': accessFixture('ACTIVE', { paused: true }),
       '@/lib/prisma': prisma,
     })
-    assert.equal((await handler.GET()).status, 200)
+    assert.equal((await handler.GET({ nextUrl: new URL('https://example.test/api/guide/revenus') })).status, 200)
   }
-  assert.equal(queries.length, 3)
+  assert.equal(queries.length, 10)
   assert.ok(queries.every(query => query.where.guideProfileId === 'guide-profile'))
 })
 

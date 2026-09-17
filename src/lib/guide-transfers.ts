@@ -7,6 +7,7 @@ import { encrypt } from '@/lib/crypto'
 import { adminAuditDetail, adminAuditFields, type AdminActor, type AdminAuditContext } from '@/lib/check-admin'
 import { dossierFingerprint, isCurrentDossierConfirmation, readGuideDossier } from '@/lib/guide-dossier'
 import { guideTransferDueAt } from '@/lib/guide-payout-policy'
+import { queueGuideTransferEmail } from '@/lib/email'
 
 export class GuideTransferError extends Error {
   constructor(message: string, readonly status = 409) { super(message) }
@@ -58,7 +59,9 @@ async function readSource(db: Prisma.TransactionClient, earningId: string) {
       id: true, refNumber: true, status: true, endDate: true, stripePaymentId: true,
       paymentAttempts: { where: { status: 'SUCCEEDED' }, select: { id: true }, take: 1 },
     } },
-    guideProfile: { select: { id: true, guideAccountId: true } },
+    guideProfile: { select: { id: true, guideAccountId: true,
+      guideAccount: { select: { email: true, displayName: true, firstName: true, lastName: true } },
+    } },
   } })
   if (!earning) throw new GuideTransferError('Revenu Guide introuvable.', 404)
   if (earning.status === 'CANCELLED' || earning.reservation.status !== 'COMPLETED') {
@@ -103,6 +106,24 @@ function validateSentAt(sentAt: Date, dueAt: Date) {
   if (sentAt < dueAt) throw new GuideTransferError('La date précède l’échéance des trois jours ouvrés après le séjour.')
 }
 
+function assertCurrentRecord(record: Transfer, source: Awaited<ReturnType<typeof readSource>>) {
+  if (source.sourceRevision !== record.sourceRevision || source.bankRevision !== record.bankRevision
+    || record.amountCents !== source.earning.totalNetCents || record.currency !== 'EUR'
+    || record.guideProfileId !== source.earning.guideProfileId || source.earning.transferId !== record.id) {
+    throw new GuideTransferError('Le revenu ou les coordonnées ont changé depuis la préparation. Vérification Superadmin nécessaire.')
+  }
+}
+
+function preparationView(source: Awaited<ReturnType<typeof readSource>>) {
+  return {
+    earningId: source.earning.id, guideProfileId: source.earning.guideProfileId,
+    refNumber: source.earning.reservation.refNumber, amountCents: source.earning.totalNetCents,
+    currency: 'EUR', dueAt: source.dueAt.toISOString(), sourceRevision: source.sourceRevision,
+    accountHolder: `${source.bank.firstName} ${source.bank.lastName}`, bankName: source.bank.bankName,
+    ibanLast4: source.bank.iban!.replace(/\s/g, '').slice(-4),
+  }
+}
+
 // Safe response and audit projection: no IBAN, bank snapshot or ciphertext.
 function publicRecord(record: Transfer) {
   return {
@@ -133,19 +154,67 @@ export async function readGuideTransferPreparation(actor: AdminActor, earningId:
     if (source.earning.transferId || source.earning.status === 'PAID') {
       throw new GuideTransferError('Ce revenu est déjà rattaché à un virement historique.')
     }
-    return { record: null, preparation: {
-      earningId, guideProfileId: source.earning.guideProfileId,
-      refNumber: source.earning.reservation.refNumber, amountCents: source.earning.totalNetCents,
-      currency: 'EUR', dueAt: source.dueAt.toISOString(), sourceRevision: source.sourceRevision,
-      accountHolder: `${source.bank.firstName} ${source.bank.lastName}`, bankName: source.bank.bankName,
-      ibanLast4: source.bank.iban!.replace(/\s/g, '').slice(-4),
-    } }
+    return { record: null, preparation: preparationView(source) }
   })
 }
 
-// Lot 1 has no HTTP entry point. Lot 2 will authenticate the session/origin before
-// invoking these commands. They recheck current roles inside each transaction.
+// Read existing records before current eligibility: a changed bank must never hide
+// the original record or silently substitute its beneficiary/amount.
+export async function readReservationGuideTransfers(actor: AdminActor, reservationId: string) {
+  const parsedId = parse(id, reservationId)
+  return transaction(async db => {
+    await requireTransferAdmin(db, actor)
+    const reservation = await db.reservation.findUnique({ where: { id: parsedId }, select: { refNumber: true } })
+    if (!reservation) throw new GuideTransferError('Réservation introuvable.', 404)
+    const earnings = await db.guideEarning.findMany({
+      where: { reservationId: parsedId }, orderBy: { id: 'asc' },
+      include: { recordedTransfer: true, guideProfile: { select: { guideAccount: {
+        select: { displayName: true, firstName: true, lastName: true },
+      } } } },
+    })
+    const items = []
+    for (const earning of earnings) {
+      const record = earning.recordedTransfer
+      let preparation: ReturnType<typeof preparationView> | null = null
+      let blockedReason: string | null = null
+      let reviewRequired = false
+      if (!(record?.status === 'PAID' && record.confirmedAt)) {
+        try {
+          if (!record && (earning.status === 'PAID' || earning.transferId)) {
+            throw new GuideTransferError('Revenu lié à un virement historique. Aucun nouvel enregistrement autorisé.')
+          }
+          const source = await readSource(db, earning.id)
+          if (record) {
+            if (record.status !== 'PENDING') throw new GuideTransferError('État du virement à vérifier manuellement.')
+            assertCurrentRecord(record, source)
+          } else preparation = preparationView(source)
+        } catch (error) {
+          if (!(error instanceof GuideTransferError)) throw error
+          blockedReason = error.message
+          reviewRequired = Boolean(record)
+        }
+      }
+      const account = earning.guideProfile.guideAccount
+      const email = record ? await db.emailDelivery.findFirst({
+        where: { referenceType: 'GUIDE_TRANSFER', referenceId: record.id, category: 'GUIDE_TRANSFER_CONFIRMED' },
+        select: { status: true, attempts: true, acceptedAt: true, deliveredAt: true },
+      }) : null
+      items.push({
+        earningId: earning.id, guideProfileId: earning.guideProfileId,
+        guideName: account?.displayName || `${account?.firstName ?? ''} ${account?.lastName ?? ''}`.trim() || 'Guide',
+        amountCents: record ? record.amountCents : earning.totalNetCents,
+        record: record ? publicRecord(record) : null, preparation, blockedReason, reviewRequired, email,
+        canConfirm: actor.role === 'SUPERADMIN' && record?.status === 'PENDING' && !blockedReason,
+        canCorrect: actor.role === 'SUPERADMIN' && Boolean(record) && !blockedReason,
+      })
+    }
+    return { reservationId: parsedId, refNumber: reservation.refNumber, role: actor.role, items }
+  })
+}
+
+// HTTP entry points authenticate session/origin. Current roles are rechecked here.
 // Existing bank operation -> ADMIN preparation -> SUPERADMIN confirmation.
+// Email is queued atomically at confirmation, never sent inside the transaction.
 // Nothing here calls a bank, payment provider, webhook or email provider.
 export async function prepareGuideTransfer(actor: AdminActor, context: AdminAuditContext, input: unknown) {
   const command = parse(prepareSchema, input)
@@ -191,11 +260,9 @@ export async function confirmGuideTransfer(actor: AdminActor, context: AdminAudi
     if (record.status === 'PAID' && record.confirmedAt) return publicRecord(record)
     if (record.status !== 'PENDING' || record.revision !== command.revision) throw new GuideTransferError('Le virement a changé. Rechargez la réservation.')
     const source = await readSource(db, record.recordedEarningId)
-    if (source.sourceRevision !== record.sourceRevision || source.bankRevision !== record.bankRevision
-      || record.amountCents !== source.earning.totalNetCents || record.currency !== 'EUR'
-      || record.guideProfileId !== source.earning.guideProfileId || source.earning.transferId !== record.id) {
-      throw new GuideTransferError('Le revenu ou les coordonnées ont changé depuis la préparation. Vérification manuelle requise.')
-    }
+    assertCurrentRecord(record, source)
+    const account = source.earning.guideProfile.guideAccount
+    if (!account?.email) throw new GuideTransferError('Adresse email du Guide indisponible. Vérification nécessaire.')
     if (!record.sentAt || !record.bankSnapshotEncrypted) throw new GuideTransferError('Le dossier du virement est incomplet.')
     validateSentAt(record.sentAt, source.dueAt)
     const claimed = await db.guideEarning.updateMany({
@@ -208,8 +275,14 @@ export async function confirmGuideTransfer(actor: AdminActor, context: AdminAudi
       revision: { increment: 1 },
     } })
     await audit(db, actor, context, 'GUIDE_TRANSFER_CONFIRMED', updated, record)
+    await queueGuideTransferEmail(db, {
+      transferId: updated.id, to: account.email,
+      name: account.displayName || `${account.firstName ?? ''} ${account.lastName ?? ''}`.trim() || 'Guide SAFARUMA',
+      refNumber: source.earning.reservation.refNumber, amountCents: source.earning.totalNetCents,
+      bankReference: updated.bankReference!, sentAt: updated.sentAt!,
+    })
     // PAID is legacy storage terminology: the UI/email must say "virement envoyé",
-    // not "reçu". Notification wiring belongs to lot 3, before exposing confirmation.
+    // not "reçu". Provider dispatch happens only after commit.
     return publicRecord(updated)
   })
 }
@@ -222,6 +295,10 @@ export async function correctGuideTransfer(actor: AdminActor, context: AdminAudi
     if (!record?.recordedEarningId || !record.dueAt) throw new GuideTransferError('Virement manuel introuvable.', 404)
     const sentAt = new Date(command.sentAt)
     if (record.revision !== command.revision) throw new GuideTransferError('Le virement a changé. Rechargez la réservation.')
+    if (record.status !== 'PENDING' && !(record.status === 'PAID' && record.confirmedAt)) {
+      throw new GuideTransferError('État du virement à vérifier manuellement.')
+    }
+    if (record.status === 'PENDING') assertCurrentRecord(record, await readSource(db, record.recordedEarningId))
     validateSentAt(sentAt, record.dueAt)
     if (record.bankReference === command.bankReference && record.sentAt?.getTime() === sentAt.getTime()) return publicRecord(record)
     const updated = await db.transfer.update({ where: { id: record.id, revision: command.revision }, data: {

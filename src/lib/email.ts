@@ -33,6 +33,7 @@ export type EmailCategory =
   | 'GUIDE_DOSSIER_RETURNED'
   | 'GUIDE_RESERVATION_INCIDENT'
   | 'GUIDE_RESERVATION_CONFIRMED'
+  | 'GUIDE_TRANSFER_CONFIRMED'
   | 'PELERIN_EMAIL_VERIFICATION'
   | 'PELERIN_EMAIL_VERIFIED'
   | 'PELERIN_MESSAGE_NOTIFICATION'
@@ -73,7 +74,7 @@ type StoredEmailPayload = Pick<EmailPayload, 'to' | 'subject' | 'html' | 'catego
 };
 
 class EmailProviderError extends Error {
-  constructor(message: string, readonly retryable: boolean) {
+  constructor(message: string, readonly retryable: boolean, readonly statusCode?: number) {
     super(message);
   }
 }
@@ -103,6 +104,7 @@ async function sendViaBrevo(payload: StoredEmailPayload): Promise<string> {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     },
+    ...(payload.category === 'GUIDE_TRANSFER_CONFIRMED' && { signal: AbortSignal.timeout(10000) }),
     body: JSON.stringify({
       sender: {
         name: process.env.SMTP_FROM_NAME ?? 'SAFARUMA',
@@ -119,7 +121,7 @@ async function sendViaBrevo(payload: StoredEmailPayload): Promise<string> {
 
   if (!response.ok) {
     await response.text().catch(() => '');
-    throw new EmailProviderError(`Brevo error ${response.status}`, response.status === 429 || response.status >= 500);
+    throw new EmailProviderError(`Brevo error ${response.status}`, response.status === 429 || response.status >= 500, response.status);
   }
 
   const body = await response.json() as { messageId?: string };
@@ -243,9 +245,12 @@ export async function retryPendingEmails(limit = 20, deliveryIds?: string[]) {
     where: {
       ...(deliveryIds && { id: { in: deliveryIds } }),
       payloadEncrypted: { not: null },
-      attempts: { lt: 3 },
+      AND: [{ OR: [
+        { attempts: { lt: 3 } },
+        { category: 'GUIDE_TRANSFER_CONFIRMED', status: 'SENDING' },
+      ] }],
       OR: [
-        { status: 'QUEUED', category: { in: [...GUIDE_DOSSIER_EMAIL_CATEGORIES] }, nextAttemptAt: { lte: now } },
+        { status: 'QUEUED', category: { in: [...GUIDE_DOSSIER_EMAIL_CATEGORIES, 'GUIDE_TRANSFER_CONFIRMED'] }, nextAttemptAt: { lte: now } },
         { status: 'RETRY_PENDING', nextAttemptAt: { lte: now } },
         { status: 'SENDING', updatedAt: { lte: staleSendingBefore } },
       ],
@@ -257,6 +262,17 @@ export async function retryPendingEmails(limit = 20, deliveryIds?: string[]) {
   let failed = 0;
 
   for (const candidate of candidates) {
+    // A stale in-flight transfer email may already have been accepted. Provider
+    // idempotency expires: never replay that ambiguous financial notification.
+    if (candidate.category === 'GUIDE_TRANSFER_CONFIRMED' && candidate.status === 'SENDING') {
+      const stopped = await prisma.emailDelivery.updateMany({
+        where: { id: candidate.id, status: 'SENDING', attempts: candidate.attempts, updatedAt: { lte: staleSendingBefore } },
+        data: { status: 'FAILED', nextAttemptAt: null,
+          lastError: 'Résultat d’envoi incertain. Vérifier chez Brevo avant tout renvoi.', payloadEncrypted: null },
+      });
+      failed += stopped.count;
+      continue;
+    }
     const claimed = await prisma.emailDelivery.updateMany({
       where: { id: candidate.id, status: candidate.status, attempts: candidate.attempts },
       data: { status: 'SENDING', attempts: { increment: 1 } },
@@ -280,14 +296,21 @@ export async function retryPendingEmails(limit = 20, deliveryIds?: string[]) {
       accepted++;
     } catch (error) {
       const attempts = candidate.attempts + 1;
-      const canRetry = attempts < candidate.maxAttempts && (!(error instanceof EmailProviderError) || error.retryable);
+      const transferEmail = candidate.category === 'GUIDE_TRANSFER_CONFIRMED';
+      // Only a definite rate-limit rejection is automatically retried here.
+      // Timeout, missing acknowledgement, 5xx or a failed ledger write can hide
+      // provider acceptance. Other email categories keep their existing policy.
+      const canRetry = attempts < candidate.maxAttempts && (transferEmail
+        ? error instanceof EmailProviderError && error.statusCode === 429
+        : !(error instanceof EmailProviderError) || error.retryable);
       await prisma.emailDelivery.update({
         where: { id: candidate.id },
         data: {
           status: canRetry ? 'RETRY_PENDING' : 'FAILED',
           nextAttemptAt: canRetry ? retryAt(attempts) : null,
           payloadEncrypted: canRetry ? candidate.payloadEncrypted : null,
-          lastError: errorMessage(error),
+          lastError: transferEmail && !(error instanceof EmailProviderError && error.statusCode && error.statusCode < 500)
+            ? 'Résultat d’envoi non confirmé. Vérification nécessaire avant tout renvoi.' : errorMessage(error),
         },
       });
       failed++;
@@ -577,6 +600,48 @@ export async function dispatchGuideDossierEmails(deliveryIds: string[]) {
   // A provider failure must not report an already committed decision as failed.
   // QUEUED/RETRY_PENDING rows remain recoverable by the existing cron.
   await retryPendingEmails(deliveryIds.length, deliveryIds).catch(error => console.error('[guide dossier email dispatch]', error));
+}
+
+// Confirmation only. Metadata corrections deliberately do not enqueue email.
+export async function queueGuideTransferEmail(db: Prisma.TransactionClient, opts: {
+  transferId: string; to: string; name: string; refNumber: string;
+  amountCents: number; bankReference: string; sentAt: Date;
+}) {
+  const idempotencyKey = `guide-transfer:confirmed:${opts.transferId}`;
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://safaruma.com';
+  const amount = (opts.amountCents / 100).toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' });
+  const sent = opts.sentAt.toLocaleString('fr-FR', { timeZone: 'Asia/Riyadh', dateStyle: 'long', timeStyle: 'short' });
+  const payload: StoredEmailPayload = {
+    to: { email: opts.to, name: opts.name }, category: 'GUIDE_TRANSFER_CONFIRMED',
+    subject: `SAFARUMA — Virement envoyé · ${opts.refNumber}`,
+    reference: { type: 'GUIDE_TRANSFER', id: opts.transferId },
+    providerIdempotencyKey: providerIdempotencyKey(idempotencyKey),
+    html: baseTemplate(`${heading('Votre virement a été envoyé')}${p(`السلام عليكم ${escapeHtml(opts.name)},`)}
+      ${p('L’équipe SAFARUMA a confirmé l’envoi de votre virement pour la réservation suivante.')}
+      ${p(`Réservation : <strong>${escapeHtml(opts.refNumber)}</strong><br>Montant envoyé : <strong>${escapeHtml(amount)}</strong><br>
+        Référence bancaire : <strong>${escapeHtml(opts.bankReference)}</strong><br>Date d’envoi : ${escapeHtml(sent)} (Arabie saoudite)`)}
+      ${p('Le virement est envoyé en euros. Le délai de réception, les frais éventuels et le taux de change dépendent de votre banque. Cet email ne confirme pas la réception des fonds sur votre compte.')}
+      ${p('Les informations actualisées sont disponibles dans votre espace Guide.')}
+      ${divider()}${btn('Consulter mes virements', `${baseUrl}/guide/revenus`)}`, true),
+  };
+  const delivery = await db.emailDelivery.create({ data: {
+    idempotencyKey, provider: EMAIL_PROVIDER, category: payload.category,
+    recipientEmail: opts.to.toLowerCase(), referenceType: 'GUIDE_TRANSFER', referenceId: opts.transferId,
+    maxAttempts: 3, payloadEncrypted: encrypt(JSON.stringify(payload)), nextAttemptAt: new Date(),
+  } });
+  return delivery.id;
+}
+
+export async function dispatchGuideTransferEmail(transferId: string) {
+  // Called only after the confirmation transaction committed. The cron recovers
+  // QUEUED rows if this call is interrupted. No bank operation occurs here.
+  try {
+    const deliveries = await prisma.emailDelivery.findMany({
+      where: { referenceType: 'GUIDE_TRANSFER', referenceId: transferId, category: 'GUIDE_TRANSFER_CONFIRMED' },
+      select: { id: true }, take: 1,
+    });
+    if (deliveries.length) await retryPendingEmails(1, deliveries.map(row => row.id));
+  } catch { console.error('[guide transfer email] Dispatch unavailable; delivery remains tracked.'); }
 }
 
 // ─── 4. Confirmation de réservation ─────────────────────────────

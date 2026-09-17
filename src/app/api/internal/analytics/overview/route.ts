@@ -94,6 +94,23 @@ export async function GET(req: NextRequest) {
   const start = new Date(Date.now() - days * 86_400_000)
   const activeSince = new Date(Date.now() - 5 * 60_000)
 
+  const [guideTransfers, transferAudit, sentGuideTotal] = await Promise.all([
+    prisma.transfer.findMany({
+      where: { recordedEarningId: { not: null }, createdAt: { gte: start } },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], take: 50,
+      select: { id: true, amountCents: true, currency: true, bankReference: true, sentAt: true, confirmedAt: true,
+        status: true, preparedByEmail: true, confirmedByEmail: true, createdAt: true,
+        recordedEarning: { select: { reservation: { select: { refNumber: true } } } },
+        guideProfile: { select: { guideAccount: { select: { email: true, displayName: true, firstName: true, lastName: true } } } },
+      },
+    }),
+    prisma.auditLog.findMany({ where: { action: { in: ['GUIDE_TRANSFER_PREPARED', 'GUIDE_TRANSFER_CONFIRMED', 'GUIDE_TRANSFER_CORRECTED'] }, createdAt: { gte: start } },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], take: 50,
+      select: { id: true, action: true, target: true, actor: true, actorRole: true, ip: true, createdAt: true, before: true, after: true },
+    }),
+    prisma.transfer.aggregate({ where: { recordedEarningId: { not: null }, status: 'PAID', confirmedAt: { gte: start } }, _sum: { amountCents: true } }),
+  ])
+
   const [events, usersTotal, usersNew, usersByRole, recentUsers, reservations, guidesActive, guidesPending, guideApplicationsNew, guideApplications, guideApplicationsTotal, guideApplicationCounts, adminAccounts, adminLoginAttempts, adminSessionsActive, emailDeliveries, paymentAttempts, paymentAttemptCounts, failedPaymentEvents, paymentTransactions, capturedPaymentsByProvider, sentry, referrals, promotionCampaigns, promotionRedemptionStats] = await Promise.all([
     prisma.analyticsEvent.findMany({
       where: { createdAt: { gte: start } },
@@ -476,6 +493,19 @@ export async function GET(req: NextRequest) {
         payment: reservation.paymentAttempts[0] ?? null,
         paymentAttempts: undefined,
       })),
+    },
+    guideTransfers: {
+      confirmedAmountCents: sentGuideTotal._sum.amountCents ?? 0,
+      rows: guideTransfers.map(transfer => ({
+        id: transfer.id, refNumber: transfer.recordedEarning!.reservation.refNumber,
+        guideEmail: transfer.guideProfile.guideAccount?.email ?? null,
+        guideName: transfer.guideProfile.guideAccount?.displayName
+          || `${transfer.guideProfile.guideAccount?.firstName ?? ''} ${transfer.guideProfile.guideAccount?.lastName ?? ''}`.trim() || 'Guide',
+        amountCents: transfer.amountCents, currency: transfer.currency, bankReference: transfer.bankReference,
+        status: transfer.status, sentAt: transfer.sentAt, confirmedAt: transfer.confirmedAt,
+        preparedByEmail: transfer.preparedByEmail, confirmedByEmail: transfer.confirmedByEmail, createdAt: transfer.createdAt,
+      })),
+      audit: transferAudit,
     },
     referrals: {
       total: referrals.length,

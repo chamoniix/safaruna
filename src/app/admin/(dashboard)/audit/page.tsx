@@ -57,6 +57,9 @@ const ACTION_COLORS: Record<string, string> = {
 }
 
 const ACTION_LABELS: Record<string, string> = {
+  GUIDE_TRANSFER_PREPARED: 'Virement Guide préparé',
+  GUIDE_TRANSFER_CONFIRMED: 'Envoi du virement Guide confirmé',
+  GUIDE_TRANSFER_CORRECTED: 'Référence ou date du virement corrigée',
   RESERVATION_CREATED:   'Réservation créée',
   PAYMENT_CONFIRMED:     'Paiement confirmé',
   PLACE_PRICE_UPDATED:   'Prix lieu modifié',

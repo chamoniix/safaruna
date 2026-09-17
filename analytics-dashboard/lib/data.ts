@@ -20,6 +20,14 @@ export type BigQueryUsage = {
 }
 
 export type AnalyticsData = {
+  guideTransfers?: {
+    confirmedAmountCents: number;
+    rows: Array<{ id: string; refNumber: string; guideEmail: string | null; guideName: string;
+      amountCents: number; currency: string; bankReference: string; status: string;
+      sentAt: string; confirmedAt: string | null; preparedByEmail: string; confirmedByEmail: string | null; createdAt: string }>;
+    audit: Array<{ id: string; action: string; target: string | null; actor: string; actorRole: string | null;
+      ip: string | null; createdAt: string; before: unknown; after: unknown }>;
+  }
   generatedAt: string
   range: { days: number; start: string; detailedRetentionDays: number }
   overview: {

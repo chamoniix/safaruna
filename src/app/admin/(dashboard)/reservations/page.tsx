@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import GuideTransferPanel from '@/components/admin/GuideTransferPanel';
 
 type Reservation = {
   id: string;
@@ -324,6 +325,7 @@ export default function AdminReservations() {
                           >
                             Transfert
                           </button>
+                          <GuideTransferPanel reservationId={r.id} />
                         </div>
                       </td>
                     </tr>

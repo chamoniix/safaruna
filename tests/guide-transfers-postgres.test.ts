@@ -22,6 +22,7 @@ test('manual Guide transfers: real PostgreSQL constraints, transactions and race
   process.env.ENCRYPTION_KEY = randomBytes(32).toString('hex')
   const require = createRequire(import.meta.url)
   const cache = new Map<string, { exports: unknown }>()
+  let simulatedProviderCalls = 0
   function load<T>(file: string): T {
     const absolute = resolve(file)
     const cached = cache.get(absolute)
@@ -32,7 +33,8 @@ test('manual Guide transfers: real PostgreSQL constraints, transactions and race
       compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.CommonJS, esModuleInterop: true },
     }).outputText, {
       module: loadedModule, exports: loadedModule.exports, console, process, Error, Date, Buffer, URL,
-      TextEncoder, TextDecoder, Headers, Request, Response, setTimeout, clearTimeout,
+      TextEncoder, TextDecoder, Headers, Request, Response, AbortSignal, setTimeout, clearTimeout,
+      fetch: () => { simulatedProviderCalls++; throw new Error('Simulated provider response loss; no network call') },
       require: (name: string) => {
         if (name === 'server-only') return {}
         if (name === '@/lib/prisma') return { default: db, __esModule: true }
@@ -80,6 +82,14 @@ test('manual Guide transfers: real PostgreSQL constraints, transactions and race
     })
     const input = await makeInput(earning.id)
 
+    await t.test('reservation panel reads both actual earnings and only masked bank data', async () => {
+      const result = await service.readReservationGuideTransfers(actor, reservation.id)
+      assert.equal(result.items.length, 2)
+      assert.deepEqual(new Set(result.items.map(item => item.guideProfileId)), new Set([guide.id, guide2.id]))
+      assert.ok(result.items.every(item => item.preparation?.amountCents === 10000 && !item.canConfirm))
+      assert.doesNotMatch(JSON.stringify(result), /LOCAL_TEST_IBAN_ONLY|bankSnapshotEncrypted/)
+    })
+
     await t.test('simultaneous preparations create one transfer and one audit', async () => {
       const results = await Promise.allSettled([
         service.prepareGuideTransfer(actor, context, input), service.prepareGuideTransfer(actor, context, input),
@@ -106,6 +116,13 @@ test('manual Guide transfers: real PostgreSQL constraints, transactions and race
       assert.equal(await db.auditLog.count({ where: { target: record.id, action: 'GUIDE_TRANSFER_CONFIRMED' } }), 1)
       assert.equal((await db.guideEarning.findUniqueOrThrow({ where: { id: earning.id } })).status, 'PAID')
       assert.equal((await db.guideEarning.findUniqueOrThrow({ where: { id: earning2.id } })).status, 'UPCOMING')
+      const emails = await db.emailDelivery.findMany({ where: { referenceType: 'GUIDE_TRANSFER', referenceId: record.id } })
+      assert.equal(emails.length, 1); assert.equal(emails[0].status, 'QUEUED')
+      assert.equal(emails[0].providerMessageId, null)
+      assert.match(crypto.decrypt(emails[0].payloadEncrypted!), /100,00/)
+      const result = await service.readReservationGuideTransfers(superadmin, reservation.id)
+      assert.equal(result.items.find(item => item.earningId === earning.id)?.record?.status, 'PAID')
+      assert.equal(result.items.find(item => item.earningId === earning2.id)?.record, null)
     })
 
     await t.test('other Guide on same reservation remains independent', async () => {
@@ -123,6 +140,55 @@ test('manual Guide transfers: real PostgreSQL constraints, transactions and race
       const event = await db.auditLog.findFirstOrThrow({ where: { target: record.id, action: 'GUIDE_TRANSFER_CORRECTED' } })
       assert.equal((event.before as Prisma.JsonObject).bankReference, input.bankReference)
       assert.doesNotMatch(JSON.stringify(event), /LOCAL_TEST_IBAN/)
+      assert.equal(await db.emailDelivery.count({ where: { referenceType: 'GUIDE_TRANSFER', referenceId: record.id } }), 1)
+    })
+
+    await t.test('Guide history uses current metadata, separates guides and excludes pending/legacy transfers', async () => {
+      cache.set(resolve('src/lib/require-account.ts'), { exports: { requireGuide: async () => ({ ok: true, actor: { guideProfileId: guide.id } }) } })
+      const route = load<typeof import('../src/app/api/guide/revenus/route')>('src/app/api/guide/revenus/route.ts')
+      const { NextRequest } = require('next/server') as typeof import('next/server')
+      const res = await route.GET(new NextRequest(`https://safaruma.example.test/api/guide/revenus?guideProfileId=${guide2.id}`))
+      const data = await res.json()
+      assert.equal(data.transfers.total, 1)
+      assert.equal(data.transfers.rows[0].bankReference, 'CORRECTED-LOCAL-REFERENCE')
+      assert.equal(data.stats.sentNet, 100)
+      assert.doesNotMatch(JSON.stringify(data), /LOCAL_TEST_IBAN|bankSnapshotEncrypted|confirmedByEmail/)
+    })
+
+    await t.test('an email ledger failure rolls back confirmation and paid status atomically', async () => {
+      const res = await createReservation(); const row = await createEarning(res.id)
+      const prepared = await service.prepareGuideTransfer(actor, context, await makeInput(row.id))
+      await db.$executeRawUnsafe(`ALTER TABLE "EmailDelivery" ADD CONSTRAINT "test_deny_transfer_mail" CHECK ("referenceId" IS DISTINCT FROM '${prepared.id}')`)
+      try {
+        await assert.rejects(service.confirmGuideTransfer(superadmin, context, { transferId: prepared.id, revision: 0 }))
+        assert.equal((await db.transfer.findUniqueOrThrow({ where: { id: prepared.id } })).status, 'PENDING')
+        assert.equal((await db.guideEarning.findUniqueOrThrow({ where: { id: row.id } })).status, 'UPCOMING')
+        assert.equal(await db.auditLog.count({ where: { target: prepared.id, action: 'GUIDE_TRANSFER_CONFIRMED' } }), 0)
+      } finally { await db.$executeRawUnsafe('ALTER TABLE "EmailDelivery" DROP CONSTRAINT "test_deny_transfer_mail"') }
+    })
+
+    await t.test('provider failure after commit never rolls back the transfer or resends an uncertain email', async () => {
+      const record = await db.transfer.findUniqueOrThrow({ where: { recordedEarningId: earning.id } })
+      const email = load<typeof import('../src/lib/email')>('src/lib/email.ts')
+      const originalKey = process.env.BREVO_API_KEY
+      process.env.BREVO_API_KEY = 'isolated-test-not-a-real-key'
+      try {
+        assert.equal(simulatedProviderCalls, 0)
+        await email.dispatchGuideTransferEmail(record.id)
+        assert.equal(simulatedProviderCalls, 1)
+        assert.equal((await db.transfer.findUniqueOrThrow({ where: { id: record.id } })).status, 'PAID')
+        assert.equal((await db.guideEarning.findUniqueOrThrow({ where: { id: earning.id } })).status, 'PAID')
+        const delivery = await db.emailDelivery.findFirstOrThrow({ where: { referenceType: 'GUIDE_TRANSFER', referenceId: record.id } })
+        assert.equal(delivery.status, 'FAILED'); assert.equal(delivery.deliveredAt, null)
+        await service.confirmGuideTransfer(superadmin, context, { transferId: record.id, revision: 0 })
+        await email.dispatchGuideTransferEmail(record.id)
+        assert.equal(simulatedProviderCalls, 1)
+        const view = (await service.readReservationGuideTransfers(superadmin, reservation.id)).items.find(item => item.earningId === earning.id)
+        assert.equal(view?.email?.status, 'FAILED'); assert.equal(view?.record?.status, 'PAID')
+      } finally {
+        if (originalKey === undefined) delete process.env.BREVO_API_KEY
+        else process.env.BREVO_API_KEY = originalKey
+      }
     })
 
     await t.test('SQL constraint rejects invalid currency and FK prevents history deletion', async () => {
@@ -206,6 +272,12 @@ test('manual Guide transfers: real PostgreSQL constraints, transactions and race
       const prepared = await service.prepareGuideTransfer(actor, context, await makeInput(row.id))
       await db.guideProfile.update({ where: { id: guide.id }, data: { ibanEncrypted: crypto.encrypt('DIFFERENT_LOCAL_IBAN') } })
       await assert.rejects(service.confirmGuideTransfer(superadmin, context, { transferId: prepared.id, revision: 0 }), /vérifiés/)
+      await assert.rejects(service.correctGuideTransfer(superadmin, context, { transferId: prepared.id, revision: 0,
+        bankReference: 'CHANGED', sentAt: prepared.sentAt!, reason: 'Must stay blocked',
+      }), /vérifiés/)
+      const item = (await service.readReservationGuideTransfers(superadmin, res.id)).items[0]
+      assert.equal(item.reviewRequired, true); assert.equal(item.canConfirm, false); assert.equal(item.canCorrect, false)
+      assert.equal(item.record?.bankReference, prepared.bankReference)
       assert.equal((await db.transfer.findUniqueOrThrow({ where: { id: prepared.id } })).status, 'PENDING')
     })
   } finally {

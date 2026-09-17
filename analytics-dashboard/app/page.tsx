@@ -238,6 +238,27 @@ function Dashboard({ data, ga4, bigQuery, loginHistory, days, query, view }: { d
         <PanelTitle eyebrow="Réservations" title="Dernières demandes" icon={<CreditCard />} />
         <div className="table-wrap"><table><thead><tr><th>Référence</th><th>Client</th><th>Destination</th><th>Voyageurs</th><th>Montant</th><th>Processeur</th><th>Paiement</th><th>Réservation</th><th>Date</th></tr></thead><tbody>{data.payments.reservations.map(item => <tr key={item.refNumber}><td><code>{item.refNumber}</code></td><td>{item.pelerin.name || item.pelerin.email || '—'}</td><td>{item.selectedCities || '—'}</td><td>{item.nbPeople}</td><td>{euro(item.totalPrice)}</td><td>{item.payment?.provider || '—'}</td><td>{item.payment ? paymentStatus(item.payment.status) : 'Aucun'}</td><td><span className={`pill ${item.status.toLowerCase()}`}>{item.status}</span></td><td>{date(item.createdAt)}</td></tr>)}</tbody></table>{!data.payments.reservations.length && <div className="empty">Aucune réservation sur cette période.</div>}</div>
       </section>
+      <section className="panel">
+        <PanelTitle eyebrow="Versements aux Guides" title="Registre des virements manuels" icon={<CreditCard />} />
+        {!data.guideTransfers ? <p>Registre indisponible dans cette réponse. Actualisez après la mise à jour du site.</p> : <>
+          <p>Envois confirmés pendant la période : <b>{euro(data.guideTransfers.confirmedAmountCents / 100)}</b>. Déclarations administratives, distinctes des paiements clients et sans confirmation de réception bancaire.</p>
+          <p>50 derniers enregistrements créés pendant la période.</p>
+          <div className="table-wrap"><table><thead><tr><th>Réservation / Guide</th><th>Montant EUR</th><th>Référence bancaire</th><th>Statut</th><th>Envoi déclaré</th><th>Préparé / confirmé par</th></tr></thead>
+            <tbody>{data.guideTransfers.rows.map(row => <tr key={row.id}>
+              <td><code>{row.refNumber}</code><br />{row.guideName}<br /><small>{row.guideEmail || '—'}</small></td>
+              <td>{euro(row.amountCents / 100)}</td><td>{row.bankReference}</td>
+              <td>{row.status === 'PAID' && row.confirmedAt ? 'Envoi confirmé' : 'Validation en attente'}</td>
+              <td>{date(row.sentAt)}</td><td>{row.preparedByEmail}<br />{row.confirmedByEmail || 'En attente'}</td>
+            </tr>)}</tbody></table>{!data.guideTransfers.rows.length && <div className="empty">Aucun virement enregistré sur cette période.</div>}</div>
+          <h3>Journal des virements</h3><p>50 dernières actions sur la période. Lecture seule.</p>
+          <div className="table-wrap"><table><thead><tr><th>Date</th><th>Action</th><th>Auteur / rôle</th><th>IP</th><th>Historique</th></tr></thead>
+            <tbody>{data.guideTransfers.audit.map(event => <tr key={event.id}>
+              <td>{date(event.createdAt)}</td><td>{event.action === 'GUIDE_TRANSFER_CONFIRMED' ? 'Envoi confirmé' : event.action === 'GUIDE_TRANSFER_PREPARED' ? 'Préparation' : 'Correction'}</td>
+              <td>{event.actor}<br />{event.actorRole}</td><td>{event.ip || '—'}</td>
+              <td><details><summary>Avant / après</summary><pre style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{JSON.stringify({ avant: event.before, après: event.after }, null, 2)}</pre></details></td>
+            </tr>)}</tbody></table>{!data.guideTransfers.audit.length && <div className="empty">Aucune action sur cette période.</div>}</div>
+        </>}
+      </section>
     </>
   }
 

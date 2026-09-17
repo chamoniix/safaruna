@@ -965,13 +965,33 @@ model Transfer {
   id             String         @id @default(cuid())
   guideProfileId String
   guideProfile   GuideProfile   @relation(fields: [guideProfileId], references: [id])
-  amount         Float
-  commission     Float
-  net            Float
-  period         String
+  // Legacy amounts/period are retained, never reconstructed for new records.
+  amount         Float?
+  commission     Float?
+  net            Float?
+  period         String?
   status         TransferStatus @default(PENDING)
   createdAt      DateTime       @default(now())
   earnings       GuideEarning[]
+  // Manual bank-transfer record, not a payment-provider instruction.
+  recordedEarningId      String?       @unique
+  recordedEarning        GuideEarning? @relation("RecordedGuideTransfer", fields: [recordedEarningId], references: [id], onDelete: Restrict)
+  amountCents            Int?
+  currency               String?
+  bankReference          String?
+  sentAt                 DateTime?
+  dueAt                  DateTime?
+  bankSnapshotEncrypted  String?
+  bankRevision           String?
+  sourceRevision         String?
+  preparedByAdminId      String?
+  preparedByEmail        String?
+  confirmedByAdminId     String?
+  confirmedByEmail       String?
+  confirmedAt           DateTime?
+  revision              Int           @default(0)
+
+  @@index([status, dueAt])
 }
 
 enum TransferStatus {
@@ -995,6 +1015,7 @@ model GuideEarning {
   status            GuideEarningStatus @default(UPCOMING)
   transferId        String?
   transfer          Transfer?          @relation(fields: [transferId], references: [id], onDelete: SetNull)
+  recordedTransfer  Transfer?          @relation("RecordedGuideTransfer")
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
 

@@ -5,6 +5,7 @@ import { assertMissionsAvailable, eachBookingDate, GuideAvailabilityConflictErro
 import prisma from '@/lib/prisma';
 import { missionDurationDays } from '@/lib/guide-workflow';
 import { sendReservationConfirmation, sendEmail } from '@/lib/email';
+import { assertNoRecordedGuideTransfer, GuideTransferError } from '@/lib/guide-transfers';
 
 export async function GET(req: NextRequest) {
   if (!await checkAdmin(req))
@@ -153,6 +154,13 @@ export async function PATCH(req: NextRequest) {
   let reservation;
   try {
     reservation = await prisma.$transaction(async tx => {
+    const current = await tx.reservation.findUnique({ where: { id: reservationId }, select: { status: true } });
+    if (!current || current.status !== existing.status) {
+      throw new GuideTransferError('La réservation a changé. Rechargez la page avant de modifier son statut.');
+    }
+    if (status !== existing.status) {
+      await assertNoRecordedGuideTransfer(tx, reservationId);
+    }
     if (status === 'CONFIRMED' && existing.status === 'CANCELLED') {
       const missions = existing.missions.map(mission => ({
         guideProfileId: mission.guideProfileId,
@@ -211,6 +219,9 @@ export async function PATCH(req: NextRequest) {
     return updated;
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
   } catch (error) {
+    if (error instanceof GuideTransferError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
     if (
       error instanceof GuideAvailabilityConflictError
       || (error instanceof Prisma.PrismaClientKnownRequestError && ['P2002', 'P2034'].includes(error.code))

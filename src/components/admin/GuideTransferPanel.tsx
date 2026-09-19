@@ -75,11 +75,18 @@ function TransferDialog({ reservationId, onClose }: { reservationId: string; onC
     }
   }
 
+  function close() {
+    if (inFlight.current) return
+    // Native close restores focus to the opener before React removes the dialog.
+    dialog.current?.close()
+    onClose()
+  }
+
   return <dialog ref={dialog} className={styles.dialog} aria-labelledby="guide-transfers-title"
-    onCancel={event => { event.preventDefault(); if (!inFlight.current) onClose() }}>
+    onCancel={event => { event.preventDefault(); close() }}>
     <div className={styles.header}>
       <div><h2 id="guide-transfers-title">Virements aux Guides</h2><p>{data?.refNumber ?? 'Réservation'}</p></div>
-      <button type="button" className={styles.close} aria-label="Fermer les virements" disabled={busy} onClick={onClose}><X size={22} /></button>
+      <button type="button" className={styles.close} aria-label="Fermer les virements" disabled={busy} onClick={close}><X size={22} /></button>
     </div>
     <p className={styles.notice}>Suivi d’un virement déjà effectué depuis votre banque. Aucun argent n’est envoyé depuis cet écran.</p>
     <p className={styles.help}>Versements en EUR, trois jours ouvrés après la fin du séjour (lundi à jeudi). Le délai de réception dépend ensuite de la banque du Guide. Un email est prévu à la confirmation ; les corrections ultérieures actualisent le dashboard sans nouvel email.</p>

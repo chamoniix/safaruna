@@ -4,7 +4,7 @@ import { createRequire } from 'node:module'
 import test from 'node:test'
 import vm from 'node:vm'
 import ts from 'typescript'
-import { createElement, type ComponentType } from 'react'
+import { createElement, Children, isValidElement, type ReactNode, type ComponentType } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import type { readReservationGuideTransfers } from '../src/lib/guide-transfers'
 
@@ -76,4 +76,51 @@ test('confirmed transfer is labelled sent, not received, without repeat confirma
   const html = render(value)
   assert.match(html, /Virement envoyé/); assert.match(html, /owner@example.test/)
   assert.doesNotMatch(html, /Virement reçu|Vérifier et confirmer/)
+})
+
+function dialogCloseHarness(inFlight = false) {
+  const calls: string[] = []
+  let refIndex = 0
+  const exports = { exports: {} }
+  vm.runInNewContext(ts.transpileModule(`${readFileSync('src/components/admin/GuideTransferPanel.tsx', 'utf8')}\nexport { TransferDialog }`, {
+    compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.CommonJS, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true },
+  }).outputText, { module: exports, exports: exports.exports, Date,
+    require: (name: string) => name.endsWith('.module.css') ? {} : name === 'react' ? {
+      useRef: () => ({ current: refIndex++ === 0 ? { close: () => calls.push('native-close') } : inFlight }),
+      useState: (initial: unknown) => [initial, () => {}],
+      useEffect: () => {},
+      useCallback: (callback: unknown) => callback,
+    } : require(name),
+  })
+  const { TransferDialog } = exports.exports as { TransferDialog: (props: { reservationId: string; onClose: () => void }) => ReactNode }
+  const element = TransferDialog({ reservationId: 'qa-focus', onClose: () => calls.push('unmount') })
+  const props: Record<string, unknown>[] = []
+  function visit(node: ReactNode) {
+    Children.forEach(node, child => {
+      if (!isValidElement<{ children?: ReactNode }>(child)) return
+      props.push(child.props); visit(child.props.children)
+    })
+  }
+  visit(element)
+  return { calls,
+    cancel: props.find(value => value.onCancel)!.onCancel as (event: { preventDefault: () => void }) => void,
+    cross: props.find(value => value['aria-label'] === 'Fermer les virements')!.onClick as () => void,
+  }
+}
+
+test('Escape closes the native dialog before unmounting so the browser restores focus', () => {
+  const h = dialogCloseHarness()
+  h.cancel({ preventDefault: () => h.calls.push('prevent-default') })
+  assert.deepEqual(h.calls, ['prevent-default', 'native-close', 'unmount'])
+})
+
+test('close button follows the same native close then unmount order', () => {
+  const h = dialogCloseHarness(); h.cross()
+  assert.deepEqual(h.calls, ['native-close', 'unmount'])
+})
+
+test('pending administrative write prevents Escape and close callbacks from dismissing the dialog', () => {
+  const h = dialogCloseHarness(true)
+  h.cancel({ preventDefault: () => h.calls.push('prevent-default') }); h.cross()
+  assert.deepEqual(h.calls, ['prevent-default'])
 })

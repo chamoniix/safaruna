@@ -1,9 +1,23 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 
-export default function ForgotPasswordPage() {
+function safePelerinRedirect(value: unknown): string {
+  if (typeof value !== 'string' || !value || value.length > 2048 || !value.startsWith('/') || value.startsWith('//') || value.includes('\\')) return '';
+  try {
+    const url = new URL(value, 'https://safaruma.com');
+    if (url.origin !== 'https://safaruma.com') return '';
+    if (url.pathname !== '/avis/deposer' && !url.pathname.startsWith('/avis/guide/') && url.pathname !== '/guides' && !url.pathname.startsWith('/guides/') && url.pathname !== '/espace' && !url.pathname.startsWith('/espace/')) return '';
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch { return ''; }
+}
+
+function ForgotPasswordForm() {
+  const searchParams = useSearchParams();
+  const redirectParam = safePelerinRedirect(searchParams.get('redirect'));
+  const loginHref = redirectParam ? `/connexion?redirect=${encodeURIComponent(redirectParam)}` : '/connexion';
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -15,7 +29,7 @@ export default function ForgotPasswordPage() {
       const res = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, redirect: redirectParam }),
       });
       const data = await res.json();
       if (data.success) {
@@ -97,7 +111,7 @@ export default function ForgotPasswordPage() {
                   <strong style={{ color: '#1A1209' }}>{email}</strong>.
                   Pensez à vérifier vos spams.
                 </p>
-                <Link href="/connexion" style={{
+                <Link href={loginHref} style={{
                   display: 'block', width: '100%', padding: '13px', textAlign: 'center',
                   background: '#1A1209', color: '#F0D897', borderRadius: 50,
                   fontSize: '0.875rem', fontWeight: 600, letterSpacing: '0.04em',
@@ -138,7 +152,7 @@ export default function ForgotPasswordPage() {
 
             {!sent && (
               <p style={{ textAlign: 'center', fontSize: '0.82rem', color: '#7A6D5A', marginTop: '1.5rem', lineHeight: 1.6 }}>
-                <Link href="/connexion" style={{ color: '#C9A84C', fontWeight: 600, textDecoration: 'none' }}>
+                <Link href={loginHref} style={{ color: '#C9A84C', fontWeight: 600, textDecoration: 'none' }}>
                   ← Retour à la connexion
                 </Link>
               </p>
@@ -148,4 +162,8 @@ export default function ForgotPasswordPage() {
       </div>
     </>
   );
+}
+
+export default function ForgotPasswordPage() {
+  return <Suspense fallback={<div style={{ textAlign: 'center', padding: '2rem' }}>Chargement…</div>}><ForgotPasswordForm /></Suspense>;
 }

@@ -154,6 +154,12 @@ test('actual checkout component keeps the header action disabled before guide se
       const html = renderToStaticMarkup(exports.default!())
       assert.equal((html.match(/role="alert"/g) || []).length, 1)
       assert.ok(html.includes('Erreur de test isolé'))
+      if (step === 5) {
+        assert.ok(!html.includes('Confirmation sous'))
+        assert.ok(html.includes('Guide Certifié SAFARUMA'))
+        assert.ok(html.includes('Annulation gratuite sous 48h'))
+        assert.ok(html.includes('Paiement 100% sécurisé'))
+      }
       const action = html.match(/<button[^>]*class="checkout-account-action"[^>]*>/)?.[0]
       assert.ok(action)
       assert.equal(action.includes('disabled'), step < (cityChoice === 'BOTH' ? 2 : 4))

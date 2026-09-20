@@ -2435,7 +2435,7 @@ export default function CheckoutPage() {
 
             {/* Trust badges */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', padding: '0.75rem 1rem', background: '#FAF8F0', borderRadius: 10, border: '1px solid #E8DFC8', marginBottom: '1.5rem' }}>
-              {['✓ Guide Certifié SAFARUMA', '✓ Annulation gratuite sous 48h', '✓ Paiement 100% sécurisé', '✓ Confirmation sous 24h'].map(t => (
+              {['✓ Guide Certifié SAFARUMA', '✓ Annulation gratuite sous 48h', '✓ Paiement 100% sécurisé'].map(t => (
                 <div key={t} style={{ fontSize: '0.78rem', color: '#8B6914', fontWeight: 600 }}>{t}</div>
               ))}
             </div>

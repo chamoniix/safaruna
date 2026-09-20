@@ -154,7 +154,6 @@ export default async function ReservationDetailPage({
           selectedPlaces: true,
           localTransport: true,
           localTransportDays: true,
-          guideConfirmationStatus: true,
           guideProfile: {
             select: {
               slug: true,
@@ -289,7 +288,6 @@ export default async function ReservationDetailPage({
               <dl style={{ display: 'grid', gap: 9, margin: '14px 0 0', color: '#4A3F30', fontSize: 13 }}>
                 <div><dt style={{ color: '#7A6D5A', fontWeight: 700 }}>Lieux</dt><dd style={{ margin: '3px 0 0' }}>{placeNames(mission.selectedPlaces)}</dd></div>
                 <div><dt style={{ color: '#7A6D5A', fontWeight: 700 }}>Transport local</dt><dd style={{ margin: '3px 0 0' }}>{localTransportLabel(mission.localTransport, mission.localTransportDays)}</dd></div>
-                <div><dt style={{ color: '#7A6D5A', fontWeight: 700 }}>Validation du Guide</dt><dd style={{ margin: '3px 0 0' }}>{mission.guideConfirmationStatus === 'CONFIRMED' ? 'Confirmée' : mission.guideConfirmationStatus === 'DECLINED' ? 'Refusée' : mission.guideConfirmationStatus === 'NO_RESPONSE' ? 'Sans réponse' : 'En attente'}</dd></div>
               </dl>
             </article>
           ))}

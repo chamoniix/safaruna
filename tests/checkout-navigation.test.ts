@@ -160,6 +160,11 @@ test('actual checkout component keeps the header action disabled before guide se
         assert.ok(html.includes('Annulation gratuite sous 48h'))
         assert.ok(html.includes('Paiement 100% sécurisé'))
       }
+      if (step === (cityChoice === 'BOTH' ? 2 : 4)) {
+        assert.ok(html.includes('Aucun guide disponible pour ces critères. Contactez-nous pour être accompagné dans votre recherche.'))
+        assert.ok(html.includes('https://wa.me/message/3LAXCIZV7FFEK1'))
+        assert.doesNotMatch(html, /Votre guide sera confirmé|sous 24h/)
+      }
       const action = html.match(/<button[^>]*class="checkout-account-action"[^>]*>/)?.[0]
       assert.ok(action)
       assert.equal(action.includes('disabled'), step < (cityChoice === 'BOTH' ? 2 : 4))

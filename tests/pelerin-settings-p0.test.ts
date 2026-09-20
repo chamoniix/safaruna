@@ -35,6 +35,10 @@ test('l’export est authentifié, limité à actor.id et construit avec des sé
   assert.doesNotMatch(exportRoute, /providerPaymentId\s*:/)
   assert.doesNotMatch(exportRoute, /moderatedByEmail\s*:/)
   assert.doesNotMatch(exportRoute, /referrer\s*:/)
+  assert.doesNotMatch(exportRoute, /guideConfirmationStatus|guideConfirmationRequestedAt|guideConfirmedAt/)
+  for (const field of ['refNumber', 'status', 'city', 'startDate', 'endDate', 'selectedPlaces', 'localTransport']) {
+    assert.ok(exportRoute.includes(`${field}: true`), `${field} remains available to the customer`)
+  }
 })
 
 test('le téléchargement affiche ses états de chargement et d’erreur', () => {

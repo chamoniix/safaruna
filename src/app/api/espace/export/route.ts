@@ -93,7 +93,6 @@ export async function GET() {
             selectedPlaces: true,
             localTransport: true,
             localTransportDays: true,
-            guideConfirmationStatus: true,
           },
         },
       },

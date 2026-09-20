@@ -135,8 +135,8 @@ function ConfirmationContent() {
         </h1>
 
         <p style={{ color: '#7A6D5A', fontSize: '0.95rem', lineHeight: 1.8, marginBottom: '1.5rem' }}>
-          Votre demande de réservation a bien été enregistrée.
-          Vous recevrez un email de confirmation avec tous les détails de votre voyage.
+          Votre réservation est confirmée.
+          Vous recevrez un email avec les détails de votre voyage.
         </p>
 
         {/* Du'a du voyageur */}

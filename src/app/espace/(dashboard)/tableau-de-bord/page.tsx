@@ -143,7 +143,7 @@ export default function EspaceTableauDeBord() {
         <>
           {/* ── FEATURED TRIP CARD ── */}
           <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'rgba(26,18,9,0.38)', marginBottom: 10 }}>
-            {featured.status === 'CONFIRMED' ? 'Prochain voyage' : 'En attente de confirmation'}
+            {featured.status === 'CONFIRMED' ? 'Prochain voyage' : 'Votre réservation'}
           </div>
 
           <div style={{

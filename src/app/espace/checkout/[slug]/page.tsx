@@ -2114,9 +2114,9 @@ export default function CheckoutPage() {
               ) : selectableGuides.length === 0 ? (
                 <div style={{ background: '#FAF8F0', border: '1px solid #E8DFC8', borderRadius: 16, padding: '2rem 1.5rem', textAlign: 'center' }}>
                   <div style={{ fontSize: '2rem', marginBottom: '0.75rem' }}>🕌</div>
-                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209', marginBottom: '0.5rem' }}>Votre guide sera confirmé</div>
+                  <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209', marginBottom: '0.5rem' }}>Aucun guide disponible</div>
                   <div style={{ fontSize: '0.82rem', color: '#7A6D5A', lineHeight: 1.7, marginBottom: '1.25rem' }}>
-                    Aucun guide disponible pour vos critères. Notre équipe sélectionnera le plus adapté sous 24h.
+                    Aucun guide disponible pour ces critères. Contactez-nous pour être accompagné dans votre recherche.
                   </div>
                   <a href="https://wa.me/message/3LAXCIZV7FFEK1" target="_blank" rel="noreferrer"
                     style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#25D366', color: 'white', fontSize: '0.78rem', fontWeight: 700, padding: '0.6rem 1.25rem', borderRadius: 50, textDecoration: 'none' }}>

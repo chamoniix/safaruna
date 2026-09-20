@@ -289,6 +289,7 @@ export default function GuideSearchPage() {
   const router = useRouter();
   const { status: sessionStatus } = useSession();
   const returnSlug = searchParams.get('returnSlug');
+  const returnCity = searchParams.get('city') === 'MAKKAH' ? 'MAKKAH' : 'MADINAH';
   const favoriteIntent = searchParams.get('favorite');
   const searchParamString = searchParams.toString();
   const [guideList, setGuideList] = useState<GuideData[]>([]);
@@ -1077,7 +1078,7 @@ export default function GuideSearchPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: 'rgba(29,92,58,0.08)', border: '1.5px solid rgba(29,92,58,0.3)', borderRadius: 12, padding: '0.875rem 1rem', marginBottom: '1.25rem' }}>
               <span style={{ fontSize: '1.3rem', flexShrink: 0 }}>🌿</span>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#1D5C3A' }}>Choisissez votre guide pour Médine</div>
+                <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#1D5C3A' }}>Choisissez votre guide pour {returnCity === 'MAKKAH' ? 'Makkah' : 'Médine'}</div>
                 <div style={{ fontSize: '0.72rem', color: '#4A7A5A', marginTop: '0.15rem' }}>Sur chaque fiche, appuyez sur le bouton vert pour le sélectionner.</div>
               </div>
               <Link href={`/espace/checkout/${returnSlug}`} style={{ fontSize: '0.72rem', color: '#1D5C3A', fontWeight: 700, textDecoration: 'none', background: 'rgba(29,92,58,0.12)', padding: '0.35rem 0.75rem', borderRadius: 50, whiteSpace: 'nowrap', border: '1px solid rgba(29,92,58,0.3)' }}>
@@ -1131,7 +1132,7 @@ export default function GuideSearchPage() {
           {filteredOfficial.map(g => (
             <div key={g.slug} className="guide-official-wrap">
               <div className="guide-official-label">★ RESPONSABLE OFFICIEL SAFARUMA</div>
-              <GuideCard guide={g} official onProfile={() => openDrawer(g)} isLoading={loadingSlug === g.slug} returnSlug={returnSlug} isFavorite={favoriteSlugs.has(g.slug)} favoritePending={pendingFavoriteSlugs.has(g.slug)} onFavorite={() => toggleFavorite(g.slug)} />
+              <GuideCard guide={g} official onProfile={() => openDrawer(g)} isLoading={loadingSlug === g.slug} returnSlug={returnSlug} returnCity={returnCity} isFavorite={favoriteSlugs.has(g.slug)} favoritePending={pendingFavoriteSlugs.has(g.slug)} onFavorite={() => toggleFavorite(g.slug)} />
             </div>
           ))}
 
@@ -1155,7 +1156,7 @@ export default function GuideSearchPage() {
           )}
 
           <div className="guides-grid">
-            {filteredNonOfficial.map(g => <GuideCard key={g.slug} guide={g} onProfile={() => openDrawer(g)} isLoading={loadingSlug === g.slug} returnSlug={returnSlug} isFavorite={favoriteSlugs.has(g.slug)} favoritePending={pendingFavoriteSlugs.has(g.slug)} onFavorite={() => toggleFavorite(g.slug)} />)}
+            {filteredNonOfficial.map(g => <GuideCard key={g.slug} guide={g} onProfile={() => openDrawer(g)} isLoading={loadingSlug === g.slug} returnSlug={returnSlug} returnCity={returnCity} isFavorite={favoriteSlugs.has(g.slug)} favoritePending={pendingFavoriteSlugs.has(g.slug)} onFavorite={() => toggleFavorite(g.slug)} />)}
           </div>
 
           {/* ── Section Prochainement ── */}
@@ -1218,7 +1219,7 @@ export default function GuideSearchPage() {
 
       {/* ── GUIDE DRAWER ── */}
       {drawerGuide && (
-        <GuideDrawer guide={drawerGuide} visible={drawerVisible} onClose={closeDrawer} returnSlug={returnSlug} isFavorite={favoriteSlugs.has(drawerGuide.slug)} favoritePending={pendingFavoriteSlugs.has(drawerGuide.slug)} onFavorite={() => toggleFavorite(drawerGuide.slug)} />
+        <GuideDrawer guide={drawerGuide} visible={drawerVisible} onClose={closeDrawer} returnSlug={returnSlug} returnCity={returnCity} isFavorite={favoriteSlugs.has(drawerGuide.slug)} favoritePending={pendingFavoriteSlugs.has(drawerGuide.slug)} onFavorite={() => toggleFavorite(drawerGuide.slug)} />
       )}
 
       {/* ── CSS ── */}
@@ -1503,7 +1504,7 @@ function FavoriteHeartButton({ guideName, active, pending, onClick, dark = false
   );
 }
 
-function GuideDrawer({ guide: g, visible, onClose, returnSlug, isFavorite, favoritePending, onFavorite }: { guide: GuideData; visible: boolean; onClose: () => void; returnSlug?: string | null; isFavorite: boolean; favoritePending: boolean; onFavorite: () => void }) {
+function GuideDrawer({ guide: g, visible, onClose, returnSlug, returnCity = 'MADINAH', isFavorite, favoritePending, onFavorite }: { guide: GuideData; visible: boolean; onClose: () => void; returnSlug?: string | null; returnCity?: 'MAKKAH' | 'MADINAH'; isFavorite: boolean; favoritePending: boolean; onFavorite: () => void }) {
   return (
     <>
       {/* Overlay */}
@@ -1590,12 +1591,12 @@ function GuideDrawer({ guide: g, visible, onClose, returnSlug, isFavorite, favor
         {/* CTAs */}
         <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <Link
-            href={returnSlug ? `/espace/checkout/${returnSlug}?pair=${g.slug}` : `/espace/checkout/${g.slug}`}
+            href={returnSlug ? `/espace/checkout/${encodeURIComponent(returnSlug)}?pair=${encodeURIComponent(g.slug)}&selectionCity=${returnCity}` : `/espace/checkout/${g.slug}`}
             {...(returnSlug ? { 'data-medine': '' } : {})}
             style={{ display: 'block', textDecoration: 'none', background: returnSlug ? 'linear-gradient(135deg, #27AE60 0%, #1D5C3A 100%)' : '#1A1209', color: returnSlug ? 'white' : '#F0D897', textAlign: 'center', padding: '0.9rem', borderRadius: 50, fontSize: '0.9rem', fontWeight: 800, letterSpacing: '0.04em', boxShadow: returnSlug ? '0 4px 16px rgba(29,92,58,0.35)' : 'none', transition: 'background 0.15s, transform 0.1s' }}
             onClick={onClose}
           >
-            {returnSlug ? 'Choisir pour Médine 🌿' : 'Réserver ce guide →'}
+            {returnSlug ? (returnCity === 'MAKKAH' ? 'Choisir pour Makkah' : 'Choisir pour Médine 🌿') : 'Réserver ce guide →'}
           </Link>
           <Link
             href={`/guides/${g.slug}`}
@@ -1610,7 +1611,7 @@ function GuideDrawer({ guide: g, visible, onClose, returnSlug, isFavorite, favor
   );
 }
 
-function GuideCard({ guide: g, official, onProfile, isLoading, returnSlug, isFavorite, favoritePending, onFavorite }: { guide: GuideData; official?: boolean; onProfile?: () => void; isLoading?: boolean; returnSlug?: string | null; isFavorite: boolean; favoritePending: boolean; onFavorite: () => void }) {
+function GuideCard({ guide: g, official, onProfile, isLoading, returnSlug, returnCity = 'MADINAH', isFavorite, favoritePending, onFavorite }: { guide: GuideData; official?: boolean; onProfile?: () => void; isLoading?: boolean; returnSlug?: string | null; returnCity?: 'MAKKAH' | 'MADINAH'; isFavorite: boolean; favoritePending: boolean; onFavorite: () => void }) {
   return (
     <div
       className={official ? 'guide-official-card' : ''}
@@ -1715,11 +1716,11 @@ function GuideCard({ guide: g, official, onProfile, isLoading, returnSlug, isFav
               ) : 'Voir le profil'}
             </button>
             <Link
-              href={returnSlug ? `/espace/checkout/${returnSlug}?pair=${g.slug}` : `/espace/checkout/${g.slug}`}
+              href={returnSlug ? `/espace/checkout/${encodeURIComponent(returnSlug)}?pair=${encodeURIComponent(g.slug)}&selectionCity=${returnCity}` : `/espace/checkout/${g.slug}`}
               {...(returnSlug ? { 'data-medine': '' } : {})}
               style={{ flex: 1, display: 'block', textDecoration: 'none', background: returnSlug ? 'linear-gradient(135deg, #27AE60 0%, #1D5C3A 100%)' : '#1A1209', color: returnSlug ? 'white' : '#F0D897', textAlign: 'center', padding: '0.65rem', borderRadius: 50, fontSize: '0.78rem', fontWeight: 700, letterSpacing: '0.04em', boxShadow: returnSlug ? '0 2px 12px rgba(29,92,58,0.3)' : 'none', transition: 'background 0.15s, transform 0.1s' }}
             >
-              {returnSlug ? 'Choisir pour Médine 🌿' : 'Choisir ce guide'}
+              {returnSlug ? (returnCity === 'MAKKAH' ? 'Choisir pour Makkah' : 'Choisir pour Médine 🌿') : 'Choisir ce guide'}
             </Link>
           </div>
         </div>

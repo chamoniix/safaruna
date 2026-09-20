@@ -4,8 +4,21 @@ import Link from 'next/link';
 import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
+function safePelerinRedirect(value: unknown): string {
+  if (typeof value !== 'string' || !value || value.length > 2048 || !value.startsWith('/') || value.startsWith('//') || value.includes('\\')) return '';
+  try {
+    const url = new URL(value, 'https://safaruma.com');
+    if (url.origin !== 'https://safaruma.com') return '';
+    if (url.pathname !== '/avis/deposer' && !url.pathname.startsWith('/avis/guide/') && url.pathname !== '/guides' && !url.pathname.startsWith('/guides/') && url.pathname !== '/espace' && !url.pathname.startsWith('/espace/')) return '';
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch { return ''; }
+}
+
 function ResetForm() {
   const searchParams = useSearchParams();
+  const redirectParam = safePelerinRedirect(searchParams.get('redirect'));
+  const loginHref = redirectParam ? `/connexion?redirect=${encodeURIComponent(redirectParam)}` : '/connexion';
+  const forgotPasswordHref = redirectParam ? `/mot-de-passe-oublie?redirect=${encodeURIComponent(redirectParam)}` : '/mot-de-passe-oublie';
   const token = searchParams.get('token');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -35,7 +48,7 @@ function ResetForm() {
   if (!token) return (
     <div style={{ textAlign: 'center', padding: '2rem' }}>
       <p style={{ color: '#C0392B', fontSize: '0.9rem' }}>Lien invalide.</p>
-      <Link href="/mot-de-passe-oublie" style={{ color: '#C9A84C', fontWeight: 600 }}>Faire une nouvelle demande</Link>
+      <Link href={forgotPasswordHref} style={{ color: '#C9A84C', fontWeight: 600 }}>Faire une nouvelle demande</Link>
     </div>
   );
 
@@ -44,7 +57,7 @@ function ResetForm() {
       <div style={{ width: 56, height: 56, borderRadius: '50%', background: '#E8F5EE', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem', fontSize: '1.5rem', color: '#1D5C3A' }}>✓</div>
       <p style={{ fontSize: '0.95rem', fontWeight: 600, color: '#1A1209', marginBottom: '0.5rem' }}>Mot de passe mis à jour !</p>
       <p style={{ fontSize: '0.85rem', color: '#7A6D5A', marginBottom: '1.75rem' }}>Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.</p>
-      <Link href="/connexion" style={{ display: 'block', padding: '13px', textAlign: 'center', background: '#1A1209', color: '#F0D897', borderRadius: 50, fontSize: '0.875rem', fontWeight: 600, textDecoration: 'none' }}>
+      <Link href={loginHref} style={{ display: 'block', padding: '13px', textAlign: 'center', background: '#1A1209', color: '#F0D897', borderRadius: 50, fontSize: '0.875rem', fontWeight: 600, textDecoration: 'none' }}>
         Se connecter
       </Link>
     </div>

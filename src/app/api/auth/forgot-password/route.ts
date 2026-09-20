@@ -5,13 +5,24 @@ import { sendPasswordReset } from '@/lib/email'
 import { authRatelimit, checkRateLimit } from '@/lib/ratelimit'
 import { getGuideRequestContext } from '@/lib/guide-auth'
 
+function safePelerinRedirect(value: unknown): string {
+  if (typeof value !== 'string' || !value || value.length > 2048 || !value.startsWith('/') || value.startsWith('//') || value.includes('\\')) return ''
+  try {
+    const url = new URL(value, 'https://safaruma.com')
+    if (url.origin !== 'https://safaruma.com') return ''
+    if (url.pathname !== '/avis/deposer' && !url.pathname.startsWith('/avis/guide/') && url.pathname !== '/guides' && !url.pathname.startsWith('/guides/') && url.pathname !== '/espace' && !url.pathname.startsWith('/espace/')) return ''
+    return `${url.pathname}${url.search}${url.hash}`
+  } catch { return '' }
+}
+
 export async function POST(req: NextRequest) {
   const context = getGuideRequestContext(req)
   const limited = await checkRateLimit(req, authRatelimit)
   if (limited) return limited
 
   try {
-    const { email } = await req.json()
+    const { email, redirect } = await req.json()
+    const redirectTo = safePelerinRedirect(redirect)
     if (!email) return NextResponse.json({ error: 'Email requis' }, { status: 400 })
 
     // Vérifier si l'utilisateur existe
@@ -46,7 +57,9 @@ export async function POST(req: NextRequest) {
     })
 
     const baseUrl = process.env.NEXTAUTH_URL || 'https://safaruma.com'
-    const resetUrl = `${baseUrl}/reinitialiser-mot-de-passe?token=${token}`
+    const resetParams = new URLSearchParams({ token })
+    if (redirectTo) resetParams.set('redirect', redirectTo)
+    const resetUrl = `${baseUrl}/reinitialiser-mot-de-passe?${resetParams.toString()}`
     try {
       await sendPasswordReset({
         to: email,

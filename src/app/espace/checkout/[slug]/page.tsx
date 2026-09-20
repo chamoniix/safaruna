@@ -512,13 +512,15 @@ export default function CheckoutPage() {
     if (slug && selectedGuideSlug === null) setSelectedGuideSlug(slug)
   }, [slug]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Initialise selectedGuideSlugMadinah depuis ?pair= (vient du profil guide)
+  // Retour du catalogue : la ville reste explicite ; les anciens liens pair
+  // sans selectionCity désignent toujours Médine.
   useEffect(() => {
     const pairSlug = searchParams.get('pair')
-    if (pairSlug && selectedGuideSlugMadinah === null) {
-      setSelectedGuideSlugMadinah(pairSlug)
-    }
-  }, [searchParams]) // eslint-disable-line react-hooks/exhaustive-deps
+    if (!pairSlug || resumeRef) return
+    const selectionCity = searchParams.get('selectionCity')
+    if (selectionCity === 'MAKKAH') setSelectedGuideSlug(pairSlug)
+    else if (!selectionCity || selectionCity === 'MADINAH') setSelectedGuideSlugMadinah(pairSlug)
+  }, [searchParams, resumeRef])
 
   // Reset sous-étape guide si cityChoice change (sauf si on revient avec ?pair=)
   useEffect(() => {
@@ -529,6 +531,7 @@ export default function CheckoutPage() {
   // Place le guide d'origine uniquement dans une ville qu'il dessert réellement.
   useEffect(() => {
     if (!guide || !cityChoice || guide.slug !== slug) return
+    if (selectedGuideSlug && selectedGuideSlug !== guide.slug) return
     if (cityChoice === 'MAKKAH' && guide.servesMakkah === false) {
       setSelectedGuideSlug(null)
     }
@@ -537,9 +540,9 @@ export default function CheckoutPage() {
     }
     if (cityChoice === 'BOTH' && guide.servesMadinah && !guide.servesMakkah) {
       setSelectedGuideSlug(null)
-      setSelectedGuideSlugMadinah(guide.slug)
+      setSelectedGuideSlugMadinah(current => current || guide.slug)
     }
-  }, [cityChoice, guide, slug])
+  }, [cityChoice, guide, slug, selectedGuideSlug])
 
   // Fetch données du guide sélectionné
   useEffect(() => {
@@ -911,10 +914,16 @@ export default function CheckoutPage() {
   const accountEmail = session?.user?.email || 'Compte connecté'
   const accountInitial = (session?.user?.name || accountEmail).trim().charAt(0).toUpperCase() || 'P'
 
+  const guideSelectionStep = cityChoice === 'BOTH' ? 2 : 4
+  const canChangeGuide = Boolean(cityChoice) && step >= guideSelectionStep && !paymentSession && !resumingPayment
   const goToGuideSelection = () => {
-    setStep(cityChoice === 'BOTH' ? 2 : 4)
+    if (!canChangeGuide) return
+    setStep(guideSelectionStep)
     scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
   }
+  useEffect(() => {
+    if (error && step !== 5) scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+  }, [error, step])
   const ProgressBar = () => {
     const items: React.ReactNode[] = []
     STEPS.forEach((s, i) => {
@@ -1105,7 +1114,7 @@ export default function CheckoutPage() {
         </Link>
         <nav className="checkout-account-actions" aria-label="Navigation de la réservation">
           <Link href="/guides" className="checkout-account-link">← Retour aux guides</Link>
-          <button type="button" className="checkout-account-action" onClick={goToGuideSelection} disabled={!cityChoice || Boolean(paymentSession)} style={{ opacity: !cityChoice || paymentSession ? .45 : 1, cursor: !cityChoice || paymentSession ? 'not-allowed' : 'pointer' }}>
+          <button type="button" className="checkout-account-action" onClick={goToGuideSelection} disabled={!canChangeGuide} style={{ opacity: canChangeGuide ? 1 : .45, cursor: canChangeGuide ? 'pointer' : 'not-allowed' }}>
             Changer de guide
           </button>
           <Link href="/espace/tableau-de-bord" className="checkout-account-link">Mon espace</Link>
@@ -1119,6 +1128,12 @@ export default function CheckoutPage() {
 
       <div ref={scrollContainerRef} data-checkout-scroll-container style={{ flex: 1, overflowY: 'auto' }}>
       <div style={{ maxWidth: 680, margin: '0 auto', padding: '2rem 1.5rem 6rem' }}>
+
+        {error && step !== 5 && (
+          <div role="alert" style={{ background: '#FDECEA', border: '1px solid rgba(192,57,43,0.3)', borderRadius: 8, padding: '0.75rem 1rem', fontSize: '0.82rem', color: '#C0392B', marginBottom: '1rem', fontWeight: 600 }}>
+            {error}
+          </div>
+        )}
 
         {/* ── ÉTAPE 1 — DESTINATION ── */}
         {step === 1 && (
@@ -1926,6 +1941,11 @@ export default function CheckoutPage() {
           )
           const canContinue = cityChoice === 'BOTH' ? bothDone : singleGuideValid
           const continueFromGuideStep = () => {
+            if (cityChoice !== 'BOTH' && (!range?.from || !range?.to || !arrivalPoint)) {
+              setError('Renseignez vos dates de séjour et votre lieu d’arrivée avant de continuer.')
+              setStep(2)
+              return
+            }
             if (cityChoice !== 'BOTH' && range?.from && range.to) {
               const missionDays = cityChoice === 'MAKKAH' ? daysMakkah : daysMadinah
               if (addDays(range.from, missionDays - 1) > range.to) {
@@ -2421,7 +2441,7 @@ export default function CheckoutPage() {
             </div>
 
             {error && (
-              <div style={{ background: '#FDECEA', border: '1px solid rgba(192,57,43,0.3)', borderRadius: 8, padding: '0.75rem 1rem', fontSize: '0.82rem', color: '#C0392B', marginBottom: '1rem', fontWeight: 600 }}>
+              <div role="alert" style={{ background: '#FDECEA', border: '1px solid rgba(192,57,43,0.3)', borderRadius: 8, padding: '0.75rem 1rem', fontSize: '0.82rem', color: '#C0392B', marginBottom: '1rem', fontWeight: 600 }}>
                 {error}
               </div>
             )}

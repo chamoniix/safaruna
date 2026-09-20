@@ -30,6 +30,9 @@ function LoginForm() {
   const inscriptionHref = redirectParam
     ? `/inscription?redirect=${encodeURIComponent(redirectParam)}`
     : '/inscription';
+  const forgotPasswordHref = redirectParam
+    ? `/mot-de-passe-oublie?redirect=${encodeURIComponent(redirectParam)}`
+    : '/mot-de-passe-oublie';
   const registered = searchParams.get('registered');
   const verify = searchParams.get('verify');
   const verified = searchParams.get('verified');
@@ -188,7 +191,7 @@ function LoginForm() {
                   <label htmlFor="password" style={{ fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#7A6D5A' }}>
                     Mot de passe
                   </label>
-                  <Link href="/mot-de-passe-oublie" style={{ fontSize: '0.75rem', fontWeight: 600, color: '#C9A84C', textDecoration: 'none' }}>Oublié ?</Link>
+                  <Link href={forgotPasswordHref} style={{ fontSize: '0.75rem', fontWeight: 600, color: '#C9A84C', textDecoration: 'none' }}>Oublié ?</Link>
                 </div>
                 <input
                   className="login-input" id="password" name="password" type="password" required

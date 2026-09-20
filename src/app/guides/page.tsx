@@ -1666,10 +1666,12 @@ function GuideCard({ guide: g, official, onProfile, isLoading, returnSlug, isFav
             {g.languages.slice(0, 1).map(l => (
               <span key={l} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.65rem', fontWeight: 600, padding: '0.2rem 0.55rem', borderRadius: 50, background: '#FAF3E0', border: '1px solid rgba(201,168,76,0.4)', color: '#8B6914' }}>
                 {l.toLowerCase().includes('français') && <FranceFlagSVG />}
-                Français
+                {l}
               </span>
             ))}
           </div>
+
+          {g.shortBio?.trim() && <p className="guide-card-summary">{g.shortBio}</p>}
 
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem', marginBottom: '0.9rem' }}>
             {g.services.map(s => (

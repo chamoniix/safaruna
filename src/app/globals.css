@@ -2584,8 +2584,8 @@ footer div::-webkit-scrollbar { display: none; }
 
 .sfr-guide-card {
   width: 245px;
-  height: 342px;
-  min-height: 342px;
+  height: 398px;
+  min-height: 398px;
   padding: 0;
   overflow: hidden;
   border: 1px solid rgba(213, 161, 74, 0.22);
@@ -2618,7 +2618,7 @@ footer div::-webkit-scrollbar { display: none; }
 }
 
 .sfr-guide-feature {
-  min-height: 342px;
+  min-height: 398px;
   padding: 1rem;
   display: flex;
   flex-direction: column;
@@ -2753,8 +2753,8 @@ footer div::-webkit-scrollbar { display: none; }
 
 .sfr-guide-meta-row {
   margin: 0.05rem 0 0.2rem;
-  color: rgba(255, 255, 255, 0.76);
-  font-size: 0.66rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -2764,6 +2764,92 @@ footer div::-webkit-scrollbar { display: none; }
   font-size: 0.7rem;
   font-weight: 900;
   letter-spacing: 0.06em;
+}
+
+.sfr-guide-card .sfr-guide-name {
+  font-size: 1.3rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.sfr-guide-card .sfr-guide-bio {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  margin: 0.45rem 0;
+  overflow-wrap: anywhere;
+}
+
+.sfr-guide-card .sfr-guide-languages {
+  font-size: 0.72rem;
+  line-height: 1.45;
+  margin-bottom: 0.4rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.guide-card-summary {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  color: #4a3f30;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  margin: 0 0 1rem;
+}
+
+.sfr-public-guide-hero {
+  background: #1a1209;
+  color: #fffaf0;
+  padding: 9rem 1.5rem 3rem;
+}
+.sfr-public-guide-container { max-width: 1136px; margin: 0 auto; }
+.sfr-public-guide-back {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: #f0d897;
+  font-size: 0.85rem;
+  margin-bottom: 1.5rem;
+  text-decoration: none;
+}
+.sfr-public-guide-back:hover { text-decoration: underline; }
+.sfr-public-guide-back:focus-visible { outline: 2px solid #f0d897; outline-offset: 4px; }
+.sfr-public-guide-intro { display: grid; grid-template-columns: 224px minmax(0, 1fr); gap: 2.75rem; align-items: center; }
+.sfr-public-guide-portrait {
+  position: relative;
+  width: 224px;
+  height: 272px;
+  overflow: hidden;
+  border-radius: 112px 112px 20px 20px;
+  border: 1px solid #c9a84c;
+  background: #30271c;
+  display: grid;
+  place-items: center;
+  font-size: 3rem;
+  color: #f0d897;
+}
+.sfr-public-guide-copy { min-width: 0; }
+.sfr-public-guide-copy h1 { color: #fffaf0; margin: 0 0 1rem; font-size: clamp(2rem, 4vw, 3.5rem); line-height: 1.1; overflow-wrap: anywhere; }
+.sfr-public-guide-cities { color: #f0d897; margin: 0 0 0.65rem; font-weight: 600; }
+.sfr-public-guide-facts { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; font-size: 0.9rem; color: #e8dfc8; }
+.sfr-public-guide-star { color: #f0d897; }
+.sfr-public-guide-bio { max-width: 65ch; margin: 1.25rem 0; line-height: 1.75; color: #e8dfc8; overflow-wrap: anywhere; }
+.sfr-public-guide-languages { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.25rem; }
+.sfr-public-guide-languages span { padding: 0.35rem 0.75rem; border: 1px solid #67583a; border-radius: 8px; color: #fffaf0; font-size: 0.85rem; }
+@media (max-width: 600px) {
+  .sfr-public-guide-hero { padding: 7.5rem 1.25rem 2rem; }
+  .sfr-public-guide-back { margin-bottom: 1rem; }
+  .sfr-public-guide-intro { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+  .sfr-public-guide-portrait { width: 128px; height: 152px; border-radius: 64px 64px 12px 12px; }
+  .sfr-public-guide-copy h1 { font-size: 2.25rem; }
 }
 
 .sfr-guide-rating strong {

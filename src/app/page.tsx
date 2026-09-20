@@ -983,8 +983,11 @@ function GuidesSection({ openModal }: { openModal: (item: ModalContent) => void 
               ) : (
                 <div className="sfr-guide-trust"><span>VÉRIFIÉ ✓</span></div>
               )}
-              <div className="sfr-guide-meta-row">{guide.name}{cities ? ` · ${cities}` : ''}{guide.experienceYears !== null ? ` · ${guide.experienceYears} ans` : ''}</div>
-              <div className="sfr-guide-rating sfr-guide-rating-compact"><strong>{ratingLabel}</strong>{languages ? ` · ${languages}` : ''}</div>
+              <h3 className="sfr-guide-name">{guide.name}</h3>
+              <div className="sfr-guide-meta-row">{cities}{guide.experienceYears !== null ? ` · ${guide.experienceYears} ans d’expérience` : ''}</div>
+              {guide.bio?.trim() && <p className="sfr-guide-bio">{guide.bio}</p>}
+              {languages && <p className="sfr-guide-languages">{languages}</p>}
+              <div className="sfr-guide-rating"><strong>{ratingLabel}</strong></div>
               <span className="sfr-guide-profile-btn">Voir le profil →</span>
             </motion.button>
             );

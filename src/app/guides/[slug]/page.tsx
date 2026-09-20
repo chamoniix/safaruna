@@ -1,6 +1,7 @@
 import { cache } from 'react'
 import type { Metadata } from 'next'
 import Image from 'next/image'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import Footer from '@/components/Footer'
 import Navbar from '@/components/Navbar'
@@ -104,10 +105,6 @@ export default async function GuideProfilePage({ params }: { params: Promise<{ s
   const profilePlaces = placeCatalog
     .filter(place => place.isActive && (place.includedInBase || guideActivePlaceKeys.has(place.key)))
     .map(place => ({ emoji: place.emoji, nameAr: place.nameAr, nameFr: place.nameFr, desc: place.desc, category: place.category }))
-  const realStats = [
-    ratingAggregate._count.ratingOverall > 0 ? { value: String(ratingAggregate._count.ratingOverall), label: 'Avis validés' } : null,
-    guide.experienceYears !== null ? { value: `${guide.experienceYears} ans`, label: 'Expérience' } : null,
-  ].filter(Boolean) as Array<{ value: string; label: string }>
   const guideImage = account.image || (slug === 'naim-laamari' ? '/images/landing/guide-naim-laamari.jpg' : null)
 
   const schema = {
@@ -123,16 +120,24 @@ export default async function GuideProfilePage({ params }: { params: Promise<{ s
   return <>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
     <Navbar />
-    <section style={{ background: '#1A1209', padding: '8rem 2rem 4rem', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 60% 80% at 50% 0%, rgba(201,168,76,.15), transparent 65%)' }} />
-      <div style={{ position: 'relative', zIndex: 1 }}>
-        {guideImage ? <div style={{ position: 'relative', width: 112, height: 112, margin: '0 auto 16px', borderRadius: '50%', overflow: 'hidden', border: '3px solid #C9A84C' }}><Image src={guideImage} alt={name} fill sizes="112px" style={{ objectFit: 'cover', objectPosition: slug === 'naim-laamari' ? '62% 42%' : 'center' }} /></div> : <div style={{ width: 112, height: 112, margin: '0 auto 16px', borderRadius: '50%', display: 'grid', placeItems: 'center', background: 'linear-gradient(135deg,#F0D897,#C9A84C)', color: '#1A1209', fontSize: 35, fontWeight: 800, border: '3px solid #C9A84C' }}>{initials}</div>}
-        <h1 style={{ color: 'white', margin: '0 0 8px', fontSize: 'clamp(2rem,5vw,3rem)' }}>{name}</h1>
-        {serviceCities.length > 0 && <div style={{ color: '#C9A84C', fontWeight: 800, fontSize: 13, letterSpacing: '.12em', textTransform: 'uppercase' }}>{serviceCities.join(' · ')}</div>}
-        {rating !== null && <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, margin: '18px 0', color: 'white' }}><span style={{ color: '#C9A84C', letterSpacing: 2 }}>★★★★★</span><strong>{rating.toFixed(1)}</strong><span style={{ color: 'rgba(255,255,255,.55)' }}>({ratingAggregate._count.ratingOverall} avis)</span></div>}
-        {guide.bio && <p style={{ color: 'rgba(255,255,255,.7)', maxWidth: 650, lineHeight: 1.8, margin: '18px auto' }}>{guide.bio}</p>}
-        {realStats.length > 0 && <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap', margin: '24px 0' }}>{realStats.map(stat => <div key={stat.label} style={{ minWidth: 130, padding: 15, borderRadius: 13, background: 'rgba(255,255,255,.06)', border: '1px solid rgba(201,168,76,.25)' }}><div style={{ color: '#F0D897', fontSize: 24, fontWeight: 800 }}>{stat.value}</div><div style={{ color: 'rgba(255,255,255,.5)', fontSize: 11 }}>{stat.label}</div></div>)}</div>}
-        {languages.length > 0 && <div style={{ display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap' }}>{languages.map(language => <span key={language} style={{ padding: '6px 12px', borderRadius: 999, background: 'rgba(255,255,255,.08)', border: '1px solid rgba(255,255,255,.15)', color: 'rgba(255,255,255,.8)', fontSize: 12 }}>{language}</span>)}</div>}
+    <section className="sfr-public-guide-hero" aria-labelledby="guide-profile-name">
+      <div className="sfr-public-guide-container">
+        <Link href="/guides" className="sfr-public-guide-back">← Tous les guides</Link>
+        <div className="sfr-public-guide-intro">
+          <div className="sfr-public-guide-portrait">
+            {guideImage ? <Image src={guideImage} alt={name} fill sizes="(max-width: 600px) 128px, 224px" style={{ objectFit: 'cover', objectPosition: slug === 'naim-laamari' ? '62% 42%' : 'center' }} /> : <span>{initials}</span>}
+          </div>
+          <div className="sfr-public-guide-copy">
+            {serviceCities.length > 0 && <p className="sfr-public-guide-cities">{serviceCities.join(' · ')}</p>}
+            <h1 id="guide-profile-name">{name}</h1>
+            <div className="sfr-public-guide-facts">
+              {guide.experienceYears !== null && <span>Expérience : <strong>{guide.experienceYears} ans</strong></span>}
+              {rating !== null && <span><span aria-hidden="true" className="sfr-public-guide-star">★</span> <strong>{rating.toFixed(1)} / 5</strong> · {ratingAggregate._count.ratingOverall} avis validés</span>}
+            </div>
+            {guide.bio?.trim() && <p className="sfr-public-guide-bio">{guide.bio}</p>}
+            {languages.length > 0 && <div className="sfr-public-guide-languages" aria-label="Langues parlées">{languages.map(language => <span key={language} dir="auto">{language}</span>)}</div>}
+          </div>
+        </div>
       </div>
     </section>
     <div style={{ background: '#FAF7F0', minHeight: '70vh' }}>

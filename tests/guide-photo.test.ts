@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import test from 'node:test'
 import sharp from 'sharp'
 import React from 'react'
@@ -12,6 +13,56 @@ const original: PhotoGuide = { id: 'guide-test', slug: 'naim-laamari', guideAcco
   id: 'account-test', image: null, updatedAt: new Date('2026-09-08T00:00:00Z'),
 } }
 const png = () => sharp({ create: { width: 20, height: 30, channels: 3, background: '#aa8833' } }).png().toBuffer()
+
+test('photo editor awaits dossier refresh after success, without duplicate publication or success callback on failure', async () => {
+  const require = createRequire(import.meta.url)
+  for (const ok of [true, false]) {
+    let cursor = 0, reads = 0, writes = 0, callbacks = 0
+    let finish!: () => void
+    const slots: any[] = [
+      { image: null, version: 'old', canPublish: true },
+      new File(['png'], 'test.png', { type: 'image/png' }), 'data:image/png;base64,dGVzdA==',
+      false, false, '', '',
+    ]
+    const hooks = { ...React,
+      useState(initial: any) { const i = cursor++; if (!(i in slots)) slots[i] = initial; return [slots[i], (v: any) => { slots[i] = v }] },
+      useRef(initial: any) { const i = cursor++; return slots[i] ??= { current: initial } },
+      useEffect() {}, useCallback: (fn: any) => fn,
+    }
+    const module = { exports: {} as any }
+    const code = ts.transpileModule(readFileSync('src/components/admin/GuidePhotoEditor.tsx', 'utf8'), {
+      compilerOptions: { module: ts.ModuleKind.CommonJS, esModuleInterop: true, jsx: ts.JsxEmit.ReactJSX },
+    }).outputText
+    new Function('require', 'module', 'exports', 'fetch', code)(
+      (name: string) => name === 'react' ? hooks : name.endsWith('.module.css') ? {} : require(name), module, module.exports,
+      async (_url: string, options?: RequestInit) => {
+        if (options?.method === 'POST') { writes++; return { ok, json: async () => ok ? { image: '/new.png', version: 'new', canPublish: true } : { error: 'Publication refusée' } } }
+        reads++; return { ok: true, json: async () => ({ image: null, version: 'old', canPublish: true }) }
+      },
+    )
+    const props = { slug: 'test', name: 'Test', email: null, registeredAt: '2026-01-01', initials: 'T',
+      onPublished: () => { callbacks++; return new Promise<void>(resolve => { finish = resolve }) },
+    }
+    const render = () => { cursor = 0; return module.exports.default(props) }
+    const nodes = (tree: any): any[] => !tree || typeof tree !== 'object' ? [] : Array.isArray(tree) ? tree.flatMap(nodes) : [tree, ...nodes(tree.props?.children)]
+    const button = nodes(render()).find(n => n.type === 'button' && n.props.onClick?.name === 'publish')
+    assert.ok(button)
+    const pending = button.props.onClick()
+    await new Promise(resolve => setImmediate(resolve))
+    if (ok) {
+      assert.equal(callbacks, 1)
+      assert.equal(render().props['aria-busy'], true)
+      await button.props.onClick()
+      assert.equal(writes, 1)
+      finish()
+    }
+    await pending
+    assert.equal(render().props['aria-busy'], false)
+    assert.equal(callbacks, ok ? 1 : 0)
+    assert.equal(reads, ok ? 0 : 1)
+    assert.equal(writes, 1)
+  }
+})
 
 function fixture() {
   let record = structuredClone(original)

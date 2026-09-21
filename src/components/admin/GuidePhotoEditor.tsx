@@ -5,10 +5,10 @@ import { Camera, LoaderCircle, Upload, X } from 'lucide-react'
 import styles from './GuidePhotoEditor.module.css'
 
 type PhotoState = { image: string | null; version: string; canPublish: boolean }
-type Props = { slug: string; name: string; email: string | null; registeredAt: string; initials: string }
+type Props = { slug: string; name: string; email: string | null; registeredAt: string; initials: string; onPublished: () => Promise<void> }
 const MAX_BYTES = 4_000_000
 
-export default function GuidePhotoEditor({ slug, name, email, registeredAt, initials }: Props) {
+export default function GuidePhotoEditor({ slug, name, email, registeredAt, initials, onPublished }: Props) {
   const [photo, setPhoto] = useState<PhotoState | null>(null)
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -75,6 +75,7 @@ export default function GuidePhotoEditor({ slug, name, email, registeredAt, init
       setPhoto(data)
       clearSelection()
       setMessage('La nouvelle photo a été publiée. L’ancienne photo est conservée.')
+      await onPublished()
     } catch (cause) {
       // Do not automatically retry a write after a timeout or conflict.
       clearSelection()

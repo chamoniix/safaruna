@@ -36,7 +36,9 @@ function fixture() {
     '@/lib/guide-application-media': load('src/lib/guide-application-media.ts', {}),
     '@/lib/guide-application-photo-receipt': { readApplicationPhotoReceipt: () => { throw new Error('Unexpected upload in dossier test') } },
   })
-  const media = { ...mediaModule, readGuideProfileMedia: async () => ({ snapshot: { profilePhotoPath: 'private/photo-test' }, view: null }) }
+  let mediaReads = 0
+  const mediaValue = { snapshot: { profilePhotoPath: 'private/photo-test' }, view: null }
+  const media = { ...mediaModule, readGuideProfileMedia: async () => { mediaReads++; return mediaValue } }
   const db: any = {
     guideAccount: { findUnique: async (query: any) => { queries.push(query); return query.where.id === account.id ? account : null } },
     guideApplication: { findFirst: async () => ({ profilePhotoPath: 'private/photo-test' }) },
@@ -76,9 +78,42 @@ function fixture() {
   })
   const read = () => dossier.readGuideDossier(db, account.id)
   const post = (body: unknown) => route.POST({ json: async () => body })
-  return { read, post, get: route.GET, dossier, db, account, profile, catalog, queries, unavailable, policy,
+  return { read, post, get: route.GET, dossier, db, account, profile, catalog, queries, unavailable, policy, mediaValue, mediaReads: () => mediaReads,
     entries: () => entries, trust: (value: boolean) => { trusted = value }, access: (value: boolean) => { access = value }, breakCrypto: () => { brokenCrypto = true } }
 }
+
+test('admin dossier reuses same-transaction profile media without changing revisions or activation blockers', async () => {
+  const f = fixture()
+  const actor = { id: 'admin-test', email: 'admin@example.test', role: 'SUPERADMIN' }
+  const original = await f.dossier.readAdminGuideDossier(f.db, f.account.id, actor)
+  assert.equal(f.mediaReads(), 1)
+  const reused = await f.dossier.readAdminGuideDossier(f.db, f.account.id, actor, {
+    db: f.db, guideProfileId: f.profile.id, value: f.mediaValue,
+  })
+  assert.equal(f.mediaReads(), 1)
+  assert.equal(JSON.stringify(reused), JSON.stringify(original))
+  assert.equal(reused.activation.canActivate, false)
+  assert.equal(f.entries().length, 0)
+})
+
+test('media reuse never crosses profiles, transactions or Guide confirmation reads', async () => {
+  const f = fixture()
+  const actor = { id: 'admin-test', email: 'admin@example.test', role: 'ADMIN' }
+  const missingMedia = { snapshot: { profilePhotoPath: null }, view: null }
+  for (const supplied of [
+    { db: f.db, guideProfileId: 'other-profile', value: missingMedia },
+    { db: {}, guideProfileId: f.profile.id, value: missingMedia },
+  ]) {
+    const view = await f.dossier.readAdminGuideDossier(f.db, f.account.id, actor, supplied)
+    assert.equal(view.progress.find((item: any) => item.key === 'photo').complete, true)
+  }
+  const own = await f.dossier.readGuideDossier(f.db, f.account.id, {
+    profileMedia: { db: f.db, guideProfileId: f.profile.id, value: missingMedia },
+  })
+  assert.equal(own.view.progress.find((item: any) => item.key === 'photo').complete, true)
+  assert.equal(f.mediaReads(), 3)
+  assert.equal(f.entries().length, 0)
+})
 
 test('dossier reads actual owner data, optional BIC and unmarked available calendar', async () => {
   const f = fixture()

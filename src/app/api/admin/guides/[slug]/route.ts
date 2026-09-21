@@ -113,7 +113,9 @@ export async function GET(
       orderBy: { createdAt: 'desc' }, select: applicationMediaSelect,
     });
     const profileMedia = await readGuideProfileMedia(tx, guide.id);
-    const dossier = guide.guideAccount ? await readAdminGuideDossier(tx, guide.guideAccount.id, actor) : null;
+    const dossier = guide.guideAccount ? await readAdminGuideDossier(tx, guide.guideAccount.id, actor, {
+      db: tx, guideProfileId: guide.id, value: profileMedia,
+    }) : null;
     const pendingProfileChange = guide.changeRequests[0];
 
     return NextResponse.json({
@@ -253,7 +255,10 @@ export async function GET(
         },
       },
     }, { headers: { 'Cache-Control': 'private, no-store' } });
-    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+    // This read includes the complete dossier and its audit evidence. The default
+    // five-second budget expires on valid new dossiers (P2028). Keep a bounded
+    // budget local to GET; writes retain their existing transaction settings.
+    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable, timeout: 30000 });
   } catch (err) {
     console.error('[admin/guides/slug GET]', err);
     return NextResponse.json(

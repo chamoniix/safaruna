@@ -237,6 +237,20 @@ export default function AdminGuideDetailPage() {
 
   useEffect(() => { if (slug) fetchGuide(); }, [slug, fetchGuide]);
 
+  const handlePhotoPublished = async () => {
+    setReviewNeedsRefresh(true);
+    setBankAttestationRevision(null);
+    setAccessResult(null);
+    try {
+      await fetchGuide(true, true);
+    } catch (cause) {
+      setAccessResult({
+        type: 'error',
+        message: `Photo publiée, mais rechargement du dossier impossible : ${errorMessage(cause, 'Erreur réseau')}`,
+      });
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true); setSaveMsg('');
     try {
@@ -511,7 +525,7 @@ export default function AdminGuideDetailPage() {
         <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Identité</div>
 
         {/* Avatar + infos rapides */}
-        <GuidePhotoEditor key={slug} slug={slug} name={guide.user.name || 'Guide'} email={guide.user.email} registeredAt={guide.user.createdAt} initials={initials(guide)} />
+        <GuidePhotoEditor key={slug} slug={slug} name={guide.user.name || 'Guide'} email={guide.user.email} registeredAt={guide.user.createdAt} initials={initials(guide)} onPublished={handlePhotoPublished} />
         <div>
           <div style={labelStyle}>Dossier privé actuel — photos et véhicule</div>
           <ApplicationMediaPanel data={guide.profileMedia} />

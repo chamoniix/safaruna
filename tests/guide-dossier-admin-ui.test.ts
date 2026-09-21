@@ -27,6 +27,7 @@ function harness(list = false) {
     ok: true, json: async () => options?.method ? { message: 'Décision enregistrée' } : { guide, guides: [guide], permissions: { canManagePricing: true } },
   })
   const Link = () => null
+  const PhotoEditor = () => null
   const mocks: any = {
     react: { ...React, useState(initial: any) {
       const index = cursor++
@@ -39,7 +40,7 @@ function harness(list = false) {
     }, useEffect(effect: () => void) { if (firstRender) effects.push(effect) }, useCallback: (callback: any) => callback },
     'next/link': Link, 'next/navigation': { useParams: () => ({ slug: guide.slug }) },
     '@/lib/places': { PLACES: [] }, '@/lib/languages': { GUIDE_LANGUAGES: [], LANG_CODE_TO_LABEL: {} },
-    '@/components/admin/GuidePhotoEditor': () => null, '@/components/guide/ApplicationMediaPanel': () => null,
+    '@/components/admin/GuidePhotoEditor': PhotoEditor, '@/components/guide/ApplicationMediaPanel': () => null,
   }
   const module = { exports: {} as any }
   vm.runInNewContext(ts.transpileModule(readFileSync(list ? 'src/app/admin/(dashboard)/guides/page.tsx' : 'src/app/admin/(dashboard)/guides/[slug]/page.tsx', 'utf8'), {
@@ -59,8 +60,72 @@ function harness(list = false) {
   const button = (label: string) => find(node => node.type === 'button' && text(node) === label)
   const attest = () => find(node => node.type === 'input' && node.props.type === 'checkbox').props.onChange({ target: { checked: true } })
   render(); effects.forEach(effect => effect())
-  return { guide, calls, render, nodes, text, find, button, attest, Link, setHandler: (value: typeof handler) => { handler = value }, ready: () => new Promise(resolve => setTimeout(resolve, 0)) }
+  return { guide, calls, render, nodes, text, find, button, attest, Link, photoEditor: () => find(node => node.type === PhotoEditor), setHandler: (value: typeof handler) => { handler = value }, ready: () => new Promise(resolve => setTimeout(resolve, 0)) }
 }
+
+test('published portrait refreshes the dossier and uses the fresh server activation revision', async () => {
+  const h = harness(); await h.ready()
+  h.guide.dossier.activation.canActivate = false
+  h.guide.dossier.activation.blockers = ['Photo manquante']
+  let finish!: (response: any) => void
+  h.setHandler(() => new Promise(resolve => { finish = resolve }))
+  const refreshing = h.photoEditor().props.onPublished()
+  assert.equal(h.button('Publier le profil guide').props.disabled, true)
+  const fresh = { ...h.guide, dossier: { ...h.guide.dossier, activation: { ...h.guide.dossier.activation, canActivate: true, blockers: [], revision: 'after-photo' } } }
+  finish({ ok: true, json: async () => ({ guide: fresh }) }); await refreshing
+  assert.equal(h.button('Publier le profil guide').props.disabled, false)
+  assert.doesNotMatch(h.text(h.render()), /Photo manquante/)
+  assert.equal(h.calls.filter(call => call.method).length, 0)
+  h.setHandler(async () => ({ ok: true, json: async () => ({ guide: fresh }) }))
+  await h.button('Publier le profil guide').props.onClick()
+  assert.equal(JSON.parse(h.calls.find(call => call.method).body).revision, 'after-photo')
+})
+
+test('portrait refresh locks eligible decisions and clears prior attestation and feedback immediately', async () => {
+  const h = harness(); await h.ready()
+  await h.button('Publier le profil guide').props.onClick()
+  assert.match(h.text(h.render()), /Décision enregistrée/)
+  h.attest()
+  assert.equal(h.button('Publier le profil guide').props.disabled, false)
+  assert.equal(h.button('Confirmer la vérification bancaire').props.disabled, false)
+  const writesBefore = h.calls.filter(call => call.method).length
+  let finish!: (response: any) => void
+  h.setHandler(() => new Promise(resolve => { finish = resolve }))
+  const refreshing = h.photoEditor().props.onPublished()
+  assert.equal(h.button('Publier le profil guide').props.disabled, true)
+  assert.equal(h.button('Confirmer la vérification bancaire').props.disabled, true)
+  assert.equal(h.find(node => node.type === 'input' && node.props.type === 'checkbox').props.checked, false)
+  assert.doesNotMatch(h.text(h.render()), /Décision enregistrée/)
+  await h.button('Publier le profil guide').props.onClick()
+  await h.button('Confirmer la vérification bancaire').props.onClick()
+  assert.equal(h.calls.filter(call => call.method).length, writesBefore)
+  finish({ ok: true, json: async () => ({ guide: h.guide }) }); await refreshing
+  assert.equal(h.button('Publier le profil guide').props.disabled, false)
+  assert.equal(h.button('Confirmer la vérification bancaire').props.disabled, true)
+})
+
+test('portrait refresh preserves other server blockers and never activates automatically', async () => {
+  const h = harness(); await h.ready()
+  h.setHandler(async () => ({ ok: true, json: async () => ({ guide: { ...h.guide, dossier: { ...h.guide.dossier, activation: { ...h.guide.dossier.activation, canActivate: false, blockers: ['Banque non vérifiée'] } } } }) }))
+  await h.photoEditor().props.onPublished()
+  assert.equal(h.button('Publier le profil guide').props.disabled, true)
+  assert.match(h.text(h.render()), /Banque non vérifiée/)
+  assert.equal(h.calls.filter(call => call.method).length, 0)
+})
+
+test('portrait saved but dossier refresh failed locks decisions and offers read-only retry', async () => {
+  const h = harness(); await h.ready()
+  h.setHandler(async () => { throw new Error('Réseau indisponible') })
+  await h.photoEditor().props.onPublished()
+  assert.equal(h.button('Publier le profil guide').props.disabled, true)
+  assert.match(h.text(h.render()), /Photo publiée, mais rechargement du dossier impossible/)
+  const retry = h.button('Recharger le dossier avant toute nouvelle décision')
+  assert.ok(retry)
+  h.setHandler(async () => ({ ok: true, json: async () => ({ guide: h.guide }) }))
+  await retry.props.onClick()
+  assert.equal(h.button('Publier le profil guide').props.disabled, false)
+  assert.equal(h.calls.filter(call => call.method).length, 0)
+})
 
 test('bank verification requires an explicit manual attestation and sends only the examined revision', async () => {
   const h = harness(); await h.ready()

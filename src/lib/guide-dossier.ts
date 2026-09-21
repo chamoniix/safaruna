@@ -23,7 +23,13 @@ export function isCurrentDossierConfirmation(after: Prisma.JsonValue | null, rev
 
 // Both GET and the confirmation transaction read the same owner-scoped sources.
 // No new business table: confirmations are immutable events in the existing audit.
-export async function readGuideDossier(db: Prisma.TransactionClient, guideAccountId: string, options: { administrative?: boolean } = {}) {
+type DossierProfileMedia = {
+  db: Prisma.TransactionClient
+  guideProfileId: string
+  value: Awaited<ReturnType<typeof readGuideProfileMedia>>
+}
+
+export async function readGuideDossier(db: Prisma.TransactionClient, guideAccountId: string, options: { administrative?: boolean; profileMedia?: DossierProfileMedia } = {}) {
   const account = await db.guideAccount.findUnique({
     where: { id: guideAccountId },
     include: { guideProfile: { include: {
@@ -37,7 +43,10 @@ export async function readGuideDossier(db: Prisma.TransactionClient, guideAccoun
   const pending = !options.administrative && parsed.success ? parsed.data : {}
   if (!options.administrative && (account.status !== 'ACTIVE' || gp.status === 'SUSPENDED' || gp.permanentlyDeactivatedAt)) throw new Error('DOSSIER_FORBIDDEN')
   const [media, catalog, places, dates, ...acknowledgements] = await Promise.all([
-    readGuideProfileMedia(db, gp.id),
+    // The admin detail already loaded these media. Reuse only for this profile
+    // and this transaction; no cross-request cache or change to decision reads.
+    options.administrative && options.profileMedia?.db === db && options.profileMedia.guideProfileId === gp.id
+      ? options.profileMedia.value : readGuideProfileMedia(db, gp.id),
     getEffectivePlaceCatalog(db),
     db.guidePlace.findMany({ where: { guideProfileId: gp.id }, orderBy: { placeKey: 'asc' }, select: { placeKey: true, isActive: true } }),
     db.availability.findMany({ where: { guideProfileId: gp.id, status: 'UNAVAILABLE' }, orderBy: [{ date: 'asc' }, { city: 'asc' }], select: { date: true, city: true } }),
@@ -133,8 +142,8 @@ export async function requireCurrentDossierAdmin(db: Prisma.TransactionClient, a
   }
 }
 
-export async function readAdminGuideDossier(db: Prisma.TransactionClient, guideAccountId: string, actor: AdminActor) {
-  const dossier = await readGuideDossier(db, guideAccountId, { administrative: true })
+export async function readAdminGuideDossier(db: Prisma.TransactionClient, guideAccountId: string, actor: AdminActor, profileMedia?: DossierProfileMedia) {
+  const dossier = await readGuideDossier(db, guideAccountId, { administrative: true, profileMedia })
   const account = dossier.account
   const profile = account.guideProfile!
   const [previousActivation, bankEvent, photoEvent] = await Promise.all([

@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     if (resetToken.usedAt) return NextResponse.json({ error: 'Ce lien a déjà été utilisé' }, { status: 400 })
     if (new Date() > resetToken.expiresAt) return NextResponse.json({ error: 'Ce lien a expiré. Faites une nouvelle demande.' }, { status: 400 })
     const user = await prisma.user.findUnique({ where: { email: resetToken.email } })
-    if (!user) return NextResponse.json({ error: 'Lien invalide ou expiré' }, { status: 400 })
+    if (!user || user.bannedAt) return NextResponse.json({ error: 'Lien invalide ou expiré' }, { status: 400 })
 
     const passwordHash = await bcrypt.hash(password, 12)
     const now = new Date()

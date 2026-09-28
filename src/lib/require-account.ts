@@ -62,11 +62,12 @@ export async function requirePelerin(): Promise<Allowed<PelerinActor> | Denied> 
 
   const user = await prisma.user.findFirst({
     where: identity.id ? { id: identity.id } : { email: identity.email },
-    select: { id: true, email: true, emailVerified: true, role: true },
+    select: { id: true, email: true, emailVerified: true, role: true, bannedAt: true },
   })
 
   if (!user) return denied(401, 'Session invalide')
   if (user.role !== 'PELERIN') return denied(403, 'Accès réservé aux pèlerins')
+  if (user.bannedAt) return denied(403, 'Compte fermé')
   if (!user.email) return denied(403, 'Compte sans adresse email')
   if (!user.emailVerified) return denied(403, 'Adresse email non vérifiée')
 

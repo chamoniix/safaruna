@@ -28,8 +28,8 @@ export async function POST(req: NextRequest) {
     // Vérifier si l'utilisateur existe
     const user = await prisma.user.findUnique({ where: { email } })
 
-    // Toujours retourner succès pour ne pas révéler si l'email existe
-    if (!user) {
+    // Toujours retourner succès pour ne pas révéler si l'email existe (ou est banni)
+    if (!user || user.bannedAt) {
       return NextResponse.json({ success: true })
     }
 

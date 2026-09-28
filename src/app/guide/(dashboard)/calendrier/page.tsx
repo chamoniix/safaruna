@@ -13,6 +13,7 @@ import {
   LoaderCircle,
   MapPin,
   Power,
+  Accessibility,
   X,
 } from 'lucide-react'
 
@@ -36,6 +37,7 @@ export default function GuideCalendrierPage() {
   const [availabilities, setAvailabilities] = useState<Avail[]>([])
   const [services, setServices] = useState({ makkah: false, madinah: false })
   const [acceptingBookings, setAcceptingBookings] = useState(false)
+  const [pmrCertified, setPmrCertified] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState<string | null>(null)
   const [error, setError] = useState('')
@@ -59,6 +61,7 @@ export default function GuideCalendrierPage() {
       setAvailabilities(data.availabilities || [])
       setServices(data.services || { makkah: false, madinah: false })
       setAcceptingBookings(Boolean(data.acceptingBookings))
+      setPmrCertified(Boolean(data.pmrCertified))
       return true
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Chargement impossible')
@@ -89,6 +92,28 @@ export default function GuideCalendrierPage() {
       const data = await response.json()
       if (!response.ok) throw new Error(data.error || 'Modification impossible')
       setAcceptingBookings(enabled)
+      setSavedMessage('Modification enregistrée.')
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Modification impossible')
+    }
+    setSaving(null)
+  }
+
+  const togglePmrCertified = async () => {
+    if (loading || saving !== null) return
+    const enabled = !pmrCertified
+    setSaving('pmr')
+    setError('')
+    setSavedMessage('')
+    try {
+      const response = await fetch('/api/guide/calendrier', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pmrCertified: enabled }),
+      })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Modification impossible')
+      setPmrCertified(enabled)
       setSavedMessage('Modification enregistrée.')
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : 'Modification impossible')
@@ -292,6 +317,18 @@ export default function GuideCalendrierPage() {
           </div>
           <button type="button" onClick={toggleService} disabled={loading || saving !== null} className={`calendar-action ${serviceEnabled ? 'is-danger' : 'is-success'}`}>
             {saving === 'service' ? 'Enregistrement…' : serviceEnabled ? 'Désactiver cette ville' : 'Activer cette ville'}
+          </button>
+        </div>
+      </section>
+
+      <section className="calendar-city-workspace" aria-label="Prise en charge PMR">
+        <div className="calendar-city-control">
+          <div>
+            <strong><Accessibility size={16} style={{ verticalAlign: 'middle', marginRight: 6 }} />Prise en charge PMR · {pmrCertified ? 'activée' : 'désactivée'}</strong>
+            <p>Indiquez que vous prenez en charge les pèlerins à mobilité réduite. Ceci s’affiche sur votre profil public et permet aux pèlerins de filtrer les guides adaptés.</p>
+          </div>
+          <button type="button" onClick={togglePmrCertified} disabled={loading || saving !== null} className={`calendar-action ${pmrCertified ? 'is-danger' : 'is-success'}`}>
+            {saving === 'pmr' ? 'Enregistrement…' : pmrCertified ? 'Désactiver' : 'Activer'}
           </button>
         </div>
       </section>

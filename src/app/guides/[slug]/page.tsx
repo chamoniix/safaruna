@@ -151,7 +151,7 @@ export default async function GuideProfilePage({ params }: { params: Promise<{ s
         places={profilePlaces}
         reviews={reviews}
         certifications={guide.university ? [`Études déclarées : ${guide.university}`] : []}
-        services={[]}
+        services={guide.pmrCertified ? ['Prend en charge les personnes à mobilité réduite (PMR)'] : []}
         bioFull={guide.bio ? [guide.bio] : []}
         languages={languages}
         activePlaceKeys={guide.places.map(place => place.placeKey)}

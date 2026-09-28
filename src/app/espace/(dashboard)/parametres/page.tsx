@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { signOut } from 'next-auth/react';
 
 type ProfilData = {
   id: string;
@@ -12,6 +13,14 @@ type ProfilData = {
   country: string | null;
   phoneWhatsapp: string | null;
   createdAt: string;
+  hasPassword: boolean;
+  notifConfirmOptIn: boolean;
+  notifRappelOptIn: boolean;
+  notifMessagesOptIn: boolean;
+  notifPromoOptIn: boolean;
+  language: string;
+  timezone: string;
+  accessibilityPmr: boolean;
 };
 
 const card: React.CSSProperties = { background: 'white', border: '1px solid #E8DFC8', borderRadius: 16, padding: '1.75rem 2rem', marginBottom: '1.25rem' };
@@ -41,10 +50,13 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void 
 
 export default function ParametresPage() {
   const [notifs, setNotifs] = useState({ confirm: true, rappel: true, messages: true, newsletter: false, promo: false });
-  const [access, setAccess] = useState({ pmr: false, contrast: false });
+  const [pmr, setPmr] = useState(false);
   const [langue, setLangue] = useState('fr');
   const [timezone, setTimezone] = useState('Europe/Paris');
   const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [deleteStatus, setDeleteStatus] = useState<'idle' | 'sending'>('idle');
+  const [deleteError, setDeleteError] = useState('');
   const [profile, setProfile] = useState<ProfilData | null>(null);
   const [phoneWhatsapp, setPhoneWhatsapp] = useState('');
   const [profileLoading, setProfileLoading] = useState(true);
@@ -68,6 +80,16 @@ export default function ParametresPage() {
       const loadedProfile = payload as ProfilData;
       setProfile(loadedProfile);
       setPhoneWhatsapp(loadedProfile.phoneWhatsapp ?? '');
+      setNotifs(p => ({
+        ...p,
+        confirm: loadedProfile.notifConfirmOptIn,
+        rappel: loadedProfile.notifRappelOptIn,
+        messages: loadedProfile.notifMessagesOptIn,
+        promo: loadedProfile.notifPromoOptIn,
+      }));
+      setLangue(loadedProfile.language);
+      setTimezone(loadedProfile.timezone);
+      setPmr(loadedProfile.accessibilityPmr);
     } catch (error) {
       setProfileError(error instanceof Error ? error.message : 'Impossible de charger votre compte.');
     } finally {
@@ -91,6 +113,21 @@ export default function ParametresPage() {
       .catch(() => {/* ignore */});
   }, []);
 
+  const NOTIF_FIELD: Record<Exclude<keyof typeof notifs, 'newsletter'>, string> = {
+    confirm: 'notifConfirmOptIn',
+    rappel: 'notifRappelOptIn',
+    messages: 'notifMessagesOptIn',
+    promo: 'notifPromoOptIn',
+  };
+
+  const savePreference = (data: Record<string, boolean | string>) => {
+    fetch('/api/espace/profil', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    }).catch(() => {/* ignore */});
+  };
+
   const toggleN = (k: keyof typeof notifs) => {
     const newValue = !notifs[k];
     setNotifs(p => ({ ...p, [k]: newValue }));
@@ -100,9 +137,51 @@ export default function ParametresPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ newsletterOptIn: newValue }),
       }).catch(() => {/* ignore */});
+    } else {
+      savePreference({ [NOTIF_FIELD[k]]: newValue });
     }
   };
-  const toggleA = (k: keyof typeof access) => setAccess(p => ({ ...p, [k]: !p[k] }));
+  const togglePmr = () => {
+    const newValue = !pmr;
+    setPmr(newValue);
+    savePreference({ accessibilityPmr: newValue });
+  };
+  const changeLangue = (value: string) => {
+    setLangue(value);
+    savePreference({ language: value });
+  };
+  const changeTimezone = (value: string) => {
+    setTimezone(value);
+    savePreference({ timezone: value });
+  };
+
+  const handleDeleteConfirm = async () => {
+    setDeleteStatus('sending');
+    setDeleteError('');
+    try {
+      const response = await fetch('/api/espace/compte/deletion-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: deletePassword }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setDeleteStatus('idle');
+        setDeleteError(payload.error || 'Impossible de traiter la demande.');
+        return;
+      }
+      // La demande a réussi et le compte est déjà banni côté serveur : la déconnexion
+      // n'est qu'un nettoyage de session, son échec ne doit pas être présenté comme un échec de la demande.
+      try {
+        await signOut({ callbackUrl: '/' });
+      } catch {
+        window.location.href = '/';
+      }
+    } catch {
+      setDeleteStatus('idle');
+      setDeleteError('Impossible de traiter la demande. Vérifiez votre connexion et réessayez.');
+    }
+  };
 
   const handleSavePhone = async () => {
     setPhoneStatus('saving');
@@ -254,7 +333,7 @@ export default function ParametresPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
           <div>
             <label style={fieldLabel}>Langue d’interface</label>
-            <select style={selectStyle} value={langue} onChange={e => setLangue(e.target.value)}>
+            <select style={selectStyle} value={langue} onChange={e => changeLangue(e.target.value)}>
               <option value="fr">🇫🇷 Français</option>
               <option value="en">🇬🇧 English</option>
               <option value="ar">🇸🇦 العربية</option>
@@ -262,7 +341,7 @@ export default function ParametresPage() {
           </div>
           <div>
             <label style={fieldLabel}>Fuseau horaire</label>
-            <select style={selectStyle} value={timezone} onChange={e => setTimezone(e.target.value)}>
+            <select style={selectStyle} value={timezone} onChange={e => changeTimezone(e.target.value)}>
               <option value="Europe/Paris">Europe/Paris (UTC+1)</option>
               <option value="Africa/Casablanca">Africa/Casablanca (UTC+1)</option>
               <option value="Asia/Riyadh">Asia/Riyadh (UTC+3)</option>
@@ -275,18 +354,13 @@ export default function ParametresPage() {
       {/* Accessibilité */}
       <div style={card}>
         <div style={cardTitle}>Accessibilité</div>
-        {([
-          { k: 'pmr',      label: 'Mobilité réduite (PMR)',  sub: 'Filtre les guides et services adaptés PMR' },
-          { k: 'contrast', label: 'Mode contraste élevé',    sub: 'Améliore la lisibilité pour les malvoyants' },
-        ] as Array<{ k: keyof typeof access; label: string; sub: string }>).map(({ k, label, sub }, i, arr) => (
-          <div key={k} style={{ ...rowStyle, borderBottom: i < arr.length - 1 ? '1px solid #F5F2EC' : 'none' }}>
-            <div>
-              <div style={rowLabel}>{label}</div>
-              <div style={rowSub}>{sub}</div>
-            </div>
-            <Toggle checked={access[k]} onChange={() => toggleA(k)} />
+        <div style={rowStyle}>
+          <div>
+            <div style={rowLabel}>Mobilité réduite (PMR)</div>
+            <div style={rowSub}>Filtre les guides prenant en charge les personnes à mobilité réduite</div>
           </div>
-        ))}
+          <Toggle checked={pmr} onChange={togglePmr} />
+        </div>
       </div>
 
       {/* Données & confidentialité */}
@@ -302,10 +376,37 @@ export default function ParametresPage() {
           {!deleteConfirm ? (
             <button style={dangerBtn} onClick={() => setDeleteConfirm(true)}>Supprimer mon compte</button>
           ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10, padding: '0.65rem 1rem', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '0.78rem', color: '#DC2626', fontWeight: 600 }}>Confirmer la suppression ?</span>
-              <button style={{ ...dangerBtn, padding: '0.35rem 0.85rem', fontSize: '0.72rem' }}>Oui, supprimer</button>
-              <button style={{ ...outlineBtn, padding: '0.35rem 0.85rem', fontSize: '0.72rem' }} onClick={() => setDeleteConfirm(false)}>Annuler</button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10, padding: '0.85rem 1rem', width: '100%' }}>
+              <span style={{ fontSize: '0.78rem', color: '#DC2626', fontWeight: 600 }}>
+                Votre demande sera transmise à un administrateur. Votre accès sera immédiatement suspendu.
+              </span>
+              {profile?.hasPassword && (
+                <input
+                  type="password"
+                  value={deletePassword}
+                  onChange={event => setDeletePassword(event.target.value)}
+                  placeholder="Confirmez avec votre mot de passe"
+                  style={{ ...inputBase, background: 'white' }}
+                  disabled={deleteStatus === 'sending'}
+                />
+              )}
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <button
+                  style={{ ...dangerBtn, padding: '0.35rem 0.85rem', fontSize: '0.72rem', opacity: deleteStatus === 'sending' ? 0.65 : 1, cursor: deleteStatus === 'sending' ? 'wait' : 'pointer' }}
+                  onClick={() => void handleDeleteConfirm()}
+                  disabled={deleteStatus === 'sending'}
+                >
+                  {deleteStatus === 'sending' ? 'Envoi…' : 'Oui, supprimer'}
+                </button>
+                <button
+                  style={{ ...outlineBtn, padding: '0.35rem 0.85rem', fontSize: '0.72rem' }}
+                  onClick={() => { setDeleteConfirm(false); setDeletePassword(''); setDeleteError(''); }}
+                  disabled={deleteStatus === 'sending'}
+                >
+                  Annuler
+                </button>
+              </div>
+              {deleteError && <div style={{ fontSize: '0.75rem', color: '#DC2626' }} role="alert">{deleteError}</div>}
             </div>
           )}
         </div>

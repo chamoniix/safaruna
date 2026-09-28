@@ -83,6 +83,7 @@ type AvailableGuideApi = {
   reviewCount?: number;
   languages?: string[];
   bio?: string | null;
+  pmrCertified?: boolean;
   prices?: {
     makkah?: { upTo6?: number };
     madinah?: { upTo6?: number };
@@ -441,7 +442,7 @@ export default function GuideSearchPage() {
             reviews: item.reviewCount || 0,
             pilgrims: '',
             languages: languageCodes.map(code => LANG_CODES[code] || code),
-            services: [],
+            services: item.pmrCertified ? ['Prend en charge les PMR'] : [],
             price: publicPrice || 0,
             priceSub: primaryIsMakkah ? 'Makkah · par groupe' : 'Médine · par groupe',
             badge: '',

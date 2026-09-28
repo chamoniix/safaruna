@@ -37,6 +37,7 @@ function LoginForm() {
   const verify = searchParams.get('verify');
   const verified = searchParams.get('verified');
   const emailError = searchParams.get('emailError');
+  const loginError = searchParams.get('error');
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -117,6 +118,12 @@ function LoginForm() {
                 SAFAR<span style={{ color: '#C9A84C' }}>U</span>MA
               </Link>
             </div>
+
+            {loginError === 'compte_ferme' && (
+              <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10, padding: '0.75rem 1rem', marginBottom: '1rem', fontSize: '0.85rem', color: '#DC2626', fontWeight: 600, textAlign: 'center' }}>
+                Ce compte est fermé.
+              </div>
+            )}
 
             {registered && !verify && (
               <div style={{ background: '#E8F5EE', border: '1px solid rgba(29,92,58,0.2)', borderRadius: 10, padding: '0.75rem 1rem', marginBottom: '1rem', fontSize: '0.85rem', color: '#1D5C3A', fontWeight: 600, textAlign: 'center' }}>

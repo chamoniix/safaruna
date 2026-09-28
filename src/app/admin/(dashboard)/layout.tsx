@@ -8,7 +8,7 @@ import styles from './layout.module.css';
 import {
   BarChart3, CalendarCheck2, ChevronLeft, ChevronRight, Gift,
   CircleDollarSign, ClipboardList, Gauge, Landmark, LogOut, MapPinned,
-  MessageSquare, Settings, ShieldCheck, Users, UserRoundCheck,
+  MessageSquare, Settings, ShieldCheck, Users, UserRoundCheck, UserX,
   Star,
   TicketPercent,
   type LucideIcon,
@@ -50,6 +50,7 @@ const NAV_SECTIONS: NavSection[] = [
     label: 'Gouvernance',
     items: [
       { href: '/admin/audit', label: 'Audit & sécurité', icon: ShieldCheck },
+      { href: '/admin/demandes-suppression', label: 'Demandes de suppression', icon: UserX },
       { href: '/admin/parametres', label: 'Paramètres', icon: Settings },
     ],
   },

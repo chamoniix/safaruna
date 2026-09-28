@@ -12,6 +12,7 @@ import { readReferralIntentCookie } from '@/lib/referral-oauth'
 import { sendReferralPromoCode } from '@/lib/email'
 
 const EMAIL_ALREADY_USED_REDIRECT = '/inscription?error=email_used'
+const ACCOUNT_BANNED_REDIRECT = '/connexion?error=compte_ferme'
 
 function loginBrowser(userAgent: string) {
   if (/Edg\//i.test(userAgent)) return 'Edge'
@@ -94,6 +95,7 @@ export const authOptions: AuthOptions = {
             where: { email },
           })
           if (!user || user.role !== "PELERIN") return null
+          if (user.bannedAt) return null
           if (!user.emailVerified) return null
           if (!user.passwordHash) return null
           const isValid = await bcrypt.compare(credentials.password, user.passwordHash)
@@ -184,6 +186,9 @@ export const authOptions: AuthOptions = {
             if (existing.role !== 'PELERIN') {
               console.error('[auth] Google signIn refusé pour un compte non-pèlerin')
               return EMAIL_ALREADY_USED_REDIRECT
+            }
+            if (existing.bannedAt) {
+              return ACCOUNT_BANNED_REDIRECT
             }
             user.id = existing.id;
             ;(user as any).role = existing.role

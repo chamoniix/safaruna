@@ -51,17 +51,26 @@ model User {
   country       String?
   createdAt     DateTime  @default(now())
   lastLogin     DateTime?
+  bannedAt      DateTime?
 
-  newsletterOptIn Boolean @default(false)
+  newsletterOptIn    Boolean @default(false)
+  notifConfirmOptIn  Boolean @default(true)
+  notifRappelOptIn   Boolean @default(true)
+  notifMessagesOptIn Boolean @default(true)
+  notifPromoOptIn    Boolean @default(false)
+  language           String  @default("fr")
+  timezone           String  @default("Europe/Paris")
+  accessibilityPmr   Boolean @default(false)
 
   // Relations
   accounts               Account[]
   sessions               Session[]
+  deletionRequests       AccountDeletionRequest[]
   // As a Pelerin
-  reservations           Reservation[]          @relation("PelerinReservations")
-  conversationsAsPelerin Conversation[]         @relation("PelerinConversations")
-  messages               Message[]              @relation("PelerinMessages")
-  legacyMessages         Message[]              @relation("LegacyMessageSender")
+  reservations           Reservation[]            @relation("PelerinReservations")
+  conversationsAsPelerin Conversation[]           @relation("PelerinConversations")
+  messages               Message[]                @relation("PelerinMessages")
+  legacyMessages         Message[]                @relation("LegacyMessageSender")
   reviews                Review[]
   experienceReviews      ExperienceReview[]
   savedDuas              SavedDua[]
@@ -70,12 +79,34 @@ model User {
   analyticsEvents        AnalyticsEvent[]
   reservationDrafts      ReservationDraft[]
   referralCode           ReferralCode?
-  sponsoredReferrals     Referral[]             @relation("ReferralSponsor")
-  referral               Referral?              @relation("ReferralReferred")
+  sponsoredReferrals     Referral[]               @relation("ReferralSponsor")
+  referral               Referral?                @relation("ReferralReferred")
   promoCodes             PromoCode[]
   promotionRedemptions   PromotionRedemption[]
   dashboardState         PelerinDashboardState?
   favoriteGuides         GuideFavorite[]
+}
+
+enum AccountDeletionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model AccountDeletionRequest {
+  id                String                @id @default(cuid())
+  userId            String
+  user              User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status            AccountDeletionStatus @default(PENDING)
+  requestedAt       DateTime              @default(now())
+  reviewedByAdminId String?
+  reviewedByEmail   String?
+  reviewNotes       String?
+  reviewedAt        DateTime?
+  createdAt         DateTime              @default(now())
+
+  @@index([userId, createdAt])
+  @@index([status, requestedAt])
 }
 
 model VerificationToken {
@@ -206,6 +237,7 @@ model GuideProfile {
   servesMakkah             Boolean          @default(false)
   servesMadinah            Boolean          @default(false)
   acceptingBookings        Boolean          @default(true)
+  pmrCertified             Boolean          @default(false)
   makkahNetUpTo6Cents      Int              @default(10000)
   makkahNetUpTo15Cents     Int              @default(13000)
   makkahNetUpTo32Cents     Int              @default(16000)
@@ -677,25 +709,25 @@ model PromotionCampaign {
 }
 
 model PromotionRedemption {
-  id                  String                    @id @default(cuid())
-  campaignId          String
-  campaign            PromotionCampaign         @relation(fields: [campaignId], references: [id], onDelete: Restrict)
-  pelerinId           String
-  pelerin             User                      @relation(fields: [pelerinId], references: [id], onDelete: Restrict)
-  status              PromotionRedemptionStatus @default(HELD)
-  reservationDraftId  String?                   @unique
-  reservationDraft    ReservationDraft?         @relation(fields: [reservationDraftId], references: [id], onDelete: SetNull)
-  reservationId       String?                   @unique
-  reservation         Reservation?              @relation(fields: [reservationId], references: [id], onDelete: SetNull)
-  grossAmountCents    Int
-  discountAmountCents Int
-  discountBpsSnapshot Int
+  id                   String                    @id @default(cuid())
+  campaignId           String
+  campaign             PromotionCampaign         @relation(fields: [campaignId], references: [id], onDelete: Restrict)
+  pelerinId            String
+  pelerin              User                      @relation(fields: [pelerinId], references: [id], onDelete: Restrict)
+  status               PromotionRedemptionStatus @default(HELD)
+  reservationDraftId   String?                   @unique
+  reservationDraft     ReservationDraft?         @relation(fields: [reservationDraftId], references: [id], onDelete: SetNull)
+  reservationId        String?                   @unique
+  reservation          Reservation?              @relation(fields: [reservationId], references: [id], onDelete: SetNull)
+  grossAmountCents     Int
+  discountAmountCents  Int
+  discountBpsSnapshot  Int
   campaignCodeSnapshot String
-  heldAt              DateTime                  @default(now())
-  redeemedAt          DateTime?
-  releasedAt          DateTime?
-  createdAt           DateTime                  @default(now())
-  updatedAt           DateTime                  @updatedAt
+  heldAt               DateTime                  @default(now())
+  redeemedAt           DateTime?
+  releasedAt           DateTime?
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
 
   @@index([campaignId, status])
   @@index([campaignId, pelerinId, status])
@@ -962,34 +994,34 @@ enum ReviewModerationStatus {
 // ---------------------------------------------------------
 
 model Transfer {
-  id             String         @id @default(cuid())
-  guideProfileId String
-  guideProfile   GuideProfile   @relation(fields: [guideProfileId], references: [id])
+  id                    String         @id @default(cuid())
+  guideProfileId        String
+  guideProfile          GuideProfile   @relation(fields: [guideProfileId], references: [id])
   // Legacy amounts/period are retained, never reconstructed for new records.
-  amount         Float?
-  commission     Float?
-  net            Float?
-  period         String?
-  status         TransferStatus @default(PENDING)
-  createdAt      DateTime       @default(now())
-  earnings       GuideEarning[]
+  amount                Float?
+  commission            Float?
+  net                   Float?
+  period                String?
+  status                TransferStatus @default(PENDING)
+  createdAt             DateTime       @default(now())
+  earnings              GuideEarning[]
   // Manual bank-transfer record, not a payment-provider instruction.
-  recordedEarningId      String?       @unique
-  recordedEarning        GuideEarning? @relation("RecordedGuideTransfer", fields: [recordedEarningId], references: [id], onDelete: Restrict)
-  amountCents            Int?
-  currency               String?
-  bankReference          String?
-  sentAt                 DateTime?
-  dueAt                  DateTime?
-  bankSnapshotEncrypted  String?
-  bankRevision           String?
-  sourceRevision         String?
-  preparedByAdminId      String?
-  preparedByEmail        String?
-  confirmedByAdminId     String?
-  confirmedByEmail       String?
+  recordedEarningId     String?        @unique
+  recordedEarning       GuideEarning?  @relation("RecordedGuideTransfer", fields: [recordedEarningId], references: [id], onDelete: Restrict)
+  amountCents           Int?
+  currency              String?
+  bankReference         String?
+  sentAt                DateTime?
+  dueAt                 DateTime?
+  bankSnapshotEncrypted String?
+  bankRevision          String?
+  sourceRevision        String?
+  preparedByAdminId     String?
+  preparedByEmail       String?
+  confirmedByAdminId    String?
+  confirmedByEmail      String?
   confirmedAt           DateTime?
-  revision              Int           @default(0)
+  revision              Int            @default(0)
 
   @@index([status, dueAt])
 }

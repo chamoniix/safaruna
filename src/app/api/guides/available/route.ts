@@ -97,6 +97,7 @@ export async function GET(req: NextRequest) {
           ...(guide.servesMadinah ? ['MADINAH'] : []),
         ],
         bio: guide.bio,
+        pmrCertified: guide.pmrCertified,
         image: guide.guideAccount!.image || null,
         experienceYears: guide.experienceYears,
         languages: guide.languages.map(language => language.languageCode),

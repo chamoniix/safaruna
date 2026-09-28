@@ -16,7 +16,7 @@ async function getGuideProfile() {
   if (!access.ok) return access
   const guideProfile = await prisma.guideProfile.findUnique({
     where: { id: access.actor.guideProfileId },
-    select: { id: true, servesMakkah: true, servesMadinah: true, acceptingBookings: true, city: true },
+    select: { id: true, servesMakkah: true, servesMadinah: true, acceptingBookings: true, pmrCertified: true, city: true },
   })
   if (!guideProfile) return { ok: false as const, response: NextResponse.json({ error: 'Profil guide introuvable' }, { status: 404 }) }
   return { ok: true as const, actor: access.actor, guideProfile }
@@ -114,6 +114,7 @@ export async function GET(req: NextRequest) {
     serviceEnabled: city === 'MAKKAH' ? guide.servesMakkah : guide.servesMadinah,
     services: { makkah: guide.servesMakkah, madinah: guide.servesMadinah },
     acceptingBookings: guide.acceptingBookings,
+    pmrCertified: guide.pmrCertified,
     availabilities: [...byDate.values()],
   })
 }
@@ -126,6 +127,30 @@ export async function PATCH(req: NextRequest) {
   const guide = result.guideProfile
   const body = await req.json()
   const context = auditContext(req)
+
+  if (typeof body.pmrCertified === 'boolean' && body.city === undefined && body.enabled === undefined && body.acceptingBookings === undefined) {
+    const before = guide.pmrCertified
+    await prisma.$transaction([
+      prisma.guideProfile.update({
+        where: { id: guide.id },
+        data: { pmrCertified: body.pmrCertified },
+      }),
+      prisma.auditLog.create({
+        data: {
+          actor: result.actor.email,
+          actorRole: 'GUIDE',
+          action: 'GUIDE_PMR_CERTIFICATION_UPDATED',
+          target: guide.id,
+          detail: JSON.stringify(context.request),
+          ip: context.ip,
+          userAgent: context.userAgent,
+          before: { pmrCertified: before },
+          after: { pmrCertified: body.pmrCertified },
+        },
+      }),
+    ])
+    return NextResponse.json({ success: true })
+  }
 
   if (typeof body.acceptingBookings === 'boolean' && body.city === undefined && body.enabled === undefined) {
     const before = guide.acceptingBookings

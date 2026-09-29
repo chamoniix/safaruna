@@ -378,7 +378,7 @@ export default function ParametresPage() {
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 10, padding: '0.85rem 1rem', width: '100%' }}>
               <span style={{ fontSize: '0.78rem', color: '#DC2626', fontWeight: 600 }}>
-                Votre demande sera transmise à un administrateur. Votre accès sera immédiatement suspendu.
+                Confirmer la suppression ? Votre accès sera immédiatement suspendu.
               </span>
               {profile?.hasPassword && (
                 <input

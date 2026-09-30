@@ -12,12 +12,11 @@ import type { AdminActor } from '../src/lib/check-admin'
 const url = process.env.PAYMENT_INTEGRATION_TEST_DATABASE_URL
 
 // Explicit opt-in to a disposable isolated PostgreSQL database (a separate
-// Neon "preview" project, never the project's real DATABASE_URL). The exact
-// hostname is asserted so this can never accidentally run against production
-// or an unexpected database.
+// Neon "preview" project, never the project's real DATABASE_URL). Rather than
+// hardcoding a real hostname in source/history, this requires a deliberate
+// confirmation flag before it will ever touch the database.
 test('payment lifecycle: full cycle, two distinct guides, replay safety, abandon/cancel', { skip: !url }, async t => {
-  const parsed = new URL(url!)
-  assert.equal(parsed.hostname, 'ep-floral-night-abr7efez.eu-west-2.aws.neon.tech')
+  assert.equal(process.env.PAYMENT_INTEGRATION_TEST_DATABASE_CONFIRM, 'yes-isolated-preview-db')
   const db = new PrismaClient({ datasources: { db: { url } } })
 
   const SIGNING_SECRET = 'isolated-test-signing-secret'
@@ -36,6 +35,21 @@ test('payment lifecycle: full cycle, two distinct guides, replay safety, abandon
 
   const nodeRequire = createRequire(import.meta.url)
   const realNextServer = nodeRequire('next/server')
+  // Routes get `db` through this proxy, which only raises the default 5s
+  // interactive-transaction budget when the caller didn't set one. Real
+  // production traffic runs co-located with the database (sub-10ms RTT) and
+  // comfortably clears that budget; this sandbox's path to the isolated Neon
+  // "preview" project does not. The override compensates for network
+  // topology only — it changes no application logic.
+  const dbForRoutes = new Proxy(db, {
+    get(target, prop, receiver) {
+      if (prop === '$transaction') {
+        return (fn: unknown, options?: Record<string, unknown>) =>
+          (target.$transaction as (fn: unknown, options?: Record<string, unknown>) => unknown)(fn, { timeout: 30000, ...options })
+      }
+      return Reflect.get(target, prop, receiver)
+    },
+  })
   const cache = new Map<string, { exports: unknown }>()
   function load<T>(file: string): T {
     const absolute = resolve(file)

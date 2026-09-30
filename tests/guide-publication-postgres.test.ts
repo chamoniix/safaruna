@@ -18,8 +18,10 @@ const url = process.env.PAYMENT_INTEGRATION_TEST_DATABASE_URL
 // the activation email — against real dossier-confirmation logic, not a
 // hand-faked shortcut.
 test('guide first publication: real dossier gate, Admin/Superadmin distinction, activation email', { skip: !url }, async t => {
-  const parsed = new URL(url!)
-  assert.equal(parsed.hostname, 'ep-floral-night-abr7efez.eu-west-2.aws.neon.tech')
+  // Explicit opt-in confirmation instead of a hardcoded hostname: never puts
+  // real infrastructure identifiers in source/history, while still refusing
+  // to run unless the caller deliberately confirms this specific isolated DB.
+  assert.equal(process.env.PAYMENT_INTEGRATION_TEST_DATABASE_CONFIRM, 'yes-isolated-preview-db')
   const db = new PrismaClient({ datasources: { db: { url } } })
   const originalEncryptionKey = process.env.ENCRYPTION_KEY
   process.env.ENCRYPTION_KEY = randomBytes(32).toString('hex')

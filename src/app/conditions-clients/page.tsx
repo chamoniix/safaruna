@@ -75,17 +75,10 @@ export default function ConditionsClients() {
 
       <section id="litiges">
         <h2 style={h2}>4. Litiges</h2>
-        <p style={p}>En cas de problème avec votre guide, voici la procédure :</p>
-        <ul style={ul}>
-          <li style={li}><strong>Signalement obligatoire dans les 24h</strong> suivant la fin de la mission via la plateforme</li>
-          <li style={li}>La <strong>messagerie SAFARUMA</strong> fait foi comme preuve officielle — conservez vos échanges</li>
-          <li style={li}><strong>SAFARUMA arbitre sous 48h</strong> après réception du dossier complet</li>
-          <li style={li}>La décision d'arbitrage est <strong>définitive</strong> et s'impose aux deux parties</li>
-          <li style={li}>Les fonds en séquestre sont libérés ou remboursés en conséquence</li>
-        </ul>
+        <p style={p}>En cas de problème avec votre guide, contactez-nous immédiatement — votre demande est prise en charge dès réception. Chaque situation est étudiée au cas par cas par notre équipe jusqu'à une solution.</p>
         <div className="legal-box-gold">
-          <div className="box-title">Comment signaler un litige</div>
-          <p style={{ ...p, marginBottom: 0 }}>Depuis votre espace client → Mes Réservations → [Mission concernée] → « Signaler un litige »<br />Ou par email : <a href="mailto:contact@safaruma.com" style={{ color: '#C9A84C', fontWeight: 700 }}>contact@safaruma.com</a> avec l'objet « LITIGE — [numéro de réservation] »</p>
+          <div className="box-title">Comment nous contacter</div>
+          <p style={{ ...p, marginBottom: 0 }}>Par WhatsApp : <a href="https://wa.me/message/3LAXCIZV7FFEK1" target="_blank" rel="noopener noreferrer" style={{ color: '#C9A84C', fontWeight: 700 }}>cliquez ici</a><br />Ou par email : <a href="mailto:contact@safaruma.com" style={{ color: '#C9A84C', fontWeight: 700 }}>contact@safaruma.com</a> avec l'objet « LITIGE — [numéro de réservation] »</p>
         </div>
       </section>
 
@@ -98,7 +91,7 @@ export default function ConditionsClients() {
             <li style={li}><strong>Guides 100% vérifiés</strong> : identité, Certifié SAFARUMA, casier judiciaire</li>
             <li style={li}><strong>Paiements sécurisés</strong> via Stripe (PCI-DSS niveau 1) — jamais stockés chez SAFARUMA</li>
             <li style={li}><strong>Argent protégé</strong> en séquestre jusqu'à la fin de la mission</li>
-            <li style={li}><strong>Arbitrage rapide</strong> en cas de litige (48h)</li>
+            <li style={li}><strong>Équipe réactive</strong> en cas de problème, par WhatsApp ou email</li>
             <li style={li}><strong>Avis vérifiés</strong> — uniquement après mission réelle</li>
             <li style={li}><strong>Messagerie sécurisée</strong> — tout est tracé et protégé</li>
           </ul>
@@ -107,7 +100,7 @@ export default function ConditionsClients() {
 
       <section id="droit" style={{ marginBottom: '-1.5rem' }}>
         <h2 style={h2}>6. Droit applicable et juridiction</h2>
-        <p style={p}>Les présentes conditions sont régies par le <strong>droit français</strong>. En cas de désaccord persistant non résolu par l'arbitrage SAFARUMA, compétence exclusive est attribuée aux <strong>tribunaux de Paris</strong>.</p>
+        <p style={p}>Les présentes conditions sont régies par le <strong>droit français</strong>. En cas de désaccord persistant non résolu à l'amiable, compétence exclusive est attribuée aux <strong>tribunaux de Paris</strong>.</p>
         <p style={p}>Pour tout litige de consommation, vous pouvez également recourir à un médiateur de la consommation agréé, conformément aux articles L.611-1 et suivants du Code de la consommation.</p>
       </section>
 

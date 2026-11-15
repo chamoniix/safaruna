@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client'
 import { NextRequest, NextResponse } from 'next/server'
 import {
   assertMissionsAvailable,
+  activeReservationHoldWhere,
   bookingToday,
   GuideAvailabilityConflictError,
   parseBookingDate,
@@ -81,7 +82,7 @@ export async function GET(req: NextRequest) {
       where: {
         guideProfileId: guide.id,
         date: { gte: from, lte: to },
-        expiresAt: { gt: new Date() },
+        ...activeReservationHoldWhere(),
       },
       orderBy: { date: 'asc' },
       select: { id: true, date: true, city: true },

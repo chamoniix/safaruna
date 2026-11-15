@@ -75,7 +75,7 @@ test('payment lifecycle: full cycle, two distinct guides, replay safety, abandon
       },
       require: (name: string) => {
         if (name === 'server-only') return {}
-        if (name === '@/lib/prisma') return { default: db, __esModule: true }
+        if (name === '@/lib/prisma') return { default: dbForRoutes, __esModule: true }
         if (name === 'next/server') {
           // Next's real `after()` throws outside an actual request-handling
           // context. Here it just fires the callback and swallows failures —

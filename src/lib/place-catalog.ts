@@ -1,6 +1,6 @@
 import prisma from '@/lib/prisma'
 import { PLACES, type Place } from '@/lib/places'
-import { guideGroupTier, PLACE_NET_BY_TIER_CENTS, withMarkupCents } from '@/lib/guide-pricing'
+import { guideGroupTier, PLACE_NET_BY_TIER_CENTS, PUBLIC_EXTRA_PLACE_CENTS, withMarkupCents } from '@/lib/guide-pricing'
 
 const DEFAULT_PLACE_NET_CENTS = {
   netUpTo6Cents: PLACE_NET_BY_TIER_CENTS.UP_TO_6,
@@ -53,13 +53,13 @@ export function placeRetailCentsForGroup(place: EffectivePlace, nbPeople: number
   return withMarkupCents(placeNetCentsForGroup(place, nbPeople), markupBps)
 }
 
-export function publicPlaceCatalog(places: EffectivePlace[], markupBps: number) {
+export function publicPlaceCatalog(places: EffectivePlace[], _markupBps: number) {
   return places.map(({ netUpTo6Cents, netUpTo15Cents, netUpTo32Cents, ...place }) => ({
     ...place,
     retailCents: {
-      upTo6: withMarkupCents(netUpTo6Cents, markupBps),
-      upTo15: withMarkupCents(netUpTo15Cents, markupBps),
-      upTo32: withMarkupCents(netUpTo32Cents, markupBps),
+      upTo6: PUBLIC_EXTRA_PLACE_CENTS,
+      upTo15: PUBLIC_EXTRA_PLACE_CENTS,
+      upTo32: PUBLIC_EXTRA_PLACE_CENTS,
     },
   }))
 }

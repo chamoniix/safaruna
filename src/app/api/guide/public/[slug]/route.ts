@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { centsToEuros, guideServiceRetailCents } from '@/lib/guide-pricing'
+import { centsToEuros, publicGuideServicePriceCents } from '@/lib/guide-pricing'
 import { getPlatformPricing } from '@/lib/platform-pricing'
 import { getEffectivePlaceCatalog, publicPlaceCatalog } from '@/lib/place-catalog'
 
@@ -52,14 +52,14 @@ export async function GET(
         bookable: guide.acceptingBookings && (guide.servesMakkah || guide.servesMadinah),
         prices: {
           makkah: {
-            upTo6: centsToEuros(guideServiceRetailCents(guide, 'MAKKAH', 6, pricing.guideServiceMarkupBps)),
-            upTo15: centsToEuros(guideServiceRetailCents(guide, 'MAKKAH', 15, pricing.guideServiceMarkupBps)),
-            upTo32: centsToEuros(guideServiceRetailCents(guide, 'MAKKAH', 32, pricing.guideServiceMarkupBps)),
+            group1To4: centsToEuros(publicGuideServicePriceCents(4)),
+            group5To14: centsToEuros(publicGuideServicePriceCents(14)),
+            group15Plus: centsToEuros(publicGuideServicePriceCents(15)),
           },
           madinah: {
-            upTo6: centsToEuros(guideServiceRetailCents(guide, 'MADINAH', 6, pricing.guideServiceMarkupBps)),
-            upTo15: centsToEuros(guideServiceRetailCents(guide, 'MADINAH', 15, pricing.guideServiceMarkupBps)),
-            upTo32: centsToEuros(guideServiceRetailCents(guide, 'MADINAH', 32, pricing.guideServiceMarkupBps)),
+            group1To4: centsToEuros(publicGuideServicePriceCents(4)),
+            group5To14: centsToEuros(publicGuideServicePriceCents(14)),
+            group15Plus: centsToEuros(publicGuideServicePriceCents(15)),
           },
         },
       },

@@ -79,7 +79,10 @@ type HomeGuide = {
   languages: string[];
   rating: number | null;
   reviewCount: number;
-  prices: { makkah: { upTo6: number }; madinah: { upTo6: number } };
+  prices: {
+    makkah: { group1To4: number; group5To14: number; group15Plus: number };
+    madinah: { group1To4: number; group5To14: number; group15Plus: number };
+  };
 };
 
 const partners = [
@@ -953,7 +956,7 @@ function GuidesSection({ openModal }: { openModal: (item: ModalContent) => void 
             const ratingLabel = guide.rating !== null && guide.reviewCount > 0
               ? `★ ${guide.rating.toFixed(1)} · ${guide.reviewCount} avis`
               : 'Aucun avis publié';
-            const price = guide.city === 'MAKKAH' ? guide.prices.makkah.upTo6 : guide.prices.madinah.upTo6;
+            const price = guide.city === 'MAKKAH' ? guide.prices.makkah.group1To4 : guide.prices.madinah.group1To4;
             return (
             <motion.button
               type="button"
@@ -971,7 +974,7 @@ function GuidesSection({ openModal }: { openModal: (item: ModalContent) => void 
                   image: guide.image || undefined,
                   badges: isOfficial ? ['OFFICIEL SAFARUMA', 'GUIDE VÉRIFIÉ'] : ['GUIDE VÉRIFIÉ'],
                   highlights: [cities, guide.experienceYears !== null ? `${guide.experienceYears} ans d’expérience` : '', languages].filter(Boolean),
-                  price: price > 0 ? `${price}€ par groupe jusqu’à 6 personnes` : undefined,
+                  price: price > 0 ? `${price}€ pour 1 à 4 personnes, puis +25€ par personne dès la 5e` : undefined,
                 })
               }
             >

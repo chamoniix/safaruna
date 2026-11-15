@@ -23,6 +23,7 @@ const MENUS = [
     id: 'services',
     label: 'Nos services',
     items: [
+      { href: '/reservation-vip', label: 'Réservation VIP', desc: 'Conciergerie privée sur mesure' },
       { href: '/omra-avec-guide-prive', label: 'Omra avec guide privé', desc: 'Accompagnement spirituel' },
       { href: '/comment-se-passe-la-omra', label: 'Comment se passe la Omra', desc: 'Récit et témoignages' },
       { href: '/guide-omra',         label: 'Guide Omra PDF',         desc: 'Guide étape par étape' },

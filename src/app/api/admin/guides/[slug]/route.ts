@@ -7,6 +7,7 @@ import { applicationMediaSelect, applicationMediaView } from '@/lib/guide-applic
 import { readGuideProfileMedia } from '@/lib/guide-profile-media';
 import { profileChangeRevision, safeProfileBefore, safeProfileChanges } from '@/lib/guide-profile-changes';
 import { readAdminGuideDossier, requireCurrentDossierAdmin } from '@/lib/guide-dossier';
+import { activeReservationHoldWhere } from '@/lib/guide-availability';
 
 export async function GET(
   req: NextRequest,
@@ -74,7 +75,7 @@ export async function GET(
       return NextResponse.json({ error: 'Guide introuvable' }, { status: 404 });
 
     const activeHolds = await tx.reservationHold.findMany({
-      where: { guideProfileId: guide.id, expiresAt: { gt: new Date() } },
+      where: { guideProfileId: guide.id, ...activeReservationHoldWhere() },
       orderBy: { date: 'asc' },
       select: { id: true, date: true, city: true, draftRefNumber: true },
     });

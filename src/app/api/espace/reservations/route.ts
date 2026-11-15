@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma';
 import { requirePelerin } from '@/lib/require-account';
 import { missionDurationDays, reviewOpensAt } from '@/lib/guide-workflow';
 import { retrieveRevolutOrder } from '@/lib/payments/revolut-provider';
+import { getWhopClient } from '@/lib/payments/whop-provider';
 import { isResumableBookingDate, type PaymentDraftData } from '@/lib/payments/types';
 
 const noStoreHeaders = { 'Cache-Control': 'no-store' }
@@ -232,6 +233,48 @@ export async function GET(req: NextRequest) {
         }
       }
 
+      if (pendingAttempt?.provider === 'WHOP' && pendingAttempt.providerCheckoutId) {
+        try {
+          const checkout = await getWhopClient().checkoutConfigurations.retrieve({ id: pendingAttempt.providerCheckoutId })
+          if (checkout.id !== pendingAttempt.providerCheckoutId || checkout.metadata?.refNumber !== refNumber || !checkout.purchase_url) {
+            return NextResponse.json({ error: 'Configuration de paiement incohérente' }, { status: 409, headers: noStoreHeaders })
+          }
+          return NextResponse.json({
+            verification: { refNumber, state: 'pending' },
+            pendingCheckout: {
+              provider: 'WHOP',
+              sessionUrl: checkout.purchase_url,
+              refNumber,
+              expiresAt: checkoutExpiresAt.toISOString(),
+              promotion: promotionSnapshot(draft),
+              pricing: draftData.pricing,
+              checkout: {
+                guideSlug: draftData.guideSlug ?? draftData.selectedGuideSlug,
+                cityChoice: draftData.cityChoice,
+                departDate: draftData.departDate,
+                returnDate: draftData.returnDate,
+                nbPersonnes: draftData.nbPersonnes,
+                gender: draftData.gender,
+                langue: draftData.langue,
+                arrivalPoint: draftData.arrivalPoint,
+                selectedPlaces: draftData.selectedPlaces,
+                transportOption: draftData.transportOption,
+                taxiDirection: draftData.taxiDirection ?? null,
+                localTransportMakkah: draftData.localTransportMakkah,
+                localTransportMadinah: draftData.localTransportMadinah,
+                guideBedProvided: draftData.guideBedProvided,
+                selectedGuideSlug: draftData.selectedGuideSlug,
+                selectedGuideSlugMadinah: draftData.selectedGuideSlugMadinah ?? null,
+                packageName: draftData.packageName,
+              },
+            },
+          }, { headers: noStoreHeaders })
+        } catch (error) {
+          console.error('[espace/reservations Whop resume]', error)
+          return NextResponse.json({ error: 'Impossible de reprendre le paiement en attente' }, { status: 503, headers: noStoreHeaders })
+        }
+      }
+
       return NextResponse.json({
         verification: { refNumber, state: 'pending' },
       }, { headers: noStoreHeaders })
@@ -307,7 +350,7 @@ export async function GET(req: NextRequest) {
   const pendingPayments = activeDrafts.flatMap(draft => {
     const attempt = pendingAttemptByRef.get(draft.refNumber)
     const draftData = parseResumableDraft(draft.data)
-    if (!attempt || !draftData || attempt.provider !== 'REVOLUT' || !attempt.providerCheckoutId) return []
+    if (!attempt || !draftData || !['REVOLUT', 'WHOP'].includes(attempt.provider) || !attempt.providerCheckoutId) return []
     const expiresAt = attempt.checkoutExpiresAt ?? draft.expiresAt
     if (expiresAt <= now) return []
     return [{

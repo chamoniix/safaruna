@@ -83,6 +83,7 @@ export default function Footer() {
         <div className="sfr-footer-col">
           <h4>Pèlerins</h4>
           <Link href="/guides">Trouver un guide</Link>
+          <Link href="/reservation-vip">Réservation VIP</Link>
           <Link href="/guides">Nos forfaits</Link>
           <Link href="/guide-omra">Guide complet de la Omra</Link>
           <Link href="/espace/tableau-de-bord">Tableau de bord</Link>

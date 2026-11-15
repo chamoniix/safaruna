@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client'
 import { randomBytes } from 'node:crypto'
 import prisma from '@/lib/prisma'
 import { getPackageForCity } from '@/lib/packages'
+import { SAFARUMA_COMMISSION_BPS, splitBookingPaymentCents } from '@/lib/guide-pricing'
 import type {
   NormalizedCheckoutExpiredEvent,
   NormalizedCheckoutPaidEvent,
@@ -41,7 +42,7 @@ function eachDate(start: Date, end: Date): Date[] {
   return dates
 }
 
-async function claimPaymentEvent(input: {
+export async function claimPaymentEvent(input: {
   provider: PaymentProviderId
   providerEventId: string
   providerEventType: string
@@ -385,6 +386,10 @@ export async function processPaidCheckout(event: NormalizedCheckoutPaidEvent): P
     }
 
     const totalGuideNetCents = data.earnings.reduce((sum, earning) => sum + earning.totalNetCents, 0)
+    if (data.commissionBps === SAFARUMA_COMMISSION_BPS
+      && totalGuideNetCents !== splitBookingPaymentCents(event.amountCents).guideNetCents) {
+      throw new PaymentProcessingError('Répartition du paiement incohérente', 400)
+    }
     const grossAmountCents = Math.round((data.pricing.grossTotal ?? data.totalPrice) * 100)
     const promotionDiscountCents = data.promotionCampaign
       ? Math.round((data.pricing.promoDiscount ?? 0) * 100)

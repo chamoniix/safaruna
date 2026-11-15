@@ -6,6 +6,7 @@ import { archiveExpiredAnalyticsEvents } from '@/lib/analytics-retention'
 import { confirmationDeadlines, reviewOpensAt } from '@/lib/guide-workflow'
 import { suspendGuideForReservationIncident } from '@/lib/guide-reservation-incidents'
 import { deleteTerminalExpiredDrafts } from '@/lib/payments/expired-drafts'
+import { reconcileExpiredWhopCheckouts } from '@/lib/payments/whop-provider'
 
 const DAY_MS = 86_400_000
 
@@ -22,6 +23,10 @@ export async function GET(req: NextRequest) {
   if (!cronSecret || req.headers.get('authorization') !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
   }
+  const whopCheckoutsTask = reconcileExpiredWhopCheckouts().catch(error => {
+    console.error('[cron] vérification Whop', error)
+    return { checked: 0, expired: 0, paid: 0, pending: 0, failed: true }
+  })
 
   const today = new Date()
   today.setUTCHours(0, 0, 0, 0)
@@ -272,6 +277,7 @@ export async function GET(req: NextRequest) {
     tx => deleteTerminalExpiredDrafts(tx),
     { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
   )
+  const whopCheckouts = await whopCheckoutsTask
   const analyticsEventsArchived = await archiveExpiredAnalyticsEvents()
-  return NextResponse.json({ success: true, reservationsChecked: reservations.length, emailsSent: sent, confirmationReminders, confirmationEscalations, reviewRequests, emailRetries, draftsReleased, analyticsEventsArchived, checkedAt: new Date().toISOString() })
+  return NextResponse.json({ success: true, reservationsChecked: reservations.length, emailsSent: sent, confirmationReminders, confirmationEscalations, reviewRequests, emailRetries, draftsReleased, whopCheckouts, analyticsEventsArchived, checkedAt: new Date().toISOString() })
 }

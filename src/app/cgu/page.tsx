@@ -61,8 +61,8 @@ export default function CGU() {
 
       <section id="commission">
         <h2 style={h2}>4. Commission et paiements</h2>
-        <p style={p}>SAFARUMA perçoit une <strong>commission de 12%</strong> sur le montant total de chaque réservation confirmée, prélevée automatiquement lors du paiement.</p>
-        <p style={p}>Tous les paiements sont traités via <strong>Stripe</strong> (certifié PCI-DSS niveau 1). Les fonds sont conservés en séquestre par SAFARUMA jusqu'à la fin de mission, puis virés au guide dans les délais prévus.</p>
+        <p style={p}>Le client règle <strong>la totalité du montant de sa réservation en un seul paiement</strong>, encaissé par SAFARUMA.</p>
+        <p style={p}>Les paiements sont traités via <strong>Whop</strong>. SAFARUMA gère le reversement au guide après la fin de la prestation.</p>
         <div className="legal-box-gold">
           <div className="box-title">Séquestre et protection</div>
           <p style={{ ...p, marginBottom: 0 }}>En cas de litige non résolu avant le virement, les fonds peuvent être temporairement bloqués le temps de l'arbitrage. Cette mesure protège les deux parties.</p>

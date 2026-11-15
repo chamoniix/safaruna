@@ -6,6 +6,13 @@ import vm from 'node:vm'
 import ts from 'typescript'
 
 const require = createRequire(import.meta.url)
+const availabilityModule = { exports: {} }
+vm.runInNewContext(ts.transpileModule(readFileSync('src/lib/guide-availability.ts', 'utf8'), {
+  compilerOptions: { module: ts.ModuleKind.CommonJS, esModuleInterop: true },
+}).outputText, {
+  module: availabilityModule, exports: availabilityModule.exports, Date, Error,
+  require: (name: string) => name === 'server-only' ? {} : require(name),
+})
 
 function fixture() {
   let actor: any = { id: 'admin-test', email: 'admin@example.test', role: 'SUPERADMIN' }
@@ -35,6 +42,7 @@ function fixture() {
     if (elapsedMs > budget) throw Object.assign(new Error('Transaction already closed: expired transaction'), { code: 'P2028' })
   }
   const mocks: Record<string, any> = {
+    '@/lib/guide-availability': availabilityModule.exports,
     '@/lib/prisma': { $transaction: async (fn: any, options: any) => {
       calls.push('transaction'); transactionOptions = options; budget = options.timeout ?? 5000
       return fn(tx)

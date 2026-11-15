@@ -41,6 +41,17 @@ export function eachBookingDate(start: Date, end: Date): Date[] {
   return dates
 }
 
+export function activeReservationHoldWhere(now = new Date()): Prisma.ReservationHoldWhereInput {
+  return {
+    OR: [
+      { expiresAt: { gt: now } },
+      // Whop has no atomic checkout expiry. Its draft is removed only after
+      // reconciliation proves no payment can still be collected.
+      { draft: { data: { contains: '"paymentProvider":"WHOP"' } } },
+    ],
+  }
+}
+
 export async function assertMissionsAvailable(
   tx: Prisma.TransactionClient,
   missions: AvailabilityMission[],
@@ -72,7 +83,7 @@ export async function assertMissionsAvailable(
       where: {
         guideProfileId: mission.guideProfileId,
         date: { in: mission.dates },
-        expiresAt: { gt: now },
+        ...activeReservationHoldWhere(now),
         ...(options.excludeDraftRefNumber
           ? { draftRefNumber: { not: options.excludeDraftRefNumber } }
           : {}),

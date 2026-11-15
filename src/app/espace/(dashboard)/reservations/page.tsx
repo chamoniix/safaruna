@@ -15,7 +15,7 @@ type Reservation = {
 
 type PendingPayment = {
   refNumber: string;
-  provider: 'REVOLUT';
+  provider: 'REVOLUT' | 'WHOP';
   guideSlug: string;
   packageName: string;
   destination: 'MAKKAH' | 'MADINAH' | 'BOTH';

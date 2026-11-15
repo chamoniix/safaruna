@@ -1277,6 +1277,32 @@ model PaymentAttempt {
   @@index([status, createdAt])
 }
 
+enum VipConsultationStatus {
+  PENDING_PAYMENT
+  PAID
+  CONSULTATION_BOOKED
+}
+
+model VipConsultation {
+  id                    String                @id @default(cuid())
+  refNumber             String                @unique
+  status                VipConsultationStatus @default(PENDING_PAYMENT)
+  amountCents           Int                   @default(50000)
+  currency              String                @default("EUR")
+  provider              String                @default("WHOP")
+  providerCheckoutId    String?               @unique
+  providerPaymentId     String?               @unique
+  customerEmail         String?
+  contactPlatform       String?
+  contactPhone          String?
+  paidAt                DateTime?
+  consultationBookedAt DateTime?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  @@index([status, createdAt])
+}
+
 model PaymentEvent {
   id                  String             @id @default(cuid())
   attemptId           String?

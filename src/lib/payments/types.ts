@@ -13,7 +13,7 @@ export function isResumableBookingDate(value: unknown): value is string {
   return !Number.isNaN(parsed.getTime()) && parsed.toISOString() === canonical
 }
 
-export type PaymentProviderId = 'STRIPE' | 'REVOLUT'
+export type PaymentProviderId = 'STRIPE' | 'REVOLUT' | 'WHOP'
 
 export type DraftMission = {
   city: 'MAKKAH' | 'MADINAH'
@@ -37,6 +37,7 @@ export type DraftEarning = {
 }
 
 export type PaymentDraftData = {
+  commissionBps?: number
   cityChoice: CityChoice
   departDate: string
   returnDate: string

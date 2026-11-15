@@ -74,7 +74,7 @@ export default function ConfidentialitePage() {
         </ul>
 
         <h3 style={h3}>3.2 Données de paiement</h3>
-        <p style={p}>Les données bancaires sont traitées exclusivement par <strong>Stripe</strong> (certifié PCI-DSS niveau 1). SAFARUMA n&apos;a jamais accès à vos informations bancaires complètes — nous ne recevons qu&apos;un identifiant de transaction et les 4 derniers chiffres de votre carte.</p>
+        <p style={p}>Les données de carte bancaire sont traitées par <strong>Whop</strong> lors du paiement. SAFARUMA ne stocke pas votre numéro de carte bancaire ni votre code de sécurité.</p>
 
         <h3 style={h3}>3.3 Données de navigation</h3>
         <ul style={ul}>
@@ -112,7 +112,7 @@ export default function ConfidentialitePage() {
         <p style={p}>Vos données peuvent être partagées avec les sous-traitants suivants, dans le strict cadre de leur mission :</p>
         <ul style={ul}>
           <li style={li}><strong>Guides certifiés SAFARUMA</strong> — nom, prénom, dates et préférences de réservation, pour l&apos;exécution de votre mission uniquement</li>
-          <li style={li}><strong>Stripe</strong> — traitement sécurisé des paiements (PCI-DSS niveau 1)</li>
+          <li style={li}><strong>Whop</strong> — traitement sécurisé des paiements</li>
           <li style={li}><strong>Brevo</strong> — envoi des emails transactionnels (confirmations, réinitialisations de mot de passe)</li>
           <li style={li}><strong>Google Analytics</strong> — mesure d&apos;audience anonyme (uniquement si consentement)</li>
           <li style={li}><strong>Vercel</strong> — hébergement de l&apos;application</li>

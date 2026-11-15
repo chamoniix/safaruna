@@ -1,4 +1,4 @@
-export type PaymentProviderName = 'STRIPE' | 'REVOLUT'
+export type PaymentProviderName = 'STRIPE' | 'REVOLUT' | 'WHOP'
 
 export const PAYMENT_EVENT_PROCESSING_LEASE_MS = 5 * 60 * 1000
 
@@ -58,6 +58,11 @@ export async function getActivePaymentProvider(): Promise<PaymentProvider> {
   if (configured === 'REVOLUT') {
     const { revolutPaymentProvider } = await import('@/lib/payments/revolut-provider')
     return revolutPaymentProvider()
+  }
+
+  if (configured === 'WHOP') {
+    const { whopPaymentProvider } = await import('@/lib/payments/whop-provider')
+    return whopPaymentProvider()
   }
 
   throw new Error(`Processeur de paiement non pris en charge: ${configured}`)

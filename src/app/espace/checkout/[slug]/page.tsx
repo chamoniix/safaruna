@@ -20,8 +20,8 @@ import {
 } from '@/lib/booking-pricing'
 import {
   centsToEuros,
-  DEFAULT_GUIDE_NET_RATES,
-  guideServiceRetailCents,
+  publicGuideServicePriceCents,
+  PUBLIC_EXTRA_PLACE_CENTS,
   GUIDE_SERVICE_MARKUP_BPS,
   TRAVEL_MARKUP_BPS,
 } from '@/lib/guide-pricing'
@@ -43,8 +43,8 @@ type PublicGuide = {
   servesMakkah?: boolean
   servesMadinah?: boolean
   prices?: {
-    makkah?: { upTo6?: number; upTo15?: number; upTo32?: number }
-    madinah?: { upTo6?: number; upTo15?: number; upTo32?: number }
+    makkah?: { group1To4?: number; group5To14?: number; group15Plus?: number }
+    madinah?: { group1To4?: number; group5To14?: number; group15Plus?: number }
   }
 }
 
@@ -56,8 +56,8 @@ type CheckoutPlace = Place & {
 }
 
 type PaymentSession = {
-  provider: 'REVOLUT'
-  checkoutToken: string
+  provider: 'REVOLUT' | 'WHOP'
+  checkoutToken?: string
   sessionUrl: string
   refNumber: string
 }
@@ -255,10 +255,9 @@ function formatGuideCity(city: string): string {
 }
 
 function guideRetailPrice(guideData: PublicGuide | null, city: 'MAKKAH' | 'MADINAH', nbPeople: number): number {
-  const tier = nbPeople <= 6 ? 'upTo6' : nbPeople <= 15 ? 'upTo15' : 'upTo32'
-  const cityPrices = city === 'MAKKAH' ? guideData?.prices?.makkah : guideData?.prices?.madinah
-  const price = cityPrices?.[tier]
-  return typeof price === 'number' ? price : 0
+  void guideData
+  void city
+  return centsToEuros(publicGuideServicePriceCents(nbPeople))
 }
 
 // ── Lieux historiques → assignés à une ville ──────
@@ -287,7 +286,7 @@ export default function CheckoutPage() {
   const [placeCatalog, setPlaceCatalog] = useState<CheckoutPlace[]>(PLACES.map(place => ({
     ...place,
     isActive: true,
-    retailCents: { upTo6: 6_500, upTo15: 9_100, upTo32: 11_700 },
+    retailCents: { upTo6: PUBLIC_EXTRA_PLACE_CENTS, upTo15: PUBLIC_EXTRA_PLACE_CENTS, upTo32: PUBLIC_EXTRA_PLACE_CENTS },
   })))
   const [pricingSettings, setPricingSettings] = useState({
     guideServiceMarkupBps: GUIDE_SERVICE_MARKUP_BPS,
@@ -393,10 +392,18 @@ export default function CheckoutPage() {
         const pending = data.pendingCheckout
         if (
           !pending
-          || pending.provider !== 'REVOLUT'
           || pending.refNumber !== resumeRef
           || pending.checkout.guideSlug !== slug
         ) {
+          throw new Error('Le paiement est encore en cours de vérification. Réessayez dans un instant.')
+        }
+
+        if (pending.provider === 'WHOP') {
+          clearSavedCheckout()
+          window.location.href = pending.sessionUrl
+          return
+        }
+        if (pending.provider !== 'REVOLUT' || !pending.checkoutToken) {
           throw new Error('Le paiement est encore en cours de vérification. Réessayez dans un instant.')
         }
 
@@ -641,8 +648,8 @@ export default function CheckoutPage() {
     : []
   const bookingPrices = getBookingPrices(pricingSettings.travelMarkupBps)
   const defaultGuidePrice = {
-    MAKKAH: centsToEuros(guideServiceRetailCents(DEFAULT_GUIDE_NET_RATES, 'MAKKAH', 6, pricingSettings.guideServiceMarkupBps)),
-    MADINAH: centsToEuros(guideServiceRetailCents(DEFAULT_GUIDE_NET_RATES, 'MADINAH', 6, pricingSettings.guideServiceMarkupBps)),
+    MAKKAH: centsToEuros(publicGuideServicePriceCents(nbPersonnes)),
+    MADINAH: centsToEuros(publicGuideServicePriceCents(nbPersonnes)),
   }
 
   // Calcul prix — tarif du ou des guides selon la taille du groupe.
@@ -657,7 +664,7 @@ export default function CheckoutPage() {
       : cityChoice ? defaultGuidePrice[cityChoice] : 0
   )
   const extraPlaces = selectedPlaces.filter(pk => !baseIncludedPlaces.includes(pk))
-  const placeTier = nbPersonnes <= 6 ? 'upTo6' : nbPersonnes <= 15 ? 'upTo15' : 'upTo32'
+  const placeTier = nbPersonnes <= 4 ? 'upTo6' : nbPersonnes <= 14 ? 'upTo15' : 'upTo32'
   const displayPlacePrices = Object.fromEntries(placeCatalog.map(place => [place.key, centsToEuros(place.retailCents[placeTier])]))
   const prixLieux = extraPlaces.reduce((sum, key) => sum + (displayPlacePrices[key] ?? 0), 0)
   const allVisitPlaces = [...new Set([...baseIncludedPlaces, ...selectedPlaces])]
@@ -843,6 +850,12 @@ export default function CheckoutPage() {
       }
       if (!res.ok) throw new Error(data.error || 'Erreur')
       if (data.provider === 'STRIPE') {
+        if (!data.sessionUrl) throw new Error('Lien de paiement indisponible')
+        clearSavedCheckout()
+        window.location.href = data.sessionUrl
+        return
+      }
+      if (data.provider === 'WHOP') {
         if (!data.sessionUrl) throw new Error('Lien de paiement indisponible')
         clearSavedCheckout()
         window.location.href = data.sessionUrl
@@ -2306,7 +2319,7 @@ export default function CheckoutPage() {
               <div style={{ display: 'flex', justifyContent: 'space-between', padding: '1rem 1.25rem', borderBottom: '1px solid #F5F0E8' }}>
                 <div>
                   <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#1A1209' }}>{basePackage?.name}</div>
-                  <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>Accompagnement sélectionné</div>
+                  <div style={{ fontSize: '0.72rem', color: '#7A6D5A', marginTop: 2 }}>Tranches : 1–4, 5–14, 15+ · +25 € par personne dès la 5e</div>
                 </div>
                 <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>{displayedBasePrice}€</div>
               </div>
@@ -2315,7 +2328,7 @@ export default function CheckoutPage() {
               {resumedPricing && extraPlaces.length > 0 ? (
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', padding: '0.75rem 1.25rem', borderBottom: '1px solid #F5F0E8' }}>
                   <div>
-                    <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>Visites supplémentaires</div>
+                    <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>Visites supplémentaires · 50 € par groupe et par lieu</div>
                     <div style={{ fontSize: '0.7rem', color: '#7A6D5A', marginTop: 2 }}>{extraPlaces.map(pk => placeCatalog.find(place => place.key === pk)?.nameFr).filter(Boolean).join(' · ')}</div>
                   </div>
                   <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209', whiteSpace: 'nowrap' }}>{displayedPlacesPrice}€</div>
@@ -2327,7 +2340,7 @@ export default function CheckoutPage() {
                   <div key={pk} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 1.25rem', borderBottom: '1px solid #F5F0E8' }}>
                     <div>
                       <div style={{ fontSize: '0.85rem', color: '#1A1209' }}>{place.emoji} {place.nameFr}</div>
-                      <div style={{ fontSize: '0.7rem', color: '#7A6D5A', marginTop: 2 }}>Visite supplémentaire</div>
+                      <div style={{ fontSize: '0.7rem', color: '#7A6D5A', marginTop: 2 }}>Visite supplémentaire · par groupe</div>
                     </div>
                     <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.1rem', fontWeight: 700, color: '#1A1209' }}>{prix}€</div>
                   </div>
@@ -2467,7 +2480,7 @@ export default function CheckoutPage() {
               </button>
             ) : (
               <RevolutEmbeddedCheckout
-                checkoutToken={paymentSession.checkoutToken}
+                checkoutToken={paymentSession.checkoutToken ?? ''}
                 hostedCheckoutUrl={paymentSession.sessionUrl}
                 confirmationUrl={`/espace/checkout/${slug}/confirmation?ref=${encodeURIComponent(paymentSession.refNumber)}&payment=success`}
                 onLeaveForPayment={clearSavedCheckout}
@@ -2483,7 +2496,7 @@ export default function CheckoutPage() {
                 <rect x="3" y="11" width="18" height="11" rx="2"/>
                 <path d="M7 11V7a5 5 0 0110 0v4"/>
               </svg>
-              Paiement 100% sécurisé{paymentSession ? ' · Powered by Revolut' : ''}
+              Paiement 100% sécurisé{paymentSession ? ` · Powered by ${paymentSession.provider === 'REVOLUT' ? 'Revolut' : 'Whop'}` : ''}
             </div>
           </div>
         )}

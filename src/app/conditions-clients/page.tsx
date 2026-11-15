@@ -61,7 +61,7 @@ export default function ConditionsClients() {
         <div className="legal-box-red">
           <div className="box-title">Fraudes clients — Sanctions et contre-mesures</div>
           <ul style={{ ...ul, marginBottom: 0 }}>
-            <li style={li}><strong>Chargeback abusif</strong> (contestation bancaire frauduleuse) : SAFARUMA conteste systématiquement, avec preuves (messages, confirmation, historique) — suspension du compte + signalement Stripe</li>
+            <li style={li}><strong>Chargeback abusif</strong> (contestation bancaire frauduleuse) : SAFARUMA conteste systématiquement, avec preuves (messages, confirmation, historique) — suspension du compte + signalement Whop</li>
             <li style={li}><strong>Fausse déclaration de mission non réalisée</strong> : preuves exigées (captures messagerie, témoignages, photos). Si mensonge prouvé : <strong>suspension permanente</strong></li>
             <li style={li}><strong>Annulations tardives répétées (3+)</strong> : dépôt de garantie de <strong>30%</strong> requis pour toutes réservations futures</li>
             <li style={li}><strong>Faux avis négatif</strong> pour obtenir un remboursement : investigation, suspension si fraude prouvée</li>
@@ -89,7 +89,7 @@ export default function ConditionsClients() {
           <div className="box-title">La Promesse SAFARUMA</div>
           <ul style={{ ...ul, marginBottom: 0 }}>
             <li style={li}><strong>Guides 100% vérifiés</strong> : identité, Certifié SAFARUMA, casier judiciaire</li>
-            <li style={li}><strong>Paiements sécurisés</strong> via Stripe (PCI-DSS niveau 1) — jamais stockés chez SAFARUMA</li>
+            <li style={li}><strong>Paiements sécurisés</strong> via Whop — données de carte bancaire jamais stockées chez SAFARUMA</li>
             <li style={li}><strong>Argent protégé</strong> en séquestre jusqu'à la fin de la mission</li>
             <li style={li}><strong>Équipe réactive</strong> en cas de problème, par WhatsApp ou email</li>
             <li style={li}><strong>Avis vérifiés</strong> — uniquement après mission réelle</li>

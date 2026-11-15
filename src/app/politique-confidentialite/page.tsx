@@ -74,20 +74,20 @@ export default function PolitiqueConfidentialite() {
 
       <section id="paiements">
         <h2 style={h2}>3. Paiements et sécurité financière</h2>
-        <p style={p}>Tous les paiements sont traités par <strong>Stripe</strong>, prestataire de paiement certifié PCI-DSS niveau 1.</p>
+        <p style={p}>Les paiements sont traités via <strong>Whop</strong>.</p>
         <div className="legal-box-red">
           <div className="box-title">Engagement fort</div>
-          <p style={{ ...p, marginBottom: 0 }}><strong>SAFARUMA ne stocke jamais vos numéros de carte bancaire</strong>, codes CVV ou données sensibles de paiement. Ces informations transitent uniquement via les serveurs sécurisés de Stripe. SAFARUMA n'y accède pas.</p>
+          <p style={{ ...p, marginBottom: 0 }}><strong>SAFARUMA ne stocke jamais vos numéros de carte bancaire</strong> ni vos codes CVV. Ces informations sont traitées par Whop lors du paiement.</p>
         </div>
         <p style={p}>Les données de facturation (montants, dates, identifiants de transaction) sont conservées pour respecter nos obligations comptables et légales (durée : 10 ans).</p>
-        <p style={p}>Pour la politique de confidentialité de Stripe : <a href="https://stripe.com/fr/privacy" style={{ color: '#C9A84C' }} target="_blank" rel="noopener noreferrer">stripe.com/fr/privacy</a></p>
+        <p style={p}>Pour la politique de confidentialité de Whop : <a href="https://whop.com/privacy/" style={{ color: '#C9A84C' }} target="_blank" rel="noopener noreferrer">whop.com/privacy</a></p>
       </section>
 
       <section id="partage">
         <h2 style={h2}>4. Partage des données</h2>
         <p style={p}><strong>SAFARUMA ne vend jamais vos données à des tiers.</strong> Vos données personnelles ne sont partagées qu'avec :</p>
         <ul style={ul}>
-          <li style={li}><strong>Stripe</strong> — pour le traitement des paiements</li>
+          <li style={li}><strong>Whop</strong> — pour le traitement des paiements</li>
           <li style={li}><strong>Brevo (Sendinblue)</strong> — pour l'envoi d'emails transactionnels</li>
           <li style={li}><strong>Vercel</strong> — hébergeur de l'infrastructure</li>
           <li style={li}><strong>L'autre partie à votre réservation</strong> — le guide voit vos coordonnées de contact après confirmation, et vice-versa</li>

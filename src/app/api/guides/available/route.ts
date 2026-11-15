@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { centsToEuros, guideServiceRetailCents } from '@/lib/guide-pricing'
+import { centsToEuros, publicGuideServicePriceCents } from '@/lib/guide-pricing'
 import { getPlatformPricing } from '@/lib/platform-pricing'
-import { parseBookingDate } from '@/lib/guide-availability'
+import { activeReservationHoldWhere, parseBookingDate } from '@/lib/guide-availability'
 
 type ServiceCity = 'MAKKAH' | 'MADINAH' | 'BOTH'
 
@@ -76,7 +76,7 @@ export async function GET(req: NextRequest) {
             where: {
               guideProfileId: { in: guideIds },
               date: { gte: startDate, lte: endDate },
-              expiresAt: { gt: new Date() },
+              ...activeReservationHoldWhere(),
             },
             select: { guideProfileId: true },
           }),
@@ -104,14 +104,14 @@ export async function GET(req: NextRequest) {
         activePlaces: guide.places.map(place => place.placeKey),
         prices: {
           makkah: {
-            upTo6: centsToEuros(guideServiceRetailCents(guide, 'MAKKAH', 6, pricing.guideServiceMarkupBps)),
-            upTo15: centsToEuros(guideServiceRetailCents(guide, 'MAKKAH', 15, pricing.guideServiceMarkupBps)),
-            upTo32: centsToEuros(guideServiceRetailCents(guide, 'MAKKAH', 32, pricing.guideServiceMarkupBps)),
+            group1To4: centsToEuros(publicGuideServicePriceCents(4)),
+            group5To14: centsToEuros(publicGuideServicePriceCents(14)),
+            group15Plus: centsToEuros(publicGuideServicePriceCents(15)),
           },
           madinah: {
-            upTo6: centsToEuros(guideServiceRetailCents(guide, 'MADINAH', 6, pricing.guideServiceMarkupBps)),
-            upTo15: centsToEuros(guideServiceRetailCents(guide, 'MADINAH', 15, pricing.guideServiceMarkupBps)),
-            upTo32: centsToEuros(guideServiceRetailCents(guide, 'MADINAH', 32, pricing.guideServiceMarkupBps)),
+            group1To4: centsToEuros(publicGuideServicePriceCents(4)),
+            group5To14: centsToEuros(publicGuideServicePriceCents(14)),
+            group15Plus: centsToEuros(publicGuideServicePriceCents(15)),
           },
         },
         rating: stats?._count.ratingOverall ? Math.round((stats._avg.ratingOverall ?? 0) * 10) / 10 : null,

@@ -4,6 +4,7 @@ import { adminAuditDetail, adminAuditFields, getAdminActor, getAdminAuditContext
 import prisma from '@/lib/prisma';
 import { baseTemplate, badge, btn, divider, escapeHtml, heading, p, sendEmail } from '@/lib/email';
 import { assertNoRecordedGuideTransfer, GuideTransferError } from '@/lib/guide-transfers';
+import { activeReservationHoldWhere } from '@/lib/guide-availability';
 
 const DAY_MS = 86_400_000;
 
@@ -88,7 +89,7 @@ export async function POST(req: NextRequest) {
             select: { id: true },
           }),
           tx.reservationHold.findFirst({
-            where: { guideProfileId: newGuideProfileId, date: { in: dates }, expiresAt: { gt: new Date() } },
+            where: { guideProfileId: newGuideProfileId, date: { in: dates }, ...activeReservationHoldWhere() },
             select: { id: true },
           }),
         ]);

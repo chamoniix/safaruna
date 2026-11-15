@@ -85,8 +85,8 @@ type AvailableGuideApi = {
   bio?: string | null;
   pmrCertified?: boolean;
   prices?: {
-    makkah?: { upTo6?: number };
-    madinah?: { upTo6?: number };
+    makkah?: { group1To4?: number; group5To14?: number; group15Plus?: number };
+    madinah?: { group1To4?: number; group5To14?: number; group15Plus?: number };
   };
 };
 
@@ -424,7 +424,7 @@ export default function GuideSearchPage() {
       .then(data => {
         const mapped: GuideData[] = ((data.guides || []) as AvailableGuideApi[]).map(item => {
           const primaryIsMakkah = String(item.city || '').toUpperCase().includes('MAKKAH');
-          const publicPrice = primaryIsMakkah ? item.prices?.makkah?.upTo6 : item.prices?.madinah?.upTo6;
+          const publicPrice = primaryIsMakkah ? item.prices?.makkah?.group1To4 : item.prices?.madinah?.group1To4;
           const languageCodes = item.slug === 'naim-laamari'
             ? ['fr', 'ar', 'algerien', 'darija'].filter(code => (item.languages || []).includes(code))
             : (item.languages || []);
@@ -444,7 +444,7 @@ export default function GuideSearchPage() {
             languages: languageCodes.map(code => LANG_CODES[code] || code),
             services: item.pmrCertified ? ['Prend en charge les PMR'] : [],
             price: publicPrice || 0,
-            priceSub: primaryIsMakkah ? 'Makkah · par groupe' : 'Médine · par groupe',
+            priceSub: `${primaryIsMakkah ? 'Makkah' : 'Médine'} · groupe de 1 à 4 pers. · +25 €/pers. dès la 5e`,
             badge: '',
             badgeColor: '#7A6D5A',
             gradient: 'linear-gradient(135deg, #1A1209, #4A3F30)',

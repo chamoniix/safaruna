@@ -12,8 +12,11 @@ import {
 } from '@/lib/booking-pricing'
 import {
   centsToEuros,
-  guideServiceNetCents,
-  guideServiceRetailCents,
+  allocateGuidePaymentCents,
+  SAFARUMA_COMMISSION_BPS,
+  type GuidePaymentServices,
+  publicGuideServicePriceCents,
+  PUBLIC_EXTRA_PLACE_CENTS,
 } from '@/lib/guide-pricing'
 import {
   analyticsCountry,
@@ -26,11 +29,10 @@ import { getPlatformPricing } from '@/lib/platform-pricing'
 import {
   getEffectivePlaceCatalog,
   includedPlaceKeysForCity,
-  placeNetCentsForGroup,
-  placeRetailCentsForGroup,
 } from '@/lib/place-catalog'
 import { getActivePaymentProvider, type PaymentProvider } from '@/lib/payments/provider'
 import { deleteTerminalExpiredDrafts } from '@/lib/payments/expired-drafts'
+import { reconcileExpiredWhopCheckouts } from '@/lib/payments/whop-provider'
 import { assertMissionsAvailable, GuideAvailabilityConflictError, parseBookingDate } from '@/lib/guide-availability'
 import { expirePromoCodes, normalizePromoCode, promoDiscountCents } from '@/lib/referral'
 import {
@@ -172,7 +174,6 @@ export async function handleCreatePaymentSession(req: NextRequest) {
     return NextResponse.json({ error: 'Un lieu sélectionné est invalide ou n’est plus actif' }, { status: 409 })
   }
   const includedPlaceKeys = includedPlaceKeysForCity(placeCatalog, cityChoice)
-  const placeByKey = new Map(placeCatalog.map(place => [place.key, place]))
 
   const makkahGuideSlug = body.selectedGuideSlug || body.guideSlug
   const madinahGuideSlug = cityChoice === 'BOTH'
@@ -272,10 +273,7 @@ export async function handleCreatePaymentSession(req: NextRequest) {
   }
 
   const extraPlaceKeys = selectedPlaceKeys.filter(key => !includedPlaceKeys.includes(key))
-  const extraPlacesRetailCents = extraPlaceKeys.reduce((sum, key) => {
-    const place = placeByKey.get(key)!
-    return sum + placeRetailCentsForGroup(place, body.nbPersonnes, pricingSettings.guideServiceMarkupBps)
-  }, 0)
+  const extraPlacesRetailCents = extraPlaceKeys.length * PUBLIC_EXTRA_PLACE_CENTS
 
   const transportPricing = calculateBookingTransportPrice({
     cityChoice,
@@ -289,77 +287,27 @@ export async function handleCreatePaymentSession(req: NextRequest) {
     guideBedProvided: body.guideBedProvided,
     travelMarkupBps: pricingSettings.travelMarkupBps,
   })
-  type EarningDraft = {
-    guideProfileId: string
-    serviceNetCents: number
-    placesNetCents: number
-    transportNetCents: number
-    hotelNetCents: number
-    totalNetCents: number
-    breakdown: {
-      missions: Array<{
-        city: MissionCity
-        serviceNetCents: number
-        extraPlaceCount: number
-        placesNetCents: number
-        localTransportNetCents: number
-      }>
-      intercityNetCents: number
-      hotelNetCents: number
-    }
-  }
-
-  const earningByGuide = new Map<string, EarningDraft>()
+  const servicesByGuide = new Map<string, GuidePaymentServices>()
   let guideServicesRetailCents = 0
   for (const mission of missions) {
-    const missionGuide = guides.find(item => item.id === mission.guideProfileId)!
-    const serviceNetCents = guideServiceNetCents(missionGuide, mission.city, body.nbPersonnes)
-    guideServicesRetailCents += guideServiceRetailCents(missionGuide, mission.city, body.nbPersonnes, pricingSettings.guideServiceMarkupBps)
-    const missionExtraPlaces = mission.selectedPlaces.filter(key => extraPlaceKeys.includes(key))
-    const placesNetTotalCents = missionExtraPlaces.reduce((sum, key) => {
-      const place = placeByKey.get(key)!
-      return sum + placeNetCentsForGroup(place, body.nbPersonnes)
-    }, 0)
-    const localTransportNetCents = Math.round((mission.city === 'MAKKAH'
-      ? transportPricing.localCarNetMakkah
-      : transportPricing.localCarNetMadinah) * 100)
-    const earning = earningByGuide.get(mission.guideProfileId) ?? {
+    const serviceGrossCents = publicGuideServicePriceCents(body.nbPersonnes)
+    guideServicesRetailCents += serviceGrossCents
+    const extraPlaceCount = mission.selectedPlaces.filter(key => extraPlaceKeys.includes(key)).length
+    const services = servicesByGuide.get(mission.guideProfileId) ?? {
       guideProfileId: mission.guideProfileId,
-      serviceNetCents: 0,
-      placesNetCents: 0,
-      transportNetCents: 0,
-      hotelNetCents: 0,
-      totalNetCents: 0,
-      breakdown: { missions: [], intercityNetCents: 0, hotelNetCents: 0 },
+      serviceGrossCents: 0, placesGrossCents: 0, transportGrossCents: 0, hotelGrossCents: 0,
     }
-    earning.serviceNetCents += serviceNetCents
-    earning.placesNetCents += placesNetTotalCents
-    earning.transportNetCents += localTransportNetCents
-    earning.breakdown.missions.push({
-      city: mission.city,
-      serviceNetCents,
-      extraPlaceCount: missionExtraPlaces.length,
-      placesNetCents: placesNetTotalCents,
-      localTransportNetCents,
-    })
-    earningByGuide.set(mission.guideProfileId, earning)
+    services.serviceGrossCents += serviceGrossCents
+    services.placesGrossCents += extraPlaceCount * PUBLIC_EXTRA_PLACE_CENTS
+    services.transportGrossCents += Math.round((mission.city === 'MAKKAH'
+      ? transportPricing.localCarMakkah : transportPricing.localCarMadinah) * 100)
+    servicesByGuide.set(mission.guideProfileId, services)
   }
-
   if (sameGuideForBothCities) {
-    const earning = earningByGuide.get(makkahGuide!.id)!
-    const intercityNetCents = Math.round(transportPricing.intercityNet * 100)
-    const hotelNetCents = Math.round(transportPricing.guideHotelNet * 100)
-    earning.transportNetCents += intercityNetCents
-    earning.hotelNetCents += hotelNetCents
-    earning.breakdown.intercityNetCents = intercityNetCents
-    earning.breakdown.hotelNetCents = hotelNetCents
+    const services = servicesByGuide.get(makkahGuide!.id)!
+    services.transportGrossCents += Math.round(transportPricing.intercity * 100)
+    services.hotelGrossCents += Math.round(transportPricing.guideHotel * 100)
   }
-
-  const earningDrafts = [...earningByGuide.values()].map(earning => ({
-    ...earning,
-    totalNetCents: earning.serviceNetCents + earning.placesNetCents +
-      earning.transportNetCents + earning.hotelNetCents,
-  }))
   const expectedPriceCents = guideServicesRetailCents + extraPlacesRetailCents + Math.round((
     transportPricing.intercity + transportPricing.localCar + transportPricing.guideHotel
   ) * 100)
@@ -399,6 +347,14 @@ export async function handleCreatePaymentSession(req: NextRequest) {
   const promoDiscount = appliedDiscountBps ? promoDiscountCents(expectedPriceCents, appliedDiscountBps) : 0
   const chargedPriceCents = expectedPriceCents - promoDiscount
   const chargedPrice = centsToEuros(chargedPriceCents)
+  const earningDrafts = allocateGuidePaymentCents(chargedPriceCents, [...servicesByGuide.values()]).map(earning => ({
+    ...earning,
+    breakdown: {
+      commissionBps: SAFARUMA_COMMISSION_BPS,
+      prestations: servicesByGuide.get(earning.guideProfileId)!,
+      cities: missions.filter(mission => mission.guideProfileId === earning.guideProfileId).map(mission => mission.city),
+    },
+  }))
 
   const refNumber = 'SAF-' + Date.now().toString(36).toUpperCase() +
     Math.random().toString(36).slice(2, 5).toUpperCase()
@@ -406,6 +362,8 @@ export async function handleCreatePaymentSession(req: NextRequest) {
   const analyticsSessionHash = hashAnalyticsSession(body.analyticsSessionId)
   const normalizedBody = {
     ...body,
+    paymentProvider: paymentProvider.name,
+    commissionBps: SAFARUMA_COMMISSION_BPS,
     selectedPlaces: selectedPlaceKeys,
     allVisitPlaces,
     totalPrice: chargedPrice,
@@ -439,6 +397,7 @@ export async function handleCreatePaymentSession(req: NextRequest) {
   }
 
   try {
+    if (paymentProvider.name === 'WHOP') await reconcileExpiredWhopCheckouts()
     await prisma.$transaction(async tx => {
       await deleteTerminalExpiredDrafts(tx)
       await expirePromoCodes(tx)

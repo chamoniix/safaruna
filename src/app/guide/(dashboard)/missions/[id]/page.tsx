@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { PLACES } from '@/lib/places';
@@ -15,6 +15,7 @@ type Mission = {
   localTransportDays: number;
   guideConfirmationStatus: string;
   guideConfirmedAt: string | null;
+  guideCompleted: boolean;
 };
 
 type MissionDetail = {
@@ -92,6 +93,31 @@ export default function MissionDetailPage() {
   const [data, setData] = useState<MissionDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [completionError, setCompletionError] = useState('');
+  const [completingId, setCompletingId] = useState<string | null>(null);
+  const completionInFlight = useRef(false);
+
+  async function completeMission(missionId: string) {
+    if (completionInFlight.current) return;
+    completionInFlight.current = true;
+    setCompletingId(missionId);
+    setCompletionError('');
+    try {
+      const response = await fetch(`/api/guide/missions/${params.id}`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'COMPLETE', missionId }),
+      });
+      const result = await response.json();
+      if (!response.ok || result.guideCompleted !== true) throw new Error(result.error || 'Déclaration non confirmée.');
+      setData(current => current && ({ ...current, missions: current.missions.map(mission =>
+        mission.id === missionId ? { ...mission, guideCompleted: true } : mission) }));
+    } catch (cause) {
+      setCompletionError(`${cause instanceof Error ? cause.message : 'Réponse non reçue.'} Rechargez la page pour vérifier l’enregistrement.`);
+    } finally {
+      completionInFlight.current = false;
+      setCompletingId(null);
+    }
+  }
 
   useEffect(() => {
     setLoading(true);
@@ -163,10 +189,19 @@ export default function MissionDetailPage() {
                   <div><dt style={{ display: 'inline', color: '#7A6D5A', fontWeight: 700 }}>Lieux : </dt><dd style={{ display: 'inline', margin: 0 }}>{placeNames(mission.selectedPlaces)}</dd></div>
                   <div><dt style={{ display: 'inline', color: '#7A6D5A', fontWeight: 700 }}>Transport local : </dt><dd style={{ display: 'inline', margin: 0 }}>{localTransportLabel(mission.localTransport, mission.localTransportDays)}</dd></div>
                 </dl>
+                {mission.guideCompleted ? (
+                  <p style={{ fontSize: '0.78rem', fontWeight: 700, color: '#1D5C3A', marginBottom: 0 }}>Prestation déclarée terminée</p>
+                ) : ['CONFIRMED', 'COMPLETED'].includes(data.status) && (
+                  <button type="button" disabled={completingId !== null} onClick={() => completeMission(mission.id)}
+                    style={{ marginTop: '0.75rem', padding: '0.5rem 1rem', border: 0, borderRadius: 20, background: '#1A1209', color: '#F0D897', fontWeight: 700 }}>
+                    {completingId === mission.id ? 'Enregistrement…' : 'Déclarer ma prestation terminée'}
+                  </button>
+                )}
               </div>
             );
           })}
         </div>
+        {completionError && <p role="alert" style={{ fontSize: '0.82rem', color: '#DC2626' }}>{completionError}</p>}
       </div>
 
       {/* Revenu */}

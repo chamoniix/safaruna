@@ -57,6 +57,7 @@ async function readSource(db: Prisma.TransactionClient, earningId: string) {
   const earning = await db.guideEarning.findUnique({ where: { id: earningId }, include: {
     reservation: { select: {
       id: true, refNumber: true, status: true, endDate: true, stripePaymentId: true,
+      missions: { select: { guideProfileId: true, endDate: true, guideCompleted: true } },
       paymentAttempts: { where: { status: 'SUCCEEDED' }, select: { id: true }, take: 1 },
     } },
     guideProfile: { select: { id: true, guideAccountId: true,
@@ -64,8 +65,14 @@ async function readSource(db: Prisma.TransactionClient, earningId: string) {
     } },
   } })
   if (!earning) throw new GuideTransferError('Revenu Guide introuvable.', 404)
-  if (earning.status === 'CANCELLED' || earning.reservation.status !== 'COMPLETED') {
-    throw new GuideTransferError('La réservation doit être terminée et le revenu non annulé.')
+  const guideMissions = earning.reservation.missions.filter(mission => mission.guideProfileId === earning.guideProfileId)
+  if (earning.status === 'CANCELLED'
+    || !['CONFIRMED', 'COMPLETED'].includes(earning.reservation.status)
+    || (!guideMissions.length && earning.reservation.status !== 'COMPLETED')) {
+    throw new GuideTransferError('La prestation doit être terminée et le revenu non annulé.')
+  }
+  if (guideMissions.some(mission => !mission.guideCompleted)) {
+    throw new GuideTransferError('Le Guide doit déclarer ses prestations terminées dans son espace.')
   }
   if (!earning.reservation.stripePaymentId && !earning.reservation.paymentAttempts.length) {
     throw new GuideTransferError('Aucun paiement client vérifié pour cette réservation.')
@@ -89,12 +96,16 @@ async function readSource(db: Prisma.TransactionClient, earningId: string) {
     || verified.after.accountHolderConfirmed !== true) {
     throw new GuideTransferError('Les coordonnées et le titulaire doivent être vérifiés par l’équipe.')
   }
-  const dueAt = guideTransferDueAt(earning.reservation.endDate)
+  // Older reservations without mission rows retain their recorded end date.
+  const serviceEnd = guideMissions.length
+    ? new Date(Math.max(...guideMissions.map(mission => mission.endDate.getTime())))
+    : earning.reservation.endDate
+  const dueAt = guideTransferDueAt(serviceEnd)
   const sourceRevision = dossierFingerprint({
     earningId: earning.id, guideProfileId: earning.guideProfileId, reservationId: earning.reservationId,
     amountCents: earning.totalNetCents, service: earning.serviceNetCents, places: earning.placesNetCents,
     transport: earning.transportNetCents, hotel: earning.hotelNetCents, breakdown: earning.breakdown,
-    endDate: earning.reservation.endDate.toISOString(), bankRevision,
+    endDate: serviceEnd.toISOString(), bankRevision,
   })
   return { earning, bank, bankRevision, sourceRevision, dueAt }
 }
@@ -103,7 +114,7 @@ function validateSentAt(sentAt: Date, dueAt: Date) {
   if (!Number.isFinite(sentAt.getTime()) || sentAt > new Date()) {
     throw new GuideTransferError('La date d’envoi doit correspondre à un virement déjà effectué.', 400)
   }
-  if (sentAt < dueAt) throw new GuideTransferError('La date précède l’échéance des trois jours ouvrés après le séjour.')
+  if (sentAt < dueAt) throw new GuideTransferError('La date précède l’échéance des trois jours ouvrés après la date de fin de prestation.')
 }
 
 function assertCurrentRecord(record: Transfer, source: Awaited<ReturnType<typeof readSource>>) {

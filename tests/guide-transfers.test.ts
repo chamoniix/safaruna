@@ -31,7 +31,7 @@ function fixture() {
     id: 'earning', reservationId: 'reservation', guideProfileId: 'guide',
     serviceNetCents: 10000, placesNetCents: 5000, transportNetCents: 0, hotelNetCents: 0,
     totalNetCents: 15000, breakdown: {}, status: 'UPCOMING' as GuideEarningStatus, transferId: null as string | null,
-    reservation: { id: 'reservation', refNumber: 'TEST-RESERVATION', status: 'COMPLETED', endDate: new Date('2026-01-01T12:00:00Z'), stripePaymentId: null as string | null, paymentAttempts: [{ id: 'succeeded' }] },
+    reservation: { id: 'reservation', refNumber: 'TEST-RESERVATION', status: 'COMPLETED', endDate: new Date('2026-01-01T12:00:00Z'), missions: [] as { guideProfileId: string; endDate: Date; guideCompleted: boolean }[], stripePaymentId: null as string | null, paymentAttempts: [{ id: 'succeeded' }] },
     guideProfile: { id: 'guide', guideAccountId: 'account', guideAccount: { email: 'guide@example.test', displayName: 'Test Guide', firstName: 'Test', lastName: 'Guide' } },
   }
   let records: Transfer[] = []
@@ -114,16 +114,55 @@ function fixture() {
 }
 
 for (const [end, due] of [
-  ['2026-09-14T12:00:00Z', '2026-09-16T21:00:00.000Z'], // Mon -> Thu
-  ['2026-09-17T12:00:00Z', '2026-09-22T21:00:00.000Z'], // Thu -> Wed
-  ['2026-09-18T12:00:00Z', '2026-09-22T21:00:00.000Z'], // Fri -> Wed
+  ['2026-09-14T12:00:00Z', '2026-09-16T21:00:00.000Z'], // Monday -> Thursday
+  ['2026-09-17T12:00:00Z', '2026-09-21T21:00:00.000Z'], // Thursday -> Tuesday
+  ['2026-09-18T12:00:00Z', '2026-09-22T21:00:00.000Z'], // Friday -> Wednesday
   ['2026-09-19T12:00:00Z', '2026-09-22T21:00:00.000Z'],
   ['2026-09-20T12:00:00Z', '2026-09-22T21:00:00.000Z'],
   ['2026-09-20T21:30:00Z', '2026-09-23T21:00:00.000Z'], // Already Monday in KSA
-  ['2026-12-31T12:00:00Z', '2027-01-05T21:00:00.000Z'],
+  ['2026-12-31T12:00:00Z', '2027-01-04T21:00:00.000Z'],
   ['2028-02-28T12:00:00Z', '2028-03-01T21:00:00.000Z'],
 ]) test(`KSA payout due date ${end}`, () => assert.equal(guideTransferDueAt(new Date(end)).toISOString(), due))
-test('invalid stay date rejected', () => assert.throws(() => guideTransferDueAt(new Date('invalid'))))
+test('invalid service date rejected', () => assert.throws(() => guideTransferDueAt(new Date('invalid'))))
+
+test('payout uses only the service date, regardless of the recorded time', () => {
+  assert.equal(guideTransferDueAt(new Date('2026-09-17T00:00:00+03:00')).getTime(),
+    guideTransferDueAt(new Date('2026-09-17T23:59:59+03:00')).getTime())
+})
+
+test('payout uses the last mission of this guide, independently of the other guide and stay end', async () => {
+  const f = fixture()
+  f.earning.reservation.status = 'CONFIRMED'
+  f.earning.reservation.endDate = new Date('2026-01-20T00:00:00Z')
+  f.earning.reservation.missions = [
+    { guideProfileId: 'guide', endDate: new Date('2026-01-01T00:00:00Z'), guideCompleted: true },
+    { guideProfileId: 'other-guide', endDate: new Date('2026-01-15T00:00:00Z'), guideCompleted: false },
+    { guideProfileId: 'guide', endDate: new Date('2026-01-02T00:00:00Z'), guideCompleted: true },
+  ]
+  const result = await f.service.readGuideTransferPreparation(f.actor, 'earning')
+  assert.equal(result.preparation?.dueAt, '2026-01-06T21:00:00.000Z')
+  const input = await f.prepareInput()
+  await assert.rejects(f.service.prepareGuideTransfer(f.actor, f.context, { ...input, sentAt: '2026-01-06T20:59:59Z' }), /trois jours ouvrés/)
+  const record = await f.service.prepareGuideTransfer(f.actor, f.context, { ...input, sentAt: '2026-01-06T21:00:00Z' })
+  assert.equal(record.dueAt, '2026-01-06T21:00:00.000Z')
+})
+
+test('guide payout is blocked until all their own missions are declared complete, even if stay is completed', async () => {
+  const f = fixture()
+  f.earning.reservation.missions = [
+    { guideProfileId: 'guide', endDate: new Date('2026-01-01T00:00:00Z'), guideCompleted: true },
+    { guideProfileId: 'guide', endDate: new Date('2026-01-02T00:00:00Z'), guideCompleted: false },
+  ]
+  await assert.rejects(f.service.readGuideTransferPreparation(f.actor, 'earning'), /déclarer ses prestations terminées/)
+  assert.equal(f.records().length, 0)
+  assert.equal(f.audits().length, 0)
+})
+
+test('legacy reservations without missions use their recorded end date', async () => {
+  const f = fixture()
+  const result = await f.service.readGuideTransferPreparation(f.actor, 'earning')
+  assert.equal(result.preparation?.dueAt, '2026-01-05T21:00:00.000Z')
+})
 
 test('preparation uses fixed full net and approved bank, no financial side effect', async () => {
   const f = fixture(); const result = await f.prepare()

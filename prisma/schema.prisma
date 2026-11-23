@@ -294,6 +294,38 @@ model GuideProfile {
   changeRequests       GuideProfileChangeRequest[]
   reservationIncidents GuideReservationIncident[]
   favoritedBy          GuideFavorite[]
+  contracts            GuideContract[]
+}
+
+// Private DocuSeal references; bearer document/signature URLs are never persisted.
+model GuideContract {
+  id                     String       @id @default(cuid())
+  guideProfileId         String
+  guideProfile           GuideProfile @relation(fields: [guideProfileId], references: [id], onDelete: Cascade)
+  guideAccountId         String
+  version                String
+  templateId             Int
+  externalId             String       @unique
+  guideName              String
+  guideEmail             String
+  guideCity              String
+  guideAddress           String?
+  submissionId           Int?         @unique
+  submitterId            Int?         @unique
+  preparationAttemptedAt DateTime?
+  sendAttemptedAt        DateTime?
+  providerStatus         String?
+  submitterStatus        String?
+  sentAt                 DateTime?
+  completedAt            DateTime?
+  archivedAt             DateTime?
+  photoConsent           Boolean?
+  lastSyncedAt           DateTime?
+  providerUpdatedAt      DateTime?
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @default(now()) @updatedAt
+
+  @@unique([guideProfileId, version])
 }
 
 model GuideFavorite {
@@ -813,6 +845,7 @@ model ReservationMission {
   guideConfirmationStatus      GuideConfirmationStatus @default(PENDING)
   guideConfirmationRequestedAt DateTime?
   guideConfirmedAt             DateTime?
+  guideCompleted               Boolean                 @default(false)
   createdAt                    DateTime                @default(now())
 
   @@unique([reservationId, city])

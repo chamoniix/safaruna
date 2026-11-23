@@ -124,7 +124,7 @@ export default function ConditionsGuides() {
         <h2 style={h2}>6. Résiliation du compte Guide</h2>
         <p style={p}>Vous pouvez désactiver votre compte Guide à tout moment depuis vos paramètres. Les réservations déjà confirmées doivent être honorées ou annulées selon la politique d’annulation.</p>
         <p style={p}>SAFARUMA peut résilier un compte Guide sans préavis en cas de fraude avérée, de 3 incidents de réservation comptabilisés, de violation grave de la <a href="/charte-islamique" style={{ color: '#C9A84C' }}>Charte Islamique</a> ou des présentes conditions.</p>
-        <p style={p}>Droit applicable : <strong>droit français</strong>. Juridiction : <strong>Tribunal de Paris</strong>.</p>
+        <p style={p}>Droit applicable : <strong>droit anglais</strong>. Juridiction : <strong>tribunaux d’Angleterre et du Pays de Galles</strong>.</p>
       </section>
 
     </LegalLayout>

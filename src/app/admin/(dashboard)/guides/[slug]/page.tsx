@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation';
 import { PLACES } from '@/lib/places';
 import { GUIDE_LANGUAGES, LANG_CODE_TO_LABEL } from '@/lib/languages';
 import GuidePhotoEditor from '@/components/admin/GuidePhotoEditor';
+import GuideContractPanel from '@/components/admin/GuideContractPanel';
 import ApplicationMediaPanel from '@/components/guide/ApplicationMediaPanel';
 import type { ApplicationMediaView } from '@/lib/guide-application-media';
 
@@ -714,6 +715,7 @@ export default function AdminGuideDetailPage() {
       </div>
 
       {/* Section 1b — Gestion des accès */}
+      <GuideContractPanel key={guide.id} slug={guide.slug} />
       <div style={{ ...sectionStyle, gap: '0.875rem' }}>
         <div style={{ fontFamily: 'var(--font-cormorant, serif)', fontSize: '1.2rem', fontWeight: 700, color: '#1A1209' }}>Gestion des accès</div>
 

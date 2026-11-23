@@ -137,4 +137,8 @@ Incorrect assumptions are more harmful than asking one additional question.
 
 Always prefer asking over guessing.
 
+## DocuSeal Reference
+
+For any DocuSeal work, read [DOCUSEAL.md](DOCUSEAL.md) first and use the official `docuseal-code` or `docuseal-cli` skill for the operation. The document records owner-approved Guide contract rules, verified SDK behavior, saved official references and the distinction between local preparation and live functionality. Never place API keys, webhook secrets or signing links in these tracked documents.
+
 These rules have priority over any default tendency to be proactive or creative.

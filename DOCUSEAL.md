@@ -103,7 +103,7 @@ Permission explicitement confirmée par le propriétaire : **Admin et Superadmin
 - Aperçu explicitement nommé « document préparé » ; lien « contrat signé » uniquement après complétion entière vérifiée. PDF et preuve d’audit passent par la route authentifiée, avec `private, no-store`, `Vary: Cookie` et `nosniff`. Les fichiers globaux observés sont servis directement en PDF par `https://docuseal.com`, sans redirection ; les autres hôtes, ports, credentials, HTTP et redirections sont refusés.
 - L’autorisation photo signée est affichée comme donnée du contrat. Elle ne publie pas de portrait et ne modifie pas les contrôles existants d’activation.
 
-Ce code est **local, non déployé**. La migration et `DOCUSEAL_API_KEY` doivent être appliquées à l’environnement cible avant de présenter le parcours comme disponible en production. Aucun email réel n’a été envoyé pendant les tests de ce raccordement. Aucun nouvel abonnement ni stockage de PDF n’a été provisionné.
+Ce code est **déployé en production depuis le 23 novembre 2026**. Les deux migrations sont appliquées et `DOCUSEAL_API_KEY` est configurée comme variable Vercel sensible. Aucun email réel n’a été envoyé pendant les tests de ce raccordement. Aucun nouvel abonnement ni stockage de PDF n’a été provisionné.
 
 **Différence vérifiée dans le SDK installé :** `DocusealApi.createSubmission()` 1.0.25 appelle `/submissions/init` et retourne un objet contenant notamment `id` et `submitters`. Plusieurs références REST montrent encore `/submissions` avec une réponse tableau. Utiliser le SDK et ses types réellement installés ; ne pas réécrire l’appel sur une supposition. Le test réseau local [tests/docuseal.test.ts](tests/docuseal.test.ts) vérifie le comportement du SDK.
 
@@ -246,7 +246,7 @@ Pour préparer sans invitation, les commandes de création requièrent `--no-sen
 
 - Clé locale : `.context/docuseal.env`, permissions `0600`, ignoré par Git.
 - Saisie masquée : `python3 .context/set-docuseal-key.py` ; n’affiche pas la clé et ne la place pas dans l’historique shell.
-- Ce fichier privé **n’est pas chargé automatiquement** dans le processus Next.js ou sur Vercel. `getDocusealClient()` attend la variable du processus. Aucun secret DocuSeal n’a été déployé sur Vercel par ces opérations.
+- Ce fichier privé **n’est pas chargé automatiquement** dans le processus Next.js ou sur Vercel. `getDocusealClient()` attend la variable du processus. Depuis la mise en service du 23 novembre, `DOCUSEAL_API_KEY` est configurée séparément sur Vercel, en variable sensible de production ; le fichier privé local reste ignoré par Git.
 - `DOCUSEAL_API_URL` dans le fichier privé sert aux scripts de vérification ; le client produit actuel utilise explicitement l’hôte global. Ne pas prétendre que l’UE ou un auto-hébergement sont déjà configurés.
 - Ne pas préfixer la clé par `NEXT_PUBLIC_`, ne pas l’écrire dans ce document, les contrats, les PR ou les fichiers suivis par Git.
 - Le secret HMAC webhook devra être fourni séparément lors du raccordement ; ne pas le remplacer par la clé API.
@@ -259,7 +259,7 @@ La présence d’une clé et la réussite d’un GET ne prouvent pas qu’une cr
 
 ## État réel et suite du travail
 
-Déjà préparé localement : SDK serveur ; quatre contrats français avec charte ; calcul lundi–vendredi ; bouton de déclaration de fin par mission ; contrôle de cette déclaration avant enregistrement des virements pour les missions détaillées ; parcours contrat dans le backoffice. Modèle DocuSeal distant `7108668` créé et contrôlé, sans demande de signature. Migrations `20261123090000_guide_mission_completion` et `20261123093000_guide_contracts` appliquées et testées **uniquement sur PostgreSQL local jetable**, pas en production. Aucun lot de ces modifications produit n’a encore été déployé.
+Déjà préparé localement : SDK serveur ; quatre contrats français avec charte ; calcul lundi–vendredi ; bouton de déclaration de fin par mission ; contrôle de cette déclaration avant enregistrement des virements pour les missions détaillées ; parcours contrat dans le backoffice. Modèle DocuSeal distant `7108668` créé et contrôlé, sans demande de signature. Migrations `20261123090000_guide_mission_completion` et `20261123093000_guide_contracts` testées sur PostgreSQL local jetable puis appliquées en production le 23 novembre. Le lot est déployé sur safaruma.com.
 
 Validation du raccordement : suite générale 449 tests réussis et cinq groupes PostgreSQL optionnels ignorés dans cette invocation ; 16 tests ciblés réussis lors de l’exécution séparée du groupe contrats sur une vraie base PostgreSQL locale avec les deux migrations additives. Le diff Prisma après application des migrations ne détecte aucun écart avec le schéma attendu. Couverture des droits, accès révoqué, concurrence, réponses perdues, reprise avant premier appel fournisseur, données d’identité modifiées, mauvais Guide, états partiels/complets, autorisation photo refusée, hôte de téléchargement inattendu et état fournisseur plus ancien. TypeScript, build Next et lint ciblé vérifiés. Navigateur : vrai composant avec API fictive, préparation sans envoi, confirmation annulée, envoi explicite simulé, état après rechargement, liens après complétion, erreur 409 sans renvoi et largeur mobile sans débordement. Rapports privés `guide-contracts-postgres.log`, `guide-contracts-full-tests.log`, `guide-contract-browser-report.json`. Cela ne constitue pas une signature réelle chez DocuSeal.
 
@@ -269,10 +269,14 @@ Restent ouverts avant un parcours opérationnel :
 
 - Compléter les adresses connues ou laisser le Guide les renseigner dans le champ obligatoire lors de la signature ; le préremplissage est raccordé localement.
 - Confirmer le mode de la clé réellement utilisée et les droits du compte sans révéler le secret. L’observation de la console hors mode test est enregistrée ci-dessus ; ne pas redemander sans tenir compte de cette preuve.
-- Mettre en service le raccordement local après migration et configuration de l’environnement cible ; aucun envoi réel n’a été effectué.
+- Le raccordement est en service après migration et configuration de production ; aucun envoi réel n’a été effectué par l’agent.
 - Si un suivi automatique par webhook est souhaité, configurer et tester son secret HMAC, les doublons, destinataires inconnus et l’ordre des événements ; le suivi actuel utilise le bouton d’actualisation.
 - Aligner les anciens barèmes nets encore présentés dans le dossier Guide avec la rémunération réellement appliquée, sans exposer les pourcentages internes.
 - Traiter explicitement les anciens dossiers sans mission détaillée : le code local conserve pour eux la logique historique de réservation globale terminée. Ce cas ne constitue pas une déclaration du Guide et doit être résolu avant de prétendre que la nouvelle règle s’applique partout.
-- Appliquer et vérifier les migrations dans l’environnement prévu avant une mise en ligne du code qui lit les nouveaux champs.
+- Les deux migrations sont appliquées et vérifiées en production ; aucune réservation sans missions détaillées n’a été trouvée lors du contrôle de mise en service.
 
-L’accord de préparation du modèle n’autorise pas un envoi aux guides, une activation de profil, une publication de photo ou une modification d’abonnement. Aucun déploiement n’a été effectué dans ce lot. Respecter les autorisations explicites du propriétaire et présenter les éléments concrets lorsqu’une décision métier reste nécessaire.
+L’accord de préparation du modèle n’autorise pas un envoi aux guides, une activation de profil, une publication de photo ou une modification d’abonnement. La mise en ligne de ce lot a été explicitement autorisée par le « ok go » suivant la présentation du raccordement. Respecter les autorisations explicites du propriétaire et présenter les éléments concrets lorsqu’une décision métier reste nécessaire.
+
+## Mise en service du 23 novembre 2026
+
+Déploiement production `dpl_EGGTrh3zrmZJRu8gmYTAYL8MRZnn`, construit depuis le commit `98a1170` et promu après état Ready. Projet Vercel safaruna, domaine safaruma.com. Migrations additives appliquées avec Prisma migrate deploy ; colonne de complétion présente et table GuideContract vide après opération. Clé ajoutée via stdin, variable sensible, sans affichage. Aucun contrat préparé ou envoyé, aucune activation de Guide ni publication de photo. Preuves privées dans `.context/contracts-production-db-proof.json`, `contracts-live-checks.json`, `contracts-ready.log` et `contracts-promote.log`. Les contrôles publics de disponibilité et de refus d’accès anonyme ne remplacent pas un essai de signature réel depuis une session Admin.

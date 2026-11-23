@@ -104,6 +104,7 @@ export async function POST(req: NextRequest) {
           guideConfirmationStatus: 'PENDING',
           guideConfirmationRequestedAt: confirmationRequestedAt,
           guideConfirmedAt: null,
+          guideCompleted: false,
         },
       });
       await tx.guideEarning.updateMany({

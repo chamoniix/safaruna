@@ -204,8 +204,8 @@ test('existing ACTIVE paused Guides keep status and prices when recording confir
 
 test('conditions and dashboard share the approved EUR policy without adding a payout engine', () => {
   const f = fixture()
-  assert.match(f.policy.GUIDE_PAYOUT_POLICY.delay, /trois jours ouvrés.*fin du séjour/)
-  assert.match(f.policy.GUIDE_PAYOUT_POLICY.delay, /vendredi, le samedi et le dimanche/)
+  assert.match(f.policy.GUIDE_PAYOUT_POLICY.delay, /trois jours ouvrés.*date de fin de la prestation/)
+  assert.match(f.policy.GUIDE_PAYOUT_POLICY.delay, /du lundi au vendredi.*samedi et le dimanche sont exclus/)
   assert.match(f.policy.GUIDE_PAYOUT_POLICY.currency, /euros/)
   const conditions = readFileSync('src/app/conditions-guides/page.tsx', 'utf8')
   assert.doesNotMatch(conditions, /Virement le 1er du mois/)
@@ -248,7 +248,7 @@ test('profile renders real dossier data, readable banking and a single final sub
   const html = renderToStaticMarkup(react.createElement(Page))
   assert.match(html, /FR7612345678901234567890123/)
   assert.match(html, /data-clarity-mask="true"/)
-  assert.match(html, /3?trois jours ouvrés/)
+  assert.match(html, /trois jours ouvrés/)
   assert.match(html, /Lieu de test/)
   assert.match(html, /110 €|110<!-- -->/)
   assert.equal((html.match(/id="guide-profile-submission"/g) || []).length, 1)

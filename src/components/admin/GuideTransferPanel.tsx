@@ -89,7 +89,7 @@ function TransferDialog({ reservationId, onClose }: { reservationId: string; onC
       <button type="button" className={styles.close} aria-label="Fermer les virements" disabled={busy} onClick={close}><X size={22} /></button>
     </div>
     <p className={styles.notice}>Suivi d’un virement déjà effectué depuis votre banque. Aucun argent n’est envoyé depuis cet écran.</p>
-    <p className={styles.help}>Versements en EUR, trois jours ouvrés après la fin du séjour (lundi à jeudi). Le délai de réception dépend ensuite de la banque du Guide. Un email est prévu à la confirmation ; les corrections ultérieures actualisent le dashboard sans nouvel email.</p>
+    <p className={styles.help}>Versements en EUR, trois jours ouvrés après la date de fin de prestation du Guide (du lundi au vendredi, samedi et dimanche exclus). Le délai de réception dépend ensuite de la banque du Guide. Un email est prévu à la confirmation ; les corrections ultérieures actualisent le dashboard sans nouvel email.</p>
     {error && <p role="alert" className={styles.error}>{error}</p>}
     {message && <p role="status" className={styles.success}>{message}</p>}
     <div aria-busy={loading || busy}>
